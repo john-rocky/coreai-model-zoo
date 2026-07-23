@@ -1,0 +1,64 @@
+name: CoreAIStudio
+options:
+  bundleIdPrefix: com.coreai
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: "27.0"
+
+# macOS-exclusive Core AI media enhancer: AdcSR x4 super-resolution + RIFE v4.26 frame
+# interpolation, both self-contained on the low-level Core AI runtime (no coreai-kit — that
+# package collides with apple/coreai-models at the SwiftPM package-name level, documented in
+# apps/CoreAIUpscale/README.md). Engine/state-machine pattern borrowed from apps/CoreAISegment
+# (SegmentationEngine + @unchecked Sendable runtime box + ModelDownloader usage), but linking
+# is simpler here: everything this app needs (AIModel, InferenceFunction, NDArray,
+# SpecializationOptions, ComputeUnitKind) lives directly in the system CoreAI.framework
+# (re-exports CoreAIDelegates -> CoreAIAsset/CoreAICommon/CoreAICompiler/CoreAIRuntime — ✓
+# VERIFIED by reading the real .swiftinterface files in the macOS 27.0 SDK, this session), so
+# this target links CoreAI.framework directly rather than depending on apple/coreai-models
+# (whose CoreAISegmentation product CoreAISegment needs specifically for SAM3/ImageSegmenter —
+# unrelated code this app doesn't use).
+
+schemes:
+  CoreAIStudio:
+    build:
+      targets:
+        CoreAIStudio: all
+    run:
+      config: Release
+
+targets:
+  CoreAIStudio:
+    type: application
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Sources
+      - path: ../AppShared/ModelDownloader.swift
+    # UNSANDBOXED — matches apps/CoreAIUpscale/project.yml's CoreAIUpscaleMac target
+    # (ENABLE_APP_SANDBOX: NO), the precedent for a Mac-power-user Core AI app in this repo.
+    # ✓ VERIFIED, this session: a sandboxed build (com.apple.security.app-sandbox +
+    # files.user-selected.read-write, the CoreAISegmentMac pattern) failed to actually grant
+    # read access to .fileImporter-picked files under this exact macOS 27.0 beta + Swift 6 —
+    # every open() from ImageIO returned errno 1 (Operation not permitted) despite the
+    # entitlement being correctly embedded (confirmed via `codesign -d --entitlements -`) and
+    # `startAccessingSecurityScopedResource()` being called correctly in ImageTensor.swift/
+    # ContentView.swift. Root-caused by rebuilding with the sandbox off: the exact same code
+    # then loads and renders images correctly, isolating the defect to security-scoped-resource
+    # grant behavior on this OS build, not to this app's Swift. Revisit if a later macOS 27
+    # build fixes the underlying entitlement bug; until then, ship unsandboxed like
+    # CoreAIUpscaleMac.
+    dependencies:
+      - sdk: CoreAI.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.coreai.studio.mac
+        DEVELOPMENT_TEAM: MFN25KNUGJ
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "6.0"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: "YES"
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: "NO"
+        SWIFT_APPROACHABLE_CONCURRENCY: "YES"
+        ENABLE_APP_SANDBOX: "NO"
+        ENABLE_HARDENED_RUNTIME: "NO"
