@@ -5,6 +5,12 @@ Hard-won, verified notes on Apple's Core AI (iOS/macOS 27) — what the docs don
 ## Orientation
 - [`coreai-overview.md`](coreai-overview.md) — what Core AI is, the 3 Apple repos, the `.aimodel`
   format, the PyTorch → `.aimodel` → Swift-runtime pipeline.
+- [`coreai-models-apple-overview.md`](coreai-models-apple-overview.md) — deep reference on
+  Apple's own [`apple/coreai-models`](https://github.com/apple/coreai-models): verified directory
+  tree, the full 22-model catalog cross-referenced against this zoo's own ports, the complete
+  ANE/GPU authoring rules extracted from its `skills/` agent-skill plugin (BC1S memory alignment,
+  KV cache patterns, MoE `SwitchLinear`, verification-gate tables), every place this repo consumes
+  it (SwiftPM pins, the `conversion/overlay/` Python source overlay), and the "no PRs" policy.
 - [`conversion-guide.md`](conversion-guide.md) — converting a PyTorch model to `.aimodel`: the
   canonical `TorchConverter` API + the gotchas that cost real time.
 - [`ship-playbook.md`](ship-playbook.md) — **the end-to-end runbook**: converted `.aimodel` →
