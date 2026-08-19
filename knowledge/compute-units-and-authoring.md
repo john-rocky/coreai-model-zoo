@@ -84,7 +84,7 @@ against 183.9 ms ANE-authored on ane, a 3.7× gap against 1.8× on the phone. Ha
 
 Instruments `ane-hw-intervals` traces of the same encoder, one phone, same fp16 weights, same
 authoring — Core AI against a Core ML conversion of the same network, exported and measured by
-[Rahul Rachuri](https://github.com/RahulRachuri) ([traces](https://gist.github.com/RahulRachuri/6761fdb6eb940bd25e4b55926925fbb4)):
+[Rahul Rachuri](https://github.com/RahulRachuri), who published the finding himself ([write-up](https://rachuri.me/blog/parakeet-apple-silicon/), [traces](https://gist.github.com/RahulRachuri/6761fdb6eb940bd25e4b55926925fbb4)):
 
 | per encoder pass | Core AI, ANE-authored | Core ML, converted |
 |---|---:|---:|
