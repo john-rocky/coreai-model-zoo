@@ -79,6 +79,13 @@ from about 0.50 s to about 0.78 s as it did. Of the compute, the encoder is 73.7
 the TDT loop 11.40 s, and 90 % of that loop is predictor dispatch at 500 µs across 20528
 calls — the decode side is dispatch-bound, not compute-bound.
 
+Through CoreAIKit rather than the author's host: `KitParakeetModel` loads all three graphs on
+one compute unit and runs the TDT loop synchronously, one `joint` call per encoder frame. On an
+iPhone 17 Pro with everything on `gpu`, one full 28.75 s window measures 0.42 s — 68× realtime,
+warmup discarded, 256 MB peak. That is the same dispatch-bound decode the table above describes,
+without the two levers it uses (predictor and joint on `cpu`, stream depth 2), so read it as a
+floor for the kit path rather than a comparison with the numbers above.
+
 ## Bundles
 
 [`rahulrachuri/parakeet-tdt-0.6b-v2-coreai`](https://huggingface.co/rahulrachuri/parakeet-tdt-0.6b-v2-coreai),
