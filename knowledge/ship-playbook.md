@@ -84,5 +84,22 @@ one). Commit (explicit paths). Draft the X post with the measured RTF — **post
 - **`devicectl` facts:** `install` preserves the app data container (sideloaded files survive a
   reinstall); env vars need the `-e '{"K":"V"}'` JSON flag; copy individual files (bulk can
   false-succeed). `GraphModel`/`AIModel(contentsOf:)` load `.aimodel` *or* `.aimodelc`.
+- **A crash with no log is usually the log's fault.** `print` under `devicectl … --console` goes to a
+  block-buffered stdout, and the buffer dies with the process — so a SIGSEGV inside a load call reads
+  as a crash with zero output. Write diagnostics with `fputs(…, stderr)` + `fflush`: one line before
+  the suspect call localizes it. Piping `--console` through `tail` hides everything until EOF too;
+  use `head` or redirect to a file.
+- **`devicectl` must come from the Xcode whose SDK matches the device OS.** After an iOS update the
+  stable Xcode's `devicectl` hung with no output and no error while the phone was healthy;
+  `DEVELOPER_DIR=/Applications/Xcode-<beta>.app/…/Developer` fixed it immediately. `list devices`
+  also returns **simulators with the same marketing name** — select on
+  `connectionProperties.transportType` (`wired`/`localNetwork`), never on the model string.
+- **There is no simulator path for a Core AI app.** The simulator SDK ships no `CoreAI` framework, so
+  any simulator destination fails at `Unable to resolve module dependency: 'CoreAI'`. To see a screen
+  without a device, render the SwiftUI view offscreen with `ImageRenderer` at the phone's point size.
+- **A single on-device run measures specialization, not throughput.** The first call after load
+  specializes the graphs: Parakeet v2 on an iPhone 17 Pro measured **7.2× realtime on the first pass
+  and 67.8× on the next**, same clip, same process. Anything that shows one number — a demo app as
+  much as a bench — must discard a warmup pass or it reports a figure no workload ever sees.
 - **`Bundle.module` / cross-file symbols show as SourceKit errors in-editor** until a real build
   regenerates the resource accessor — `swift build` is the source of truth, not the squiggles.
