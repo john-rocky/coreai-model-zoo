@@ -1,0 +1,279 @@
+# OvisOCR2 (0.8B page parser) — Core AI port
+
+Status **in progress**: both bundles export and the vision half is gated; the decoder has no
+numerics gate yet. Nothing is published, so there is deliberately **no `models/ovisocr2/`** — that
+directory is the catalog's published surface (every entry needs a real `hf_repo` and a card whose
+numbers are measured). The recipe below moves there when it ships.
+
+```toml
+["ovisocr2-vision"]
+script = "export_qwen38vl_pipelined.py"
+args = ["fp16", "--hf-id", "ATH-MaaS/OvisOCR2", "--name", "ovisocr2",
+        "--grid-h", "40", "--grid-w", "28", "--skip-decoder"]
+card = "README.md"
+source_hf_id = "ATH-MaaS/OvisOCR2"
+bundle = "gpu-pipelined/ovisocr2_vision_fp16"
+status = "unverified"
+overlay = true
+notes = [
+  "The ~98M Qwen3.5 tower at a PORTRAIT grid: patches [4480,1536] -> image_embeds",
+  "[1120,1024], 80x56 patches / 40x28 merged = a 1280x896 page. 196 MB fp16.",
+  "First NON-SQUARE grid through qwen3_5_vision.py — the 27B only ever baked 32x32,",
+  "so the row/col paths in _init_positional_constants were untested. Gate:",
+  "_smoke/test_ovisocr2_tower_gate.py (fp32 fixture captured under the SYSTEM python;",
+  "the overlay venv's transformers has no qwen3_5 classes).",
+  "Measured: torch fp32 cos 1.000000 / min-row 1.000000 vs HF-fp32; negative control",
+  "(raster instead of merge-block-major patch order) collapses to cos 0.389 = the gate",
+  "can go red. fp16 .aimodel on the M4 Max GPU: cos 0.999985 but min-row 0.997018 —",
+  "4 of 1120 rows land in the 0.997-0.999 band, so it MISSES the repo bar (both cos and",
+  "min-row >= 0.999, the same condition the 27B gate uses). Isolated, not explained away:",
+  "the low rows are NOT the blank margin (their |ref| median 3.33 vs 3.17 over all rows;",
+  "corr(row-cos, pixel-std) = 0.043; 377 tokens are perfectly flat and only 2 of the 4 are).",
+  "fp32 authoring is exact, so this is fp16 execution noise — whether it MATTERS is a",
+  "question for the end-to-end token gate, which is not done.",
+  "Encode 119.7 ms median (10x, M4 Max GPU).",
+  "Host preprocessing: _smoke/qwen38vl_preprocess.py preprocess(u8, 1280, 896) — gated",
+  "byte-equal (max|d| 0.000e+00) against the HF processor at this grid.",
+]
+
+["ovisocr2"]
+script = "export_qwen38vl_pipelined.py"
+args = ["int8hu", "--hf-id", "ATH-MaaS/OvisOCR2", "--name", "ovisocr2",
+        "--grid-h", "40", "--grid-w", "28", "--max-ctx", "8192", "--skip-vision"]
+card = "README.md"
+source_hf_id = "ATH-MaaS/OvisOCR2"
+bundle = "gpu-pipelined/ovisocr2_vl_decode_int8hu_block32_sym_pf16"
+status = "unverified"
+overlay = true
+notes = [
+  "OvisOCR2 is a pure fine-tune of Qwen/Qwen3.5-0.8B: text_config AND vision_config are",
+  "field-for-field identical to the base, so this rides the shipped qwen3.5-0.8b ship",
+  "recipe (int8hu per-block-32 body + absmax-sym int8 head) with new weights.",
+  "EMBEDDINGS-INPUT multifunction bundle ('main' S=1 decode + 'prefill' S=16 chunk),",
+  "764 MB, + embed_tokens.safetensors 508 MB fp16 (vocab 248320 x 1024 — a third of the",
+  "shipped bytes for a 0.8B model). Whole page: 196 + 764 + 508 = ~1.4 GB, inside the",
+  "~1.5 GB iOS ship rule.",
+  "PF stays 16, not 32: same family, same fp16 doubling-inverse bound as the 27B.",
+  "Gated end-to-end: 128/128 tokens exact vs the fp32 HF oracle at this grid",
+  "(_smoke/test_ovisocr2_suite_gate.py). No tok/s and no device run yet - timing needs the AOT",
+  "compile, which is blocked on this machine's Metal Toolchain, not on the port.",
+]
+open_questions = [
+  "STOP TOKEN: config.json says eos_token_id 248044 (<|endoftext|>) but the tokenizer's",
+  "eos_token is <|im_end|> = 248046, and 248044 is what a chat-tuned model never emits.",
+  "Driven on the config value the model does not terminate — measured: it ran the full",
+  "3000-token cap and restarted the document from the top; on 248046 the SAME page ends",
+  "cleanly at 640 tokens. Any host must stop on 248046. Same class as the muse-glimmer",
+  "<|eot|> miss. The bundle's own tokenizer_config.json does carry <|im_end|>, so only a",
+  "host that reads config.json is exposed.",
+  "Grid 40x28 = 1120 tokens is a first pick, not a measured optimum: the HF processor at",
+  "max_pixels 1.4 MP chose 43x31 = 1333 for the same page. Ship-grid choice should follow",
+  "an accuracy-vs-prefill measurement that has not been run.",
+  "The fp16 tower's 4-row cosine tail is CLOSED by the end-to-end gate (128/128 exact) - the",
+  "tower recipe entry still reports a red cosine gate, and that is the honest record: the",
+  "shipping criterion for this family is tokens, not cosine.",
+]
+```
+
+## Why this one
+
+[`ATH-MaaS/OvisOCR2`](https://huggingface.co/ATH-MaaS/OvisOCR2) (Apache-2.0) scores **96.58 on
+OmniDocBench v1.6** — above the zoo's own best page parser, MinerU2.5-Pro at **95.69** — and is the
+first end-to-end model to top a leaderboard that pipeline methods had held. One model does the whole
+page: image → Markdown, tables as HTML, formulas as LaTeX, visual regions as `<img src="images/
+bbox_{l}_{t}_{r}_{b}.jpg" />` in reading order. No separate layout pass (MinerU runs two).
+
+## The port is a weights swap, and that is a measured claim
+
+`ATH-MaaS/OvisOCR2` and `Qwen/Qwen3.5-0.8B` have **field-for-field identical** `text_config` *and*
+`vision_config` — hidden 1024 / 24 L / head_dim 256 / GQA 8-2 / vocab 248320 / `full_attention_interval`
+4 / mrope `[11,11,10]` `partial_rotary_factor` 0.25, tower depth 12 / 768 / patch 16 / merge 2 /
+`out_hidden_size` 1024 / `deepstack_visual_indexes: []`. It is a pure fine-tune. So it rides:
+
+* the shipped **qwen3.5-0.8b** decode recipe (`int8hu` per-block-32 body + absmax-sym int8 head), and
+* the shipped **`qwen3_5_vision.py`** tower authoring, and
+* the shipped **`qwen38vl_host.py`** contract verbatim — `image_token_id` is 248056 in both.
+
+No new authoring module. `export_qwen38vl_pipelined.py` gained `--name` / `--grid-h` / `--grid-w`
+instead of being copied, the same way `qwen3.5-2b` reuses the 0.8B script through `--hf-id`.
+
+## The one genuinely new thing: a portrait grid
+
+The 27B only ever baked a **square** 32×32 tile, so `_init_positional_constants` (bilinear pos-embed
+interpolation, 2D-rope coordinate build) had never run with h ≠ w. A row/col transposition there is
+silent everywhere else. OvisOCR2 bakes **80×56 patches → 40×28 = 1120 merged tokens = a 1280×896
+page**, which keeps A4's aspect instead of squashing it into a square (the 27B recipe files that
+squash as an open question).
+
+Gated in [`_smoke/test_ovisocr2_tower_gate.py`](../_smoke/test_ovisocr2_tower_gate.py):
+
+| stage | result |
+|---|---|
+| host preprocess vs HF processor at 1280×896 | **byte-equal**, max\|d\| 0.000e+00 |
+| authored fp32 tower vs HF-fp32 | cos **1.000000**, min-row **1.000000** |
+| negative control (raster instead of merge-block-major patch order) | cos **0.389** — the gate can go red |
+| exported fp16 `.aimodel`, M4 Max GPU | cos 0.999985, **min-row 0.997018 → MISSES the bar** |
+| encode | **119.7 ms** median (10×, M4 Max GPU) |
+
+The bar is `cos >= 0.999 AND min-row >= 0.999` — the repo's own, the identical condition the 27B
+tower gate uses.
+
+**The fp16 miss, isolated rather than explained away.** 4 of 1120 rows land in 0.997–0.999. The
+obvious story — "it's the blank page margin, low-norm rows, cosine noise" — is **wrong**: those rows'
+reference norms (median 3.33) are *not* below the all-row median (3.17), `corr(row-cos, pixel-std)`
+is **0.043**, and of the 377 perfectly-flat (blank) tokens only 2 are among the 4. Since the fp32
+stage is exact, this is fp16 execution noise, not wiring.
+
+**Resolved by the end-to-end gate: it changes nothing.** The full chain is **128/128 tokens exact**
+against the fp32 HF oracle (below), so the 4-row tail does not flip a single argmax. Recorded
+because the *cosine* gate stays red and the next person will see it: the shipping criterion for
+this family is tokens, not cosine — a single-position summary that hides argmax flips, and here
+over-reports risk in the other direction.
+
+## Stop token: `<|im_end|>` (248046), not the config's 248044
+
+`config.json` says `eos_token_id: 248044` (`<|endoftext|>`); `tokenizer_config.json` says
+`eos_token: <|im_end|>` = **248046**. A chat-tuned model never emits 248044, so driven on the config
+value **generation does not stop** — measured on the same page: the full 3000-token cap, ending with
+the model re-emitting `<think></think>` and restarting the document from the title. On 248046 the
+same page ends cleanly at **640 tokens**. Second sighting of this class (Muse-Glimmer needed `<|eot|>`
+declared) — now recorded in [`conversion-guide.md`](conversion-guide.md). The exported bundle's own
+`tokenizer/tokenizer_config.json` carries `<|im_end|>`, so only a host that reads `config.json` is
+exposed.
+
+## Japanese: reads a real page
+
+The card documents no languages and OmniDocBench is CN+EN, so this was a ship gate. Rendered an A4
+technical page (headings, justified body, a 4-row bordered table, a display formula with a caption,
+a numbered list) and ran the HF checkpoint on it: headings, both body paragraphs, **all 16 table
+cells** as `<table>`, the formula as `$$ T = n \cdot c + \alpha \log_{2}(n + 1) $$`, and the list —
+all correct. Errors in ~640 tokens: one character-level miss (ルック＆フィール → ルック＆ファイル) and
+one heading that lost its `###`. **Good enough to ship on**; Japanese is not a blocker.
+
+## The AOT size lever: it is the function count, not the flag
+
+`--expect-frequent-reshapes` is **not optional** here, and the first guess about why was wrong.
+The reshapes do not come from the `main` S=1 / `prefill` S=16 split — they come from
+**`position_ids`, which grows by one every call** (`shape=[1, -1]` on both functions). Any build
+therefore reshapes constantly, so dropping efr just moves the cost to the runtime:
+
+| decoder build | iOS AOT (h18p, gpu) | ANE re-specialisations during the gate | prefill | decode | tokens |
+|---|---|---|---|---|---|
+| multifunction (`main` S=1 + `prefill` S=16) + efr | **3.6 GB** | **0** | **892.0 tok/s** | 134.1 | 128/128 |
+| decode-only (`main` S=1) + efr | **2.1 GB** | **0** | 141.4 tok/s | 136.1 | 128/128 |
+| decode-only, no efr | 763 MB | **428** — compile-bound, unusable | — | — | — |
+| multifunction, no efr | 764 MB | 392+ — compile-bound, unusable | — | — | — |
+
+Without efr the AOT is byte-for-byte the source `.aimodel` and buys nothing. **What efr costs is
+~1.5 GB per exported function**: dropping `prefill` takes 3.6 GB → 2.1 GB. That is the lever —
+export fewer functions, not fewer flags.
+
+Page latency on an M4 Max through the python driver (1247-token prompt, 640-token page):
+
+* multifunction — 0.14 s tower + 1.4 s prefill + 4.8 s decode = **~6.3 s**
+* decode-only — 0.14 s tower + 8.8 s prefill + 4.7 s decode = **~13.6 s**
+
+So the phone build costs ~2.2× the page time to save 1.5 GB — the chunked prefill is worth
+**6.3×** on the prompt (892.0 vs 141.4 tok/s), and a page prompt is 1247 tokens.
+
+⚠️ These numbers were re-taken **with the GPU to themselves**. A first pass measured prefill at
+472.7 tok/s because an unrelated MPS job was running — nearly a 2× understatement from contention
+alone. Anything timed here has to hold `_GPU_LOCK` and run solo, exactly as the repo's rule says. Note the opposite trap still holds:
+efr on a genuinely **fixed-shape** graph SIGSEGVs on iOS. Decide it per graph.
+
+## Mac ships; iPhone has an identified path and one unanswered question
+
+**Mac: green.** Multifunction + efr, 128/128 exact, ~8 s/page.
+
+**iPhone: the decode-only build is the candidate, and it is not settled.** At 2.1 GB the decoder is
+under the proven-loadable 2.39 GiB and far under the 3.92 GB failure point — but it is a
+**multi-input/output graph above 2 GB**, which is exactly the documented `NSPOSIXErrorDomain 2`
+band, and it is above the ~1.5 GB ship rule. The 3.6 GB multifunction build is simply out. The one
+remaining test is a device load of the 2.1 GB decode-only bundle; if it refuses, the fix is a graph
+split, which the ship rule points at anyway.
+
+## Grid: 1120 is not costing anything measurable
+
+Ran the HF checkpoint on the same page at the ship grid and at the grid the processor picks itself:
+
+| grid | tokens in | tokens out | errors |
+|---|---|---|---|
+| 40×28 = **1120** (ship) | 1120 | 639 | 2 — `ルック＆フィルール`, table cell `導入パターン` |
+| 43×31 = 1333 (processor default at `max_pixels` 1.4 MP) | 1333 | 641 | 2 — `ルック＆ファイル`, one heading loses its `###` |
+
+**Two errors each, in different places.** 19% fewer image tokens for no measurable loss, so 1120
+stays. One page is thin evidence and this is not an OmniDocBench run — but it is evidence, and it
+points the cheap way.
+
+## Sizes — and where a 0.8B model's bytes actually go
+
+| | |
+|---|---|
+| `ovisocr2_vision_fp16.aimodel` | 196 MB |
+| `ovisocr2_vl_decode_int8hu_block32_sym_pf16.aimodel` | 764 MB |
+| `embed_tokens.safetensors` (fp16, host-side gather table) | **508 MB** |
+| total, uncompiled | **~1.4 GB** |
+| total, AOT multifunction + efr | ~4.3 GB — Mac only |
+| total, AOT decode-only + efr | **~2.8 GB** — the iPhone candidate |
+
+The embed table is a third of the shipped bytes because vocab is 248320 × 1024. For this family the
+vocabulary, not the body, is what to attack if the budget ever gets tight.
+
+## Tooling written for this port
+
+| file | what |
+|---|---|
+| `_smoke/ovisocr2_jp_page.html` | the fixture's source page (render → capture → gate; `.npz` is gitignored by convention) |
+| `_smoke/test_ovisocr2_tower_gate.py` | tower gate + `--capture-ref`, with a raster-order negative control |
+| `_smoke/dump_ovisocr2_oracle.py` | fp32 greedy oracle **at the shipped grid** (asserts the processor did not pick its own) |
+| `_smoke/test_ovisocr2_suite_gate.py` | end-to-end token gate; reads hybrid state shapes from the bundle's own `desc.state_descriptor` instead of hardcoding them, so it runs for any Qwen3.5-family export |
+
+Three existing files were **generalized rather than copied**, the way `qwen3.5-2b` reuses the 0.8B
+script: `export_qwen38vl_pipelined.py` gained `--name`/`--grid-h`/`--grid-w`, and
+`qwen38vl_preprocess.py`'s `preprocess()` gained a rectangular tile (its own 6-case gate still
+passes byte-equal). `qwen38vl_host.py` needed nothing.
+
+## End to end: 128/128 tokens exact
+
+`_smoke/test_ovisocr2_suite_gate.py` runs the whole shipped chain — NumPy preprocess → fp16 tower
+`.aimodel` → embed splice + host mRoPE → int8hu embeddings-decoder (`prefill` S=16 chunks, then
+`main` S=1) → greedy — against the fp32 HF oracle captured at the same grid:
+
+```
+oracle: prompt 1247 tok, 128 generated, grid (1, 80, 56), dtype float32
+state   keyCache (6,1,2,2048,256) · convState (18,1,6144,3) · recState (18,1,16,128,128)
+tower   (1120, 1024) in 149 ms
+PASS: 128/128 tokens (100.0%)
+```
+
+So **quantization is free here**: int8hu body + absmax-sym int8 head + an fp16 tower reproduce fp32
+greedy exactly over 128 tokens. The zoo's qwen3.5-0.8b ship recipe transfers to this fine-tune
+without a numerics concession.
+
+## Measured (M4 Max, macOS GPU, AOT h16c, python driver)
+
+Same 128/128 through the AOT assets, with usable timings:
+
+| | |
+|---|---|
+| tower (1120 tokens, one shot) | **135 ms** (10× median on the tower gate: 125.9 ms) |
+| prefill (chunked, S=16) | **892.0 tok/s** |
+| decode | **134.1 tok/s** |
+
+A full page at the measured 640-token output is therefore roughly **6.3 s** on an M4 Max through
+the python driver. The pipelined engine would do better — the shipped qwen3.5-0.8b text bundle is
+210 tok/s on this machine against 134.1 here, the same python-driver overhead the 27B recorded.
+
+The AOT tower is **bit-identical to the JIT one** (cos 0.999985, min-row 0.997018 both ways), which
+closes the last alternative explanation for the fp16 tail: it is the graph's own fp16 numerics, not
+a compile artifact.
+
+## Not done
+
+* **The device load of the 2.1 GB decode-only decoder** — the one question between this and an
+  iPhone ship (see above). Everything upstream of it is measured.
+* **No publish.** Nothing is on the Hub; there is no `models/ovisocr2/` yet by design.
+* The grid evidence is one page, not a benchmark. If a real OmniDocBench-style sweep ever runs,
+  1120 vs 1333 is the first thing to re-check.
+* The tower's fp16 4-row cosine tail is closed for *tokens* (128/128, twice, JIT and AOT). It has
+  not been checked on a page whose content differs sharply from this one.

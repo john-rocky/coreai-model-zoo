@@ -1,0 +1,46 @@
+<!doctype html><meta charset="utf-8">
+<style>
+ @page{size:A4}
+ *{box-sizing:border-box} body{width:794px;margin:0;padding:48px 56px;background:#fff;
+      font-family:"Hiragino Mincho ProN","Hiragino Sans",serif;color:#111;line-height:1.85;font-size:15px}
+ h1{font-size:25px;border-bottom:2px solid #111;padding-bottom:8px;margin:0 0 6px}
+ .sub{font-size:12px;color:#555;margin-bottom:26px}
+ h2{font-size:18px;margin:26px 0 10px;border-left:5px solid #333;padding-left:9px}
+ p{margin:0 0 13px;text-align:justify}
+ table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}
+ th,td{border:1px solid #444;padding:7px 10px}
+ th{background:#eee}
+ .f{text-align:center;margin:18px 0;font-family:"Times New Roman",serif;font-size:17px;font-style:italic}
+ .cap{font-size:11.5px;color:#666;text-align:center;margin-top:-8px}
+ ol{margin:0 0 13px 22px} li{margin-bottom:5px}
+</style>
+<h1>App Intents による Siri 連携の設計指針</h1>
+<div class="sub">技術資料 第 3 版 ／ 2026 年 6 月 11 日 ／ 社内配布用（WWDC26 セッション 343 要約）</div>
+
+<h2>1. はじめに</h2>
+<p>本日は、Siri と Apple Intelligence におけるアプリ体験を基礎の先へと引き上げるためのテクニックを扱う。洗練されていて、パーソナルで、そのアプリならではの体験を実現するためのものである。本資料は App Intents と App Schemas の基礎知識を前提としている。</p>
+<p>最初に、Siri を通じてアプリとやり取りする際の会話をより直感的で親しみやすいものにする方法を探る。アプリのルック＆フィールに合わせたカスタムレスポンスの作り方と、インタラクションのドネーション（Interaction Donations）の設定方法を学ぶ。</p>
+
+<h2>2. 対象コンポーネントの一覧</h2>
+<table>
+<tr><th>機能</th><th>導入バージョン</th><th>必須<br>権限</th><th>備考</th></tr>
+<tr><td>セマンティックインデックス</td><td>iOS 26.0</td><td>不要</td><td>構造化検索と併用する</td></tr>
+<tr><td>画面認識（onscreen awareness）</td><td>iOS 26.2</td><td>必要</td><td>エンティティ注釈が前提</td></tr>
+<tr><td>インタラクション・ドネーション</td><td>iOS 26.0</td><td>不要</td><td>頻度は 1 日 200 件まで</td></tr>
+<tr><td>アプリ内検索</td><td>iOS 27.0</td><td>不要</td><td>β 期間中は API が変動</td></tr>
+</table>
+
+<h2>3. 応答遅延の見積もり</h2>
+<p>ドネーション件数を <i>n</i>、1 件あたりの索引化コストを <i>c</i> とすると、初回同期に要する時間 <i>T</i> は次式で近似できる。</p>
+<div class="f">T = n · c + &alpha; log<sub>2</sub>(n + 1)</div>
+<div class="cap">式 (1)　初回同期時間の近似式</div>
+<p>ここで &alpha; は端末の I/O 特性に依存する定数であり、実測では 0.42 から 0.68 の範囲に収まった。</p>
+
+<h2>4. 実装手順</h2>
+<ol>
+<li>エンティティを <code>AppEntity</code> に準拠させ、識別子を安定化する。</li>
+<li>スキーマ注釈を付与し、Siri 側の意図スロットと対応付ける。</li>
+<li>通知、Now Playing、アラームの既存統合に注釈を追加する。</li>
+<li>ユーザーがコンテンツを目にした場所でそのまま操作できることを確認する。</li>
+</ol>
+<p>最後に、Siri はシステムのどこからでも使えるという点を押さえておきたい。実例として、音楽再生とアラーム作成を行う CosmoTunes、メッセージングの UnicornChat、カレンダー管理の CometCal を用いて検証した。</p>

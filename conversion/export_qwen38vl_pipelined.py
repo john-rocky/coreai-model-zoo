@@ -54,15 +54,18 @@ DTYPE = torch.float16
 # but collapses CONTENT-DEPENDENTLY on real images (weak-decay image spans;
 # reproduced 2026-08-15 on two Pexels photos — "!" spam from the first token).
 PF = 16
-GRID = 16  # merged grid side: 16x16 = 256 tokens = a 512x512 tile
+GRID = 16  # default merged grid side: 16x16 = 256 tokens = a 512x512 tile
+# --grid-h/--grid-w override it: the tower authoring is generic over the grid,
+# so a portrait document page can bake its own aspect instead of being squashed
+# into the square tile (OvisOCR2 ships 28x40 = 1120 tokens = 896x1280).
 
 
 def export_vision(args) -> None:
-    name = "qwen3_8_27b_vision_fp16"
+    name = f"{args.name}_vision_fp16"
     out_dir = Path(args.out_dir) / name
     print(f"loading vision tower ({args.hf_id}) ...")
     vis = Qwen3_5VisionEncoder.from_hf(
-        args.hf_id, target_dtype=DTYPE, grid_h=GRID, grid_w=GRID)
+        args.hf_id, target_dtype=DTYPE, grid_h=args.grid_h, grid_w=args.grid_w)
     patch_dim = (vis.vcfg["in_channels"] * vis.vcfg["temporal_patch_size"]
                  * vis.vcfg["patch_size"] ** 2)
     patches = torch.zeros(vis.n_patches, patch_dim, dtype=DTYPE)
@@ -142,10 +145,20 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("mode", nargs="?", default="int8hu", choices=["fp16", "int8hu"])
     ap.add_argument("--hf-id", default="Qwen/Qwen3.8-27B")
+    ap.add_argument("--name", default="qwen3_8_27b",
+                    help="bundle name stem: <name>_vision_fp16 / <name>_vl_decode_...")
+    ap.add_argument("--grid-h", type=int, default=GRID,
+                    help="merged grid rows (each merged token = 32x32 px)")
+    ap.add_argument("--grid-w", type=int, default=GRID,
+                    help="merged grid cols (each merged token = 32x32 px)")
     ap.add_argument("--out-dir", default="exports")
     ap.add_argument("--max-ctx", type=int, default=4096)
     ap.add_argument("--skip-vision", action="store_true")
     ap.add_argument("--skip-decoder", action="store_true")
+    ap.add_argument("--no-prefill", action="store_true",
+                    help="export ONLY the S=1 'main' function. One static shape means the AOT "
+                         "needs no --expect-frequent-reshapes, which is what the flag's ~4.7x "
+                         "size inflation buys back; the host then ingests the prompt at S=1.")
     ap.add_argument("--num-layers", type=int, default=None,
                     help="debug: truncated-layer export (engine-contract de-risk)")
     args = ap.parse_args()
@@ -156,7 +169,8 @@ def main() -> None:
         return
 
     suffix = "int8hu_block32_sym" if args.mode == "int8hu" else "fp16"
-    name = f"qwen3_8_27b_vl_decode_{suffix}_pf{PF}"
+    name = (f"{args.name}_vl_decode_{suffix}_s1" if args.no_prefill
+            else f"{args.name}_vl_decode_{suffix}_pf{PF}")
     if args.num_layers is not None:
         name += f"_l{args.num_layers}"
 
@@ -197,10 +211,14 @@ def main() -> None:
     entries = [
         ("main", model.build_vl_export_spec(
             DTYPE, args.max_ctx, query_len=1, trace_kv_len=TRACE_KV_CACHE_SEQ_LEN)),
+    ] if args.no_prefill else [
+        ("main", model.build_vl_export_spec(
+            DTYPE, args.max_ctx, query_len=1, trace_kv_len=TRACE_KV_CACHE_SEQ_LEN)),
         ("prefill", model.build_vl_export_spec(
             DTYPE, args.max_ctx, query_len=PF, trace_kv_len=TRACE_KV_CACHE_SEQ_LEN)),
     ]
-    print(f"exporting multifunction decoder (main S=1 + prefill S={PF}) ...")
+    print("exporting decode-only decoder (main S=1, no prefill) ..." if args.no_prefill
+          else f"exporting multifunction decoder (main S=1 + prefill S={PF}) ...")
     prog = export_to_coreai_multifunction(model, entries, externalize_modules=specs)
     print("optimizing ...")
     prog.optimize()
@@ -215,7 +233,7 @@ def main() -> None:
     print(f"saving {aimodel} ...")
     prog.save_asset(aimodel, rt.AIModelAssetMetadata())
     write_bundle_metadata(out_dir, name, args.hf_id, cfg.vocab_size, args.max_ctx,
-                          functions=("main", "prefill"))
+                          functions=("main",) if args.no_prefill else ("main", "prefill"))
 
     from safetensors.torch import save_file
 

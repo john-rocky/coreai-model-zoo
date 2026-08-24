@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Qwen3.8-27B host image preprocessing in NumPy — the spec any app-side code
+"""Qwen3.5-family host image preprocessing in NumPy — the spec any app-side code
 reproduces, gated against the HF processor BEFORE any Swift exists.
 
-The vision bundle bakes ONE grid (32x32 patches = a 512x512 tile -> 256 merged
-tokens), so the host's whole job is:
+Shared by every Qwen3.5-family vision bundle (Qwen3.8-27B, OvisOCR2): the tower
+is a fixed grid, so only the tile size differs. The gate below runs the 27B's
+512x512 tile; pass ``tile``/``tile_w`` for the others.
+
+The vision bundle bakes ONE grid (the 27B: 32x32 patches = a 512x512 tile ->
+256 merged tokens), so the host's whole job is:
 
     RGB uint8 [H,W,3] -> resize 512x512 (PIL BICUBIC, antialiased)
                       -> /255 -> (x-0.5)/0.5
@@ -66,9 +70,15 @@ def qwen_patchify(image: np.ndarray, patch: int = PATCH, merge: int = MERGE,
     return x.reshape(gh * gw, c * temporal * patch * patch)
 
 
-def preprocess(image: np.ndarray, tile: int = TILE) -> np.ndarray:
-    """RGB uint8 [H,W,3] -> patches [(tile/16)^2, 1536] float32 (block-major)."""
-    x = resize_antialias(image, tile, tile, BICUBIC)
+def preprocess(image: np.ndarray, tile: int = TILE,
+               tile_w: int | None = None) -> np.ndarray:
+    """RGB uint8 [H,W,3] -> patches [n_patch, 1536] float32 (block-major).
+
+    ``tile`` is the target height and ``tile_w`` the width (default: square).
+    A non-square tile is how a portrait document page keeps its aspect instead
+    of being squashed into the square VLM tile — OvisOCR2 bakes 1280x896.
+    """
+    x = resize_antialias(image, tile, tile_w if tile_w is not None else tile, BICUBIC)
     x = (x / 255.0 - IMAGE_MEAN) / IMAGE_STD
     return qwen_patchify(x).astype(np.float32)
 

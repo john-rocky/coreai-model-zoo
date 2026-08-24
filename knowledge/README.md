@@ -147,6 +147,12 @@ For the long-form version of the same material, read
   [`unlimited-ocr-rswa-static-decode.md`](unlimited-ocr-rswa-static-decode.md) — the document-OCR
   trio: a Glm4v variant, whole-page parsing on stock Qwen2-VL, and an R-SWA MoE on the **stock
   runtime** with static-shape stateful decode.
+- [`ovisocr2-port.md`](ovisocr2-port.md) — **in progress, nothing published**. OvisOCR2 tops
+  OmniDocBench v1.6 (96.58) over the zoo's own MinerU2.5-Pro (95.69) and is config-identical to
+  Qwen3.5-0.8B, so it is a weights swap on shipped authoring. Carries the port's two transferable
+  findings: the **first non-square vision grid** through `qwen3_5_vision.py` (gated exact in fp32,
+  a 4-row fp16 tail that is *not* the blank margin), and the **stop token living in
+  `tokenizer_config.json`, not `config.json`** — on the config value the bundle never terminates.
 - [`video-world-models-vjepa2.md`](video-world-models-vjepa2.md) — V-JEPA 2: a self-supervised
   **video world model** as on-device action classification (16-frame clips).
 - [`gemma4-mixedbit-qat-transplant.md`](gemma4-mixedbit-qat-transplant.md) — extracting Google's

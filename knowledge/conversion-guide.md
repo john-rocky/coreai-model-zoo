@@ -28,6 +28,25 @@ res = await fn({"x": rt.NDArray(np_or_tensor)})        # __call__ is ASYNC -> di
 ## Gotchas that cost real time
 
 - **`save_asset` won't overwrite** — `shutil.rmtree(out)` first.
+- **`coreai-build` lives inside the Metal Toolchain cryptex, not in Xcode.** `xcrun -f coreai-build`
+  resolves to `…/cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v<ver>/Metal.xctoolchain/usr/bin/`.
+  So it is present or absent depending on which Xcode `xcode-select` points at — an Xcode whose
+  Metal Toolchain predates it simply has no `coreai-build`, and `aimodelc` there answers the
+  misleading `error: Core AI requires the Metal Toolchain` even when `xcrun metal` works fine in
+  the same shell. `DEVELOPER_DIR` does **not** fix it; only `sudo xcode-select -s <Xcode>` does.
+  Diagnose with `xcodebuild -showComponent MetalToolchain` (prints the toolchain identifier per
+  Xcode) rather than believing the error text.
+- **`--expect-frequent-reshapes` is usually mandatory for a decoder, and it costs ~1.5 GB per
+  exported function.** The reshapes come from `position_ids` growing by one every call
+  (`shape=[1, -1]`), not from a multifunction split — so no build escapes them. Without efr the
+  AOT is byte-for-byte the source `.aimodel` and buys nothing: the runtime re-specialises per
+  shape (hundreds of `ANECCompile() FAILED`) and is compile-bound. Measured on OvisOCR2's int8hu
+  decoder: `main`+`prefill` + efr = 3.6 GB (0 re-specialisations), `main` only + efr = 2.1 GB,
+  either one without efr = 764 MB and unusable. **The lever is the function count, not the flag** —
+  dropping a `prefill` function is what buys the 1.5 GB, at the cost of ingesting the prompt at
+  S=1 (3.7× slower prefill). Budget the result against the iOS load wall (2.39 GiB ✅ / 3.92 GB ❌)
+  and the ~1.5 GB ship rule. The opposite trap still holds: efr on a genuinely **fixed-shape**
+  graph SIGSEGVs on iOS — decide per graph.
 - **`AIModel.load` is async; `load_function` is sync; calling the function is async.** Mixing these
   up is the most common first error.
 - **Use `cpu_only()` for numeric parity checks** — h16c (fp16-compute) on GPU/ANE produces larger
