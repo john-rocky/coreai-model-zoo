@@ -27,7 +27,7 @@ dictation path, microphone to finished sentence, with nothing leaving the device
 let clean = try await CoreAI.tidyTranscript(rawTranscript)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [Tidy runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Tidy)
 (GUI + CLI, the three control axes as pickers):
