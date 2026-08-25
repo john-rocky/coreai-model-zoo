@@ -36,7 +36,7 @@ shows no fp16-matmul amplification; the SSM step itself computes in fp32 in-grap
 let tldr = try await CoreAI.summarize(text, options: .model("granite-4.0-h-1b"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ChatDemo)
 (GUI + CLI, one app for every chat model in the catalog):

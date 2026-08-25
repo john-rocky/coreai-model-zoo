@@ -34,7 +34,7 @@ Convert with [`conversion/export_qwen3_6_moe_metal_decode_pipelined.py`](../../c
 let tldr = try await CoreAI.summarize(text, options: .model("qwen3.6-35b-a3b"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ChatDemo)
 (GUI + CLI, one app for every chat model in the catalog):

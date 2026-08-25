@@ -19,7 +19,7 @@ iPhone 17 Pro (A19 Pro) and M4 Max.**
 let scene = try await CoreAI.describeAudio(audioURL)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [AudioChat runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/AudioChat)
 (GUI + CLI, one app for every audio-understanding model in the catalog):

@@ -14,7 +14,7 @@ OpenBMB's 1.08B on-device LLM (hybrid Think / No-Think reasoning, 128K context, 
 let tldr = try await CoreAI.summarize(text, options: .model("minicpm5-1b"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ChatDemo)
 (GUI + CLI, one app for every chat model in the catalog):
@@ -50,7 +50,7 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
 - SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
 - Info.plist: none needed
 - Entitlements: none needed
-- First run downloads the model — 2.0 GB (Mac) / 2.0 GB (iPhone) — then it loads from the
+- First run downloads the model — 1.1 GB (Mac) / 1.1 GB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

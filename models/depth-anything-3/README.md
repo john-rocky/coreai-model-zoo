@@ -30,7 +30,7 @@ eliminated by `optimize()` because only `depth`/`depth_conf` are graph outputs.
 let map = try await CoreAI.estimateDepth(in: image)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [DepthCamera runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/DepthCamera)
 (live camera depth, one app for every depth model in the catalog):

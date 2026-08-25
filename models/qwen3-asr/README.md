@@ -21,7 +21,7 @@ is the first on the new **Core AI** runtime and a CoreAIKit drop-in.)
 let text = try await CoreAI.transcribe(audioURL, options: .model("qwen3-asr-1.7b"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [Transcribe runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Transcribe)
 (GUI + CLI, one app for every speech-to-text model in the catalog):

@@ -227,7 +227,10 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
             f"let {o['result']} = try await {o['call']}\n"
             "```\n"
             "\n"
-            f"Twenty ops, one shape — [Cookbook]({kit_url}/blob/main/docs/COOKBOOK.md).\n")
+            # No count here on purpose: this line lands in ~40 external READMEs at once,
+            # so a numeral goes stale in 40 places and costs 40 pushes to correct — which
+            # is how it came to say "Twenty" while the enum held 23.
+            f"Every op, one shape — [Cookbook]({kit_url}/blob/main/docs/COOKBOOK.md).\n")
 
     # Engine-showcase models (custom backends the generic kit path can't drive yet):
     # the ▶️ door points at their zoo app; 💻 is omitted until the backend is ported

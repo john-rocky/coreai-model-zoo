@@ -44,7 +44,7 @@ Convert with [`conversion/export_glm47_moe_metal_decode_pipelined.py`](../../con
 let tldr = try await CoreAI.summarize(text, options: .model("glm-4.7-flash"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ChatDemo)
 (GUI + CLI, one app for every chat model in the catalog):

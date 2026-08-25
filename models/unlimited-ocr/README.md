@@ -26,7 +26,7 @@ port that the runtime can run as-is.
 let markdown = try await CoreAI.read(documentAt: url, options: .model("unlimited-ocr"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [ReadDoc runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ReadDoc)
 (GUI + CLI, one app for every document-OCR model in the catalog):

@@ -25,7 +25,7 @@ reported number).
 let boxes = try await CoreAI.detect(inImageAt: url, options: .model("yolox-s"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [DetectCamera runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/DetectCamera)
 (real-time object detection on the zero-copy camera path):

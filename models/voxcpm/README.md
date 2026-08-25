@@ -21,7 +21,7 @@ VoxCPM is not a classic vocoder TTS: it pairs a **MiniCPM4 language-model backbo
 let audio = try await CoreAI.speak(text)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [Speak runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Speak)
 (GUI + CLI, one app for every text-to-speech model in the catalog):

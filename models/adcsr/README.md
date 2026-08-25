@@ -16,7 +16,7 @@ no prompt, no noise — so it is fast and small enough to run fully on-device, i
 let big = try await CoreAI.upscale(image)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [UpscaleDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/UpscaleDemo)
 (pick a photo, upscale it ×4 on-device):

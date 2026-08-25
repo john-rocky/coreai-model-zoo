@@ -31,7 +31,7 @@ flash-decode kernel (`_g8`).
 let tldr = try await CoreAI.summarize(text, options: .model("gemma-4-31b"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ChatDemo)
 (GUI + CLI, one app for every chat model in the catalog):
@@ -69,7 +69,7 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
 - SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
 - Info.plist: none needed
 - Entitlements: none needed (macOS)
-- First run downloads the model — 18.0 GB (Mac) — then it loads from the
+- First run downloads the model — 20.1 GB (Mac) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

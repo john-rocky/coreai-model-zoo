@@ -30,7 +30,7 @@ apple/coreai-models issue **#7**.
 let text = try await CoreAI.transcribe(audioURL, options: .model("parakeet-tdt-0.6b-v3"))
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [Transcribe runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Transcribe)
 (GUI + CLI, one app for every speech-to-text model in the catalog):

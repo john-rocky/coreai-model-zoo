@@ -22,7 +22,7 @@ waveform. Distilled (ARC) for few-step generation, so it's fast.
 let audio = try await CoreAI.compose(prompt)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [Music runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Music)
 (GUI + CLI, one app for every text-to-music model in the catalog):

@@ -21,7 +21,7 @@ alongside. Catalog id: **`vjepa2-vitl-ssv2`**.
 let actions = try await CoreAI.recognizeAction(videoAt: videoURL)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [ActionCamera runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ActionCamera)
 (live camera action recognition, one app for every video model in the catalog):
@@ -59,7 +59,7 @@ clip (a hand pushing a block); point `--video` at real footage for real results.
 - SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKitVision**
 - Info.plist: `NSCameraUsageDescription` — only for the live camera; the snippet needs none
 - Entitlements: none needed
-- First run downloads the model — 0.7 GB (Mac) / 1.4 GB (iPhone) — then it loads from the
+- First run downloads the model — 0.7 GB (Mac) / 0.7 GB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

@@ -51,7 +51,7 @@ bundles convert from the same recipe (`--hf-id Qwen/Qwen3-VL-4B-Instruct` /
 let caption = try await CoreAI.caption(imageAt: url)
 ```
 
-Twenty ops, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
 
 ▶️ **Run it (source)** — the [VLChat runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/VLChat)
 (GUI + CLI, one app for every vision-language model in the catalog):
