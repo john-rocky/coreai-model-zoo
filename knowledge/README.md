@@ -99,6 +99,10 @@ For the long-form version of the same material, read
   Arrives from generic postprocess code that sizes a section by subtraction. Also: pin the compute
   unit explicitly when isolating — `SpecializationOptions.default()` can fall back to CPU and a
   fallback reads as a pass (apple/coreai-torch#68).
+- [`porting-text-embedders.md`](porting-text-embedders.md) — an embedder is not a small LLM:
+  gate the **ranking**, not the cosine; k-means skips `nn.Embedding`, which is 24% of a big-vocab
+  embedder; fp16 tables are free when the checkpoint is bf16; int4 fails on the **interval**. Plus
+  the three ways a retrieval benchmark lies, all of which make the numbers look better.
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
   converting the same minimal module under both versions, diffing the graph, and running the ones
