@@ -100,15 +100,22 @@ def load_retrieval(name: str):
         corpus = dict(zip(map(str, c[idcol(c)]), c[text_col]))
     queries = dict(zip(map(str, q[idcol(q)]), q["text"]))
     qrels: dict[str, set[str]] = {}
+    # A judged-but-not-relevant row is a HARD NEGATIVE, not noise. In
+    # MIRACLRetrievalHardNegatives they are most of the file (about 6.5k of 8.3k
+    # rows) and they are the whole reason the collection is hard. Dropping them and
+    # then sampling distractors uniformly turns a retrieval benchmark into a
+    # near-ceiling one — every model above 0.93, differences compressed to nothing.
+    hard_negatives: dict[str, set[str]] = {}
     score_col = "score" if "score" in r else None
     for idx, (qid, cid) in enumerate(zip(map(str, r["query-id"]), map(str, r["corpus-id"]))):
         if score_col and r[score_col][idx] <= 0:
-            continue                      # explicit non-relevant judgement
+            hard_negatives.setdefault(qid, set()).add(cid)
+            continue
         qrels.setdefault(qid, set()).add(cid)
-    return queries, corpus, qrels
+    return queries, corpus, qrels, hard_negatives
 
 
-def subset(queries, corpus, qrels, max_queries, corpus_pool, seed=0):
+def subset(queries, corpus, qrels, max_queries, corpus_pool, hard_negatives=None, seed=0):
     """Cut a full-size collection down to something two 1B models can encode twice.
 
     Keeps every judged document for the sampled queries and fills the rest of the
@@ -129,9 +136,16 @@ def subset(queries, corpus, qrels, max_queries, corpus_pool, seed=0):
     # left to rank were the answers.
     if corpus_pool and len(corpus) > corpus_pool:
         keep = set().union(*qrels.values()) & set(corpus)
+        # Every hard negative for a surviving query stays in the pool. Random
+        # distractors only fill whatever room is left after them.
+        if hard_negatives:
+            for q in qrels:
+                keep |= hard_negatives.get(q, set()) & set(corpus)
         rest = [d for d in corpus if d not in keep]
-        extra = rng.choice(len(rest), max(0, corpus_pool - len(keep)), replace=False)
-        keep |= {rest[i] for i in extra}
+        room = max(0, corpus_pool - len(keep))
+        if room and rest:
+            extra = rng.choice(len(rest), min(room, len(rest)), replace=False)
+            keep |= {rest[i] for i in extra}
         corpus = {d: corpus[d] for d in keep}
     return queries, corpus, qrels
 
@@ -227,11 +241,15 @@ def main():
 
     results = {}
     for ds in args.datasets:
-        queries, corpus, qrels = load_retrieval(ds)
+        queries, corpus, qrels, hard_negatives = load_retrieval(ds)
         full_corpus_size = len(corpus)
         if args.max_queries or args.corpus_pool:
             queries, corpus, qrels = subset(queries, corpus, qrels,
-                                            args.max_queries, args.corpus_pool)
+                                            args.max_queries, args.corpus_pool,
+                                            hard_negatives)
+        n_hard = sum(len(hard_negatives.get(q, set()) & set(corpus)) for q in qrels)
+        if hard_negatives:
+            print(f"  [hard-neg] {n_hard} judged-negative documents kept in the pool")
         ratio = assert_retrieval_is_hard(ds, corpus, qrels, full_corpus_size)
         print(f"\n=== {ds}: {len(queries)} queries, {len(corpus)} docs "
               f"({ratio:.0f}x the judged set), "
