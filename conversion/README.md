@@ -77,6 +77,21 @@ Apple's repo; each recipe names the script it runs.
   `test_qwen3vl_aimodel_gate.py` patched (rope_scaling/get_image_features-tuple/get_rope_index sig;
   `QWEN3VL_MID`/`QWEN3VL_REF`/`QWEN3VL_NLAYERS=36` envs). See [`../models/holo2/README.md`](../models/holo2/README.md). The
   VLM analogue of the FastContext stock-drop-in template.
+- **S1-mini (STOCK dense qwen3 drop-in): `export_s1_mini_decode_pipelined.py int8lin`** —
+  Superwhisper's ASR text normalizer is a Qwen3-0.6B finetune, byte-identical in shape to
+  `Qwen/Qwen3-0.6B`, so it rides the stock `coreai_models.models.macos.qwen3` graph with no
+  model code (that class already fuses q/k/v and q_norm/k_norm). Deliberately **no `*hu`
+  mode**: the head is TIED to the 151936×1024 embedding, and untying it to quantize ADDS
+  156 MB beside the fp16 embedding instead of replacing it — a pure loss at every bit width.
+  int8lin 759 MB, **268.4 decode / 4161 prefill tok/s M4 Max**, oracle gate 16/16.
+  **int4lin is a measured no-go** and this is the interesting part: it passes the SAME 16/16
+  oracle gate and still corrupts digits (`$23,450`→`$2,345`, `107`→`177`). A free-run
+  continuation gate is blind to a single-task model's task, so this port ships a second gate
+  that speaks the model's own input format — `_smoke/gate_s1_mini_task.py`, 14 cases across
+  the card's control axes, verdict against the released weights (the upstream card's own
+  printed examples reproduce only 9/14 and cannot be used as fixtures).
+  See [`../knowledge/s1-mini-port.md`](../knowledge/s1-mini-port.md) and
+  [`../models/s1-mini/README.md`](../models/s1-mini/README.md).
 - Gemma 4: `convert.py` / `convert_palettize.py` (int8 `all8`) / `convert_stateful*.py` (stateful +
   ring) / `convert_head.py` / `check_pipeline.py` / `verify_*` — the full convert+verify harness.
 - Qwen3.5: parity ladder + fp16/int8 + head-split + stateful-palettize harnesses.

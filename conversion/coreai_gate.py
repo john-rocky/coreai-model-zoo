@@ -71,6 +71,10 @@ ARCH = {
     "lfm2_moe": {},
     "qwen3_6_moe": {},
     "muse_glimmer": {},
+    # Plain dense qwen3 (Qwen3-0.6B and its finetunes). LAST on purpose:
+    # detect_arch scans ARCH in order, so "qwen3.5"/"qwen3_6_moe" must be
+    # reached first or every hybrid/MoE bundle would route to this branch.
+    "qwen3": {},
 }
 # Dense Qwen3.6-27B reuses the qwen3.5 overlay; the 35B-A3B is MoE (own overlay). Match the
 # MoE substrings before the generic qwen3.6->qwen3.5 fallback.
@@ -86,7 +90,10 @@ ALIASES = {"ornith": "qwen3.5", "lfm2_moe": "lfm2_moe", "a1b": "lfm2_moe",
            "qwen3_8": "qwen3.5", "qwen3.8": "qwen3.5",
            # The Muse-Glimmer repo id is dashed, so the underscore key never
            # matches `hf_id` — only the bundle name. Route both spellings.
-           "muse-glimmer": "muse_glimmer", "glimmer": "muse_glimmer"}
+           "muse-glimmer": "muse_glimmer", "glimmer": "muse_glimmer",
+           # S1-mini (Superwhisper): a Qwen3-0.6B finetune whose bundle name and
+           # repo id name neither "qwen" nor "3", so nothing else can route it.
+           "s1_mini": "qwen3", "s1-mini": "qwen3"}
 
 
 def resolve_python(flag: str | None) -> str:
@@ -212,6 +219,18 @@ def build(arch, hf_id):
             k, v = create_cache_tensors(m.config, dtype=FP32)
         else:
             k, v = KVCache.create_cache_tensors(m.config, dtype=FP32)
+        m.config.max_position_embeddings = saved
+        st = {"k_cache": k, "v_cache": v}; order = ["k_cache","v_cache"]
+    elif arch == "qwen3":
+        # Plain dense qwen3 on the stock model definition (fused qkv + fused qk_norm
+        # live in Qwen3ForCausalLM._mutate_state_dict). Tied head: the class re-ties
+        # lm_head to embed_tokens after load_state_dict, so the oracle matches the
+        # export's own weight sharing rather than a stale materialized copy.
+        from coreai_models.models.macos.qwen3 import Qwen3ForCausalLM
+        from coreai_models.primitives.macos.cache import KVCache
+        m = Qwen3ForCausalLM.from_hf_memory_efficient(hf_id, max_context_length=CTX, target_dtype=FP32)
+        saved = m.config.max_position_embeddings; m.config.max_position_embeddings = TRACE_KV_CACHE_SEQ_LEN
+        k, v = KVCache.create_cache_tensors(m.config, dtype=FP32)
         m.config.max_position_embeddings = saved
         st = {"k_cache": k, "v_cache": v}; order = ["k_cache","v_cache"]
     elif arch == "muse_glimmer":

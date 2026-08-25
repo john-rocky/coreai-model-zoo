@@ -1,0 +1,36 @@
+# Recipe for s1-mini — the configuration that produced each published bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+
+["s1-mini"]
+script = "export_s1_mini_decode_pipelined.py"
+args = ["int8lin", "--hf-id", "superwhisper/s1-mini"]
+card = "README.md"
+hf_repo = "mlboydaisuke/S1-mini-CoreAI"
+source_hf_id = "superwhisper/s1-mini"
+bundle = "gpu-pipelined/s1_mini_decode_int8lin"
+status = "verified"
+overlay = true
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "S1-mini by Superwhisper: the license adds a naming term to Apache-2.0 — every card and",
+  "product integration must keep calling it \"S1-mini\" by \"Superwhisper\", exact capitalization.",
+  "Qwen3-0.6B finetune, so it rides the stock `qwen3` graph with no new model code.",
+  "Tied head: there is deliberately no *hu mode — untying to quantize the head ADDS 156 MB",
+  "(fp16 embed 311 MB stays either way), so it is a pure loss at every bit width.",
+  "int8lin 759 MB passes the fp32 oracle gate 16/16 and the task gate 13/14; M4 Max measures",
+  "268.4 decode / 4161 prefill tok/s. No iPhone measurement yet.",
+  "int4lin is a measured no-go: 549 MB and faster, passes the SAME 16/16 oracle gate, but",
+  "corrupts digits ($23,450 -> $2,345; 107 -> 177) — only the task gate sees it.",
+  "Published as mlboydaisuke/S1-mini-CoreAI at revision cf2e14841fbdbbbf4cbca29ff3e49cddd75392c0 (int8lin only —",
+  "int4lin is deliberately NOT published: same 16/16 oracle, corrupts digits).",
+  "iPhone 17 Pro VERIFIED (2026-08-25, PipelinedBench Release): numerics 276/276 + 27/27",
+  "token-exact vs the Mac engine, PB_G=1024 dynamic-KV gate passes, 62.4 decode / 69.0",
+  "prefill tok/s cold. No AOT needed — the JIT .aimodel loads directly. Sustained load",
+  "halves it (34.9/30.5) and seven idle minutes restore it: thermal, not a regression.",
+  "iPhone CEILING: prompt + generated must stay under 1024 tokens. A 611-token prompt whose",
+  "rewrite runs 603 produced 413 correct tokens then stopped at exactly 1024 — the shipped",
+  "CoreAIPipelinedEngine iOS GrowingKVCache guard (iosDynamicKVCapacityCap = 1024) capping",
+  "maxTokens to 1024 - processed - prompt.count; a >=1024-token prompt throws. Chunk input",
+  "to ~450-500 tokens. Mac has no such cap. Evidence: models/s1-mini/device/gate.json.",
+]

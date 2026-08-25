@@ -1,0 +1,81 @@
+{
+  "schema": "s1-mini-number-probe/1",
+  "question": "is int4's digit damage systematic, or was $23,450 -> $2,345 one unlucky draw?",
+  "protocol": {
+    "cases": "10 number/date/time/currency ASR transcripts",
+    "control_line": "[Styling: semi-formal] [Structure: prose] [Context: general]",
+    "greedy": true,
+    "max_new_tokens": 192,
+    "enable_thinking": false,
+    "reference": "superwhisper/s1-mini released weights via transformers, bf16",
+    "engine": "coreai-pipelined, warmup off, COREAI_CHUNK_THRESHOLD=1, M4 Max"
+  },
+  "result": {
+    "int8lin_exact_vs_reference": 9,
+    "int4lin_exact_vs_reference": 7,
+    "of": 10,
+    "reading": "int8lin's single miss is punctuation only ('$23,450 and' for '$23,450, and'). Two of int4lin's three misses are wrong digits ($23,450 -> $2,345; 107 -> 177); the third ($1,999/$2,150 -> $19.99/$21.50) is arguably the better reading of 'nineteen ninety nine plus tax so about twenty one fifty', so it is not counted against int4 as damage. Two clear digit corruptions in ten number-heavy transcripts is enough to keep int4 out of a normalizer."
+  },
+  "cases": [
+    {
+      "input": "the invoice came to twenty three thousand four hundred and fifty dollars and it's due on march third twenty twenty six",
+      "reference": "The invoice came to $23,450, and it's due on March 3rd, 2026.",
+      "int8lin": "The invoice came to $23,450 and it's due on March 3, 2026.",
+      "int4lin": "The invoice came to $2,345 and it's due on March 3, 2026."
+    },
+    {
+      "input": "we sold one hundred and seven units last quarter up from eighty nine",
+      "reference": "We sold 107 units last quarter up from 89.",
+      "int8lin": "We sold 107 units last quarter up from 89.",
+      "int4lin": "We sold 177 units last quarter up from 89."
+    },
+    {
+      "input": "the meeting is at nine forty five a m on tuesday the fourteenth",
+      "reference": "The meeting is at 9:45am on Tuesday the 14th.",
+      "int8lin": "The meeting is at 9:45am on Tuesday the 14th.",
+      "int4lin": "The meeting is at 9:45am on Tuesday the 14th."
+    },
+    {
+      "input": "transfer four thousand two hundred dollars to account number five five two one",
+      "reference": "Transfer $4,200 to account number 5521.",
+      "int8lin": "Transfer $4,200 to account number 5521.",
+      "int4lin": "Transfer $4,200 to account number 5521."
+    },
+    {
+      "input": "it costs nineteen ninety nine plus tax so about twenty one fifty",
+      "reference": "It costs $1,999 plus tax, so about $2,150.",
+      "int8lin": "It costs $1,999 plus tax, so about $2,150.",
+      "int4lin": "It costs $19.99 plus tax, so about $21.50."
+    },
+    {
+      "input": "call me back at five five five one two three four five six seven",
+      "reference": "Call me back at 5551234567.",
+      "int8lin": "Call me back at 5551234567.",
+      "int4lin": "Call me back at 5551234567."
+    },
+    {
+      "input": "the flight leaves at six oh five p m and lands at eleven twenty",
+      "reference": "The flight leaves at 6:05pm and lands at 11:20.",
+      "int8lin": "The flight leaves at 6:05pm and lands at 11:20.",
+      "int4lin": "The flight leaves at 6:05pm and lands at 11:20."
+    },
+    {
+      "input": "revenue grew from two point three million to five point eight million",
+      "reference": "Revenue grew from $2.3 million to $5.8 million.",
+      "int8lin": "Revenue grew from $2.3 million to $5.8 million.",
+      "int4lin": "Revenue grew from $2.3 million to $5.8 million."
+    },
+    {
+      "input": "i need three hundred and sixty five days of data starting january first",
+      "reference": "I need 365 days of data starting January 1.",
+      "int8lin": "I need 365 days of data starting January 1.",
+      "int4lin": "I need 365 days of data starting January 1."
+    },
+    {
+      "input": "she scored ninety eight out of one hundred on the second attempt",
+      "reference": "She scored 98 out of 100 on the second attempt.",
+      "int8lin": "She scored 98 out of 100 on the second attempt.",
+      "int4lin": "She scored 98 out of 100 on the second attempt."
+    }
+  ]
+}

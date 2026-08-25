@@ -135,6 +135,12 @@ For the long-form version of the same material, read
   zoo's first sub-int8 packed-GEMM Metal kernel; an 8B running in ~2.1 GB on the iPhone GPU.
 - [`bitvla-1.58bit-vla.md`](bitvla-1.58bit-vla.md) — 1.58-bit **Vision-Language-Action** (robotics):
   image + instruction → 7-DoF actions, fully on-device.
+- [`s1-mini-port.md`](s1-mini-port.md) — S1-mini (Superwhisper), a Qwen3-0.6B ASR text
+  normalizer, and the port's real finding: **a passing conversion gate says nothing about a
+  task model's task.** int4 scored the same 16/16 token-exact oracle as int8 and still
+  corrupted digits. Also: why a tied head makes `*hu` the wrong idea rather than a smaller
+  one, and why an upstream card's example outputs are not fixtures until you check they
+  reproduce on the released weights (here: 9/14).
 - [`minicpm5-1b.md`](minicpm5-1b.md) — the clean-LlamaForCausalLM recipe done end-to-end (hybrid
   Think/No-Think, untied head, 128K) — the most reusable conversion template in the zoo.
 - [`youtu-mla-port.md`](youtu-mla-port.md) — dense **DeepSeek-style MLA at 2B on iPhone**: latent-KV
