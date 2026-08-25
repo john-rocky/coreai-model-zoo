@@ -3,9 +3,30 @@
 The open, **multilingual, instruction-aware, Matryoshka** text embedder running as a single
 static `.aimodel`, completing the on-device RAG stack: **embed → (rerank) → generate**, all
 local and private. [`Qwen/Qwen3-Embedding-0.6B`](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B)
-(Apache-2.0) is current open SOTA-class for its size on multilingual MTEB (incl. Japanese); it
-is the instruction-aware / MRL complement to the already-shipped
+(Apache-2.0) is the instruction-aware / MRL complement to the already-shipped
 [EmbeddingGemma-300m](https://huggingface.co/mlboydaisuke/embeddinggemma-300m-CoreAI).
+
+> **Corrected 2026-08-25.** This card used to call it "current open SOTA-class for its size on
+> multilingual MTEB (incl. Japanese)". Measured here on three retrieval collections under one
+> protocol, it is **last of the three embedders this repo can run**, on English and on Japanese:
+>
+> | collection | Qwen3-Embedding-0.6B | EmbeddingGemma-300m | Nemotron-3-Embed-1B |
+> |---|---|---|---|
+> | NanoSciFact (en, 50 q) | 0.687 | **0.864** | 0.765 |
+> | JaQuAD (ja, 250 q) | 0.570 | **0.621** | 0.616 |
+> | MIRACL-ja (ja, 250 q, hard negatives) | 0.792 | 0.825 | **0.862** |
+>
+> nDCG@10; every gap against Qwen3-Embedding is separated at 95% by a paired bootstrap. An
+> independent evaluation reaches the same ordering on Japanese
+> ([sionic-ai Nano-BEIR](https://huggingface.co/blog/sionic-ai/eval-sionic-nano-beir):
+> EmbeddingGemma 0.590 leads Japanese, and the two are within 0.004 on English aggregate).
+> Reproduce with `_smoke/compare_embedders_retrieval.py`; the numbers are in
+> `_smoke/results/embedder_retrieval_2026-08-25.json`.
+>
+> What still stands, and is why this model stays in the catalog: it is the only one of the three
+> that takes a **task instruction** in the query, and the only one with **Matryoshka** truncation
+> (1024 → 32 dims, re-normalize on the host, zero ranking flips measured). Those are capabilities
+> the other two do not have. The retrieval-accuracy claim was the part that was not measured.
 
 **This is an encoder, not a generator** — one forward over the (right-padded) input returns one
 pooled vector. No autoregressive loop, no KV cache, no LM head, no sampling. It runs like the

@@ -1,0 +1,149 @@
+{
+ "measured": "2026-08-25",
+ "protocol": {
+  "runtime": "native torch (sentence-transformers), MPS, fp32-from-bf16 where applicable",
+  "seq_len": 256,
+  "note": "each model runs its own documented prefixes/pooling/dim; corpus, queries, qrels, metric and sequence budget are held identical",
+  "metric": "nDCG@10, binary relevance, paired bootstrap 10k resamples",
+  "script": "_smoke/compare_embedders_retrieval.py"
+ },
+ "datasets": {
+  "NanoSciFact": {
+   "lang": "en",
+   "queries": 50,
+   "docs": 2919,
+   "note": "full published corpus"
+  },
+  "JaQuAD": {
+   "lang": "ja",
+   "queries": 250,
+   "docs": 3014,
+   "note": "WEAK discriminator: only 6.3x the judged set, QA-derived"
+  },
+  "MIRACL-ja": {
+   "lang": "ja",
+   "queries": 250,
+   "docs": 8000,
+   "note": "pooled from 185319 with all 1638 hard negatives for these queries kept; NOT comparable to published full-MIRACL numbers"
+  }
+ },
+ "results": {
+  "NanoSciFact": {
+   "nvidia/Nemotron-3-Embed-1B-BF16": {
+    "ndcg@10": 0.7654121010547534,
+    "recall@10": 0.87,
+    "top1": 0.68,
+    "n_queries": 50,
+    "dim": 2048,
+    "delta_vs_best": {
+     "mean": 0.09843325750307062,
+     "ci95": [
+      0.02731343154167867,
+      0.17746137055602065
+     ],
+     "separated": true
+    }
+   },
+   "Qwen/Qwen3-Embedding-0.6B": {
+    "ndcg@10": 0.6869316926166023,
+    "recall@10": 0.79,
+    "top1": 0.58,
+    "n_queries": 50,
+    "dim": 1024,
+    "delta_vs_best": {
+     "mean": 0.17691366594122188,
+     "ci95": [
+      0.0870551377624231,
+      0.2730932836309756
+     ],
+     "separated": true
+    }
+   },
+   "google/embeddinggemma-300m": {
+    "ndcg@10": 0.8638453585578242,
+    "recall@10": 0.94,
+    "top1": 0.76,
+    "n_queries": 50,
+    "dim": 768
+   }
+  },
+  "JaQuAD": {
+   "nvidia/Nemotron-3-Embed-1B-BF16": {
+    "ndcg@10": 0.6157176339610815,
+    "recall@10": 0.6,
+    "top1": 0.848,
+    "n_queries": 250,
+    "dim": 2048,
+    "delta_vs_best": {
+     "mean": 0.00507483115865691,
+     "ci95": [
+      -0.01447149273019335,
+      0.024110333038584723
+     ],
+     "separated": false
+    }
+   },
+   "Qwen/Qwen3-Embedding-0.6B": {
+    "ndcg@10": 0.5695061412027156,
+    "recall@10": 0.62,
+    "top1": 0.668,
+    "n_queries": 250,
+    "dim": 1024,
+    "delta_vs_best": {
+     "mean": 0.05128632391702283,
+     "ci95": [
+      0.027688382175447532,
+      0.07535387141797861
+     ],
+     "separated": true
+    }
+   },
+   "google/embeddinggemma-300m": {
+    "ndcg@10": 0.6207924651197385,
+    "recall@10": 0.642,
+    "top1": 0.776,
+    "n_queries": 250,
+    "dim": 768
+   }
+  },
+  "MIRACL-ja": {
+   "nvidia/Nemotron-3-Embed-1B-BF16": {
+    "ndcg@10": 0.8622570891251041,
+    "recall@10": 0.9727393939393939,
+    "top1": 0.788,
+    "n_queries": 250,
+    "dim": 2048
+   },
+   "Qwen/Qwen3-Embedding-0.6B": {
+    "ndcg@10": 0.7916353149615879,
+    "recall@10": 0.9460821067821068,
+    "top1": 0.684,
+    "n_queries": 250,
+    "dim": 1024,
+    "delta_vs_best": {
+     "mean": 0.0706217741635161,
+     "ci95": [
+      0.0490504924264261,
+      0.09261097675400032
+     ],
+     "separated": true
+    }
+   },
+   "google/embeddinggemma-300m": {
+    "ndcg@10": 0.8245845381142228,
+    "recall@10": 0.9610949494949494,
+    "top1": 0.708,
+    "n_queries": 250,
+    "dim": 768,
+    "delta_vs_best": {
+     "mean": 0.03767255101088132,
+     "ci95": [
+      0.01807251055216724,
+      0.057925017894130994
+     ],
+     "separated": true
+    }
+   }
+  }
+ }
+}
