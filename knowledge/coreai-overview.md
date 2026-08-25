@@ -32,8 +32,13 @@ PyTorch (re-authored model)
   → [Swift]  CoreAI.framework (on device, iOS/macOS 27)  ── AOT-compiled by `aimodelc`
 ```
 
-- **macOS is enough to convert + run (Python) + numerically verify.** On-device iOS / the Swift
-  runtime / the AOT compiler (`aimodelc`, shipped in Xcode 27) need iOS/macOS 27.
+- **macOS 26+ on Apple silicon is enough to convert + run (Python) + numerically verify.** The
+  `coreai-core` wheels are tagged `macosx_26_0_arm64` (PyPI also carries `manylinux_2_34_x86_64`
+  Linux wheels — convert-on-Linux untested by us). Verified on macOS 26.5.2 (2026-08-26,
+  ultralytics CI run 32907390789): coreai-torch 0.4.2 exported + loaded + validated 8 YOLO task
+  models, detect mAP identical to macOS 27.0 beta. On-device iOS / the Swift runtime need
+  iOS/macOS 27; the AOT compiler (`aimodelc`, ships in Xcode 27) runs on macOS 26.4+ — see
+  [`swift-runtime.md`](swift-runtime.md).
 - Python runtime (sketch): `prog.save_asset(Path(out), rt.AIModelAssetMetadata())`;
   `model = await rt.AIModel.load(path, rt.SpecializationOptions.cpu_only())`;
   `fn = model.load_function("main")`; `res = await fn({"x": rt.NDArray(arr)}, state=...)`.
