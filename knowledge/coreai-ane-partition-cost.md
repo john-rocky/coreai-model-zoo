@@ -86,5 +86,23 @@ xcrun coreai-build compile topk.aimodel --platform iOS --preferred-compute gpu  
 ```
 
 Time inside the app, not from the host, and allocate the input `NDArray` once outside the loop.
-With marshalling inside the timed loop the same graph reads 8.9 ms instead of 3.0 ms, and the
-measurement is of the bridge rather than the model.
+
+## Three ways this measurement goes wrong
+
+All three were hit in the session that produced the numbers above, on a model that was correct
+every time. Each one produces a confident wrong answer rather than an error.
+
+**Marshalling inside the timed loop.** With the input conversion in the loop, the same graph reads
+8.9 ms instead of 3.0 ms. The dominant term becomes the host bridge, not the model. Equalize the
+output readback too — a large output converted element-by-element on one side and not the other is
+the same mistake in reverse.
+
+**Comparing order-sensitive outputs as raw tensors.** A detection head emits a fixed number of rows
+and the row order is not meaningful: equal-confidence rows swap between backends. Comparing the raw
+tensor gave a max delta of 6.3e+02 on a model whose detections were identical. Match each reference
+detection to its nearest predicted box, then compare.
+
+**Unmatched preprocessing.** A PyTorch predictor letterboxes to a rectangle (640×480 for one image);
+a static exported graph takes 640×640. Same image, different input, and a 0.106 confidence delta
+that looks like a numerics bug. Print the real shape and dtype entering both sides before believing
+any difference.
