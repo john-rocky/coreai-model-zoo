@@ -6,6 +6,7 @@
 #     "pyarrow",
 #     "numpy",
 #     "torch",
+#     "coreai-opt",
 # ]
 #
 # [tool.uv]
@@ -187,11 +188,38 @@ def ndcg_at_k(ranked: list[str], relevant: set[str], k: int) -> float:
     return dcg / ideal if ideal else 0.0
 
 
-def evaluate(model_id, prefixes, queries, corpus, qrels, seq_len, device, batch):
+def palettize(st, preset: str, seq_len: int):
+    """Compress the transformer in place with k-means palettization.
+
+    prepare() returns a model whose forward already carries the compression, so
+    retrieval quality can be measured before anything is exported — which is the
+    order that matters, because compression is where ports die and a cosine gate
+    on 20 sentences does not tell you whether ranking survived.
+    """
+    import torch as _t
+    from coreai_opt.palettization import KMeansPalettizer, KMeansPalettizerConfig
+
+    inner = st[0].auto_model
+    cfg = getattr(KMeansPalettizerConfig.presets, preset)()
+    ids = _t.ones(1, seq_len, dtype=_t.long)
+    mask = _t.ones(1, seq_len, dtype=_t.long)
+    # vector k-means is non-deterministic; seed before prepare()
+    _t.manual_seed(0)
+    np.random.seed(0)
+    palettizer = KMeansPalettizer(inner, cfg)
+    st[0].auto_model = palettizer.prepare((ids, mask), num_workers=1)
+    return st
+
+
+def evaluate(model_id, prefixes, queries, corpus, qrels, seq_len, device, batch,
+             preset=None):
     qp, dp = prefixes
-    st = SentenceTransformer(model_id, device=device)
+    st = SentenceTransformer(model_id, device="cpu" if preset else device)
     st.max_seq_length = seq_len
     st.eval()
+    if preset:
+        st = palettize(st, preset, seq_len)
+        st.to(device)
 
     qids = list(queries)
     cids = list(corpus)
@@ -236,6 +264,8 @@ def main():
     ap.add_argument("--batch", type=int, default=16)
     ap.add_argument("--max-queries", type=int, default=0, help="0 = all")
     ap.add_argument("--corpus-pool", type=int, default=0, help="0 = full corpus")
+    ap.add_argument("--palettize", choices=["w8", "w4", "w6"], default=None,
+                    help="k-means palettize before measuring (the compression gate)")
     ap.add_argument("--out")
     args = ap.parse_args()
 
@@ -260,9 +290,10 @@ def main():
             if mid not in MODELS:
                 raise SystemExit(f"no documented prefixes for {mid}; add them to MODELS")
             r = evaluate(mid, MODELS[mid], queries, corpus, qrels,
-                         args.seq_len, args.device, args.batch)
-            results.setdefault(ds, {})[mid] = r
-            print(f"{mid:38} {r['dim']:5d} {r['ndcg@10']:8.4f} "
+                         args.seq_len, args.device, args.batch, args.palettize)
+            label = mid if not args.palettize else f"{mid} [{args.palettize}]"
+            results.setdefault(ds, {})[label] = r
+            print(f"{label:38} {r['dim']:5d} {r['ndcg@10']:8.4f} "
                   f"{r['recall@10']:7.4f} {r['top1']:7.4f}")
 
     # Paired bootstrap on the per-query nDCG differences. Paired because both models

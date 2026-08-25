@@ -143,6 +143,52 @@
      ],
      "separated": true
     }
+   },
+   "nvidia/Nemotron-3-Embed-1B-BF16 [w8]": {
+    "ndcg@10": 0.8617879869314446,
+    "recall@10": 0.9740727272727272,
+    "top1": 0.784,
+    "n_queries": 250,
+    "dim": 2048
+   },
+   "nvidia/Nemotron-3-Embed-1B-BF16 [w4]": {
+    "ndcg@10": 0.8452088460112318,
+    "recall@10": 0.9641997113997113,
+    "top1": 0.74,
+    "n_queries": 250,
+    "dim": 2048
+   }
+  }
+ },
+ "compression_gate": {
+  "note": "measured on the palettized torch model before export \u2014 prepare() carries the compression in its forward, so ranking is gated before any bundle exists",
+  "dataset": "MIRACL-ja (250 q, 8000 docs, hard negatives kept)",
+  "line_to_beat": {
+   "embeddinggemma-300m": 0.8246
+  },
+  "nemotron_fp32": 0.8623,
+  "verdict": {
+   "ship_dtype": "int8 k-means",
+   "int8": {
+    "ndcg": 0.8618,
+    "delta_vs_embeddinggemma": 0.0372,
+    "ci95": [
+     0.0173,
+     0.0576
+    ],
+    "separated": true,
+    "size_mb": 1141
+   },
+   "int4": {
+    "ndcg": 0.8452,
+    "delta_vs_embeddinggemma": 0.0206,
+    "ci95": [
+     -0.0008,
+     0.0425
+    ],
+    "separated": false,
+    "size_mb": 705,
+    "note": "REJECTED: the CI crosses zero, so at 705 MB the reason to ship this model at all \u2014 clearly beating the 300M already in the catalog \u2014 stops holding. top1 also falls 0.784 -> 0.740."
    }
   }
  }
