@@ -27,8 +27,8 @@ cannot have changed numerically: it is the same program.
 
 | Fix | Reaches a graph? | Values move? |
 |---|---|---|
-| #54 fp16 batch norm computed in fp32 | **yes, fp16 only** | **yes** |
-| #32 integer true-divide promoted | **yes** | **yes** |
+| #54 fp16 batch norm computed in fp32 | yes, fp16 only | **no — measured** |
+| #32 integer true-divide promoted | **yes** | **yes — measured** |
 | #40 conv transpose, 1D | yes | no — shapes only |
 | #40 conv transpose, 2D without `output_padding` | no | no |
 | #55 layer_norm gamma/beta shape | yes, multi-dim `normalized_shape` only | no |
@@ -38,30 +38,61 @@ cannot have changed numerically: it is the same program.
 | #35 `atan2` | 0.4.1 **cannot convert it at all** | n/a |
 | #24 quantize/dequantize negative axis | not from this repo — see below | n/a |
 
-### #54 — the one that changes fp16 numbers
+### #54 — changes the graph, and not the output
 
-Under 0.4.1 the whole normalisation runs in fp16, `eps` included: `1e-5` is cast to fp16
+Under 0.4.1 the whole normalisation is written in fp16, `eps` included: `1e-5` is cast to fp16
 before it is added to the variance, and the `sqrt`, the subtract and the divide are all fp16.
-Under 0.4.2 the input and all four parameters are cast to fp32, the arithmetic runs there, and
-the result is cast back. An fp32 model is unaffected apart from the removal of some no-op
-`cast f32 -> f32`.
+Under 0.4.2 the input and all four parameters are cast to fp32, the arithmetic is written
+there, and the result is cast back. An fp32 model is unaffected apart from the removal of some
+no-op `cast f32 -> f32`.
 
-Four recipes here build a `BatchNorm1d` — the Conformer convolution module in
+**Then it was run, and the outputs are bit-identical.** `Conv1d -> BatchNorm1d` in fp16,
+executed through `coreai.runtime` under both converters, max-abs against a torch fp32
+reference:
+
+| regime | 0.4.1 | 0.4.2 |
+|---|---|---|
+| trained-looking stats (`var` 0.01–5) | 0.00873 | 0.00873 |
+| `var` below fp16's smallest normal (`1e-8`–`1e-6`) | 7.2617 | 7.2617 |
+| fp32 control | 1.9e-06 | 1.9e-06 |
+
+The second row is the regime built to defeat it: `eps = 1e-5` is **subnormal in fp16**, so if
+the fp32 upcast ever mattered it would matter there. It does not. Nor is it `optimize()`
+erasing the difference — running with and without it gives the same digits.
+
+**Why: `batch_norm` is emitted as `coreai.invoke @batch_norm_<suffix>`, and the runtime picks
+the kernel for a composite.** The casts the converter writes inside the composite body are a
+declaration of intent, not the arithmetic that runs. The fp16 error that is there — and 0.00873
+against a signal of 21.8 is real error — comes from fp16 weights and fp16 input, and both
+converters inherit it equally.
+
+**The general form, which is the opposite direction of this note's own method:** a graph that is
+identical proves the output is identical, because it is the same program. A graph that
+*differs* proves nothing about the output, and proves least of all across a composite boundary.
+Measure the second case; only the first one is free.
+
+Three recipes here build a `BatchNorm1d` — the Conformer convolution module in
 `conversion/parakeet/export_encoder.py`, `conversion/lfm_audio/export_encoder_adapter.py` and
 `conversion/sortformer_diar/sortformer_model.py`. (`conversion/nemotron_asr/export_encoder.py`
-states in its own header that its conv-module norm is LayerNorm, not BatchNorm.) In a
-Conformer the batch norm follows a depthwise conv and the Core AI compiler folds it, so
-whether this reaches the shipped bytes is a question about the fold, not about the recipe —
-and `sortformer_float16` is the fp16 bundle to check it on.
+states in its own header that its conv-module norm is LayerNorm, not BatchNorm.) They are the
+models this would have reached, and it reaches none of them: the measurement above is exactly
+their shape. `sortformer_float16` needs no re-export on this account.
 
 ### #32 — silently truncating division
 
 0.4.1 lowered a true-divide on two integer tensors to an **integer** divide and then cast the
-truncated result to float: `7 / 3` came out `2.0`. 0.4.2 casts both operands to float first.
-Any model whose graph did this was wrong by whole units, not by an ulp — which is also the
-reason to expect none shipped: every bundle here passes a parity gate against torch eager
-before it is published, and an error of that size does not pass a cosine check. The fp16
-batch norm above is the opposite case: small enough to sit inside a tolerance.
+truncated result to float. Run through the runtime on `[7, 8, 9, 10] / 3`:
+
+| | output |
+|---|---|
+| torch | `2.3333, 2.6667, 3.0, 3.3333` |
+| 0.4.1 | `2.0, 2.0, 3.0, 3.0` |
+| 0.4.2 | `2.3333, 2.6667, 3.0, 3.3333` |
+
+Wrong by whole units, not by an ulp — which is also the reason to expect none shipped: every
+bundle here passes a parity gate against torch eager before publication, and an error that size
+does not pass a cosine check. This is the one place in 0.4.2 where a graph difference and an
+output difference actually coincide.
 
 ### #40 — 1D conv transpose loses its static shape under 0.4.1
 
@@ -104,3 +135,9 @@ Reach for the converter, not the artifact, when the question is "did a converter
 us". Two versions, one variable, diff the graph. It is minutes rather than a re-export, it
 names the mechanism instead of producing a number to interpret, and it answers for constructs
 no shipped model happens to contain yet.
+
+But the diff is only half a method, and the half that is sound runs one way. **Graph identical
+⇒ output identical. Graph different ⇒ nothing yet.** Of the two changes here that rewrote a
+graph's arithmetic, one moved the output by whole units and the other did not move it by a
+single bit, and no amount of reading the diff separated them — running them did, in about ten
+minutes. Diff to find the short list; run the short list.

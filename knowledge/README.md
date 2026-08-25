@@ -94,11 +94,17 @@ For the long-form version of the same material, read
 - [`coreai-ane-partition-cost.md`](coreai-ane-partition-cost.md) — an op the ANE cannot run (`topk`
   is the usual one) charges a **fixed** cost, not one that scales with its work: cutting k 30× buys
   nothing. Count boundary crossings, not ops. Self-contained reproducer (apple/coreai-torch#66).
+- [`coreai-zero-sized-dim-abort.md`](coreai-zero-sized-dim-abort.md) — a 0-length `split` section
+  or a width-0 output converts fine and then **aborts the process** on GPU and ANE (CPU runs it).
+  Arrives from generic postprocess code that sizes a section by subtraction. Also: pin the compute
+  unit explicitly when isolating — `SpecializationOptions.default()` can fall back to CPU and a
+  fallback reads as a pass (apple/coreai-torch#68).
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
-  converting the same minimal module under both versions and diffing the graph. Two move values
-  (fp16 batch norm, integer true-divide); the rest move shapes or cannot be reached. **Scanning a
-  bundle for op names cannot answer this** — `batch_norm` ships as `invoke @batch_norm_<suffix>`.
+  converting the same minimal module under both versions, diffing the graph, and running the ones
+  that differ. **Exactly one moves values** (integer true-divide: `7/3` was `2.0`); fp16 batch norm
+  rewrites the graph and changes nothing, because the runtime picks the kernel for a composite.
+  Graph-identical proves output-identical; graph-different proves nothing until you run it.
 
 ## Agent & app layer (FM framework / App Intents / Evaluations / security)
 - [`spotlight-rag-third-party.md`](spotlight-rag-third-party.md) — running Apple's WWDC26
