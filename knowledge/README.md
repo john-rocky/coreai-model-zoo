@@ -91,6 +91,9 @@ For the long-form version of the same material, read
   API reference (int4/int8, granularity, mixed-precision, joint); the LM-head/embedding lever.
 - [`coreai-beta-mpsgraph-kvwrite-bug.md`](coreai-beta-mpsgraph-kvwrite-bug.md) — the data-indexed
   in-graph KV write SIGSEGV (FB23024751 / apple#5): platform-agnostic (GPU too), host-cache workaround.
+- [`coreai-ane-partition-cost.md`](coreai-ane-partition-cost.md) — an op the ANE cannot run (`topk`
+  is the usual one) charges a **fixed** cost, not one that scales with its work: cutting k 30× buys
+  nothing. Count boundary crossings, not ops. Self-contained reproducer (apple/coreai-torch#66).
 
 ## Agent & app layer (FM framework / App Intents / Evaluations / security)
 - [`spotlight-rag-third-party.md`](spotlight-rag-third-party.md) — running Apple's WWDC26
