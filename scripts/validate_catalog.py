@@ -34,6 +34,9 @@ REPO = Path(__file__).resolve().parents[1]
 MODELS = REPO / "models"
 CONVERSION = REPO / "conversion"
 STATUSES = {"verified", "unverified"}
+
+# Recipe names whose upstream id legitimately shares no token with them.
+SOURCE_ID_EXCEPTIONS: dict[str, str] = {}
 HF_REPO = re.compile(r"^[A-Za-z0-9][\w.\-]*/[\w.\-]+$")
 
 failures: list[str] = []
@@ -69,6 +72,30 @@ def check_entry(model_dir: Path, name: str, step: dict) -> None:
     repo = step.get("hf_repo")
     if repo is not None and not HF_REPO.match(repo):
         fail(where, f"hf_repo {repo!r} is not owner/name")
+
+    # Two entries in the same family are written by copying the first and editing it,
+    # and `source_hf_id` is the field that gets left behind: embeddinggemma-300m
+    # claimed to convert from Qwen/Qwen3-Embedding-0.6B, and depth-anything-3-base
+    # from DA3-SMALL. Both were wrong for a year in the field whose entire job is to
+    # answer "how do I convert THIS model" from a Hugging Face id.
+    #
+    # Sharing no name token is the signal. It is a heuristic, so a legitimate mismatch
+    # is silenced by listing the entry in SOURCE_ID_EXCEPTIONS with the reason.
+    source = step.get("source_hf_id") or step.get("source_repo")
+    if source and name not in SOURCE_ID_EXCEPTIONS:
+        tail = source.split("/")[-1].lower()
+        # Keep this minimal. An earlier version dropped "base"/"instruct" as
+        # generic and thereby deleted the only token depth-anything-3-base
+        # shares with DA3-BASE, failing a correct entry.
+        drop = {"", "b", "m", "v"}
+        ntok = {t for t in re.split(r"[-_.\d]+", name.lower()) if t} - drop
+        stok = {t for t in re.split(r"[-_.\d]+", tail) if t} - drop
+        # substring either way covers ids written without separators (melbandroformer)
+        joined = "".join(sorted(stok))
+        if ntok and stok and not (ntok & stok) and not any(t in joined for t in ntok):
+            fail(where, f"source_hf_id {source!r} shares no name token with the recipe "
+                        f"`{name}` — check it was not copied from a sibling entry "
+                        f"(add to SOURCE_ID_EXCEPTIONS if the mismatch is real)")
 
     card = step.get("card")
     if card is not None and not (model_dir / card).is_file():
