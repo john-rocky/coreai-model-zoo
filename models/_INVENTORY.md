@@ -15,7 +15,7 @@ configuration; a single bundle answers that question by itself.
 
 | metric | count |
 | --- | --- |
-| published repos | 244 |
+| published repos | 245 |
 | Core AI repos | 80 |
 | Core AI bundles inside them | 278 |
 | Core AI repos with a `models/<family>/` card | 70 |
@@ -258,9 +258,10 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/ms-marco-MiniLM-L4-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/ms-marco-MiniLM-L4-v2-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
 | [mlboydaisuke/multilingual-e5-base-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-base-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
 | [mlboydaisuke/multilingual-e5-large-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-large-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
+| [mlboydaisuke/Qwen3-ASR-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-ASR-0.6B-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
 | [mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
 | [mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
-| [mlboydaisuke/S1-mini-CoreAI](https://huggingface.co/mlboydaisuke/S1-mini-CoreAI) | 0 | 0 | coreai | port | 1 | — | [s1-mini](s1-mini/README.md) | `s1-mini` | — |
+| [mlboydaisuke/S1-mini-CoreAI](https://huggingface.co/mlboydaisuke/S1-mini-CoreAI) | 0 | 0 | coreai | port | 1 | — | [s1-mini](s1-mini/README.md) | `s1-mini` | `s1-mini` |
 | [mlboydaisuke/ViT-Base-ImageNet-ExecuTorch](https://huggingface.co/mlboydaisuke/ViT-Base-ImageNet-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
 | [mlboydaisuke/ViTPose-plus-base-ExecuTorch](https://huggingface.co/mlboydaisuke/ViTPose-plus-base-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |
 | [mlboydaisuke/wav2vec2-XLSR53-Japanese-ExecuTorch](https://huggingface.co/mlboydaisuke/wav2vec2-XLSR53-Japanese-ExecuTorch) | 0 | 0 | other | port | 0 | — | — | — | — |

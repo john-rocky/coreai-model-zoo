@@ -116,6 +116,46 @@ after it). The user turn is a control line, a newline, then the raw transcript:
 `[Styling: casual|semi-casual|semi-formal|formal] [Structure: prose|lists] [Context: general|email]`.
 The system prompt is part of the trained format and must be sent verbatim.
 
+## Kit enrollment: what a single-task model does to an op layer
+
+Enrolled in coreai-kit as `CoreAI.tidyTranscript` over a new `KitTextNormalizer`, catalog
+kind `textNormalizer` (2026-08-25). The interesting part is what could NOT be reused, because
+it generalizes to the next single-task port:
+
+- **The obvious cheap option was wrong.** Backing the existing `proofread` op with S1-mini is
+  a one-line change and would have broken that op's contract under everyone using it —
+  `proofread` promises to keep the wording as close to the original as possible, and this
+  model deletes fillers and false starts, is English-only, and returns the empty string for
+  filler-only input. A model that does one job well is not a drop-in for a general op that
+  overlaps it.
+
+- **The shared chat path could not drive it.** `OpModels.respondText` deliberately sends an
+  EMPTY system prompt (that is what lets every text op share one loaded model) and retries
+  once on empty output (a thinking model burning its budget in `<think>`). Both are exactly
+  wrong here: the system prompt IS the trained input format, and the empty string is a
+  correct answer. So the port gets a thin path that renders the real prompt — and the way to
+  keep that honest is to gate it against the token sequence the device evidence was taken on
+  (`Tests/CoreAIKitTests/KitTextNormalizerTests`, the currency/date case from
+  `ondevice/PipelinedBench`), which needs the tokenizer and not the weights.
+
+- **`enable_thinking=False` is not delegated to the template.** The rendered prompt's tail is
+  checked for `<think>\n\n</think>\n\n` and appended if the template did not emit it. The
+  failure being guarded is silent and uniform — every call returns "" — so a flag that might
+  be honoured is not good enough.
+
+- **The 1024-token ceiling became the op's shape, not a caveat in its docs.** Input past ~450
+  tokens is cut at word boundaries and the rewrites stitched. Two choices worth carrying
+  forward: cut on **token count**, not on structure, because raw dictation has no punctuation
+  to split on — that is the thing being added; and **even the pieces out** rather than pack
+  them, so a 500-token transcript becomes 250+250 instead of 450+50 and never ends in an
+  orphan the model rewrites with nothing around it.
+
+Verified on Mac through `Examples/OpsDemo`: the currency/date case returns
+`The invoice came to $23,450 and it's due on March 3, 2026.` — including the comma the task
+gate already records int8lin missing (13/14), so the kit path reproduces the gated bundle
+rather than something near it. A 695-token meeting transcript chunks, rewrites and stitches
+in 13.6 s with the seam invisible in the output.
+
 ## Licensing
 
 Apache-2.0 plus an ADDITIONAL TERM: any use, distribution or product integration must keep

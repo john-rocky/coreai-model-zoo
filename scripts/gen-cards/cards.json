@@ -885,6 +885,35 @@
         }
       }
     },
+    "s1-mini": {
+      "zooCard": "models/s1-mini/README.md",
+      "runner": {
+        "dir": "Examples/Tidy",
+        "xcodeproj": "Tidy.xcodeproj",
+        "scheme": "Tidy",
+        "cliTarget": "tidy-cli",
+        "cliArgs": "--text \"so um i need to like send the the report by uh friday no wait make that thursday\"",
+        "blurb": "GUI + CLI, the three control axes as pickers"
+      },
+      "quickstart": "Examples/Tidy/Sources/QuickStart.swift",
+      "product": "CoreAIKit",
+      "snippetImport": "CoreAIKit",
+      "snippetFreeVars": {
+        "transcript": "String"
+      },
+      "snippetResultComment": "// result: the transcript as written text — English only; filler-only input returns \"\"",
+      "takeHomeNote": "Cleaning transcripts repeatedly? Keep the `KitTextNormalizer` loaded and call\n`normalize(_:)` per transcript — the 796 MB load is what you are avoiding.",
+      "checklistInfoPlist": "Info.plist: none needed",
+      "checklistEntitlements": "Entitlements: none needed",
+      "op": {
+        "call": "CoreAI.tidyTranscript(rawTranscript)",
+        "result": "clean",
+        "isDefault": true,
+        "freeVars": {
+          "rawTranscript": "String"
+        }
+      }
+    },
     "stable-audio-open-small": {
       "mediaCaption": "Stable Audio Open Small on iPhone 17 Pro — the zoo's coreai-audio app, 12 s of audio in ~1 s.",
       "runner": {
