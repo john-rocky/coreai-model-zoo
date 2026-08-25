@@ -34,6 +34,12 @@ python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit --write --push # 
 ```
 
 Exit 0 = all cards clean. Exit 1 = drift (rerun with `--write`) or a gate failure.
+
+**Drift here is not only template drift.** The block quotes `catalog.json` — sizes above
+all — so a card goes stale the moment the kit corrects one and nobody regenerates. Run
+2026-08-25 (a one-word template change) turned up five cards advertising a first-run
+download the catalog no longer agreed with, one of them by almost 2x. Worth a periodic
+full run even when no template changed.
 `--skip-builds` iterates templates without gates and refuses `--write`/`--push`.
 
 ## Enrolling a model
