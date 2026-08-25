@@ -101,5 +101,12 @@ one). Commit (explicit paths). Draft the X post with the measured RTF — **post
   specializes the graphs: Parakeet v2 on an iPhone 17 Pro measured **7.2× realtime on the first pass
   and 67.8× on the next**, same clip, same process. Anything that shows one number — a demo app as
   much as a bench — must discard a warmup pass or it reports a figure no workload ever sees.
+- **And a run right after a long one measures the thermal state, not the model.** The other end
+  of the same problem. S1-mini int8lin on an iPhone 17 Pro: 64.7 decode tok/s cold, **30.5** after
+  back-to-back 1024-token generations, and 62.4 again after seven idle minutes — same bundle, same
+  process shape, a 2× swing with nothing changed. Well past the ±30% a screen-lock GPU cap explains,
+  so a number taken at the end of a probe session is not comparable to one taken at the start.
+  Publish the cold number (it is the shared protocol) and record the sustained one separately when
+  the workload is repetitive — a dictation post-processor or a streaming ASR meets it every time.
 - **`Bundle.module` / cross-file symbols show as SourceKit errors in-editor** until a real build
   regenerates the resource accessor — `swift build` is the source of truth, not the squiggles.
