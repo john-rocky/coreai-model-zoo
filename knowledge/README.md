@@ -94,6 +94,11 @@ For the long-form version of the same material, read
 - [`coreai-ane-partition-cost.md`](coreai-ane-partition-cost.md) — an op the ANE cannot run (`topk`
   is the usual one) charges a **fixed** cost, not one that scales with its work: cutting k 30× buys
   nothing. Count boundary crossings, not ops. Self-contained reproducer (apple/coreai-torch#66).
+- [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
+  nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
+  converting the same minimal module under both versions and diffing the graph. Two move values
+  (fp16 batch norm, integer true-divide); the rest move shapes or cannot be reached. **Scanning a
+  bundle for op names cannot answer this** — `batch_norm` ships as `invoke @batch_norm_<suffix>`.
 
 ## Agent & app layer (FM framework / App Intents / Evaluations / security)
 - [`spotlight-rag-third-party.md`](spotlight-rag-third-party.md) — running Apple's WWDC26
