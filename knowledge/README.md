@@ -89,6 +89,12 @@ For the long-form version of the same material, read
   `--preferred-compute neural-engine`). The first-run-latency mitigation path.
 - [`compression-reference.md`](compression-reference.md) — `coreai-opt` quantization & palettization
   API reference (int4/int8, granularity, mixed-precision, joint); the LM-head/embedding lever.
+- [`ane-silicon-reference.md`](ane-silicon-reference.md) — **the ANE silicon map**, distilled from the
+  reverse-engineering guide arXiv:2606.22283: which compression forms stream vs fold per generation
+  (palettization is the only always-streaming form), the M(n)=H(n+12) family/capability staircase,
+  hard caps (~128 programs/process, 2→4.72 MB working set, >4094 slice-inf on A13/A14), the measured
+  decode-vs-encoder verdict with its bandwidth mechanism, and the warmup/idle/power rules a fair ANE
+  bench must follow. External direct-route numbers on M-series — not our Core AI-route measurements.
 - [`coreai-beta-mpsgraph-kvwrite-bug.md`](coreai-beta-mpsgraph-kvwrite-bug.md) — the data-indexed
   in-graph KV write SIGSEGV (FB23024751 / apple#5): platform-agnostic (GPU too), host-cache workaround.
 - [`coreai-ane-partition-cost.md`](coreai-ane-partition-cost.md) — an op the ANE cannot run (`topk`
