@@ -400,6 +400,11 @@ positions). New, generalizable findings:
   ship is provider mode (`PerTokenInputProvider` PLE rows, extension ids
   mapped to the pad row host-side) with `image_embeds` still a static
   buffer: **static and per-token extra inputs compose in one engine**.
+  Status 2026-08-27: still live on iOS 27.0 (24A5418b) — a fresh
+  coreai-torch 0.4.2/coreai-core b2 pf32 export re-AOT'd with coreai-build
+  3600.82.1 aborts the first S=32 prefill chunk byte-identically
+  (`offset 98816 + size 98304 exceeds heap total 145920`, 2/2). Filed
+  upstream as apple/coreai-models#201 (iOS face of the closed #27).
 - Device-vs-Mac exactness has a context-length limit: at 272 tokens the
   AOT-h18p fusion lands elsewhere within the runtime's own fp16 noise
   (Mac prompt-end logits cos dips to ~0.9), so a 24-token greedy chain can

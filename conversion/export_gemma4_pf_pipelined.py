@@ -29,7 +29,12 @@ import torch
 from huggingface_hub import snapshot_download
 from _bundle import write_bundle_metadata
 
+# coreai-torch 0.4.2 moved the private _torch_export_module from converter to
+# externalize (same name/signature); the shim below monkeypatches it, so pick
+# whichever module carries it.
 import coreai_torch.converter as _ct_conv
+if not hasattr(_ct_conv, "_torch_export_module"):
+    import coreai_torch.externalize as _ct_conv
 from coreai_models.export._constants import TRACE_KV_CACHE_SEQ_LEN
 from coreai_models.export.compression import quantize_pytorch_model
 from coreai_models.export.macos import export_to_coreai_multifunction

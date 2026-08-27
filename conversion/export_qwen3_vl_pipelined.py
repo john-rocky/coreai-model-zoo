@@ -211,7 +211,11 @@ def main() -> None:
         # ConstraintViolation message.
         import re as _re
 
+        # coreai-torch 0.4.2 moved _torch_export_module converter -> externalize
+        # (same name/signature); patch whichever module carries it.
         import coreai_torch.converter as _ct_conv
+        if not hasattr(_ct_conv, "_torch_export_module"):
+            import coreai_torch.externalize as _ct_conv
         from torch.export import Dim as _Dim
 
         _orig_export_module = _ct_conv._torch_export_module
