@@ -177,7 +177,8 @@ For the long-form version of the same material, read
   [`unlimited-ocr-rswa-static-decode.md`](unlimited-ocr-rswa-static-decode.md) — the document-OCR
   trio: a Glm4v variant, whole-page parsing on stock Qwen2-VL, and an R-SWA MoE on the **stock
   runtime** with static-shape stateful decode.
-- [`ovisocr2-port.md`](ovisocr2-port.md) — **in progress, nothing published**. OvisOCR2 tops
+- [`ovisocr2-port.md`](ovisocr2-port.md) — **in progress, nothing published; carries its own
+  handoff** (§Start here: one authoring variant left, plus artifact/device/gate state). OvisOCR2 tops
   OmniDocBench v1.6 (96.58) over the zoo's own MinerU2.5-Pro (95.69) and is config-identical to
   Qwen3.5-0.8B, so it is a weights swap on shipped authoring. Carries the port's two transferable
   findings: the **first non-square vision grid** through `qwen3_5_vision.py` (gated exact in fp32,

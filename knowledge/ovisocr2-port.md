@@ -1,9 +1,11 @@
 # OvisOCR2 (0.8B page parser) — Core AI port
 
-Status **in progress**: both bundles export and the vision half is gated; the decoder has no
-numerics gate yet. Nothing is published, so there is deliberately **no `models/ovisocr2/`** — that
-directory is the catalog's published surface (every entry needs a real `hf_repo` and a card whose
-numbers are measured). The recipe below moves there when it ships.
+Status **in progress**. Numerics are done: **128/128 tokens exact** end to end vs the fp32 HF
+oracle, on Mac, through both the JIT and the AOT assets. Mac is shippable at ~6.3 s/page. The phone
+**loads** the 2.15 GiB bundle but cannot yet run it — that needs one authoring variant, which is the
+whole of the handoff below. Nothing is published, so there is deliberately **no `models/ovisocr2/`**
+— that directory is the catalog's published surface (every entry needs a real `hf_repo` and a card
+whose numbers are measured). The recipe below moves there when it ships.
 
 ```toml
 ["ovisocr2-vision"]
@@ -74,6 +76,70 @@ open_questions = [
   "shipping criterion for this family is tokens, not cosine.",
 ]
 ```
+
+## Start here (the port is unfinished — this is the handoff)
+
+**One thing is left: a static-input `image_embeds` VL variant for the qwen3.5 family.** Everything
+else is measured and recorded below. Why that one thing, and why it is not blocked, is in
+*The iPhone gap is authoring, not the kit*.
+
+**Write it here** — the live checkout, not this repo:
+
+    ~/code/coreai/coreai-models/python/src/coreai_models/models/macos/qwen3_5.py
+
+Model it on `qwen3_vl_pipelined.py` in the same directory (`Qwen3VLPipelinedForCausalLM`). `qwen3_5.py`
+is **tracked** upstream, so the new class rides `overlay/patches/python-overlay.patch`, not
+`overlay/files/`.
+
+⚠️ **`overlay/regen.sh` sweeps the whole checkout.** It runs
+`git diff <BASE> -- python/src/coreai_models` and copies every untracked package file into `files/`.
+As of this writing the checkout also holds another session's in-flight work — `bailing_moe_v3.py`
+(Ling-3.0), `qwen3_5_mtp_ios.py`, and edits to `lfm2.py` / `model_registry.py` / `models/base.py` /
+`models/registry.py`. Running regen as-is publishes all of it. Check
+`git -C ~/code/coreai/coreai-models status --short -- python/src/coreai_models` first.
+
+**What already exists** (`~/code/coreai/coreai-models/exports/`, ~16 GB, keep — re-exporting costs an hour):
+
+| dir | what |
+|---|---|
+| `ovisocr2_vision_fp16` · `ovisocr2_vision_aotc` · `ovisocr2_vision_ios_aotc` | the 196 MB tower, source + macOS h16c + iOS h18p |
+| `ovisocr2_vl_decode_int8hu_block32_sym_pf16` | multifunction decoder (`main` S=1 + `prefill` S=16), 764 MB + 508 MB embed table |
+| `ovisocr2_vl_decode_int8hu_block32_sym_s1` | decode-only source |
+| `ovisocr2_vl_decode_aotc` · `_ios_aotc` | multifunction AOT, **3.6 GB** — Mac only |
+| `ovisocr2_vl_decode_s1_efr_aotc` · `_s1_efr_ios_aotc` | decode-only AOT, **2.1 GB** — the one that loads on the phone |
+
+**Already on the iPhone 17 Pro**, app container `com.coreai.pipelinedbench`:
+`Documents/models/ovisocr2_s1b/ovisocr2_vl_decode_int8hu_block32_sym_s1.h18p.aimodelc` (loads; see the
+device section). `Documents/models/ovisocr2_s1` is the **flattened, broken** copy from the first
+attempt — `devicectl` has no delete, so it is dead weight until someone wipes the container.
+
+**Re-run the gates** (from this repo's root; the GPU ones want `_GPU_LOCK` held and the GPU to themselves):
+
+    # fixture (system python — the overlay venv has no qwen3_5 classes)
+    python3 _smoke/test_ovisocr2_tower_gate.py <page.png> --capture-ref
+    python3 _smoke/dump_ovisocr2_oracle.py <page.png> --max-new 128
+
+    # gates (overlay venv)
+    V=~/code/coreai/coreai-models/.venv/bin/python; E=~/code/coreai/coreai-models/exports
+    $V _smoke/test_ovisocr2_tower_gate.py <page.png>                  # fp32 authoring
+    $V _smoke/test_ovisocr2_tower_gate.py <page.png> --stage aimodel   # fp16 .aimodel
+    $V _smoke/test_ovisocr2_suite_gate.py \
+        --vision-asset  $E/ovisocr2_vision_aotc/ovisocr2_vision_fp16.h16c.aimodelc \
+        --decoder-asset $E/ovisocr2_vl_decode_aotc/ovisocr2_vl_decode_int8hu_block32_sym_pf16.h16c.aimodelc
+
+The page itself is `_smoke/ovisocr2_jp_page.html` (render command in the tower gate's docstring); the
+`.npz` fixtures are gitignored by repo convention and regenerate from it.
+
+**Re-export** (from `~/code/coreai/coreai-models`, not from `conversion/` — the drivers' `--out-dir`
+default is relative and the repo convention is to run them there):
+
+    python conversion/export_qwen38vl_pipelined.py int8hu --hf-id ATH-MaaS/OvisOCR2 \
+      --name ovisocr2 --grid-h 40 --grid-w 28 --max-ctx 8192 --skip-vision
+
+**Then the ship tail**, none of which is started: `models/ovisocr2/{README.md,recipe.toml}` with a real
+`hf_repo` (the recipe is drafted below), the HF upload, the four indexes, `gen_inventory.py` →
+`gen_llms_txt.py` → `validate_catalog.py`, and kit enrollment (`catalog.json` + `ModelCatalog.swift`)
+— OvisOCR2 becomes the fourth reader behind `CoreAI.read(documentAt:)`.
 
 ## Why this one
 
