@@ -331,12 +331,29 @@ Two things it would fix for free: no 508 MB host-side embed table (it moves back
 cutting the phone footprint), and chunked prefill through the engine instead of the S=1 ingest that
 costs 6.3× on the prompt.
 
-**The open technical question, and it is not a formality.** The rope-shift hook collapses image
-positions with a single scalar subtraction, which is enough for Qwen3-VL's *sectioned* M-RoPE.
-Qwen3.5 is `mrope_interleaved: true` with `mrope_section [11,11,10]` — the t/h/w components
-interleave inside the head dim rather than occupying contiguous sections. Whether one scalar shift
-can express that, or whether the graph needs the three planes after all, is unanswered. Settle it
-before writing the class, not after.
+**The question I flagged as open is closed, and its premise was wrong.** I wrote that the
+rope-shift hook "collapses image positions with a single scalar subtraction, which suits Qwen3-VL's
+*sectioned* M-RoPE" and that Qwen3.5's interleaved form might not fit. Both halves are wrong.
+`qwen3_vl_pipelined.py` says it plainly: Qwen3-VL is **already interleaved**, and the 3D position is
+computed **in-graph from `(ids, position)` alone** —
+
+    image tokens self-locate: slot = ids - V, s0 = pos - slot,
+                              t = s0, h = s0 + slot//W, w = s0 + slot%W
+    the interleave is three constant 0/1 masks over head_dim
+      (freq j: j%3==1 and j<3*sec_h -> h;  j%3==2 and j<3*sec_w -> w;  else t)
+
+The shift does none of the 3D work — it only fixes *post-image text* positions, because an image
+consumes `max(H,W)` rope positions rather than `N`. So there is no scalar-vs-3D problem to solve.
+Qwen3.5's `mrope_section [11,11,10]` sums to 32 pairs, exactly the 64 rope dims that head_dim 256 ×
+`partial_rotary_factor` 0.25 gives, and drops straight into the mask scheme.
+
+What genuinely differs from Qwen3-VL, and is already solved elsewhere: Qwen3-VL is pure attention
+("NO extra states"), while Qwen3.5 is a GDN/full-attention hybrid with `convState`/`recState`. The
+shipped `qwen3.5-0.8b` decode bundle already rides the pipelined engine with those four states via
+`apps/coreai-pipelined-extra-states.patch`, so that piece exists too.
+
+**Net: the variant is tractable and closely modelled on an existing file.** It is still a new
+authoring module, which is this project's session boundary — but it is not blocked on an unknown.
 
 ## Not done
 
