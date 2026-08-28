@@ -297,13 +297,51 @@ The AOT tower is **bit-identical to the JIT one** (cos 0.999985, min-row 0.99701
 closes the last alternative explanation for the fp16 tail: it is the graph's own fp16 numerics, not
 a compile artifact.
 
+## The iPhone gap is authoring, not the kit — and this port exported the wrong variant
+
+Correcting an earlier reading of this. The kit is **not** missing a driver. `CoreAIKit/Vision`
+(`VLArchitecture` + `VLRuntime`) is a generic VLM driver with presets for Qwen3-VL 2B/4B/8B,
+LFM2.5-VL, North-Micro-Vision and GLM-OCR; `CoreAIKit/OCR` has three shipped readers
+(`KitDocReader`, `KitMineruReader`, `KitGlmOcrReader`) behind `CoreAI.read(documentAt:)`, running
+on iPhone today — GLM-OCR even on a **portrait non-square** 32×24 grid, so the grid shape was never
+the obstacle either.
+
+What the kit drives is one specific contract, the one `qwen3_vl_pipelined.py` exports:
+
+    input_ids [1,s]          image tokens encoded as V + slot
+    position_ids [1,total]
+    image_embeds [N,h]       static input
+    rope_shift_start/amount  static inputs
+    embedding = ids < V ? embed_tokens[ids] : image_embeds[ids - V]     -- INSIDE the graph
+    position  = p >= rope_shift_start ? p - rope_shift_amount : p
+
+The embed table stays in the graph, so the engine drives it and `VLRuntime` binds the image rows as
+a static buffer. **This port exported the other variant** — `Qwen3_5VLStatefulEmbeds`: `inputs_embeds`
+plus three interleaved-mRoPE planes, with the host doing the gather and a 508 MB
+`embed_tokens.safetensors` shipped alongside. That is correct for the 27B, which is Mac-only and
+driven from python, and it is what makes the bundle *not* engine-drivable — so neither the stock
+engine nor the kit can run it, whatever the kit contains.
+
+The actual gap is upstream of both: **`coreai_models/models/macos/qwen3_5.py` has exactly one VL
+class, `Qwen3_5VLStatefulEmbeds`.** The qwen3.5 family has no static-input `image_embeds` variant at
+all. Writing one — modelled on `Qwen3VLPipelinedForCausalLM` — is a **new authoring module**, which
+is this project's session boundary.
+
+Two things it would fix for free: no 508 MB host-side embed table (it moves back into the graph,
+cutting the phone footprint), and chunked prefill through the engine instead of the S=1 ingest that
+costs 6.3× on the prompt.
+
+**The open technical question, and it is not a formality.** The rope-shift hook collapses image
+positions with a single scalar subtraction, which is enough for Qwen3-VL's *sectioned* M-RoPE.
+Qwen3.5 is `mrope_interleaved: true` with `mrope_section [11,11,10]` — the t/h/w components
+interleave inside the head dim rather than occupying contiguous sections. Whether one scalar shift
+can express that, or whether the graph needs the three planes after all, is unanswered. Settle it
+before writing the class, not after.
+
 ## Not done
 
-* **A real device run.** The bundle loads on the phone; nothing has been *executed* there. Driving
-  it needs app-side code PipelinedBench does not have: the contract is `inputs_embeds` + three
-  interleaved-mRoPE planes (`pos_t/pos_h/pos_w`), not `input_ids`, so neither the stock engine path
-  nor the `vlSingle` VLM path fits. The python gate (`_smoke/test_ovisocr2_suite_gate.py`) is the
-  reference to port. It also needs the 508 MB `embed_tokens.safetensors` on device for the host gather.
+* **Everything above.** The phone can load the bundle; it cannot run it, and the route to running it
+  is the authoring variant, not app code.
 * **The 3.6 GB multifunction build on device** — untested; Mac-only for now.
 * **No publish.** Nothing is on the Hub; there is no `models/ovisocr2/` yet by design.
 * The grid evidence is one page, not a benchmark. If a real OmniDocBench-style sweep ever runs,
