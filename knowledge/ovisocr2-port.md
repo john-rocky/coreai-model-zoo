@@ -181,16 +181,45 @@ So the phone build costs ~2.2× the page time to save 1.5 GB — the chunked pre
 alone. Anything timed here has to hold `_GPU_LOCK` and run solo, exactly as the repo's rule says. Note the opposite trap still holds:
 efr on a genuinely **fixed-shape** graph SIGSEGVs on iOS. Decide it per graph.
 
-## Mac ships; iPhone has an identified path and one unanswered question
+## Mac ships. The iPhone load question is answered: it loads.
 
-**Mac: green.** Multifunction + efr, 128/128 exact, ~8 s/page.
+**Mac: green.** Multifunction + efr, 128/128 exact, ~6.3 s/page.
 
-**iPhone: the decode-only build is the candidate, and it is not settled.** At 2.1 GB the decoder is
-under the proven-loadable 2.39 GiB and far under the 3.92 GB failure point — but it is a
-**multi-input/output graph above 2 GB**, which is exactly the documented `NSPOSIXErrorDomain 2`
-band, and it is above the ~1.5 GB ship rule. The 3.6 GB multifunction build is simply out. The one
-remaining test is a device load of the 2.1 GB decode-only bundle; if it refuses, the fix is a graph
-split, which the ship rule points at anyway.
+**iPhone 17 Pro: the 2.15 GiB decode-only bundle loads.** Measured on device
+(`PipelinedBench`, `PB_TERNPF=ovisocr2_s1b`, iOS 27 beta):
+
+```
+MEM start          footprint=0.012 GB  headroom=6.430 GB
+OPTS gpu-reshape → LOAD 1.68 s   |  OPTS default → LOAD 3.51 s
+MEM model loaded   footprint=0.048 GB  headroom=6.395 GB
+TERNPF ERROR main/prefill missing (functions: ["main"])   <- expected: this bundle has only "main"
+```
+
+No `NSPOSIXErrorDomain 2`. The feared multi-IO-above-2 GB wall did not fire for this graph
+(5 inputs / 1 output / 4 states, `resources.bin` 2,304,556,708 B = 2.15 GiB), and the post-load
+footprint is **0.048 GB** — the weights are mapped, not resident. For calibration, this same phone
+already carries Shieldstral's 2.34 GB `resources.bin`, so 2.15 GiB was never the outlier; the open
+question was the IO shape, and it is now closed for this bundle. The 3.6 GB multifunction build is
+still untested on device and stays Mac-only.
+
+### The trap that cost two transfers: `devicectl copy to` flattens a `.aimodelc`
+
+Pointing `--source` at the `.aimodelc` directory copies its **contents** into the destination, so
+the `.aimodelc` level disappears. The runtime then cannot select the AOT specialization and fails
+with **`failedToSpecialize` (`CoreAIDelegates.AIModelError` code 1)** — which reads like a bad
+compile, not a bad path. All three `SpecializationOptions` modes fail identically, so option
+A/B tells you nothing. Push so the `.aimodelc` name survives:
+
+    --destination Documents/models/<dir>/<name>.h18p.aimodelc
+
+Every working sideload on the device has that level (`bitcpm_pf64/bitcpm_8b_ternary_pf64.h18p.aimodelc/…`).
+`TernaryPrefill.swift`'s comment says it handles the flattened layout by using `<dir>` itself as the
+asset — that works for a `.aimodel`, **not** for an AOT `.aimodelc`.
+
+Also: `--destination` is relative to the **appDataContainer root**, not `Documents`. A first push to
+`models/…` reported `EXIT=0` and printed a plausible path, and nothing landed — the container held
+only `Documents`/`Library`/`tmp` afterwards. Verify by listing, never by exit code. A genuine 2.15 GiB
+transfer took 77 s flat and 311 s nested; anything much faster did not happen.
 
 ## Grid: 1120 is not costing anything measurable
 
@@ -270,8 +299,12 @@ a compile artifact.
 
 ## Not done
 
-* **The device load of the 2.1 GB decode-only decoder** — the one question between this and an
-  iPhone ship (see above). Everything upstream of it is measured.
+* **A real device run.** The bundle loads on the phone; nothing has been *executed* there. Driving
+  it needs app-side code PipelinedBench does not have: the contract is `inputs_embeds` + three
+  interleaved-mRoPE planes (`pos_t/pos_h/pos_w`), not `input_ids`, so neither the stock engine path
+  nor the `vlSingle` VLM path fits. The python gate (`_smoke/test_ovisocr2_suite_gate.py`) is the
+  reference to port. It also needs the 508 MB `embed_tokens.safetensors` on device for the host gather.
+* **The 3.6 GB multifunction build on device** — untested; Mac-only for now.
 * **No publish.** Nothing is on the Hub; there is no `models/ovisocr2/` yet by design.
 * The grid evidence is one page, not a benchmark. If a real OmniDocBench-style sweep ever runs,
   1120 vs 1333 is the first thing to re-check.

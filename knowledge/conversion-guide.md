@@ -28,6 +28,16 @@ res = await fn({"x": rt.NDArray(np_or_tensor)})        # __call__ is ASYNC -> di
 ## Gotchas that cost real time
 
 - **`save_asset` won't overwrite** — `shutil.rmtree(out)` first.
+- **`devicectl copy to` flattens a `.aimodelc`, and the symptom lies.** Pointing `--source` at the
+  `.aimodelc` directory copies its *contents* into the destination, dropping the `.aimodelc` level.
+  The runtime then cannot select the AOT specialization and reports **`failedToSpecialize`
+  (`CoreAIDelegates.AIModelError` code 1)** — which reads like a bad compile. Every
+  `SpecializationOptions` mode fails identically, so A/B-ing the load options teaches nothing.
+  Push so the name survives: `--destination Documents/models/<dir>/<name>.h18p.aimodelc`.
+  Two more from the same hour: `--destination` is relative to the **appDataContainer root**, not
+  `Documents` (a push to `models/…` returned `EXIT=0` with a plausible printed path and landed
+  nothing); and a real 2.15 GiB transfer takes ~77 s flat / ~311 s nested — verify by listing the
+  device, never by exit code.
 - **`coreai-build` lives inside the Metal Toolchain cryptex, not in Xcode.** `xcrun -f coreai-build`
   resolves to `…/cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v<ver>/Metal.xctoolchain/usr/bin/`.
   So it is present or absent depending on which Xcode `xcode-select` points at — an Xcode whose

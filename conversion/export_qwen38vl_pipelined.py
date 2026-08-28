@@ -100,6 +100,11 @@ def _install_externalize_dim_retry() -> None:
     import coreai_torch.converter as _ct_conv
     from torch.export import Dim as _Dim
 
+    # coreai-torch 0.4.2 moved _torch_export_module converter -> externalize
+    # (same name/signature); patch whichever module carries it.
+    if not hasattr(_ct_conv, "_torch_export_module"):
+        import coreai_torch.externalize as _ct_conv
+
     _orig = _ct_conv._torch_export_module
 
     def _with_retry(prep):
