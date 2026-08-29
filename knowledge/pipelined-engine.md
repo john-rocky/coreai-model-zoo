@@ -32,6 +32,25 @@ structural" verdict was measured on the hand-rolled loop — it was that loop's 
 AI's. The official engine is ~2× **faster** than MLX on the same machine (qwen3-0.6B-4bit:
 ~1,150 tok/s vs MLX ~535).
 
+### The fork's sampler drain — retired 2026-08-29 (measured redundant after upstream #121)
+
+Fork commit 427a05b (2026-07-23) put `await computeStream.currentWorkCompleted()` before every
+GPU sampler encode, against a bogus first token sampled from a not-yet-written logits row
+(observed under the composite sampler after the 0.2.0 merge). Upstream #121 (aff0bb2) later
+gave the composite sampler a per-call `MPSGraphExecutableExecutionDescriptor` — the shared one
+corrupted scratch across in-flight steps, the same class of symptom. Re-measured with #121 in
+the tree (macOS, qwen3-0.6b 4-bit dynamic, release, drain vs. none interleaved, GPU lock held):
+single turn N=20/arm, 200 tokens — greedy **354.5 → 538.5 tok/s (+52%)**, temperature 0.7
+**336.6 → 481.0 (+43%)**, greedy output token-identical across all 40 runs, zero repeated
+words / doubled punctuation in the sampled runs; multi-turn (generate → partial `reset(to:)` →
+generate, the "post-drain boundary" the original symptom named) 12 turns × 3 reps/arm — greedy
+streams identical, sampled runs clean. Removed in zoo-0.4 (`8c6f804`). What the code says: the
+model step and the sampler share one `MTLCommandQueue`, and upstream's own constrained path
+(#169/#170) commits the sampler straight after `function.encode(to:)` with no drain. Residual:
+**not measured on iOS**; the other `currentWorkCompleted()` sites (reset/teardown) stay.
+Harness: `~/code/coreai/_zoo04_harness/` (`forkturns` = fork by path, `hybrid2turn` = kit by
+path).
+
 ## What a model needs to ride the engine
 
 `EngineFactory.createEngine` auto-selects `coreai-pipelined` for **dynamic-shape** bundles
