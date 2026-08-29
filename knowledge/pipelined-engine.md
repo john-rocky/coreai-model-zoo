@@ -118,6 +118,18 @@ possible:
   static `[1,1]` graph rejects it (`NDArrayDescriptor` fatal). `llm-benchmark` is safe (warms
   via a real trial); `llm-runner` needs `--warmup exact --warmup-length 1`; in an app, a
   1-token generate after load IS the warmup.
+- **Stock `apple/coreai-models` cannot even CONSTRUCT the pipelined engine for an S=1
+  decode-only bundle** (logits static `[1,1,vocab]`): `CoreAIPipelinedEngine.swift` sizes
+  `GrowingLogitsBuffer` to `averageExpectedPromptSize` (256) before any token is bound, and
+  `TensorStorage+CoreAI.swift` resolves `[1,256,vocab]` against the static descriptor →
+  `Shape at dimension 1 of 256 is not a valid substitution for source shape 1`. The `256` in
+  that message is the constant, not the prompt length (fingerprint). The zoo fork's five-line
+  `logitsSeqIsStatic` guard (john-rocky/coreai-models@9e5b605, 2026-06-13) is what makes every
+  zoo S=1 bundle load; `CoreAIStaticShapeEngine` is not involved (an S=1 bundle with a `main`
+  function and no `extend_*`/`load_embeddings` is `.dynamic` → pipelined, in both trees).
+  Reported upstream as apple/coreai-models#212 (2026-08-29, patch inline); a third party had
+  misattributed it to "the fork's static-shape engine chunked prefill" (Liquid4All/pipette-clients#13).
+  `COREAI_CHUNK_THRESHOLD` itself is upstream (`ModelConfig.swift`), so guard + `=1` is the whole recipe.
 - **Benchmark Release builds only** — a Debug engine measures ~3× slow (host-side per-token
   work dominates unoptimized Swift).
 - Cold GPU specialization of the 0.8B bundle: ~4.8 s on iPhone, then ~0.2–1.0 s warm loads
