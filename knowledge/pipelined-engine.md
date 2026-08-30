@@ -148,6 +148,9 @@ possible:
   function and no `extend_*`/`load_embeddings` is `.dynamic` → pipelined, in both trees).
   Reported upstream as apple/coreai-models#212 (2026-08-29, patch inline); a third party had
   misattributed it to "the fork's static-shape engine chunked prefill" (Liquid4All/pipette-clients#13).
+  Upstream triage (stikves, 2026-08-29): a feature request outside the pipelined engine's scope, "as
+  it is designed for dynamic inputs" — so plan on the fork guard, not an upstream fix. The S=1
+  rationale (this section) was answered on-thread 2026-08-30 (issuecomment-5471143196).
   `COREAI_CHUNK_THRESHOLD` itself is upstream (`ModelConfig.swift`), so guard + `=1` is the whole recipe.
 - **Benchmark Release builds only** — a Debug engine measures ~3× slow (host-side per-token
   work dominates unoptimized Swift).
