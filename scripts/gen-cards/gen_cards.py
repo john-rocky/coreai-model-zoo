@@ -271,10 +271,12 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
         fm_note = ""
         if cfg.get("fmProvider"):
             fm_note = (
-                f"Also runs behind **Apple's FoundationModels API** — CoreAIKit's "
-                f"[`{cfg['fmProvider']}`]({kit_url}#works-with-apples-foundationmodels-api) "
-                "plugs this bundle into the system `LanguageModelSession`; capabilities "
-                "(tool calling, guided generation) auto-detect per model.\n"
+                "**When Apple's FoundationModels built-in model isn't enough, keep your "
+                "session code and swap the model — one line.** CoreAIKit's "
+                f"[`{cfg['fmProvider']}`]({kit_url}#when-foundationmodels-isnt-enough) "
+                "plugs this bundle into the same system `LanguageModelSession`; your "
+                "`Tool`s, `@Generable` types and transcripts work unchanged, and "
+                "capabilities (tool calling, guided generation) auto-detect per model.\n"
                 "\n")
         parts.append(
             "💻 **Build with it** — complete; the glue is kit API, copy-paste runs:\n"
