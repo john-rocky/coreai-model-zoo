@@ -405,6 +405,14 @@ fixes them in minutes — no re-conversion needed. (One port, FastContext-1.0-4B
 instead of recovered: Microsoft removed its upstream weights on 2026-06-30, so it cannot be
 rebuilt.) Details: [`knowledge/coreai-torch-041-ir-incident.md`](knowledge/coreai-torch-041-ir-incident.md).
 
+## Maintainer
+
+[**Daisuke Majima (MLBoy)**](https://github.com/john-rocky) — the converted models live at
+[huggingface.co/mlboydaisuke](https://huggingface.co/mlboydaisuke); the same maintainer runs
+[devicemark](https://devicemark.github.io/) (on-device LLM leaderboard, where zoo ports are
+measured) and wrote the Japanese textbook
+[The Art of Core AI](https://zenn.dev/mlboydaisuke/books/coreai-textbook), drawn from these ports.
+
 ## License
 
 BSD-3-Clause ([`LICENSE`](LICENSE)). Re-authored model code derives from Apple's BSD-3-Clause
