@@ -194,6 +194,12 @@ For the long-form version of the same material, read
   foundation model (stateless graph + host RevIN DSP).
 - [`esam3-port.md`](esam3-port.md) — EfficientSAM3: a **dropped** port (device-verified but redundant
   vs the official SAM 3) — kept for what transferred.
+- [`magenta-rt2-port.md`](magenta-rt2-port.md) — Magenta RealTime 2: a **parked** port (not shipped,
+  not dead — real-time on iPhone was proven against a Mac-only model, on both runtimes, and the
+  first Core AI blocker is identified in the note). Kept for the ANE sampler rewrite — `argmax`+`gather` in a 12-step depth loop costs 12
+  partition crossings and 34 ms/frame; `onehot = (x >= max(x))` then matmul is the same tensor for
+  free — plus the codec rules (batch the call, keep the iSTFT on the host) and where 4-bit stops
+  working (79% of the params take it; the logits head and embeddings do not).
 - [`shieldstral-port.md`](shieldstral-port.md) — Shieldstral-1.0-3B: why a model that answers
   with **one token** should not ship as a decoder (bake the tail, keep two rows of the head), how
   to port a checkpoint your **export venv cannot load** — build the oracle in the venv that
