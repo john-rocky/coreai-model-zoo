@@ -166,7 +166,7 @@ is not currently expressible through the kit.
   scheme, not the gather.)** `llm-benchmark` drives the bundle; `llm-runner`'s gen path hard-asserts
   on the 3-state (KV+conv) layout (CLI limit).
   ⚠️ **REFINEMENT — "sym8 not k-means" holds for top-k≥4, REVERSES for top-1** (ZAYA1-8B,
-  `ZAYA1_8B_CCA_VALIDATED_UNSHIPPED.md`, 2026-06-22). The sym8-wins result was measured on top-4
+  `ZAYA1_8B_CCA_STATE.md`, 2026-06-22). The sym8-wins result was measured on top-4
   (LFM) / top-8 (Qwen3.6) MoE, where each token's FFN output is a weighted sum of k experts so
   expert-quant error AVERAGES (~/√k) and even crude linear int8 survives. **ZAYA is top-1 of 16:
   one token → one expert, error NOT averaged → `sym8` (linear) collapses** (engine skips the
