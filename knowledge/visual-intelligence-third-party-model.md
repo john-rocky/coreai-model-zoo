@@ -2,8 +2,20 @@
 
 > Verified against the 27 beta SDK swiftinterface, 2026-06-13. WWDC26 297 "Best practices for
 > integrating visual intelligence in your app." Working example: `coreai-kit/Examples/VisualIntel`.
-> Device surfacing (camera/screenshot → system UI) is USER device-pending; the API surface and
-> the engine path are SDK- and Mac-verified.
+>
+> **Update 2026-08-03 — device-confirmed, and the OS floor is lower than assumed.**
+> Camera → system UI surfacing is CONFIRMED on device with a VLM answering inside the background
+> launch (`apps/MiniCPMVisualIntel`, MiniCPM-V 4.6; tabs render as `Google | RF-DETR | MiniCPM-V`).
+> **Availability is iOS 26.0, not 27**: `IntentValueQuery` is `@available(macOS 26.0, iOS 26.0, …)`
+> and `SemanticContentDescriptor` is `@available(iOS 26.0, *)` in the shipping iPhoneOS26.1 SDK
+> (`@UnionValue` is even older — iOS 18.0). Our apps deploy at iOS 27 only because **Core AI**
+> (the inference runtime) is iOS 27 — the Visual Intelligence hook itself is not the constraint.
+> One more spec line worth quoting when arguing app layout: *"Your app can't contain more than one
+> `IntentValueQuery` that takes a `SemanticContentDescriptor`"* → one app = one tab.
+> Caveat on the line below: the published Apple doc does NOT mention
+> `GenerateImageFeaturePrintRequest`; that came from the WWDC26 297 sample. The doc says only
+> "search your app's content for matching items" — i.e. model-agnostic by omission.
+> Write-up: https://qiita.com/john-rocky/items/22ca6dcdbedbf7bd91c4
 
 Visual Intelligence (camera on iOS, screenshots on iPad/Mac) lets the system query your app and
 show your results in its own UI — with your app closed. Apple's samples compute similarity with
