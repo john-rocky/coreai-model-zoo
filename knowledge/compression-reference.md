@@ -24,6 +24,20 @@ Every compressor output is itself a PyTorch model (validate/finetune/export it).
   (see [pipelined-engine.md](pipelined-engine.md)).
 - **scheme**: symmetric vs asymmetric. At int8 the gap is small (~1.5 dB); at int4 asymmetric gains +3–5 dB,
   and `symmetric_with_clipping` can add +7 dB.
+  ⚠️ **That ordering does not hold on stacked MoE expert weights** — measured on Ling-3.0-tiny (128 experts,
+  `[1,128,512,1536]` stacks, 2026-08-21), only the expert qscheme varied, everything else identical:
+  | expert qscheme | size | meanKL | top-1 vs fp32 |
+  |---|---|---|---|
+  | `symmetric_with_clipping` (the default everywhere) | 4.56 GiB | 3.68e-2 | 91.0% |
+  | `asymmetric` | 4.66 GiB | 3.43e-2 | 92.2% |
+  | **`symmetric`** (plain absmax) | **4.56 GiB** | 3.45e-2 | **92.7%** |
+  Plain absmax wins **at identical size and with no extra storage**; asymmetric ties it on KL but must carry a
+  zero-point per block (+0.125 bits/param at int4 block-32). Not an int4 artefact either — the same swap at int8
+  took meanKL 3.76e-3 → 3.37e-3 and oracle cos 0.998999 → **0.999684**, i.e. from failing the `cos ≥ 0.999` gate
+  to passing it. The likely cause is the one already written down for the LM head in `conversion/_bundle.py:
+  head_quant_spec`: clipping craters fat-tailed outlier rows, and a 128-expert stack is fat-tailed for the same
+  reason a 157 k-row vocabulary is. **Treat the big-vocab-head rule as a big-expert-stack rule too**, and re-check
+  it on the other MoE ports, which have all been left at the clipping default.
 - **workflows**: data-free weight-only PTQ (seconds; good ≥8-bit, sometimes 4–6) → calibration (≈128 samples,
   needed for activation ranges) → QAT (full training; the only way to recover ≤4-bit).
 - **modes**: graph (torchao PT2E, default; needs `torch.export`-able model; best for weight+activation) vs
@@ -63,9 +77,54 @@ Every compressor output is itself a PyTorch model (validate/finetune/export it).
   [`custom-metal-kernels.md`](custom-metal-kernels.md): the fused-int8 head+argmax kernel.)
 
 ## Pitfalls
-- **Silent skips**: per-block quant / per-grouped-channel palettization silently skip layers whose dim isn't
-  divisible by the block/group → those layers stay uncompressed. Check divisibility before trusting a size.
+- **Silent skips (divisibility)**: per-block quant / per-grouped-channel palettization silently skip layers whose
+  dim isn't divisible by the block/group → those layers stay uncompressed. Check divisibility before trusting a size.
+- **Silent skips (op registry) — the expensive one.** Both compressors find weights by intercepting the ops in
+  their registry (`F.linear`, `F.conv*`, `F.embedding`, `matmul`, …). **`SwitchLinear` is not one of them**: it
+  routes through `coreai_torch.composite_ops.GatherMM`, so a MoE model's expert weights are invisible unless the
+  config names them explicitly. Measured 2026-08-21 on a real `[1,128,512,1536]` stack: `palettize_pytorch_model`
+  reported 100.7 M params "palettized" in **0.0 s**, weight bit-identical afterwards, 99,649 distinct values in the
+  first 100 k — versus a same-recipe `nn.Linear` that came back with `parametrizations.weight.0.{indices,lut}` and 48.
+  The *quantizer* path is safe only because `presets.py` carries `_TORCH_MOE_SWITCH_LINEAR_4BIT`, a `module_state_spec`
+  with 4-D `block_size=[1,1,1,32]`; the palettization recipes in `ondevice/export_qwen3_5*.py` carry no equivalent.
+  On a model like Ling-3.0-tiny (experts = 88% of 7.9 B) this ships a "4-bit" bundle at ~14 GiB.
+  **Never accept a compression run without a per-tensor coverage table** — the cosine will not tell you, and it lies
+  in the reassuring direction: skipping the experts *improves* it (0.99988 vs 0.99604 on a 2-layer repro).
+- **`RMSNormGated` crashes the stock macOS `4bit` preset.** `presets.py:_TORCH_MODULE_EXCLUSIONS` excludes `RMSNorm`
+  and `RMSNormPlusOne` but not `RMSNormGated`, whose `weight` is rank 1 — `per_block block_size=32 axis=1` on a rank-1
+  tensor raises `ValueError: axis 1 is out of bounds`, the hard path, not the graceful block-size skip. Reproduced on
+  the bare primitive, so it hits **qwen3.5 / granite4h / nemotron_h** too; they ship via palettization, whose exclusion
+  set differs, which is why nothing had taken the quantizer path on a gated norm before. Add it (and any subclass —
+  matching is by exact class) to `module_type_configs` yourself.
 - **Boundary layers** (first/last) are high-error — skipping them can add up to +9 dB; always ablate.
+- **`‖ΔW‖/‖W‖` is not a layer-sensitivity proxy** — at least not on a stacked-expert MoE. Ranking Ling-3.0-tiny's 23
+  MoE layers by forward KL vs by relative weight-space error agreed on **0/23** positions (top-6 overlap 0/6): the
+  weight-space error was flat to three decimals across every layer (0.0970–0.0983) because every expert stack
+  quantizes equally well. Sensitivity there is a function of *depth* (7.8× from first MoE layer to last), which a
+  weight-space statistic cannot see. Budget for the forward sweep; don't substitute the cheap number.
+- **MPSGraph's fused SDPA takes ONE head_dim.** Not a compression pitfall but it surfaces at the same
+  stage (first engine run of a converted bundle), so it belongs next to them. A model whose `qk_head_dim`
+  differs from its `v_head_dim` fails to lower:
+  `'mps_spi.sdpa' op failed: query and value must have matching inner dimension but have 192 and 128`
+  (Ling-3.0-tiny, 2026-08-21: qk 192 = 128 nope + 64 rope, v 128). GLM-4.7-Flash never hit it because it
+  is 256/256. **Fix: store V in the KV cache zero-padded to `qk_head_dim` and slice the extra dims off the
+  SDPA output** — exact, and it keeps the fused kernel. Costs KV: Ling went 60 → 72 KB/token. `models/macos/
+  mla_metal_sdpa.py` records the same constraint for ABSORBED MLA and rejects padding there for a different
+  reason — 576 > 512 trips the ViewOp overflow — so check your padded width against 512 before assuming this
+  fix transfers.
+- **`_ANECompiler : ANECCompile() FAILED ... MLIR MPS to ANEC conversion failed` is usually noise.** MPSGraph
+  probes the ANE, fails, falls back to the GPU, and the run completes. Expected for blockwise int4, which the
+  ANE cannot take at all (it wants palettization). Do not chase it on a GPU-targeted bundle.
+- **int4 puts a MoE router on a knife edge — do not verify such a model mid-stream.** Measured on
+  Ling-3.0-tiny (128 experts, group-limited top-8), controlled, one process: perturbing the hidden state
+  by a relative **1e-5** flips **54 of 128 expert slots** across 11 of 16 MoE layers and drops the final
+  hidden to cos 0.875, where the SAME model in fp16 flips **zero**. The cliff sits between 1e-6 and 1e-5,
+  well under fp16's ~1e-3, so any two implementations differ enough to cross it. End-to-end comparisons
+  are unaffected (engine-vs-torch logits 0.999997; engine single bundle vs engine 3-slice chain
+  0.9999994) because each run's router sees its own numbers throughout. **Splicing a reference tensor
+  into the middle of a run measures nothing** — it looks exactly like a broken conversion. If you need to
+  localise a fault in a quantized MoE, compare end-to-end outputs of self-consistent runs and bisect by
+  re-exporting, not by mixing tensors from two implementations.
 - graph-mode export fails on dynamic control flow → fall back to eager for weight-only.
 
 ## Theoretical size
