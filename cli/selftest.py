@@ -176,6 +176,77 @@ def check_eval() -> int:
     return len(cases) + 13
 
 
+def check_host_build() -> int:
+    """The two asset rules Apple fixed in OS 27 beta 5 must be fatal only on a build that
+    refuses the artifact. 'fatal' on a release build is false, and a lint that is false gets
+    muted — which is worse than no lint."""
+    failures: list[str] = []
+
+    parse = [("26A5416b", (26, "A", 5416, True)), ("26A353", (26, "A", 353, False)),
+             ("24A5408d", (24, "A", 5408, True)), ("26B31", (26, "B", 31, False)),
+             ("garbage", None), ("", None), (None, None)]
+    for build, want in parse:
+        if doctor.parse_build(build) != want:
+            failures.append(f"parse_build({build!r}) = {doctor.parse_build(build)}, want {want}")
+
+    # 0.4.0-era IR: loads on beta 1; refused on every build measured since (26A5416b,
+    # 2026-09-04) — Apple's beta 5 note did not change that. A release build inherits
+    # nothing: it flips only once IR040_MEASURED_OK_FROM names a build a sweep measured.
+    ir = [("26A5353q", "info"),   # beta 1 loads it
+          ("26A5368g", "fatal"),  # beta 2: the break
+          ("26A5378j", "fatal"),  # beta 3
+          ("26A5406e", "fatal"),  # beta 5: the note said fixed; the load says no
+          ("26A5416b", "fatal"),  # measured
+          ("26A353", "fatal"),    # a release build: not measured, so not assumed
+          ("26B31", "fatal"),     # 27.1: same
+          ("27A5100a", "fatal"),  # a later major: same
+          ("24A5355q", "info"),   # iOS beta 1
+          ("24A5380h", "fatal"),  # iOS beta 3
+          ("25A353", "fatal"),    # ambiguous major: unreadable premise, worst case
+          (None, "fatal")]        # sw_vers unavailable: worst case
+    for build, want in ir:
+        got = doctor.ir040_severity(build)
+        if got != want:
+            failures.append(f"ir040_severity({build!r}) = {got}, want {want}")
+    # ... and the flip, when a sweep measures it: everything at or past that build is info.
+    saved = doctor.IR040_MEASURED_OK_FROM
+    doctor.IR040_MEASURED_OK_FROM = {"26A": "26A353", "24A": "24A353"}
+    try:
+        for build, want in [("26A353", "info"), ("26A5416b", "fatal"), ("26B31", "info"),
+                            ("26A5353q", "info"), ("24A353", "info"), ("24A5408d", "fatal")]:
+            got = doctor.ir040_severity(build)
+            if got != want:
+                failures.append(f"ir040_severity({build!r}) after the flip = {got}, want {want}")
+    finally:
+        doctor.IR040_MEASURED_OK_FROM = saved
+
+    # Pre-beta-3 AOT (181264112) is the break; merely older than the installed toolchain is
+    # info; same or newer is nothing.
+    aotc = [("3600.70.1", "3600.82.1", "fatal"), ("3600.70.1", None, "fatal"),
+            ("3600.75.3", "3600.82.1", "info"), ("3600.75.3", None, None),
+            ("3600.82.1", "3600.82.1", None), ("3600.90.0", "3600.82.1", None)]
+    for producer, installed, want in aotc:
+        got = doctor.aotc_severity(producer, installed)
+        if got != want:
+            failures.append(f"aotc_severity({producer}, {installed!r}) = {got}, want {want}")
+
+    # The effective severity is what the report sorts and exits on.
+    rep = doctor.Report(target="x", kind="asset", host_build="26A5353q")
+    rep.add(doctor.IR_040, "x", "e", "f", severity=doctor.ir040_severity(rep.host_build))
+    if rep.defects() or not rep.requirements():
+        failures.append("a host-conditional info finding was counted as a defect")
+    rep = doctor.Report(target="x", kind="asset", host_build="26A5378j")
+    rep.add(doctor.IR_040, "x", "e", "f", severity=doctor.ir040_severity(rep.host_build))
+    if not rep.defects():
+        failures.append("a host-conditional fatal finding was not counted as a defect")
+
+    for f in failures:
+        print(f"FAIL {f}")
+    if failures:
+        raise SystemExit(1)
+    return len(parse) + len(ir) + 6 + len(aotc) + 2
+
+
 def main() -> int:
     failures: list[str] = []
     for rule_id, trigger, workaround in CASES:
@@ -209,11 +280,13 @@ def main() -> int:
 
     n_verify = check_verify(failures)
     n_eval = check_eval()
+    n_host = check_host_build()
 
     for line in failures:
         print("FAIL  " + line)
     print(f"\n{len(CASES) + 4} checks over {len(covered)} source rules, "
-          f"{n_verify} over verify's verdict, {n_eval} over eval's refusals: "
+          f"{n_verify} over verify's verdict, {n_eval} over eval's refusals, "
+          f"{n_host} over the host-build rules: "
           f"{'FAILED' if failures else 'all pass'}")
     return 1 if failures else 0
 

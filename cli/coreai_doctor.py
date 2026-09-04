@@ -78,16 +78,19 @@ def rule(**kw) -> Rule:
 IR_040 = rule(
     id="IR-040-DEBUG-LOC",
     scope="asset", severity="fatal",
-    title="asset was converted by coreai-torch 0.4.0 (no producer stamp) — the OS 27 beta 2+ "
-          "compiler refuses its IR debug locations, so it loads on beta 1 and nowhere after",
-    source="knowledge/coreai-torch-041-ir-incident.md; apple/coreai-torch#37, #44; RECOVERY_STATUS.md",
+    title="asset carries coreai-torch 0.4.0-era IR (no producer stamp) — every OS 27 build from "
+          "beta 2 on refuses its debug locations at load (measured through 26A5416b, 2026-09-04); "
+          "only beta 1 loads it. Severity follows the host build; see --host-build",
+    source="knowledge/coreai-torch-041-ir-incident.md; apple/coreai-torch#37, #44; "
+           "RECOVERY_STATUS.md; models/_SMOKE.json (the measured builds)",
 )
 
 AOTC_STALE = rule(
     id="AOTC-STALE-TOOLCHAIN",
     scope="asset", severity="fatal",
-    title="compiled .aimodelc predates the installed coreai-build — a beta-2-or-earlier compiled "
-          "asset needs a recompile with the current toolchain",
+    title="compiled .aimodelc comes from an Xcode 27 beta-2-or-earlier coreai-build (below "
+          "3600.75.3) — OS 27 beta 3 and later fail to specialize it (Apple 181264112). An "
+          "artifact merely older than the installed toolchain is info, not a defect",
     source="knowledge/coreai-torch-041-ir-incident.md 'Environment the fix needs' (Apple 181264112)",
 )
 
@@ -529,6 +532,15 @@ class Finding:
     where: str
     evidence: str
     fix: str
+    # The severity this finding carries HERE. Normally the rule's own; the two loader-side
+    # incidents Apple fixed in OS 27 beta 5 report by the host build instead — fatal on a
+    # build that refuses the artifact, info on one that loads it — because "fatal" on a
+    # release build would be false, and a lint that is false gets muted.
+    severity: str = ""
+
+    def __post_init__(self) -> None:
+        self.severity = self.severity or self.rule.severity
+        assert self.severity in SEVERITY_ORDER, self.severity
 
 
 @dataclass
@@ -538,18 +550,124 @@ class Report:
     findings: list[Finding] = field(default_factory=list)
     checked: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
+    host_build: str | None = None  # OS build the asset rules judge against (default: this Mac)
 
-    def add(self, r: Rule, where: str, evidence: str, fix: str) -> None:
-        self.findings.append(Finding(r, where, evidence, fix))
+    def add(self, r: Rule, where: str, evidence: str, fix: str, severity: str = "") -> None:
+        self.findings.append(Finding(r, where, evidence, fix, severity))
 
     def ran(self, *rule_ids: str) -> None:
         self.checked.extend(rule_ids)
 
     def defects(self) -> list[Finding]:
-        return [f for f in self.findings if f.rule.severity in DEFECT_SEVERITIES]
+        return [f for f in self.findings if f.severity in DEFECT_SEVERITIES]
 
     def requirements(self) -> list[Finding]:
-        return [f for f in self.findings if f.rule.severity not in DEFECT_SEVERITIES]
+        return [f for f in self.findings if f.severity not in DEFECT_SEVERITIES]
+
+
+# ---------------------------------------------------------------------------
+# Host OS build — the two asset rules above are true only on some OS 27 builds
+# ---------------------------------------------------------------------------
+
+BUILD = re.compile(r"^(\d+)([A-Z])(\d+)([a-z]?)$")
+
+# OS 27 seed builds, recorded from device-attributed measurements in the zoo's cards and
+# notes (macOS 26A… / iOS 24A…). Apple seeds carry a 4-digit build number starting with 5;
+# the RC/GA build drops it (macOS 26 shipped as 25A353 after 25A5xxx seeds), so a release
+# build sorts AFTER every seed.
+#   beta 1  26A5353q / 24A5355q   loads 0.4.0-era IR
+#   beta 2  26A5368g               first build to refuse 0.4.0-era IR
+#   beta 3  26A5378j / 24A5380h   first build to refuse beta-2-or-earlier AOT (181264112)
+# iOS beta 2's build is not recorded here; anything past beta 1 is treated as beta 2+.
+#
+# Apple's beta 5 release notes list both incidents as fixed (177008303, 181264112). The
+# first is NOT what a load shows: on 26A5416b (2026-09-04, coreai-build 3600.82.1) a
+# 0.4.0-era asset still aborts at AIModel.load AND at coreai-build compile with the July
+# signature (conversion/zoo_smoke.py, models/_SMOKE.json). A release note is not a
+# measurement. IR040_MEASURED_OK_FROM names the first build MEASURED to load such an asset;
+# it stays None until a sweep on that build says so, and a release build inherits nothing.
+OS27_BETA2 = {"26A": "26A5368g", "24A": "24A5356"}
+OS27_BETA3 = {"26A": "26A5378j", "24A": "24A5380h"}
+IR040_MEASURED_OK_FROM: dict[str, str] | None = None   # e.g. {"26A": "26A353", "24A": "24A353"}
+# coreai-build shipped with Xcode 27 beta 3 — an AOT artifact whose producer is older than
+# this was compiled by beta 2 or earlier, the class 181264112 describes.
+COREAI_BUILD_BETA3 = (3600, 75, 3)
+
+
+def parse_build(build: str | None) -> tuple[int, str, int, bool] | None:
+    """'26A5416b' -> (26, 'A', 5416, seed=True); '26A353' -> (26, 'A', 353, seed=False)."""
+    m = BUILD.match((build or "").strip())
+    if not m:
+        return None
+    major, train, num = int(m.group(1)), m.group(2), m.group(3)
+    return major, train, int(num), len(num) >= 4 and num.startswith("5")
+
+
+def host_os_build() -> str | None:
+    try:
+        out = subprocess.run(["sw_vers", "-buildVersion"], capture_output=True, text=True,
+                             timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return out.stdout.strip() or None if out.returncode == 0 else None
+
+
+# Build majors of the OS 27 generation: macOS 27 = 26x, iOS 27 = 24x. Majors above these are
+# later releases (macOS 28 = 27A). 25A is ambiguous — macOS 26 or iOS 28 — and 23A and below
+# predate Core AI, so those read as unknown and the rules take the worst case.
+OS27_MAJORS = {26, 24}
+
+
+def build_at_least(build: str | None, thresholds: dict[str, str] | None) -> bool | None:
+    """Is this OS build at or past the threshold build of its train? None = cannot be known.
+
+    Within a train, every seed (26A5xxx) precedes the release build (26A353) regardless of
+    the number, so a threshold that is a release build is NOT reached by any seed. A later
+    major or a later train (26B = 27.1) is past every 27.0 threshold. A None table means
+    "no such build has been measured", which is False for every host.
+    """
+    if thresholds is None:
+        return False
+    p = parse_build(build)
+    if p is None:
+        return None
+    major, train, num, seed = p
+    if major > max(OS27_MAJORS):
+        return True
+    if major not in OS27_MAJORS:
+        return None
+    threshold = parse_build(thresholds.get(f"{major}{train}"))
+    if threshold is None:
+        return True
+    return (0 if seed else 1, num) >= (0 if threshold[3] else 1, threshold[2])
+
+
+def ir040_severity(build: str | None) -> str:
+    """0.4.0-era IR: loads on OS 27 beta 1, refused on every build measured since. Unknown
+    host = worst case. Flips to info only past a build MEASURED to load it again."""
+    past_beta2 = build_at_least(build, OS27_BETA2)
+    if past_beta2 is None:
+        return "fatal"
+    if not past_beta2:
+        return "info"
+    return "info" if build_at_least(build, IR040_MEASURED_OK_FROM) else "fatal"
+
+
+def aotc_severity(producer_version: str, installed: str | None) -> str | None:
+    """fatal: compiled by a pre-beta-3 coreai-build (181264112). info: older than the
+    installed toolchain, which is not a known break. None: nothing to report."""
+    if version_tuple(producer_version) < COREAI_BUILD_BETA3:
+        return "fatal"
+    if installed and version_tuple(producer_version) < version_tuple(installed):
+        return "info"
+    return None
+
+
+def build_label(build: str | None) -> str:
+    p = parse_build(build)
+    if p is None:
+        return "an unreadable host build"
+    return f"{build} ({'seed' if p[3] else 'release build'})"
 
 
 # ---------------------------------------------------------------------------
@@ -653,15 +771,28 @@ def check_asset(path: Path, rep: Report, *, inside_bundle: bool = False,
     if not compiled:
         rep.ran(IR_040.id)
         if producer is None:
+            severity = ir040_severity(rep.host_build)
+            if severity == "fatal":
+                verdict = (f"this host, {build_label(rep.host_build)}, refuses it at load — "
+                           f"measured on 26A5416b (2026-09-04); no later build has been measured "
+                           f"to accept it, and Apple's beta 5 note (177008303) did not change this"
+                           if rep.host_build else
+                           "the host build could not be read, so this assumes a build that "
+                           "refuses it (every OS 27 build from beta 2 on)")
+            else:
+                verdict = (f"this host, {build_label(rep.host_build)}, loads it; every OS 27 build "
+                           f"from beta 2 on refuses it, so no one else can")
             rep.add(
                 IR_040, str(path / "metadata.json"),
                 "no 'producer' key — a 0.4.1+ asset carries "
-                '{"producer": "coreai-core 1.0.0b2", ...}; a 0.4.0 one carries only assetVersion',
+                '{"producer": "coreai-core 1.0.0b2", ...}; a 0.4.0 one carries only assetVersion. '
+                + verdict,
                 "strip_debug_info is the cheap fix: weights stay byte-identical, minutes per "
                 "model, no re-export. It needs an isolated coreai-torch 0.4.0 + coreai-core "
                 "1.0.0b1 venv to parse the old locations, then a b2 re-save to restamp the "
                 "producer. Note coreai-build inspect reads a broken asset happily — inspect "
                 "succeeding is not evidence the asset loads.",
+                severity=severity,
             )
         else:
             rep.notes.append(f"asset producer: {producer}")
@@ -687,17 +818,33 @@ def check_asset(path: Path, rep: Report, *, inside_bundle: bool = False,
         rep.ran(AOTC_STALE.id)
         installed = installed_coreai_build()
         m = re.search(r"coreai-build-([\d.]+)", producer or "")
-        if installed and m:
-            if version_tuple(m.group(1)) < version_tuple(installed):
+        if m:
+            beta3 = ".".join(map(str, COREAI_BUILD_BETA3))
+            severity = aotc_severity(m.group(1), installed)
+            if severity == "fatal":
                 rep.add(
                     AOTC_STALE, str(path / "metadata.json"),
-                    f"compiled by coreai-build {m.group(1)}, installed toolchain is {installed}",
+                    f"compiled by coreai-build {m.group(1)}, older than Xcode 27 beta 3's {beta3}"
+                    + (f"; installed toolchain is {installed}" if installed else "")
+                    + " — OS 27 beta 3 and later fail to specialize it (181264112)",
                     "Recompile: xcrun coreai-build compile <source>.aimodel --output <dir> "
                     "--platform <iOS|macOS> --architecture <arch> --preferred-compute gpu",
                 )
+            elif severity == "info":
+                rep.add(
+                    AOTC_STALE, str(path / "metadata.json"),
+                    f"compiled by coreai-build {m.group(1)}; installed toolchain is {installed}. "
+                    f"Not a known break (181264112 needs a producer below {beta3}) — whether a "
+                    f"release toolchain still specializes it is a device check, not a lint",
+                    "Recompile with the current toolchain when the device sweep says so, or for "
+                    "its own improvements: xcrun coreai-build compile <source>.aimodel --output "
+                    "<dir> --platform <iOS|macOS> --architecture <arch> --preferred-compute gpu",
+                    severity="info",
+                )
             else:
                 rep.notes.append(
-                    f"AOT producer coreai-build {m.group(1)} matches the installed {installed}")
+                    f"AOT producer coreai-build {m.group(1)}"
+                    + (f" matches the installed {installed}" if installed else ""))
         arch = next((re.match(r"main-([a-z0-9]+)\.mlirb$", f.name).group(1)
                      for f in path.iterdir()
                      if re.match(r"main-([a-z0-9]+)\.mlirb$", f.name)), None)
@@ -1309,8 +1456,9 @@ def check_env(rep: Report, python: str | None = None) -> None:
             "working directory contains " + ", ".join(p.name for p in shadows[:3]),
             "Never run an export with a coreai-torch clone as the working directory. Its "
             "egg-info takes sys.path[0] priority over the installed wheel, so a 0.4.1 "
-            "environment silently exports 0.4.0 IR — and the asset only fails much later, on "
-            "an OS 27 beta 2+ device. cd somewhere else and re-export.",
+            "environment silently exports 0.4.0-era IR — an asset with no producer stamp that "
+            "OS 27 beta 2-4 refuse at load and every producer audit flags. cd somewhere else "
+            "and re-export.",
         )
 
 
@@ -1381,6 +1529,8 @@ path, not only the python runtime.
 def render(rep: Report, verbose: bool) -> None:
     print(f"coreai doctor  {rep.target}")
     print(f"kind           {rep.kind}")
+    if rep.host_build:
+        print(f"host build     {build_label(rep.host_build)}")
     for note in rep.notes:
         print(f"note           {note}")
     print(f"rules run      {len(rep.checked)}")
@@ -1394,11 +1544,13 @@ def render(rep: Report, verbose: bool) -> None:
     for group, heading in ((defects, "DEFECTS"), (requirements, "NOTES AND SHIP REQUIREMENTS")):
         if not group:
             continue
-        group.sort(key=lambda f: SEVERITY_ORDER[f.rule.severity])
+        group.sort(key=lambda f: SEVERITY_ORDER[f.severity])
         print(f"--- {heading} " + "-" * (66 - len(heading)))
         print()
         for f in group:
-            print(f"{BADGE[f.rule.severity]} {f.rule.id}")
+            print(f"{BADGE[f.severity]} {f.rule.id}"
+                  + (f"  (host-conditional: {f.rule.severity} on a build that refuses it)"
+                     if f.severity != f.rule.severity else ""))
             print(f"  {f.rule.title}")
             print(f"  where : {f.where}")
             print(f"  found : {f.evidence}")
@@ -1409,7 +1561,7 @@ def render(rep: Report, verbose: bool) -> None:
 
     counts: dict[str, int] = {}
     for f in rep.findings:
-        counts[f.rule.severity] = counts.get(f.rule.severity, 0) + 1
+        counts[f.severity] = counts.get(f.severity, 0) + 1
     if counts:
         print("summary        " + ", ".join(
             f"{n} {s}" for s, n in sorted(counts.items(), key=lambda kv: SEVERITY_ORDER[kv[0]])))
@@ -1422,11 +1574,12 @@ def to_json(rep: Report) -> str:
         "kind": rep.kind,
         "rules_run": rep.checked,
         "notes": rep.notes,
+        "host_build": rep.host_build,
         "findings": [{
-            "id": f.rule.id, "severity": f.rule.severity, "scope": f.rule.scope,
-            "title": f.rule.title, "where": f.where, "evidence": f.evidence,
-            "fix": f.fix, "source": f.rule.source,
-        } for f in sorted(rep.findings, key=lambda f: SEVERITY_ORDER[f.rule.severity])],
+            "id": f.rule.id, "severity": f.severity, "rule_severity": f.rule.severity,
+            "scope": f.rule.scope, "title": f.rule.title, "where": f.where,
+            "evidence": f.evidence, "fix": f.fix, "source": f.rule.source,
+        } for f in sorted(rep.findings, key=lambda f: SEVERITY_ORDER[f.severity])],
     }, indent=2)
 
 
@@ -1449,6 +1602,9 @@ def main() -> None:
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     ap.add_argument("--verbose", "-v", action="store_true", help="print each finding's source")
     ap.add_argument("--rules", action="store_true", help="list every rule and exit")
+    ap.add_argument("--host-build", metavar="BUILD",
+                    help="judge the OS-build-conditional asset rules against this OS build "
+                         "(e.g. 26A5378j, 24A5408d, 26A353) instead of this Mac's sw_vers")
     ap.add_argument("--cache", default=None, help="directory for fetched HF metadata")
     ap.add_argument("--env", nargs="?", const="", default=None, metavar="PYTHON",
                     help="also probe an interpreter for the zoo overlay (superset of "
@@ -1479,7 +1635,7 @@ def main() -> None:
     if env_python == "":
         sibling = Path.home() / "code/coreai/coreai-models/.venv/bin/python"
         env_python = str(sibling) if sibling.exists() else None
-    rep = Report(target=label, kind=kind)
+    rep = Report(target=label, kind=kind, host_build=args.host_build or host_os_build())
     check_env(rep, env_python)
     if kind == "asset":
         check_asset(path, rep, profile=args.profile)

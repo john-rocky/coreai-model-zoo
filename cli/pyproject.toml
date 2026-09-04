@@ -26,6 +26,8 @@ hf = ["huggingface_hub"]
 [project.urls]
 Repository = "https://github.com/john-rocky/coreai-model-zoo"
 Documentation = "https://github.com/john-rocky/coreai-model-zoo/tree/main/cli"
+Changelog = "https://github.com/john-rocky/coreai-model-zoo/blob/main/cli/CHANGELOG.md"
+Development = "https://github.com/john-rocky/coreai-model-zoo/blob/main/cli/DEVELOPMENT.md"
 
 [project.scripts]
 coreai = "coreai_cli:main"
