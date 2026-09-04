@@ -125,9 +125,14 @@ Core ML and Core AI are the only phone routes for this model today.
 
 All five are verified with minimal repros, and all five are filed with Apple: FB24322424 (1),
 FB24322437 (2), FB24322585 (3), FB24322596 (4), FB24322605 (5). Repros are available on request.
+**FB24322585 (3) is fixed in coreai-torch 0.4.2.** The other four still reproduce there.
 
-1. **ConvTranspose1d is numerically wrong on the `cpu_only` delegate** at stride >= 8
-   and kernel >= 16 (the same asset is correct on gpu). Mimi's k=32/s=16/groups=512
+1. **ConvTranspose1d is numerically wrong on the `cpu_only` delegate** (the same asset
+   is correct on gpu). **The trigger is wider than this card first claimed.** It was
+   written up as stride >= 8 *and* kernel >= 16; a kernel x stride grid on 0.4.2 puts it
+   at kernel >= 8 at any stride, stride 1 included, or stride >= 16 at any kernel. So
+   k=8/s=1 fails and k=2/s=16 fails, while k=4/s=8 is clean. A nonzero `output_padding`
+   escapes it. Mimi's k=32/s=16/groups=512
    upsample hit it at cos -0.01. Workaround: at T=1 with groups == channels the op
    degenerates to a per-channel outer product (`out[c,:] = x[c,0] * W[c,0,:]`), and
    re-authoring it that way takes `cpu_only` to bit-exact. T=1 is what makes that escape
@@ -137,10 +142,10 @@ FB24322437 (2), FB24322585 (3), FB24322596 (4), FB24322605 (5). Repros are avail
    call to about 3 GB. Every Python harness runs generation in subprocess workers on a
    1,500-call budget. The Swift `CoreAI` framework does not leak: one process ran 4,773
    calls flat at 300 MB.
-3. **coreai-torch lowers ConvTranspose `output_padding` by padding the input**, which
-   silently produces the wrong output length. This is a converter defect and goes to the
-   apple/coreai-torch tracker as well as Feedback Assistant. The streaming rewrite here
-   never uses `output_padding`, so the port is unaffected; the repro is in the report.
+3. **coreai-torch lowered ConvTranspose `output_padding` by padding the input**, which
+   silently produced the wrong output length. **Fixed in coreai-torch 0.4.2**: a 66-case
+   sweep gives 41 wrong lengths on 0.4.1 and 0 on 0.4.2. The streaming rewrite here never
+   uses `output_padding`, so the port was unaffected either way.
 4. **fp32 graphs with in-graph state abort the process under the default
    `SpecializationOptions`** (SIGABRT in ANERegionFormationPass) instead of falling back.
    Since both main graphs carry in-graph state, every load states an explicit `gpu` or

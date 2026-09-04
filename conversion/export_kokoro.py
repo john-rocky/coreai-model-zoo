@@ -53,10 +53,12 @@ Why three bundles + masking + host source (every workaround is load-bearing):
   * weight_norm MUST be folded (`torch.nn.utils.remove_weight_norm`): kokoro uses
     the old hook-based weight_norm, so `module.weight` stays at its random init
     value until a forward fires -- and the manual conv stand-ins read it directly.
-  * ConvTranspose1d output_padding makes the coreai output length symbolic, and
-    coreai's conv_transpose1d returns all zeros for the iSTFT -> both replaced by a
-    bit-exact zero-insertion + conv1d. input_ids are int32; atan2 -> 2*atan; the
-    `%1` in SineGen is a no-op for speech (f0/sr<1) and dropped.
+  * ConvTranspose1d is replaced by a bit-exact zero-insertion + conv1d. The original
+    reasons (a symbolic output length from output_padding; conv_transpose1d returning
+    all zeros for the iSTFT) no longer reproduce as of coreai-torch 0.4.1/0.4.2, but
+    the iSTFT rewrite still has to stay -- see its docstring.
+  * input_ids are int32; atan2 -> 2*atan; the `%1` in SineGen is a no-op for speech
+    (f0/sr<1) and dropped.
 
 Run on the Core AI CPU compute unit (the unrolled LSTM is fast there, ~8 ms;
 on the GPU it is dispatch-bound). Numerics gate = magspec-corr vs the torch
@@ -129,8 +131,13 @@ def _run_lstm(lstm, x, real_mask):
 # export-friendly, numerically-faithful monkeypatches
 # ===========================================================================
 def _manual_depthwise_ctranspose(x, ct):
-    """Depthwise ConvTranspose1d (k3 s2 p1 op1) as zero-insertion + conv1d
-    (output_padding makes the coreai output length symbolic)."""
+    """Depthwise ConvTranspose1d (k3 s2 p1 op1) as zero-insertion + conv1d.
+
+    Written for a symbolic coreai output length under output_padding, which no longer
+    reproduces: this config converts and runs clean on 0.4.1 and 0.4.2, gpu and
+    cpu_only, to 2.4e-07 through a downstream concat. Kept because it is bit-exact and
+    verified in the shipped graph; dropping it needs a full kokoro re-export first.
+    """
     C = ct.in_channels
     B, _, L = x.shape
     up = x.new_zeros(B, C, 2 * L)
@@ -140,8 +147,15 @@ def _manual_depthwise_ctranspose(x, ct):
 
 
 def _manual_convT_general(x, weight, bias, stride, padding=0):
-    """General conv_transpose1d as zero-insertion + conv1d (coreai's
-    conv_transpose1d returns all zeros for the iSTFT)."""
+    """General conv_transpose1d as zero-insertion + conv1d.
+
+    DO NOT remove this. The original symptom (all zeros) is gone, so the old comment
+    invited exactly that. The rewrite is still required: at the iSTFT shape (11 -> 1,
+    k=20, s=5) coreai's conv_transpose1d is correct on gpu (4.8e-07) and wrong on
+    cpu_only (max|d| 4.86) on both 0.4.1 and 0.4.2, and kokoro ships
+    GraphModel(computeUnits: .cpu). That is FB24322424, which is still open -- any
+    ConvTranspose with kernel >= 8 is exposed on cpu_only.
+    """
     B, Cin, L = x.shape
     K = weight.shape[-1]
     up = x.new_zeros(B, Cin, stride * L - (stride - 1))

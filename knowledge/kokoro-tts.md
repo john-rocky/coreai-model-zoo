@@ -77,10 +77,16 @@ torch's and shifts the mask. 0.13 → 0.98.
   classic on-device-TTS trap; existing CoreML ports also compute this **one windowed FFT on the
   host**. So `compute_har` (f0_upsamp + SineGen + STFT) runs host-side (torch/Swift, fp32-stable);
   engine output then matches torch (magspec 0.9994).
-- **`ConvTranspose1d` with `output_padding`** → a *symbolic* output length that poisons later concats
-  ("shapes don't match"). **`conv_transpose1d`** (the iSTFT, stride 5, 11→1) → returns **all zeros**
-  on Core AI. Both fixed by **zero-insertion + `conv1d`** (insert stride-1 zeros + plain conv with the
-  flipped kernel) → bit-exact and correct on the engine.
+- **`ConvTranspose1d`** → both uses are rewritten as **zero-insertion + `conv1d`** (insert stride-1
+  zeros + plain conv with the flipped kernel) → bit-exact and correct on the engine. **The two
+  symptoms this was written for are gone; the rewrite still has to stay.** As of coreai-torch
+  0.4.1/0.4.2 the `output_padding` case (k3 s2 p1 op1) converts and runs clean on gpu and cpu_only
+  to 2.4e-07 through a downstream concat, and the iSTFT case (stride 5, 11→1, k=20) returns real
+  audio rather than zeros. The iSTFT case still comes out wrong on **cpu_only**
+  (max|Δ| 4.86 against torch, correct on gpu at 4.8e-07): this port ships
+  `GraphModel(computeUnits: .cpu)`, so `_manual_convT_general` is holding that. The cause is
+  **FB24322424**, still open: ConvTranspose on `cpu_only` is wrong at kernel ≥ 8 at any stride, or
+  stride ≥ 16 at any kernel.
 - `aten.atan2` unsupported → half-angle `2·atan(y / (√(x²+y²) + x))`. `aten.remainder` (`%1`) is
   identity in the audio range → removed. `input_ids` must be **int32**.
 

@@ -99,10 +99,18 @@ collapses to a single unit.
 ## The other Core AI defects this port found
 
 All verified with minimal repros, and all five are filed with Apple: FB24322424 (1), FB24322437 (2),
-FB24322585 (3), FB24322596 (4), FB24322605 (5).
+FB24322585 (3), FB24322596 (4), FB24322605 (5). **FB24322585 (3) is fixed in coreai-torch 0.4.2**;
+the rest still reproduce there. Re-verification detail is under each item.
 
-1. **`ConvTranspose1d` is numerically wrong on the `cpu_only` delegate** at stride ≥ 8 and
-   kernel ≥ 16 — the same asset is correct on gpu. Mimi's k=32/s=16/groups=512 upsample hit it at
+1. **`ConvTranspose1d` is numerically wrong on the `cpu_only` delegate** — the same asset is
+   correct on gpu. **The trigger is wider than this note first claimed.** It was written up as
+   stride ≥ 8 *and* kernel ≥ 16; a kernel × stride grid on 0.4.2 (plain `ConvTranspose1d(4,4,k,
+   stride=s)`, `[1,4,8]` fp32, `cpu_only` vs torch) puts it at **kernel ≥ 8 at any stride, stride 1
+   included, or stride ≥ 16 at any kernel** — a disjunction. k=8/s=1 fails, k=2/s=16 fails,
+   k=4/s=8 is clean. Errors are order 1.0 on values of order 1, so nothing here is a rounding
+   margin. A nonzero `output_padding` escapes it (k=16/s=8 is wrong at op=0 and clean at op=1..7),
+   which suggests the op takes a different lowering path once `output_padding` is set.
+   Mimi's k=32/s=16/groups=512 upsample hit it at
    cos −0.01. Escape: at T=1 with `groups == channels` the op degenerates to a per-channel outer
    product, `out[c,:] = x[c,0] * W[c,0,:]`, and re-authoring it that way is bit-exact on
    `cpu_only`. **T=1 is what makes that escape available, not a condition of the defect** —
@@ -112,9 +120,13 @@ FB24322585 (3), FB24322596 (4), FB24322605 (5).
    state sizes the process dies at ~2,250 calls, climbing 1.9 MB per call to ~3 GB. Run Python
    harnesses in subprocess workers on a call budget. The Swift `CoreAI` framework does not leak:
    4,773 calls flat at 300 MB.
-3. **coreai-torch lowers ConvTranspose `output_padding` by padding the input**, silently producing
-   the wrong output length. A converter defect, distinct from the *symbolic* output length
-   [`kokoro-tts.md`](kokoro-tts.md) records for the same op.
+3. **coreai-torch lowered ConvTranspose `output_padding` by padding the input**, silently producing
+   the wrong output length. A converter defect. **Fixed in coreai-torch 0.4.2.** A 66-case sweep
+   over (kernel, padding) ∈ {(4,1), (16,0), (3,1)} × stride ∈ {2,3,4,5,8} × every legal
+   `output_padding` gives 41 wrong lengths on 0.4.1 and 0 on 0.4.2, with values matching torch to
+   1.2e-07. The overshoot grew with stride: k=4/s=8/p=1/op=7 returned 107 against torch's 65.
+   `output_padding` 0 was always correct and 1 was correct at `padding=1`, which is why this port
+   never saw it — the streaming rewrite sets no `output_padding` at all.
 4. **fp32 graphs with in-graph state abort under the default `SpecializationOptions`** — SIGABRT
    in `ANERegionFormationPass` instead of falling back. State an explicit `gpu` or `cpuOnly`
    preference on every load; see the placement section above.
