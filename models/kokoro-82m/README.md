@@ -181,8 +181,12 @@ workaround below is load-bearing.
 4. **The hn-nsf source goes on the host.** Its STFT phase (atan2) flips 2π at the
    F0→0 pad boundary under fp32 on the engine; computing that one windowed FFT on the
    host (`compute_har`) makes the engine match torch.
-5. **Two coreai op traps.** `ConvTranspose1d` with `output_padding` gives a *symbolic*
-   output length that poisons later concats, and `conv_transpose1d` returns **all
-   zeros** for the iSTFT — both replaced by a bit-exact **zero-insertion + conv1d**.
+5. **One coreai op trap, and a rewrite that outlived its original reason.** Both
+   `ConvTranspose1d` uses are replaced by a bit-exact **zero-insertion + conv1d**. The
+   symptoms this was written for (a symbolic output length under `output_padding`;
+   `conv_transpose1d` returning **all zeros** for the iSTFT) no longer reproduce on
+   coreai-torch 0.4.1/0.4.2. The iSTFT rewrite still has to stay: at that shape
+   `conv_transpose1d` is wrong on **cpu_only** (max|Δ| 4.86, correct on gpu), and this
+   port ships `computeUnits: .cpu`. That is **FB24322424**, still open. Alongside these,
    `input_ids` must be int32; `atan2(y,x)` → `2·atan(y/(|z|+x))`; SineGen's `%1` is a
    no-op for speech (f0/sr<1) and dropped.
