@@ -1,0 +1,176 @@
+{
+ "generated": "2026-09-04",
+ "bundles": [
+  {
+   "repo": "mlboydaisuke/Streaming-Sortformer-Diar-CoreAI",
+   "bundle": "sortformer_float16.aimodel",
+   "revision": "724b3c2bd5fdf9cd032ddef2d903ddaf72912f83",
+   "size": 236887381,
+   "date": "2026-09-04",
+   "host": {
+    "os": "macOS 27.0",
+    "os_build": "26A5416b",
+    "coreai_build": "3600.82.1",
+    "wheels": "coreai-core 1.0.0b2 coreai-torch 0.4.2",
+    "python": "/Users/majimadaisuke/code/coreai/coreai-models/.venv/bin/python"
+   },
+   "producer": {
+    "sortformer_float16.aimodel": "coreai-core 1.0.0b2"
+   },
+   "ir": "coreai-core 1.0.0b2",
+   "load": {
+    "status": "ok",
+    "compute": "cpu",
+    "assets": {
+     "sortformer_float16.aimodel": {
+      "status": "ok",
+      "seconds": 1.1,
+      "functions": [
+       "main"
+      ]
+     }
+    }
+   },
+   "verify": "PASS",
+   "verify_notes": [
+    "eos/bos: skipped not a tokenizer-bearing bundle",
+    "chat template: skipped not a tokenizer-bearing bundle",
+    "context: skipped not a context-bearing bundle"
+   ]
+  },
+  {
+   "repo": "mlboydaisuke/Streaming-Sortformer-Diar-CoreAI",
+   "bundle": "sortformer_float16.h18p.aimodelc",
+   "revision": "724b3c2bd5fdf9cd032ddef2d903ddaf72912f83",
+   "size": 238235050,
+   "date": "2026-09-04",
+   "host": {
+    "os": "macOS 27.0",
+    "os_build": "26A5416b",
+    "coreai_build": "3600.82.1",
+    "wheels": "coreai-core 1.0.0b2 coreai-torch 0.4.2",
+    "python": "/Users/majimadaisuke/code/coreai/coreai-models/.venv/bin/python"
+   },
+   "producer": {
+    "sortformer_float16.h18p.aimodelc": "coreai-build-3600.75.3"
+   },
+   "ir": "compiled",
+   "load": {
+    "status": "skipped",
+    "detail": "compiled (.aimodelc) \u2014 device/arch-specific"
+   },
+   "verify": "PASS",
+   "verify_notes": [
+    "eos/bos: skipped not a tokenizer-bearing bundle",
+    "chat template: skipped not a tokenizer-bearing bundle",
+    "context: skipped not a context-bearing bundle"
+   ]
+  },
+  {
+   "repo": "mlboydaisuke/qwen3.5-0.8B-CoreAI",
+   "bundle": "gpu-pipelined-b2/qwen3_5_0_8b_decode_int8hu_block32_sym",
+   "revision": "342fa02e30bda9e6ae95b72b5e29a5bfdba4de28",
+   "size": 1337858025,
+   "date": "2026-09-04",
+   "host": {
+    "os": "macOS 27.0",
+    "os_build": "26A5416b",
+    "coreai_build": "3600.82.1",
+    "wheels": "coreai-core 1.0.0b2 coreai-torch 0.4.2",
+    "python": "/Users/majimadaisuke/code/coreai/coreai-models/.venv/bin/python"
+   },
+   "producer": {
+    "gpu-pipelined-b2/qwen3_5_0_8b_decode_int8hu_block32_sym/qwen3_5_0_8b_decode_int8hu_block32_sym.aimodel": "coreai-core 1.0.0b2"
+   },
+   "ir": "coreai-core 1.0.0b2",
+   "load": {
+    "status": "ok",
+    "compute": "cpu",
+    "assets": {
+     "gpu-pipelined-b2/qwen3_5_0_8b_decode_int8hu_block32_sym/qwen3_5_0_8b_decode_int8hu_block32_sym.aimodel": {
+      "status": "ok",
+      "seconds": 0.0,
+      "functions": [
+       "main"
+      ]
+     }
+    }
+   },
+   "verify": "PASS",
+   "verify_notes": [
+    "bos: skipped source declares no bos_token; bundle has None",
+    "dtype: info name says int8hu; metadata declares no compression"
+   ]
+  },
+  {
+   "repo": "mlboydaisuke/qwen3.5-0.8B-CoreAI",
+   "bundle": "gpu-pipelined/qwen3_5_0_8b_decode_int8hu_block32_sym",
+   "revision": "342fa02e30bda9e6ae95b72b5e29a5bfdba4de28",
+   "size": 1337858033,
+   "date": "2026-09-04",
+   "host": {
+    "os": "macOS 27.0",
+    "os_build": "26A5416b",
+    "coreai_build": "3600.82.1",
+    "wheels": "coreai-core 1.0.0b2 coreai-torch 0.4.2",
+    "python": "/Users/majimadaisuke/code/coreai/coreai-models/.venv/bin/python"
+   },
+   "producer": {
+    "gpu-pipelined/qwen3_5_0_8b_decode_int8hu_block32_sym/qwen3_5_0_8b_decode_int8hu_block32_sym.aimodel": "coreai-core 1.0.0b2"
+   },
+   "ir": "coreai-core 1.0.0b2",
+   "load": {
+    "status": "ok",
+    "compute": "cpu",
+    "assets": {
+     "gpu-pipelined/qwen3_5_0_8b_decode_int8hu_block32_sym/qwen3_5_0_8b_decode_int8hu_block32_sym.aimodel": {
+      "status": "ok",
+      "seconds": 0.0,
+      "functions": [
+       "main"
+      ]
+     }
+    }
+   },
+   "verify": "PASS",
+   "verify_notes": [
+    "bos: skipped source declares no bos_token; bundle has None",
+    "dtype: info name says int8hu; metadata declares no compression"
+   ]
+  },
+  {
+   "repo": "mlboydaisuke/qwen3.5-0.8B-CoreAI",
+   "bundle": "gpu-pipelined/qwen3_5_0_8b_decode_int8hu_perchan_sym",
+   "revision": "342fa02e30bda9e6ae95b72b5e29a5bfdba4de28",
+   "size": 1337613893,
+   "date": "2026-09-04",
+   "host": {
+    "os": "macOS 27.0",
+    "os_build": "26A5416b",
+    "coreai_build": "3600.82.1",
+    "wheels": "coreai-core 1.0.0b2 coreai-torch 0.4.2",
+    "python": "/Users/majimadaisuke/code/coreai/coreai-models/.venv/bin/python"
+   },
+   "producer": {
+    "gpu-pipelined/qwen3_5_0_8b_decode_int8hu_perchan_sym/qwen3_5_0_8b_decode_int8hu_perchan_sym.aimodel": null
+   },
+   "ir": "0.4.0-era (no producer stamp)",
+   "load": {
+    "status": "ir-incompatible",
+    "compute": "cpu",
+    "assets": {
+     "gpu-pipelined/qwen3_5_0_8b_decode_int8hu_perchan_sym/qwen3_5_0_8b_decode_int8hu_perchan_sym.aimodel": {
+      "status": "ir-incompatible",
+      "seconds": 0,
+      "detail": "signal 6: loc(fused<{call_stack = [\"_empty_nn_module_stack_from_metadata_hook$1\"], identifiers = [\"sym_size_int_15\"]}>[\"torch/fx/passes/runtime_assert.py\":24:0, \"coreai\"(\"op_id\":0:0), \"torch\"(\"op_id\":2425:0), \"coreai\"(\"op_id\":0:0)]): error: expected AICode versioned location, got: loc(fused<{call_stack = [\"_empty_nn_module_stack_from_metadata_hook$1\"], identifiers = [\"sym_size_int_15\"]}>[\"torch/fx/passes/runtime_assert.py\":24:0, \"coreai\"(\"op_id\":0:0), \"torch\"(\"op_id\":2425:0), \"coreai\"(\"op_id\":0:0)])\nloc(fused<{call_stack = [\"_empty_nn_module_stack_from_metadata_hook$1\"], identifiers = [\"sym_size_int_15\"]}>[\"torch/fx/passes/runtime_assert.py\":24:0, \"coreai\"(\"op_id\":3256:0), \"torch\"(\"op_id\":2425:0), \"coreai\"(\"op_id\":3256:0)]): error: Failed to convert to versioned IR\nLLVM ERROR: cannot unwrap empty `odiec_module_t`"
+     }
+    }
+   },
+   "verify": "PASS",
+   "verify_notes": [
+    "bos: skipped source declares no bos_token; bundle has None",
+    "dtype: info name says int8hu; metadata declares no compression"
+   ]
+  }
+ ]
+}

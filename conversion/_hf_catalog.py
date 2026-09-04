@@ -82,6 +82,11 @@ class Catalog:
         text = self._get(f"{API}/{repo_id}", f"repo:{repo_id}")
         return json.loads(text) if text else None
 
+    def repo_blobs(self, repo_id: str) -> dict | None:
+        """The listing with per-file sizes (`?blobs=true`) — what a download plan needs."""
+        text = self._get(f"{API}/{repo_id}?blobs=true", f"repo-blobs:{repo_id}")
+        return json.loads(text) if text else None
+
     # ---- files ----------------------------------------------------------
     def file(self, repo_id: str, path: str, rev: str = "main") -> str | None:
         url = RESOLVE.format(repo=repo_id, rev=rev, path=urllib.parse.quote(path))

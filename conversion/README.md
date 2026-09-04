@@ -15,6 +15,14 @@ names in its own `metadata.json` — no oracle, no device, no weights, so it run
 catalog in minutes: `python3 zoo_verify.py --all --json ../models/_VERIFY.json`. Results land in
 [`../models/_INVENTORY.md`](../models/_INVENTORY.md) via `scripts/gen_inventory.py`.
 
+**Does it still load on this OS?** [`zoo_smoke.py`](zoo_smoke.py) is the tier below that: it
+reads each asset's producer stamp off the Hub, downloads the bundle, loads every `.aimodel` in it
+through the Core AI runtime in a child interpreter, and runs the tier-1 checks — recording which
+OS build and toolchain did so in `../models/_SMOKE.json`. `python3 zoo_smoke.py --top 20` is the
+sweep an OS release day needs (`--dry-run` prints the plan with sizes first);
+`--all --stamp-only` audits the producer of all 278 bundles in minutes without downloading any.
+It never loads a compiled `.aimodelc` or an iOS-path bundle on a Mac; those are device work.
+
 **No setup, where possible**: 14 scripts carry a PEP 723 inline dependency block, so
 `uv run conversion/<script>.py ...` builds a throwaway environment and runs them — no venv, no
 overlay. Every one of them is checked with `uv lock --script`. Scripts that import re-authored

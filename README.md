@@ -4,6 +4,7 @@
 [![HF downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjohn-rocky%2Fcoreai-assets%2Fmain%2Fbadge%2Fhf-downloads.json)](https://huggingface.co/mlboydaisuke)
 [![CI](https://github.com/john-rocky/coreai-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/john-rocky/coreai-kit/actions/workflows/ci.yml)
 [![Nightly device gate](https://github.com/john-rocky/coreai-kit/actions/workflows/nightly-gate.yml/badge.svg)](https://github.com/john-rocky/coreai-kit/actions/workflows/nightly-gate.yml)
+[![GA validation](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjohn-rocky%2Fcoreai-assets%2Fmain%2Fbadge%2Fga-validation.json)](models/_INVENTORY.md#tier-0-load-check)
 
 **Converted models + conversion recipes** for Apple **Core AI** (`.aimodel`, iOS 27 / macOS 27):
 every model here is downloadable, gated against the original model before it ships, and carries
@@ -231,9 +232,18 @@ in. [`CONTRIBUTING.md`](CONTRIBUTING.md) is the path to the next row.
 
 ▸ **Run in app** — apps in [`apps/`](apps) live in this repo; **↗** links a
 [CoreAIKit example app](https://github.com/john-rocky/coreai-kit/tree/main/Examples); **‡** = app
-wiring in progress. **🔧** = re-export to coreai-torch 0.4.1 queued (still loads on OS 27
-beta 1; see the [recovery note](#recovery-note--the-coreai-torch-040-incident) at the end).
+wiring in progress. **🔧** = the bundle still carries coreai-torch 0.4.0-era IR, which every
+OS 27 build from beta 2 on refuses at load (measured through macOS 26A5416b, 2026-09-04); it
+is queued for the in-place `strip_debug_info` repair (see the
+[recovery note](#recovery-note--the-coreai-torch-040-incident) at the end).
 Full app list: [`apps/README.md`](apps/README.md).
+
+**GA validation** (the badge at the top) is staged, not assumed: on the day the release OS
+lands, the most-downloaded bundles are downloaded and loaded through the runtime on that build
+(`python3 conversion/zoo_smoke.py --top 20`), and the rest of the catalog follows over the next
+week. The badge counts only bundles checked on the current release build; per-bundle status and
+the build that checked it are in [`models/_INVENTORY.md`](models/_INVENTORY.md#tier-0-load-check).
+A bundle that fails there is repaired or re-exported, not relabelled.
 
 ### Built with the zoo
 

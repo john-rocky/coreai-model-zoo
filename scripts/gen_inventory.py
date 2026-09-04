@@ -127,6 +127,17 @@ def verify_results() -> dict[str, list[dict]]:
     return out
 
 
+def smoke_results() -> dict[str, list[dict]]:
+    """HF repo id -> per-bundle tier-0 records, from `conversion/zoo_smoke.py`."""
+    path = MODELS / "_SMOKE.json"
+    if not path.exists():
+        return {}
+    out: dict[str, list[dict]] = defaultdict(list)
+    for b in json.loads(path.read_text())["bundles"]:
+        out[b["repo"]].append(b)
+    return out
+
+
 def contributor_repos(all_recipes: dict[str, dict]) -> list[str]:
     """Published repos a recipe names that we do not own — a contributor's own account.
 
@@ -148,7 +159,7 @@ def collect(cat: Catalog) -> list[dict]:
     by_family_recipes: dict[str, list[str]] = defaultdict(list)
     for name, r in all_recipes.items():
         by_family_recipes[r["family"]].append(name)
-    slugs, verified = kit_slugs(), verify_results()
+    slugs, verified, smoked = kit_slugs(), verify_results(), smoke_results()
 
     rows = []
     for m in published:
@@ -169,6 +180,7 @@ def collect(cat: Catalog) -> list[dict]:
             "recipes": sorted({n for f in fams for n in by_family_recipes.get(f, [])}),
             "kit": [slugs[rid]] if rid in slugs else [],
             "tier1": verified.get(rid, []),
+            "smoke": smoked.get(rid, []),
         })
     rows.sort(key=lambda r: (-r["dl30"], r["id"].lower()))
     return rows
@@ -188,6 +200,25 @@ def tier1_cell(row: dict) -> str:
         tally[b["verdict"]] += 1
     return " ".join(f"**{tally[v]} {v}**" if v in ("FAIL", "DIFF") else f"{tally[v]} {v.lower()}"
                     for v in ("FAIL", "DIFF", "PASS", "SKIPPED") if tally.get(v))
+
+
+def smoke_cell(row: dict) -> str:
+    """Per-repo tier-0 result: which OS build loaded it, failures first."""
+    if not row["smoke"]:
+        return "—"
+    tally: dict[str, int] = defaultdict(int)
+    builds: set[str] = set()
+    for b in row["smoke"]:
+        status = (b.get("load") or {}).get("status", "stamp")
+        tally["ok" if status == "ok" else "device-only" if status == "skipped"
+              else "deferred" if status in ("deferred", "stamp") else "FAIL"] += 1
+        if status == "ok":
+            builds.add((b.get("host") or {}).get("os_build") or "?")
+    parts = [f"**{tally['FAIL']} FAIL**"] if tally.get("FAIL") else []
+    if tally.get("ok"):
+        parts.append(f"{tally['ok']} load ({', '.join(sorted(builds))})")
+    parts += [f"{tally[k]} {k}" for k in ("device-only", "deferred") if tally.get(k)]
+    return " ".join(parts)
 
 
 def render(rows: list[dict]) -> str:
@@ -227,14 +258,15 @@ def render(rows: list[dict]) -> str:
         "",
         "## All repos, by 30-day downloads",
         "",
-        "| repo | 30d DL | ♥ | fmt | role | bundles | tier-1 | model | recipe | kit |",
-        "| --- | ---: | ---: | --- | --- | ---: | --- | --- | --- | --- |",
+        "| repo | 30d DL | ♥ | fmt | role | bundles | tier-1 | tier-0 load | model | recipe | kit |",
+        "| --- | ---: | ---: | --- | --- | ---: | --- | --- | --- | --- | --- |",
     ]
     for r in rows:
         model = ", ".join(f"[{f}]({f}/README.md)" for f in r["families"]) or "—"
         L.append(
             f"| [{r['id']}](https://huggingface.co/{r['id']}) | {r['dl30']} | {r['likes']} | "
-            f"{r['format']} | {r['role']} | {len(r['bundles'])} | {tier1_cell(r)} | {model} | "
+            f"{r['format']} | {r['role']} | {len(r['bundles'])} | {tier1_cell(r)} | "
+            f"{smoke_cell(r)} | {model} | "
             f"{', '.join(f'`{x}`' for x in r['recipes']) or '—'} | "
             f"{', '.join(f'`{x}`' for x in r['kit']) or '—'} |"
         )
@@ -267,6 +299,41 @@ def render(rows: list[dict]) -> str:
         L.append("declared expectation in `models/<family>/verify.toml`.")
     else:
         L.append("- (not run — `conversion/zoo_verify.py --all --json models/_VERIFY.json`)")
+
+    smoked = [(r, b) for r in rows for b in r["smoke"]]
+    loaded = [(r, b) for r, b in smoked if (b.get("load") or {}).get("status") == "ok"]
+    failed = [(r, b) for r, b in smoked
+              if (b.get("load") or {}).get("status") not in (None, "ok", "skipped", "deferred")]
+    stale_ir = [(r, b) for r, b in smoked if str(b.get("ir", "")).startswith("0.4.0")]
+    L += [
+        "",
+        "## Tier-0 load check",
+        "",
+        "From `conversion/zoo_smoke.py`: the published bundle downloaded and loaded through the",
+        "Core AI runtime on a named OS build, plus its asset producer stamp read off the Hub.",
+        "Staged on purpose — the most-downloaded bundles first, the rest afterwards — so the",
+        "table says which build checked which bundle rather than implying a sweep that did not",
+        "run. `device-only` = compiled or iOS-path bundles, checked on a device, never on a Mac.",
+        "",
+        f"- bundles with a load record: {len(loaded)} loaded, {len(failed)} failing, "
+        f"{sum(1 for _, b in smoked if (b.get('load') or {}).get('status') == 'skipped')} device-only, "
+        f"{sum(1 for _, b in smoked if (b.get('load') or {}).get('status') in ('deferred', None))} not yet run",
+        f"- bundles still carrying 0.4.0-era IR (no producer stamp): {len(stale_ir)} of those "
+        "with a record — loads on OS 27 beta 1 only; refused at load on every build measured "
+        "since, through 26A5416b on 2026-09-04 (`cli/DOCTOR_RULES.md` IR-040)",
+    ]
+    if failed:
+        L += ["", "| repo | bundle | build | what |", "| --- | --- | --- | --- |"]
+        for r, b in sorted(failed, key=lambda x: -x[0]["dl30"]):
+            load = b["load"]
+            detail = load.get("detail") or "; ".join(
+                f"{a.split('/')[-1]}: {v.get('detail', '')}"
+                for a, v in (load.get("assets") or {}).items() if v.get("status") != "ok")
+            L.append(f"| {r['id'].split('/')[-1]} | `{cell(b['bundle'])}` | "
+                     f"{(b.get('host') or {}).get('os_build', '?')} | "
+                     f"{load['status']}: {cell(' '.join(detail.split())[:160])} |")
+    if not smoked:
+        L.append("- (not run — `python3 conversion/zoo_smoke.py --top 20 --badge <path>`)")
 
     L += [
         "",
@@ -375,6 +442,11 @@ def render_index(rows: list[dict]) -> dict:
                 "tier1": {v: sum(1 for b in row["tier1"] if b["verdict"] == v)
                           for v in ("PASS", "DIFF", "FAIL", "SKIPPED")
                           if any(b["verdict"] == v for b in row["tier1"])},
+                # Tier-0: per bundle, whether it loaded and on which OS build (zoo_smoke.py).
+                "smoke": [{"bundle": b["bundle"], "ir": b.get("ir"),
+                           "load": (b.get("load") or {}).get("status"),
+                           "os_build": (b.get("host") or {}).get("os_build"),
+                           "date": b.get("date")} for b in row["smoke"]],
             })
     return {
         "generated": date.today().isoformat(),
