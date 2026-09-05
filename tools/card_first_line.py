@@ -57,6 +57,20 @@ def http_json(url: str, tries: int = 6):
     raise RuntimeError(f"gave up on {url}")
 
 
+def http_text(url: str, tries: int = 6) -> str:
+    """Fetch a text file; on 429 wait and retry like http_json does."""
+    for i in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "card-first-line"}), timeout=60) as r:
+                return r.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                time.sleep(10 * (i + 1))
+                continue
+            raise
+    raise RuntimeError(f"gave up on {url}")
+
+
 def list_candidates() -> list[str]:
     ids: list[str] = []
     for ns in OWN_NAMESPACES:
@@ -155,9 +169,7 @@ def main() -> int:
         try:
             info = api.model_info(repo)
             sha = info.sha
-            url = f"https://huggingface.co/{repo}/raw/{sha}/README.md"
-            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "card-first-line"}), timeout=60) as r:
-                src = r.read().decode("utf-8")
+            src = http_text(f"https://huggingface.co/{repo}/raw/{sha}/README.md")
         except Exception as e:  # noqa: BLE001
             rows.append((repo, author, created, "error", f"readme: {e}", "")); continue
         new, status = patch(src, line, args.replace)
