@@ -24,6 +24,9 @@ For the long-form version of the same material, read
   CoreAIKit Swift engine → app → on-device (AOT + sideload + headless self-test for RTF) → publish
   (HF + zoo + post). The stage checklist + cross-cutting traps (gate-before-port, JIT→AOT, tokenizer
   retag), validated shipping Parakeet in one session.
+- [`card-definition-line.md`](card-definition-line.md) — the one sentence every own card and
+  repo opens with (what Core AI is, the export tools, one measured number with source and date),
+  why that number, and how to update it with `tools/card_first_line.py`.
 - [`compute-units-and-authoring.md`](compute-units-and-authoring.md) — **ANE vs GPU vs CPU**: the
   static/BC1S/Conv2d/per-head/fp16 ANE rules vs the dynamic/fused/custom-kernel GPU rules, the
   macOS↔iOS export split, and the PSNR verification gates. Read this to choose a target.

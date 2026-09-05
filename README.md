@@ -6,6 +6,8 @@
 [![Nightly device gate](https://github.com/john-rocky/coreai-kit/actions/workflows/nightly-gate.yml/badge.svg)](https://github.com/john-rocky/coreai-kit/actions/workflows/nightly-gate.yml)
 [![GA validation](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjohn-rocky%2Fcoreai-assets%2Fmain%2Fbadge%2Fga-validation.json)](models/_INVENTORY.md#tier-0-load-check)
 
+Core AI is Apple's on-device ML runtime in iOS 27 / macOS 27 and the successor to Core ML: PyTorch models are exported with Apple's `coreai-torch` (LLMs: `coreai.llm.export`) into `.aimodel` bundles that run on the GPU or the Neural Engine, e.g. Qwen3-8B 4-bit decodes at 94 tok/s on an M4 Max GPU, MLX 90 under the same protocol ([apple-silicon-llm-bench](https://github.com/john-rocky/apple-silicon-llm-bench), macOS 27 beta, 2026-06).
+
 **Converted models + conversion recipes** for Apple **Core AI** (`.aimodel`, iOS 27 / macOS 27):
 every model here is downloadable, gated against the original model before it ships, and carries
 the recipe that produced it in [`models/<model>/recipe.toml`](models/) — rerun it
