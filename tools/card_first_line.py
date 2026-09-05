@@ -10,9 +10,15 @@ unified diff per repo and a summary table; `--go` writes, one commit per repo.
     python3 tools/card_first_line.py --go                      # write (after the owner's GO)
     python3 tools/card_first_line.py --report path.md          # also save the summary table
 
+The same tool serves another namespace and sentence, e.g. the LiteRT cards the owner created
+inside the shared `litert-community` org (targets and sentence kept outside this repo):
+
+    python3 tools/card_first_line.py --namespace litert-community --marker "LiteRT is " \
+        --message "Card: definition line (LiteRT, 2026-09)" --line-file <sentence.txt> --targets <ids.txt>
+
 Guards, all checked live at run time, never from a cached list:
   * logged-in user must be `mlboydaisuke`;
-  * a target must live in one of OWN_NAMESPACES;
+  * a target must live in one of OWN_NAMESPACES (or the --namespace values given);
   * a target's oldest commit must be authored by `mlboydaisuke` (ownership = created by the
     user, not "has a commit" — see the 2026-09-05 litert-community incident). Anything else is
     listed under EXCLUDED and never written, even with --go.
@@ -71,10 +77,10 @@ def http_text(url: str, tries: int = 6) -> str:
     raise RuntimeError(f"gave up on {url}")
 
 
-def list_candidates() -> list[str]:
+def list_candidates(namespaces=OWN_NAMESPACES, search: str = SEARCH) -> list[str]:
     ids: list[str] = []
-    for ns in OWN_NAMESPACES:
-        q = urllib.parse.urlencode({"search": SEARCH, "author": ns, "limit": 1000})
+    for ns in namespaces:
+        q = urllib.parse.urlencode({"search": search, "author": ns, "limit": 1000})
         ids += [m["id"] for m in http_json(f"https://huggingface.co/api/models?{q}")]
     return ids
 
@@ -104,7 +110,7 @@ def split_front_matter(text: str) -> int:
     return 0
 
 
-def patch(text: str, line: str, replace: bool) -> tuple[str, str]:
+def patch(text: str, line: str, replace: bool, marker: str = SENTENCE_MARKER) -> tuple[str, str]:
     """Return (new_text, status). status in {'insert', 'present', 'stale', 'replace'}."""
     lines = text.split("\n")
     body = split_front_matter(text)
@@ -114,7 +120,7 @@ def patch(text: str, line: str, replace: bool) -> tuple[str, str]:
     first = lines[j] if j < len(lines) else ""
     if first.strip() == line.strip():
         return text, "present"
-    if first.startswith(SENTENCE_MARKER):
+    if first.startswith(marker):
         if not replace:
             return text, "stale"
         k = j + 1
@@ -135,7 +141,12 @@ def main() -> int:
     ap.add_argument("--no-diff", action="store_true", help="dry run without the per-repo diffs")
     ap.add_argument("--line-file", type=Path, default=LINE_FILE)
     ap.add_argument("--targets", type=Path, default=TARGETS_FILE)
+    ap.add_argument("--namespace", action="append", help=f"allowed namespace (repeatable; default {', '.join(OWN_NAMESPACES)})")
+    ap.add_argument("--search", default=SEARCH, help="--list: name substring to search for")
+    ap.add_argument("--marker", default=SENTENCE_MARKER, help="prefix that identifies an older variant of the sentence")
+    ap.add_argument("--message", default=COMMIT_MESSAGE, help="commit message")
     args = ap.parse_args()
+    namespaces = tuple(args.namespace) if args.namespace else OWN_NAMESPACES
 
     api = HfApi()
     who = api.whoami()["name"]
@@ -143,10 +154,10 @@ def main() -> int:
         sys.exit(f"logged in as {who}, expected {OWNER}")
 
     if args.list:
-        ids = list_candidates()
+        ids = list_candidates(namespaces, args.search)
         args.targets.write_text(
             "# Targets of tools/card_first_line.py — HF models whose name contains "
-            f"'{SEARCH}' in {', '.join(OWN_NAMESPACES)} (HF API, {time.strftime('%Y-%m-%d')}).\n"
+            f"'{args.search}' in {', '.join(namespaces)} (HF API, {time.strftime('%Y-%m-%d')}).\n"
             "# Ownership is re-checked live at run time; a repo not created by the owner is excluded there.\n"
             + "\n".join(ids) + "\n")
         print(f"{len(ids)} candidates written to {args.targets}")
@@ -164,15 +175,15 @@ def main() -> int:
             author, created = first_commit_author(api, repo)
         except Exception as e:  # noqa: BLE001
             rows.append((repo, "?", "?", "error", f"commits: {e}", "")); continue
-        if ns not in OWN_NAMESPACES or author != OWNER:
-            rows.append((repo, author, created, "EXCLUDED", "not created by owner" if ns in OWN_NAMESPACES else "foreign namespace", "")); continue
+        if ns not in namespaces or author != OWNER:
+            rows.append((repo, author, created, "EXCLUDED", "not created by owner" if ns in namespaces else "foreign namespace", "")); continue
         try:
             info = api.model_info(repo)
             sha = info.sha
             src = http_text(f"https://huggingface.co/{repo}/raw/{sha}/README.md")
         except Exception as e:  # noqa: BLE001
             rows.append((repo, author, created, "error", f"readme: {e}", "")); continue
-        new, status = patch(src, line, args.replace)
+        new, status = patch(src, line, args.replace, args.marker)
         body = split_front_matter(src)
         cur = next((l for l in src.split("\n")[body:] if l.strip()), "")
         if status in ("insert", "replace"):
@@ -184,7 +195,7 @@ def main() -> int:
                 for i in range(6):
                     try:
                         api.create_commit(repo_id=repo, operations=[CommitOperationAdd("README.md", new.encode("utf-8"))],
-                                          commit_message=COMMIT_MESSAGE, parent_commit=sha)
+                                          commit_message=args.message, parent_commit=sha)
                         status = f"{status}: committed"
                         break
                     except HfHubHTTPError as e:
