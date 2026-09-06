@@ -10,10 +10,11 @@ was seen on.
 Three rules, so the page stays true:
 
 - **Only strings this project observed in its own runs.** Nothing here is copied from Apple's docs
-  or from hearsay. The evidence line says what is behind each entry: `log:` a file kept on the
-  maintainer's machine (`~/code/coreai/…`) or in this repo (`cli/logs/…`); `issue:` the report this
-  project filed against `apple/coreai-models` or `apple/coreai-torch`, which carries the log
-  excerpt; `record:` the note or state file that captured the string when the raw log was not kept.
+  or from hearsay. The evidence line says what is behind each entry. `log:` is a file kept on the
+  maintainer's machine (`~/code/coreai/…`) or in this repo (`cli/logs/…`). `issue:` is the report
+  this project filed against `apple/coreai-models` or `apple/coreai-torch`; it carries the log
+  excerpt. `record:` is the note or state file that captured the string when the raw log was not
+  kept.
 - **"Not isolated" means exactly that.** Where the cause was never pinned down, the entry says
   "Not isolated" and gives only what was measured. No entry states a cause that was not established.
 - **Silent failures are not here.** A conversion that succeeds and produces wrong numbers prints no
@@ -286,9 +287,9 @@ LLVM ERROR: cannot unwrap empty `odiec_module_t`
   a `coreai-core` 1.0.0b1 wheel first; recipe in the note) — or re-export with 0.4.1+. `.aimodelc`
   cannot be stripped; recompile from a fixed `.aimodel`. Things that do not work: `coreai-build
   package`, pinning `coreai-core` back, re-AOT with a newer toolchain.
-- **Also recorded with this string, not re-isolated against the cause above:** loading a
-  custom-Metal-kernel `.aimodel` low-level on device (`AIModel(contentsOf:)`) in June 2026 — the
-  AOT-compiled `.aimodelc` loads ([`bitvla-1.58bit-vla.md`](bitvla-1.58bit-vla.md)); a hand-rolled
+- **Also recorded with this string, not re-isolated against the cause above.** Loading a
+  custom-Metal-kernel `.aimodel` low-level on device (`AIModel(contentsOf:)`) in June 2026; the
+  AOT-compiled `.aimodelc` loads ([`bitvla-1.58bit-vla.md`](bitvla-1.58bit-vla.md)). A hand-rolled
   multi-head view/transpose/matmul attention in a DiT failing "the versioned-IR pass", where the
   SDPA composite passes ([`zimage-port.md`](zimage-port.md)).
 - **Evidence:** log: [`cli/logs/case-a-ground-truth-load-abort.txt`](../cli/logs/case-a-ground-truth-load-abort.txt)
@@ -472,10 +473,10 @@ Error Domain=com.apple.appleneuralengine.compiler Code=1 "_ANECompiler : ANECCom
   spec in the Python runtime (`allowed_compute_unit_kinds` is read-only), so the probe cannot be
   suppressed. A run killed on the first of these lines was killed for nothing.
 - **When it is not noise:** the int8 *dynamic* decoder graph of Qwen2.5-Omni cannot compile on the
-  ANE at all (its fixed-shape encoder does, at cos ~0.99 → byte-identical text); and a raw Python
+  ANE at all; its fixed-shape encoder does, at cos ~0.99 → byte-identical text. And a raw Python
   `AIModel.load` of a dynamic-shape S=1 decode graph on macOS 27 routes to `ANECCompile`, fails
-  this way, then wedges in repeated [`MTL4CommandQueueErrorDomain error 1`](#the-operation-couldnt-be-completed-mtl4commandqueueerrordomain-error-1)
-  (MinerU: kill it, the 90 s watchdog will not). That wedge is the Python binding not exposing
+  this way, then wedges in repeated [`MTL4CommandQueueErrorDomain error 1`](#the-operation-couldnt-be-completed-mtl4commandqueueerrordomain-error-1).
+  Kill it; the 90 s watchdog will not (MinerU). That wedge is the Python binding not exposing
   `expectFrequentReshapes`, which the Swift engine sets to steer such graphs off the ANE path.
 - **Fix:** ignore it on GPU bundles. For a dynamic graph in the Python runtime, AOT-compile with
   `--expect-frequent-reshapes` and load the `.aimodelc` with `SpecializationOptions.default()`.
@@ -631,11 +632,11 @@ the op; two triggers verified here.
 - **(a) The SDPA head_dim mismatch** in the previous entry.
 - **(b) The Core AI SDPA composite over a large prefill query block.** The LFM2-Audio detokenizer
   backbone at S=384 prefill with `SDPA(is_causal, window_size)` aborts at GPU load with this
-  assertion and at AOT with a `libODIECompiler` NSException; `window=0` full-causal crashes too, so
-  it is not the sliding window. The composite is fine for S=1 decode; the blow-up is large
-  query-length attention. **Two escapes:** rewrite as raw matmul-softmax with an explicit additive
-  mask (`(q@kᵀ)·scale + mask → softmax → @v`, GQA via `repeat_interleave`; GPU JIT then cos
-  1.000000 / 68 dB fp16), or keep the query block small — pocket-tts prefills through a 16-token
+  assertion, and at AOT with a `libODIECompiler` NSException. `window=0` full-causal crashes too,
+  so it is not the sliding window. The composite is fine for S=1 decode; the blow-up is large
+  query-length attention. **Two escapes.** Rewrite as raw matmul-softmax with an explicit additive
+  mask (`(q@kᵀ)·scale + mask → softmax → @v`, GQA via `repeat_interleave`); GPU JIT is then cos
+  1.000000 / 68 dB fp16. Or keep the query block small: pocket-tts prefills through a 16-token
   window and never triggers it. Record: [`lfm2audio-port.md`](lfm2audio-port.md),
   [`pocket-tts-port.md`](pocket-tts-port.md). (The LFM2-Audio note spells the string `AICode→MPS`;
   the log prints `AICode -> MPS`.)
@@ -681,9 +682,9 @@ App terminated due to signal 6.
   `_vl3.log` (2026-06-12); record: [`pipelined-engine.md`](pipelined-engine.md) (iOS per-encode
   scratch-heap ceiling), `~/code/coreai/GEMMA4VL_STATE.md`.
 - **(c) Any multi-token (S>1) prefill of Gemma 4 E2B on iOS.** The iOS heap is 145920 B and the
-  overflowing allocation scales with query width: chunk 64 → `offset 512 + size 196608` (the
-  64·1536·2 hidden buffer), chunk 32 → `offset 98816 + size 98304` (two 32·1536·2 buffers), chunk
-  16 clears those and a ~560 KB attention intermediate overflows instead. Only S=1 stays under, so
+  overflowing allocation scales with query width. Chunk 64 → `offset 512 + size 196608` (the
+  64·1536·2 hidden buffer). Chunk 32 → `offset 98816 + size 98304` (two 32·1536·2 buffers). Chunk
+  16 clears those, and a ~560 KB attention intermediate overflows instead. Only S=1 stays under, so
   a 1024-token prompt degrades to per-token processing. A Qwen3-VL-2B multifunction bundle with a
   static S=64 prefill runs clean on the same phone and build, so it is per-graph under-sizing, not a
   blanket S>1 limit. **Status:** still reproduces byte-identically on 24A5418b with a fresh
@@ -784,11 +785,11 @@ runtime `in_step` index — converts fine and dies at the first execute on the W
   runtime data (`arange == in_step` crashes exactly like `slice_update`); a one-hot mask handed in as
   an *input* lowers and runs. Model-agnostic — every model shares `KVCache.update_and_fetch`, and
   Apple's own `KVCacheHandler` (`primitives/ios/cache.py`) uses the crashing form.
-- **Fix:** the input-mask blend (`sl.copy_(sl * (1 - m) + col * m)`, mask built on the host;
-  fixed shapes *and* Core AI states; 35-layer Gemma 4 E2B 8/8 greedy-exact on the beta Mac GPU), or
-  the host-cache pattern (KV as plain I/O, `cat`-append, masked SDPA; runs on Mac GPU, iPhone GPU,
-  iPhone ANE chunked). **Status:** Apple said fixed in macOS / Xcode beta 4 and closed the issue
-  2026-09-02; not re-verified here on beta 4+.
+- **Fix:** the input-mask blend — `sl.copy_(sl * (1 - m) + col * m)` with the mask built on the
+  host — keeps fixed shapes *and* Core AI states; a 35-layer Gemma 4 E2B ran 8/8 greedy-exact on
+  the beta Mac GPU with it. Or the host-cache pattern: KV as plain I/O, `cat`-append, masked SDPA;
+  runs on Mac GPU, iPhone GPU, and iPhone ANE (chunked). **Status:** Apple said fixed in macOS /
+  Xcode beta 4 and closed the issue 2026-09-02; not re-verified here on beta 4+.
 - **Evidence:** issue: [apple/coreai-models#5](https://github.com/apple/coreai-models/issues/5),
   Apple Feedback FB23024751, repro gist linked there; record:
   [`coreai-beta-mpsgraph-kvwrite-bug.md`](coreai-beta-mpsgraph-kvwrite-bug.md). `coreai doctor`:
@@ -815,14 +816,14 @@ Error: command buffer exited with error status.
   `pgrep` for other Python-GPU processes. Export (CPU lowering + quant) is safe to run
   concurrently; only engine load / gate / bench must be solo. Record: `~/code/coreai/GEMMA4_12B_STATE.md`.
 - **(b) The Python runtime driving a dynamic-shape decoder per token.** Every step grows
-  `position_ids` → a new MPSGraph shape → a re-specialization; on Metal 4 the *second* distinct
+  `position_ids` → a new MPSGraph shape → a re-specialization. On Metal 4 the *second* distinct
   shape faults (`Failed to import MPS module` + this error, Unlimited-OCR), or the rollout
-  corrupts around step 25 (Qwen2.5-Omni). **Fix:** make the decode graph fully static (a `pos`
-  tensor drives a data-driven `mutable_slice_update`; the engine then compiles once), or reload the
-  bundle every 8 calls (the Python-held KV NDArrays survive the reload), or AOT-compile — the 4B
+  corrupts around step 25 (Qwen2.5-Omni). **Three fixes.** Make the decode graph fully static: a
+  `pos` tensor drives a data-driven `mutable_slice_update`, and the engine compiles once. Or reload
+  the bundle every 8 calls; the Python-held KV NDArrays survive the reload. Or AOT-compile: the 4B
   hybrid decode bundle under Python JIT errored on every forward at 24,000 ms and degenerated to
-  token 0 after ~25 tokens; the same bundle AOT-compiled ran at 44.4 ms/forward with zero errors.
-  Record: [`unlimited-ocr-rswa-static-decode.md`](unlimited-ocr-rswa-static-decode.md),
+  token 0 after ~25 tokens, while the same bundle AOT-compiled ran at 44.4 ms/forward with zero
+  errors. Record: [`unlimited-ocr-rswa-static-decode.md`](unlimited-ocr-rswa-static-decode.md),
   `~/code/coreai/QWEN2_5_OMNI_THINKER_STATE.md`, `~/code/coreai/SPEC35_HYBRID_S_WINDOW_STATE.md`,
   [`spec-decode-hybrid-verify-design.md`](spec-decode-hybrid-verify-design.md) (`--reload-every 3`).
 - **(c) Long Python gates** — the per-step re-specialization (~10 s/step with a benign
@@ -874,9 +875,9 @@ Also printed as `CoreAIRuntime error 3`.
 The CPU delegate cannot compile the graph (`cpu_only`); `CoreAICompiler error 3` is the same class
 on other graphs. GPU compiles them.
 
-- **When:** MinerU's dynamic-shape S=1 decode graph (`cpu_only()` fails fast with error 2 while the
-  GPU load wedges in ANECCompile, above); Unlimited-OCR's sym8 Metal MoE graph; a Qwen3.5
-  bundle whose GDN recurrence is a `while_loop` ("Compiler error 2" on the macOS 27 beta); the
+- **When:** MinerU's dynamic-shape S=1 decode graph — `cpu_only()` fails fast with error 2 while
+  the GPU load wedges in ANECCompile, above. Unlimited-OCR's sym8 Metal MoE graph. A Qwen3.5
+  bundle whose GDN recurrence is a `while_loop` ("Compiler error 2" on the macOS 27 beta). The
   RWKV-7 recurrence graphs (`error 3`).
 - **Verified cause where known:** a custom Metal kernel is GPU-only by construction; a `scf.while`
   region fails the delegates (next entry). For the plain dynamic decode graphs: **Not isolated.**
@@ -1019,8 +1020,8 @@ FoundationModels rejects what the model generated ("failed to parse generated co
 
 - **When (all on the kit engine behind `LanguageModelSession`):** small / thinking models emitting
   tool-call JSON, independent of the argument schema (verified with required, optional and empty
-  `@Generable` arguments); `/no_think` on the qwen3 kit bundles, even the 0.6B on a tool-free
-  respond; a thinking model whose token budget runs out inside `<think>`; a plain
+  `@Generable` arguments). `/no_think` on the qwen3 kit bundles, even the 0.6B on a tool-free
+  respond. A thinking model whose token budget runs out inside `<think>`. A plain
   `LanguageModelSession(model:instructions:)` first respond where the profile path is solid.
 - **Verified:** the tool-call rejection is independent of the argument schema (tested with
   required, optional and empty `@Generable` arguments). The other triggers are observations from
