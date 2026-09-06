@@ -34,5 +34,8 @@ repos (`coreai-model-zoo`, `coreai-kit`, `apple-silicon-llm-bench`, `awesome-cor
   pull request instead. On 2026-09-05 that was `Real-ESRGAN-CoreAI` and `Moebius-CoreAI` in
   `coreai-community` (created by a contributor).
 - Mirrors in `coreai-community` carry the sentence too, above their "Mirror of" line.
+- The LiteRT cards the owner created in `litert-community` carry a sibling sentence (LiteRT / `litert-torch`, one
+  parity number) with the same tool, its targets and sentence kept outside this repo. When the wording or the
+  freshness rule changes, update both sets.
 - When the number goes stale (new OS, new export generation), change the sentence and re-run with
   `--replace`.
