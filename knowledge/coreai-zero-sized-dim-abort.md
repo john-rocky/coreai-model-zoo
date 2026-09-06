@@ -1,4 +1,4 @@
-# Beta gotcha: a zero-sized dimension aborts the process on GPU and ANE (CPU is fine)
+# Pass failed: MPSCommonRuntimeCanonicalization — a zero-length split section or a width-0 output aborts the process on GPU and ANE (CPU runs it)
 
 A graph carrying a **zero-sized tensor** converts cleanly, then kills the process at load or run on
 the GPU and the Neural Engine. A CPU-only specialization runs the same asset. Two shapes of it, two

@@ -16,6 +16,13 @@ For the long-form version of the same material, read
   with measured answers: the AOT threshold, the iOS-only dynamic-KV miscompile at seq ≥2048, whether
   a 4B fits on the ANE, what the chunk threshold really dials, and why a hand-written kernel forces
   a single-token export.
+- [`coreai-error-index.md`](coreai-error-index.md) — **got an error string? search it here**: every
+  exact Core AI / `coreai-torch` / `coreai-build` / Swift-engine error this project has hit, verbatim
+  as a heading (`cannot unwrap empty odiec_module_t`, `Failed to acquire the source buffer for the
+  ViewOp`, `not a valid substitution for source shape 1`, `failedToSpecialize`,
+  `NSPOSIXErrorDomain Code=2`, …), each with when it appears, the verified cause or "Not
+  isolated", the fix, the log or Apple issue behind it, and the OS / toolchain. `coreai doctor`
+  links its findings here by anchor.
 - [`coreai-overview.md`](coreai-overview.md) — what Core AI is, the 3 Apple repos, the `.aimodel`
   format, the PyTorch → `.aimodel` → Swift-runtime pipeline.
 - [`conversion-guide.md`](conversion-guide.md) — converting a PyTorch model to `.aimodel`: the
@@ -98,13 +105,15 @@ For the long-form version of the same material, read
   hard caps (~128 programs/process, 2→4.72 MB working set, >4094 slice-inf on A13/A14), the measured
   decode-vs-encoder verdict with its bandwidth mechanism, and the warmup/idle/power rules a fair ANE
   bench must follow. External direct-route numbers on M-series — not our Core AI-route measurements.
-- [`coreai-beta-mpsgraph-kvwrite-bug.md`](coreai-beta-mpsgraph-kvwrite-bug.md) — the data-indexed
-  in-graph KV write SIGSEGV (FB23024751 / apple#5): platform-agnostic (GPU too), host-cache workaround.
+- [`coreai-beta-mpsgraph-kvwrite-bug.md`](coreai-beta-mpsgraph-kvwrite-bug.md) — `EXC_BREAKPOINT`
+  (SIGTRAP) at the first execute: the data-indexed in-graph KV write SIGSEGV (FB23024751 / apple#5),
+  platform-agnostic (GPU too), host-cache workaround.
 - [`coreai-ane-partition-cost.md`](coreai-ane-partition-cost.md) — an op the ANE cannot run (`topk`
   is the usual one) charges a **fixed** cost, not one that scales with its work: cutting k 30× buys
   nothing. Count boundary crossings, not ops. Self-contained reproducer (apple/coreai-torch#66).
-- [`coreai-zero-sized-dim-abort.md`](coreai-zero-sized-dim-abort.md) — a 0-length `split` section
-  or a width-0 output converts fine and then **aborts the process** on GPU and ANE (CPU runs it).
+- [`coreai-zero-sized-dim-abort.md`](coreai-zero-sized-dim-abort.md) — `Pass failed:
+  MPSCommonRuntimeCanonicalization` / `MPSNDArray … buffer is not large enough`: a 0-length `split`
+  section or a width-0 output converts fine and then **aborts the process** on GPU and ANE (CPU runs it).
   Arrives from generic postprocess code that sizes a section by subtraction. Also: pin the compute
   unit explicitly when isolating — `SpecializationOptions.default()` can fall back to CPU and a
   fallback reads as a pass (apple/coreai-torch#68).

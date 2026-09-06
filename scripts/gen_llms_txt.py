@@ -53,6 +53,11 @@ PREAMBLE = f"""\
   `gate_transcript` (is the numerical check against the original published, and where).
 - [PORTING.md]({SITE}/PORTING.html): the full walk from a Hugging Face checkpoint to a verified
   bundle on an iPhone, with two worked examples.
+- [knowledge/coreai-error-index.md]({SITE}/knowledge/coreai-error-index.html): hit an error
+  string? Every exact Core AI / coreai-torch / coreai-build / Swift-engine error this project has
+  observed, verbatim as a heading, with when it appears, the verified cause (or "Not isolated"),
+  the fix, the log or Apple issue behind it, and the OS / toolchain. Search the string; land on
+  the section.
 - [SECURITY.md]({SITE}/SECURITY.html): what the integrity story is, including the parts that are
   absent — pinned revisions rather than signatures, and no checksum manifest.
 - [Source repository]({REPO_URL}): the conversion scripts, the gates, and the recipes behind

@@ -1,4 +1,4 @@
-# Beta gotcha: the data-indexed in-graph KV write crashes MPSGraph (host-cache workaround)
+# EXC_BREAKPOINT (SIGTRAP) at the first execute — the data-indexed in-graph KV write does not lower on the OS 27 beta MPSGraph (host-cache and input-mask escapes)
 
 On the WWDC26 betas (macOS 27 / iOS 27) the **fixed-shape / ANE decode path** — the one that writes each
 new KV column in-graph with `slice_update` at a runtime `in_step` index (Apple's documented

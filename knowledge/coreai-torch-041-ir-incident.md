@@ -1,4 +1,4 @@
-# The coreai-torch 0.4.0 IR-location incident, and how to recover / re-verify
+# LLVM ERROR: cannot unwrap empty odiec_module_t — every coreai-torch 0.4.0 asset stops loading on OS 27 beta 2+, and how to recover / re-verify
 
 **What happened (2026-07-18).** Every `.aimodel` converted with `coreai-torch` **0.4.0**
 stops loading on **iOS/macOS 27 beta 2 and later**. It runs on beta 1. On beta 2+ both
