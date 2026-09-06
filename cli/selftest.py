@@ -247,6 +247,46 @@ def check_host_build() -> int:
     return len(parse) + len(ir) + 6 + len(aotc) + 2
 
 
+def check_rule_urls(failures: list[str]) -> int:
+    """Every rule's `see` URL must resolve against this checkout: the page exists and, when
+    the URL carries an anchor, a heading on that page slugs to it the way the site does.
+    A finding that points at a dead anchor is a finding nobody can follow up."""
+    repo = Path(__file__).resolve().parents[1]
+    checked = 0
+    for r in doctor.RULES.values():
+        checked += 1
+        if r.url.startswith(doctor.SITE + "/knowledge/"):
+            page, _, anchor = r.url[len(doctor.SITE) + len("/knowledge/"):].partition("#")
+            md = repo / "knowledge" / (page.removesuffix(".html") + ".md")
+            if not md.exists():
+                failures.append(f"{r.id}: url points at a page that is not in the checkout: {md.name}")
+                continue
+            if anchor:
+                headings = [line.lstrip("#").strip() for line in md.read_text().splitlines()
+                            if line.startswith("#")]
+                if anchor not in {doctor.slug(h) for h in headings}:
+                    failures.append(f"{r.id}: no heading in {md.name} slugs to #{anchor}")
+        elif r.url.startswith(doctor.REPO_URL + "/blob/main/"):
+            rel = r.url[len(doctor.REPO_URL) + len("/blob/main/"):]
+            if not (repo / rel).exists():
+                failures.append(f"{r.id}: url points at a file that is not in the checkout: {rel}")
+        elif not r.url.startswith("https://github.com/apple/"):
+            failures.append(f"{r.id}: url is neither a knowledge page, a repo file, nor an Apple issue: {r.url}")
+    # The slug must be what the site produces, or the anchors above are validated against
+    # the wrong thing. These three were read off the live site on 2026-09-07.
+    live = [("Critical ordering — register kernels BEFORE add_exported_program",
+             "critical-ordering--register-kernels-before-add_exported_program"),
+            ("Re-verifying a recovered bundle: `conversion/coreai_gate.py`",
+             "re-verifying-a-recovered-bundle-conversioncoreai_gatepy"),
+            ("The chunk-threshold dial (`COREAI_CHUNK_THRESHOLD` / `llm-runner --chunk-size`)",
+             "the-chunk-threshold-dial-coreai_chunk_threshold--llm-runner---chunk-size")]
+    for heading, want in live:
+        checked += 1
+        if doctor.slug(heading) != want:
+            failures.append(f"slug({heading!r}) = {doctor.slug(heading)!r}, the site has {want!r}")
+    return checked
+
+
 def main() -> int:
     failures: list[str] = []
     for rule_id, trigger, workaround in CASES:
@@ -281,12 +321,13 @@ def main() -> int:
     n_verify = check_verify(failures)
     n_eval = check_eval()
     n_host = check_host_build()
+    n_urls = check_rule_urls(failures)
 
     for line in failures:
         print("FAIL  " + line)
     print(f"\n{len(CASES) + 4} checks over {len(covered)} source rules, "
           f"{n_verify} over verify's verdict, {n_eval} over eval's refusals, "
-          f"{n_host} over the host-build rules: "
+          f"{n_host} over the host-build rules, {n_urls} over the rules' URLs: "
           f"{'FAILED' if failures else 'all pass'}")
     return 1 if failures else 0
 

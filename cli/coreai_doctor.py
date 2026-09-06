@@ -60,7 +60,8 @@ class Rule:
     scope: str  # asset | graph | bundle | checkpoint | source
     severity: str
     title: str
-    source: str  # where this rule is written down
+    source: str  # where this rule is written down, as a citation
+    url: str  # the same record as one fetchable URL, anchored to the section
 
 
 RULES: dict[str, Rule] = {}
@@ -69,14 +70,47 @@ RULES: dict[str, Rule] = {}
 def rule(**kw) -> Rule:
     r = Rule(**kw)
     assert r.severity in SEVERITY_ORDER, r.severity
+    assert r.url.startswith("https://"), r.id
     RULES[r.id] = r
     return r
+
+
+# Every rule links to the page and section that recorded the incident, so a finding is one
+# fetch away from its evidence. The published knowledge base is a Jekyll site; a section's
+# anchor is what kramdown makes of the heading (measured against the live site 2026-09-07:
+# everything but letters, digits, spaces, underscores and hyphens is dropped, leading
+# non-letters are dropped, spaces become hyphens, lower-cased). `slug` reproduces that, and
+# cli/selftest.py resolves every URL below against the checkout so a renamed heading fails
+# the self-test instead of leaving a dead link in the report.
+
+SITE = "https://john-rocky.github.io/coreai-model-zoo"
+REPO_URL = "https://github.com/john-rocky/coreai-model-zoo"
+ERROR_INDEX = "knowledge/coreai-error-index.md"
+
+
+def slug(heading: str) -> str:
+    """kramdown's auto_id for a heading, as the published site renders it."""
+    s = re.sub(r"^[^a-zA-Z]+", "", heading)
+    s = re.sub(r"[^a-zA-Z0-9 _-]", "", s)
+    return s.replace(" ", "-").lower() or "section"
+
+
+def note(page: str, heading: str | None = None) -> str:
+    """URL of a knowledge note (`page` is the file name), anchored to `heading` if given."""
+    url = f"{SITE}/knowledge/{page.removesuffix('.md')}.html"
+    return f"{url}#{slug(heading)}" if heading else url
+
+
+def err(exact_string: str) -> str:
+    """URL of one entry in the error index: the H2 there is the exact error string."""
+    return note(ERROR_INDEX.removeprefix("knowledge/"), exact_string)
 
 
 # --- ASSET -----------------------------------------------------------------
 
 IR_040 = rule(
     id="IR-040-DEBUG-LOC",
+    url=err("LLVM ERROR: cannot unwrap empty odiec_module_t"),
     scope="asset", severity="fatal",
     title="asset carries coreai-torch 0.4.0-era IR (no producer stamp) — every OS 27 build from "
           "beta 2 on refuses its debug locations at load (measured through 26A5416b, 2026-09-04); "
@@ -87,6 +121,7 @@ IR_040 = rule(
 
 AOTC_STALE = rule(
     id="AOTC-STALE-TOOLCHAIN",
+    url=note("coreai-torch-041-ir-incident.md", "Environment the fix needs"),
     scope="asset", severity="fatal",
     title="compiled .aimodelc comes from an Xcode 27 beta-2-or-earlier coreai-build (below "
           "3600.75.3) — OS 27 beta 3 and later fail to specialize it (Apple 181264112). An "
@@ -96,6 +131,7 @@ AOTC_STALE = rule(
 
 AOTC_NO_SOURCE = rule(
     id="AOTC-NO-SOURCE-ASSET",
+    url=note("coreai-torch-041-ir-incident.md", "UPDATE 2026-07-21 — the in-place fix: `strip_debug_info` (no re-conversion needed)"),
     scope="asset", severity="info",
     title="compiled-only artifact: its 0.4.0 provenance cannot be read from it, and it cannot be "
           "repaired in place — strip_debug_info works on .aimodel only",
@@ -104,6 +140,7 @@ AOTC_NO_SOURCE = rule(
 
 SYMLINKED_ASSET = rule(
     id="ASSET-SYMLINK",
+    url=err("failedToSpecialize"),
     scope="asset", severity="fatal",
     title="asset path is a symlink — Swift AIModel(contentsOf:) does not follow symlinks and "
           "cannot resolve the per-arch delegates directory (failedToSpecialize)",
@@ -112,6 +149,7 @@ SYMLINKED_ASSET = rule(
 
 AOTC_LOAD_OPTIONS = rule(
     id="AOTC-LOAD-OPTIONS",
+    url=err("failedToSpecialize"),
     scope="asset", severity="requires",
     title="an AOT .aimodelc must be loaded with SpecializationOptions.default() or .cpuOnly() — "
           "asking for preferredComputeUnitKind re-specializes the baked graph on device",
@@ -123,6 +161,7 @@ AOTC_LOAD_OPTIONS = rule(
 
 GRAPH_STATE_COUNT = rule(
     id="GRAPH-STATE-COUNT",
+    url=err('invalidOutputType("Expected 2 states (KV cache), got 4: [keyCache, valueCache, convState, recState]")'),
     scope="graph", severity="requires",
     title="the graph declares a number of states the stock sequential engine cannot drive — it "
           "hard-requires exactly 2 and fails engine-create with invalidOutputType",
@@ -132,6 +171,7 @@ GRAPH_STATE_COUNT = rule(
 
 GRAPH_S1_CONTRACT = rule(
     id="GRAPH-S1-RUN-CONTRACT",
+    url=err("Shape at dimension 1 of 256 is not a valid substitution for source shape 1"),
     scope="graph", severity="requires",
     title="static S=1 decode graph: the engine's default warmup prefills 256 tokens and this "
           "graph rejects the substitution, and any multi-token prefill chunk is fatal",
@@ -141,6 +181,7 @@ GRAPH_S1_CONTRACT = rule(
 
 GRAPH_VOCAB_MISMATCH = rule(
     id="GRAPH-VOCAB-MISMATCH",
+    url=note("pipelined-engine.md", "What a model needs to ride the engine"),
     scope="graph", severity="silent",
     title="metadata language.vocab_size disagrees with the graph's logits width — the sampler is "
           "sized from metadata and indexes the real logits, so this drifts without an error",
@@ -149,6 +190,7 @@ GRAPH_VOCAB_MISMATCH = rule(
 
 GRAPH_TOKENIZER_OVERFLOW = rule(
     id="GRAPH-TOKENIZER-OVERFLOW",
+    url=note("gliner2-pii.md", "3. swift-transformers tokenizer routing — the make-or-break"),
     scope="graph", severity="info",
     title="the tokenizer can produce ids the head cannot emit (max token id >= logits width). "
           "Harmless when the overflow is a multimodal placeholder a text-only port never sees; "
@@ -159,6 +201,7 @@ GRAPH_TOKENIZER_OVERFLOW = rule(
 
 GRAPH_CUSTOM_METAL = rule(
     id="GRAPH-CUSTOM-METAL-KERNEL",
+    url=note("custom-metal-kernels.md", "Constraints & gotchas"),
     scope="graph", severity="requires",
     title="the graph embeds custom Metal kernels — GPU-only by construction (the ANE runs fixed "
           "hardware ops and can never execute MSL)",
@@ -167,6 +210,7 @@ GRAPH_CUSTOM_METAL = rule(
 
 GRAPH_FLOOR_IDENTITY = rule(
     id="GRAPH-FLOOR-IDENTITY",
+    url=note("conversion-guide.md", "Detection transformers"),
     scope="graph", severity="silent",
     title="the graph contains floor / trunc / ceil, which execute as the IDENTITY function on "
           "the GPU delegate — the same asset is correct on CPU, so a cpu_only parity gate "
@@ -176,6 +220,7 @@ GRAPH_FLOOR_IDENTITY = rule(
 
 GRAPH_ROUND_TIES = rule(
     id="GRAPH-ROUND-TIES",
+    url="https://github.com/apple/coreai-torch/issues/10",
     scope="graph", severity="info",
     title="the graph contains round, which uses ties-away-from-zero on the GPU delegate instead "
           "of ties-to-even — a 1-LSB divergence that matters most inside a quantize path",
@@ -184,6 +229,7 @@ GRAPH_ROUND_TIES = rule(
 
 GRAPH_DYNAMIC_KV_IOS = rule(
     id="GRAPH-DYNAMIC-KV-IOS-2048",
+    url=note("undocumented-answers.md", "Does iOS behave differently from macOS for a dynamically-sized KV cache?"),
     scope="graph", severity="requires",
     title="growing (dynamic-seq) KV state plus a declared context of 2048 or more — the iOS "
           "on-device compiler miscompiles this graph class once the bound KV seq dim reaches "
@@ -198,6 +244,7 @@ GRAPH_DYNAMIC_KV_IOS = rule(
 
 BUNDLE_INCOMPLETE = rule(
     id="BUNDLE-INCOMPLETE",
+    url=note("pipelined-engine.md", "What a model needs to ride the engine"),
     scope="bundle", severity="fatal",
     title="LanguageBundle is missing a required key or file — a bare .aimodel directory is not "
           "loadable by LanguageBundle/EngineFactory",
@@ -206,6 +253,7 @@ BUNDLE_INCOMPLETE = rule(
 
 NOT_A_BUNDLE_MANIFEST = rule(
     id="BUNDLE-NOT-A-MANIFEST",
+    url=note("pipelined-engine.md", "What a model needs to ride the engine"),
     scope="bundle", severity="info",
     title="metadata.json here is not a Core AI bundle manifest (no metadata_version, no assets) "
           "— it is some other sidecar that happens to share the name",
@@ -214,6 +262,7 @@ NOT_A_BUNDLE_MANIFEST = rule(
 
 BUNDLE_ASSET_MISSING = rule(
     id="BUNDLE-ASSET-MISSING",
+    url=note("pipelined-engine.md", "What a model needs to ride the engine"),
     scope="bundle", severity="fatal",
     title="metadata.json assets.main does not resolve to anything on disk",
     source="knowledge/pipelined-engine.md 'What a model needs to ride the engine'",
@@ -221,6 +270,7 @@ BUNDLE_ASSET_MISSING = rule(
 
 NO_CHAT_TEMPLATE = rule(
     id="CHAT-TEMPLATE-MISSING",
+    url=note("cross-runtime-quality-benchmarking.md", "Ops notes"),
     scope="bundle", severity="runaway",
     title="an instruction-tuned model with no chat template in the bundle — the runtime silently "
           "falls back to raw completion and the model never sees turn markers",
@@ -229,6 +279,7 @@ NO_CHAT_TEMPLATE = rule(
 
 NO_CHAT_TEMPLATE_INFO = rule(
     id="CHAT-TEMPLATE-ABSENT",
+    url=note("cross-runtime-quality-benchmarking.md", "Ops notes"),
     scope="bundle", severity="info",
     title="no chat template in the bundle. Expected for a non-chat decoder (ASR, OCR, drafter); "
           "a defect if this model is meant to hold a conversation",
@@ -237,6 +288,7 @@ NO_CHAT_TEMPLATE_INFO = rule(
 
 EOS_NOT_IN_TEMPLATE = rule(
     id="EOS-NOT-EMITTED-BY-TEMPLATE",
+    url=note("minicpm5-1b.md", "App integration (CoreAIChat — applies to any Think-mode model)"),
     scope="bundle", severity="runaway",
     title="the declared eos_token is never emitted by the chat template — generation runs to the "
           "token cap instead of stopping at the turn terminator",
@@ -245,6 +297,7 @@ EOS_NOT_IN_TEMPLATE = rule(
 
 TOKENIZER_CLASS_UNKNOWN = rule(
     id="TOKENIZER-CLASS-UNREGISTERED",
+    url=err("unsupportedTokenizer"),
     scope="bundle", severity="fatal",
     title="tokenizer_class is not in swift-transformers' registry — a strict load throws "
           "unsupportedTokenizer, and the non-strict fallback is BPE for everything, which is "
@@ -255,6 +308,7 @@ TOKENIZER_CLASS_UNKNOWN = rule(
 
 BIG_IOS_JIT = rule(
     id="IOS-LARGE-GRAPH-JIT",
+    url=note("aot-and-specialization.md", "The 4B wall — large decoders MUST ship AOT, not as a portable IR"),
     scope="bundle", severity="requires",
     title="a GB-class graph's on-device specialization is the coin-flip step — some bundles of "
           "this size JIT fine on iPhone and some abort; measure it before you ship",
@@ -264,6 +318,7 @@ BIG_IOS_JIT = rule(
 
 IPHONE_MEMORY_ENTITLEMENT = rule(
     id="IPHONE-MEMORY-ENTITLEMENT",
+    url=err("libc++abi: terminating due to uncaught exception of type std::bad_alloc: std::bad_alloc"),
     scope="bundle", severity="requires",
     title="at this size cold specialization hits the default jetsam limit and dies with "
           "std::bad_alloc — the app needs the increased-memory-limit entitlement",
@@ -274,6 +329,7 @@ IPHONE_MEMORY_ENTITLEMENT = rule(
 
 ACT_SCALE_QAT = rule(
     id="QAT-STATIC-ACTIVATION-SCALES",
+    url=note("gemma4-wna8o8-requires-int8-activations.md"),
     scope="checkpoint", severity="silent",
     title="the checkpoint carries static activation / KV-cache scales — these weights were "
           "trained with a learned activation clamp in the loop, and exporting them into an "
@@ -284,6 +340,7 @@ ACT_SCALE_QAT = rule(
 
 PREQUANTIZED_CHECKPOINT = rule(
     id="CHECKPOINT-PREQUANTIZED",
+    url=note("cross-runtime-quality-benchmarking.md", "Bits are not a spec"),
     scope="checkpoint", severity="info",
     title="the checkpoint carries a quantization_config — its weights are already fitted to one "
           "runtime's grid, so re-quantizing it to 'int4' produces a different product, not a "
@@ -293,6 +350,7 @@ PREQUANTIZED_CHECKPOINT = rule(
 
 EOS_SOURCE_MISMATCH = rule(
     id="EOS-SOURCE-MISMATCH",
+    url=note("minicpm5-1b.md", "App integration (CoreAIChat — applies to any Think-mode model)"),
     scope="checkpoint", severity="runaway",
     title="generation_config lists more eos ids than tokenizer_config's eos_token resolves to — "
           "pick the turn terminator and retag the exported bundle, or anything that stops on a "
@@ -302,6 +360,7 @@ EOS_SOURCE_MISMATCH = rule(
 
 TIED_EMBEDDINGS = rule(
     id="TIED-EMBEDDINGS-SKIP-QUANT",
+    url=note("pipelined-engine.md", "Quantization on the GPU delegate (measured, qwen3.5-0.8B, M4 Max p128/g256)"),
     scope="checkpoint", severity="perf",
     title="tie_word_embeddings is set — the eager quantizer silently skips tied weights, so the "
           "lm_head ships full precision; on a bandwidth-bound phone that head is a large share "
@@ -311,6 +370,7 @@ TIED_EMBEDDINGS = rule(
 
 BLOCK_DIVISIBILITY = rule(
     id="QUANT-BLOCK-DIVISIBILITY",
+    url=note("compression-reference.md", "Pitfalls"),
     scope="checkpoint", severity="silent",
     title="a weight dimension is not divisible by the intended quant block size — per-block "
           "quantization and per-grouped-channel palettization silently skip those layers and "
@@ -322,6 +382,7 @@ BLOCK_DIVISIBILITY = rule(
 
 ENV_CLONE_SHADOW = rule(
     id="ENV-CONVERTER-SHADOWED",
+    url=note("coreai-torch-041-ir-incident.md", "Environment the fix needs"),
     scope="env", severity="silent",
     title="a coreai_torch source checkout in the working directory shadows the installed wheel "
           "through sys.path[0] — exports run on the checkout's version, whatever is pip-installed",
@@ -330,6 +391,7 @@ ENV_CLONE_SHADOW = rule(
 
 ENV_OVERLAY_MISSING = rule(
     id="ENV-OVERLAY-MISSING",
+    url=f"{REPO_URL}/blob/main/conversion/overlay/README.md",
     scope="env", severity="fatal",
     title="the interpreter has coreai_models without the zoo overlay applied — every recipe that "
           "re-authors a model imports overlay-only classes and dies on import",
@@ -351,6 +413,7 @@ def src_rule(pattern: str, fix: str, **kw) -> Rule:
 
 src_rule(
     id="SRC-CAST-ROUNDTRIP", severity="silent",
+    url=note("conversion-guide.md", "Detection transformers"),
     title="float->int->float cast round-trip: the converter cancels the pair and drops the "
           "truncation, so the bounded-floor idiom compiles to the identity function — on every "
           "compute unit, CPU included",
@@ -362,6 +425,7 @@ src_rule(
 
 src_rule(
     id="SRC-FLOOR-ON-GPU", severity="silent",
+    url=note("conversion-guide.md", "Detection transformers"),
     title="aten.floor / trunc / ceil execute as the identity function on the GPU delegate, and "
           "the same asset is correct on CPU",
     source="apple/coreai-torch#10; knowledge/conversion-guide.md 'Detection transformers' 3",
@@ -374,6 +438,7 @@ src_rule(
 
 src_rule(
     id="SRC-FLOORDIV-ONE", severity="silent",
+    url="https://github.com/apple/coreai-torch/issues/10",
     title="div(x, 1, rounding_mode='floor') is simplified to the identity at conversion time — "
           "the divisor-1 fold drops the rounding semantics. A divisor other than 1 is fine",
     source="apple/coreai-torch#10",
@@ -384,6 +449,7 @@ src_rule(
 
 src_rule(
     id="SRC-INT64-BOOL-MASK", severity="silent",
+    url=note("conversion-guide.md", "Detection transformers"),
     title="an int64-comparison -> bool -> float mask chain corrupts an unrelated, still-live "
           "tensor elsewhere in the graph (even a declared graph output); clone()/contiguous() "
           "barriers do not protect the victim and skipping optimize() does not help",
@@ -396,6 +462,7 @@ src_rule(
 
 src_rule(
     id="SRC-ARANGE-FLOAT", severity="fatal",
+    url=err("bad_optional_access"),
     title="torch.arange with float start/end/step aborts the converter with a C++ "
           "bad_optional_access — no Python traceback, the process just dies",
     source="apple/coreai-torch#8; knowledge/conversion-guide.md 'Detection transformers' 1",
@@ -407,6 +474,7 @@ src_rule(
 
 src_rule(
     id="SRC-FP16-DECOMP-OVERFLOW", severity="silent",
+    url="https://github.com/apple/coreai-torch/issues/21",
     title="softplus / mish / logsumexp / logcumsumexp get PyTorch's naive decomposition, which "
           "overflows fp16 on the ANE — output collapses to 0, or to inf/NaN",
     source="apple/coreai-torch#21 (and #5); the same fixes landed in apple/coremltools#2725-2727",
@@ -417,6 +485,7 @@ src_rule(
 
 src_rule(
     id="SRC-OPTIMIZE-AXIS-MOVE", severity="silent",
+    url="https://github.com/apple/coreai-torch/issues/49",
     title="AIProgram.optimize() removes a broadcasting-significant axis move in the expanded "
           "squared-distance form, so ||y_i||^2 broadcasts where ||y_j||^2 belongs; for "
           "equal-length inputs the output shape is still right and nothing is emitted",
@@ -428,6 +497,7 @@ src_rule(
 
 src_rule(
     id="SRC-SQUEEZE-DIM", severity="fatal",
+    url=err("dimension to be shrunk must have size 1, got N"),
     title="squeeze(dim) is a no-op in torch when that dim != 1, but coreai-torch lowers it to a "
           "hard shrink and aborts",
     source="knowledge/conversion-guide.md 'Gotchas that cost real time'",
@@ -437,6 +507,7 @@ src_rule(
 
 src_rule(
     id="SRC-COMPLEX-OPS", severity="fatal",
+    url=note("conversion-guide.md", "Gotchas that cost real time"),
     title="complex tensor ops (torch.polar, view_as_complex/view_as_real, complex multiply) do "
           "not lower — the usual source is a complex-valued RoPE",
     source="knowledge/conversion-guide.md 'Gotchas that cost real time'",
@@ -447,6 +518,7 @@ src_rule(
 
 src_rule(
     id="SRC-REMAINDER", severity="fatal",
+    url=err("Unsupported ATen op: sym_max"),
     title="aten.remainder (tensor modulo) is unsupported and surfaces at add_exported_program "
           "validate time, not at runtime",
     source="knowledge/conversion-guide.md; knowledge/stateful-kv-cache.md 'Sliding-window ring buffer'",
@@ -457,6 +529,7 @@ src_rule(
 
 src_rule(
     id="SRC-F-NORMALIZE", severity="silent",
+    url=note("conversion-guide.md", "Gotchas that cost real time"),
     title="F.normalize loses its eps denominator clamp, so near-zero-norm vectors blow up "
           "(~1e13); it is input-dependent, hides at small sequence lengths and surfaces at large",
     source="knowledge/conversion-guide.md 'Gotchas that cost real time'",
@@ -467,6 +540,7 @@ src_rule(
 
 src_rule(
     id="SRC-TORCH-ASSERT", severity="fatal",
+    url=note("conversion-guide.md", "Detection transformers"),
     title="torch._assert on a data-dependent comparison breaks torch.export non-strict "
           "(GuardOnDataDependentSymNode) — often added upstream FOR export compatibility",
     source="knowledge/conversion-guide.md 'Detection transformers' 4",
@@ -477,6 +551,7 @@ src_rule(
 
 src_rule(
     id="SRC-WHILE-LOOP", severity="fatal",
+    url=err("'scf.while' region type mismatch"),
     title="a recurrent scan (torch.ops.higher_order.while_loop) does not lower on the MPSGraph "
           "GPU delegate ('scf.while' region type mismatch), and on the macOS-27 beta the same "
           "bundle fails even cpu_only — so 'it verified on CPU' proves nothing",
@@ -488,6 +563,7 @@ src_rule(
 
 src_rule(
     id="SRC-CHAINED-STATE-WRITES", severity="silent",
+    url=note("pipelined-engine.md", "State & precision traps on the GPU delegate (found by the LFM2.5 port)"),
     title="more than one per-layer write to the same fixed-shape state handle: the GPU delegate "
           "drops all but one, so position 0 is fine (a fresh state IS zero) and everything after "
           "decodes garbage",
@@ -501,6 +577,7 @@ src_rule(
 
 src_rule(
     id="SRC-DATA-INDEXED-KV-WRITE", severity="fatal",
+    url=err("EXC_BREAKPOINT (SIGTRAP, code 5)"),
     title="a KV write position derived in-graph from runtime data (the in_step index) does not "
           "lower on the WWDC26 betas: SIGTRAP on Mac GPU, SIGSEGV on iPhone GPU, and on the ANE "
           "it corrupts the compile cache so the next load ENOENTs. Conversion succeeds",
@@ -513,6 +590,7 @@ src_rule(
 
 src_rule(
     id="SRC-MISSING-DEFUNCTIONALIZE", severity="silent",
+    url=note("conversion-guide.md", "Gotchas that cost real time"),
     title="in-place state writes without remove_functionalization(ep): the mutation is dropped at "
           "conversion and the state never updates",
     source="knowledge/conversion-guide.md 'Gotchas that cost real time'; knowledge/stateful-kv-cache.md",
@@ -1555,6 +1633,7 @@ def render(rep: Report, verbose: bool) -> None:
             print(f"  where : {f.where}")
             print(f"  found : {f.evidence}")
             print(f"  fix   : {f.fix}")
+            print(f"  see   : {f.rule.url}")
             if verbose:
                 print(f"  source: {f.rule.source}")
             print()
@@ -1579,6 +1658,7 @@ def to_json(rep: Report) -> str:
             "id": f.rule.id, "severity": f.severity, "rule_severity": f.rule.severity,
             "scope": f.rule.scope, "title": f.rule.title, "where": f.where,
             "evidence": f.evidence, "fix": f.fix, "source": f.rule.source,
+            "url": f.rule.url,
         } for f in sorted(rep.findings, key=lambda f: SEVERITY_ORDER[f.severity])],
     }, indent=2)
 
@@ -1616,6 +1696,7 @@ def main() -> None:
                         key=lambda r: (r.scope, SEVERITY_ORDER[r.severity], r.id)):
             print(f"{r.scope:<11}{r.severity:<9}{r.id}")
             print(f"           {r.title}")
+            print(f"           see:    {r.url}")
             print(f"           source: {r.source}\n")
         print(f"{len(RULES)} rules")
         return

@@ -10,6 +10,12 @@ Validated on: _stamped by `cli/release.py` at release time_
 
 ### doctor
 
+- Every finding prints a `see` line: the URL of the page and section that recorded the
+  incident — an entry in `knowledge/coreai-error-index.md` when the rule corresponds to an
+  exact error string, otherwise the note section or the upstream issue. Before this the
+  report carried zero URLs (measured 2026-09-07); an agent that reads the finding can now
+  fetch the record in one step. `--rules` and `--json` carry it as `url`; the self-test
+  resolves every URL against the checkout and fails on a missing page or anchor.
 - `IR-040-DEBUG-LOC` (0.4.0-era IR, no producer stamp) now reports by the **host OS
   build**: `info` on OS 27 beta 1, which loads it, `fatal` on every build from beta 2 on.
   Apple's beta 5 note lists the incident (177008303) as fixed; a load on 26A5416b and a
