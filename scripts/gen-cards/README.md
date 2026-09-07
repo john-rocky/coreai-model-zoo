@@ -14,9 +14,48 @@ Design: [`_ZOO_DX_DESIGN.md` §6.2–6.3] — "cards never lie", enforced:
 | 💻 snippet | extracted from the runner's `QuickStart.swift` `CARD-SNIPPET` markers (never hand-written), then compiled standalone in a scratch package against kit as a **url-dep** (catches non-public API / missing imports) |
 | 🟢 app door | a TestFlight/dmg link is configured (none yet) |
 | hero `demo.gif` | the file exists in the model's HF repo (HEAD-check); missing = info, not failure |
+| **Measured decode** line | the model's HF repo maps to a [DeviceMark](https://devicemark.github.io/) row (`cards.json` → `devicemark.rows`) and the board's data files carry a decode measurement for it; a device without one is not mentioned |
 
 A failed gate **drops the door and fails the run loudly** (nonzero exit) — a kit regression
 cannot silently strip doors across the cards.
+
+## DeviceMark rows — the measured numbers on the cards
+
+Two surfaces carry the board's numbers, both rendered by this generator from the board's own
+data files (`board.json` + `measurements.jsonl`, the rows the site renders and the HF dataset
+`devicemark/results` publishes; default location `~/code/devicemark/data/leaderboard`,
+`--devicemark DIR` otherwise; a run without the files refuses to render):
+
+1. **The measured line inside the Use-it block** (zoo card and HF README, byte-identical):
+   `**Measured decode** — iPhone 17 Pro: 29 tok/s · Mac (M4 Max): 165 tok/s (DeviceMark row …)`.
+   Only for a model whose HF repo is in `devicemark.rows`; the numbers are the `coreai`
+   measurements for that artifact, cross-checked against the board's iPhone/Mac columns (a
+   disagreement between the two files is a gate failure).
+2. **The `gen-cards:devicemark` block on every own HF card** — the board's badge markup
+   (`[![DeviceMark](https://devicemark.github.io/badge/<slug>.svg)](https://devicemark.github.io/)`,
+   what the site's footer asks vendors to embed) plus the same measured line; a repo with no
+   row gets one sentence linking the board and no numbers. `tools/devicemark_row.py` puts the
+   block on all own `.aimodel` repos (enrolled here or not), right after the card's definition
+   sentence; when an HF README already has the block, this generator regenerates it too, so
+   the two writers cannot disagree.
+
+`devicemark.rows` is an explicit map, HF repo → board `artifact_id`, because the board does not
+carry repo ids and the model names differ (`nemotron-4b` is `Nemotron-3-Nano-4B-CoreAI`). A
+mapped artifact must be an `aimodel` row on the `coreai` runtime with a measurement; a board
+row that no repo maps to is a warning. The Gemma 4 E2B row is LiteRT-LM, not the Core AI
+bundle, so `gemma-4-E2B-CoreAI` is deliberately unmapped.
+
+Refreshing after a new measurement drop (GM day): sync the board's data files, then
+
+```bash
+DEVELOPMENT_TEAM=<team id> python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit --write --push \
+  && python3 tools/devicemark_row.py --go
+```
+
+(`gen_cards` rewrites both blocks on the enrolled cards; the tool covers the rest of the own
+repos and skips cards that are already right.) Run them one after the other, never at the
+same time: `gen_cards --push` uploads the whole README it fetched at the start of that model's
+turn, so a tool commit landing in between would be overwritten.
 
 ## Usage
 

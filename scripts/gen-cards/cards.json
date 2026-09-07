@@ -6,6 +6,20 @@
     "macos": "Mac",
     "ios": "iPhone"
   },
+  "devicemark": {
+    "board": "https://devicemark.github.io/",
+    "dataset": "https://huggingface.co/datasets/devicemark/results",
+    "rows": {
+      "mlboydaisuke/qwen3.5-0.8B-CoreAI": "qwen3.5-0.8b__int8hu__aimodel",
+      "mlboydaisuke/qwen3.5-2B-CoreAI": "qwen3.5-2b__int8hu__aimodel",
+      "mlboydaisuke/qwen3.5-4B-CoreAI": "qwen3.5-4b__int8hu__aimodel",
+      "mlboydaisuke/LFM2.5-1.2B-CoreAI": "lfm2.5-1.2b__int8hu__aimodel",
+      "mlboydaisuke/granite-4.0-h-CoreAI": "granite-4.0-h-1b__int8hu__aimodel",
+      "mlboydaisuke/Youtu-LLM-2B-CoreAI": "youtu-2b__int8__aimodel",
+      "mlboydaisuke/Nemotron-3-Nano-4B-CoreAI": "nemotron-4b__int8hu__aimodel",
+      "mlboydaisuke/Nanbeige4.1-3B-CoreAI": "nanbeige-3b__int8hu__aimodel"
+    }
+  },
   "models": {
     "whisper-large-v3-turbo": {
       "zooCard": "models/whisper-large-v3-turbo/README.md",

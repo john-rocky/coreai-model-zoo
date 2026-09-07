@@ -20,6 +20,10 @@ extra-states patch budget (≤2). No engine changes needed beyond the existing p
 <!-- gen-cards:use-it begin id=lfm2.5-1.2b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**Measured decode** — iPhone 17 Pro: 45.5 tok/s · Mac (M4 Max): 277 tok/s
+([DeviceMark](https://devicemark.github.io/) row `lfm2.5-1.2b`, `int8hu` bundle ·
+[data](https://huggingface.co/datasets/devicemark/results))
+
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
 
@@ -52,7 +56,7 @@ let reply = try await chat.respond(to: prompt)
 // reply: the answer, generated fully on-device
 ```
 
-Also runs behind **Apple's FoundationModels API** — CoreAIKit's [`KitLanguageModel`](https://github.com/john-rocky/coreai-kit#works-with-apples-foundationmodels-api) plugs this bundle into the system `LanguageModelSession`; capabilities (tool calling, guided generation) auto-detect per model.
+**When Apple's FoundationModels built-in model isn't enough, keep your session code and swap the model — one line.** CoreAIKit's [`KitLanguageModel`](https://github.com/john-rocky/coreai-kit#when-foundationmodels-isnt-enough) plugs this bundle into the same system `LanguageModelSession`; your `Tool`s, `@Generable` types and transcripts work unchanged, and capabilities (tool calling, guided generation) auto-detect per model.
 
 The take-home is [`Examples/ChatDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/ChatDemo/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and

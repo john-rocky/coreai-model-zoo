@@ -38,6 +38,10 @@ so after `coreai-build compile` you must rewrite `assets.main` to `<name>.h18p.a
 <!-- gen-cards:use-it begin id=nemotron-3-nano-4b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**Measured decode** — iPhone 17 Pro: 14.7 tok/s · Mac (M4 Max): 100 tok/s
+([DeviceMark](https://devicemark.github.io/) row `nemotron-4b`, `int8hu` bundle ·
+[data](https://huggingface.co/datasets/devicemark/results))
+
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
 

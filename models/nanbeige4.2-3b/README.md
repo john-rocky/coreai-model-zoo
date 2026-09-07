@@ -81,6 +81,19 @@ The advertised 262K context is not claimed; the published bundle is verified to 
 <!-- gen-cards:use-it begin id=nanbeige4.2-3b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ChatDemo)
+(GUI + CLI, one app for every chat model in the catalog):
+
+```bash
+git clone https://github.com/john-rocky/coreai-kit
+open coreai-kit/Examples/ChatDemo/ChatDemo.xcodeproj
+# → Run, then pick "Nanbeige4.2 3B" in the model picker
+
+# agents / headless (macOS):
+cd coreai-kit/Examples/ChatDemo
+swift run chat-cli --model nanbeige4.2-3b --prompt "What can you do, offline?"
+```
+
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
 ```swift

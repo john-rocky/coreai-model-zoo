@@ -59,7 +59,7 @@ let reply = try await chat.respond(to: prompt)
 // reply: the answer, generated fully on-device
 ```
 
-Also runs behind **Apple's FoundationModels API** — CoreAIKit's [`KitLanguageModel`](https://github.com/john-rocky/coreai-kit#works-with-apples-foundationmodels-api) plugs this bundle into the system `LanguageModelSession`; capabilities (tool calling, guided generation) auto-detect per model.
+**When Apple's FoundationModels built-in model isn't enough, keep your session code and swap the model — one line.** CoreAIKit's [`KitLanguageModel`](https://github.com/john-rocky/coreai-kit#when-foundationmodels-isnt-enough) plugs this bundle into the same system `LanguageModelSession`; your `Tool`s, `@Generable` types and transcripts work unchanged, and capabilities (tool calling, guided generation) auto-detect per model.
 
 The take-home is [`Examples/ChatDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/ChatDemo/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
