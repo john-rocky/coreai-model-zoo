@@ -1,0 +1,29 @@
+# Recipe for minicpm5-2b — the configuration that produced each published bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+
+["minicpm5-2b"]
+script = "export_minicpm5.py"
+args = ["--hf-id", "openbmb/MiniCPM5-2B", "--qconfig", "minicpm5_int8sym_b32.yaml"]
+card = "README.md"
+hf_repo = "mlboydaisuke/MiniCPM5-2B-CoreAI"
+source_hf_id = "openbmb/MiniCPM5-2B"
+bundle = "int8"
+status = "verified"
+overlay = true
+needs = [
+  "Two one-time coreai_models edits, both in conversion/overlay/: registry",
+  "MODEL_TYPE_REMAPPING llama -> mistral, and an AIModelMetadataFields entry for",
+  "openbmb/MiniCPM5-2B (export/metadata.py).",
+]
+notes = [
+  "Same wrapper as minicpm5-1b, one yaml apart: the stock exporter runs as",
+  "`uv run coreai.llm.export openbmb/MiniCPM5-2B --experimental --compute-precision float16",
+  "--compression-config minicpm5_int8sym_b32.yaml` (int8 symmetric PER-BLOCK-32 — the 1B ships",
+  "per-channel; on the 2B per-channel flipped a 0.245-margin greedy token and decoded 5x slower on",
+  "the Mac GPU, see the card), then rewrites the bundle's eos_token to",
+  "<|im_end|> (the engine stops on a single eosTokenId; a chat bundle that declares </s>",
+  "never halts). models/minicpm5-2b/verify.toml declares that.",
+  "Plain LlamaForCausalLM (42 layers x hidden 2048, GQA 16:2, head_dim 128, untied",
+  "130560-vocab head) — identical shape family to the 1B, so it rides the stock exporter.",
+]

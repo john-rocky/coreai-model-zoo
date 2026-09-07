@@ -178,7 +178,9 @@ For the long-form version of the same material, read
   one, and why an upstream card's example outputs are not fixtures until you check they
   reproduce on the released weights (here: 9/14).
 - [`minicpm5-1b.md`](minicpm5-1b.md) — the clean-LlamaForCausalLM recipe done end-to-end (hybrid
-  Think/No-Think, untied head, 128K) — the most reusable conversion template in the zoo.
+  Think/No-Think, untied head, 128K) — the most reusable conversion template in the zoo; re-run
+  unchanged for **MiniCPM5-2B** (2026-09), plus why a device-gate prompt is chosen by fp32
+  margin, not habit.
 - [`youtu-mla-port.md`](youtu-mla-port.md) — dense **DeepSeek-style MLA at 2B on iPhone**: latent-KV
   attention with an absorbed flash-decode kernel.
 - [`diffusion-llms-dllm.md`](diffusion-llms-dllm.md) — masked-**diffusion** LLMs (LLaDA): parallel

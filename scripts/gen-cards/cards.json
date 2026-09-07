@@ -381,6 +381,36 @@
         }
       }
     },
+    "minicpm5-2b": {
+      "zooCard": "models/minicpm5-2b/README.md",
+      "runner": {
+        "dir": "Examples/ChatDemo",
+        "xcodeproj": "ChatDemo.xcodeproj",
+        "scheme": "ChatDemo",
+        "cliTarget": "chat-cli",
+        "cliArgs": "--prompt \"What can you do, offline?\"",
+        "blurb": "GUI + CLI, one app for every chat model in the catalog"
+      },
+      "quickstart": "Examples/ChatDemo/Sources/QuickStart.swift",
+      "product": "CoreAIKit",
+      "snippetImport": "CoreAIKit",
+      "snippetFreeVars": {
+        "prompt": "String"
+      },
+      "snippetResultComment": "// reply: the answer, generated fully on-device",
+      "takeHomeTagline": "— this exact code as one typed function, no UI; the CLI is an argument shell over it, and\nthe GUI drives the same `ChatSession` across turns for its transcript.",
+      "takeHomeNote": "Multi-turn? Hold the `ChatSession` and call `respond(to:)` per turn — it keeps the\nconversation history; `streamResponse(to:)` yields tokens as they decode.",
+      "checklistInfoPlist": "Info.plist: none needed",
+      "checklistEntitlements": "Entitlements: none on Mac; iPhone needs `com.apple.developer.kernel.increased-memory-limit` (the 2.7 GB cold specialization passes the default jetsam limit)",
+      "op": {
+        "call": "CoreAI.summarize(text, options: .model(\"minicpm5-2b\"))",
+        "result": "tldr",
+        "isDefault": false,
+        "freeVars": {
+          "text": "String"
+        }
+      }
+    },
     "nanbeige4.1-3b": {
       "zooCard": "models/nanbeige4.1-3b/README.md",
       "runner": {

@@ -5,7 +5,7 @@ A live zoo checkout always wins; coreai_export reads this only when
 find_zoo_root() comes back empty, and stamps the route SNAPSHOT rather than live.
 """
 
-DATE = '2026-08-25'
+DATE = '2026-09-08'
 ROUTES = {'adcsr-x4': {'family': 'adcsr',
               'source_id': 'Guaishou74851/AdcSR',
               'source_kind': 'github',
@@ -35,8 +35,8 @@ ROUTES = {'adcsr-x4': {'family': 'adcsr',
  'depth-anything-3-base': {'family': 'depth-anything-3',
                            'needs': ['--ckpt <DA3-BASE checkout> and --da3-src '
                                      '<depth_anything_3 source tree>.'],
-                           'source_hf_id': 'depth-anything/DA3-SMALL',
-                           'source_id': 'depth-anything/DA3-SMALL',
+                           'source_hf_id': 'depth-anything/DA3-BASE',
+                           'source_id': 'depth-anything/DA3-BASE',
                            'source_kind': 'hf',
                            'status': 'verified'},
  'depth-anything-3-small': {'family': 'depth-anything-3',
@@ -47,8 +47,8 @@ ROUTES = {'adcsr-x4': {'family': 'adcsr',
                             'source_kind': 'hf',
                             'status': 'verified'},
  'embeddinggemma-300m': {'family': 'qwen3-embedding',
-                         'source_hf_id': 'Qwen/Qwen3-Embedding-0.6B',
-                         'source_id': 'Qwen/Qwen3-Embedding-0.6B',
+                         'source_hf_id': 'google/embeddinggemma-300m',
+                         'source_id': 'google/embeddinggemma-300m',
                          'source_kind': 'hf',
                          'status': 'verified'},
  'fastcontext-4b': {'family': 'fastcontext',
@@ -250,6 +250,17 @@ ROUTES = {'adcsr-x4': {'family': 'adcsr',
                  'overlay': True,
                  'source_hf_id': 'openbmb/MiniCPM5-1B',
                  'source_id': 'openbmb/MiniCPM5-1B',
+                 'source_kind': 'hf',
+                 'status': 'verified'},
+ 'minicpm5-2b': {'family': 'minicpm5-2b',
+                 'needs': ['Two one-time coreai_models edits, both in conversion/overlay/: '
+                           'registry',
+                           'MODEL_TYPE_REMAPPING llama -> mistral, and an '
+                           'AIModelMetadataFields entry for',
+                           'openbmb/MiniCPM5-2B (export/metadata.py).'],
+                 'overlay': True,
+                 'source_hf_id': 'openbmb/MiniCPM5-2B',
+                 'source_id': 'openbmb/MiniCPM5-2B',
                  'source_kind': 'hf',
                  'status': 'verified'},
  'muse-glimmer-30b': {'family': 'muse-glimmer-30b',

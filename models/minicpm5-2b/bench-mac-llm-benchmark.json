@@ -1,0 +1,143 @@
+{
+ "protocol": "coreai-models llm-benchmark, 512 prompt / 1024 generation tokens, 5 trials, greedy-free synthetic prompt; Mac Studio M4 Max, macOS 27 beta (26A5416b), release build; GPU exclusive (no other GPU job)",
+ "note": "run1 of the per-channel bundle was taken with COREAI_CHUNK_THRESHOLD=1 (single-token prefill), which is why its prompt tok/s is ~27; run2 is the same bundle with the default multi-token prefill.",
+ "bundles": {
+  "int8 per-channel absmax (minicpm5_int8sym.yaml)": {
+   "main.mlirb_bytes": 2519709096,
+   "run1_chunk_threshold_1": {
+    "averages": {
+     "generation_tps": 25.6483678133876,
+     "prompt_tps": 27.128279417899755
+    },
+    "generation_tokens": 1024,
+    "model": "minicpm5_2b_minicpm5_int8sym_dynamic",
+    "num_trials": 5,
+    "prompt_tokens": 512,
+    "trials": [
+     {
+      "gen_tps": 25.65167494059603,
+      "prompt_tps": 27.148753828933575
+     },
+     {
+      "gen_tps": 25.642704887590583,
+      "prompt_tps": 27.14086679101812
+     },
+     {
+      "gen_tps": 25.646659089725173,
+      "prompt_tps": 27.127529902868545
+     },
+     {
+      "gen_tps": 25.65063120674598,
+      "prompt_tps": 27.115565979982375
+     },
+     {
+      "gen_tps": 25.650168942280242,
+      "prompt_tps": 27.108680586696178
+     }
+    ]
+   },
+   "run2": {
+    "averages": {
+     "generation_tps": 25.55785331147675,
+     "prompt_tps": 2018.465761950693
+    },
+    "generation_tokens": 1024,
+    "model": "minicpm5_2b_minicpm5_int8sym_dynamic",
+    "num_trials": 5,
+    "prompt_tokens": 512,
+    "trials": [
+     {
+      "gen_tps": 25.57442311006558,
+      "prompt_tps": 2015.9560400625905
+     },
+     {
+      "gen_tps": 25.591411025261085,
+      "prompt_tps": 2020.3468420181462
+     },
+     {
+      "gen_tps": 25.5693424633632,
+      "prompt_tps": 2020.1585067657497
+     },
+     {
+      "gen_tps": 25.53516184901101,
+      "prompt_tps": 2019.5150790879973
+     },
+     {
+      "gen_tps": 25.51892810968287,
+      "prompt_tps": 2016.35234181898
+     }
+    ]
+   }
+  },
+  "fp16 control (--compression none)": {
+   "main.mlirb_bytes": 5034079259,
+   "run": {
+    "averages": {
+     "generation_tps": 80.04816155587179,
+     "prompt_tps": 2775.137587638996
+    },
+    "generation_tokens": 1024,
+    "model": "minicpm5_2b_dynamic",
+    "num_trials": 5,
+    "prompt_tokens": 512,
+    "trials": [
+     {
+      "gen_tps": 79.5660229554393,
+      "prompt_tps": 2776.444686660322
+     },
+     {
+      "gen_tps": 79.35758752933911,
+      "prompt_tps": 2751.2533786143786
+     },
+     {
+      "gen_tps": 80.40986419769982,
+      "prompt_tps": 2788.0174191407696
+     },
+     {
+      "gen_tps": 80.39034160128136,
+      "prompt_tps": 2788.576734834587
+     },
+     {
+      "gen_tps": 80.51699149559938,
+      "prompt_tps": 2771.3957189449225
+     }
+    ]
+   }
+  },
+  "int8 per-block-32 (minicpm5_int8sym_b32.yaml)": {
+   "main.mlirb_bytes": 2674882267,
+   "run": {
+    "averages": {
+     "generation_tps": 127.63468356855915,
+     "prompt_tps": 2654.2086244874386
+    },
+    "generation_tokens": 1024,
+    "model": "minicpm5_2b_minicpm5_int8sym_b32_dynamic",
+    "num_trials": 5,
+    "prompt_tokens": 512,
+    "trials": [
+     {
+      "gen_tps": 127.73938269006808,
+      "prompt_tps": 2568.9232705819136
+     },
+     {
+      "gen_tps": 127.35778545081779,
+      "prompt_tps": 2645.1461433944883
+     },
+     {
+      "gen_tps": 127.53614046030137,
+      "prompt_tps": 2697.5296087066813
+     },
+     {
+      "gen_tps": 127.67577327107588,
+      "prompt_tps": 2695.1399215579527
+     },
+     {
+      "gen_tps": 127.8643359705327,
+      "prompt_tps": 2664.304178196157
+     }
+    ]
+   }
+  }
+ }
+}

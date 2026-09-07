@@ -104,6 +104,16 @@ Apple's repo; each recipe names the script it runs.
   ring) / `convert_head.py` / `check_pipeline.py` / `verify_*` — the full convert+verify harness.
 - Qwen3.5: parity ladder + fp16/int8 + head-split + stateful-palettize harnesses.
 - On-device export (kept artifacts): `export_qwen3_5.py [0.8b|2b]`, `export_gemma4_frontend.py`.
+- **MiniCPM5-1B / MiniCPM5-2B (STOCK plain-Llama drop-in): `export_minicpm5.py [--hf-id openbmb/MiniCPM5-2B]`** —
+  OpenBMB's dense `LlamaForCausalLM` checkpoints ride Apple's stock `coreai.llm.export` through a
+  one-line `llama → mistral` registry remap (overlay) — the Mistral builder is the same graph minus
+  the sliding window — with weight-only symmetric per-channel int8 (`minicpm5_int8sym.yaml`,
+  absmax, no clipping) as a torch pre-export pass, then the chat EOS rewritten to `<|im_end|>`.
+  The 2B (42 layers, 2026-09) is the same wrapper with `--hf-id` and `--qconfig minicpm5_int8sym_b32.yaml`
+  (per-BLOCK-32 scales: per-channel flipped a 0.245-margin token and decoded 5× slower on the Mac GPU —
+  127.6 vs 25.6 tok/s M4 Max, fp16 80.0); gate with `cli/coreai_verify.py`
+  (16/16) or `verify_minicpm5.py --hf-id …`. See [`../knowledge/minicpm5-1b.md`](../knowledge/minicpm5-1b.md),
+  [`../models/minicpm5-1b/README.md`](../models/minicpm5-1b/README.md), [`../models/minicpm5-2b/README.md`](../models/minicpm5-2b/README.md).
 - **Qwen3.5 pipelined fast path (in this dir): `export_qwen3_5_decode_pipelined.py`** —
   decode-only loop-free bundles for Apple's `coreai-pipelined` GPU engine. Ship config for
   BOTH sizes is `int8hu --head-sym` (per-block-32 **absmax** int8 head — clipping corrupts

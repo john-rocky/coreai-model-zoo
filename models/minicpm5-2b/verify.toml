@@ -1,0 +1,9 @@
+# Declared deviations from the source repository, for conversion/zoo_verify.py.
+
+[config]
+# The bundle stops at <|im_end|> where the source's tokenizer_config says </s>. This is not
+# drift: conversion/export_minicpm5.py::fix_chat_eos does it deliberately, and says why —
+# "the engine stops on the single eosTokenId, so a chat bundle must declare <|im_end|> as eos
+# or it never halts". The source's own chat template emits only <|im_start|>/<|im_end|>, and
+# its generation_config lists both ids as stops ([1, 130073]).
+eos_token = "<|im_end|>"

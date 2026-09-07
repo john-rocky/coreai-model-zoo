@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Greedy parity gate: Core AI engine vs HF transformers for MiniCPM5-1B.
+"""Greedy parity gate: Core AI engine vs HF transformers for MiniCPM5 (1B / 2B).
 
 Feeds identical token ids to both and compares the greedy continuation
 token-for-token (via decoded text). A faithful conversion reproduces HF's
@@ -11,8 +11,8 @@ logits, and the sequential engine's raw-tokens logit buffer is off-by-one —
 generatedTokens = logits + 1 — so we compare the greedy text instead.)
 
 Usage:
-    LLM_RUNNER=/path/to/coreai-models/.build/out/Products/Release/llm-runner \
-        python conversion/verify_minicpm5.py <bundle_dir> [n_new_tokens]
+    LLM_RUNNER=/path/to/coreai-models/.build/release/llm-runner \
+        python conversion/verify_minicpm5.py [--hf-id openbmb/MiniCPM5-2B] <bundle_dir> [n_new_tokens]
 """
 import json
 import os
@@ -25,7 +25,7 @@ from pathlib import Path
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-HF_ID = "openbmb/MiniCPM5-1B"
+HF_ID = "openbmb/MiniCPM5-1B"  # overridden by --hf-id (the 2B shares the tokenizer/eos)
 # Path to the coreai-models llm-runner Release binary (built locally).
 RUNNER = os.environ.get("LLM_RUNNER", "")
 
@@ -52,16 +52,22 @@ def engine_text(bundle: str, token_ids: list[int], n: int) -> str:
 
 
 def main() -> None:
+    global HF_ID
+    argv = list(sys.argv[1:])
+    if "--hf-id" in argv:
+        i = argv.index("--hf-id")
+        HF_ID = argv[i + 1]
+        del argv[i:i + 2]
     if not RUNNER or not Path(RUNNER).exists():
         sys.exit("set LLM_RUNNER to the coreai-models llm-runner Release binary")
-    bundle = str(Path(sys.argv[1]).resolve())
-    n = int(sys.argv[2]) if len(sys.argv) > 2 else 30
+    bundle = str(Path(argv[0]).resolve())
+    n = int(argv[1]) if len(argv) > 1 else 30
     tok = AutoTokenizer.from_pretrained(HF_ID, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(
         HF_ID, dtype=torch.float32, trust_remote_code=True
     ).eval()
 
-    print(f"bundle: {bundle}  (n_new={n})\n")
+    print(f"bundle: {bundle}  oracle: {HF_ID}  (n_new={n})\n")
     passes = 0
     for p in PROMPTS:
         ids = tok(p, return_tensors="pt").input_ids

@@ -534,10 +534,10 @@ index c879830..0a3d316 100644
  
      logger.info("Optimizing AIProgram...")
 diff --git a/python/src/coreai_models/export/metadata.py b/python/src/coreai_models/export/metadata.py
-index 77e17c2..3555563 100644
+index 77e17c2..81d1d7f 100644
 --- a/python/src/coreai_models/export/metadata.py
 +++ b/python/src/coreai_models/export/metadata.py
-@@ -35,6 +35,16 @@ class AIModelMetadataFields:
+@@ -35,6 +35,27 @@ class AIModelMetadataFields:
  # `coreai_models.model_registry`, add a matching entry here.
  _METADATA: dict[str, AIModelMetadataFields] = {
      # ---- LLMs ----
@@ -551,10 +551,21 @@ index 77e17c2..3555563 100644
 +            "Source: https://huggingface.co/openbmb/MiniCPM5-1B"
 +        ),
 +    ),
++    "openbmb/MiniCPM5-2B": AIModelMetadataFields(
++        author="OpenBMB",
++        license="Apache-2.0",
++        model_description=(
++            "MiniCPM5-2B is a 2.5B-parameter on-device causal language model "
++            "from OpenBMB (dense LlamaForCausalLM, 42 layers), with hybrid "
++            "(Think / No-Think) reasoning, tool calling and 128K context, "
++            "reaching 2B-class open-source SOTA. "
++            "Source: https://huggingface.co/openbmb/MiniCPM5-2B"
++        ),
++    ),
      "Qwen/Qwen2.5-1.5B-Instruct": AIModelMetadataFields(
          author="Qwen Team",
          license="Apache-2.0",
-@@ -60,6 +70,17 @@ _METADATA: dict[str, AIModelMetadataFields] = {
+@@ -60,6 +81,17 @@ _METADATA: dict[str, AIModelMetadataFields] = {
              "family. Source: https://huggingface.co/Qwen/Qwen3-4B"
          ),
      ),
@@ -572,7 +583,7 @@ index 77e17c2..3555563 100644
      "Qwen/Qwen3-8B": AIModelMetadataFields(
          author="Qwen Team",
          license="Apache-2.0",
-@@ -95,6 +116,16 @@ _METADATA: dict[str, AIModelMetadataFields] = {
+@@ -95,6 +127,16 @@ _METADATA: dict[str, AIModelMetadataFields] = {
              "Source: https://huggingface.co/google/gemma-3-12b-it"
          ),
      ),

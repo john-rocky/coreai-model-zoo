@@ -1,0 +1,22 @@
+# Weight-only INT8, symmetric, PER-BLOCK-32 (block along the input dim, axis resolved by the
+# quantizer per module type; no clipping). The per-channel sibling (minicpm5_int8sym.yaml) is
+# what ships the 1B; on the 2B it flips one 0.245-margin greedy decision in a 30-token
+# free-run that the fp16 export reproduces exactly, so this is the one-variable experiment:
+# same recipe, finer scale granularity. SDPA/RoPE/RMSNorm stay full precision.
+quantization_config:
+  execution_mode: eager
+  global_config:
+    op_state_spec:
+      weight:
+        dtype: int8
+        qscheme: symmetric
+        granularity:
+          type: per_block
+          block_size: 32
+    op_input_spec: null
+    op_output_spec: null
+  module_type_configs:
+    coreai_models.primitives.macos.sdpa.SDPA: null
+    coreai_models.primitives.macos.rope.RoPE: null
+    coreai_models.primitives.macos.rms_norm.RMSNorm: null
+    coreai_models.primitives.macos.rms_norm.RMSNormPlusOne: null
