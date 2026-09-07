@@ -117,6 +117,12 @@ What the re-run taught:
   quantization, not the engine; then the margin at the first divergent token says whether it
   matters: `Emma`/`Lily` (0.2126 vs 0.2065, margin 0.006) is a tie any precision may flip;
   `,`/` and` (0.612 vs 0.367, margin 0.245) is a real per-channel error, gone at per-block-32.
+- **Publish record.** The per-block bundle was exported with the bare CLI for the A/B, and that
+  skipped the wrapper's chat-EOS rewrite: the first Hub commit shipped `</s>` as eos. Tier-1 verify
+  against `verify.toml` flagged it (`eos: '</s>', declared expectation '<|im_end|>'`) and the two
+  tokenizer files were re-published (weights unchanged; kit re-pinned). The engine still stopped
+  cleanly on the wrong file in a chat-template run, so this is the kind of drift only the
+  declared-expectation check sees.
 - **Spec-decode test bed.** OpenBMB ships `openbmb/MiniCPM5-2B-DSpark`: a 5-layer, 324M
   DSpark draft (7 draft tokens per pass, `num_target_layers` 42, the target's tokenizer) trained
   for exact pairing with this checkpoint. Not ported here; a dense target with an official

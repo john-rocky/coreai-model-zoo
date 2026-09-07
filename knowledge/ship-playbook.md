@@ -108,5 +108,16 @@ one). Commit (explicit paths). Draft the X post with the measured RTF — **post
   so a number taken at the end of a probe session is not comparable to one taken at the start.
   Publish the cold number (it is the shared protocol) and record the sustained one separately when
   the workload is repetitive — a dictation post-processor or a streaming ASR meets it every time.
+- **The catalog tooling memoises the Hub with no expiry.** `gen_inventory.py` and `zoo_verify.py`
+  read the author listing and every small file through `conversion/_hf_catalog.py`, which caches
+  each URL under `.cache/hf/` forever. After publishing a new repo (or re-publishing a file), the
+  inventory still says the old count and tier-1 still judges the old bytes — delete
+  `.cache/hf/author%3A<author>` and `find .cache/hf -name "*<Repo>*" -delete` first (a shell glob
+  in `rm` fails under zsh's nomatch and silently aborts the whole line; use `find`).
+- **Export through the recipe wrapper, not the raw CLI.** A one-variable experiment run as a bare
+  `coreai.llm.export …` skips whatever the wrapper does after the export — for MiniCPM5 the chat-EOS
+  rewrite — and the experiment's bundle then ships with the source's `</s>`. Tier-1 (`verify.toml`)
+  caught it on the Hub, after the first publish; run the wrapper (or `zoo_convert.py run`) for the
+  bundle that ships, and `zoo_verify.py <repo>` before announcing.
 - **`Bundle.module` / cross-file symbols show as SourceKit errors in-editor** until a real build
   regenerates the resource accessor — `swift build` is the source of truth, not the squiggles.
