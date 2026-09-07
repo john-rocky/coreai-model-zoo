@@ -46,7 +46,7 @@ public struct ZooLanguageModel: LanguageModel {
         if thinkingMarkers != nil {
             capabilities.append(.reasoning)
         }
-        return LanguageModelCapabilities(capabilities: capabilities)
+        return LanguageModelCapabilities(capabilities)
     }
 
     public var executorConfiguration: ZooExecutor.Configuration {

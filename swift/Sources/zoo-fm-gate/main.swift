@@ -61,6 +61,60 @@ struct FavoriteCityTool: Tool {
     }
 }
 
+// MARK: - apps/CoreAIAgent mirror (fixed data; same names/descriptions/schemas)
+
+struct MockCalendarEventsTool: Tool {
+    let name = "get_calendar_events"
+    let description = "List the events on the user's calendar for one day."
+
+    @Generable
+    struct Arguments {
+        @Guide(description: "Which day: \"today\", \"tomorrow\" or a date as YYYY-MM-DD")
+        var day: String
+    }
+
+    func call(arguments: Arguments) async throws -> String {
+        print("  [tool] get_calendar_events(day: \(arguments.day))")
+        ToolCallLog.shared.record(name)
+        return "Events on \(arguments.day):\n10:00-10:30 Standup\n13:00-14:00 Lunch with Ken\n16:00-17:00 Design review"
+    }
+}
+
+struct MockCreateReminderTool: Tool {
+    let name = "create_reminder"
+    let description = "Create a reminder that alerts the user at a given day and time."
+
+    @Generable
+    struct Arguments {
+        @Guide(description: "Short reminder text")
+        var title: String
+        @Guide(description: "Which day: \"today\", \"tomorrow\" or a date as YYYY-MM-DD")
+        var day: String
+        @Guide(description: "Alert time as HH:MM in 24-hour format")
+        var time: String
+    }
+
+    func call(arguments: Arguments) async throws -> String {
+        print("  [tool] create_reminder(title: \(arguments.title), day: \(arguments.day), time: \(arguments.time))")
+        ToolCallLog.shared.record("\(name)@\(arguments.day) \(arguments.time)")
+        return "Reminder \"\(arguments.title)\" set for \(arguments.day) at \(arguments.time)."
+    }
+}
+
+struct MockDeviceStatusTool: Tool {
+    let name = "get_device_status"
+    let description = "Get the phone's battery level, charging state and free storage."
+
+    @Generable
+    struct Arguments {}
+
+    func call(arguments: Arguments) async throws -> String {
+        print("  [tool] get_device_status()")
+        ToolCallLog.shared.record(name)
+        return "Battery 63%, on battery. Free storage: 4.2 GB."
+    }
+}
+
 /// Records which tools the framework actually executed.
 final class ToolCallLog: @unchecked Sendable {
     static let shared = ToolCallLog()
@@ -137,7 +191,7 @@ func dumpUsage(_ usage: LanguageModelSession.Usage, label: String) {
 struct MockLanguageModel: LanguageModel {
     typealias Executor = MockExecutor
     var capabilities: LanguageModelCapabilities {
-        LanguageModelCapabilities(capabilities: [.toolCalling, .reasoning])
+        LanguageModelCapabilities([.toolCalling, .reasoning])
     }
     var executorConfiguration: MockExecutor.Configuration { .init() }
 }
@@ -227,13 +281,22 @@ struct ZooFMGate {
         let scenario = args[2]
 
         let t0 = Date()
-        let model = try await ZooLanguageModel(resourcesAt: bundleURL)
+        // ZOO_FM_NOTHINK=1: MiniCPM5 without its reasoning trace (the dialect's
+        // enable_thinking=false prefix) — the shape a 1024-token iOS budget wants.
+        let dialect: (any PromptDialect)? =
+            ProcessInfo.processInfo.environment["ZOO_FM_NOTHINK"] == "1"
+            ? MiniCPMDialect(thinking: .off) : nil
+        let model = try await ZooLanguageModel(resourcesAt: bundleURL, dialect: dialect)
         print(String(format: "[load] %.2f s", Date().timeIntervalSince(t0)))
 
         switch scenario {
         case "chat": try await chat(model)
         case "tools": try await tools(model)
         case "toolchain": try await toolchain(model)
+        case "agent":
+            // Optional 4th arg = maximumResponseTokens (the app uses 220).
+            let cap = args.count >= 4 ? Int(args[3]) : 220
+            try await agent(model, maxTokens: cap)
         case "multiturn":
             // Optional 4th arg = maximumResponseTokens. Capped turns end by
             // token exhaustion, not EOS — the one case without post-EOS
@@ -671,6 +734,50 @@ struct ZooFMGate {
         if !answer.contains("24") { failures.append("answer not grounded on weather result") }
         if failures.isEmpty {
             print("GATE PASS: toolchain (executed: \(executed.joined(separator: " → ")))")
+        } else {
+            print("GATE FAIL: \(failures.joined(separator: "; "))")
+            exit(1)
+        }
+    }
+
+    // apps/CoreAIAgent's flow with fixed data: turn 1 reads tomorrow's calendar, turn 2
+    // asks for a reminder relative to the first event (the model must carry the
+    // tool result across turns and do the time arithmetic), turn 3 a no-argument tool.
+    static func agent(_ model: ZooLanguageModel, maxTokens: Int?) async throws {
+        let session = LanguageModelSession(
+            model: model,
+            tools: [MockCalendarEventsTool(), MockCreateReminderTool(), MockDeviceStatusTool()],
+            instructions: """
+                You are an assistant running on the user's iPhone. Use the tools to read the \
+                calendar, create reminders and check the device. Answer briefly.
+                """)
+        let options = maxTokens.map { GenerationOptions(maximumResponseTokens: $0) } ?? GenerationOptions()
+        var failures: [String] = []
+        let prompts = [
+            "What's on my calendar tomorrow?",
+            "Remind me 15 minutes before the first one.",
+            "How much battery and storage do I have left?",
+        ]
+        for prompt in prompts {
+            print("[prompt] \(prompt)")
+            let t = Date()
+            let response = try await session.respond(to: prompt, options: options)
+            let dt = Date().timeIntervalSince(t)
+            print("[response] \(response.content)")
+            print(String(format: "[turn] %.2f s", dt))
+            dumpUsage(response.usage, label: "response")
+        }
+        dumpUsage(session.usage, label: "session")
+        dumpTranscript(session.transcript)
+        let executed = ToolCallLog.shared.recorded
+        print("[executed] \(executed.joined(separator: " → "))")
+        if executed.first != "get_calendar_events" { failures.append("turn 1 did not read the calendar first") }
+        if !executed.contains("create_reminder@tomorrow 09:45") {
+            failures.append("turn 2 did not create the reminder at tomorrow 09:45 (got \(executed))")
+        }
+        if !executed.contains("get_device_status") { failures.append("turn 3 did not call get_device_status") }
+        if failures.isEmpty {
+            print("GATE PASS: agent")
         } else {
             print("GATE FAIL: \(failures.joined(separator: "; "))")
             exit(1)

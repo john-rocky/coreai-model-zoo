@@ -22,7 +22,9 @@ The same `session.respond` / `streamResponse` / `Tool` / `@Generable` API as App
 model. The framework executes your Swift `Tool` and the model answers grounded on the result.
 Tool calls are rendered and parsed in each model's **native dialect** (picked automatically by
 probing the tokenizer vocab): Qwen3.5 speaks Hermes `<tool_call>` JSON, LFM2.5 speaks its
-pythonic `<|tool_call_start|>[fn(arg=…)]<|tool_call_end|>` special-token form — an in-context
+pythonic `<|tool_call_start|>[fn(arg=…)]<|tool_call_end|>` special-token form, MiniCPM5 speaks
+`<function name=…><param name=…>…</param></function>` XML (`MiniCPMDialect`, with a `thinking: .off`
+option for the 1024-token iOS budget) — an in-context
 format instruction does not override a model's training prior, so each family gets its own
 `PromptDialect`. `<think>` blocks stream to `Transcript.reasoning` entries; `session.usage`
 reports prompt/generated token counts including KV-cache reuse (`cachedTokenCount`).
@@ -54,6 +56,7 @@ Verification harness (macOS):
 swift run -c release zoo-fm-gate <bundle-dir> chat        # plain-chat regress, streamed deltas
 swift run -c release zoo-fm-gate <bundle-dir> tools       # two-tool round trip
 swift run -c release zoo-fm-gate <bundle-dir> multiturn   # per-turn latency + KV reuse
+swift run -c release zoo-fm-gate <bundle-dir> agent [cap] # apps/CoreAIAgent flow with fixed data (ZOO_FM_NOTHINK=1 for MiniCPM5 without its trace)
 ZOO_FM_DEBUG=1 ...                                        # log KV fast-path / reset decisions
 ```
 

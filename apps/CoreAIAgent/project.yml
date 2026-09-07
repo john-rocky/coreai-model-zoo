@@ -1,0 +1,43 @@
+name: CoreAIAgent
+options:
+  bundleIdPrefix: com.daisukemajima
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: "27.0"
+packages:
+  coreai-models:
+    path: ../../coreai-models
+  zoo-swift:
+    path: ../../swift
+settings:
+  base:
+    DEVELOPMENT_TEAM: MFN25KNUGJ
+    SWIFT_VERSION: "6.0"
+targets:
+  CoreAIAgent:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: ../AppShared/ModelDownloader.swift
+    dependencies:
+      - package: coreai-models
+        product: CoreAILM
+      - package: zoo-swift
+        product: ZooFMProvider
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.CoreAIAgent
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        CODE_SIGN_ENTITLEMENTS: CoreAIAgent.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: CoreAIAgent
+        INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "The on-device agent reads your calendar when you ask about your schedule. Nothing leaves the phone."
+        INFOPLIST_KEY_NSRemindersFullAccessUsageDescription: "The on-device agent creates reminders when you ask for one. Nothing leaves the phone."
+        TARGETED_DEVICE_FAMILY: "1"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_APPROACHABLE_CONCURRENCY: "YES"

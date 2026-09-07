@@ -24,6 +24,9 @@ import Tokenizers
 ///   framing (per its chat template); a future dialect, not yet implemented.
 /// * gemma4 — fully custom non-JSON format (`<|tool_call>call:name{…}`,
 ///   `<|"|>` quote token); recorded, not implemented.
+/// * MiniCPM5 — Hermes-style `<tools>` JSON block + the template's guidelines,
+///   calls as `<function name="…"><param name="…">…</param></function>` XML,
+///   `<tool_response>` results, ChatML framing → `MiniCPMDialect`.
 public protocol PromptDialect: Sendable {
     /// Short identifier for logs and debugging.
     var name: String { get }
@@ -79,10 +82,22 @@ public struct ParsedToolCall: Sendable, Equatable {
 /// shipped lineup (qwen → Hermes, LFM → LFM); the call site
 /// (`ZooLanguageModel.init`) documents the same caveat.
 public func defaultDialect(probing tokenizer: any Tokenizer) -> any PromptDialect {
-    if tokenizer.convertTokenToId("<|tool_call_start|>") != nil,
-        tokenizer.convertTokenToId("<|tool_call_end|>") != nil
-    {
+    // A vocab probe must exclude the unknown-token id: some tokenizer models
+    // answer `convertTokenToId` with the unk id instead of nil (MiniCPM5's does,
+    // which routed it to LFM before this check existed).
+    func has(_ token: String) -> Bool {
+        guard let id = tokenizer.convertTokenToId(token) else { return false }
+        return id != tokenizer.unknownTokenId
+    }
+    if has("<|tool_call_start|>"), has("<|tool_call_end|>") {
         return LFMDialect()
+    }
+    // MiniCPM5 carries its XML call syntax as single vocab tokens (`<function`,
+    // `<param`, `</param>`, `</function>`); a Hermes-tuned vocab tokenizes those as
+    // fragments. (MiniCPM5 also owns `<tool_call>` tokens, so that probe cannot
+    // separate the two.)
+    if ["<function", "<param", "</param>", "</function>"].allSatisfy(has) {
+        return MiniCPMDialect()
     }
     return HermesDialect()
 }

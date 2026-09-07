@@ -20,6 +20,13 @@ greedy-exact (top-1 vs the HF eager reference) on an iPhone 17 Pro running the i
 Measured numbers, bundle sizes, and per-config caveats live in the zoo cards:
 [`models/gemma4-e2b/README.md`](../models/gemma4-e2b/README.md) · [`models/qwen3.5/README.md`](../models/qwen3.5/README.md).
 
+### On-device agent — CoreAIAgent
+
+[`CoreAIAgent/`](CoreAIAgent/) — **MiniCPM5-2B** (int8 block-32) behind FoundationModels'
+`LanguageModelSession` with three Swift `Tool`s (EventKit calendar read, EventKit reminder
+creation, device status), on the zoo's `ZooFMProvider` + `MiniCPMDialect`. The flow is gated on
+the Mac with fixed data (`zoo-fm-gate … agent`); device run pending. See its README.
+
 ### macOS chat — CoreAIChatMac
 
 A desktop chat app on Apple's **stock runtime** with an in-app download catalog

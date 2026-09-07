@@ -155,16 +155,30 @@ The dialect owns the **whole** render (not just the tool block) because families
 framing too, not only call syntax. `ZooLanguageModel` auto-selects by probing the tokenizer
 vocab (`defaultDialect(probing:)`); pass `dialect:` to override.
 
-Two dialects ship, both verified against the bundle's own `chat_template.jinja` (render the
+Three dialects ship, each verified against the bundle's own `chat_template.jinja` (render the
 template with jinja2 and diff against the Swift output — the template is the spec):
 
-| | Hermes (Qwen3.5, the default) | LFM (LFM2.5) |
-|---|---|---|
-| tools advertised | system `<tools>{json}…</tools>` block | system `List of tools: [{json}, …]` text |
-| call syntax | `<tool_call>\n{"name","arguments"}\n</tool_call>` | `<\|tool_call_start\|>[fn(a="x"), fn2(n=3)]<\|tool_call_end\|>` (pythonic) |
-| result replay | user-role `<tool_response>…</tool_response>` | `tool`-role `<\|tool_response_start\|>…<\|tool_response_end\|>` |
-| framing | ChatML `<\|im_start\|>` | ChatML `<\|im_start\|>` |
-| parse | JSON object (or array of objects) | tolerant pythonic scanner |
+| | Hermes (Qwen3.5, the default) | LFM (LFM2.5) | MiniCPM (MiniCPM5-1B/2B) |
+|---|---|---|---|
+| tools advertised | system `<tools>{json}…</tools>` block | system `List of tools: [{json}, …]` text | system `<tools>{json}…</tools>` block + the template's "Tool usage guidelines" paragraph |
+| call syntax | `<tool_call>\n{"name","arguments"}\n</tool_call>` | `<\|tool_call_start\|>[fn(a="x"), fn2(n=3)]<\|tool_call_end\|>` (pythonic) | `<function name="fn"><param name="p">v</param></function>` XML, one block per call, CDATA for `<`/`&`/newline values |
+| result replay | user-role `<tool_response>…</tool_response>` | `tool`-role `<\|tool_response_start\|>…<\|tool_response_end\|>` | user-role `<tool_response>…</tool_response>` |
+| framing | ChatML `<\|im_start\|>` | ChatML `<\|im_start\|>` | ChatML `<\|im_start\|>`; `thinking: .off` renders `<think>\n\n</think>\n\n` (`enable_thinking=false`) |
+| parse | JSON object (or array of objects) | tolerant pythonic scanner | regex over `<param>` elements, values typed against the tool's schema |
+
+MiniCPM5-2B on the gate (int8 block-32, greedy, macOS 27 beta): `tools` PASS (two parallel calls
+in one turn, grounded answer), `toolchain` PASS, and the `agent` scenario — the
+`apps/CoreAIAgent` flow with fixed data: read tomorrow's calendar → "remind me 15 minutes before
+the first one" → a `create_reminder` at 09:45 → device status — PASS with thinking on (cap 220)
+and off (cap 120; prompts 541 / 701 / 789 tokens, so three turns fit the 1024-token iOS KV cap).
+
+**Probe trap (fixed 2026-09-08):** `defaultDialect(probing:)` tested vocab membership with
+`convertTokenToId(_:) != nil`, but some tokenizer models answer an unknown token with the unk id
+instead of nil — MiniCPM5's does, so every LFM special token "existed" and the 2B was routed to
+the LFM dialect (it still emitted its native XML; nothing parsed). The probe now also requires
+`id != tokenizer.unknownTokenId`. MiniCPM5's own markers are single vocab tokens (`<function`,
+`<param`, `</param>`, `</function>`), which is what its probe keys on; note its vocab also carries
+`<tool_call>` tokens, so that Hermes probe cannot separate the two.
 
 The LFM parser must be **tolerant**: the model emits half-mangled argument lists (single
 quotes, bare/unquoted values, Python `True`/`None`, nested containers, truncated tails). It

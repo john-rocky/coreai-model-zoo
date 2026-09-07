@@ -99,7 +99,7 @@ public struct ZooExecutor: LanguageModelExecutor {
                     _ = try? await previous.value  // engine free before generate
                 }
                 let seed = tokenizer.encode(text: "Hi").first.map(Int32.init) ?? 1
-                let stream = try engine.generate(
+                let stream = try await engine.generate(
                     with: [seed],
                     samplingConfiguration: .greedy,
                     inferenceOptions: InferenceOptions(maxTokens: 1))
@@ -190,7 +190,7 @@ public struct ZooExecutor: LanguageModelExecutor {
         let pump = Task {
             var ids: [Int32] = []
             do {
-                let stream = try engine.generate(
+                let stream = try await engine.generate(
                     with: fed,
                     samplingConfiguration: sampling,
                     inferenceOptions: InferenceOptions(maxTokens: maxTokens))
@@ -316,7 +316,8 @@ public struct ZooExecutor: LanguageModelExecutor {
 
         // 7) Metadata + usage once per turn, attached to the kind of entry
         //    this turn actually produced (see the note above step 4).
-        let metadata: [String: any Sendable & Codable & Equatable] = [
+        // Beta 5: metadata values are `ConvertibleToGeneratedContent` (String conforms).
+        let metadata: [String: any ConvertibleToGeneratedContent] = [
             "modelID": modelID,
             "requestID": request.id.uuidString,
         ]
