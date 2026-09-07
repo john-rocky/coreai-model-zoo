@@ -28,9 +28,11 @@ engine keeps decoding to the cap after EOS.
 - **Mac (gate):** `swift run -c release zoo-fm-gate <bundle> agent` runs this exact flow with fixed
   calendar data — PASS with the model's thinking on (cap 220) and off (cap 120): calendar read →
   reminder at 09:45 for a 10:00 first meeting → device status.
+- **Build:** compiles for iOS (unsigned `xcodebuild … CODE_SIGNING_ALLOWED=NO`, 2026-09-08).
 - **iPhone:** not yet run on a device (the phone was disconnected when the app was written). The
-  build needs the app id registered with the two kernel entitlements (open the project in Xcode
-  once with the team signed in, then `xcodebuild … -allowProvisioningUpdates`).
+  signed build needs the app id registered with the two kernel entitlements, which automatic
+  provisioning can only do with an Apple ID signed in to Xcode — open the project in Xcode once
+  with the team signed in and Run, then `xcodebuild … -allowProvisioningUpdates` works from the CLI.
 
 ```bash
 cd apps/CoreAIAgent && xcodegen generate

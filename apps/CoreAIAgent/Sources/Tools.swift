@@ -10,7 +10,8 @@ import UIKit
 
 /// Shared EventKit store + access requests (iOS 17+ full-access API).
 enum Calendar_ {
-    static let store = EKEventStore()
+    // EKEventStore is documented thread-safe for reads/saves; Swift 6 cannot see that.
+    nonisolated(unsafe) static let store = EKEventStore()
 
     static func ensureEventsAccess() async throws {
         if EKEventStore.authorizationStatus(for: .event) != .fullAccess {
@@ -160,11 +161,13 @@ struct DeviceStatusTool: Tool {
 }
 
 /// What the UI shows while a tool runs (the transcript only carries the result
-/// after the call returns).
+/// after the call returns). Tools call it from nonisolated contexts; the handler
+/// runs on the main actor.
 @MainActor
 final class AgentLog {
-    static let shared = AgentLog()
+    nonisolated static let shared = AgentLog()
     var onToolExecuted: ((String, String) -> Void)?
+    nonisolated init() {}
     nonisolated func toolExecuted(_ name: String, summary: String) {
         Task { @MainActor in self.onToolExecuted?(name, summary) }
     }

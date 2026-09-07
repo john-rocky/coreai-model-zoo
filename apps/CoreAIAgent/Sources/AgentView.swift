@@ -48,7 +48,7 @@ struct AgentView: View {
             Label(agent.online ? "Online" : "Offline",
                   systemImage: agent.online ? "wifi" : "airplane")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(agent.online ? .secondary : .orange)
+                .foregroundStyle(agent.online ? Color.secondary : Color.orange)
             Spacer()
             Text("MiniCPM5-2B · int8 · Core AI")
                 .font(.caption)
