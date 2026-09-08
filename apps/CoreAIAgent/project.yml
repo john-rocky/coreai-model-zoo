@@ -27,7 +27,11 @@ targets:
         product: ZooFMProvider
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.CoreAIAgent
+        # Borrowed app id: its provisioning profile already carries increased-memory-limit +
+        # extended-virtual-addressing, so the device build signs without an Xcode account.
+        # (No app with this id is installed on the phone.) Switch to com.daisukemajima.CoreAIAgent
+        # once that id is registered with the same two capabilities.
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.llmbench014
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         CODE_SIGN_ENTITLEMENTS: CoreAIAgent.entitlements
@@ -38,6 +42,29 @@ targets:
         INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "The on-device agent reads your calendar when you ask about your schedule. Nothing leaves the phone."
         INFOPLIST_KEY_NSRemindersFullAccessUsageDescription: "The on-device agent creates reminders when you ask for one. Nothing leaves the phone."
         TARGETED_DEVICE_FAMILY: "1"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_APPROACHABLE_CONCURRENCY: "YES"
+
+  CoreAIAgentMac:
+    type: application
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: coreai-models
+        product: CoreAILM
+      - package: zoo-swift
+        product: ZooFMProvider
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.CoreAIAgentMac
+        PRODUCT_NAME: CoreAIAgentMac
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "Reads your calendar when you ask about your schedule."
+        INFOPLIST_KEY_NSRemindersFullAccessUsageDescription: "Creates reminders when you ask for one."
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_APPROACHABLE_CONCURRENCY: "YES"

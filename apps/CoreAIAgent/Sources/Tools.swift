@@ -1,7 +1,15 @@
 import EventKit
 import Foundation
 import FoundationModels
+#if canImport(UIKit)
 import UIKit
+#endif
+
+/// AGENT_MOCK_TOOLS=1: the same three tools answer with fixed data and never touch
+/// EventKit — the macOS verification path (no TCC dialog) and the gate's data.
+enum MockTools {
+    static let enabled = ProcessInfo.processInfo.environment["AGENT_MOCK_TOOLS"] == "1"
+}
 
 // Three tools that touch the phone. The model never sees these implementations —
 // only the name, description and @Generable argument schema that FoundationModels
@@ -65,6 +73,10 @@ struct CalendarEventsTool: Tool {
     }
 
     func call(arguments: Arguments) async throws -> String {
+        if MockTools.enabled {
+            AgentLog.shared.toolExecuted(name, summary: "mock: 3 events on \(arguments.day)")
+            return "Events on \(arguments.day):\n10:00-10:30 Standup\n13:00-14:00 Lunch with Ken\n16:00-17:00 Design review"
+        }
         try await Calendar_.ensureEventsAccess()
         guard let start = Calendar_.day(arguments.day) else {
             throw ToolError.badInput("day '\(arguments.day)'")
@@ -102,6 +114,10 @@ struct CreateReminderTool: Tool {
     }
 
     func call(arguments: Arguments) async throws -> String {
+        if MockTools.enabled {
+            AgentLog.shared.toolExecuted(name, summary: "mock: '\(arguments.title)' \(arguments.day) \(arguments.time)")
+            return "Reminder \"\(arguments.title)\" set for \(arguments.day) at \(arguments.time)."
+        }
         try await Calendar_.ensureRemindersAccess()
         guard let dayStart = Calendar_.day(arguments.day) else {
             throw ToolError.badInput("day '\(arguments.day)'")
@@ -136,18 +152,25 @@ struct DeviceStatusTool: Tool {
     struct Arguments {}
 
     func call(arguments: Arguments) async throws -> String {
+        if MockTools.enabled {
+            AgentLog.shared.toolExecuted(name, summary: "mock: battery 63%, 4.2 GB free")
+            return "Battery 63%, on battery. Free storage: 4.2 GB."
+        }
+        var level = "unknown"
+        var state = "unknown"
+        #if canImport(UIKit)
         let device = await MainActor.run { () -> (Float, UIDevice.BatteryState) in
             UIDevice.current.isBatteryMonitoringEnabled = true
             return (UIDevice.current.batteryLevel, UIDevice.current.batteryState)
         }
-        let level = device.0 < 0 ? "unknown" : "\(Int(device.0 * 100))%"
-        let state: String
+        level = device.0 < 0 ? "unknown" : "\(Int(device.0 * 100))%"
         switch device.1 {
         case .charging: state = "charging"
         case .full: state = "full"
         case .unplugged: state = "on battery"
         default: state = "unknown"
         }
+        #endif
         var free = "unknown"
         if let values = try? URL(fileURLWithPath: NSHomeDirectory())
             .resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),

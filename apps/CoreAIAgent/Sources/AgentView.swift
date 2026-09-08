@@ -26,19 +26,31 @@ struct AgentView: View {
                 composer
             }
             .navigationTitle("On-device agent")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Menu {
+                        #if !os(iOS)
+                        // The reasoning trace needs a ~400-token cap; three turns of that do not
+                        // fit the iOS 1024-token growing-KV cap, so the toggle is macOS-only.
                         Toggle("Thinking", isOn: Binding(
                             get: { agent.thinking },
                             set: { on in Task { await agent.setThinking(on) } }))
+                        #endif
                         Button("New conversation") { agent.newConversation() }
                     } label: { Image(systemName: "ellipsis.circle") }
                 }
             }
             .task {
-                if agent.phase == .loading { await agent.load() }
+                let env = ProcessInfo.processInfo.environment
+                if env["AGENT_SELFTEST"] == "1" {
+                    if env["AGENT_THINKING"] == "1" { agent.thinking = true } else { agent.thinking = false }
+                    await agent.selfTest(prompts: presets)
+                } else if agent.phase == .loading {
+                    await agent.load()
+                }
             }
         }
     }

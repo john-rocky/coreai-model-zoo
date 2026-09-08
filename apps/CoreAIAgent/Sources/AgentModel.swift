@@ -23,6 +23,8 @@ struct TurnEntry: Identifiable, Equatable {
 }
 
 struct TurnStats: Equatable {
+    /// Seconds from send to the first answer text (covers the tool round trip: two prefills).
+    var firstTextSeconds = 0.0
     var promptTokens = 0
     var cachedTokens = 0
     var outputTokens = 0
@@ -54,10 +56,15 @@ final class AgentModel {
     var phase: Phase = ModelSource.isPresent ? .loading : .needsDownload
     var entries: [TurnEntry] = []
     var stats: [TurnStats] = []
-    var thinking = true
+    /// Off by default on the phone: the trace costs a second prefill's worth of tokens per turn.
+    var thinking = false
     var online = true
     var loadSeconds = 0.0
+    #if os(iOS)
     let downloader = ModelDownloader()
+    #else
+    let downloader = NoDownloader()   // macOS verification build: seed Documents/models by hand
+    #endif
 
     private var session: LanguageModelSession?
     private var model: ZooLanguageModel?
@@ -76,6 +83,7 @@ final class AgentModel {
     // MARK: model
 
     func download() async {
+        #if os(iOS)
         phase = .downloading
         await downloader.fetch(
             repo: "https://huggingface.co/" + ModelSource.repo,
@@ -91,6 +99,9 @@ final class AgentModel {
         }
         phase = .loading
         await load()
+        #else
+        phase = .failed("macOS build: copy the int8 bundle to \(ModelSource.bundleDir.path)")
+        #endif
     }
 
     func load() async {
@@ -113,6 +124,7 @@ final class AgentModel {
         thinking = on
         entries.removeAll()
         stats.removeAll()
+        usageSeen = (0, 0, 0)
         await load()
     }
 
@@ -120,6 +132,7 @@ final class AgentModel {
         guard let model else { return }
         entries.removeAll()
         stats.removeAll()
+        usageSeen = (0, 0, 0)
         session = makeSession(model)
     }
 
@@ -133,6 +146,36 @@ final class AgentModel {
                 """)
     }
 
+    // MARK: self-test (AGENT_SELFTEST=1): download if needed, load, run the presets, log to stderr
+
+    func selfTest(prompts: [String]) async {
+        func log(_ line: String) { FileHandle.standardError.write(Data((line + "\n").utf8)) }
+        log("[selftest] start phase=\(phase) online=\(online) thinking=\(thinking)")
+        if phase == .needsDownload { await download() }
+        if phase == .loading { await load() }
+        guard phase == .ready else { log("[selftest] ERROR not ready: \(phase)"); return }
+        log(String(format: "[selftest] loaded in %.1f s", loadSeconds))
+        for prompt in prompts {
+            let before = entries.count
+            await send(prompt)
+            for entry in entries.dropFirst(before) {
+                switch entry.kind {
+                case .prompt: log("[selftest] > \(entry.text)")
+                case .reasoning: log("[selftest] think(\(entry.text.count) chars)")
+                case .toolCall(let name, let args): log("[selftest] tool \(name) \(args)")
+                case .toolResult(let name): log("[selftest] result \(name): \(entry.text.replacingOccurrences(of: "\n", with: " | "))")
+                case .response: log("[selftest] < \(entry.text.replacingOccurrences(of: "\n", with: " "))")
+                case .error: log("[selftest] ERROR \(entry.text)")
+                }
+            }
+            if let t = stats.last {
+                log(String(format: "[selftest] turn %.1f s (first text %.1f s) prompt=%d cached=%d out=%d tools=%d",
+                           t.seconds, t.firstTextSeconds, t.promptTokens, t.cachedTokens, t.outputTokens, t.toolCalls))
+            }
+        }
+        log("[selftest] DONE")
+    }
+
     // MARK: turns
 
     func send(_ prompt: String) async {
@@ -144,12 +187,21 @@ final class AgentModel {
         var turn = TurnStats()
         do {
             // Short cap on purpose: the pipelined engine keeps decoding to the cap
-            // after EOS, and iOS caps the growing KV at 1024 tokens.
-            let options = GenerationOptions(maximumResponseTokens: 220)
+            // after EOS (each respond pays the whole cap), and iOS caps the growing KV
+            // at 1024 tokens. Without the trace the model answers in 30–60 tokens.
+            // 120 without the trace: a three-event calendar answer measured 80 tokens. With the
+            // trace the model needs ~400, which does not fit three turns under the iOS 1024 KV
+            // cap — so the trace stays a macOS-only option.
+            let options = GenerationOptions(maximumResponseTokens: thinking ? 400 : 120)
             let stream = session.streamResponse(to: prompt, options: options)
             var responseIndex: Int?
+            var firstText: Date?
             for try await partial in stream {
                 let text = partial.content
+                if firstText == nil, !text.isEmpty {
+                    firstText = Date()
+                    turn.firstTextSeconds = firstText!.timeIntervalSince(t0)
+                }
                 if let i = responseIndex {
                     entries[i].text = text
                 } else if !text.isEmpty {
@@ -211,9 +263,25 @@ final class AgentModel {
                 break
             }
         }
+        // session.usage accumulates across turns (and across the two respond calls of a
+        // tool round trip); show this turn's share.
         let usage = session.usage
-        turn.promptTokens = usage.input.totalTokenCount
-        turn.cachedTokens = usage.input.cachedTokenCount
-        turn.outputTokens = usage.output.totalTokenCount
+        turn.promptTokens = usage.input.totalTokenCount - usageSeen.input
+        turn.cachedTokens = usage.input.cachedTokenCount - usageSeen.cached
+        turn.outputTokens = usage.output.totalTokenCount - usageSeen.output
+        usageSeen = (usage.input.totalTokenCount, usage.input.cachedTokenCount, usage.output.totalTokenCount)
     }
+
+    private var usageSeen: (input: Int, cached: Int, output: Int) = (0, 0, 0)
 }
+
+#if !os(iOS)
+/// Stand-in for the shared ModelDownloader (which needs UIKit background tasks).
+@MainActor
+final class NoDownloader: ObservableObject {
+    enum Phase: Equatable { case idle, failed(String), done }
+    @Published private(set) var phase: Phase = .idle
+    @Published private(set) var fraction: Double = 0
+    @Published private(set) var detail = ""
+}
+#endif
