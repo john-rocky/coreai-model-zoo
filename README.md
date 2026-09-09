@@ -333,7 +333,8 @@ kernel — the stock MPSGraph SDPA crashes on the ≥16-head × 512 Q (a GPU scr
   [**awesome-core-ai**](https://github.com/john-rocky/awesome-core-ai) — Apple's own tooling,
   other people's converters and runtimes, sample apps, benchmarks, and learning material.
 - **Try the app** (iOS 27 / macOS 27 beta; the model downloads in-app):
-  - **Demo app, no build** → Mac: [**.dmg**](https://github.com/john-rocky/coreai-model-zoo/releases/download/mac-v1.0/CoreAI-Zoo-for-Mac.dmg) (notarized, runs the Mac-only bundles) · iPhone: [**CoreAIChat on TestFlight**](https://testflight.apple.com/join/bK4P7xby)
+  - **Demo app, no build** → Mac: [**2.0 (build 9) .dmg**](https://github.com/john-rocky/coreai-model-zoo/releases/download/mac-2.0.9/CoreAIZoo-2.0-9.dmg) (signed and notarized; Apple silicon, macOS 27) · iPhone: [**CoreAIChat on TestFlight**](https://testflight.apple.com/join/bK4P7xby)
+    Mac quick start: drag the app into Applications, open **Chat → Qwen3 0.6B → Download & Load**, wait for **Ready**, then send a message. [Release notes and tested beta environment](https://github.com/john-rocky/coreai-model-zoo/releases/tag/mac-2.0.9).
   - **Build it** → [`apps/`](apps/) — Xcode 27 beta + xcodegen, the `coreai-models` patch stack + `tokenizer.json`
 - **Use a model in your own app** → add [**CoreAIKit**](https://github.com/john-rocky/coreai-kit)
   (SPM) and load the catalog id; the model's card has the complete snippet + a 5-line
