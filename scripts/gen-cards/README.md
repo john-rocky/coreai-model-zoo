@@ -6,11 +6,19 @@ Renders each enrolled model's **Use it** block from `../coreai-kit/catalog.json`
 - `zoo/<model>.md` — between `<!-- gen-cards:use-it begin/end -->` markers
 - the HF README of the model's repo — same markers, fetched live, diffed, `--push` to upload
 
+`cards.json` pins `kitVersion` for the clone command, example/source links, SPM
+instruction and standalone snippet compilation. `starterID` and `starterRunner` route
+every card to the same first run through the CoreAIKit README. Regenerate from a
+checkout of that public tag, so the runner and the snippets describe the same release.
+Update these fields when a newly published release has passed the first-run checks.
+Runner commands take the Xcode path and build from that tag's `.xcode-pin`, so the
+card's CLI and GUI instructions select the toolchain that the release actually uses.
+
 Design: [`_ZOO_DX_DESIGN.md` §6.2–6.3] — "cards never lie", enforced:
 
 | Emitted | Only if |
 |---|---|
-| ▶️ runner door | the runner smoke-builds **in this run** (`swift build` + `xcodebuild`) and the committed xcodeproj matches fresh `xcodegen generate` output (lockfile guard) |
+| ▶️ runner door | the runner smoke-builds **in this run** (`swift build -c release` + `xcodebuild`) and the committed xcodeproj matches fresh `xcodegen generate` output (lockfile guard) |
 | 💻 snippet | extracted from the runner's `QuickStart.swift` `CARD-SNIPPET` markers (never hand-written), then compiled standalone in a scratch package against kit as a **url-dep** (catches non-public API / missing imports) |
 | 🟢 app door | a TestFlight/dmg link is configured (none yet) |
 | hero `demo.gif` | the file exists in the model's HF repo (HEAD-check); missing = info, not failure |
@@ -48,7 +56,7 @@ bundle, so `gemma-4-E2B-CoreAI` is deliberately unmapped.
 Refreshing after a new measurement drop (GM day): sync the board's data files, then
 
 ```bash
-DEVELOPMENT_TEAM=<team id> python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit --write --push \
+env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards --write --push \
   && python3 tools/devicemark_row.py --go
 ```
 
@@ -59,17 +67,24 @@ turn, so a tool commit landing in between would be overwritten.
 
 ## Usage
 
-**Export `DEVELOPMENT_TEAM` first.** The lockfile guard regenerates each Example's project with
-`xcodegen` and diffs it against the committed one. The committed projects were generated with a
-team id in the environment, so a run without it regenerates `DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}"`
-instead of the literal id and every project "differs" — 44 gate failures, all false, all six lines
-of signing. Measured 2026-07-25: same run with `DEVELOPMENT_TEAM=<team id>` exported = 1 failure
-(an external repo's missing markers) and 79 clean surfaces.
+Use an isolated checkout of the configured public release; do not switch a shared
+checkout away from someone else's work. For the current pin:
 
 ```bash
-DEVELOPMENT_TEAM=<team id> python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit  # verify (dry-run)
-python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit --write        # apply zoo cards
-python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit --write --push # + HF upload
+git clone --branch 0.4.1 --depth 1 https://github.com/john-rocky/coreai-kit ~/code/coreai-kit-cards
+```
+
+For **0.4.1**, leave `DEVELOPMENT_TEAM` unset during this generator run. The
+committed example projects keep the `${DEVELOPMENT_TEAM}` placeholder; a literal
+team ID would make the lockfile guard report a signing-only difference. macOS smoke
+builds disable signing. Set your own development team separately when installing the
+example on an iPhone. For another release, check whether its committed projects use
+a placeholder or a literal team ID before regenerating.
+
+```bash
+env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards  # verify (dry-run)
+env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards --write        # apply zoo cards
+env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards --write --push # + HF upload
 ```
 
 Exit 0 = all cards clean. Exit 1 = drift (rerun with `--write`) or a gate failure.

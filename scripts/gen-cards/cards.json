@@ -1,5 +1,8 @@
 {
   "kitURL": "https://github.com/john-rocky/coreai-kit",
+  "kitVersion": "0.4.1",
+  "starterID": "qwen3-0.6b",
+  "starterRunner": "Examples/ChatDemo",
   "zooURL": "https://github.com/john-rocky/coreai-model-zoo",
   "cloneDirName": "coreai-kit",
   "variantLabels": {
@@ -212,7 +215,7 @@
         "xcodeproj": "ChatDemo.xcodeproj",
         "scheme": "ChatDemo",
         "cliTarget": "chat-cli",
-        "cliArgs": "--prompt \"What can you do, offline?\"",
+        "cliArgs": "--prompt \"What is the capital of Japan?\"",
         "blurb": "GUI + CLI, one app for every chat model in the catalog"
       },
       "quickstart": "Examples/ChatDemo/Sources/QuickStart.swift",
@@ -840,7 +843,7 @@
       "zooCard": "models/adcsr/README.md"
     },
     "voxcpm-0.5b": {
-      "mediaCaption": "VoxCPM 0.5B on iPhone 17 Pro — the zoo's coreai-audio app, real speed.",
+      "mediaCaption": "Earlier VoxCPM 0.5B capture on iPhone 17 Pro in the zoo's coreai-audio app. This is separate from the release's Mac entry check linked below; it does not validate that package on iPhone.",
       "runner": {
         "dir": "Examples/Speak",
         "xcodeproj": "Speak.xcodeproj",

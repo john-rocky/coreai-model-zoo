@@ -22,46 +22,56 @@ community ports from the contributor's own Hugging Face namespace, credited by n
 ([who](#community-ports)).
 Successor to [`CoreML-Models`](https://github.com/john-rocky/CoreML-Models).
 
-**The `from_pretrained` of Core AI** — one line, any zoo model, via
-[**CoreAIKit**](https://github.com/john-rocky/coreai-kit) (SPM):
+## Start here — put one model in your Swift app
+
+[**CoreAIKit 0.4.1: requirements, install and first answer →**](https://github.com/john-rocky/coreai-kit#readme)
+
+Start with **`qwen3-0.6b`** in the release's built-in catalog. CoreAIKit downloads the matching
+platform bundle once and caches it; your prompts and inference stay on the device.
+The first download is about **352 MB on Mac** (the separate iPhone variant is about
+**456 MB**). Follow the Kit README for the exact tested OS/SDK and current device
+verification. A Mac run is not evidence for the iPhone variant.
 
 ```swift
-let chat = try await ChatSession(catalog: "qwen3.5-2b")   // downloads once, then cached
-let reply = try await chat.respond(to: "What can you do, offline?")
+import CoreAIKit
+
+guard let modelID = ModelCatalog.builtin.entry(id: "qwen3-0.6b")?.modelID else {
+    throw CoreAIKitError.modelNotAvailableOnPlatform(id: "qwen3-0.6b")
+}
+let chat = try await ChatSession(model: modelID)
+let reply = try await chat.respond(to: "What is the capital of Japan?")
+print(reply)
 ```
 
-Same gesture for every capability — `KitTranscriber(catalog: "whisper-large-v3-turbo")` is
-speech-to-text in 3 lines ([card](models/whisper-large-v3-turbo/README.md)). Each model's card carries the
-complete copy-paste snippet and its integration checklist. Every row below also links a
-ready-to-build app — in this repo's [`apps/`](apps) or a
-[CoreAIKit example](https://github.com/john-rocky/coreai-kit/tree/main/Examples) (marked ↗).
-
-**When Apple's FoundationModels built-in model isn't enough, keep your session code and
-swap the model — one line.**
-`LanguageModelSession(model: try await KitLanguageModel(model: .qwen3_0_6B))` gives you the
-same system session — `Tool` calling, `@Generable` guided generation, transcripts — backed
-by any zoo chat model
-([how](https://github.com/john-rocky/coreai-kit#when-foundationmodels-isnt-enough)).
-Zero-dependency alternative: every bundle loads with Apple's own
-`CoreAILanguageModel(resourcesAt:)` as-is; this repo's
-[`ZooFMProvider`](swift/Sources/ZooFMProvider) adds streaming tool calling on top (incl. LFM's
-native dialect) — engineering notes in [`knowledge/fm-provider.md`](knowledge/fm-provider.md).
-
-## Quickstart — running a model on your device
-
-New here? You'll have a model answering on-device in a few minutes (needs Xcode 27 + a Mac or an
-iPhone/iPad on iOS/macOS 27):
+The same published release includes the
+[ChatDemo app and CLI](https://github.com/john-rocky/coreai-kit/tree/0.4.1/Examples/ChatDemo):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/ChatDemo/ChatDemo.xcodeproj   # Run, then pick a model in the picker
+git clone --branch 0.4.1 --depth 1 https://github.com/john-rocky/coreai-kit
+cd coreai-kit/Examples/ChatDemo
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-Beta.5.app/Contents/Developer
+swift run -c release chat-cli --model qwen3-0.6b --prompt "What is the capital of Japan?"
 ```
 
-The app downloads the model on first pick (cached after), then runs it fully offline. **Start
-small for the fastest first run:** `Qwen3-0.6B` (454 MB) or `Qwen3.5-2B` on iPhone;
-any of the Mac-only rows on a Mac. Prefer the terminal? `swift run chat-cli --model qwen3-0.6b
---prompt "Hello"` from `Examples/ChatDemo`. To drop a model into **your own** app, copy the
-snippet from that model's card — it's the same `catalog:` one-liner shown above.
+Adjust `DEVELOPER_DIR` to your installed beta 5 app if its name differs.
+Expect a text answer mentioning Tokyo after the initial download and model load.
+For a conversation, keep one `ChatSession` and call `respond(to:)` again. The GUI is
+in `ChatDemo.xcodeproj`; use My Mac or a physical iPhone with the required OS and SDK.
+
+After that first success, try text-to-speech with
+[Speak and VoxCPM 0.5B](https://github.com/john-rocky/coreai-kit/tree/0.4.1/Examples/Speak)
+from the same release (a separate download, about 1.37 GB on Mac). Each model card
+below links its own runner, minimal Swift function and integration requirements.
+
+For FoundationModels apps, `KitLanguageModel(model: modelID)` supplies a chat
+model to `LanguageModelSession`. Tool calling depends on the model's dialect; guided
+generation also needs a compatible sequential engine. Check the
+[capability matrix](https://github.com/john-rocky/coreai-kit#works-with-apples-foundationmodels-api).
+The catalog includes non-chat tasks, which use their own Kit APIs.
+
+If a run fails, start with the Kit README's troubleshooting links and the
+[observed error index](knowledge/coreai-error-index.md). For details about using
+Apple's adapter directly, see [FoundationModels integration notes](knowledge/fm-provider.md).
 
 ## Rebuild a bundle — the conversion recipes
 

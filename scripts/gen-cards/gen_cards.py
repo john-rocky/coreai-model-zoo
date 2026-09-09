@@ -31,6 +31,7 @@ import argparse
 import difflib
 import json
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -103,11 +104,11 @@ def gate_regen_diff(kit: Path, runner_dir: Path, xcodeproj: str) -> bool:
 
 
 def gate_cli_build(runner_dir: Path) -> bool:
-    r = run(["swift", "build", "--package-path", str(runner_dir)])
+    r = run(["swift", "build", "-c", "release", "--package-path", str(runner_dir)])
     if r.returncode != 0:
         fail(f"CLI smoke build failed in {runner_dir}:\n{r.stderr[-1500:]}")
         return False
-    log("gate", f"swift build OK: {runner_dir.name}")
+    log("gate", f"swift build -c release OK: {runner_dir.name}")
     return True
 
 
@@ -145,6 +146,10 @@ def extract_snippet(kit: Path, cfg: dict, model_id: str) -> str | None:
     if lines and lines[-1].startswith("return "):
         lines[-1] = "let result = " + lines[-1][len("return "):]
     body = "\n".join(lines)
+    # ChatDemo's release starter chooses the built-in pin while other selections
+    # retain catalog dispatch. The function parameter becomes a local in the card.
+    if re.search(r"\bif id ==", body):
+        body = f'let id = "{model_id}"\n' + body
     imports = cfg["snippetImport"]
     if isinstance(imports, str):
         imports = [imports]
@@ -153,7 +158,8 @@ def extract_snippet(kit: Path, cfg: dict, model_id: str) -> str | None:
 
 
 def gate_snippet_compiles(snippet: str, kit_url: str, local_kit: Path | None,
-                          free_vars: dict, product: str = "CoreAIKit") -> bool:
+                          free_vars: dict, product: str = "CoreAIKit",
+                          kit_version: str | None = None) -> bool:
     """Compile the extracted snippet in a scratch package against kit (url-dep by default) —
     catches the "compiles in the runner, not in the reader's app" class. `free_vars` names the
     reader-supplied inputs the snippet references (e.g. {"url": "URL"} / {"prompt": "String"});
@@ -165,8 +171,12 @@ def gate_snippet_compiles(snippet: str, kit_url: str, local_kit: Path | None,
     # stale lockfile from an earlier run silently compiles against old kit main (or
     # fails on products that didn't exist yet). Force re-resolution every gate.
     (scratch / "Package.resolved").unlink(missing_ok=True)
-    dep = (f'.package(path: "{local_kit}")' if local_kit
-           else f'.package(url: "{kit_url}", branch: "main")')
+    if local_kit:
+        dep = f'.package(path: "{local_kit}")'
+    elif kit_version:
+        dep = f'.package(url: "{kit_url}", exact: "{kit_version}")'
+    else:
+        dep = f'.package(url: "{kit_url}", branch: "main")'
     (scratch / "Package.swift").write_text(f"""// swift-tools-version: 6.0
 import PackageDescription
 let package = Package(
@@ -316,6 +326,7 @@ def render_devicemark_block(row: dict | None, dm: dict) -> str:
 def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
                  snippet: str, doors: dict) -> str:
     kit_url = top["kitURL"]
+    kit_ref = top.get("kitVersion", "main")
     clone = top["cloneDirName"]
     parts: list[str] = []
 
@@ -330,6 +341,15 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
                          f"*{cap}*\n")
 
     parts.append("## Use it\n")
+
+    if top.get("kitVersion"):
+        parts.append(
+            f"**New to Core AI? [Start with CoreAIKit {kit_ref}]({kit_url}#readme).** "
+            f"Follow its requirements and first-run steps for `{top['starterID']}`, then "
+            f"open the same release's [{Path(top['starterRunner']).name}]"
+            f"({kit_url}/tree/{kit_ref}/{top['starterRunner']}). "
+            "The README records the tested OS/SDK and download size; model and device "
+            "coverage is stated per example.\n")
 
     # Measured decode (the answer at the moment of choosing): only when the model's HF
     # repo maps to a DeviceMark row, numbers straight from the board's data files.
@@ -356,7 +376,7 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
             # No count here on purpose: this line lands in ~40 external READMEs at once,
             # so a numeral goes stale in 40 places and costs 40 pushes to correct — which
             # is how it came to say "Twenty" while the enum held 23.
-            f"Every op, one shape — [Cookbook]({kit_url}/blob/main/docs/COOKBOOK.md).\n")
+            f"Every op, one shape — [Cookbook]({kit_url}/blob/{kit_ref}/docs/COOKBOOK.md).\n")
 
     # Engine-showcase models (custom backends the generic kit path can't drive yet):
     # the ▶️ door points at their zoo app; 💻 is omitted until the backend is ported
@@ -370,27 +390,36 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
     if doors["runner"]:
         r = cfg["runner"]
         runner_name = Path(r["dir"]).name
+        xcode = top.get("_xcode", {})
+        developer_dir = (str(Path(xcode["XCODE_PATH"]) / "Contents/Developer")
+                         if xcode.get("XCODE_PATH") else None)
+        sdk_setup = (f"export DEVELOPER_DIR={shlex.quote(developer_dir)}\n" if developer_dir else "")
+        open_app = (f"open -a {shlex.quote(xcode['XCODE_PATH'])}" if developer_dir else "open")
         # The GUI hint after "Run": defaults to the catalog picker convention; a runner
         # whose picker labels differ (or that auto-loads its single model) overrides it
         # with `runner.pickNote` — the line must match what the app actually shows.
         pick = r.get("pickNote", f"Run, then pick \"{entry['name']}\" in the model picker")
         parts.append(
-            f"▶️ **Run it (source)** — the [{runner_name} runner]({kit_url}/tree/main/{r['dir']})\n"
+            f"▶️ **Run it (source)** — the [{runner_name} runner]({kit_url}/tree/{kit_ref}/{r['dir']})\n"
             f"({r['blurb']}):\n"
             "\n"
             "```bash\n"
-            f"git clone {kit_url}\n"
-            f"open {clone}/{r['dir']}/{r['xcodeproj']}\n"
+            f"git clone --branch {kit_ref} --depth 1 {kit_url}\n"
+            + sdk_setup +
+            f"{open_app} {clone}/{r['dir']}/{r['xcodeproj']}\n"
             f"# → {pick}\n"
             "\n"
             "# agents / headless (macOS):\n"
             f"cd {clone}/{r['dir']}\n"
-            f"swift run {r['cliTarget']} --model {model_id} {r['cliArgs']}\n"
+            f"swift run -c release {r['cliTarget']} --model {model_id} {r['cliArgs']}\n"
             "```\n")
+        if developer_dir:
+            parts.append(f"Use Xcode build **{xcode['XCODE_BUILD']}** from the release's "
+                         "`.xcode-pin`; adjust the app path if your installation is named differently.\n")
 
     if doors["snippet"]:
         sizes = " / ".join(
-            f"{v['sizeMB'] / 1000:.1f} GB ({top['variantLabels'][k]})"
+            f"~{v['sizeMB']:,} MB ({top['variantLabels'][k]})"
             for k, v in entry["variants"].items())
         # FM-provider pitch (chat-family cards): cards.json `fmProvider` names the
         # provider type (KitLanguageModel / KitGemmaModel); wording is fixed here.
@@ -399,10 +428,11 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
             fm_note = (
                 "**When Apple's FoundationModels built-in model isn't enough, keep your "
                 "session code and swap the model — one line.** CoreAIKit's "
-                f"[`{cfg['fmProvider']}`]({kit_url}#when-foundationmodels-isnt-enough) "
-                "plugs this bundle into the same system `LanguageModelSession`; your "
-                "`Tool`s, `@Generable` types and transcripts work unchanged, and "
-                "capabilities (tool calling, guided generation) auto-detect per model.\n"
+                f"[`{cfg['fmProvider']}`]({kit_url}#works-with-apples-foundationmodels-api) "
+                "plugs supported chat bundles into the system `LanguageModelSession`. "
+                "Tool calling depends on the model's dialect; guided generation also "
+                "requires a compatible sequential engine. Check the linked support "
+                "matrix before using either capability.\n"
                 "\n")
         parts.append(
             "💻 **Build with it** — complete; the glue is kit API, copy-paste runs:\n"
@@ -412,7 +442,7 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
             "```\n"
             "\n"
             + fm_note +
-            f"The take-home is [`{cfg['quickstart']}`]({kit_url}/blob/main/{cfg['quickstart']})\n"
+            f"The take-home is [`{cfg['quickstart']}`]({kit_url}/blob/{kit_ref}/{cfg['quickstart']})\n"
             + cfg.get("takeHomeTagline",
                       "— this exact code as one typed function, no UI; both the runner's GUI "
                       "and its CLI call it.") + "\n"
@@ -420,7 +450,8 @@ def render_block(model_id: str, entry: dict, cfg: dict, top: dict,
             "\n"
             "**Integration checklist**\n"
             "\n"
-            f"- SPM: `{kit_url}` → product **{cfg['product']}**\n"
+            f"- SPM: `{kit_url}`" + (f" (exact **{kit_ref}**)" if top.get("kitVersion") else "")
+            + f" → product **{cfg['product']}**\n"
             f"- {cfg['checklistInfoPlist']}\n"
             f"- {cfg['checklistEntitlements']}\n"
             f"- First run downloads the model — {sizes} — then it loads from the\n"
@@ -499,6 +530,17 @@ def main() -> int:
 
     kit = Path(args.kit).expanduser().resolve()
     top = json.loads((HERE / "cards.json").read_text())
+    if (kit / ".xcode-pin").is_file():
+        top["_xcode"] = dict(re.findall(r"^(XCODE_PATH|XCODE_BUILD)=(.+)$",
+                                       (kit / ".xcode-pin").read_text(), re.M))
+    if top.get("kitVersion") and not args.skip_builds:
+        head = run(["git", "rev-parse", "HEAD"], cwd=kit)
+        tag = run(["git", "rev-parse", f"refs/tags/{top['kitVersion']}^{{commit}}"], cwd=kit)
+        if head.returncode or tag.returncode or head.stdout.strip() != tag.stdout.strip():
+            print(f"Use a separate checkout of public CoreAIKit tag {top['kitVersion']}; "
+                  "the runner source and published snippet dependency must agree",
+                  file=sys.stderr)
+            return 2
     catalog = {e["id"]: e for e in json.loads((kit / "catalog.json").read_text())["models"]}
     ids = args.ids or list(top["models"].keys())
     OUT.mkdir(exist_ok=True)
@@ -556,7 +598,7 @@ def main() -> int:
             doors["snippet"] = snippet is not None and gate_snippet_compiles(
                 snippet, top["kitURL"], kit if args.local_kit_dep else None,
                 cfg.get("snippetFreeVars", {"url": "URL"}),
-                product=cfg.get("product", "CoreAIKit"))
+                product=cfg.get("product", "CoreAIKit"), kit_version=top.get("kitVersion"))
             if cfg.get("op"):
                 o = cfg["op"]
                 # CoreGraphics: CGImage free vars (upscale / estimateDepth) need the type.
@@ -564,7 +606,7 @@ def main() -> int:
                            f"let {o['result']} = try await {o['call']}")
                 doors["op"] = gate_snippet_compiles(
                     op_line, top["kitURL"], kit if args.local_kit_dep else None,
-                    o.get("freeVars", {}), product="CoreAIOps")
+                    o.get("freeVars", {}), product="CoreAIOps", kit_version=top.get("kitVersion"))
 
         if cfg.get("testflightURL") or cfg.get("dmgURL"):
             fail("green door configured but its template is not implemented yet")
@@ -584,6 +626,10 @@ def main() -> int:
             log("info", "devicemark: no board row for this repo — measured line omitted")
 
         block = render_block(model_id, entry, cfg, top, snippet or "", doors)
+
+        if failures and (args.write or args.push):
+            log("warn", "gate failure: leaving zoo and HF cards unchanged")
+            continue
 
         # zoo surface (optional — official models have no zoo/<id>.md, HF surface only)
         if cfg.get("zooCard") is None:
@@ -621,6 +667,9 @@ def main() -> int:
         if show_diff(hf_old, hf_new, f"HF:{entry['repo']}"):
             drift = True
             if args.push:
+                if fetch_text(f"https://huggingface.co/{entry['repo']}/raw/main/README.md") != hf_old:
+                    fail(f"HF README changed during this run: {entry['repo']} — rerun to preserve it")
+                    continue
                 r = run(["hf", "upload", entry["repo"], str(out_path), "README.md",
                          "--commit-message", "gen-cards: regenerate Use-it block"])
                 if r.returncode != 0:
