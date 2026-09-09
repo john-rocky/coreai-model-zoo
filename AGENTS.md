@@ -27,7 +27,7 @@ is a guess with extra steps.
 | Port a **new** model, end to end | [`PORTING.md`](PORTING.md) — the full walk, two worked examples |
 | Rebuild a model this repo already publishes | `python3 conversion/zoo_convert.py run <name>` · [`models/<model>/recipe.toml`](models/) |
 | Find out whether a model is already ported | [`models/index.json`](models/index.json) — machine-readable catalog; start here |
-| Export API details and gotchas | [`knowledge/conversion-guide.md`](knowledge/conversion-guide.md) |
+| Convert a PyTorch model to `.aimodel` — which path, the five lines, the gotchas | [`knowledge/conversion-guide.md`](knowledge/conversion-guide.md) — decision table first, then the canonical API |
 | An error string you just hit (`LLVM ERROR: …`, `failed assertion …`, `failedToSpecialize`, `NSPOSIXErrorDomain Code=2`) | [`knowledge/coreai-error-index.md`](knowledge/coreai-error-index.md) — every exact string this project has observed, verbatim as a heading, with the verified cause and the fix. Search the string; `coreai doctor` links here too |
 | Quantization / compression | [`knowledge/compression.md`](knowledge/compression.md) |
 | Make it fast (custom Metal kernels, the bandwidth floor) | [`knowledge/custom-metal-kernels.md`](knowledge/custom-metal-kernels.md) · [`knowledge/performance-ceiling.md`](knowledge/performance-ceiling.md) |

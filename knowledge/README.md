@@ -25,8 +25,9 @@ For the long-form version of the same material, read
   links its findings here by anchor.
 - [`coreai-overview.md`](coreai-overview.md) — what Core AI is, the 3 Apple repos, the `.aimodel`
   format, the PyTorch → `.aimodel` → Swift-runtime pipeline.
-- [`conversion-guide.md`](conversion-guide.md) — converting a PyTorch model to `.aimodel`: the
-  canonical `TorchConverter` API + the gotchas that cost real time.
+- [`conversion-guide.md`](conversion-guide.md) — **how do I convert a PyTorch model to `.aimodel`?**
+  The short answer, the decision table (zoo recipe / Apple preset / re-author / the five lines /
+  ONNX), the canonical `TorchConverter` API, and the gotchas that cost real time.
 - [`ship-playbook.md`](ship-playbook.md) — **the end-to-end runbook**: converted `.aimodel` →
   CoreAIKit Swift engine → app → on-device (AOT + sideload + headless self-test for RTF) → publish
   (HF + zoo + post). The stage checklist + cross-cutting traps (gate-before-port, JIT→AOT, tokenizer

@@ -1,10 +1,33 @@
-# Conversion guide (PyTorch → `.aimodel`)
+# How do I convert a PyTorch model to Apple Core AI (.aimodel)? — conversion guide
 
-Re-author the model with `coreai_models` primitives (so it lowers cleanly), export via
-`torch.export`, convert with `TorchConverter`, optimize, save. Verify numerically against the
-Hugging Face reference (cosine / top-1 argmax) before trusting a bundle.
+**Short answer.** For a small stateless model it is five lines: `torch.export` → `TorchConverter`
+→ `optimize` → `save_asset`, then compare the outputs against PyTorch before you trust the bundle.
+For an LLM, do not start from those five lines. Start from a recipe that already shipped, or from
+Apple's exporter with a preset for your checkpoint. The table says which.
 
-## Canonical API (gotchas burned in)
+## Which path — decide before writing code
+
+| Your model | Path | Why |
+|---|---|---|
+| One this zoo already publishes (67 families, [`models/index.json`](../models/index.json)) | `python3 conversion/zoo_convert.py run <recipe>` — the configuration that produced the shipped bundle | Reproduces a gated bundle. Nothing to tune |
+| An LLM with an Apple preset for the exact checkpoint (`coreai export <hf-id>` prints it) | Apple's `coreai.llm.export` with that preset | Precision, compression and context length are resolved, and Apple ran the combination |
+| An LLM with neither | Re-author from the checkpoint with `coreai_models` primitives — [`PORTING.md`](../PORTING.md) | A one-shot converter yields a bundle that loads, runs, and emits plausible garbage. The gates are the port |
+| A stateless model: vision encoder, detector, depth, embedder, audio front-end | The five lines below | This is what `TorchConverter` was built for |
+| An ONNX file | [`coreai-onnx`](https://github.com/devin-lai/coreai-onnx) (third-party, on PyPI) | Converts ONNX directly. Verify the same way |
+| `coreai export` answers `none` | A new architecture — [`PORTING.md`](../PORTING.md) | The `model_type` does not route. That is not a CLI problem |
+
+`pip install coreai-cli` gives the router and the gates: `coreai export <hf-id> --device iphone`
+(which path, and what blocks it), `coreai doctor <bundle>` (the traps that pass every gate),
+`coreai verify <bundle>` (does it compute what the reference computes).
+
+## When it fails
+
+Search the exact error string in [`coreai-error-index.md`](coreai-error-index.md). If the string is
+there, so is the fix. If it is not, open a
+[conversion clinic issue](https://github.com/john-rocky/coreai-model-zoo/issues/new?template=conversion-clinic.yml)
+— the error text alone is enough to start.
+
+## The five lines — canonical API (gotchas burned in)
 
 ```python
 import torch, shutil
