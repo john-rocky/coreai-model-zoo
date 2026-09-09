@@ -1,8 +1,9 @@
 # Weight-only INT8, symmetric, PER-BLOCK-32 (block along the input dim, axis resolved by the
-# quantizer per module type; no clipping). The per-channel sibling (minicpm5_int8sym.yaml) is
-# what ships the 1B; on the 2B it flips one 0.245-margin greedy decision in a 30-token
-# free-run that the fp16 export reproduces exactly, so this is the one-variable experiment:
-# same recipe, finer scale granularity. SDPA/RoPE/RMSNorm stay full precision.
+# quantizer per module type; no clipping). Ships BOTH the 1B (since 2026-09-09) and the 2B.
+# The per-channel sibling (minicpm5_int8sym.yaml) shipped the 1B before that: its LM head is
+# dead from vocab id ~65024 up through the engine (it never emitted <|im_end|>), and on the 2B
+# it flips a 0.245-margin greedy decision that fp16 reproduces exactly. Same recipe, finer
+# scale granularity, no dead rows. SDPA/RoPE/RMSNorm stay full precision.
 quantization_config:
   execution_mode: eager
   global_config:

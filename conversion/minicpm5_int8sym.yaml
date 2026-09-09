@@ -1,7 +1,11 @@
-# Clean weight-only INT8 for MiniCPM5-1B: symmetric per-channel (absmax, NO
-# clipping — clipping craters big-vocab head rows; absmax keeps cos ~0.9999).
-# Mirrors the proven VoxCPM INT8_CFG and the zoo "sym8" recipe. torch pre-export
-# quantization via coreai-opt; SDPA/RoPE/RMSNorm stay full precision.
+# DO NOT SHIP THIS ONE (kept as the per-channel arm of the experiment). Weight-only INT8,
+# symmetric per-channel (absmax, no clipping). It shipped the 1B until 2026-09-09 (HF rev
+# 5ad650f): through the engine the LM head is dead from vocab id ~65024 up — <|im_end|>
+# (130073) included, so a chat turn never halts — while rows below match fp32 to ~0.01 and a
+# 24-token low-vocab parity check reads 24/24. Reproduced bit-for-bit by a fresh export on
+# coreai-torch 0.4.1 / coreai-opt 0.2.1; the per-block-32 sibling (minicpm5_int8sym_b32.yaml),
+# the int4 default preset and fp16 are clean on the same probes. knowledge/minicpm5-1b.md.
+# torch pre-export quantization via coreai-opt; SDPA/RoPE/RMSNorm stay full precision.
 quantization_config:
   execution_mode: eager
   global_config:

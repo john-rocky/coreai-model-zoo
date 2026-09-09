@@ -1,0 +1,76 @@
+{
+ "protocol": "coreai-models llm-benchmark (397b337), 512 prompt / 1024 generation tokens, 5 trials, synthetic prompt seed 0; Mac Studio M4 Max, macOS 27 beta (26A5416b), Xcode 27 beta 5, release build; GPU exclusive (no other GPU job), both bundles the same night (2026-09-09)",
+ "bundles": {
+  "int8 per-block-32 (minicpm5_int8sym_b32.yaml) \u2014 ships from 2026-09-09": {
+   "main.mlirb_bytes": 1148614014,
+   "run": {
+    "averages": {
+     "generation_tps": 246.6011990240228,
+     "prompt_tps": 6649.246583596253
+    },
+    "generation_tokens": 1024,
+    "model": "minicpm5_1b_minicpm5_int8sym_b32_dynamic",
+    "num_trials": 5,
+    "prompt_tokens": 512,
+    "trials": [
+     {
+      "gen_tps": 246.56315693874487,
+      "prompt_tps": 6640.180818348853
+     },
+     {
+      "gen_tps": 246.84082549018467,
+      "prompt_tps": 6671.415446200487
+     },
+     {
+      "gen_tps": 246.48642890044255,
+      "prompt_tps": 6655.170379770799
+     },
+     {
+      "gen_tps": 246.9074122546448,
+      "prompt_tps": 6616.728886964754
+     },
+     {
+      "gen_tps": 246.20817153609713,
+      "prompt_tps": 6662.737386696377
+     }
+    ]
+   }
+  },
+  "int8 per-channel absmax (minicpm5_int8sym.yaml) \u2014 HF rev 5ad650f, replaced": {
+   "main.mlirb_bytes": 1082313882,
+   "run": {
+    "averages": {
+     "generation_tps": 53.70952963463392,
+     "prompt_tps": 4900.422430308607
+    },
+    "generation_tokens": 1024,
+    "model": "minicpm5_1b_int8",
+    "num_trials": 5,
+    "prompt_tokens": 512,
+    "trials": [
+     {
+      "gen_tps": 53.78578317457692,
+      "prompt_tps": 4909.13625061248
+     },
+     {
+      "gen_tps": 53.67482484653289,
+      "prompt_tps": 4893.679554789856
+     },
+     {
+      "gen_tps": 53.651127954152756,
+      "prompt_tps": 4905.105324634576
+     },
+     {
+      "gen_tps": 53.8356458130292,
+      "prompt_tps": 4897.722965370373
+     },
+     {
+      "gen_tps": 53.60026638487783,
+      "prompt_tps": 4896.468056135749
+     }
+    ]
+   }
+  }
+ },
+ "note": "Same mechanism as the 2B measurement: per-channel int8 lowers to a slow dequant path on the Mac GPU; per-block-32 lands on the quantized-matmul path. The per-channel bundle is also the one with the dead LM-head rows (knowledge/minicpm5-1b.md, 2026-09-09) \u2014 this file records speed only."
+}

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-08",
+ "generated": "2026-09-09",
  "how_to_use": {
   "list": "python3 conversion/zoo_convert.py list",
   "show": "python3 conversion/zoo_convert.py show <recipe>",
@@ -1139,7 +1139,7 @@
      "bundle": "int8",
      "steps": 1,
      "run": "python3 conversion/zoo_convert.py run minicpm5-1b",
-     "gate_transcript": null,
+     "gate_transcript": "models/minicpm5-1b/gate-minicpm5-1b.json",
      "open_questions": []
     }
    ],

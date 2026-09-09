@@ -44,12 +44,16 @@ load it like any pipelined model). Cold first-load is one-time (~45 s JIT spec);
 
 Chat EOS: base `eos_token` is `</s>`, but the chat template ends turns with `<|im_end|>` (130073) —
 set the bundle's tokenizer `eos_token` to `<|im_end|>` (as Qwen ships) or generation never halts.
+That is necessary, not sufficient: the per-channel bundle carried the right eos and still never
+halted, because its head could not produce the token (see the 2026-09-09 section).
 
 ## Result
 
 iPhone 17 Pro (`PipelinedBench`): **int8 decode 66.8 / prefill 68.0 tok/s, 24/24 token-exact vs HF
 fp32 (lossless), 1.0 GB** — ~2.2× fp16 (decode is bandwidth-bound → half the weight read ≈ double
-throughput) at no quality cost. 🤗 `mlboydaisuke/MiniCPM5-1B-CoreAI`.
+throughput) at no quality cost. 🤗 `mlboydaisuke/MiniCPM5-1B-CoreAI`. **Superseded 2026-09-09:**
+that per-channel bundle's 24/24 was true and irrelevant — its LM head was dead from vocab id ~65024
+up and it never emitted `<|im_end|>`; the section below has the measurements and the replacement.
 
 **Mac is the opposite — for PER-CHANNEL int8.** On a compute-rich M4 Max int8 is ~59 tok/s vs fp16's
 ~208 — when bandwidth isn't the bottleneck the per-channel dequant overhead dominates. **This is a
@@ -66,6 +70,62 @@ property of the granularity, not of int8**: the 2B section below measured per-bl
   the experienced rate below the true model rate (in-app read ~59 vs the 66.8 bench). Throttle the
   live refresh to ~25 fps and **exclude the UI-callback time from the decode timer**; after that the
   in-app rate matches `PipelinedBench`. Full write-up: `int8-head-and-decode-measurement.md`.
+
+## 2026-09-09 — the shipped 1B never halted: per-channel int8 kills LM-head rows from id ~65024 up
+
+The per-channel int8 bundle published as rev `5ad650f` (07-20 re-export, coreai-torch 0.4.1) ran
+every chat turn to the token cap. Kit `chat-cli` and Apple's `llm-runner` agreed, greedy and
+sampled, Think and No-Think; the fp32 reference stops the no-think turn `1+1=?` after `1+1=2` at
+step 5 with `<|im_end|>` at p=0.873 (top-2 margin 0.80). The bundle's tokenizer already declared
+`<|im_end|>` as eos and its prompt ids were identical to the reference's (18 ids), so neither the
+template nor the eos declaration was the variable. What was:
+
+- **Teacher-forcing through the engine locates it in the LM head, by vocab id.** `llm-runner
+  --inference-engine-variant coreai-sequential --continuation <text> --print-logits` scores a
+  continuation token by token (the pipelined engine refuses logits; `--raw-tokens` cannot be
+  combined with `--continuation`, so the context is text with the runner adding BOS — check the
+  printed context-token count equals the reference's). At `1+1=2` → `<|im_end|>` the bundle gave
+  the stop token P=0.0000 (not in its top-5; top-1 `.` at logit 17.5 where fp32 has `.` at 17.5
+  and `<|im_end|>` at 20.0). Same for `\n\n` (130063) after `</think>` (fp32 0.9999 → 0.0000),
+  ` OpenAI` (130051, 0.93 → 0), `粒子` (65039, 0.98 → 0), ` chromosomal` (65528, 0.38 → 0),
+  ` IRA` (65047, 0.94 → 0); while `.lineTo` (65023, 0.98 → 0.99), ` Buckingham` (65020, 0.29 →
+  0.27), `神話` (64512, 0.96 → 0.95) and every token below are healthy to ~0.01. Sixteen probes:
+  everything ≤ 65023 alive, everything ≥ 65039 dead; 65024 = 127 × 512 sits in the window. Prompts
+  came from the fp32 reference (P(target) ≥ 0.2 required) — a probe the reference itself does not
+  predict measures nothing, which is also why `<|im_start|>` after a user turn (fp32 P=0.0) is not
+  evidence of anything.
+- **Why 24/24 token-exact never saw it.** The capital-of-France spec's expected ids top out at
+  10296, the alphabet's at 1435, the four free-run prompts are low-id English. A token-exact gate
+  proves the rows it exercised; a 130k-row head with its top half dead passes any prompt whose
+  continuation lives in the bottom half. `<|im_end|>` (130073) is the one high-id token every chat
+  turn must produce, so **a chat-templated turn that reaches EOS is the probe** — and the old
+  `cli/coreai_verify.py` read a bundle running past the oracle's stop as "continued past, nothing
+  disagrees". It now treats the stop as a step (`--chat no-think --prompt "1+1=?" -n 16
+  --must-stop-within 16`): old 1B FAIL (5/6, then runs to the cap against a 0.80-margin stop),
+  rebuilt 1B PASS (6/6 and stops). The device spec `minicpm5_1b_b32` in PipelinedBench carries the
+  same turn as its oracle prompt with `130073` as the last expected id.
+- **One variable at a time, and what each arm said.** A fresh per-channel export today (same
+  coreai-torch 0.4.1 / coreai-opt 0.2.1 / coreai-core 1.0.0b2) reproduces the shipped bundle's
+  logits to four decimals at every probed position — so "old toolchain" is refuted; the per-channel
+  recipe is the artifact. Per-block-32 (`minicpm5_int8sym_b32.yaml`, the 2B's), the CLI's default
+  `4bit` preset (int4 per-block-32 with clipping, 608 MB) and fp16 (`--compression none`) are clean
+  on every probe (im_end at step 5: 0.867 / 0.846 / 0.875 vs fp32 0.873). Not separated: whether
+  the per-channel weights are already wrong in the IR (quantizer or converter) or the runtime's
+  per-channel int8 matmul mishandles rows past 65024 — the graph's dynamic logits keep it off the
+  CPU python runtime, and `coreai-build inspect` prints op counts, not constants. Both engines
+  (pipelined greedy, sequential teacher-forced) show it identically.
+- **Two wrapper traps found on the way.** `coreai.llm.export` with no compression flag is not
+  fp16: its macOS default is the `4bit` preset (the export dir is even named `*_4bit_dynamic`);
+  fp16 needs `--compression none` — `export_minicpm5.py --qconfig none` does that now. And the
+  exporter runs with cwd = the coreai-models checkout, so a yaml path relative to the caller
+  ("conversion/x.yaml") is "file not found" there; the wrapper resolves it to absolute.
+
+**Ship:** the 1B moved to per-block-32 (recipe, card, HF revision, kit pin). Measured on the rebuilt
+bundle — iPhone 17 Pro `PipelinedBench`: decode 61.7 / prefill 65.6 tok/s,
+nat 24/24 (alphabet) + oracle 6/6 incl. the stop, engine ready 7.3 s; M4 Max
+`llm-benchmark` 512p/1024g: 246.6 decode / 6649 prefill tok/s (the per-channel
+1B measured ~59 on the same protocol class; block scales land on the fast quantized-matmul path, as
+the 2B section below predicted). Think-mode `1+1=?` halts after 171 tokens.
 
 ## MiniCPM5-2B (2026-09-06 release) — the recipe, one YAML apart
 

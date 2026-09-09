@@ -1,0 +1,66 @@
+{
+  "schema": "coreai-verify-transcript/1",
+  "generated_at": "2026-09-09T13:44:10+00:00",
+  "bundle": "/Users/majimadaisuke/code/coreai/coreai-models/exports/minicpm5-1b-b32-20260909/minicpm5_1b_minicpm5_int8sym_b32_dynamic",
+  "backend": "stock",
+  "driver": "llm-runner",
+  "oracle_model": "openbmb/MiniCPM5-1B",
+  "oracle_revision": null,
+  "oracle_dtype": "fp32",
+  "prompt": "1+1=?",
+  "chat": "no-think",
+  "margin_floor": 0.1,
+  "input_ids": [
+    0,
+    130072,
+    8448,
+    220,
+    38,
+    32,
+    38,
+    50,
+    52,
+    130073,
+    220,
+    130072,
+    130071,
+    220,
+    8,
+    130063,
+    9,
+    130063
+  ],
+  "oracle_ids": [
+    38,
+    32,
+    38,
+    50,
+    39,
+    130073
+  ],
+  "oracle_stopped_on_eos": true,
+  "oracle_text": "1+1=2",
+  "bundle_text": "1+1=2",
+  "bundle_tokens": 6,
+  "cap": 16,
+  "margins": [
+    0.25391632318496704,
+    0.908764660358429,
+    0.9996275305747986,
+    0.8884644508361816,
+    0.9861853122711182,
+    0.8013301491737366
+  ],
+  "result": "PASS",
+  "verdict": "6/6 token-exact, and the bundle stopped where the oracle did (EOS at step 5, oracle margin 0.801).",
+  "halt_check": {
+    "cap": 16,
+    "result": "PASS",
+    "verdict": "the bundle stopped after 6 tokens (cap 16); tail '1+1=2'"
+  },
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "python": "3.14.6",
+    "runner": "/Users/majimadaisuke/code/coreai/coreai-models/.build/release/llm-runner"
+  }
+}

@@ -4,6 +4,13 @@
 
 OpenBMB's 1.08B on-device LLM (hybrid Think / No-Think reasoning, 128K context, 1B-class open-source SOTA), converted to Apple **Core AI** and running fully on-device on iPhone via the pipelined engine.
 
+> **2026-09-09 — the bundle was rebuilt (int8 per-block-32) and the HF revision moved.** The
+> per-channel int8 bundle published as `5ad650f` had dead LM-head rows from vocab id ~65024 up,
+> `<|im_end|>` (130073) included, so a chat turn never halted and any high-id token was lost; its
+> "24/24 token-exact" was real and blind to it (the checked continuation never left the low vocab).
+> Measurements and the gate that catches it: [`knowledge/minicpm5-1b.md`](../../knowledge/minicpm5-1b.md)
+> (2026-09-09 section). Pin the new revision or newer.
+
 <!-- gen-cards:use-it begin id=minicpm5-1b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
@@ -55,20 +62,38 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->
 
-## On-device (iPhone 17 Pro, A19 Pro — `PipelinedBench`, random 128-tok prompt, greedy)
+## Measured (rebuilt bundle, 2026-09-09)
 
-| bundle | decode | prefill | quality | size |
+| | decode | prefill | numerics | size |
 |---|---:|---:|---|---:|
-| **`int8/`** (ship) | **66.8 tok/s** | 68.0 tok/s | **lossless** (24/24 token-exact vs HF fp32) | **1.0 GB** |
+| **iPhone 17 Pro** (A19 Pro — `PipelinedBench`, random 128-tok prompt, greedy, Release; medians of 5 trials over 2 launches: decode 63.6 / 61.2 / 48.4 / 62.7 / 61.7) | **61.7 tok/s** | 65.6 tok/s | **24/24 token-exact** vs HF fp32 on the alphabet prompt (min fp32 top-2 margin 0.841) **+ 6/6 including the stop** on the no-think turn `1+1=?`; engine ready 7.3 s cold, 0.2 s warm | **1.1 GB** |
+| **M4 Max** (macOS 27, `llm-benchmark`, 512p/1024g, 5 trials) | **246.6 tok/s** | 6649 tok/s | **16/16 token-exact** vs the fp32 oracle (`cli/coreai_verify.py`, min margin 0.913, [`gate-minicpm5-1b.json`](gate-minicpm5-1b.json)) + **6/6 and stops** on `--chat no-think --prompt "1+1=?"` ([`gate-minicpm5-1b-stop.json`](gate-minicpm5-1b-stop.json)) | |
 
-int8 is **~2.2× faster than fp16** on iPhone (decode is memory-bandwidth-bound → half the weight read ≈ double throughput) at **no quality cost**. So int8 strictly dominates fp16 here.
+The per-channel bundle it replaces, on the same Mac the same night: 53.7 tok/s decode, and **FAIL** on the
+stop gate (5/6, then runs to the cap against the oracle's 0.80-margin `<|im_end|>`) and on the Think-mode halt check
+(400-token cap). The rebuilt bundle's Think-mode `1+1=?` halts after 171 tokens; the 2B after 190.
+
+⚠️ **iPhone context cap: prompt + generated tokens must stay under 1024** (the shipped pipelined engine caps iOS growing-KV
+capacity at 1024). Trim or chunk the history on the phone; macOS has no cap.
 
 ## Conversion
 
 - **`llama → mistral` remap** — MiniCPM5-1B is a plain `LlamaForCausalLM`; the stock exporter has no `llama` graph family, but the Mistral builder is architecturally identical (GQA, no qkv bias, no qk-norm, explicit `head_dim`). One-line remap in the model registry.
-- **int8** — weight-only symmetric per-channel (absmax, no clipping; SDPA/RoPE/RMSNorm full precision) via `coreai.llm.export … --compression-config` with a `quantization_config` (coreai-opt torch pre-export). Same recipe family as the zoo's `sym8`.
-- **Chat EOS** — base `eos_token` is `</s>`, but the chat template ends turns with `<|im_end|>` (130073); the bundle's tokenizer `eos_token` is set to `<|im_end|>` (as Qwen ships) so generation halts cleanly.
+- **int8 per-block-32** — weight-only symmetric (a scale per 32-wide block along the input dim, no clipping; SDPA/RoPE/RMSNorm full precision) via `coreai.llm.export … --compression-config minicpm5_int8sym_b32.yaml` (coreai-opt torch pre-export) — the same YAML as the 2B. The per-channel sibling (`minicpm5_int8sym.yaml`) is the arm that produced the dead head rows and must not ship; fresh per-channel exports on the current toolchain reproduce them exactly, while per-block-32, the CLI's int4 default and fp16 are clean on the same teacher-forced probes.
+- **Chat EOS** — base `eos_token` is `</s>`, but the chat template ends turns with `<|im_end|>` (130073); the bundle's tokenizer `eos_token` is set to `<|im_end|>` (as Qwen ships). Necessary, not sufficient: the gate now checks that the engine actually stops where the fp32 oracle stops.
 - **Dynamic-shape bundle** → the pipelined engine (the iPhone path). Runs unchanged on macOS and iOS.
+
+## Gate
+
+```bash
+python3 cli/coreai_verify.py <bundle> -n 16                                                   # alphabet, margin-clean parity
+python3 cli/coreai_verify.py <bundle> --chat no-think --prompt "1+1=?" -n 16 --must-stop-within 16   # the stop is a gated step
+python3 cli/coreai_verify.py <bundle> --chat think    --prompt "1+1=?" -n 0  --must-stop-within 400  # Think-mode halt check
+```
+
+A cross-model form of the stop gate — `--prompt "Reply with only the number: 1+1=?"` — reaches `2` `<|im_end|>` at step 1
+on both the 1B (min margin 0.315) and the 2B (0.992); the plain `1+1=?` is rejected on the 2B (two positions below the
+0.1 floor) because the 2B answers it at length.
 
 ## Run
 

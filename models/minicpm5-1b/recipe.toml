@@ -4,7 +4,7 @@
 
 ["minicpm5-1b"]
 script = "export_minicpm5.py"
-args = []
+args = ["--qconfig", "minicpm5_int8sym_b32.yaml"]
 card = "README.md"
 hf_repo = "mlboydaisuke/MiniCPM5-1B-CoreAI"
 source_hf_id = "openbmb/MiniCPM5-1B"
@@ -19,8 +19,11 @@ needs = [
 notes = [
   "This wrapper is the recipe: it runs the stock exporter as",
   "`uv run coreai.llm.export openbmb/MiniCPM5-1B --experimental --compute-precision float16",
-  "--compression-config minicpm5_int8sym.yaml`, then rewrites the bundle's eos_token to",
-  "<|im_end|>. Its own comment states why: the engine stops on a single eosTokenId, so a chat",
-  "bundle that declares </s> never halts. models/minicpm5-1b/verify.toml declares that.",
+  "--compression-config minicpm5_int8sym_b32.yaml` (int8 symmetric PER-BLOCK-32, the 2B's yaml),",
+  "then rewrites the bundle's eos_token to <|im_end|> (the engine stops on a single eosTokenId).",
+  "The per-channel yaml (minicpm5_int8sym.yaml) shipped this model until 2026-09-09 as HF rev",
+  "5ad650f: its LM head was dead from vocab id ~65024 up, <|im_end|> included, so a chat turn",
+  "never halted (knowledge/minicpm5-1b.md, 2026-09-09 section). Gate a rebuild with",
+  "`cli/coreai_verify.py <bundle> --chat no-think --prompt '1+1=?' -n 16 --must-stop-within 16`.",
   "Plain LlamaForCausalLM, so it rides the stock exporter rather than a pipelined script.",
 ]

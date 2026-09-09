@@ -282,7 +282,7 @@ Third-party apps running zoo models. Built something? Open a
 | **Nanbeige4.1-3B** | **15.9** | — | **114.5** |
 | **Nanbeige4.2-3B** (22 physical / 44 executed+cache layers; int8) | pending | — | **46.4** |
 | **S1-mini** (Superwhisper, ASR text normalizer, int8lin — device 276/276 + 27/27 token-exact; ⚠️ iOS cap: prompt+gen < 1024 tok) | **62.4** | — | **268.4** |
-| **MiniCPM5-1B** (OpenBMB, int8 — 24/24 exact vs HF) | **66.8** | — | 59.4 |
+| **MiniCPM5-1B** (OpenBMB, int8 per-block-32 since 2026-09-09 — 24/24 + 6/6-incl.-stop on device, 16/16 on Mac; the earlier per-channel bundle never halted) | **61.7** | — | 246.6 |
 | **MiniCPM5-2B** (OpenBMB, int8 — 16/16 exact vs fp32 HF on Mac, 24/24 + 24/24 on device) | **22.4** | — | 127.6 |
 | **Youtu-LLM-2B** (dense MLA, int8 — 16/16 device ≡ Mac ≡ HF) | **~19** (in-app ~24) | — | **102.8** |
 | **FastContext-1.0-4B** (repo-exploration agent, 4bit — AOT h18p; ANE inference unsupported) | **20.4** | ✗ | — |

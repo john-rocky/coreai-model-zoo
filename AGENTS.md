@@ -84,6 +84,11 @@ template, a tokenizer that silently disagrees with the source).
   max first.
 - **Comparing quality across runtimes without matching the generation budget.** A 12-point
   "quality gap" in this repo's history turned out to be a 600-vs-2048 token cap difference.
+- **Reading token-exact as "the head is fine".** A 24/24 greedy match on a prose prompt exercises
+  the low vocab only; a bundle shipped here for two months with every LM-head row above id ~65024
+  dead — `<|im_end|>` included, so it never ended a turn — and passed. Gate a chat-templated turn
+  that reaches EOS (`cli/coreai_verify.py --chat no-think --prompt "Reply with only the number: 1+1=?"
+  --must-stop-within 16`): the stop token is a high-id token every turn must produce.
 
 ## What a finished port ships
 

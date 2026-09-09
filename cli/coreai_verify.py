@@ -16,6 +16,15 @@ insist on:
   mismatch where the oracle's own top-2 gap is below the floor is a knife-edge tie (fp16
   class), not a failure. Above it, it is a failure.
 
+  The STOP is a token too. When the oracle ends its turn (EOS) at a step whose margin
+  clears the floor and the bundle keeps generating, that is a divergence at that step and
+  it fails — a bundle that never halts scored 24/24 here for two months because the free-run
+  prompts never reached EOS and a longer bundle output was read as "continued past the
+  oracle's stop, nothing disagrees". `--chat no-think --prompt "1+1=?"` is the shape that
+  reaches EOS within a few tokens; `--must-stop-within N` adds a plain halt check on top
+  (the bundle must emit EOS before N tokens), which is what a Think-mode trace needs since
+  its long trace rarely clears the margin floor at every position.
+
 Two backends, chosen automatically:
 
   zoo    The bundle's family has a hand-transcribed fp32 oracle in the zoo's
@@ -203,7 +212,8 @@ warnings.filterwarnings("ignore")
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-hf_id, prompt, n, dtype_name, revision = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4], (sys.argv[5] or None)
+hf_id, prompt, n, dtype_name, revision, chat = (sys.argv[1], sys.argv[2], int(sys.argv[3]),
+                                                sys.argv[4], (sys.argv[5] or None), (sys.argv[6] or None))
 dtype = {"fp32": torch.float32, "fp16": torch.float16}[dtype_name]
 
 tok = AutoTokenizer.from_pretrained(hf_id, revision=revision)
@@ -214,7 +224,20 @@ for e in (getattr(tok, "eos_token_id", None), getattr(model.config, "eos_token_i
     if isinstance(e, int): eos.add(e)
     elif isinstance(e, (list, tuple)): eos.update(int(x) for x in e)
 
-ids = tok(prompt, return_tensors="pt").input_ids
+if chat:
+    # The chat-templated prompt, exactly as the source's own template renders it — one user
+    # turn, generation prompt appended; "no-think" passes enable_thinking=False (a no-op on
+    # templates without that switch). Both sides then see identical ids.
+    if not getattr(tok, "chat_template", None):
+        raise SystemExit(f"--chat: {hf_id}'s tokenizer has no chat template")
+    kw = {} if chat == "think" else {"enable_thinking": False}
+    ids = tok.apply_chat_template([{"role": "user", "content": prompt}],
+                                  add_generation_prompt=True, return_tensors="pt", **kw)
+    if not hasattr(ids, "shape"):
+        ids = ids["input_ids"]
+else:
+    ids = tok(prompt, return_tensors="pt").input_ids
+input_ids = ids[0].tolist()
 gen, margins = [], []
 with torch.no_grad():
     for _ in range(n):
@@ -232,12 +255,18 @@ with torch.no_grad():
 # token-id output, so this is what makes a text-level comparison locate an exact STEP
 # index — and therefore keeps the per-token margin rule meaningful — without
 # re-tokenizing the bundle's output and hoping the round trip is faithful.
+# The stop token is a step with a margin like any other, but the runner never prints it,
+# so the text the bundle can be held to ends before it.
+stopped = bool(gen) and gen[-1] in eos
+text_ids = gen[:-1] if stopped else gen
 prefixes = [tok.decode(gen[:i + 1], skip_special_tokens=False) for i in range(len(gen))]
+if stopped:
+    prefixes[-1] = tok.decode(text_ids, skip_special_tokens=False)
 
 print("<<<JSON>>>" + json.dumps({
-    "input_ids": tok(prompt, return_tensors="pt").input_ids[0].tolist(),
-    "gen_ids": gen, "margins": margins,
-    "gen_text": tok.decode(gen, skip_special_tokens=False),
+    "input_ids": input_ids, "chat": chat,
+    "gen_ids": gen, "margins": margins, "stopped_on_eos": stopped,
+    "gen_text": tok.decode(text_ids, skip_special_tokens=False),
     "step_prefixes": prefixes,
     "eos_ids": sorted(eos), "dtype": dtype_name,
 }))
@@ -245,7 +274,7 @@ print("<<<JSON>>>" + json.dumps({
 
 
 def run_stock_oracle(python: str, hf_id: str, prompt: str, n: int, dtype: str,
-                     revision: str | None) -> dict:
+                     revision: str | None, chat: str | None = None) -> dict:
     with tempfile.NamedTemporaryFile("w", prefix="coreai_verify_oracle_", suffix=".py",
                                      delete=False) as f:
         f.write(ORACLE_SRC)
@@ -254,7 +283,8 @@ def run_stock_oracle(python: str, hf_id: str, prompt: str, n: int, dtype: str,
            "HF_HUB_DISABLE_XET": os.environ.get("HF_HUB_DISABLE_XET", "1"),
            "HF_HUB_DISABLE_PROGRESS_BARS": "1"}
     try:
-        r = subprocess.run([python, script, hf_id, prompt, str(n), dtype, revision or ""],
+        r = subprocess.run([python, script, hf_id, prompt, str(n), dtype, revision or "",
+                            chat or ""],
                            capture_output=True, text=True, env=env,
                            cwd=tempfile.gettempdir())
     finally:
@@ -293,11 +323,14 @@ def driver_plan(facts: dict, runner: str | None) -> tuple[str | None, list[str]]
 
 
 def run_llm_runner(runner: str, bundle: Path, input_ids: list[int], n: int,
-                   static_query: bool) -> tuple[str | None, str]:
-    """Free-running greedy through the engine. Returns (generated text, raw stdout tail).
+                   static_query: bool) -> tuple[str | None, str, int | None]:
+    """Free-running greedy through the engine.
 
-    llm-runner has no token-id output — it prints decoded text between its banner and the
-    timing summary, which is what conversion/coreai_gate.py parses too.
+    Returns (generated text, raw stdout tail, generated-token count). llm-runner has no
+    token-id output — it prints decoded text between its banner and the timing summary,
+    which is what conversion/coreai_gate.py parses too. The count comes from that summary
+    ("Generation: 17ms, 6 tokens"); it includes the stop token, so a count below the cap
+    means the engine halted on EOS.
     """
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
         json.dump({"tokens": input_ids}, f)
@@ -317,8 +350,9 @@ def run_llm_runner(runner: str, bundle: Path, input_ids: list[int], n: int,
     try:
         body = r.stdout.split("Generating...", 1)[1].split("⏱", 1)[0]
     except IndexError:
-        return None, (r.stdout[-1200:] + r.stderr[-800:])
-    return body.strip("\n"), r.stdout[-400:]
+        return None, (r.stdout[-1200:] + r.stderr[-800:]), None
+    m = re.search(r"Generation:\s*[\d.]+\s*ms,\s*(\d+)\s*tokens", r.stdout)
+    return body.strip("\n"), r.stdout[-400:], (int(m.group(1)) if m else None)
 
 
 def run_python_cpu(python: str, bundle: Path, asset: Path, input_ids: list[int],
@@ -374,29 +408,82 @@ asyncio.run(main())
 # ---------------------------------------------------------------------------
 
 
-def judge(oracle: dict, got: str, floor: float) -> tuple[str, str]:
+def judge(oracle: dict, got: str, floor: float, bundle_tokens: int | None = None,
+          cap: int | None = None) -> tuple[str, str]:
     """Compare the bundle's decoded text against the oracle's, per generation STEP.
 
     The oracle records its cumulative decode after every step, so the first step whose
     prefix the bundle's text stops matching IS the diverging step — which is what makes
     the per-token margin rule applicable to a text-only driver.
+
+    The stop is judged like any other step. `bundle_tokens` (from the runner's summary,
+    stop token included) below `cap` means the engine halted on EOS; the oracle records
+    whether it did. Where one side stops and the other continues, the oracle's margin at
+    that step decides, exactly as for a token disagreement.
     """
     prefixes, margins = oracle["step_prefixes"], oracle["margins"]
     n = len(prefixes)
     want = oracle["gen_text"]
+    o_stop = bool(oracle.get("stopped_on_eos"))
+    # None = the runner printed no count, so whether the engine halted is unknowable here;
+    # the text-only rules below then apply and say so. An oracle EOS landing exactly on the
+    # cap is equally undecidable (both sides produce `cap` tokens either way).
+    b_stop: bool | None = None
+    if bundle_tokens is not None and cap is not None:
+        b_stop = bundle_tokens < cap
+    if o_stop and cap is not None and len(oracle["gen_ids"]) >= cap:
+        o_stop, undecidable = False, True
+    else:
+        undecidable = False
     if got == want:
-        return "PASS", f"{n}/{n} token-exact (decoded text identical to the fp32 oracle)."
+        if o_stop and b_stop:
+            return "PASS", (f"{n}/{n} token-exact, and the bundle stopped where the oracle did "
+                            f"(EOS at step {n - 1}, oracle margin {margins[-1]:.3f}).")
+        if o_stop and b_stop is False:
+            m = margins[-1]
+            if m >= floor:
+                return "FAIL", (f"{n - 1}/{n} exact, but the oracle stops at step {n - 1} (EOS, "
+                                f"margin {m:.4f}, above the {floor} floor) and the bundle did "
+                                f"not — it ran to the {cap}-token cap.")
+        note = ""
+        if o_stop and b_stop is None:
+            note = " The oracle stopped here; whether the bundle did is not verifiable (no token count from the runner)."
+        if undecidable:
+            note = f" The oracle's EOS landed on the {cap}-token cap itself; raise -n to gate the stop."
+        return "PASS", f"{n}/{n} token-exact (decoded text identical to the fp32 oracle).{note}"
 
-    # A length difference is not a disagreement. One side stopping first (EOS, or the token
-    # cap landing differently) leaves every token they both produced in agreement, and
-    # calling that a conversion defect is how a gate gets overridden into uselessness.
-    if want.startswith(got):
-        k = sum(1 for p in prefixes if got.startswith(p))
-        return "PASS", (f"{k}/{n} exact; the bundle stopped early — its output is a prefix of "
-                        f"the oracle's, so nothing they both produced disagrees.")
     if got.startswith(want):
-        return "PASS", (f"{n}/{n} exact; the bundle continued past the oracle's stop, so the "
-                        f"oracle hit EOS or the cap first. Nothing disagrees.")
+        # The bundle produced everything the oracle did, then more.
+        if o_stop:
+            k, m = n - 1, margins[-1]
+            extra = got[len(want):][:40]
+            if m >= floor:
+                return "FAIL", (f"{k}/{n} exact, then the oracle stops (EOS at step {k}, top-2 "
+                                f"margin {m:.4f}, above the {floor} floor) and the bundle keeps "
+                                f"generating: {extra!r}. A stop the model is sure of is a token "
+                                f"like any other; not emitting it is a disagreement.")
+            return "PASS", (f"{k}/{n} exact; the oracle stops at step {k} on a {m:.4f} margin, "
+                            f"below the {floor} floor — a knife-edge stop, not a defect. Bundle "
+                            f"continued: {extra!r}")
+        return "PASS", (f"{n}/{n} exact; the bundle continued past the oracle's {cap}-token cap "
+                        f"(different tokenization of the same text). Nothing disagrees.")
+
+    if want.startswith(got):
+        # The bundle's text is a strict prefix of the oracle's.
+        matched = sum(1 for p in prefixes if got.startswith(p))
+        if b_stop is True:
+            i = min(matched, len(margins) - 1)
+            m = margins[i]
+            nxt = want[len(got):][:40]
+            if m >= floor:
+                return "FAIL", (f"{matched}/{n} exact, then the bundle stopped (EOS) where the "
+                                f"oracle continues with {nxt!r} at a {m:.4f} margin, above the "
+                                f"{floor} floor.")
+            return "PASS", (f"{matched}/{n} exact; the bundle stopped where the oracle's next "
+                            f"token sits on a {m:.4f} margin, below the floor — a tie.")
+        return "PASS", (f"{matched}/{n} exact; the bundle's output is a prefix of the oracle's "
+                        f"(same {cap}-token cap, different tokenization), so nothing they both "
+                        f"produced disagrees.")
 
     # Longest step whose cumulative decode the bundle still reproduces.
     matched = 0
@@ -439,6 +526,13 @@ def main() -> None:
                                                   "source.hf_model_id)")
     ap.add_argument("-n", type=int, default=16, help="tokens to compare (default: 16)")
     ap.add_argument("--prompt", default=DEFAULT_PROMPT)
+    ap.add_argument("--chat", choices=["think", "no-think"], default=None,
+                    help="wrap --prompt in the tokenizer's chat template as one user turn "
+                         "(no-think passes enable_thinking=False); the oracle's EOS then "
+                         "becomes a gated step")
+    ap.add_argument("--must-stop-within", type=int, default=None, metavar="N",
+                    help="also require the bundle to emit EOS before N generated tokens on "
+                         "the same prompt (a plain halt check; with -n 0 it is the only check)")
     ap.add_argument("--margin-floor", type=float, default=MARGIN_FLOOR)
     ap.add_argument("--oracle-dtype", default="fp32", choices=["fp32", "fp16"],
                     help="fp32 is the strict ceiling; fp16 for models that will not fit")
@@ -464,8 +558,14 @@ def main() -> None:
     if args.ignore_gpu_lock:
         blockers = [b for b in blockers if "GPU_LOCK" not in b and "_GPU_LOCK" not in b]
 
+    if args.n <= 0 and args.must_stop_within is None:
+        raise SystemExit("-n 0 skips the parity comparison; it only makes sense with "
+                         "--must-stop-within N")
+
     print(f"coreai verify  {bundle}")
     print(f"oracle         {hf_id}" + (f" @ {facts['revision'][:8]}" if facts["revision"] else ""))
+    if args.chat:
+        print(f"prompt         {args.prompt!r} through the chat template ({args.chat})")
     print(f"graph          {facts['n_states']} states, "
           f"query {'static S=1' if facts['static_query'] else 'dynamic'}, "
           f"logits {'dynamic' if facts['dynamic_logits'] else 'static'}")
@@ -493,20 +593,27 @@ def main() -> None:
     if args.plan:
         print("--- PLAN " + "-" * 63)
         print(f"  1. oracle: {hf_id} in {args.oracle_dtype}, greedy, {args.n} tokens, "
-              f"prompt {args.prompt!r}")
+              f"prompt {args.prompt!r}" + (f" via chat template ({args.chat})" if args.chat else ""))
         print(f"  2. reject the prompt if any oracle position's top-2 margin < "
               f"{args.margin_floor}")
         print(f"  3. bundle: {driver}")
-        print("  4. compare token-for-token; a divergence below the margin floor is a tie")
+        print("  4. compare token-for-token; a divergence below the margin floor is a tie;")
+        print("     the oracle's EOS is a step — a bundle that runs past it (or stops before")
+        print("     it) is judged by the margin at that step like any other token")
+        if args.must_stop_within is not None:
+            print(f"  5. halt check: the bundle must emit EOS before {args.must_stop_within} "
+                  f"tokens on the same prompt")
         raise SystemExit(2 if blockers else 0)
 
     print(f"running the oracle ({hf_id}, {args.oracle_dtype}) …", flush=True)
     oracle = run_stock_oracle(python, hf_id, args.prompt, args.n, args.oracle_dtype,
-                              facts["revision"])
-    print(f"  oracle: {oracle['gen_ids']}")
-    print(f"  text  : {oracle['gen_text']!r}")
+                              facts["revision"], args.chat)
+    print(f"  prompt: {len(oracle['input_ids'])} ids")
+    if args.n > 0:
+        print(f"  oracle: {oracle['gen_ids']}" + ("  (stopped on EOS)" if oracle.get("stopped_on_eos") else ""))
+        print(f"  text  : {oracle['gen_text']!r}")
 
-    weak = validate_prompt(oracle, args.margin_floor)
+    weak = validate_prompt(oracle, args.margin_floor) if args.n > 0 else []
     if weak:
         print()
         print("--- PROMPT REJECTED " + "-" * 52)
@@ -519,28 +626,58 @@ def main() -> None:
         print("  Pick a more deterministic prompt and re-run. This is computable from the")
         print("  oracle alone, before any bundle exists.")
         raise SystemExit(3)
-    print(f"  margins: min {min(oracle['margins']):.3f} — clears the {args.margin_floor} floor")
+    if args.n > 0:
+        print(f"  margins: min {min(oracle['margins']):.3f} — clears the {args.margin_floor} floor")
 
     if blockers:
         raise SystemExit(2)
 
-    print(f"\nrunning the bundle ({driver}) …", flush=True)
-    if driver == "llm-runner":
-        got, tail = run_llm_runner(runner, bundle, oracle["input_ids"], args.n,
-                                   bool(facts["static_query"]))
-    else:
-        got, tail = run_python_cpu(python, bundle, Path(facts["asset"]), oracle["input_ids"],
-                                   args.n)
-    if got is None:
-        print("  the driver produced no output:")
-        print("  " + tail.replace("\n", "\n  ")[:1200])
-        raise SystemExit(4)
-    print(f"  bundle: {got!r}")
+    result, line, got, bundle_tokens = "SKIPPED", "no parity comparison requested (-n 0)", None, None
+    if args.n > 0:
+        print(f"\nrunning the bundle ({driver}) …", flush=True)
+        if driver == "llm-runner":
+            got, tail, bundle_tokens = run_llm_runner(runner, bundle, oracle["input_ids"], args.n,
+                                                      bool(facts["static_query"]))
+        else:
+            got, tail = run_python_cpu(python, bundle, Path(facts["asset"]), oracle["input_ids"],
+                                       args.n)
+        if got is None:
+            print("  the driver produced no output:")
+            print("  " + tail.replace("\n", "\n  ")[:1200])
+            raise SystemExit(4)
+        print(f"  bundle: {got!r}" + (f"  ({bundle_tokens} tokens incl. stop)" if bundle_tokens is not None else ""))
 
-    result, line = judge(oracle, got, args.margin_floor)
-    print()
-    print(f"--- {result} " + "-" * (66 - len(result)))
-    print(f"  {line}")
+        result, line = judge(oracle, got, args.margin_floor, bundle_tokens, args.n)
+        print()
+        print(f"--- {result} " + "-" * (66 - len(result)))
+        print(f"  {line}")
+
+    halt = None
+    if args.must_stop_within is not None:
+        cap = args.must_stop_within
+        if driver != "llm-runner":
+            raise SystemExit("--must-stop-within needs the engine (llm-runner); the python-cpu "
+                             "driver has no stop logic to check")
+        print(f"\nhalt check: {cap}-token cap on the same prompt …", flush=True)
+        if args.n == cap and bundle_tokens is not None:
+            h_text, h_tokens = got, bundle_tokens
+        else:
+            h_text, h_tail, h_tokens = run_llm_runner(runner, bundle, oracle["input_ids"], cap,
+                                                      bool(facts["static_query"]))
+            if h_text is None:
+                print("  the driver produced no output:")
+                print("  " + h_tail.replace("\n", "\n  ")[:1200])
+                raise SystemExit(4)
+        if h_tokens is None:
+            halt = ("FAIL", "the runner printed no token count, so the stop cannot be verified")
+        elif h_tokens < cap:
+            halt = ("PASS", f"the bundle stopped after {h_tokens} tokens (cap {cap}); "
+                            f"tail {h_text[-60:]!r}")
+        else:
+            halt = ("FAIL", f"the bundle ran to the {cap}-token cap without emitting EOS; "
+                            f"tail {h_text[-60:]!r}")
+        print(f"--- HALT {halt[0]} " + "-" * (61 - len(halt[0])))
+        print(f"  {halt[1]}")
 
     if args.transcript:
         record = {
@@ -548,19 +685,25 @@ def main() -> None:
             "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "bundle": str(bundle), "backend": backend, "driver": driver,
             "oracle_model": hf_id, "oracle_revision": facts["revision"],
-            "oracle_dtype": args.oracle_dtype, "prompt": args.prompt,
+            "oracle_dtype": args.oracle_dtype, "prompt": args.prompt, "chat": args.chat,
             "margin_floor": args.margin_floor,
             "input_ids": oracle["input_ids"], "oracle_ids": oracle["gen_ids"],
+            "oracle_stopped_on_eos": oracle.get("stopped_on_eos"),
             "oracle_text": oracle["gen_text"], "bundle_text": got,
+            "bundle_tokens": bundle_tokens, "cap": args.n,
             "margins": oracle["margins"],
             "result": result, "verdict": line,
+            "halt_check": ({"cap": args.must_stop_within, "result": halt[0], "verdict": halt[1]}
+                           if halt else None),
             "environment": {"platform": platform.platform(),
                             "python": sys.version.split()[0], "runner": runner},
         }
         Path(args.transcript).write_text(json.dumps(record, indent=2))
         print(f"\n  transcript: {args.transcript}")
 
-    raise SystemExit(0 if result == "PASS" else 1)
+    if result == "FAIL" or (halt and halt[0] == "FAIL"):
+        raise SystemExit(1)
+    raise SystemExit(0)
 
 
 if __name__ == "__main__":
