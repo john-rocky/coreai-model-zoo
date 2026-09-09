@@ -1,0 +1,43 @@
+name: Conversion clinic
+description: A model or a Core ML project that will not convert to Core AI. An error message is enough to start.
+title: "[clinic] "
+labels: ["clinic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Paste what you have. Only the first field is required. We ask for anything missing.
+        On the clinic day after the iOS 27 / macOS 27 release (announced in the pinned issue) every ticket gets a same-day answer: a fix, or the reason it cannot be done yet. Other days: best effort.
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried, and what happened
+      description: The command or code, and the error text or the wrong output. Verbatim is best. If you already searched the error string, say where it led.
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model or project
+      description: Hugging Face URL or name, or a link to the Core ML project
+      placeholder: "https://huggingface.co/Qwen/Qwen3-0.6B"
+    validations:
+      required: false
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: macOS / iOS build, Xcode, coreai-torch version, device
+      placeholder: "macOS 27.0 (26A353), Xcode 27, coreai-torch 0.4.2, iPhone 17 Pro"
+    validations:
+      required: false
+  - type: dropdown
+    id: writeup
+    attributes:
+      label: May we publish the fix in the knowledge base?
+      options:
+        - "Yes"
+        - "Yes, without naming me"
+        - "No"
+    validations:
+      required: false
