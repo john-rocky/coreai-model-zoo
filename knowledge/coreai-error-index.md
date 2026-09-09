@@ -178,6 +178,19 @@ xcrun coreai-build compile <x>.aimodel --platform macOS --preferred-compute gpu 
 - **OS · toolchain:** `coreai-torch` 0.4.0, `coreai-core` 1.0.0b1, MetalToolchain v27.1.5194
   (2026-06-22). Not re-tested on 0.4.2.
 
+## --compression-config: file not found: conversion/minicpm5_int8sym_b32.yaml
+
+`coreai.llm.export` cannot open a quantization YAML given by a path relative to the caller.
+
+- **When:** a wrapper (or a shell) passes `--compression-config <relative path>` while running the
+  exporter with `cwd` set to the `coreai-models` checkout (`uv run` resolves the project there).
+- **Verified cause:** the path is opened relative to the exporter's cwd, not the caller's; a bare
+  file name happens to work only when the caller already sits in the directory holding the YAML.
+- **Fix:** resolve the path to absolute before passing it (`conversion/export_minicpm5.py` does).
+- **Evidence:** log: `~/code/standup/handoffs/assets/2026-09-09-minicpm5-1b-eos-repair/export_step3_b32.log`
+  (first attempt). Record: [`minicpm5-1b.md`](minicpm5-1b.md) (2026-09-09 section).
+- **OS · toolchain:** `coreai-torch` 0.4.1, `coreai-models` 397b337, 2026-09-09.
+
 ---
 
 **`xcrun coreai-build compile`**
@@ -965,6 +978,44 @@ Engine creation fails for every hybrid bundle on the stock engines.
 - **Evidence:** record: `~/code/coreai/SPOT_RAG_STATE.md`, [`pipelined-engine.md`](pipelined-engine.md)
   (Driving hybrid bundles from an APP). `coreai doctor`: `GRAPH-STATE-COUNT`.
 - **OS · toolchain:** `coreai-models` v0.1.0 through July 2026.
+
+## CoreAI pipelined engine does not support logits (GPU-side sampling)
+
+`llm-runner --print-logits` / `--save-logits` refused on a dynamic bundle (the default engine).
+
+- **When:** asking the pipelined engine for logits in any form; the full line continues "Use a
+  sequential engine for constrained generation or evaluation."
+- **Verified cause:** the pipelined engine samples on the GPU and never materializes a logits
+  buffer on the host.
+- **Fix:** score through `--inference-engine-variant coreai-sequential` **in teacher-forced mode**:
+  `--prompt-file <ctx> --apply-chat-template=false --continuation "<text>" --print-logits`, which
+  prints P(target) and the top-5 logits at every position of the continuation. The context must be
+  text (`--raw-tokens` is rejected, next entry) and the runner adds BOS itself, so write the template
+  text without `<s>` and check the printed `Context tokens:` count against the reference's ids. The
+  sequential engine's *free-running* logits path is the off-by-one below, so do not use that.
+- **Evidence:** log: `~/code/standup/handoffs/assets/2026-09-09-minicpm5-1b-eos-repair/runA_1b_nothink_greedy_printlogits.out`
+  (refusal), `runE2_1b_nobos_continuation.out` (the working form). Record: [`minicpm5-1b.md`](minicpm5-1b.md).
+- **OS · toolchain:** `coreai-models` 397b337 `llm-runner`, macOS 27 beta (26A5416b), 2026-09-09.
+
+## Token count (9) does not match logits count (8)
+
+The sequential engine's free-running `--print-logits` / `--save-logits` abort after generation with
+one fewer logits row than tokens (the numbers scale with `--max-tokens`: 7 vs 6 at 6).
+
+- **When:** `--inference-engine-variant coreai-sequential --raw-tokens … --max-tokens N --print-logits`
+  (or `--save-logits`); nothing is written, the JSON file is not created.
+- **Cause:** Not isolated. Measured: generatedTokens = logits + 1 on every N tried (6, 8).
+- **Fix:** none for the free-run path; use teacher-forced `--continuation` scoring (previous entry),
+  which prints per-position logits and exits 0.
+- **Evidence:** log: `…/2026-09-09-minicpm5-1b-eos-repair/runB_1b_nothink_seq_logits.out`,
+  `runC_1b_seq_savelogits.out`. Record: `conversion/verify_minicpm5.py` docstring.
+- **OS · toolchain:** `coreai-models` 397b337, 2026-09-09.
+
+## --continuation requires text prompt (--prompt or --prompt-file), not --raw-tokens
+
+Usage constraint of the teacher-forced path, as printed. Give the context as text and verify the
+`Context tokens:` count, as in
+[CoreAI pipelined engine does not support logits](#coreai-pipelined-engine-does-not-support-logits-gpu-side-sampling).
 
 ---
 

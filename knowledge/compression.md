@@ -41,6 +41,18 @@ Big-vocab models have huge embedding tables (Gemma 4's per-layer table is 9.4 GB
   gather, and the iOS palettized-embedding custom op doesn't lower on macOS. int4 gather has no
   clean path today; **int8 is the practical floor** for embedding gather too.
 
+## Per-channel int8 on a big-vocab LM head: use per-block-32
+
+Weight-only symmetric int8 with **per-channel** scales (`granularity: per_channel, axis: 0`) on
+MiniCPM5's 130560-row untied head produced bundles whose rows from vocab id ~65024 up score ~0
+through the engine — `<|im_end|>` among them, so chat turns never ended — while rows below match
+fp32 to ~0.01 and a low-vocab parity gate reads 24/24. Reproduced bit-for-bit by a fresh export on
+`coreai-torch` 0.4.1 / `coreai-opt` 0.2.1; the same YAML with `granularity: {type: per_block,
+block_size: 32}` has no dead rows, and on the Mac GPU it also lands on the fast quantized-matmul path
+(1B: 246.6 vs 53.7 tok/s decode; 2B: 127.6 vs 25.6). Which component cuts the rows is not
+established. Ship per-block-32 for int8 heads of this size, and gate the stop token
+([`minicpm5-1b.md`](minicpm5-1b.md), 2026-09-09 section).
+
 ## Via the CLI
 
 `coreai.llm.export <model> --compression int8` routes a new macOS int8 k-means preset through the

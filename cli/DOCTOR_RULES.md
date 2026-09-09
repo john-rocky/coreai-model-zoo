@@ -163,7 +163,7 @@ looks upstream. Both, not either.
 
 Doctor is static. Everything above is a pattern in a file. The defects that remain after a
 clean run are the ones that only a measurement can see, and the notes are emphatic about
-three of them:
+four of them:
 
 **An equivalence gate cannot detect a defect its reference shares.** The `wNa8o8`
 checkpoint scored 3/3 "EXACT vs oracle" while losing half its reasoning accuracy, because
@@ -181,6 +181,16 @@ space is not something a file can be inspected for.
 because every device gate capped generation at 256 tokens and the bug needs 1024. A quality
 comparison in the same period produced a 20%-vs-80% result that was entirely a 512-token
 budget cutting off a reasoning arm mid-thought. Neither is visible in any artifact.
+
+**Token-exact on a prompt that never leaves the low vocabulary.** A per-channel int8 export of
+MiniCPM5-1B shipped for two months at "24/24 token-exact vs HF fp32" with every LM-head row above
+vocab id ~65024 dead — `<|im_end|>` (130073) included, so no chat turn ever ended. The 24 expected
+ids of that gate topped out at 10296; the four free-run prompts were low-id English. A greedy match
+proves the rows it exercised and nothing about the rest of a 130k-row head. The probe that sees it
+is a chat-templated turn that reaches EOS (`cli/coreai_verify.py --chat no-think --prompt "Reply
+with only the number: 1+1=?" --must-stop-within 16`): the stop token is a high-id token every turn
+must produce, and the fp32 margin at that step is what makes its absence a verdict.
+Record: [`knowledge/minicpm5-1b.md`](../knowledge/minicpm5-1b.md) (2026-09-09 section).
 
 So the honest closing line of a clean doctor run is the one the tool prints: gate the bundle
 against an HF oracle, teacher-forced top-1 over a prompt whose fp32 top-2 margin clears 0.1
