@@ -144,3 +144,10 @@ The working recipe on this machine:
 
 Driver scripts: recovery session scratchpad `strip_b1.py` / `strip_sweep.py`.
 `.aimodelc` (compiled) artifacts cannot be stripped — those need re-export + AOT recompile.
+
+**2026-09-09 — re-verified, drivers checked in.** The two-step recipe above now lives in
+[`conversion/recovery/`](../conversion/recovery/) (`strip_b1.py` for the 0.4.0 + b1 venv, whose helper
+signatures differ from 0.4.1's; `resave_b2.py` for the producer stamp and a `cpu_only` runtime load).
+On macOS 27 26A5416b the `qwen3.5-0.8B` `perchan_sym` bundle that still aborted at load on 2026-09-04
+strips in 2.2 s, re-saves in 0.9 s, and loads. 34 published bundles still carry 0.4.0-era IR
+(`zoo_smoke.py --all --stamp-only`); they are the queue for the GA+2 sweep.
