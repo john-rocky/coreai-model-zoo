@@ -349,6 +349,7 @@ kernel — the stock MPSGraph SDPA crashes on the ≥16-head × 512 Q (a GPU scr
 - **Make it fast** → [`knowledge/custom-metal-kernels.md`](knowledge/custom-metal-kernels.md) · [`knowledge/performance-ceiling.md`](knowledge/performance-ceiling.md)
 - **Known beta issue** (in-graph KV-write crash; workarounds + the input-mask escape) → [`knowledge/coreai-beta-mpsgraph-kvwrite-bug.md`](knowledge/coreai-beta-mpsgraph-kvwrite-bug.md) — FB23024751 / [apple/coreai-models#5](https://github.com/apple/coreai-models/issues/5)
 - **Hit an error string** (`LLVM ERROR: …`, `failed assertion …`, `failedToSpecialize`, `NSPOSIXErrorDomain Code=2`, …) → [`knowledge/coreai-error-index.md`](knowledge/coreai-error-index.md) — every exact string this project has observed, verbatim as a heading, with the verified cause, the fix, and the log or Apple issue behind it
+- **Still stuck** → [conversion clinic](https://github.com/john-rocky/coreai-model-zoo/issues/new?template=conversion-clinic.yml) — paste the error, get an answer
 
 ## Repository layout
 
@@ -419,6 +420,7 @@ for you if you don't have the device.
 - **Port a model** — [`PORTING.md`](PORTING.md) walks the whole path (oracle → export → gates →
   publish); PRs welcome.
 - **Conversion requests** — a model you'd like to see here? [Open an issue](https://github.com/john-rocky/coreai-model-zoo/issues/new) with the Hugging Face link and what you'd use it for.
+- **Stuck converting?** Open a [conversion clinic](https://github.com/john-rocky/coreai-model-zoo/issues/new?template=conversion-clinic.yml) issue. The error text alone is enough to start; we ask for the rest. On the clinic day after the OS 27 release every ticket gets a same-day answer — a fix, or the reason it cannot be done yet. Search your error string first in [`knowledge/coreai-error-index.md`](knowledge/coreai-error-index.md); if it is there, so is the fix.
 - **No code needed** — run the Bench tab in [CoreAIChat (TestFlight)](https://testflight.apple.com/join/bK4P7xby) and submit the result: your device becomes a row in [`BENCHMARKS.md`](BENCHMARKS.md).
 
 ## Recovery note — the coreai-torch 0.4.0 incident
