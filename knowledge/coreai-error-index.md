@@ -1091,6 +1091,27 @@ down.) Record: [`bitvla-1.58bit-vla.md`](bitvla-1.58bit-vla.md), `~/code/coreai/
 
 ---
 
+## Unable to resolve module dependency: 'CoreAI'
+
+```
+.../coreai-models/swift/Sources/CoreAIShared/Runtime/ModelStructure.swift:6:8: error: Unable to resolve module dependency: 'CoreAI' (in target 'CoreAIShared' from project 'coreai-models')
+    note: A dependency of main module 'CoreAIShared'
+```
+
+- **When:** building any target that depends on `apple/coreai-models` (or CoreAIKit) for the **iOS
+  Simulator** — `-sdk iphonesimulator` / `-destination 'platform=iOS Simulator'`. The first
+  `import CoreAI` in the Swift package fails to resolve.
+- **Cause (verified 2026-09-10):** `CoreAI.framework` is not in `iPhoneSimulator.sdk` and not in the
+  simulator runtime root (`iOS 27.0.simruntime`, 24A5408d); it exists only in `iPhoneOS.sdk` and
+  `MacOSX.sdk`. There is nothing to link against, so the dependency package cannot compile for the
+  simulator at all — not a project setting, not a signing issue.
+- **Fix:** build for a real iPhone/iPad (`generic/platform=iOS`) or for macOS. Host-side verification
+  without a device: the Mac target — `swift run chat-cli --model qwen3-0.6b --prompt "Hello"` from
+  `coreai-kit/Examples/ChatDemo`, or any macOS scheme. Do not report "works" from a Simulator run.
+- **Evidence:** Xcode 27 beta 5 (27A5237l), ChatDemo built for `generic/platform=iOS Simulator`,
+  log `sim_build.log` 2026-09-10; SDK / runtime listings the same day.
+- **OS / toolchain:** macOS 27 26A5416b, Xcode 27 beta 5, coreai-models 0.2.4-zoo via CoreAIKit 0.4.1.
+
 ## When there is no string
 
 Some aborts print nothing useful. What was learned about each:
