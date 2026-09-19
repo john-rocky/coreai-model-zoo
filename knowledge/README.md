@@ -187,6 +187,9 @@ For the long-form version of the same material, read
   taken on knowing it is Mac-only against an already-converted MLX build.
 - [`bitcpm-ternary-1.58bit.md`](bitcpm-ternary-1.58bit.md) — **1.58-bit ternary** MiniCPM4-8B: the
   zoo's first sub-int8 packed-GEMM Metal kernel; an 8B running in ~2.1 GB on the iPhone GPU.
+- [`bonsai-ternary-hadamard.md`](bonsai-ternary-hadamard.md) — **Bonsai 2 27B** (ternary g128 +
+  blockwise Hadamard, Qwen3.8-27B hybrid): PQ2_0/PTQ1_0 bit layouts, where the rotation sits,
+  what stays non-ternary, and the diff against the zoo's `qwen3_5.py`. Written before the port.
 - [`bitvla-1.58bit-vla.md`](bitvla-1.58bit-vla.md) — 1.58-bit **Vision-Language-Action** (robotics):
   image + instruction → 7-DoF actions, fully on-device.
 - [`s1-mini-port.md`](s1-mini-port.md) — S1-mini (Superwhisper), a Qwen3-0.6B ASR text
