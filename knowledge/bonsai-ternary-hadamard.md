@@ -792,10 +792,19 @@ they replace; the host's position math (no off-by-one in decode or prefill).
 **Broad host battery (2026-09-19):** ten isolated prompts from 53 to 848 tokens covered prose,
 code, numbers, repetition, newlines, CJK, mixed scripts and emoji. Chunked prefill vs the S=1
 fused walk agreed on 4,347/4,405 teacher-forced prompt argmaxes and **80/80 continuation tokens**.
-The intermediate drift is largest on repeated newline/high-ID-token inputs and is consistent with
-the known q/k L2-reduction difference (fp16 graph reduction in the chunk path, fp32 in the fused
-step). It is now measured rather than latent, but has not changed a tested continuation; the three
-MLX-reference generations also remain identical.
+The intermediate drift is largest on repeated newline/high-ID-token inputs. Follow-up controls on
+the 419-position `mixed_scripts` case identified one cause directly: the chunk kernel retains the
+GDN recurrent state in fp32 through the whole chunk, whereas an S=1 walk writes it to fp16 after
+every token. A 4-layer, same-GDN-path S=64 control moved from 418/419 to 419/419 when the chunk
+kernel deliberately reproduced the per-token fp16 writeback. At 64 layers, per-token state
+rounding moved the shipping fused-main comparison from 399/419 to 407/419; also using the same GDN
+path reached 413/419 at S=64 and 410/419 at S=16. All controls retained 8/8 continuation agreement.
+The residual is therefore shape- and path-dependent floating-point reduction order elsewhere in
+the chunk graph, not a monotonic chunk-length error; the q/k L2 reduction remains a known candidate
+but was not isolated as the sole cause. This is measured internal drift, not a demonstrated
+generation failure, and the three MLX-reference generations also remain identical. Per-token state
+rounding stays diagnostic because it throws away the chunk recurrence's extra precision and adds
+work without making the full model exact.
 
 **Other latent traps:** `TernaryLinear128` under a dynamic query length would compute row 0 only
 (the `else` branch of the int check); `last_token_only=True` would double-apply the head transform

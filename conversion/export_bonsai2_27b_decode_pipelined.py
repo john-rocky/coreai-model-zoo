@@ -298,6 +298,8 @@ def main() -> int:
     ap.add_argument("--head-rows", type=int, default=None, help="debug: truncate lm_head to N rows (timing probes)")
     ap.add_argument("--gdn-main", choices=("fused", "chunk", "step"), default="fused",
                     help="GDN path traced into `main` (S=1): fused step kernel (round 3), chunk-scan kernel, or torch step")
+    ap.add_argument("--round-chunk-state", action="store_true",
+                    help="diagnostic: round GDN recurrent state to fp16 after every token inside prefill chunks")
     args = ap.parse_args()
 
     path = gguf_path(args.gguf)
@@ -321,7 +323,8 @@ def main() -> int:
         raise SystemExit(f"--chunks {extra_chunks} must all be smaller than --chunk {args.chunk}")
     model, kern = load_bonsai2_from_gguf(path, num_layers=args.num_layers, dtype=DTYPE,
                                          chunk=([args.chunk, *extra_chunks] if args.chunk else None),
-                                         head_rows=args.head_rows)
+                                         head_rows=args.head_rows,
+                                         round_chunk_state_each_token=args.round_chunk_state)
     cfg = model.config
     n_buf = sum(b.numel() * b.element_size() for b in model.buffers()) / 1e9
     print(f"loaded in {time.perf_counter() - t0:.0f}s: hidden={cfg.hidden_size} layers={cfg.num_hidden_layers} "
@@ -329,7 +332,8 @@ def main() -> int:
           f"buffers={n_buf:.2f} GB", flush=True)
 
     name = "bonsai2_27b_decode_pq2_0" + (f"_pf{args.chunk}" if args.chunk else "") + \
-           (f"_l{args.num_layers}" if args.num_layers else "")
+           (f"_l{args.num_layers}" if args.num_layers else "") + \
+           ("_roundstate" if args.round_chunk_state else "")
     functions = ("main", "prefill", *(f"prefill{c}" for c in extra_chunks)) if args.chunk else ("main",)
     t0 = time.perf_counter()
     if args.chunk:

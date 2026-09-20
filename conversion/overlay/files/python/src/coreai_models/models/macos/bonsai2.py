@@ -49,7 +49,8 @@ class BonsaiKernels:
     """The kernels one export registers: matvec, FWHT, embed, the fused S=1 GDN step, and with a
     prefill chunk also the tiled GEMM and the zoo's fp32 GDN chunk-scan (`qwen3_5_gdn_metal`)."""
 
-    def __init__(self, chunk: int | list[int] | None = None, rms_eps: float = 1e-6) -> None:
+    def __init__(self, chunk: int | list[int] | None = None, rms_eps: float = 1e-6,
+                 round_chunk_state_each_token: bool = False) -> None:
         chunks = sorted({int(c) for c in ([chunk] if isinstance(chunk, int) else (chunk or [])) if c > 1}, reverse=True)
         self.chunks = chunks
         self.chunk = chunks[0] if chunks else None       # the largest: sizes the GDN scan's buffers
@@ -60,7 +61,9 @@ class BonsaiKernels:
         self.gemm = self.gemms.get(self.chunk)
         self.fwht = build_fwht_kernel()
         self.embed = build_embed_kernel()
-        self.gdn_chunk = build_gdn_chunk_kernel_sh(chunk_max=self.chunk) if self.chunk else None
+        self.gdn_chunk = build_gdn_chunk_kernel_sh(
+            chunk_max=self.chunk, round_state_each_token=round_chunk_state_each_token
+        ) if self.chunk else None
         self.gdn_step = build_gdn_step_kernel(rms_eps)
         # S=1 site fusions (round 3): residual add + pre-norm + transform, and swiglu + transform
         self.add_norm_fwht = build_add_norm_fwht_kernel(rms_eps)
@@ -74,7 +77,7 @@ class BonsaiKernels:
 
 
 def build_gdn_chunk_kernel_sh(name: str = "bonsai_gdn_chunk_sh", max_dk: int = 128,
-                              chunk_max: int = 64):
+                              chunk_max: int = 64, round_state_each_token: bool = False):
     """The zoo's fp32 GDN chunk-scan kernel with G/BETA read from the [S, h] layout.
 
     `qwen3_5_gdn_metal` transposes g/beta to [h, S] and `.contiguous()`s them; the Core AI graph
@@ -87,6 +90,12 @@ def build_gdn_chunk_kernel_sh(name: str = "bonsai_gdn_chunk_sh", max_dk: int = 1
 
     src = _GDN_CHUNK_SRC.replace("G[t, hh]", "G[hh, t]").replace("BETA[t, hh]", "BETA[hh, t]")
     assert "G[hh, t]" in src and "BETA[hh, t]" in src
+    if round_state_each_token:
+        marker = "        OUT[c, t, hh] = TYPE(oc);\n"
+        rounded = marker + "        for (uint d = 0; d < dk; ++d) st[d] = float(half(st[d]));\n"
+        assert src.count(marker) == 1
+        src = src.replace(marker, rounded)
+        name += "_roundstate"
 
     def _torch_defn(QN: torch.Tensor, KN: torch.Tensor, V: torch.Tensor, G: torch.Tensor,
                     BETA: torch.Tensor, S0: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
@@ -358,7 +367,8 @@ def _vperm(nv: int, nk: int, unit: int) -> np.ndarray:
 
 def load_bonsai2_from_gguf(gguf_path: str, *, num_layers: int | None = None,
                            chunk: int | list[int] | None = None, dtype: torch.dtype = torch.float16,
-                           head_rows: int | None = None):
+                           head_rows: int | None = None,
+                           round_chunk_state_each_token: bool = False):
     """Build the stateful decoder from the PQ2_0 GGUF. Returns (model, kernels)."""
     import gguf
 
@@ -366,7 +376,8 @@ def load_bonsai2_from_gguf(gguf_path: str, *, num_layers: int | None = None,
     cfg = config_from_gguf(reader, num_layers)
     _, signs, folded = hadamard_signs_from_gguf(reader)
     src = _Src(reader)
-    kern = BonsaiKernels(chunk, rms_eps=cfg.rms_norm_eps)
+    kern = BonsaiKernels(chunk, rms_eps=cfg.rms_norm_eps,
+                         round_chunk_state_each_token=round_chunk_state_each_token)
     d_model = cfg.hidden_size
 
     with torch.device("meta"):

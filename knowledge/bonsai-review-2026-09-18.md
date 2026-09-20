@@ -263,6 +263,17 @@ MLX fixtures retained identical 24-, 48- and 40-token generations. This is measu
 numeric drift, not yet a demonstrated generation failure; matching the reduction dtype remains a
 candidate for a future re-export, not a release claim.
 
+Follow-up on 2026-09-20: q/k reduction was not the whole explanation. The chunk GDN kernel keeps
+its recurrent state in fp32 until the end of a chunk, while the S=1 path writes fp16 state after
+every token. On a 4-layer same-GDN-path control, deliberately rounding chunk state after each token
+changed S=64 from 418/419 to 419/419. On the full 64-layer model, state rounding changed the
+shipping fused-main result from 399/419 to 407/419; aligning the GDN path as well reached 413/419
+at S=64 and 410/419 at S=16. Every control retained 8/8 continuation agreement. The non-monotonic
+S=16/S=64 residual points to shape-dependent reduction order elsewhere in the chunk graph; q/k
+normalization is one known contributor, not an isolated root cause. Per-token state rounding is a
+diagnostic, not a recommended shipping change: it discards the chunk path's higher-precision
+recurrence and adds work without producing full-model exactness.
+
 Confidence: **verified by reading and exercised by the host battery**; user-visible impact **not observed**.
 
 ---
