@@ -175,16 +175,15 @@ Confidence: **verified by reading both sides + metadata.json.**
 
 ---
 
-### 5. Step 0 of any walk feeds `position_ids` of length 1, below the traced Dim min of 2
+### 5. Resolved: the S=1 trace must accept a length-1 `position_ids`
 `export_bonsai2_27b_decode_pipelined.py:82`; `BonsaiEngine.swift:269`
 
-`torch.export.Dim("seq_pos", min=max(2, query))` = 2 for `main`, but `run()` builds
-`[1, total]` with `total = 1` on the first walked token. Reached by: a 1-token prompt, `--walk`,
-`parity --walk`, and `selfCheck`'s walk arm (which always walks from position 0). The zoo note §8.4
-records this as "the Mac accepts it; the device may not" — so every `parity` run on device would
-fail at step 0, and `selfCheck` can never run on device at all. Unguarded in the host.
+The original trace used `torch.export.Dim("seq_pos", min=max(2, query))`, which set a minimum of 2
+for `main`, while `run()` builds `[1, total]` with `total = 1` on the first walked token. Reached
+by a one-token prompt, `--walk`, `parity --walk`, and `selfCheck`'s walk arm. The exporter now uses
+`min=query`, so the S=1 contract accepts the first length-1 position tensor.
 
-Confidence: **verified by reading**; the device behaviour itself is **speculative** (untested, per the note).
+Confidence: **verified in the current exporter and host gate.**
 
 ---
 

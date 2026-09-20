@@ -78,10 +78,8 @@ def decode_spec(cfg, max_ctx: int, query: int = 1):
     reference_inputs = {"input_ids": input_ids, "position_ids": position_ids, **state}
     dynamic_shapes = {
         "input_ids": None,
-        # min = the query length, NOT max(2, query): iOS MPSGraph asserts `Failed to resolve dynamic
-        # dimensions for memref.alloc` when the S=1 entrypoint is driven at position 0 (length 1 <
-        # min 2). macOS tolerates it; the device does not (see ternary-chunked-prefill.md, and the
-        # same fix in export_bitcpm8b_chunked_prefill.py).
+        # min = the query length, NOT max(2, query): the S=1 entrypoint is driven at position 0
+        # with a length-1 position tensor, so a minimum of 2 contradicts the host contract.
         "position_ids": {1: torch.export.Dim("seq_pos", min=query, max=max_ctx - 1)},
         "k_cache": {KVCache.seq_len_dim(): torch.export.Dim("k_seq", min=TRACE_KV_CACHE_SEQ_LEN, max=max_ctx)},
         "v_cache": {KVCache.seq_len_dim(): torch.export.Dim("v_seq", min=TRACE_KV_CACHE_SEQ_LEN, max=max_ctx)},
@@ -349,7 +347,7 @@ def main() -> int:
         def prepare_main(m):
             # "fused" (round 3): the whole GDN block between the projections in one kernel.
             # "chunk" is the round-0..2 path (the fp32 chunk-scan kernel at S=1, the proven one);
-            # the loop-free torch step ("step") is untested on device.
+            # the loop-free torch step ("step") is a diagnostic path, not the published graph.
             set_gdn_mode(m, args.gdn_main)
             set_next_token_output(m, not args.no_next_token)
 

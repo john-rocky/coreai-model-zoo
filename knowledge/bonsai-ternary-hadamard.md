@@ -410,9 +410,7 @@ matmul reference disagrees with it at the same rate. Near zero the residual is ~
 dominated by the runtime's per-invocation floor (~0.3 ms), not the kernel; the per-token cost in
 the real graph is a per-node dispatch question for step 3.
 
-**iPhone AOT: passes.** `coreai-build compile <bundle> --platform iOS --preferred-compute gpu
---architecture h18p --min-deployment-version 27.0` → EXIT 0, a 56 KB `fwht_k5120_s1.h18p.aimodelc`.
-The trap on the way there is worth its own line: `aimodelc`, the binary in Xcode 27 beta's
+**AOT compiler entrypoint.** `aimodelc`, the binary in Xcode 27 beta's
 `usr/bin`, refuses with "Core AI requires the Metal Toolchain" even with the Metal Toolchain
 component (27A5237l) installed. It is only a proxy (`IDEMLCompilerCore.MLAssetCompilerProxy`)
 that resolves the real compiler through the DVT toolchain registry's *default* toolchain, which
@@ -422,8 +420,8 @@ compiler is `Metal.xctoolchain/usr/bin/coreai-build`; once the component is inst
 and the explicit path works regardless:
 
 ```bash
-"$(dirname "$(xcrun -f metal)")/coreai-build" compile <bundle.aimodel> --platform iOS \
-    --preferred-compute gpu --architecture h18p --min-deployment-version 27.0 --output <dir>
+"$(dirname "$(xcrun -f metal)")/coreai-build" compile <bundle.aimodel> --platform macOS \
+    --preferred-compute gpu --architecture h16s --expect-frequent-reshapes --output <dir>
 ```
 
 ### 8.2 Status: the decoder runs on Core AI (2026-09-17, step 3)
@@ -531,10 +529,6 @@ scope … depends on this scoped access to variable 'keyCache'" — although App
 the statement; a view from a local `var` lives to the end of the scope (parakeet-swift's decode loop
 found the same). Fix in `BonsaiEngine.run`: `swap` each state/output NDArray out of its slot into a
 local, insert the locals, run, `defer` the swap back. Handles move, bytes do not.
-
-One more contract note for iOS: `main`'s `position_ids` Dim has `min=2` (§8.3) but step 0 of a walk
-feeds length 1. The Mac accepts it; the device may not (`ternary-chunked-prefill.md` §6), so a
-device host should prime position 0 through a chunk or pad — untested.
 
 ### 8.5 Perf round 1: where a token goes, and the matvec wall (2026-09-18)
 
@@ -776,11 +770,11 @@ they replace; the host's position math (no off-by-one in decode or prefill).
    `reduce_index` in generation, on fp16 logits where ties near a 0.01 margin are routine. The gate
    now compares both at every walked step (0 mismatches over 134 steps on the three fixtures) and
    `BONSAI_CHECK_ARGMAX=1` does the same on a chat run.
-5. *`--kv` was unvalidated:* below the traced KV minimum of 2048 or at exactly `max_ctx` (where
+5. *`--kv` and the position trace bounds needed validation:* below the traced KV minimum of 2048
+   or at exactly `max_ctx` (where
    `position_ids` of length 4096 exceeds its traced max of 4095). The host now refuses capacities
-   outside [2048, max_ctx] and caps positions at `min(kv, max_ctx - 1)`. Still open: the first
-   walked step passes `position_ids` of length 1 against `Dim(min=2)`; the Mac accepts it, a device
-   may not (untested, no device yet).
+   outside [2048, max_ctx] and caps positions at `min(kv, max_ctx - 1)`. The export now traces
+   `position_ids` with `min=query`, so the S=1 entrypoint accepts the length-1 first step.
 6. *`A_log` and `dt_bias` were cast to fp16* by the loader's `param`, contradicting the file's own
    docstring; `exp(fp16(log A))` is off by up to 1e-3 relative, 2.2x the error of keeping fp32, on
    the factor that multiplies the recurrent state every token. Both are fp32 now (the zoo's forward
