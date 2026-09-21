@@ -1,0 +1,19 @@
+# HF-id swap of the unchanged qwen3.5-4b recipe.
+["agents-a1-4b"]
+script = "export_qwen3_5_decode_pipelined.py"
+args = ["int8hu", "--head-sym", "--hf-id", "InternScience/Agents-A1-4B"]
+card = "README.md"
+hf_repo = "mlboydaisuke/Agents-A1-4B-CoreAI"
+source_hf_id = "InternScience/Agents-A1-4B"
+bundle = "gpu-pipelined-b2/agents_a1_4b_decode_int8hu_block32_sym"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "HF-id swap of qwen3.5-4b; unchanged exporter with int8hu --head-sym.",
+  "No system message injects the Intern-A1 deep research assistant persona and Current date: 2026-07-14; apps should pass their own system message with the real date.",
+  "Thinking is on by default; enable_thinking=False renders the no-think prefix.",
+  "Tool calls use XML function/parameter blocks inside tool_call, not JSON; nothing follows the closing tool_call tag.",
+  "The chat stop is im_end 248046; text_config eos_token_id 248044 is not the chat stop.",
+]

@@ -1,0 +1,99 @@
+{
+  "result": "PASS",
+  "arch": "qwen3.5",
+  "bundle": "agents_a1_4b_decode_int8hu_block32_sym",
+  "artifact": null,
+  "source_model": {
+    "hf_id": "InternScience/Agents-A1-4B",
+    "revision": "945c40a4aa6f534d434a353207b8d42ecf7a5293",
+    "weights_pinned": false,
+    "note": "the oracle loads the source repo's default branch; the recipe's revision pins the export, not this comparison"
+  },
+  "protocol": {
+    "prompt": "The alphabet begins A, B, C, D, E, F,",
+    "max_new_tokens": 16,
+    "greedy": true,
+    "oracle_dtype": "fp32",
+    "engine_variant": "coreai-pipelined",
+    "warmup": "off",
+    "env": {
+      "COREAI_CHUNK_THRESHOLD": "1"
+    },
+    "tie_rule": "a first divergence passes only where the oracle's top-2 margin < 0.1"
+  },
+  "input_ids": [
+    760,
+    26887,
+    11690,
+    357,
+    11,
+    417,
+    11,
+    351,
+    11,
+    414,
+    11,
+    458,
+    11,
+    426,
+    11
+  ],
+  "oracle": {
+    "gen_ids": [
+      469,
+      11,
+      462,
+      11,
+      353,
+      11,
+      604,
+      11,
+      710,
+      11,
+      436,
+      11,
+      380,
+      11,
+      443,
+      11
+    ],
+    "gen_text": " G, H, I, J, K, L, M, N,",
+    "top2_margins": [
+      0.9657768607139587,
+      0.9452205896377563,
+      0.9811243414878845,
+      0.9574398398399353,
+      0.9909595847129822,
+      0.977692186832428,
+      0.9930384755134583,
+      0.9602941870689392,
+      0.992953360080719,
+      0.9879523515701294,
+      0.9970197677612305,
+      0.9895161986351013,
+      0.9979963898658752,
+      0.9810081720352173,
+      0.9948955774307251,
+      0.9948394298553467
+    ]
+  },
+  "engine": {
+    "gen_text": " G, H, I, J, K, L, M, N,"
+  },
+  "match": {
+    "exact_prefix": 16,
+    "of": 16,
+    "first_divergence": null
+  },
+  "schema": "coreai-gate-transcript/1",
+  "generated_at": "2026-09-21T03:38:52+00:00",
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "python": "3.11.13",
+    "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-21/agents-a1-4b-coreai/swift-build/out/Products/Release/llm-runner"
+  },
+  "recheck": {
+    "engine_side_only": "Download the bundle at the pinned revision, then feed the recorded input_ids to llm-runner with the protocol above (greedy, warmup off, coreai-pipelined, COREAI_CHUNK_THRESHOLD=1). The output must equal engine.gen_text. No oracle, no fp32 weights, no GPU beyond the one running the bundle.",
+    "full_gate": "python3 conversion/coreai_gate.py <bundle> InternScience/Agents-A1-4B --revision 945c40a4aa6f534d434a353207b8d42ecf7a5293 --arch qwen3.5 --prompt 'The alphabet begins A, B, C, D, E, F,' -n 16"
+  }
+}

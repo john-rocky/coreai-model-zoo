@@ -1,0 +1,89 @@
+{
+  "result": "PASS",
+  "arch": "qwen3.5",
+  "bundle": "agents_a1_4b_decode_int8hu_block32_sym",
+  "artifact": null,
+  "source_model": {
+    "hf_id": "InternScience/Agents-A1-4B",
+    "revision": "945c40a4aa6f534d434a353207b8d42ecf7a5293",
+    "weights_pinned": false,
+    "note": "the oracle loads the source repo's default branch; the recipe's revision pins the export, not this comparison"
+  },
+  "protocol": {
+    "prompt": "The capital of France is",
+    "max_new_tokens": 16,
+    "greedy": true,
+    "oracle_dtype": "fp32",
+    "engine_variant": "coreai-pipelined",
+    "warmup": "off",
+    "env": {
+      "COREAI_CHUNK_THRESHOLD": "1"
+    },
+    "tie_rule": "a first divergence passes only where the oracle's top-2 margin < 0.1"
+  },
+  "input_ids": [
+    760,
+    6511,
+    314,
+    9338,
+    369
+  ],
+  "oracle": {
+    "gen_ids": [
+      11751,
+      13,
+      198,
+      760,
+      6511,
+      314,
+      9338,
+      369,
+      11751,
+      13,
+      198,
+      760,
+      6511,
+      314,
+      9338,
+      369
+    ],
+    "gen_text": " Paris.\nThe capital of France is Paris.\nThe capital of France is",
+    "top2_margins": [
+      0.42065098881721497,
+      0.4681999683380127,
+      0.05156506597995758,
+      0.045990705490112305,
+      0.2374124675989151,
+      0.9665632843971252,
+      0.2498423159122467,
+      0.9473817348480225,
+      0.44914156198501587,
+      0.7514169812202454,
+      0.7481201887130737,
+      0.5019440650939941,
+      0.9081643223762512,
+      0.9968029260635376,
+      0.8608078360557556,
+      0.998782217502594
+    ]
+  },
+  "engine": {
+    "gen_text": " Paris.\nThe capital of France is Paris.\nThe capital of France is"
+  },
+  "match": {
+    "exact_prefix": 16,
+    "of": 16,
+    "first_divergence": null
+  },
+  "schema": "coreai-gate-transcript/1",
+  "generated_at": "2026-09-21T03:33:36+00:00",
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "python": "3.11.13",
+    "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-21/agents-a1-4b-coreai/swift-build/out/Products/Release/llm-runner"
+  },
+  "recheck": {
+    "engine_side_only": "Download the bundle at the pinned revision, then feed the recorded input_ids to llm-runner with the protocol above (greedy, warmup off, coreai-pipelined, COREAI_CHUNK_THRESHOLD=1). The output must equal engine.gen_text. No oracle, no fp32 weights, no GPU beyond the one running the bundle.",
+    "full_gate": "python3 conversion/coreai_gate.py <bundle> InternScience/Agents-A1-4B --revision 945c40a4aa6f534d434a353207b8d42ecf7a5293 --arch qwen3.5 --prompt 'The capital of France is' -n 16"
+  }
+}
