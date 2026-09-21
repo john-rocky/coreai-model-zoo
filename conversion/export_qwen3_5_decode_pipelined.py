@@ -122,9 +122,14 @@ def main() -> None:
         name += f"_l{args.num_layers}"
 
     print(f"loading {args.hf_id} fp16 ...")
-    model = Qwen3_5StatefulForCausalLM.from_hf_memory_efficient(
-        args.hf_id, max_context_length=args.max_ctx, target_dtype=DTYPE,
-        hf_config_attr="text_config", num_layers=args.num_layers)
+    try:
+        model = Qwen3_5StatefulForCausalLM.from_hf_memory_efficient(
+            args.hf_id, max_context_length=args.max_ctx, target_dtype=DTYPE,
+            hf_config_attr="text_config", num_layers=args.num_layers)
+    except AttributeError:
+        model = Qwen3_5StatefulForCausalLM.from_hf_memory_efficient(
+            args.hf_id, max_context_length=args.max_ctx, target_dtype=DTYPE,
+            hf_config_attr=None, num_layers=args.num_layers)
     model.eval()
     cfg = model.config
 

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-19",
+ "generated": "2026-09-21",
  "how_to_use": {
   "list": "python3 conversion/zoo_convert.py list",
   "show": "python3 conversion/zoo_convert.py show <recipe>",
@@ -211,6 +211,25 @@
      ]
     }
    ]
+  },
+  {
+   "family": "decider-0.8b",
+   "card": "models/decider-0.8b/README.md",
+   "recipes": [
+    {
+     "name": "decider-0.8b",
+     "status": "verified",
+     "source_model": "Mapika/decider-0.8b",
+     "source_model_from": "recipe",
+     "hf_repo": "mlboydaisuke/decider-0.8b-CoreAI",
+     "bundle": "gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run decider-0.8b",
+     "gate_transcript": "models/decider-0.8b/gate-decider-0.8b.json",
+     "open_questions": []
+    }
+   ],
+   "repos": []
   },
   {
    "family": "depth-anything-3",

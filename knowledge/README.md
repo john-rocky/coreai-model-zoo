@@ -139,6 +139,19 @@ For the long-form version of the same material, read
   `ignore_merges=true`; a gate whose corpus cannot separate a mutation is not gating it). w8 palettes
   shrink the bundle 22% and buy no speed because the fp32 table is 71% of the bytes; the fp16-table
   lever is exact on a bf16 checkpoint and still unshipped. fp16 whole-model fails the layer gate.
+- [`decider-0.8b-port.md`](decider-0.8b-port.md) — **a System One decision model on Core AI**
+  (Mapika/decider-0.8b): the gate is probability parity, not a transcript — the author's fp32
+  letter readout vs the bundle on 44 rows (int8hu max |Δp| 0.0084, argmax 44/44; the fp16 floor
+  is 0.0050 because the graph emits float16 logits). The Swift pipelined engine has no logits
+  (sequential = 2 states only), so probabilities come from an AOT `.aimodelc` through the Python
+  runtime — whose GPU **JIT is wrong even at 0.8B on 26A428** (MTL4 error 1, zero logits) and
+  which leaks one IOSurface per call (~25k S=1 calls per process). Also SemIf's authored144 read
+  the same way on two shipped bundles (MiniCPM5-2B 0.681, Qwen3.5-4B 0.821).
+- [`decider-systemone-op-design.md`](decider-systemone-op-design.md) — design of
+  `CoreAI.systemOne(state:questions:options:)` for coreai-kit: wire shape, the prompt-builder port
+  line by line, tokenizer parity on the 44 fixture rows, and the readout primitive (recommended: a
+  completion-synchronized read-last-logits call on the pipelined engine; fallback: the zoo's
+  N-state low-level runner). Not implemented.
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
   converting the same minimal module under both versions, diffing the graph, and running the ones

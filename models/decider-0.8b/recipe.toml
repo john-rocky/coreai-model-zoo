@@ -1,0 +1,25 @@
+# Recipe for decider-0.8b — the configuration that produced the published bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+
+["decider-0.8b"]
+script = "export_qwen3_5_decode_pipelined.py"
+args = ["int8hu", "--head-sym", "--hf-id", "Mapika/decider-0.8b"]
+card = "README.md"
+hf_repo = "mlboydaisuke/decider-0.8b-CoreAI"
+source_hf_id = "Mapika/decider-0.8b"
+bundle = "gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "The Qwen3.5-0.8B ship shape with the HF id swapped. The checkpoint stores a FLAT",
+  "qwen3_5_text config (no text_config); the exporter falls back to the root config on",
+  "AttributeError (2026-09-21). Source revision 1ea54127d3bd52f6d753d9257b32a6380b873907.",
+  "Gate = probability parity vs the author's fp32 readout on 44 fixture rows",
+  "(conversion/decider/): letter argmax 44/44, max |dp| 0.0084, mean of row means 0.00067,",
+  "engine argmax 44/44; bar 0.02 / 0.002. M4 Max decode 193.6 tok/s (see the card's caveat).",
+  "The published bundle's main.mlirb is 1,309,263,719 B, sha256 2ab6d715...; a re-export from",
+  "the same recipe passes the same gates but is not byte-identical (IR serialization).",
+]

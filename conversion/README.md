@@ -83,6 +83,17 @@ Apple's repo; each recipe names the script it runs.
   scalar-palette variant (48 linears only; the 276 MB fp32 table stays, so −22% bytes and no
   speed; own env because coreai-opt 0.2.1 pins safetensors ≤ 0.7.0; `--palettes` reuses the Mac
   LUTs for the phone build). Published: [`models/granite-embedding-97m/`](../models/granite-embedding-97m/README.md).
+- **decider-0.8b (System One decision model, Mapika; the Qwen3.5 exporter + [`decider/`](decider/)):
+  `export_qwen3_5_decode_pipelined.py int8hu --head-sym --hf-id Mapika/decider-0.8b`** — the
+  0.8B ship recipe with the HF id swapped (the checkpoint's flat `qwen3_5_text` config made the
+  exporter fall back from `text_config` to the root, its only change). What is new is the gate:
+  `decider/oracle_decider.py` (uv-managed; the author's own `decider/` package from the checkpoint
+  builds 44 rows from 13 typed requests and records fp32 letter probabilities) →
+  `decider/readout_gate_decider.py` (AOT h16c `.aimodelc` through the Python runtime, S=1 steps
+  with fresh states, `softmax(logits[labels]/1.03)` vs the oracle: argmax 44/44, max |Δp| ≤ 0.02,
+  mean of row means ≤ 0.002, reset proof) → `decider/engine_argmax_decider.py` (Release
+  `llm-runner --raw-tokens --max-tokens 1`, greedy: the first token must be the oracle's label,
+  44/44). Card: [`../models/decider-0.8b/README.md`](../models/decider-0.8b/README.md).
 - **FastContext-1.0-4B-SFT (STOCK — no re-authoring): `coreai.llm.export fastcontext-4b`** —
   Microsoft's Qwen3-4B-arch repo-exploration agent is byte-identical to `Qwen/Qwen3-4B`, so it
   rides the stock `coreai_models` `qwen3` graph unchanged (GQA, q/k-norm, tied embeddings all

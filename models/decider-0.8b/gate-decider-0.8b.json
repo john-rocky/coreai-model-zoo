@@ -1,0 +1,99 @@
+{
+  "result": "PASS",
+  "arch": "qwen3.5",
+  "bundle": "decider_0_8b_decode_int8hu_block32_sym",
+  "artifact": null,
+  "source_model": {
+    "hf_id": "Mapika/decider-0.8b",
+    "revision": "1ea54127d3bd52f6d753d9257b32a6380b873907",
+    "weights_pinned": false,
+    "note": "the oracle loads the source repo's default branch; the recipe's revision pins the export, not this comparison"
+  },
+  "protocol": {
+    "prompt": "The alphabet begins A, B, C, D, E, F,",
+    "max_new_tokens": 16,
+    "greedy": true,
+    "oracle_dtype": "fp32",
+    "engine_variant": "coreai-pipelined",
+    "warmup": "off",
+    "env": {
+      "COREAI_CHUNK_THRESHOLD": "1"
+    },
+    "tie_rule": "a first divergence passes only where the oracle's top-2 margin < 0.1"
+  },
+  "input_ids": [
+    760,
+    26887,
+    11690,
+    357,
+    11,
+    417,
+    11,
+    351,
+    11,
+    414,
+    11,
+    458,
+    11,
+    426,
+    11
+  ],
+  "oracle": {
+    "gen_ids": [
+      469,
+      11,
+      462,
+      11,
+      353,
+      11,
+      604,
+      11,
+      710,
+      11,
+      436,
+      11,
+      380,
+      11,
+      443,
+      11
+    ],
+    "gen_text": " G, H, I, J, K, L, M, N,",
+    "top2_margins": [
+      0.3929172158241272,
+      0.7725287675857544,
+      0.3155224323272705,
+      0.7550499439239502,
+      0.155877023935318,
+      0.797856867313385,
+      0.1387077420949936,
+      0.8202160596847534,
+      0.40920668840408325,
+      0.8061230778694153,
+      0.05792047083377838,
+      0.8130906820297241,
+      0.3800106644630432,
+      0.8385016918182373,
+      0.6662670373916626,
+      0.8440982103347778
+    ]
+  },
+  "engine": {
+    "gen_text": " G, H, I, J, K, L, M, N,"
+  },
+  "match": {
+    "exact_prefix": 16,
+    "of": 16,
+    "first_divergence": null
+  },
+  "schema": "coreai-gate-transcript/1",
+  "generated_at": "2026-09-21T05:18:48+00:00",
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "python": "3.11.13",
+    "runner": "swift-build/out/Products/Release/llm-runner"
+  },
+  "recheck": {
+    "engine_side_only": "Download the bundle at the pinned revision, then feed the recorded input_ids to llm-runner with the protocol above (greedy, warmup off, coreai-pipelined, COREAI_CHUNK_THRESHOLD=1). The output must equal engine.gen_text. No oracle, no fp32 weights, no GPU beyond the one running the bundle.",
+    "full_gate": "python3 conversion/coreai_gate.py <bundle> Mapika/decider-0.8b --revision 1ea54127d3bd52f6d753d9257b32a6380b873907 --arch qwen3.5 --prompt 'The alphabet begins A, B, C, D, E, F,' -n 16"
+  }
+}
