@@ -43,8 +43,10 @@ greedy transcript:
   `CoreAI.systemOne` op, the prompt-builder port, a tokenizer parity contract on the 44 rows,
   and the cost model (S=1 prefill: a request costs `rows × (state + question tokens)` steps).
 - The frozen fork's pipelined engine caps the iOS growing KV cache at 1,024 tokens
-  (`CoreAIPipelinedEngine.swift`, the `GrowingKVCache` limit), so a 255-option row (1,965
-  tokens) does not run on the phone as is.
+  (`CoreAIPipelinedEngine.swift`, the `GrowingKVCache` limit). Measured on the iPhone 17 Pro
+  (2026-09-21, AOT h18p GPU, PipelinedBench rows mode, sideloaded file by file with md5 round
+  trips): 43/43 rows under the cap emit the oracle's label, load 2.5 s; the 1,965-token row is
+  rejected with `contextLengthExceeded(0, 1024)` — `models/decider-0.8b/gate-decider-0.8b-iphone-argmax.json`.
 
 ## Python runtime traps on macOS 27.0 (26A428)
 

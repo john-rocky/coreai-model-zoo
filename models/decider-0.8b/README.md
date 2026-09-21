@@ -99,8 +99,13 @@ runner) — is in
 Until it exists the Swift engine gives the **argmax** only (the first greedy token), and the
 probabilities come from the Python runtime.
 
-iPhone: not measured. The frozen fork's pipelined engine caps the iOS growing KV cache at
-1,024 tokens, so the 255-option row does not run on the phone as is; the 43 other rows fit.
+**iPhone 17 Pro (iOS 27.0, GPU, pipelined engine, AOT h18p, 2026-09-21):** the same 44 rows through a
+PipelinedBench rows mode (raw ids in, one greedy token out) — **43/43 rows that fit emit the
+oracle's label**, engine load 2.5 s; the 255-option row (1,965 tokens) is rejected with
+`InferenceRuntimeError.contextLengthExceeded(0, 1024)` because the frozen fork's pipelined engine
+caps the iOS growing KV cache at 1,024 tokens
+([`gate-decider-0.8b-iphone-argmax.json`](gate-decider-0.8b-iphone-argmax.json)). Phone
+probabilities wait for the read-last-logits primitive above.
 
 ## ⬇️ Bundle
 
