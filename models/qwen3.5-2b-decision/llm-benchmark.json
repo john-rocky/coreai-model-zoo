@@ -1,0 +1,735 @@
+{
+  "schema": "coreai-letter-llm-benchmark/1",
+  "status": "PASS",
+  "round": 3,
+  "phase": "quiet repeat after correctness, original first-A evidence preserved in results/round3/benchmark-first-a.json",
+  "round_clock": {
+    "round": 3,
+    "first_command_utc": "2026-09-22T22:01:38+00:00",
+    "deadline_utc": "2026-09-23T00:31:38+00:00",
+    "wall_limit_seconds": 9000,
+    "fence": "OPEN",
+    "machine_facts_source": "supervisor; ps explicitly authorized this round",
+    "timing": "A quiet throughput first; later correctness may contend",
+    "instruction": "rounds/03.instruction.md"
+  },
+  "device": "Apple M4 Max GPU",
+  "macos": "27.0 (26A428)",
+  "build": "Release 0.2.4-zoo f7a75ec + local engine-option patch, Xcode 27.0 (27A266a)",
+  "binary": {
+    "name": "llm-benchmark",
+    "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+    "size_bytes": 17063440,
+    "sha256": "33ca310ad84f089158052e8be918f4c09dc0f098046d2322b9fb7511efdf582d"
+  },
+  "bundle": "exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+  "env": {
+    "COREAI_CHUNK_THRESHOLD": "1"
+  },
+  "num_trials_per_engine": 6,
+  "num_launches_per_engine": 2,
+  "prompt_tokens": 128,
+  "generation_tokens": 256,
+  "driver_pid": 31619,
+  "launches": [
+    {
+      "launch": 1,
+      "engine": "coreai-pipelined",
+      "pid": 31644,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-1.json"
+      ],
+      "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-pipelined-1.log",
+      "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-1.json",
+      "returncode": 0,
+      "wall_seconds": 15.995586542063393,
+      "load_seconds": 3.818190542,
+      "warmup_seconds": 4.261901833,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 161.42453784914645,
+          "decode_tokens_per_second": 158.23314188155302,
+          "load_seconds": 3.818190542
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 163.13128815119097,
+          "decode_tokens_per_second": 159.86522842152263,
+          "load_seconds": 3.818190542
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 163.4548132144257,
+          "decode_tokens_per_second": 127.06098314757145,
+          "load_seconds": 3.818190542
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "engine": "coreai-sequential",
+      "pid": 33351,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-1.json"
+      ],
+      "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-sequential-1.log",
+      "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-sequential-1.json",
+      "returncode": 0,
+      "wall_seconds": 12.889605375006795,
+      "load_seconds": 0.455691583,
+      "warmup_seconds": 3.159419416,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 130.78071955678595,
+          "decode_tokens_per_second": 127.47536538563924,
+          "load_seconds": 0.455691583
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 130.05679396283924,
+          "decode_tokens_per_second": 126.6093087671097,
+          "load_seconds": 0.455691583
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 129.77734407270867,
+          "decode_tokens_per_second": 127.65012184076478,
+          "load_seconds": 0.455691583
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "engine": "coreai-pipelined",
+      "pid": 33898,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-2.json"
+      ],
+      "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-pipelined-2.log",
+      "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-2.json",
+      "returncode": 0,
+      "wall_seconds": 10.335034459014423,
+      "load_seconds": 0.427583333,
+      "warmup_seconds": 2.501602625,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 165.14605426725146,
+          "decode_tokens_per_second": 160.140530085012,
+          "load_seconds": 0.427583333
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 165.11300808328147,
+          "decode_tokens_per_second": 159.24407559222846,
+          "load_seconds": 0.427583333
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 164.79544443593286,
+          "decode_tokens_per_second": 160.13582029495447,
+          "load_seconds": 0.427583333
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "engine": "coreai-sequential",
+      "pid": 34332,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-2.json"
+      ],
+      "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-sequential-2.log",
+      "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-sequential-2.json",
+      "returncode": 0,
+      "wall_seconds": 12.82596512499731,
+      "load_seconds": 0.430609708,
+      "warmup_seconds": 3.127364708,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 130.23436033321366,
+          "decode_tokens_per_second": 126.92429254192453,
+          "load_seconds": 0.430609708
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 130.00308757332985,
+          "decode_tokens_per_second": 127.25545478323623,
+          "load_seconds": 0.430609708
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 129.4525383885561,
+          "decode_tokens_per_second": 127.30043270290707,
+          "load_seconds": 0.430609708
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 1,
+      "prefill_tokens_per_second": 161.42453784914645,
+      "decode_tokens_per_second": 158.23314188155302,
+      "load_seconds": 3.818190542
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 2,
+      "prefill_tokens_per_second": 163.13128815119097,
+      "decode_tokens_per_second": 159.86522842152263,
+      "load_seconds": 3.818190542
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 3,
+      "prefill_tokens_per_second": 163.4548132144257,
+      "decode_tokens_per_second": 127.06098314757145,
+      "load_seconds": 3.818190542
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 1,
+      "prefill_tokens_per_second": 130.78071955678595,
+      "decode_tokens_per_second": 127.47536538563924,
+      "load_seconds": 0.455691583
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 2,
+      "prefill_tokens_per_second": 130.05679396283924,
+      "decode_tokens_per_second": 126.6093087671097,
+      "load_seconds": 0.455691583
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 3,
+      "prefill_tokens_per_second": 129.77734407270867,
+      "decode_tokens_per_second": 127.65012184076478,
+      "load_seconds": 0.455691583
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 1,
+      "prefill_tokens_per_second": 165.14605426725146,
+      "decode_tokens_per_second": 160.140530085012,
+      "load_seconds": 0.427583333
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 2,
+      "prefill_tokens_per_second": 165.11300808328147,
+      "decode_tokens_per_second": 159.24407559222846,
+      "load_seconds": 0.427583333
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 3,
+      "prefill_tokens_per_second": 164.79544443593286,
+      "decode_tokens_per_second": 160.13582029495447,
+      "load_seconds": 0.427583333
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 1,
+      "prefill_tokens_per_second": 130.23436033321366,
+      "decode_tokens_per_second": 126.92429254192453,
+      "load_seconds": 0.430609708
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 2,
+      "prefill_tokens_per_second": 130.00308757332985,
+      "decode_tokens_per_second": 127.25545478323623,
+      "load_seconds": 0.430609708
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 3,
+      "prefill_tokens_per_second": 129.4525383885561,
+      "decode_tokens_per_second": 127.30043270290707,
+      "load_seconds": 0.430609708
+    }
+  ],
+  "engines": {
+    "coreai-pipelined": {
+      "engine": "coreai-pipelined",
+      "num_trials": 6,
+      "num_launches": 2,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 161.42453784914645,
+          "decode_tokens_per_second": 158.23314188155302,
+          "load_seconds": 3.818190542
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 163.13128815119097,
+          "decode_tokens_per_second": 159.86522842152263,
+          "load_seconds": 3.818190542
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 163.4548132144257,
+          "decode_tokens_per_second": 127.06098314757145,
+          "load_seconds": 3.818190542
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 165.14605426725146,
+          "decode_tokens_per_second": 160.140530085012,
+          "load_seconds": 0.427583333
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 165.11300808328147,
+          "decode_tokens_per_second": 159.24407559222846,
+          "load_seconds": 0.427583333
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 164.79544443593286,
+          "decode_tokens_per_second": 160.13582029495447,
+          "load_seconds": 0.427583333
+        }
+      ],
+      "launches": [
+        {
+          "launch": 1,
+          "engine": "coreai-pipelined",
+          "pid": 31644,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-pipelined",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-1.json"
+          ],
+          "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-pipelined-1.log",
+          "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-1.json",
+          "returncode": 0,
+          "wall_seconds": 15.995586542063393,
+          "load_seconds": 3.818190542,
+          "warmup_seconds": 4.261901833,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 1,
+              "prefill_tokens_per_second": 161.42453784914645,
+              "decode_tokens_per_second": 158.23314188155302,
+              "load_seconds": 3.818190542
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 2,
+              "prefill_tokens_per_second": 163.13128815119097,
+              "decode_tokens_per_second": 159.86522842152263,
+              "load_seconds": 3.818190542
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 3,
+              "prefill_tokens_per_second": 163.4548132144257,
+              "decode_tokens_per_second": 127.06098314757145,
+              "load_seconds": 3.818190542
+            }
+          ]
+        },
+        {
+          "launch": 2,
+          "engine": "coreai-pipelined",
+          "pid": 33898,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-pipelined",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-2.json"
+          ],
+          "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-pipelined-2.log",
+          "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-2.json",
+          "returncode": 0,
+          "wall_seconds": 10.335034459014423,
+          "load_seconds": 0.427583333,
+          "warmup_seconds": 2.501602625,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 1,
+              "prefill_tokens_per_second": 165.14605426725146,
+              "decode_tokens_per_second": 160.140530085012,
+              "load_seconds": 0.427583333
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 2,
+              "prefill_tokens_per_second": 165.11300808328147,
+              "decode_tokens_per_second": 159.24407559222846,
+              "load_seconds": 0.427583333
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 3,
+              "prefill_tokens_per_second": 164.79544443593286,
+              "decode_tokens_per_second": 160.13582029495447,
+              "load_seconds": 0.427583333
+            }
+          ]
+        }
+      ],
+      "load_seconds_per_launch": [
+        3.818190542,
+        0.427583333
+      ],
+      "median_prefill_tokens_per_second": 164.12512882517927,
+      "min_prefill_tokens_per_second": 161.42453784914645,
+      "max_prefill_tokens_per_second": 165.14605426725146,
+      "median_decode_tokens_per_second": 159.55465200687553,
+      "min_decode_tokens_per_second": 127.06098314757145,
+      "max_decode_tokens_per_second": 160.140530085012,
+      "median_load_seconds": 2.1228869375,
+      "min_load_seconds": 0.427583333,
+      "max_load_seconds": 3.818190542
+    },
+    "coreai-sequential": {
+      "engine": "coreai-sequential",
+      "num_trials": 6,
+      "num_launches": 2,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 130.78071955678595,
+          "decode_tokens_per_second": 127.47536538563924,
+          "load_seconds": 0.455691583
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 130.05679396283924,
+          "decode_tokens_per_second": 126.6093087671097,
+          "load_seconds": 0.455691583
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 129.77734407270867,
+          "decode_tokens_per_second": 127.65012184076478,
+          "load_seconds": 0.455691583
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 130.23436033321366,
+          "decode_tokens_per_second": 126.92429254192453,
+          "load_seconds": 0.430609708
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 130.00308757332985,
+          "decode_tokens_per_second": 127.25545478323623,
+          "load_seconds": 0.430609708
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 129.4525383885561,
+          "decode_tokens_per_second": 127.30043270290707,
+          "load_seconds": 0.430609708
+        }
+      ],
+      "launches": [
+        {
+          "launch": 1,
+          "engine": "coreai-sequential",
+          "pid": 33351,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-sequential",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-1.json"
+          ],
+          "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-sequential-1.log",
+          "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-sequential-1.json",
+          "returncode": 0,
+          "wall_seconds": 12.889605375006795,
+          "load_seconds": 0.455691583,
+          "warmup_seconds": 3.159419416,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 1,
+              "prefill_tokens_per_second": 130.78071955678595,
+              "decode_tokens_per_second": 127.47536538563924,
+              "load_seconds": 0.455691583
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 2,
+              "prefill_tokens_per_second": 130.05679396283924,
+              "decode_tokens_per_second": 126.6093087671097,
+              "load_seconds": 0.455691583
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 3,
+              "prefill_tokens_per_second": 129.77734407270867,
+              "decode_tokens_per_second": 127.65012184076478,
+              "load_seconds": 0.455691583
+            }
+          ]
+        },
+        {
+          "launch": 2,
+          "engine": "coreai-sequential",
+          "pid": 34332,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-sequential",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-2.json"
+          ],
+          "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-sequential-2.log",
+          "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-sequential-2.json",
+          "returncode": 0,
+          "wall_seconds": 12.82596512499731,
+          "load_seconds": 0.430609708,
+          "warmup_seconds": 3.127364708,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 1,
+              "prefill_tokens_per_second": 130.23436033321366,
+              "decode_tokens_per_second": 126.92429254192453,
+              "load_seconds": 0.430609708
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 2,
+              "prefill_tokens_per_second": 130.00308757332985,
+              "decode_tokens_per_second": 127.25545478323623,
+              "load_seconds": 0.430609708
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 3,
+              "prefill_tokens_per_second": 129.4525383885561,
+              "decode_tokens_per_second": 127.30043270290707,
+              "load_seconds": 0.430609708
+            }
+          ]
+        }
+      ],
+      "load_seconds_per_launch": [
+        0.455691583,
+        0.430609708
+      ],
+      "median_prefill_tokens_per_second": 130.02994076808454,
+      "min_prefill_tokens_per_second": 129.4525383885561,
+      "max_prefill_tokens_per_second": 130.78071955678595,
+      "median_decode_tokens_per_second": 127.27794374307166,
+      "min_decode_tokens_per_second": 126.6093087671097,
+      "max_decode_tokens_per_second": 127.65012184076478,
+      "median_load_seconds": 0.4431506455,
+      "min_load_seconds": 0.430609708,
+      "max_load_seconds": 0.455691583
+    }
+  },
+  "interpretation": "S=1 prefill-rate proxy: a decision costs one S=1 prefill of the entire row; measured through coreai-kit, the sequential engine costs about 10 ms per token and reuses zero recurrent tokens between questions. Synthetic decode throughput is not decision latency. Input IDs are sampled from metadata vocabulary width 248320 by llm-benchmark.",
+  "contention_rule": "Mandated top-eight ps snapshot; non-WindowServer/Chrome Core AI, Python, Swift engine jobs; exclude this foreground driver using the sibling rule. A tagged GPU lock also marks contention. Wait at most 600 seconds before running with contention recorded.",
+  "snapshots": [
+    {
+      "path": "results/round3/quiet-repeat/ps-before.txt",
+      "at": "2026-09-22T22:49:55.895383+00:00",
+      "engine_jobs": []
+    },
+    {
+      "path": "results/round3/quiet-repeat/ps-after.txt",
+      "at": "2026-09-22T22:50:47.976312+00:00",
+      "engine_jobs": []
+    }
+  ],
+  "contended": false,
+  "started_utc": "2026-09-22T22:49:55.860661+00:00",
+  "gpu_lock_read_only": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "contents": "",
+    "never_modified": true
+  },
+  "gpu_lock_wait_reads": [
+    ""
+  ],
+  "wait_seconds": 3.7910649552941322e-06,
+  "benchmark_start_snapshot": {
+    "path": "results/round3/quiet-repeat/ps-before.txt",
+    "at": "2026-09-22T22:49:55.895383+00:00",
+    "engine_jobs": []
+  },
+  "gpu_lock_after": "",
+  "benchmark_process_wall_seconds": 52.08076137502212,
+  "load_measurement": "llm-benchmark prepare_seconds: EngineFactory creation; per launch, not per trial; excluded warmup.",
+  "completed_utc": "2026-09-22T22:50:47.976375+00:00",
+  "background_activity_note": "No competing inference job was detected by the prescribed top-eight ps rule; Swift compiler/build and Storage CPU activity were visible before, and Storage/background desktop activity after. This is a quiet inference window, not a claim that all system processes were idle."
+}

@@ -93,7 +93,17 @@
      "open_questions": []
     }
    ],
-   "repos": []
+   "repos": [
+    {
+     "id": "mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI",
+     "downloads_30d": 0,
+     "bundles": [
+      "gpu-pipelined-b2/apus_openjev_v1_4b_decode_int8hu_block32_sym"
+     ],
+     "tier1": {},
+     "smoke": []
+    }
+   ]
   },
   {
    "family": "bitcpm-8b",
@@ -3613,6 +3623,48 @@
        "date": "2026-09-15"
       }
      ]
+    }
+   ]
+  },
+  {
+   "family": "qwen3.5-2b-decision",
+   "card": "models/qwen3.5-2b-decision/README.md",
+   "recipes": [
+    {
+     "name": "qwen3.5-2b-decision",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/Qwen3.5-2B-Decision-CoreAI",
+     "bundle": "gpu-pipelined/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run qwen3.5-2b-decision",
+     "gate_transcript": "models/qwen3.5-2b-decision/gate-qwen3.5-2b-decision.json",
+     "open_questions": []
+    },
+    {
+     "name": "qwen3.5-2b-decision-fp16",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/Qwen3.5-2B-Decision-CoreAI",
+     "bundle": "gpu-pipelined/qwen3_5_2b_decision_decode_fp16",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run qwen3.5-2b-decision-fp16",
+     "gate_transcript": "models/qwen3.5-2b-decision/gate-qwen3.5-2b-decision-fp16.json",
+     "open_questions": []
+    }
+   ],
+   "repos": [
+    {
+     "id": "mlboydaisuke/Qwen3.5-2B-Decision-CoreAI",
+     "downloads_30d": 0,
+     "bundles": [
+      "gpu-pipelined/qwen3_5_2b_decision_decode_fp16",
+      "gpu-pipelined/qwen3_5_2b_decision_decode_int8hu_block32_sym"
+     ],
+     "tier1": {},
+     "smoke": []
     }
    ]
   },

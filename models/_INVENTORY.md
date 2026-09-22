@@ -15,12 +15,12 @@ configuration; a single bundle answers that question by itself.
 
 | metric | count |
 | --- | --- |
-| published repos | 273 |
-| Core AI repos | 85 |
-| Core AI bundles inside them | 295 |
-| Core AI repos with a `models/<family>/` card | 78 |
-| repos covered by a recipe | 78 |
-| Core AI repos with 0 downloads in the last 30 days | 2 |
+| published repos | 275 |
+| Core AI repos | 87 |
+| Core AI bundles inside them | 298 |
+| Core AI repos with a `models/<family>/` card | 80 |
+| repos covered by a recipe | 80 |
+| Core AI repos with 0 downloads in the last 30 days | 4 |
 
 ## All repos, by 30-day downloads
 
@@ -286,6 +286,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/yolox-m-litert](https://huggingface.co/mlboydaisuke/yolox-m-litert) | 3 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLOE-S-CoreML](https://huggingface.co/mlboydaisuke/YOLOE-S-CoreML) | 2 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/xfeat-litert](https://huggingface.co/mlboydaisuke/xfeat-litert) | 1 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI](https://huggingface.co/mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI) | 0 | 0 | coreai | port | 1 | — | — | [apus-openjev-v1-4b](apus-openjev-v1-4b/README.md) | `apus-openjev-v1-4b` | — |
 | [mlboydaisuke/coreml-zoo](https://huggingface.co/mlboydaisuke/coreml-zoo) | 0 | 1 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/embeddinggemma-300m-coreml](https://huggingface.co/mlboydaisuke/embeddinggemma-300m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/functiongemma-270m-coreml](https://huggingface.co/mlboydaisuke/functiongemma-270m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
@@ -297,6 +298,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/magenta-arbitrary-style-transfer-litert](https://huggingface.co/mlboydaisuke/magenta-arbitrary-style-transfer-litert) | 0 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Mordant-3B-Think-LiteRT](https://huggingface.co/mlboydaisuke/Mordant-3B-Think-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/OpenThai-SystemOne-CoreAI](https://huggingface.co/mlboydaisuke/OpenThai-SystemOne-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [openthai-systemone](openthai-systemone/README.md) | `openthai-systemone`, `openthai-systemone-fp16` | — |
+| [mlboydaisuke/Qwen3.5-2B-Decision-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.5-2B-Decision-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [qwen3.5-2b-decision](qwen3.5-2b-decision/README.md) | `qwen3.5-2b-decision`, `qwen3.5-2b-decision-fp16` | — |
 | [mlboydaisuke/Tashkeel-350M-v2-LiteRT](https://huggingface.co/mlboydaisuke/Tashkeel-350M-v2-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [ukint-vs/Nanbeige4.2-3B-CoreAI](https://huggingface.co/ukint-vs/Nanbeige4.2-3B-CoreAI) | 0 | 1 | coreai | port | 1 | **1 DIFF** | 1 deferred | [nanbeige4.2-3b](nanbeige4.2-3b/README.md) | `nanbeige4.2-3b` | `nanbeige4.2-3b` |
 
@@ -354,7 +356,7 @@ published configuration. **Do not guess their `args`.**
 
 ### 3. Recipes recorded, shipped configuration unknown
 
-6 of the 99 recipes carry `status = "unverified"`:
+6 of the 101 recipes carry `status = "unverified"`:
 the script is known, the arguments that produced the published bundle are not,
 and nothing in the repo records them. `zoo_convert.py` refuses to run these
 without `--force`. Each needs one answer from the owner.

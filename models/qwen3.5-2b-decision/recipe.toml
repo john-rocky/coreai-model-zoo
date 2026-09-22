@@ -1,0 +1,47 @@
+# Decision-function letter readout; int8hu ships, fp16 is the reference.
+
+["qwen3.5-2b-decision"]
+script = "export_qwen3_5_decision_mlx_decode_pipelined.py"
+args = ["int8hu", "--head-sym"]
+card = "README.md"
+hf_repo = "mlboydaisuke/Qwen3.5-2B-Decision-CoreAI"
+source_hf_id = "chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-MLX-bf16"
+source_revision = "69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5"
+bundle = "gpu-pipelined/qwen3_5_2b_decision_decode_int8hu_block32_sym"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "MLX source inverted: 18 conv transposes and 61 norm offsets in FP32; gated norms unchanged.",
+  "24-layer S=1 text tower, context4096, vocab248320; frozen loader/graph unchanged.",
+  "Space-prefixed A-Z LM-head readout at Answer:, no template/BOS; T=1, calibration already folded.",
+  "Mac GPU vs converted FP32:58/58 argmax,57/57 margin>=0.02; max|dp|0.007585824.",
+  "Author BF16 vs FP32:58/58; max|dp|0.011958122; both Swift engines58/58 each.",
+  "main.mlirb 3017991690 bytes; sha256 2daf0c1522ab65fc6c124dc6d8ef80cca3c9341ae8a435636b27aeddc8aa4ed3.",
+  "Metadata includes source.hf_revision and decision contract; graph/tokenizer are the tested originals.",
+  "Serialization byte identity is not required; see re-export comparison and both-reference transcripts.",
+]
+
+["qwen3.5-2b-decision-fp16"]
+script = "export_qwen3_5_decision_mlx_decode_pipelined.py"
+args = ["fp16"]
+card = "README.md"
+hf_repo = "mlboydaisuke/Qwen3.5-2B-Decision-CoreAI"
+source_hf_id = "chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-MLX-bf16"
+source_revision = "69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5"
+bundle = "gpu-pipelined/qwen3_5_2b_decision_decode_fp16"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "MLX source inverted: 18 conv transposes and 61 norm offsets in FP32; gated norms unchanged.",
+  "24-layer S=1 text tower, context4096, vocab248320; frozen loader/graph unchanged.",
+  "Space-prefixed A-Z LM-head readout at Answer:, no template/BOS; T=1, calibration already folded.",
+  "Mac GPU vs converted FP32:58/58 argmax,57/57 margin>=0.02; max|dp|0.005788386.",
+  "Author BF16 vs FP32:58/58; max|dp|0.011958122; both Swift engines58/58 each.",
+  "main.mlirb 3764478641 bytes; sha256 d2c2bac89671def4253ce545dd2502bc115e0b5656305fbcedad9c38c5221558.",
+  "Metadata includes source.hf_revision and decision contract; graph/tokenizer are the tested originals.",
+  "Serialization byte identity is not required; see re-export comparison and both-reference transcripts.",
+]

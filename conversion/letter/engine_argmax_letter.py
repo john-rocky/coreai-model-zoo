@@ -36,7 +36,7 @@ from pathlib import Path
 import readout_gate_letter as gate
 from readout_gate_letter import (
     RUN, RUNTIME_STOP, VOCAB_SIZE, alarm_returncode, deadline_for, foreground,
-    local_path, remaining, safe_id, sha256, utc_now, validate_rows, write_json,
+    local_path, remaining, safe_id, sha256, utc_now, validate_rows, validate_tokenization, write_json,
 )
 
 ENGINES = ("coreai-pipelined", "coreai-sequential")
@@ -114,16 +114,25 @@ def summarize(record: dict, expected: int) -> dict:
                            "first_call_preparation": {key: rows[0][key] for key in (
                                "id", "prepare_seconds_contended", "model_load_seconds_contended", "cache_hit",
                                "wall_seconds_contended", "stdout_log")} if rows else None}
-    return {"engines": engines, "expected_calls": expected * len(ENGINES), "calls": len(record["rows"]),
+        author_rows = [row for row in rows if "author_label_agrees" in row]
+        if author_rows:
+            engines[engine].update(author_rows=len(author_rows), author_label_agreement=sum(row["author_label_agrees"] for row in author_rows))
+    result = {"engines": engines, "expected_calls": expected * len(ENGINES), "calls": len(record["rows"]),
             "agreement": sum(row["agrees"] for row in record["rows"]),
             "oracle_label_agreement": sum(row["oracle_label_agrees"] for row in record["rows"])}
+    author_rows = [row for row in record["rows"] if "author_label_agrees" in row]
+    if author_rows:
+        result.update(author_rows=len(author_rows), author_label_agreement=sum(row["author_label_agrees"] for row in author_rows))
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("bundle")
     parser.add_argument("fixtures")
-    parser.add_argument("--mode", default="int8hu", choices=("int8hu",))
+    parser.add_argument("--mode", default="int8hu", choices=("fp16", "int8hu"))
+    parser.add_argument("--label-style", choices=("plain", "space-prefixed"), default="plain")
+    parser.add_argument("--prompt-format", choices=("chat", "decision-function"), default="chat")
     parser.add_argument("--readout", required=True)
     parser.add_argument("--runner", default=os.environ.get("ZOO_LLM_RUNNER"))
     parser.add_argument("--transcript")
@@ -149,16 +158,20 @@ def main() -> int:
     transcript = local_path(args.transcript or RUN / f"results/engine_argmax_{args.mode}.json")
     deadline = deadline_for(args.deadline_epoch)
     fx, readout = json.loads(fixtures_path.read_text()), json.loads(readout_path.read_text())
-    fixture_rows = validate_rows(fx, 4096)
+    fixture_rows = validate_rows(fx, 4096, args.label_style, args.prompt_format)
     assert readout["schema"] == "coreai-letter-readout-gate/1"
     assert local_path(readout["bundle"]) == bundle and readout["mode"] == args.mode
     assert readout["fixtures_sha256"] == sha256(fixtures_path)
+    assert readout.get("label_style", "plain") == args.label_style
+    assert readout.get("prompt_format", "chat") == args.prompt_format
     references = {row["id"]: row for row in readout["rows"]}
     missing = [row["id"] for row in fixture_rows if row["id"] not in references]
     if missing:
         raise ValueError(f"Python readout missing fixture rows: {missing}")
     tokenizer = AutoTokenizer.from_pretrained(bundle / "tokenizer", local_files_only=True)
+    validate_tokenization(fixture_rows, tokenizer, args.prompt_format)
     record = {"schema": "coreai-letter-engine-gate/1", "mode": args.mode, "bundle": str(bundle),
+              "label_style": args.label_style, "prompt_format": args.prompt_format, "source": fx["source"],
               "runner": str(runner), "readout": str(readout_path), "fixtures": str(fixtures_path),
               "runner_sha256": sha256(runner), "fixtures_sha256": sha256(fixtures_path),
               "readout_sha256": sha256(readout_path), "readout_result": readout["result"],
@@ -175,6 +188,8 @@ def main() -> int:
         for engine in ENGINES:
             for row in fixture_rows:
                 remaining(deadline)
+                if RUNTIME_STOP.exists():
+                    raise RuntimeError(f"round runtime stop condition: {RUNTIME_STOP}")
                 reference = references[row["id"]]
                 full_id = int(reference["full_vocab_argmax_id"])
                 assert 0 <= full_id < VOCAB_SIZE
@@ -188,6 +203,12 @@ def main() -> int:
                          "agrees": got["text"] == expected, "oracle_argmax_label": oracle_label,
                          "oracle_label_agrees": got["text"] == oracle_label,
                          "is_row_label": got["text"] in row["labels"], "oracle_margin": row["top2_margin"]}
+                if "p_author" in row:
+                    author_label = row["labels"][row["author_argmax"]]
+                    value.update(author_argmax_label=author_label, author_label_agrees=got["text"] == author_label)
+                for key in ("kind", "request_id", "evidence_only"):
+                    if key in row:
+                        value[key] = row[key]
                 record["rows"].append(value)
                 record["summary"] = summarize(record, len(fixture_rows))
                 write_json(transcript, record)

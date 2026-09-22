@@ -8,7 +8,7 @@
 #   "accelerate==1.15.0",
 # ]
 # ///
-"""AOT Mac GPU letter-probability gate against OpenJev's full-depth fp32 oracle.
+"""AOT Mac GPU letter probabilities for chat or plain decision-function fixtures.
 
 Adapted from zoo 082fe55 and the sibling OpenThai process-splitting gate. The
 unchanged 248320-vocabulary bundle receives each FULL compiled chat prompt as
@@ -36,6 +36,7 @@ import time
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -168,9 +169,13 @@ def aot_compile(aimodel: Path, out_dir: Path, mode: str, deadline: float) -> tup
     return target, record
 
 
-def validate_rows(fx: dict, max_ctx: int) -> list[dict]:
+def validate_rows(fx: dict, max_ctx: int, label_style: str = "plain", prompt_format: str = "chat") -> list[dict]:
     if fx.get("schema") != "coreai-letter-fixtures/1":
         raise ValueError("expected coreai-letter-fixtures/1")
+    if float(fx.get("temperature", 1.0)) != 1.0:
+        raise ValueError("letter gates require T=1")
+    if label_style == "space-prefixed" and fx.get("label_style") != label_style:
+        raise ValueError("space-prefixed mode requires matching fixture label_style")
     rows = fx["rows"]
     if not rows or len({row["id"] for row in rows}) != len(rows):
         raise ValueError("fixtures must contain rows with unique IDs")
@@ -178,14 +183,30 @@ def validate_rows(fx: dict, max_ctx: int) -> list[dict]:
         safe_id(row["id"])
         labels, ids = row["labels"], row["ids"]
         n = len(labels)
-        if not 2 <= n <= 16 or labels != list("ABCDEFGHIJKLMNOP"[:n]):
-            raise ValueError(f"{row['id']}: invalid A-P labels")
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" if label_style == "space-prefixed" else "ABCDEFGHIJKLMNOP"
+        expected_labels = [(" " if label_style == "space-prefixed" else "") + x for x in alphabet[:n]]
+        if not 2 <= n <= len(alphabet) or labels != expected_labels:
+            raise ValueError(f"{row['id']}: invalid {label_style} option labels")
         if not ids or row["slot"] != len(ids) - 1 or len(ids) > max_ctx:
             raise ValueError(f"{row['id']}: invalid compiled sequence/slot/context")
         if len(set(row["label_ids"])) != n or any(not 0 <= tok < VOCAB_SIZE for tok in row["label_ids"]):
             raise ValueError(f"{row['id']}: invalid label IDs")
         if len(row["raw_logits"]) != n or len(row["p_oracle"]) != n:
             raise ValueError(f"{row['id']}: invalid oracle vectors")
+        if "p_author" in row:
+            for key in ("p_author", "author_raw_logits"):
+                values = np.asarray(row[key], np.float64)
+                if values.shape != (n,) or not np.isfinite(values).all():
+                    raise ValueError(f"{row['id']}: invalid optional {key}")
+            if row["author_argmax"] != int(np.argmax(row["p_author"])):
+                raise ValueError(f"{row['id']}: invalid author argmax")
+        if prompt_format == "decision-function":
+            if row["tokens"] != len(ids) or len(row["options"]) != n:
+                raise ValueError(f"{row['id']}: invalid decision row token/option count")
+            if row["kind"] == "bool" and row["options"] != ["yes", "no"]:
+                raise ValueError(f"{row['id']}: bool must use ['yes', 'no']")
+            if not row.get("prompt", "").endswith("\n\nAnswer:"):
+                raise ValueError(f"{row['id']}: invalid plain-text decision answer slot")
         if not 0 <= row["argmax"] < n or float(row.get("temperature", 1.0)) != 1.0:
             raise ValueError(f"{row['id']}: invalid argmax or temperature")
         if row.get("zoo_only"):
@@ -194,6 +215,16 @@ def validate_rows(fx: dict, max_ctx: int) -> list[dict]:
         elif len(ids) > 1024:
             raise ValueError(f"{row['id']}: ordinary row exceeds 1024 compiled tokens")
     return rows
+
+
+def validate_tokenization(rows: list[dict], tokenizer, prompt_format: str) -> None:
+    if prompt_format != "decision-function":
+        return
+    for row in rows:
+        if [tokenizer.encode(label, add_special_tokens=False) for label in row["labels"]] != [[i] for i in row["label_ids"]]:
+            raise ValueError(f"{row['id']}: bundle tokenizer disagrees with space-prefixed label IDs")
+        if tokenizer.encode(row["prompt"], add_special_tokens=False) != row["ids"]:
+            raise ValueError(f"{row['id']}: bundle tokenizer disagrees with raw plain-text prompt IDs")
 
 
 def row_record(logits: np.ndarray, row: dict, seconds: float, tokenizer, dump_path: Path) -> dict:
@@ -215,7 +246,7 @@ def row_record(logits: np.ndarray, row: dict, seconds: float, tokenizer, dump_pa
     dump_path = local_path(dump_path)
     dump_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(dump_path, logits, allow_pickle=False)
-    return {"id": row["id"], "primitive": row["primitive"], "zoo_only": bool(row.get("zoo_only", False)),
+    result = {"id": row["id"], "primitive": row["primitive"], "zoo_only": bool(row.get("zoo_only", False)),
             "tokens": len(row["ids"]), "slot": row["slot"], "nopts": len(row["labels"]),
             "labels": row["labels"], "label_ids": row["label_ids"], "temperature": 1.0,
             "raw_logits": gathered.tolist(), "full_logits_npy": str(dump_path),
@@ -237,6 +268,23 @@ def row_record(logits: np.ndarray, row: dict, seconds: float, tokenizer, dump_pa
             "oracle_logits_absmax": float(np.max(np.abs(oracle_raw))),
             "finite": finite, "nonconstant": bool(logits.max() > logits.min()),
             "wall_seconds_contended": seconds}
+    if "p_author" in row:
+        author = np.asarray(row["p_author"], np.float64)
+        author_delta = np.abs(p.astype(np.float64) - author)
+        author_raw = np.asarray(row["author_raw_logits"], np.float64)
+        author_raw_delta = np.abs(gathered.astype(np.float64) - author_raw)
+        ordered = sorted(row["p_author"], reverse=True)
+        result.update(author_argmax=row["author_argmax"], author_argmax_label=row["labels"][row["author_argmax"]],
+                      author_argmax_agrees=option == row["author_argmax"], p_author=row["p_author"],
+                      author_margin=float(ordered[0]-ordered[1]), author_raw_logits=row["author_raw_logits"],
+                      author_max_abs_delta_p=float(author_delta.max()), author_mean_abs_delta_p=float(author_delta.mean()),
+                      author_max_abs_delta_raw_logits=float(author_raw_delta.max()), author_mean_abs_delta_raw_logits=float(author_raw_delta.mean()),
+                      author_logits_min=float(author_raw.min()), author_logits_max=float(author_raw.max()),
+                      author_logits_absmax=float(np.abs(author_raw).max()), author_probability_sum=float(author.sum()))
+    for key in ("kind", "request_id", "evidence_only"):
+        if key in row:
+            result[key] = row[key]
+    return result
 
 
 def run_worker(args: argparse.Namespace) -> int:
@@ -252,12 +300,22 @@ def run_worker(args: argparse.Namespace) -> int:
     transcript = local_path(config["transcript"])
     fixtures = json.loads(local_path(config["fixtures"]).read_text())
     rows = [fixtures["rows"][index] for index in config["indices"]]
-    register_qwen3_5_configs()
-    raw = AutoConfig.from_pretrained(local_path(config["snapshot"]), local_files_only=True)
-    cfg = q.qwen3_5_config_from_hf(raw.text_config, config["max_ctx"], None)
-    if cfg.vocab_size != VOCAB_SIZE or cfg.num_hidden_layers != 32:
-        raise ValueError("expected ordinary full-depth Qwen3.5-4B text tower")
+    if config["prompt_format"] == "decision-function":
+        # MLX's nested text-only config lacks vision_config; AutoConfig 4.57.6
+        # fails serializing it. This accepts unchanged source text attributes.
+        raw = json.loads((local_path(config["snapshot"]) / "config.json").read_text())
+        hf_text = SimpleNamespace(**raw.get("text_config", raw))
+        expected_layers = 24
+    else:
+        register_qwen3_5_configs()
+        raw = AutoConfig.from_pretrained(local_path(config["snapshot"]), local_files_only=True)
+        hf_text = raw.text_config
+        expected_layers = 32
+    cfg = q.qwen3_5_config_from_hf(hf_text, config["max_ctx"], None)
+    if cfg.vocab_size != VOCAB_SIZE or cfg.num_hidden_layers != expected_layers:
+        raise ValueError(f"expected full-depth Qwen3.5 text tower with {expected_layers} layers")
     tokenizer = AutoTokenizer.from_pretrained(local_path(config["tokenizer"]), local_files_only=True)
+    validate_tokenization(rows, tokenizer, config["prompt_format"])
     record = {"schema": "coreai-letter-readout-session/1", "session": config["session"],
               "mode": config["mode"], "indices": config["indices"], "pid": os.getpid(),
               "asset": config["asset"], "snapshot": config["snapshot"],
@@ -391,7 +449,8 @@ def summary(record: dict, expected: int) -> dict:
     near = [row for row in rows if row["oracle_margin"] < 0.02]
     sessions = [session for session in record["sessions"] if session.get("result") == "PASS"]
     in_label = sum(row["full_vocab_argmax_is_label"] for row in rows)
-    return {"rows": len(rows), "expected_rows": expected,
+    expectation = 0.02 if record["mode"] == "fp16" else 0.05
+    result = {"rows": len(rows), "expected_rows": expected,
             "argmax_agreement": sum(row["argmax_agrees"] for row in rows),
             "margin_ge_0_02_rows": len(strict),
             "margin_ge_0_02_argmax_agreement": sum(row["argmax_agrees"] for row in strict),
@@ -411,9 +470,26 @@ def summary(record: dict, expected: int) -> dict:
             "reset_identical": record.get("reset_check", {}).get("identical", False),
             "session_resets_identical": bool(sessions) and all(session.get("reset_check", {}).get("identical", False) for session in sessions),
             "provisional_int8hu_max_delta_p_expectation": 0.05,
-            "provisional_expectation_exceeded": any(row["max_abs_delta_p"] > 0.05 for row in rows),
+            "provisional_max_delta_p_expectation": expectation,
+            "provisional_expectation_exceeded": any(row["max_abs_delta_p"] > expectation for row in rows),
             "provisional_expectation_policy": "Exceedance is recorded for supervisor judgment; no investigation or new tolerance.",
             "worst_five": sorted(rows, key=lambda row: row["max_abs_delta_p"], reverse=True)[:5]}
+    if record.get("prompt_format") == "decision-function":
+        result["provisional_expectation_policy"] = "Exceedance is recorded, not a hard failure; no investigation or new tolerance."
+    author_rows = [row for row in rows if "p_author" in row]
+    if author_rows:
+        strict_author = [row for row in author_rows if row["author_margin"] >= 0.02]
+        result.update(author_rows=len(author_rows),
+                      author_argmax_agreement=sum(row["author_argmax_agrees"] for row in author_rows),
+                      author_margin_ge_0_02_rows=len(strict_author),
+                      author_margin_ge_0_02_argmax_agreement=sum(row["author_argmax_agrees"] for row in strict_author),
+                      author_max_abs_delta_p=max(row["author_max_abs_delta_p"] for row in author_rows),
+                      author_mean_of_row_mean_abs_delta_p=float(np.mean([row["author_mean_abs_delta_p"] for row in author_rows])),
+                      author_max_abs_delta_raw_logits=max(row["author_max_abs_delta_raw_logits"] for row in author_rows),
+                      author_near_ties=[row for row in author_rows if row["author_margin"] < 0.02],
+                      author_disagreements=[row for row in author_rows if not row["author_argmax_agrees"]],
+                      author_worst_five=sorted(author_rows, key=lambda row: row["author_max_abs_delta_p"], reverse=True)[:5])
+    return result
 
 
 def controller(args: argparse.Namespace) -> int:
@@ -426,7 +502,7 @@ def controller(args: argparse.Namespace) -> int:
         raise ValueError("pass --snapshot to the pinned source config/tokenizer snapshot")
     snapshot = local_path(args.snapshot)
     fx = json.loads(fixtures_path.read_text())
-    rows = validate_rows(fx, args.max_ctx)
+    rows = validate_rows(fx, args.max_ctx, args.label_style, args.prompt_format)
     if snapshot.name != fx["source"]["revision"]:
         raise ValueError("fixture/source snapshot revision mismatch")
     meta = json.loads((bundle / "metadata.json").read_text())
@@ -436,6 +512,7 @@ def controller(args: argparse.Namespace) -> int:
     out_dir = local_path(args.aot_dir or bundle.parent / "aotc")
     plans = session_plan(rows)
     record = {"schema": "coreai-letter-readout-gate/1", "mode": args.mode, "bundle": str(bundle),
+              "label_style": args.label_style, "prompt_format": args.prompt_format,
               "fixtures": str(fixtures_path), "fixtures_sha256": sha256(fixtures_path),
               "snapshot": str(snapshot), "max_ctx": args.max_ctx, "temperature": 1.0,
               "runtime": "coreai Python runtime, AOT h16c GPU asset, SpecializationOptions.default()",
@@ -471,6 +548,7 @@ def controller(args: argparse.Namespace) -> int:
                 log_path = RUN / f"logs/readout-{session_name}.log"
                 pid_path = RUN / f"results/readout_pids/{session_name}.json"
                 config = {"session": session_name, "mode": args.mode, "asset": str(asset),
+                          "label_style": args.label_style, "prompt_format": args.prompt_format,
                           "snapshot": str(snapshot), "tokenizer": str(bundle / "tokenizer"),
                           "fixtures": str(fixtures_path), "indices": plan["indices"], "max_ctx": args.max_ctx,
                           "deadline": deadline, "transcript": str(session_path), "work_dir": str(RUN)}
@@ -526,13 +604,14 @@ def controller(args: argparse.Namespace) -> int:
             if not succeeded:
                 raise RuntimeError(f"runtime session {number} did not complete")
         value = summary(record, len(rows))
-        hard_passed = (value["rows"] == value["expected_rows"] and value["finite_all"] and value["nonconstant_all"]
+        hard_passed = (value["rows"] == value["expected_rows"] and value["finite_all"]
                        and value["margin_ge_0_02_argmax_agreement"] == value["margin_ge_0_02_rows"]
-                       and value["full_vocab_argmax_label_fraction"] >= 0.90
                        and value["reset_identical"] and value["session_resets_identical"])
+        if args.prompt_format == "chat":
+            hard_passed = hard_passed and value["nonconstant_all"] and value["full_vocab_argmax_label_fraction"] >= 0.90
         record["hard_gates_result"] = "PASS" if hard_passed else "FAIL"
         record["result"] = "FAIL" if not hard_passed else (
-            "REVIEW_REQUIRED" if value["provisional_expectation_exceeded"] else "PASS")
+            "REVIEW_REQUIRED" if value["provisional_expectation_exceeded"] and args.prompt_format == "chat" else "PASS")
     except Exception as exc:
         record["result"] = "PARTIAL"
         record["error"] = {"class": type(exc).__name__, "message": str(exc), "traceback": traceback.format_exc()}
@@ -553,7 +632,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("bundle", nargs="?")
     parser.add_argument("fixtures", nargs="?")
-    parser.add_argument("--mode", choices=("int8hu",), default="int8hu")
+    parser.add_argument("--mode", choices=("fp16", "int8hu"), default="int8hu")
+    parser.add_argument("--label-style", choices=("plain", "space-prefixed"), default="plain",
+                        help="plain A-P preserves APUS; decision-function uses space-prefixed A-Z")
+    parser.add_argument("--prompt-format", choices=("chat", "decision-function"), default="chat",
+                        help="fixture form and acceptance policy; ids are always used verbatim, no template applied")
     parser.add_argument("--snapshot", help="pinned local HF snapshot containing source config and tokenizer")
     parser.add_argument("--work-dir", type=Path, help="logs, sessions and logits; default beside transcript")
     parser.add_argument("--aot-asset", type=Path, help="reuse this existing h16c GPU .aimodelc without compiling")
@@ -574,7 +657,7 @@ def main() -> int:
         parser.error("bundle and fixtures required (fixtures may be omitted with --compile-only)")
     if args.plan_only:
         fx = json.loads(local_path(args.fixtures).read_text())
-        print(json.dumps(session_plan(validate_rows(fx, args.max_ctx)), indent=1))
+        print(json.dumps(session_plan(validate_rows(fx, args.max_ctx, args.label_style, args.prompt_format)), indent=1))
         return 0
     if args.compile_only:
         bundle = local_path(args.bundle)

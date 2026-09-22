@@ -161,6 +161,7 @@ For the long-form version of the same material, read
   (apus-ailab/APUS-OpenJev-v1-4B): the unchanged Qwen3.5-4B exporter; the author's `openjet_runtime` as the fp32
   oracle (transformers 5.16.1 pinned); the `Shared state:` + JSON task turn under the chat template read at
   A–P; the 16-layer early-exit path left out; the fixture's short states and absent near ties, said plainly.
+- [`qwen3.5-2b-decision-port.md`](qwen3.5-2b-decision-port.md) — inverse MLX Qwen3.5 conv/RMSNorm layout, two-oracle proof, plain-text space-prefixed letter readout, Mac GPU gates and supervisor-supplied coreai-kit measurements.
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
   converting the same minimal module under both versions, diffing the graph, and running the ones

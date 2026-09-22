@@ -1,0 +1,102 @@
+{
+  "schema": "coreai-kit-measurements/1",
+  "source": "measured through coreai-kit; supervisor supplied in rounds/03.instruction.md",
+  "measured_by_this_run": false,
+  "date": "2026-09-23 06:5x–07:0x JST",
+  "worktree_read_only_reference": "/Users/majimadaisuke/code/coreai-kit-models-wt",
+  "device": "Apple M4 Max GPU",
+  "macos": "27.0 (26A428)",
+  "engine": "coreai-sequential",
+  "format": "Decision.Format.decisionFunction",
+  "rendering": "kit own rendering of author plain-text prompt",
+  "parity": {
+    "fixture": "fixtures-qwen3.5-2b-decision.json",
+    "reference": "p_oracle: converted FP32 Torch CPU",
+    "rows": 58,
+    "kind_mapping": {
+      "choice": "choice",
+      "bool": "noul",
+      "score": "score over ordered levels"
+    },
+    "int8hu": {
+      "tokens_identical": 58,
+      "label_slots_identical": 58,
+      "option_argmax_agreement": 58,
+      "max_abs_delta_p": 0.0079,
+      "mean_abs_delta_p": 0.0017
+    },
+    "fp16": {
+      "tokens_identical": 58,
+      "label_slots_identical": 58,
+      "option_argmax_agreement": 58,
+      "max_abs_delta_p": 0.0058,
+      "mean_abs_delta_p": 0.0008
+    },
+    "int8hu_median_question_ms": 986,
+    "long_rows_up_to_seconds": 13.6,
+    "long_rows_token_range": [
+      1500,
+      2000
+    ]
+  },
+  "semif_authored144": {
+    "rows": 144,
+    "language": "en",
+    "options_per_row": 3,
+    "gold": "SemIf own labels",
+    "evaluator": "unchanged benchmarks/evaluate.py",
+    "rendering": "author form as choice",
+    "bundle": "int8hu",
+    "raw_correct": 114,
+    "mean_family_balanced_accuracy": 0.798,
+    "median_decision_ms": 872,
+    "same_rows_evaluator_scale": {
+      "Qwen3.5-4B int8 zero-shot": 0.821,
+      "MiniCPM5-2B int8": 0.681,
+      "OpenThai": 0.725,
+      "APUS-OpenJev-v1-4B": 0.906
+    },
+    "comparison_policy": "Numbers on same rows and evaluator, not a ranking."
+  },
+  "author_card_example": {
+    "state": "Shares of the chipmaker jumped 8% after it raised its revenue forecast.",
+    "question": "Which news section does this article belong to?",
+    "kit_int8hu_probabilities": {
+      "Business": 0.684,
+      "Science/Technology": 0.309,
+      "World": 0.005,
+      "Sports": 0.002
+    },
+    "author_card_mlx_bf16_probabilities": {
+      "Business": 0.7,
+      "Science/Technology": 0.29,
+      "World": 0.005,
+      "Sports": 0.002
+    }
+  },
+  "three_question_request": {
+    "state": "same chipmaker news sentence",
+    "kinds": [
+      "choice",
+      "yes/no",
+      "five-level score"
+    ],
+    "row_tokens": [
+      82,
+      73,
+      88
+    ],
+    "row_wall_ms": [
+      817,
+      633,
+      766
+    ],
+    "tokens_reused": [
+      0,
+      0,
+      0
+    ],
+    "sequential_ms_per_token_approx": 10,
+    "reason": "Recurrent hybrid re-prefills every row."
+  }
+}
