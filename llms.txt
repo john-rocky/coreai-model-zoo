@@ -140,6 +140,7 @@
 ## Everything else in the knowledge base
 
 - [accel-levers-survey-and-plan.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/accel-levers-survey-and-plan.html): Accel levers — industry survey + zoo maximal-optimization plan (2026-07-01)
+- [ane-region-count-and-fp32-ops.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/ane-region-count-and-fp32-ops.html): Zero ANE regions is a failure mode, not a rounding error
 - [coreai-torch-041-ir-incident.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/coreai-torch-041-ir-incident.html): LLVM ERROR: cannot unwrap empty odiec_module_t — every coreai-torch 0.4.0 asset stops loading on OS 27 beta 2+, and how to recover / re-verify
 - [cross-runtime-quality-benchmarking.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/cross-runtime-quality-benchmarking.html): Cross-runtime quality benchmarking: how to not measure your own harness
 - [dense-int4km-flagship-session-findings.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/dense-int4km-flagship-session-findings.html): Dense-path int4km coverage + flagship Qwen3.6-35B — session findings & methods (2026-07-01)

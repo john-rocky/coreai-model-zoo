@@ -83,6 +83,39 @@ for queries and short notes, S=512 for passages. **fp32 is the default.** w8 is 
 option only — 22% smaller, not faster here — because the 180,000×384 fp32 vocabulary table is
 276 MB of the bundle and palettization touches the 48 linear weights alone.
 
+**Mac ANE (base M4, Mac mini), fp16, `--preferred-compute neural-engine`.** The fp32 bundle above
+cannot reach the Neural Engine at all: `coreai-build compile --preferred-compute neural-engine`
+forms **0 ANE regions** on it, which is a silent GPU fallback. fp16 forms 13; removing two fp32
+ops from the graph forms **1** — the whole 12-layer body in a single ANE program — and that is
+the configuration that beats the GPU path. 4000 warm iterations per row.
+
+| Variant | S | Gate | Min cosine vs HF | Max \|err\| | Load | **Warm median** | ANE regions |
+|---|---:|---|---:|---:|---:|---:|---:|
+| fp32 (published), GPU | 128 | 35/35 | 0.999999881 | 2.98e-7 | 797 ms | 4.31 ms | **0** |
+| fp16, as exported | 128 | 35/35 | 0.999957561 | 1.46e-3 | — | 13.19 ms | 13 |
+| **fp16 + two fp32-op fixes** | 128 | 35/35 | **0.999958634** | 1.58e-3 | **257 ms** | **2.14 ms** | **1** |
+
+The two fixes are one line each, both fp32 ops that Apple's authoring rules say create an f32
+buffer the engine cannot execute — the attention softmax (`F.softmax(…, dtype=torch.float32)`) and
+the pooling head's `.float()` cast. The progression is the point: **13 regions cost 13.19 ms,
+1 region costs 4.60 ms** for the same graph at the same precision, because each boundary is a GPU
+dispatch inside the layer loop (a (1,128,384) fp16 boundary tensor is ~98 KB ≈ 1 µs, so the cost
+is latency, not transfer).
+
+The embedding + retrieval gate is run on **runtime** embeddings: 4/4 queries keep their exact
+top-1, 0 clear pair flips, worst score error 2.20e-03 (≤ 0.01), cosine 24× over the floor. The
+**layer** gate (per-hidden-state ≤ 1e-4) is the one it fails — the gate whose documented purpose is
+catching graph bugs (a window of 63 instead of 64 passes the embedding gate at cos 0.99995) — so
+this is a uniform precision reduction, not a structural error. **Not a shippable variant**: the
+published fp32 bundle stays the default.
+
+Also measured, and negative: **w8 palettes with fp16 compute compile and pass the gate but are
+4.8× slower** (int8-affine weights *fold* to dense fp16 before the data-movement step, so they save
+storage and not bandwidth); **w6** compiles (14 regions) but fails the gate; **w4** forms 0 ANE
+regions *and* inverts 16 document pairs. `--preferred-compute neural-engine` is baked into an AOT
+bundle: the fp16 `.aimodelc` uses the ANE under both `--compute neuralEngine` and `--compute gpu`,
+and only `cpuOnly` drops it to zero.
+
 ## Numerics gate
 
 One gate at every stage, the oracle being official HF eager CPU fp32 (transformers 4.57.6):
@@ -157,5 +190,14 @@ epsilon because the converter's `F.normalize` decomposition drops it.
 Apache-2.0 at the pinned upstream revision; the HF repo carries IBM's unmodified card as
 `UPSTREAM_README.md` and a `LICENSE-NOTE.md` listing the changes (static graph, in-graph
 pooling, optional w8 palettes, h18p compile). Not tested: other phones or OS builds, the Mac GPU
-with w8, the Neural Engine, dynamic or batched shapes, S > 512, languages beyond the JA/EN
+with w8, dynamic or batched shapes, S > 512, languages beyond the JA/EN
 fixtures, retrieval quality on a benchmark, sustained thermals, true cache-cold load.
+
+
+The Neural Engine is **no longer untested** — see the Mac ANE block above. Short version: the fp32
+bundle cannot use it (0 ANE regions), fp16 can, and two fp32-op removals make it worth having
+(2.14 ms / 257 ms load against 4.31 ms / 797 ms for the published fp32 export, on a base M4). It
+fails the layer gate, so it is a measured result and not a shipped variant. One observation is
+left open: the ANE shows a burst state (~1.85 ms) and a sustained state (~4.75 ms) with a one-way
+transition about 830 inferences into a run that 4 minutes of idle does not restore;
+`powermetrics`' ANE power rail was not reliable enough to identify the cause.
