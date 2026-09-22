@@ -157,6 +157,10 @@ For the long-form version of the same material, read
   `model.*` weights, a resized embedding, `vocab_size` 256 as the logits width; temperatures from the
   checkpoint tensor, not the author's card; the author's one-pass API differs from independent rows
   (max |Δp| 0.375); and the Swift tokenizer's grapheme-cluster cut of Thai, fixed in the kit.
+- [`apus-openjev-v1-4b-port.md`](apus-openjev-v1-4b-port.md) — **a letter-readout decision model as an HF-id swap**
+  (apus-ailab/APUS-OpenJev-v1-4B): the unchanged Qwen3.5-4B exporter; the author's `openjet_runtime` as the fp32
+  oracle (transformers 5.16.1 pinned); the `Shared state:` + JSON task turn under the chat template read at
+  A–P; the 16-layer early-exit path left out; the fixture's short states and absent near ties, said plainly.
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
   converting the same minimal module under both versions, diffing the graph, and running the ones

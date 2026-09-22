@@ -15,12 +15,12 @@ configuration; a single bundle answers that question by itself.
 
 | metric | count |
 | --- | --- |
-| published repos | 272 |
-| Core AI repos | 84 |
-| Core AI bundles inside them | 293 |
-| Core AI repos with a `models/<family>/` card | 77 |
-| repos covered by a recipe | 77 |
-| Core AI repos with 0 downloads in the last 30 days | 1 |
+| published repos | 273 |
+| Core AI repos | 85 |
+| Core AI bundles inside them | 295 |
+| Core AI repos with a `models/<family>/` card | 78 |
+| repos covered by a recipe | 78 |
+| Core AI repos with 0 downloads in the last 30 days | 2 |
 
 ## All repos, by 30-day downloads
 
@@ -296,6 +296,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/lfm2.5-350m-coreml](https://huggingface.co/mlboydaisuke/lfm2.5-350m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/magenta-arbitrary-style-transfer-litert](https://huggingface.co/mlboydaisuke/magenta-arbitrary-style-transfer-litert) | 0 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Mordant-3B-Think-LiteRT](https://huggingface.co/mlboydaisuke/Mordant-3B-Think-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/OpenThai-SystemOne-CoreAI](https://huggingface.co/mlboydaisuke/OpenThai-SystemOne-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [openthai-systemone](openthai-systemone/README.md) | `openthai-systemone`, `openthai-systemone-fp16` | — |
 | [mlboydaisuke/Tashkeel-350M-v2-LiteRT](https://huggingface.co/mlboydaisuke/Tashkeel-350M-v2-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [ukint-vs/Nanbeige4.2-3B-CoreAI](https://huggingface.co/ukint-vs/Nanbeige4.2-3B-CoreAI) | 0 | 1 | coreai | port | 1 | **1 DIFF** | 1 deferred | [nanbeige4.2-3b](nanbeige4.2-3b/README.md) | `nanbeige4.2-3b` | `nanbeige4.2-3b` |
 
@@ -353,7 +354,7 @@ published configuration. **Do not guess their `args`.**
 
 ### 3. Recipes recorded, shipped configuration unknown
 
-6 of the 98 recipes carry `status = "unverified"`:
+6 of the 99 recipes carry `status = "unverified"`:
 the script is known, the arguments that produced the published bundle are not,
 and nothing in the repo records them. `zoo_convert.py` refuses to run these
 without `--force`. Each needs one answer from the owner.

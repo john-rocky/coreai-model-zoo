@@ -1,0 +1,717 @@
+{
+  "schema": "coreai-letter-llm-benchmark/1",
+  "status": "PASS",
+  "device": "Apple M4 Max GPU",
+  "macos": "27.0 (26A428)",
+  "build": "Release 0.2.4-zoo f7a75ec + local engine-option patch, Xcode 27.0 (27A266a)",
+  "binary": {
+    "name": "llm-benchmark",
+    "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+    "size_bytes": 17060736,
+    "sha256": "4a1cdce76814d048ec1e8ab45b082b63c3bc9a5421e27808a581550ff9585460"
+  },
+  "env": {
+    "COREAI_CHUNK_THRESHOLD": "1"
+  },
+  "num_trials_per_engine": 6,
+  "num_launches_per_engine": 2,
+  "prompt_tokens": 128,
+  "generation_tokens": 256,
+  "driver_pid": 19206,
+  "launches": [
+    {
+      "launch": 1,
+      "engine": "coreai-pipelined",
+      "pid": 24132,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
+      "returncode": 0,
+      "wall_seconds": 22.83370462502353,
+      "load_seconds": 2.898999666,
+      "warmup_seconds": 4.908032042,
+      "cache_hit": false,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 81.16589095378403,
+          "decode_tokens_per_second": 80.29326774087497,
+          "load_seconds": 2.898999666
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 81.87028181525923,
+          "decode_tokens_per_second": 80.60632922945459,
+          "load_seconds": 2.898999666
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 81.7394016963161,
+          "decode_tokens_per_second": 80.16369005514399,
+          "load_seconds": 2.898999666
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "engine": "coreai-sequential",
+      "pid": 25094,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
+      "returncode": 0,
+      "wall_seconds": 23.440204082988203,
+      "load_seconds": 0.702610791,
+      "warmup_seconds": 5.715737667,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 69.52424909397818,
+          "decode_tokens_per_second": 68.59945712439544,
+          "load_seconds": 0.702610791
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 69.397019194714,
+          "decode_tokens_per_second": 68.443095269338,
+          "load_seconds": 0.702610791
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 69.42411322075763,
+          "decode_tokens_per_second": 68.44072786325447,
+          "load_seconds": 0.702610791
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "engine": "coreai-pipelined",
+      "pid": 26069,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
+      "returncode": 0,
+      "wall_seconds": 20.164394207997248,
+      "load_seconds": 0.700155959,
+      "warmup_seconds": 4.892035209,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 81.64945941519531,
+          "decode_tokens_per_second": 79.3227126179155,
+          "load_seconds": 0.700155959
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 81.8361386722244,
+          "decode_tokens_per_second": 80.48649087892476,
+          "load_seconds": 0.700155959
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 81.82261145494188,
+          "decode_tokens_per_second": 80.46377532856943,
+          "load_seconds": 0.700155959
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "engine": "coreai-sequential",
+      "pid": 27283,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",
+      "returncode": 0,
+      "wall_seconds": 23.47749391605612,
+      "load_seconds": 0.7056655,
+      "warmup_seconds": 5.7166475420000005,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 69.28138023664734,
+          "decode_tokens_per_second": 68.54295156701284,
+          "load_seconds": 0.7056655
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 69.34155477432591,
+          "decode_tokens_per_second": 67.85954657248915,
+          "load_seconds": 0.7056655
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 69.25747953481789,
+          "decode_tokens_per_second": 68.60532767451481,
+          "load_seconds": 0.7056655
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 1,
+      "prefill_tokens_per_second": 81.16589095378403,
+      "decode_tokens_per_second": 80.29326774087497,
+      "load_seconds": 2.898999666
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 2,
+      "prefill_tokens_per_second": 81.87028181525923,
+      "decode_tokens_per_second": 80.60632922945459,
+      "load_seconds": 2.898999666
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 3,
+      "prefill_tokens_per_second": 81.7394016963161,
+      "decode_tokens_per_second": 80.16369005514399,
+      "load_seconds": 2.898999666
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 1,
+      "prefill_tokens_per_second": 69.52424909397818,
+      "decode_tokens_per_second": 68.59945712439544,
+      "load_seconds": 0.702610791
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 2,
+      "prefill_tokens_per_second": 69.397019194714,
+      "decode_tokens_per_second": 68.443095269338,
+      "load_seconds": 0.702610791
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 3,
+      "prefill_tokens_per_second": 69.42411322075763,
+      "decode_tokens_per_second": 68.44072786325447,
+      "load_seconds": 0.702610791
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 1,
+      "prefill_tokens_per_second": 81.64945941519531,
+      "decode_tokens_per_second": 79.3227126179155,
+      "load_seconds": 0.700155959
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 2,
+      "prefill_tokens_per_second": 81.8361386722244,
+      "decode_tokens_per_second": 80.48649087892476,
+      "load_seconds": 0.700155959
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 3,
+      "prefill_tokens_per_second": 81.82261145494188,
+      "decode_tokens_per_second": 80.46377532856943,
+      "load_seconds": 0.700155959
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 1,
+      "prefill_tokens_per_second": 69.28138023664734,
+      "decode_tokens_per_second": 68.54295156701284,
+      "load_seconds": 0.7056655
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 2,
+      "prefill_tokens_per_second": 69.34155477432591,
+      "decode_tokens_per_second": 67.85954657248915,
+      "load_seconds": 0.7056655
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 3,
+      "prefill_tokens_per_second": 69.25747953481789,
+      "decode_tokens_per_second": 68.60532767451481,
+      "load_seconds": 0.7056655
+    }
+  ],
+  "engines": {
+    "coreai-pipelined": {
+      "engine": "coreai-pipelined",
+      "num_trials": 6,
+      "num_launches": 2,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 81.16589095378403,
+          "decode_tokens_per_second": 80.29326774087497,
+          "load_seconds": 2.898999666
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 81.87028181525923,
+          "decode_tokens_per_second": 80.60632922945459,
+          "load_seconds": 2.898999666
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 81.7394016963161,
+          "decode_tokens_per_second": 80.16369005514399,
+          "load_seconds": 2.898999666
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 81.64945941519531,
+          "decode_tokens_per_second": 79.3227126179155,
+          "load_seconds": 0.700155959
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 81.8361386722244,
+          "decode_tokens_per_second": 80.48649087892476,
+          "load_seconds": 0.700155959
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 81.82261145494188,
+          "decode_tokens_per_second": 80.46377532856943,
+          "load_seconds": 0.700155959
+        }
+      ],
+      "launches": [
+        {
+          "launch": 1,
+          "engine": "coreai-pipelined",
+          "pid": 24132,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-pipelined",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
+          "returncode": 0,
+          "wall_seconds": 22.83370462502353,
+          "load_seconds": 2.898999666,
+          "warmup_seconds": 4.908032042,
+          "cache_hit": false,
+          "trials": [
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 1,
+              "prefill_tokens_per_second": 81.16589095378403,
+              "decode_tokens_per_second": 80.29326774087497,
+              "load_seconds": 2.898999666
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 2,
+              "prefill_tokens_per_second": 81.87028181525923,
+              "decode_tokens_per_second": 80.60632922945459,
+              "load_seconds": 2.898999666
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 3,
+              "prefill_tokens_per_second": 81.7394016963161,
+              "decode_tokens_per_second": 80.16369005514399,
+              "load_seconds": 2.898999666
+            }
+          ]
+        },
+        {
+          "launch": 2,
+          "engine": "coreai-pipelined",
+          "pid": 26069,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-pipelined",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
+          "returncode": 0,
+          "wall_seconds": 20.164394207997248,
+          "load_seconds": 0.700155959,
+          "warmup_seconds": 4.892035209,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 1,
+              "prefill_tokens_per_second": 81.64945941519531,
+              "decode_tokens_per_second": 79.3227126179155,
+              "load_seconds": 0.700155959
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 2,
+              "prefill_tokens_per_second": 81.8361386722244,
+              "decode_tokens_per_second": 80.48649087892476,
+              "load_seconds": 0.700155959
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 3,
+              "prefill_tokens_per_second": 81.82261145494188,
+              "decode_tokens_per_second": 80.46377532856943,
+              "load_seconds": 0.700155959
+            }
+          ]
+        }
+      ],
+      "load_seconds_per_launch": [
+        2.898999666,
+        0.700155959
+      ],
+      "median_prefill_tokens_per_second": 81.781006575629,
+      "min_prefill_tokens_per_second": 81.16589095378403,
+      "max_prefill_tokens_per_second": 81.87028181525923,
+      "median_decode_tokens_per_second": 80.3785215347222,
+      "min_decode_tokens_per_second": 79.3227126179155,
+      "max_decode_tokens_per_second": 80.60632922945459,
+      "median_load_seconds": 1.7995778125,
+      "min_load_seconds": 0.700155959,
+      "max_load_seconds": 2.898999666
+    },
+    "coreai-sequential": {
+      "engine": "coreai-sequential",
+      "num_trials": 6,
+      "num_launches": 2,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 69.52424909397818,
+          "decode_tokens_per_second": 68.59945712439544,
+          "load_seconds": 0.702610791
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 69.397019194714,
+          "decode_tokens_per_second": 68.443095269338,
+          "load_seconds": 0.702610791
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 69.42411322075763,
+          "decode_tokens_per_second": 68.44072786325447,
+          "load_seconds": 0.702610791
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 69.28138023664734,
+          "decode_tokens_per_second": 68.54295156701284,
+          "load_seconds": 0.7056655
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 69.34155477432591,
+          "decode_tokens_per_second": 67.85954657248915,
+          "load_seconds": 0.7056655
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 69.25747953481789,
+          "decode_tokens_per_second": 68.60532767451481,
+          "load_seconds": 0.7056655
+        }
+      ],
+      "launches": [
+        {
+          "launch": 1,
+          "engine": "coreai-sequential",
+          "pid": 25094,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-sequential",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
+          "returncode": 0,
+          "wall_seconds": 23.440204082988203,
+          "load_seconds": 0.702610791,
+          "warmup_seconds": 5.715737667,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 1,
+              "prefill_tokens_per_second": 69.52424909397818,
+              "decode_tokens_per_second": 68.59945712439544,
+              "load_seconds": 0.702610791
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 2,
+              "prefill_tokens_per_second": 69.397019194714,
+              "decode_tokens_per_second": 68.443095269338,
+              "load_seconds": 0.702610791
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 3,
+              "prefill_tokens_per_second": 69.42411322075763,
+              "decode_tokens_per_second": 68.44072786325447,
+              "load_seconds": 0.702610791
+            }
+          ]
+        },
+        {
+          "launch": 2,
+          "engine": "coreai-sequential",
+          "pid": 27283,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-sequential",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",
+          "returncode": 0,
+          "wall_seconds": 23.47749391605612,
+          "load_seconds": 0.7056655,
+          "warmup_seconds": 5.7166475420000005,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 1,
+              "prefill_tokens_per_second": 69.28138023664734,
+              "decode_tokens_per_second": 68.54295156701284,
+              "load_seconds": 0.7056655
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 2,
+              "prefill_tokens_per_second": 69.34155477432591,
+              "decode_tokens_per_second": 67.85954657248915,
+              "load_seconds": 0.7056655
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 3,
+              "prefill_tokens_per_second": 69.25747953481789,
+              "decode_tokens_per_second": 68.60532767451481,
+              "load_seconds": 0.7056655
+            }
+          ]
+        }
+      ],
+      "load_seconds_per_launch": [
+        0.702610791,
+        0.7056655
+      ],
+      "median_prefill_tokens_per_second": 69.36928698451996,
+      "min_prefill_tokens_per_second": 69.25747953481789,
+      "max_prefill_tokens_per_second": 69.52424909397818,
+      "median_decode_tokens_per_second": 68.49302341817543,
+      "min_decode_tokens_per_second": 67.85954657248915,
+      "max_decode_tokens_per_second": 68.60532767451481,
+      "median_load_seconds": 0.7041381455,
+      "min_load_seconds": 0.702610791,
+      "max_load_seconds": 0.7056655
+    }
+  },
+  "interpretation": "Prefill-rate proxy: a decision costs one S=1 prefill of the entire row; measured through coreai-kit, the sequential engine costs about 15 ms per token and reuses zero recurrent tokens between questions. Synthetic decode throughput is not decision latency. Input IDs are sampled from metadata vocabulary width 248320 by llm-benchmark.",
+  "contention_rule": "Mandated top-eight ps snapshot; non-WindowServer/Chrome Core AI, Python, Swift engine jobs; exclude this foreground driver only.",
+  "snapshots": [
+    {
+      "path": "results/ps-before.txt",
+      "at": "2026-09-22T20:38:37.063233+00:00",
+      "engine_jobs": []
+    },
+    {
+      "path": "results/ps-after.txt",
+      "at": "2026-09-22T20:40:07.009221+00:00",
+      "engine_jobs": []
+    }
+  ],
+  "contended": false,
+  "gpu_lock_read_only": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "contents": "",
+    "never_modified": true
+  },
+  "wait_seconds": 2.4994369596242905e-07,
+  "benchmark_start_snapshot": {
+    "path": "results/ps-before.txt",
+    "at": "2026-09-22T20:38:37.063233+00:00",
+    "engine_jobs": []
+  },
+  "gpu_lock_after": "",
+  "benchmark_process_wall_seconds": 89.94552587496582,
+  "load_measurement": "llm-benchmark prepare_seconds: EngineFactory creation; per launch, not per trial; excluded warmup.",
+  "completed_utc": "2026-09-22T20:40:07.009266+00:00"
+}

@@ -77,6 +77,25 @@
    ]
   },
   {
+   "family": "apus-openjev-v1-4b",
+   "card": "models/apus-openjev-v1-4b/README.md",
+   "recipes": [
+    {
+     "name": "apus-openjev-v1-4b",
+     "status": "verified",
+     "source_model": "apus-ailab/APUS-OpenJev-v1-4B",
+     "source_model_from": "recipe",
+     "hf_repo": "mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI",
+     "bundle": "gpu-pipelined-b2/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run apus-openjev-v1-4b",
+     "gate_transcript": "models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b.json",
+     "open_questions": []
+    }
+   ],
+   "repos": []
+  },
+  {
    "family": "bitcpm-8b",
    "card": "models/bitcpm-8b/README.md",
    "recipes": [
@@ -2688,7 +2707,18 @@
      "open_questions": []
     }
    ],
-   "repos": []
+   "repos": [
+    {
+     "id": "mlboydaisuke/OpenThai-SystemOne-CoreAI",
+     "downloads_30d": 0,
+     "bundles": [
+      "gpu-pipelined/openthai_systemone_decode_fp16",
+      "gpu-pipelined/openthai_systemone_decode_int8lin"
+     ],
+     "tier1": {},
+     "smoke": []
+    }
+   ]
   },
   {
    "family": "ornith-1.0-9b",

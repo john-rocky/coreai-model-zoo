@@ -1,0 +1,23 @@
+# HF-id swap of the unchanged qwen3.5-4b / agents-a1-4b recipe.
+["apus-openjev-v1-4b"]
+script = "export_qwen3_5_decode_pipelined.py"
+args = ["int8hu", "--head-sym", "--hf-id", "apus-ailab/APUS-OpenJev-v1-4B"]
+card = "README.md"
+hf_repo = "mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI"
+source_hf_id = "apus-ailab/APUS-OpenJev-v1-4B"
+source_revision = "65797c526c27c4d24f564333779162cd4a64328e"
+bundle = "gpu-pipelined-b2/apus_openjev_v1_4b_decode_int8hu_block32_sym"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "Unchanged exporter and default text_config/model.language_model loader; full 32-layer text path.",
+  "int8hu --head-sym: block32 linears plus absmax block32 vocabulary head; context 4096, vocab 248320.",
+  "jev.dynamic.prompt.v2 is one user turn under the source chat template with enable_thinking=False.",
+  "Read A-P token ids 32-47 at the last compiled position, softmax T=1; calibrated=false.",
+  "Author low effort is a separate 16-layer candidate-projection path and is not exported.",
+  "Mac GPU 48/48 option argmax; max |dp| 0.005302, mean 0.000127; both engines 96/96.",
+  "main.mlirb 5742220411 bytes; sha256 7b719b75f6782d60ff0e082230e464f041927ef7bbd3ffb5cfbd2a9352e32f23.",
+  "Prefill is S=1; every decision re-prefills the whole compiled row. No phone result.",
+]

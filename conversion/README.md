@@ -108,6 +108,7 @@ Apple's repo; each recipe names the script it runs.
   fp16 0.005 / 0.00022, reset proof) → `slot/engine_argmax_slot.py` (Release `llm-runner`, both
   engines, the first greedy token = the decoded raw-slot argmax, 200/200). Card:
   [`../models/openthai-systemone/README.md`](../models/openthai-systemone/README.md).
+- **APUS-OpenJev-v1-4B (letter-readout decision model, apus-ailab; the unchanged Qwen3.5 exporter + [`letter/`](letter/)): `export_qwen3_5_decode_pipelined.py int8hu --head-sym --hf-id apus-ailab/APUS-OpenJev-v1-4B`** — Qwen3.5-4B / agents-a1-4b HF-id swap with the default loader. `oracle_letter.py` uses the author's pinned `openjet_runtime` and transformers 5.16.1 to record 48 compiled chat rows; `readout_gate_letter.py` runs AOT h16c, fresh states and S=1 steps, gathers A–P label ids and softmaxes at T=1 (uncalibrated): argmax 48/48, max |Δp| 0.005302, mean 0.000127, reset proof. `engine_argmax_letter.py` checks both Release Swift engines against the full-vocabulary Python argmax, 96/96. The vocabulary LM head remains; the alphabet transcript records the ordinary LM gate. Card: [`../models/apus-openjev-v1-4b/README.md`](../models/apus-openjev-v1-4b/README.md).
 - **FastContext-1.0-4B-SFT (STOCK — no re-authoring): `coreai.llm.export fastcontext-4b`** —
   Microsoft's Qwen3-4B-arch repo-exploration agent is byte-identical to `Qwen/Qwen3-4B`, so it
   rides the stock `coreai_models` `qwen3` graph unchanged (GQA, q/k-norm, tied embeddings all

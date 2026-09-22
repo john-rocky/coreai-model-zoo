@@ -1,0 +1,99 @@
+{
+  "result": "PASS",
+  "arch": "qwen3.5",
+  "bundle": "apus_openjev_v1_4b_decode_int8hu_block32_sym",
+  "artifact": null,
+  "source_model": {
+    "hf_id": "apus-ailab/APUS-OpenJev-v1-4B",
+    "revision": "65797c526c27c4d24f564333779162cd4a64328e",
+    "weights_pinned": false,
+    "note": "the oracle loads the source repo's default branch; the recipe's revision pins the export, not this comparison"
+  },
+  "protocol": {
+    "prompt": "The alphabet begins A, B, C, D, E, F,",
+    "max_new_tokens": 16,
+    "greedy": true,
+    "oracle_dtype": "fp32",
+    "engine_variant": "coreai-pipelined",
+    "warmup": "off",
+    "env": {
+      "COREAI_CHUNK_THRESHOLD": "1"
+    },
+    "tie_rule": "a first divergence passes only where the oracle's top-2 margin < 0.1"
+  },
+  "input_ids": [
+    760,
+    26887,
+    11690,
+    357,
+    11,
+    417,
+    11,
+    351,
+    11,
+    414,
+    11,
+    458,
+    11,
+    426,
+    11
+  ],
+  "oracle": {
+    "gen_ids": [
+      469,
+      11,
+      462,
+      11,
+      353,
+      11,
+      604,
+      11,
+      710,
+      11,
+      436,
+      11,
+      380,
+      11,
+      443,
+      11
+    ],
+    "gen_text": " G, H, I, J, K, L, M, N,",
+    "top2_margins": [
+      0.9660667181015015,
+      0.9181726574897766,
+      0.9770938754081726,
+      0.9292700290679932,
+      0.9722172021865845,
+      0.9409890174865723,
+      0.9624050855636597,
+      0.9114782214164734,
+      0.9841787815093994,
+      0.9536238312721252,
+      0.9898477792739868,
+      0.9608781337738037,
+      0.988394021987915,
+      0.9149690270423889,
+      0.9798856377601624,
+      0.970874011516571
+    ]
+  },
+  "engine": {
+    "gen_text": " G, H, I, J, K, L, M, N,"
+  },
+  "match": {
+    "exact_prefix": 16,
+    "of": 16,
+    "first_divergence": null
+  },
+  "schema": "coreai-gate-transcript/1",
+  "generated_at": "2026-09-22T21:26:27+00:00",
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "python": "3.11.13",
+    "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/scripts/alphabet_runner.py"
+  },
+  "recheck": {
+    "engine_side_only": "Download the bundle at the pinned revision, then feed the recorded input_ids to llm-runner with the protocol above (greedy, warmup off, coreai-pipelined, COREAI_CHUNK_THRESHOLD=1). The output must equal engine.gen_text. No oracle, no fp32 weights, no GPU beyond the one running the bundle.",
+    "full_gate": "python3 conversion/coreai_gate.py <bundle> apus-ailab/APUS-OpenJev-v1-4B --revision 65797c526c27c4d24f564333779162cd4a64328e --arch qwen3.5 --prompt 'The alphabet begins A, B, C, D, E, F,' -n 16"
+  }
+}
