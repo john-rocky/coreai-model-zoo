@@ -1,0 +1,711 @@
+{
+  "schema": "coreai-slot-llm-benchmark/1",
+  "status": "PASS",
+  "device": "Apple M4 Max GPU",
+  "macos": "27.0 (26A428)",
+  "build": "Release 0.2.4-zoo f7a75ec + local engine-option patch, Xcode 27.0 (27A266a)",
+  "binary": {
+    "name": "llm-benchmark",
+    "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+    "size_bytes": 17063440,
+    "sha256": "1161f9076cd66ca279711feca8287789625d0cfda20c765776f309d9ac6cb4f3"
+  },
+  "env": {
+    "COREAI_CHUNK_THRESHOLD": "1"
+  },
+  "num_trials_per_engine": 6,
+  "num_launches_per_engine": 2,
+  "prompt_tokens": 128,
+  "generation_tokens": 256,
+  "driver_pid": 93377,
+  "launches": [
+    {
+      "launch": 1,
+      "engine": "coreai-pipelined",
+      "pid": 93383,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
+      "returncode": 0,
+      "wall_seconds": 8.220703084021807,
+      "load_seconds": 1.414586083,
+      "warmup_seconds": 1.631468334,
+      "cache_hit": false,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 252.52844898699632,
+          "decode_tokens_per_second": 253.0164564889887,
+          "load_seconds": 1.414586083
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 254.7808735202058,
+          "decode_tokens_per_second": 252.0935504336627,
+          "load_seconds": 1.414586083
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 258.56576985378376,
+          "decode_tokens_per_second": 253.77845845384445,
+          "load_seconds": 1.414586083
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "engine": "coreai-sequential",
+      "pid": 93702,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
+      "returncode": 0,
+      "wall_seconds": 8.310072167078033,
+      "load_seconds": 0.172054,
+      "warmup_seconds": 2.031085,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 201.25757145724364,
+          "decode_tokens_per_second": 192.64417194062574,
+          "load_seconds": 0.172054
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 196.1141690340596,
+          "decode_tokens_per_second": 197.65960041682428,
+          "load_seconds": 0.172054
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 197.26953777036385,
+          "decode_tokens_per_second": 193.31968059713273,
+          "load_seconds": 0.172054
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "engine": "coreai-pipelined",
+      "pid": 94066,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
+      "returncode": 0,
+      "wall_seconds": 6.742144333082251,
+      "load_seconds": 0.16701425,
+      "warmup_seconds": 1.66963975,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 252.8524716983957,
+          "decode_tokens_per_second": 249.45770462960482,
+          "load_seconds": 0.16701425
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 244.70684048818057,
+          "decode_tokens_per_second": 244.79629883663122,
+          "load_seconds": 0.16701425
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 243.79336750696703,
+          "decode_tokens_per_second": 244.51588224721894,
+          "load_seconds": 0.16701425
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "engine": "coreai-sequential",
+      "pid": 94304,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "-p",
+        "128",
+        "-g",
+        "256",
+        "-n",
+        "3",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--output-json",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+      ],
+      "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
+      "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",
+      "returncode": 0,
+      "wall_seconds": 8.31699312501587,
+      "load_seconds": 0.165566875,
+      "warmup_seconds": 2.042509167,
+      "cache_hit": true,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 197.01550993211984,
+          "decode_tokens_per_second": 194.46614805285301,
+          "load_seconds": 0.165566875
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 196.78542824074384,
+          "decode_tokens_per_second": 197.51888519114257,
+          "load_seconds": 0.165566875
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 197.7727390365532,
+          "decode_tokens_per_second": 195.1917448423383,
+          "load_seconds": 0.165566875
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 1,
+      "prefill_tokens_per_second": 252.52844898699632,
+      "decode_tokens_per_second": 253.0164564889887,
+      "load_seconds": 1.414586083
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 2,
+      "prefill_tokens_per_second": 254.7808735202058,
+      "decode_tokens_per_second": 252.0935504336627,
+      "load_seconds": 1.414586083
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 1,
+      "trial": 3,
+      "prefill_tokens_per_second": 258.56576985378376,
+      "decode_tokens_per_second": 253.77845845384445,
+      "load_seconds": 1.414586083
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 1,
+      "prefill_tokens_per_second": 201.25757145724364,
+      "decode_tokens_per_second": 192.64417194062574,
+      "load_seconds": 0.172054
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 2,
+      "prefill_tokens_per_second": 196.1141690340596,
+      "decode_tokens_per_second": 197.65960041682428,
+      "load_seconds": 0.172054
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 1,
+      "trial": 3,
+      "prefill_tokens_per_second": 197.26953777036385,
+      "decode_tokens_per_second": 193.31968059713273,
+      "load_seconds": 0.172054
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 1,
+      "prefill_tokens_per_second": 252.8524716983957,
+      "decode_tokens_per_second": 249.45770462960482,
+      "load_seconds": 0.16701425
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 2,
+      "prefill_tokens_per_second": 244.70684048818057,
+      "decode_tokens_per_second": 244.79629883663122,
+      "load_seconds": 0.16701425
+    },
+    {
+      "engine": "coreai-pipelined",
+      "launch": 2,
+      "trial": 3,
+      "prefill_tokens_per_second": 243.79336750696703,
+      "decode_tokens_per_second": 244.51588224721894,
+      "load_seconds": 0.16701425
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 1,
+      "prefill_tokens_per_second": 197.01550993211984,
+      "decode_tokens_per_second": 194.46614805285301,
+      "load_seconds": 0.165566875
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 2,
+      "prefill_tokens_per_second": 196.78542824074384,
+      "decode_tokens_per_second": 197.51888519114257,
+      "load_seconds": 0.165566875
+    },
+    {
+      "engine": "coreai-sequential",
+      "launch": 2,
+      "trial": 3,
+      "prefill_tokens_per_second": 197.7727390365532,
+      "decode_tokens_per_second": 195.1917448423383,
+      "load_seconds": 0.165566875
+    }
+  ],
+  "engines": {
+    "coreai-pipelined": {
+      "engine": "coreai-pipelined",
+      "num_trials": 6,
+      "num_launches": 2,
+      "trials": [
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 252.52844898699632,
+          "decode_tokens_per_second": 253.0164564889887,
+          "load_seconds": 1.414586083
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 254.7808735202058,
+          "decode_tokens_per_second": 252.0935504336627,
+          "load_seconds": 1.414586083
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 258.56576985378376,
+          "decode_tokens_per_second": 253.77845845384445,
+          "load_seconds": 1.414586083
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 252.8524716983957,
+          "decode_tokens_per_second": 249.45770462960482,
+          "load_seconds": 0.16701425
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 244.70684048818057,
+          "decode_tokens_per_second": 244.79629883663122,
+          "load_seconds": 0.16701425
+        },
+        {
+          "engine": "coreai-pipelined",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 243.79336750696703,
+          "decode_tokens_per_second": 244.51588224721894,
+          "load_seconds": 0.16701425
+        }
+      ],
+      "launches": [
+        {
+          "launch": 1,
+          "engine": "coreai-pipelined",
+          "pid": 93383,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-pipelined",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
+          "returncode": 0,
+          "wall_seconds": 8.220703084021807,
+          "load_seconds": 1.414586083,
+          "warmup_seconds": 1.631468334,
+          "cache_hit": false,
+          "trials": [
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 1,
+              "prefill_tokens_per_second": 252.52844898699632,
+              "decode_tokens_per_second": 253.0164564889887,
+              "load_seconds": 1.414586083
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 2,
+              "prefill_tokens_per_second": 254.7808735202058,
+              "decode_tokens_per_second": 252.0935504336627,
+              "load_seconds": 1.414586083
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 1,
+              "trial": 3,
+              "prefill_tokens_per_second": 258.56576985378376,
+              "decode_tokens_per_second": 253.77845845384445,
+              "load_seconds": 1.414586083
+            }
+          ]
+        },
+        {
+          "launch": 2,
+          "engine": "coreai-pipelined",
+          "pid": 94066,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-pipelined",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
+          "returncode": 0,
+          "wall_seconds": 6.742144333082251,
+          "load_seconds": 0.16701425,
+          "warmup_seconds": 1.66963975,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 1,
+              "prefill_tokens_per_second": 252.8524716983957,
+              "decode_tokens_per_second": 249.45770462960482,
+              "load_seconds": 0.16701425
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 2,
+              "prefill_tokens_per_second": 244.70684048818057,
+              "decode_tokens_per_second": 244.79629883663122,
+              "load_seconds": 0.16701425
+            },
+            {
+              "engine": "coreai-pipelined",
+              "launch": 2,
+              "trial": 3,
+              "prefill_tokens_per_second": 243.79336750696703,
+              "decode_tokens_per_second": 244.51588224721894,
+              "load_seconds": 0.16701425
+            }
+          ]
+        }
+      ],
+      "load_seconds_per_launch": [
+        1.414586083,
+        0.16701425
+      ],
+      "median_prefill_tokens_per_second": 252.690460342696,
+      "min_prefill_tokens_per_second": 243.79336750696703,
+      "max_prefill_tokens_per_second": 258.56576985378376,
+      "median_decode_tokens_per_second": 250.77562753163375,
+      "min_decode_tokens_per_second": 244.51588224721894,
+      "max_decode_tokens_per_second": 253.77845845384445,
+      "median_load_seconds": 0.7908001665000001,
+      "min_load_seconds": 0.16701425,
+      "max_load_seconds": 1.414586083
+    },
+    "coreai-sequential": {
+      "engine": "coreai-sequential",
+      "num_trials": 6,
+      "num_launches": 2,
+      "trials": [
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 1,
+          "prefill_tokens_per_second": 201.25757145724364,
+          "decode_tokens_per_second": 192.64417194062574,
+          "load_seconds": 0.172054
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 2,
+          "prefill_tokens_per_second": 196.1141690340596,
+          "decode_tokens_per_second": 197.65960041682428,
+          "load_seconds": 0.172054
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 1,
+          "trial": 3,
+          "prefill_tokens_per_second": 197.26953777036385,
+          "decode_tokens_per_second": 193.31968059713273,
+          "load_seconds": 0.172054
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 1,
+          "prefill_tokens_per_second": 197.01550993211984,
+          "decode_tokens_per_second": 194.46614805285301,
+          "load_seconds": 0.165566875
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 2,
+          "prefill_tokens_per_second": 196.78542824074384,
+          "decode_tokens_per_second": 197.51888519114257,
+          "load_seconds": 0.165566875
+        },
+        {
+          "engine": "coreai-sequential",
+          "launch": 2,
+          "trial": 3,
+          "prefill_tokens_per_second": 197.7727390365532,
+          "decode_tokens_per_second": 195.1917448423383,
+          "load_seconds": 0.165566875
+        }
+      ],
+      "launches": [
+        {
+          "launch": 1,
+          "engine": "coreai-sequential",
+          "pid": 93702,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-sequential",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
+          "returncode": 0,
+          "wall_seconds": 8.310072167078033,
+          "load_seconds": 0.172054,
+          "warmup_seconds": 2.031085,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 1,
+              "prefill_tokens_per_second": 201.25757145724364,
+              "decode_tokens_per_second": 192.64417194062574,
+              "load_seconds": 0.172054
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 2,
+              "prefill_tokens_per_second": 196.1141690340596,
+              "decode_tokens_per_second": 197.65960041682428,
+              "load_seconds": 0.172054
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 1,
+              "trial": 3,
+              "prefill_tokens_per_second": 197.26953777036385,
+              "decode_tokens_per_second": 193.31968059713273,
+              "load_seconds": 0.172054
+            }
+          ]
+        },
+        {
+          "launch": 2,
+          "engine": "coreai-sequential",
+          "pid": 94304,
+          "command": [
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "--model",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "-p",
+            "128",
+            "-g",
+            "256",
+            "-n",
+            "3",
+            "--inference-engine-variant",
+            "coreai-sequential",
+            "--output-json",
+            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+          ],
+          "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
+          "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",
+          "returncode": 0,
+          "wall_seconds": 8.31699312501587,
+          "load_seconds": 0.165566875,
+          "warmup_seconds": 2.042509167,
+          "cache_hit": true,
+          "trials": [
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 1,
+              "prefill_tokens_per_second": 197.01550993211984,
+              "decode_tokens_per_second": 194.46614805285301,
+              "load_seconds": 0.165566875
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 2,
+              "prefill_tokens_per_second": 196.78542824074384,
+              "decode_tokens_per_second": 197.51888519114257,
+              "load_seconds": 0.165566875
+            },
+            {
+              "engine": "coreai-sequential",
+              "launch": 2,
+              "trial": 3,
+              "prefill_tokens_per_second": 197.7727390365532,
+              "decode_tokens_per_second": 195.1917448423383,
+              "load_seconds": 0.165566875
+            }
+          ]
+        }
+      ],
+      "load_seconds_per_launch": [
+        0.172054,
+        0.165566875
+      ],
+      "median_prefill_tokens_per_second": 197.14252385124183,
+      "min_prefill_tokens_per_second": 196.1141690340596,
+      "max_prefill_tokens_per_second": 201.25757145724364,
+      "median_decode_tokens_per_second": 194.82894644759565,
+      "min_decode_tokens_per_second": 192.64417194062574,
+      "max_decode_tokens_per_second": 197.65960041682428,
+      "median_load_seconds": 0.16881043750000002,
+      "min_load_seconds": 0.165566875,
+      "max_load_seconds": 0.172054
+    }
+  },
+  "interpretation": "Prefill-rate proxy: this decision graph is decode-only S=1; synthetic generation throughput is not decision latency. Input IDs are sampled from metadata logits width 256 by llm-benchmark.",
+  "contention_rule": "Mandated top-eight ps snapshot; non-WindowServer/Chrome Core AI, Python, Swift engine jobs; exclude this foreground driver only.",
+  "snapshots": [
+    {
+      "path": "results/ps-before.txt",
+      "at": "2026-09-22T19:19:24.177433+00:00",
+      "engine_jobs": []
+    },
+    {
+      "path": "results/ps-after.txt",
+      "at": "2026-09-22T19:19:55.799761+00:00",
+      "engine_jobs": []
+    }
+  ],
+  "contended": false,
+  "wait_seconds": 3.3294782042503357e-07,
+  "benchmark_start_snapshot": {
+    "path": "results/ps-before.txt",
+    "at": "2026-09-22T19:19:24.177433+00:00",
+    "engine_jobs": []
+  },
+  "benchmark_process_wall_seconds": 31.62205179198645,
+  "load_measurement": "llm-benchmark prepare_seconds: EngineFactory creation; per launch, not per trial; excluded warmup.",
+  "completed_utc": "2026-09-22T19:19:55.799819+00:00"
+}

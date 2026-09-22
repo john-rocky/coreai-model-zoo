@@ -1,0 +1,88 @@
+{
+  "source": "Supervisor-provided round 2 prompt; measured through coreai-kit; not re-derived in this run",
+  "prompt": "rounds/02.prompt.md",
+  "reported_time_jst": "2026-09-23 04:0x–04:3x",
+  "worktree": "~/code/coreai-kit-models-wt",
+  "engine": "coreai-sequential",
+  "device": "Apple M4 Max GPU",
+  "parity": {
+    "rows": 50,
+    "includes_wide_options": [
+      40,
+      255
+    ],
+    "fp16": {
+      "tokens_equal": 50,
+      "slots_equal": 50,
+      "option_argmax_equal": 50,
+      "max_abs_dp": 0.0051,
+      "mean_abs_dp": 0.0003,
+      "max_abs_dabstain": 0.0165,
+      "worst_row": "r05-task"
+    },
+    "int8lin": {
+      "tokens_equal": 50,
+      "slots_equal": 50,
+      "option_argmax_equal": 50,
+      "max_abs_dp": 0.0226,
+      "mean_abs_dp": 0.0009,
+      "max_abs_dabstain": 0.0222,
+      "worst_row": "r05-dry"
+    }
+  },
+  "latency": {
+    "mode": "int8lin",
+    "median_question_ms": 354,
+    "note": "Median over the 50 fixture rows, two to three questions per state; a question on a new state pays for the whole state (S=1 prefill)",
+    "wide_255": {
+      "tokens": 1449,
+      "seconds": 7.2,
+      "prefill": "S=1"
+    },
+    "thai_ticket": {
+      "questions": 3,
+      "row_tokens": [
+        57,
+        63,
+        83
+      ],
+      "question_ms": [
+        351,
+        316,
+        429
+      ],
+      "prefix_tokens_reused": 0,
+      "note": "median of two runs (351.2/350.3, 315.6/322.8, 429.0/435.0); the recurrent hybrid re-prefills every row; an earlier 170/40/65 ms figure was minicpm5-2b measured by mistake and is withdrawn"
+    }
+  },
+  "semif": {
+    "dataset": "authored144",
+    "language": "en",
+    "rows": 144,
+    "options": 3,
+    "evaluator": "unchanged benchmarks/evaluate.py with SemIf gold labels",
+    "mode": "int8lin",
+    "raw_correct": 109,
+    "mean_family_balanced_accuracy": 0.7249,
+    "kit_readme_reference_values": {
+      "MiniCPM5-2B int8": 0.681,
+      "Qwen3.5-4B int8": 0.821
+    }
+  },
+  "swift_tokenizer": {
+    "initial_token_matches": 23,
+    "rows": 50,
+    "cause": "Foundation string-search match ranges snap to grapheme clusters, keeping Thai combining marks with letter runs and changing BPE merges",
+    "example": {
+      "text": "กล่อง",
+      "old": [
+        "กล่อง"
+      ],
+      "reference": [
+        "กล",
+        "่อง"
+      ]
+    },
+    "fix": "Cut each text segment with the same Split regex using ICU on UTF-16, then encode each piece."
+  }
+}

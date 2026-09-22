@@ -152,6 +152,11 @@ For the long-form version of the same material, read
   line by line, tokenizer parity on the 44 fixture rows, and the readout primitive (recommended: a
   completion-synchronized read-last-logits call on the pipelined engine; fallback: the zoo's
   N-state low-level runner). Not implemented.
+- [`openthai-systemone-port.md`](openthai-systemone-port.md) — **a slot-head decision model on Core AI**
+  (iapp/OpenThai-SystemOne): the LM head replaced by a 256-way head read at a control token —
+  `model.*` weights, a resized embedding, `vocab_size` 256 as the logits width; temperatures from the
+  checkpoint tensor, not the author's card; the author's one-pass API differs from independent rows
+  (max |Δp| 0.375); and the Swift tokenizer's grapheme-cluster cut of Thai, fixed in the kit.
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
   converting the same minimal module under both versions, diffing the graph, and running the ones

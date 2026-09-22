@@ -94,6 +94,20 @@ Apple's repo; each recipe names the script it runs.
   mean of row means ≤ 0.002, reset proof) → `decider/engine_argmax_decider.py` (Release
   `llm-runner --raw-tokens --max-tokens 1`, greedy: the first token must be the oracle's label,
   44/44). Card: [`../models/decider-0.8b/README.md`](../models/decider-0.8b/README.md).
+- **OpenThai-SystemOne (System One decision model with a 256-way slot head, iApp;
+  [`export_openthai_systemone_decode_pipelined.py`](export_openthai_systemone_decode_pipelined.py) + [`slot/`](slot/)):
+  `export_openthai_systemone_decode_pipelined.py int8lin`** — the Qwen3.5 S=1 decode graph with
+  three changes: weights under `model.*`, a 248,339-row embedding (295 control tokens), and the
+  biased 256-way slot head in the `lm_head` position (`language.vocab_size` = 256 is the logits
+  width; the tokenizer keeps its 248,339 ids). The gate reads slot probabilities:
+  `slot/oracle_slot.py` (uv-managed; the author's own modeling/formatting files and pinned client,
+  18 requests → 50 single-question rows — Thai and English, JSON states, 40- and 255-option rows —
+  each equal to the author's single-question API) → `slot/readout_gate_slot.py` (AOT h16c through
+  the Python runtime, S=1 with fresh states, temperature per question type from the checkpoint,
+  mask, softmax, renormalise: argmax 50/50 on both bundles, int8lin max |Δp| 0.021 / mean 0.00066,
+  fp16 0.005 / 0.00022, reset proof) → `slot/engine_argmax_slot.py` (Release `llm-runner`, both
+  engines, the first greedy token = the decoded raw-slot argmax, 200/200). Card:
+  [`../models/openthai-systemone/README.md`](../models/openthai-systemone/README.md).
 - **FastContext-1.0-4B-SFT (STOCK — no re-authoring): `coreai.llm.export fastcontext-4b`** —
   Microsoft's Qwen3-4B-arch repo-exploration agent is byte-identical to `Qwen/Qwen3-4B`, so it
   rides the stock `coreai_models` `qwen3` graph unchanged (GQA, q/k-norm, tied embeddings all

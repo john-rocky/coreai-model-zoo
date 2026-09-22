@@ -1,0 +1,52 @@
+{
+ "schema": "coreai-slot-gate-summary/1",
+ "recipe": "openthai-systemone-fp16",
+ "bundle": "gpu-pipelined/openthai_systemone_decode_fp16",
+ "source": {
+  "hf_id": "iapp/OpenThai-SystemOne",
+  "revision": "f3709948b5e3cc9606a57e74ba62b7a639d17dd3"
+ },
+ "result": "PASS",
+ "gate": "option argmax = the author's fp32 oracle on every row with oracle margin >= 0.02; finite logits; state reset bit-identical; both Swift engines' first greedy token = the decoded raw-slot argmax of the same bundle's Python readout",
+ "readout": {
+  "transcript": "models/openthai-systemone/gate-openthai-systemone-readout-fp16.json",
+  "rows": 50,
+  "expected_rows": 50,
+  "full_vocab_argmax_is_label": 43,
+  "argmax_agreement": 50,
+  "margin_ge_0_02_rows": 49,
+  "margin_ge_0_02_argmax_agreement": 49,
+  "max_abs_delta_p": 0.005058646202087402,
+  "mean_of_row_mean_abs_delta_p": 0.00022480956720861644,
+  "max_abs_delta_abstain": 0.01648791879415512,
+  "max_abs_delta_raw_logits": 0.10010689496994019,
+  "finite_all": true,
+  "nonconstant_all": true,
+  "reset_identical": true,
+  "session_resets_identical": true,
+  "provisional_fp16_max_delta_p_expectation": 0.02,
+  "provisional_expectation_exceeded": false,
+  "result": "PASS"
+ },
+ "engine": {
+  "transcript": "models/openthai-systemone/gate-openthai-systemone-engine-fp16.json",
+  "expected_calls": 100,
+  "calls": 100,
+  "rows": 100,
+  "calls_succeeded": 100,
+  "agreement": 100,
+  "result": "PASS"
+ },
+ "through_coreai_kit": {
+  "tokens_equal": 50,
+  "slots_equal": 50,
+  "option_argmax_equal": 50,
+  "max_abs_dp": 0.0051,
+  "mean_abs_dp": 0.0003,
+  "max_abs_dabstain": 0.0165,
+  "worst_row": "r05-task",
+  "record": "models/openthai-systemone/measurements-coreai-kit.json"
+ },
+ "fixture": "models/openthai-systemone/fixtures-openthai-systemone.json",
+ "generated_from": "the two transcripts' summary blocks (supervisor, 2026-09-23)"
+}

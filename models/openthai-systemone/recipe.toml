@@ -1,0 +1,48 @@
+# Recipe for OpenThai-SystemOne. Schema: ../README.md.
+# int8lin ships; fp16 is the probability reference.
+
+["openthai-systemone"]
+script = "export_openthai_systemone_decode_pipelined.py"
+args = ["int8lin"]
+card = "README.md"
+hf_repo = "mlboydaisuke/OpenThai-SystemOne-CoreAI"
+source_hf_id = "iapp/OpenThai-SystemOne"
+source_revision = "f3709948b5e3cc9606a57e74ba62b7a639d17dd3"
+bundle = "gpu-pipelined/openthai_systemone_decode_int8lin"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "Qwen3.5 S=1 decode, max_ctx 4096; text_config with model.* weights and 248339 embedding rows.",
+  "Biased 256-way slot head replaces lm_head; linears int8 block32, head/embedding/conv/norm fp16.",
+  "language.vocab_size=256 is the logits width; the tokenizer retains all 295 added tokens.",
+  "Tensor temperatures: choice 1.058534, score 1.043141, noul 1.006767; differ from author card.",
+  "Mac GPU readout 50/50 argmax (49/49 margin>=0.02); max |dp| 0.020813, mean 0.000659.",
+  "Pipelined and sequential engine checks 50/50 each; max |dabstain| 0.018837.",
+  "main.mlirb 1039655099 bytes; sha256 0e58d55b8740710eee7bea8117aa8625a1061c142a63e03a1a79d47bf71ed9eb.",
+  "IR serialization can vary across re-exports; gate transcripts and metadata define the readout contract.",
+]
+
+["openthai-systemone-fp16"]
+script = "export_openthai_systemone_decode_pipelined.py"
+args = ["fp16"]
+card = "README.md"
+hf_repo = "mlboydaisuke/OpenThai-SystemOne-CoreAI"
+source_hf_id = "iapp/OpenThai-SystemOne"
+source_revision = "f3709948b5e3cc9606a57e74ba62b7a639d17dd3"
+bundle = "gpu-pipelined/openthai_systemone_decode_fp16"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "Qwen3.5 S=1 decode, max_ctx 4096; text_config with model.* weights and 248339 embedding rows.",
+  "Biased 256-way slot head replaces lm_head; fp16 reference for the int8lin ship bundle.",
+  "language.vocab_size=256 is the logits width; the tokenizer retains all 295 added tokens.",
+  "Tensor temperatures: choice 1.058534, score 1.043141, noul 1.006767; differ from author card.",
+  "Mac GPU readout 50/50 argmax (49/49 margin>=0.02); max |dp| 0.005059, mean 0.000225.",
+  "Pipelined and sequential engine checks 50/50 each; max |dabstain| 0.016488.",
+  "main.mlirb 1506078533 bytes; sha256 f811a29cb5c2e6ff5ab5834e4ad288d04aa22c06791b4efcd1abb9c629a18e08.",
+  "IR serialization can vary across re-exports; gate transcripts and metadata define the readout contract.",
+]
