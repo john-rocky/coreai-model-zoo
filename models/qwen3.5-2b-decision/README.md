@@ -81,7 +81,7 @@ A decision costs one S=1 prefill of the **whole question row**, so these are **p
 
 SemIf's authored144 uses 144 English rows, three options each, SemIf's gold labels and its unchanged `benchmarks/evaluate.py`. Rendering each row in the author's Choice form gave **114/144 raw**, **0.798 mean family balanced accuracy**, and **872 ms median per decision** on int8hu. For scale on the same rows/evaluator, the kit README reports Qwen3.5-4B int8 zero-shot **0.821**, MiniCPM5-2B int8 **0.681**, OpenThai **0.725** and APUS-OpenJev-v1-4B **0.906**. These are numbers on that evaluator, not a ranking.
 
-On the author's chipmaker-news example, the kit's int8hu probabilities were **Business 0.684 / Science-Technology 0.309 / World 0.005 / Sports 0.002**; the author's MLX BF16 card quotes **0.70 / 0.29 / 0.005 / 0.002**. A three-question request on that sentence (Choice, yes/no, five-level Score) took **817 / 633 / 766 ms** for its **82 / 73 / 88-token** rows, with **0 tokens reused**. This recurrent hybrid re-prefills each row, about **10 ms per token** on the sequential engine. [Supervisor-supplied record](measurements-coreai-kit.json).
+On the author's chipmaker-news example, the kit's int8hu probabilities were **Business 0.684 / Science/Technology 0.309 / World 0.005 / Sports 0.002**; the author's MLX BF16 card quotes **0.70 / 0.29 / 0.005 / 0.002**. A three-question request on that sentence (Choice, yes/no, five-level Score) took **817 / 633 / 766 ms** for its **82 / 73 / 88-token** rows, with **0 tokens reused**. This recurrent hybrid re-prefills each row, about **10 ms per token** on the sequential engine. [Supervisor-supplied record](measurements-coreai-kit.json).
 
 ## Bundle
 
