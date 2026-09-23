@@ -1,0 +1,155 @@
+{
+  "schema": "coreai-kit-measurements/1",
+  "source": "measured through coreai-kit; supervisor supplied in rounds/04.instruction.md",
+  "measured_by_this_run": false,
+  "instruction_sha256": "56e14d517692ddfed9bd7c9f18fe7def0545c5ff71a427a52d872e060f8dc496",
+  "date": "2026-09-23 09:05–09:25 JST",
+  "worktree_read_only_reference": "/Users/majimadaisuke/code/coreai-kit-models-wt",
+  "branch": "decision-models-4",
+  "device": "Apple M4 Max GPU",
+  "macos": "27.0 (26A428)",
+  "engine": "coreai-sequential",
+  "format": "Decision.Format.scalar",
+  "rendering": "kit own rendering of the author's per-option rows with the author's truncation",
+  "source_hf_id": "pngwn/system-one-qwen3.5-4b-scorer",
+  "license": "cc-by-nc-4.0",
+  "contended": true,
+  "timing_provenance": "GPU shared with two conversion runs; every kit time in this record is contended",
+  "parity": {
+    "command": "decide-cli parity",
+    "fixture": "fixtures-system-one-scorer-4b.json",
+    "fixture_schema": "coreai-scalar-fixtures/1",
+    "reference": "p_oracle: author's PEFT model, FP32 Torch CPU; canonical results/fixtures.json",
+    "questions": 48,
+    "option_rows": 280,
+    "int8lin": {
+      "questions": 48,
+      "tokens_identical": 280,
+      "slots_identical": 280,
+      "question_argmax_agreement": 48,
+      "max_abs_delta_p": 0.011,
+      "mean_abs_delta_p": 0.0012,
+      "median_question_ms": 1016,
+      "max_cardinality_question": {
+        "options": 32,
+        "seconds": 11.2
+      }
+    },
+    "fp16": {
+      "questions": 48,
+      "tokens_identical": 280,
+      "slots_identical": 280,
+      "question_argmax_agreement": 48,
+      "max_abs_delta_p": 0.0037,
+      "mean_abs_delta_p": 0.0004,
+      "median_question_ms": 1556
+    },
+    "question_time_definition": "All option rows summed for each question",
+    "contended": true
+  },
+  "semif_authored144": {
+    "rows": 144,
+    "language": "en",
+    "options_per_row": 3,
+    "gold": "SemIf own gold labels",
+    "evaluator": "unchanged benchmarks/evaluate.py",
+    "rendering": "Each option rendered as one scalar row",
+    "bundle": "int8lin",
+    "raw_correct": 121,
+    "mean_family_balanced_accuracy": 0.844,
+    "family_balanced_accuracy": {
+      "evidence_interpretation": 0.918,
+      "rule_application": 0.759,
+      "candidate_selection": 0.855
+    },
+    "median_decision_ms": 2311,
+    "option_rows_per_decision": 3,
+    "approx_total_tokens_per_decision": 175,
+    "same_rows_evaluator_scale": {
+      "Qwen3.5-4B int8 zero-shot": 0.821,
+      "MiniCPM5-2B int8": 0.681,
+      "OpenThai-SystemOne": 0.725,
+      "APUS-OpenJev-v1-4B": 0.906,
+      "Qwen3.5-2B-Decision": 0.798
+    },
+    "comparison_policy": "Numbers on the same rows and evaluator, not a ranking.",
+    "contended": true
+  },
+  "three_question_request": {
+    "state": "Customer message: I was charged twice for my order last week and nobody has replied. I want this fixed today.",
+    "questions": [
+      {
+        "question": "which team",
+        "kind": "choice",
+        "options": [
+          "billing",
+          "shipping",
+          "technical"
+        ],
+        "probabilities": {
+          "billing": 0.95,
+          "shipping": 0.01,
+          "technical": 0.04
+        },
+        "question_ms": 1862,
+        "option_rows": 3,
+        "total_tokens": 123
+      },
+      {
+        "question": "is the customer angry",
+        "kind": "noul",
+        "options": [
+          "yes",
+          "no"
+        ],
+        "yes_probability": 0.723,
+        "question_ms": 1094,
+        "option_rows": 2,
+        "total_tokens": 80
+      },
+      {
+        "question": "how urgent",
+        "kind": "score",
+        "options": [
+          "can wait",
+          "this week",
+          "today",
+          "right now"
+        ],
+        "expected_level": 2.16,
+        "reported_probabilities": {
+          "today": 0.586,
+          "right now": 0.301
+        },
+        "question_ms": 2198,
+        "option_rows": 4,
+        "total_tokens": 163
+      }
+    ],
+    "tokens_reused": 0,
+    "reason": "Every row is prefilled from its first token on the decode-only graph; a choice costs one row per option.",
+    "contended": true
+  },
+  "scalar_contract": {
+    "metadata_detection": {
+      "decision.head": "scalar"
+    },
+    "metadata_fields": [
+      "decision.head",
+      "decision.temperature",
+      "decision.max_len"
+    ],
+    "row_rendering": "Author State/Question/Option encoding and truncation",
+    "temperature": 1.75,
+    "max_len": 384,
+    "max_options": 64,
+    "readout": "Softmax over per-option scalars at temperature 1.75"
+  },
+  "catalog": {
+    "id": "system-one-scorer-4b",
+    "platform": "macOS only",
+    "license": "CC-BY-NC-4.0",
+    "status": "kit catalog entry pending the Hub revision",
+    "condition": "Catalog entry lands after the Hub upload"
+  }
+}

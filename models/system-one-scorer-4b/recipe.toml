@@ -1,0 +1,47 @@
+# pngwn/system-one-qwen3.5-4b-scorer; license cc-by-nc-4.0; int8lin ships, fp16 is the reference.
+
+["system-one-scorer-4b"]
+script = "export_system_one_scorer_decode_pipelined.py"
+args = ["int8lin"]
+card = "README.md"
+hf_repo = "mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI"
+source_hf_id = "pngwn/system-one-qwen3.5-4b-scorer"
+source_revision = "e6464dce15f013c2ef641593a85cc6afcdaea928"
+bundle = "gpu-pipelined/system_one_qwen3_5_4b_scorer_decode_int8lin"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "License cc-by-nc-4.0; base Qwen/Qwen3.5-4B-Base@1001bb4d826a52d1f399e183466143f4da7b741b is Apache-2.0.",
+  "Rank16 alpha32 LoRA: 200 A/B pairs across 10 projection families; merge CPU FP32, tower stored BF16 and score FP32.",
+  "Full 32-layer S=1 text graph; 24 loop-free linear-attention layers; scalar lm_head [1,2560], output width1, context4096.",
+  "Author State/Question/Option per-option encode; state end-truncated to max384; tail suffix384 when tail alone >=384; T=1.75.",
+  "Embedding248320/tokenizer248077 retained; head, embeddings, conv1d and norms FP16; int8lin linears block32 symmetric-with-clipping.",
+  "Mac GPU:48/48 question argmax,46/46 margin>=0.02; max|dp|0.010874180; both engines4/4 load calls.",
+  "main.mlirb 5066794425 bytes; sha256 1dbd8310571e2a306fd0b00fae2a3fe252905b8267e183f865cea911bf3933f5.",
+  "Engine token id0 text is meaningless; scalar probabilities are the contract. measured through coreai-kit; kit catalog entry pending the Hub revision.",
+]
+
+["system-one-scorer-4b-fp16"]
+script = "export_system_one_scorer_decode_pipelined.py"
+args = ["fp16"]
+card = "README.md"
+hf_repo = "mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI"
+source_hf_id = "pngwn/system-one-qwen3.5-4b-scorer"
+source_revision = "e6464dce15f013c2ef641593a85cc6afcdaea928"
+bundle = "gpu-pipelined/system_one_qwen3_5_4b_scorer_decode_fp16"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+notes = [
+  "License cc-by-nc-4.0; base Qwen/Qwen3.5-4B-Base@1001bb4d826a52d1f399e183466143f4da7b741b is Apache-2.0.",
+  "Rank16 alpha32 LoRA: 200 A/B pairs across 10 projection families; merge CPU FP32, tower stored BF16 and score FP32.",
+  "Full 32-layer S=1 text graph; 24 loop-free linear-attention layers; scalar lm_head [1,2560], output width1, context4096.",
+  "Author State/Question/Option per-option encode; state end-truncated to max384; tail suffix384 when tail alone >=384; T=1.75.",
+  "Embedding248320/tokenizer248077 retained; head, embeddings, conv1d and norms FP16; int8lin linears block32 symmetric-with-clipping.",
+  "Mac GPU:48/48 question argmax,46/46 margin>=0.02; max|dp|0.003684332; both engines4/4 load calls.",
+  "main.mlirb 8412700156 bytes; sha256 f07923c007f760dd8fcd11d8c755d097ecdeb4adc2c51bf1c306648eca4eff89.",
+  "Engine token id0 text is meaningless; scalar probabilities are the contract. measured through coreai-kit; kit catalog entry pending the Hub revision.",
+]

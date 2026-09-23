@@ -1,0 +1,650 @@
+{
+  "schema": "coreai-scalar-gate-summary/1",
+  "result": "PASS",
+  "recipe": "system-one-scorer-4b",
+  "license": "cc-by-nc-4.0",
+  "source": {
+    "hf_id": "pngwn/system-one-qwen3.5-4b-scorer",
+    "revision": "e6464dce15f013c2ef641593a85cc6afcdaea928"
+  },
+  "base": {
+    "hf_id": "Qwen/Qwen3.5-4B-Base",
+    "revision": "1001bb4d826a52d1f399e183466143f4da7b741b",
+    "license": "Apache-2.0"
+  },
+  "gate": "FP32-reference argmax at margin>=0.02; finite scalars/probabilities; exact fresh-state repeats; both engines load and emit one meaningless id0 token",
+  "generated_at": "2026-09-23T01:32:24.084272+00:00",
+  "bundle": "gpu-pipelined/system_one_qwen3_5_4b_scorer_decode_int8lin",
+  "protocol": {
+    "prompt_version": "State/Question/Option, last token",
+    "layers": 32,
+    "temperature": 1.75,
+    "max_len": 384,
+    "slot": "len(ids)-1",
+    "head": "scalar",
+    "logits_shape": [
+      1,
+      1,
+      1
+    ],
+    "chat_template": "unused; add_special_tokens=False"
+  },
+  "fixtures": {
+    "path": "fixtures-system-one-scorer-4b.json",
+    "sha256": "7ad0713e165f17873f59adfd15a58ebc91860132bab26038381ce929ac0a4125",
+    "requests": 20,
+    "questions": 48,
+    "rows": 280
+  },
+  "transcripts": {
+    "readout": "gate-system-one-scorer-4b-readout-int8lin.json",
+    "engine": "gate-system-one-scorer-4b-engine-int8lin.json"
+  },
+  "fixture_coverage": {
+    "requests": 20,
+    "questions": 48,
+    "questions_non_zoo": 44,
+    "rows": 280,
+    "question_counts_non_zoo": {
+      "choice": 24,
+      "noul": 10,
+      "score": 10
+    },
+    "wide_choice_questions": 6,
+    "descriptive_choice_questions": 16,
+    "score_ten_level_questions": 2,
+    "zoo_only_questions": 4,
+    "zoo_only_rows": 104,
+    "states_truncated": 6,
+    "truncated_request_ids": [
+      "request-01",
+      "request-02",
+      "request-03",
+      "request-04",
+      "request-05",
+      "request-06"
+    ],
+    "truncated_rows": 12,
+    "state_longer_than_384_requests": 6,
+    "total_tokens": 12153,
+    "min_row_tokens": 24,
+    "max_row_tokens": 384,
+    "questions_completed": 48,
+    "rows_completed": 280,
+    "wall_seconds": 1214.858353166026,
+    "all_finite": true,
+    "scalar_min": -14.593598365783691,
+    "scalar_max": 7.658686637878418,
+    "scalar_max_absolute": 14.593598365783691,
+    "near_tie_questions": [
+      "request-07-q03",
+      "request-08-q03"
+    ],
+    "wall": 1214.858353083022,
+    "total_merge_oracle_wall_seconds": 1258.4867856669007,
+    "status": "PASS"
+  },
+  "readout": {
+    "rows": 280,
+    "expected_rows": 280,
+    "questions": 48,
+    "expected_questions": 48,
+    "argmax_agreement": 48,
+    "margin_ge_0_02_questions": 46,
+    "margin_ge_0_02_argmax_agreement": 46,
+    "near_ties": [
+      {
+        "id": "request-07-q03",
+        "oracle_margin": 0.006739843342914137,
+        "oracle_argmax": 1,
+        "argmax": 1,
+        "argmax_agrees": true,
+        "p": [
+          0.0668905628612553,
+          0.13881996412774117,
+          0.13353910941541403,
+          0.11781497336516934,
+          0.0988923283790044,
+          0.11531078903673647,
+          0.11923700360205998,
+          0.11317517052682867,
+          0.06733529674798773,
+          0.028984801937802986
+        ],
+        "p_oracle": [
+          0.06844557046678758,
+          0.1410972557943501,
+          0.13435741245143595,
+          0.11769923201661937,
+          0.09850107499890995,
+          0.11399026048335885,
+          0.11797473484160344,
+          0.11195394081789756,
+          0.0672594693782866,
+          0.028721048750750485
+        ]
+      },
+      {
+        "id": "request-08-q03",
+        "oracle_margin": 0.004176430865158717,
+        "oracle_argmax": 5,
+        "argmax": 5,
+        "argmax_agrees": true,
+        "p": [
+          0.03844735559601341,
+          0.08568083778528952,
+          0.11268820304996982,
+          0.11529616943900456,
+          0.1093431181851565,
+          0.12812072124379084,
+          0.12328126965086839,
+          0.11652512124167493,
+          0.1072282308349132,
+          0.06338897297331891
+        ],
+        "p_oracle": [
+          0.03829370334805408,
+          0.08559956498729611,
+          0.11225994259558048,
+          0.11473061408817004,
+          0.10857444261658075,
+          0.12713889005910925,
+          0.12296245919395053,
+          0.11719791061365697,
+          0.10862090712691694,
+          0.06462156537068481
+        ]
+      }
+    ],
+    "strict_disagreements": [],
+    "max_abs_delta_p": 0.010874463417753888,
+    "mean_of_question_mean_abs_delta_p": 0.0008333858900326634,
+    "mean_of_row_mean_abs_delta_p": 0.0008333858900326634,
+    "mean_of_row_mean_note": "Each probability row is one question; options are weighted equally within it.",
+    "mean_option_abs_delta_p": 0.0004889207254776194,
+    "max_abs_delta_scalar": 0.0973968505859375,
+    "mean_abs_delta_scalar": 0.021620490508420128,
+    "scalar_min": -14.59375,
+    "scalar_max": 7.6484375,
+    "scalar_absmax": 14.59375,
+    "oracle_scalar_min": -14.593600273132324,
+    "oracle_scalar_max": 7.658699989318848,
+    "oracle_scalar_absmax": 14.593600273132324,
+    "finite_all": true,
+    "reset_identical": true,
+    "session_resets_identical": true,
+    "max_row_executions_per_process": 15,
+    "provisional_max_delta_p_expectation": 0.05,
+    "provisional_expectation_exceeded": false,
+    "provisional_expectation_is_acceptance_gate": false,
+    "worst_five_questions": [
+      {
+        "id": "request-14-q04",
+        "request_id": "request-14",
+        "type": "noul",
+        "zoo_only": false,
+        "row_ids": [
+          "request-14-q04-option-00",
+          "request-14-q04-option-01"
+        ],
+        "options": [
+          "yes",
+          "no"
+        ],
+        "nopts": 2,
+        "scalars": [
+          -1.6494140625,
+          1.400390625
+        ],
+        "scalars_oracle": [
+          -1.5531220436096191,
+          1.3508743047714233
+        ],
+        "p": [
+          0.14896453614240898,
+          0.851035463857591
+        ],
+        "p_oracle": [
+          0.15983899956016281,
+          0.8401610004398371
+        ],
+        "argmax": 1,
+        "oracle_argmax": 1,
+        "argmax_agrees": true,
+        "selected_option": "no",
+        "oracle_selected_option": "no",
+        "oracle_margin": 0.6803220008796743,
+        "abs_delta_p": [
+          0.010874463417753832,
+          0.010874463417753888
+        ],
+        "max_abs_delta_p": 0.010874463417753888,
+        "mean_abs_delta_p": 0.01087446341775386,
+        "finite": true
+      },
+      {
+        "id": "request-11-q03",
+        "request_id": "request-11",
+        "type": "score",
+        "zoo_only": false,
+        "row_ids": [
+          "request-11-q03-option-00",
+          "request-11-q03-option-01",
+          "request-11-q03-option-02"
+        ],
+        "options": [
+          "none",
+          "some",
+          "complete"
+        ],
+        "nopts": 3,
+        "scalars": [
+          -1.96875,
+          -0.794921875,
+          0.211669921875
+        ],
+        "scalars_oracle": [
+          -1.9961133003234863,
+          -0.7945132851600647,
+          0.13405287265777588
+        ],
+        "p": [
+          0.15547332793355584,
+          0.30406245395135767,
+          0.5404642181150865
+        ],
+        "p_oracle": [
+          0.15711289848380908,
+          0.3121841461234784,
+          0.5307029553927125
+        ],
+        "argmax": 2,
+        "oracle_argmax": 2,
+        "argmax_agrees": true,
+        "selected_option": "complete",
+        "oracle_selected_option": "complete",
+        "oracle_margin": 0.21851880926923412,
+        "abs_delta_p": [
+          0.0016395705502532387,
+          0.00812169217212072,
+          0.009761262722373987
+        ],
+        "max_abs_delta_p": 0.009761262722373987,
+        "mean_abs_delta_p": 0.006507508481582648,
+        "finite": true
+      },
+      {
+        "id": "request-15-q04",
+        "request_id": "request-15",
+        "type": "noul",
+        "zoo_only": false,
+        "row_ids": [
+          "request-15-q04-option-00",
+          "request-15-q04-option-01"
+        ],
+        "options": [
+          "yes",
+          "no"
+        ],
+        "nopts": 2,
+        "scalars": [
+          -1.669921875,
+          1.3291015625
+        ],
+        "scalars_oracle": [
+          -1.7337946891784668,
+          1.3656667470932007
+        ],
+        "p": [
+          0.1526808435988674,
+          0.8473191564011325
+        ],
+        "p_oracle": [
+          0.14540299930898767,
+          0.8545970006910122
+        ],
+        "argmax": 1,
+        "oracle_argmax": 1,
+        "argmax_agrees": true,
+        "selected_option": "no",
+        "oracle_selected_option": "no",
+        "oracle_margin": 0.7091940013820245,
+        "abs_delta_p": [
+          0.007277844289879737,
+          0.007277844289879654
+        ],
+        "max_abs_delta_p": 0.007277844289879737,
+        "mean_abs_delta_p": 0.007277844289879695,
+        "finite": true
+      },
+      {
+        "id": "request-13-q05",
+        "request_id": "request-13",
+        "type": "score",
+        "zoo_only": false,
+        "row_ids": [
+          "request-13-q05-option-00",
+          "request-13-q05-option-01",
+          "request-13-q05-option-02",
+          "request-13-q05-option-03"
+        ],
+        "options": [
+          "unusable",
+          "limited",
+          "mostly usable",
+          "fully usable"
+        ],
+        "nopts": 4,
+        "scalars": [
+          1.6171875,
+          0.30712890625,
+          -1.2392578125,
+          -3.888671875
+        ],
+        "scalars_oracle": [
+          1.6196714639663696,
+          0.27900874614715576,
+          -1.3120677471160889,
+          -3.97291898727417
+        ],
+        "p": [
+          0.5842727542749888,
+          0.2763762074563208,
+          0.11421851986295291,
+          0.02513251840573747
+        ],
+        "p_oracle": [
+          0.5906616660481768,
+          0.274554667682575,
+          0.11060483754235892,
+          0.024178828726889312
+        ],
+        "argmax": 0,
+        "oracle_argmax": 0,
+        "argmax_agrees": true,
+        "selected_option": "unusable",
+        "oracle_selected_option": "unusable",
+        "oracle_margin": 0.3161069983656018,
+        "abs_delta_p": [
+          0.006388911773188011,
+          0.0018215397737457728,
+          0.003613682320593989,
+          0.0009536896788481589
+        ],
+        "max_abs_delta_p": 0.006388911773188011,
+        "mean_abs_delta_p": 0.003194455886593983,
+        "finite": true
+      },
+      {
+        "id": "request-19-q01",
+        "request_id": "request-19",
+        "type": "choice",
+        "zoo_only": true,
+        "row_ids": [
+          "request-19-q01-option-00",
+          "request-19-q01-option-01",
+          "request-19-q01-option-02",
+          "request-19-q01-option-03",
+          "request-19-q01-option-04",
+          "request-19-q01-option-05",
+          "request-19-q01-option-06",
+          "request-19-q01-option-07",
+          "request-19-q01-option-08",
+          "request-19-q01-option-09",
+          "request-19-q01-option-10",
+          "request-19-q01-option-11",
+          "request-19-q01-option-12",
+          "request-19-q01-option-13",
+          "request-19-q01-option-14",
+          "request-19-q01-option-15",
+          "request-19-q01-option-16",
+          "request-19-q01-option-17",
+          "request-19-q01-option-18",
+          "request-19-q01-option-19",
+          "request-19-q01-option-20",
+          "request-19-q01-option-21",
+          "request-19-q01-option-22",
+          "request-19-q01-option-23",
+          "request-19-q01-option-24",
+          "request-19-q01-option-25",
+          "request-19-q01-option-26",
+          "request-19-q01-option-27"
+        ],
+        "options": [
+          "lighting",
+          "plumbing",
+          "heating",
+          "cooling",
+          "doors",
+          "windows",
+          "floors",
+          "walls",
+          "ceilings",
+          "roofs",
+          "stairs",
+          "lifts",
+          "locks",
+          "shelves",
+          "desks",
+          "chairs",
+          "curtains",
+          "carpets",
+          "drains",
+          "pipes",
+          "valves",
+          "tanks",
+          "pumps",
+          "fans",
+          "sockets",
+          "switches",
+          "cables",
+          "sensors"
+        ],
+        "nopts": 28,
+        "scalars": [
+          -7.59765625,
+          -8.25,
+          -7.59765625,
+          -0.9609375,
+          -9.203125,
+          -8.6796875,
+          -10.09375,
+          -9.671875,
+          -5.91015625,
+          -9.5859375,
+          -10.515625,
+          -10.109375,
+          -8.046875,
+          -9.9140625,
+          -10.5859375,
+          -9.6953125,
+          -11.84375,
+          -11.140625,
+          -9.34375,
+          -8.171875,
+          -8.9296875,
+          -7.9453125,
+          -6.96484375,
+          1.26953125,
+          -7.0859375,
+          -7.0234375,
+          -7.6796875,
+          -7.4765625
+        ],
+        "scalars_oracle": [
+          -7.635459899902344,
+          -8.273568153381348,
+          -7.611283779144287,
+          -1.0317230224609375,
+          -9.20922565460205,
+          -8.708393096923828,
+          -10.114972114562988,
+          -9.697352409362793,
+          -5.983921051025391,
+          -9.618802070617676,
+          -10.518702507019043,
+          -10.130147933959961,
+          -8.015636444091797,
+          -9.947691917419434,
+          -10.613463401794434,
+          -9.693241119384766,
+          -11.859024047851562,
+          -11.160334587097168,
+          -9.379319190979004,
+          -8.208106994628906,
+          -8.927600860595703,
+          -7.999220848083496,
+          -6.959987640380859,
+          1.2542405128479004,
+          -7.119679927825928,
+          -7.052636623382568,
+          -7.682580471038818,
+          -7.514122486114502
+        ],
+        "p": [
+          0.004526783387353771,
+          0.0031181621105346538,
+          0.004526783387353771,
+          0.20082268058215394,
+          0.0018086865230514972,
+          0.0024392925209502617,
+          0.0010872725715984505,
+          0.0013836760489464956,
+          0.011873361156765551,
+          0.0014533204499990575,
+          0.0008543630178829675,
+          0.0010776079904366784,
+          0.003501933307932868,
+          0.0012048449710962612,
+          0.0008207163951989388,
+          0.0013652682151830736,
+          0.00039998522604067495,
+          0.0005977743405616494,
+          0.0016690319056385683,
+          0.00326051976002208,
+          0.0021145687774376896,
+          0.0037111837803048627,
+          0.006498807906726891,
+          0.7183636405308844,
+          0.006064319485437097,
+          0.006284816331210735,
+          0.00431948688361155,
+          0.004851112435685633
+        ],
+        "p_oracle": [
+          0.004499781253382536,
+          0.003124878797177552,
+          0.004562376779827329,
+          0.19589772566343958,
+          0.0018307652855539633,
+          0.0024373809976546406,
+          0.0010910763243614134,
+          0.0013851445384904116,
+          0.011562478811383397,
+          0.0014487344786067763,
+          0.0008662875177938502,
+          0.001081655530193219,
+          0.0036211260670016426,
+          0.0012005182597137926,
+          0.0008206262574979196,
+          0.0013884024958851027,
+          0.00040275113364651385,
+          0.0006003843042419653,
+          0.0016611958951607308,
+          0.0032439829291755987,
+          0.002150418602406555,
+          0.003655253274956507,
+          0.00661945429342202,
+          0.7233242444573894,
+          0.006042151746046325,
+          0.006278120533185768,
+          0.0043802366148561886,
+          0.004822847157549282
+        ],
+        "argmax": 23,
+        "oracle_argmax": 23,
+        "argmax_agrees": true,
+        "selected_option": "fans",
+        "oracle_selected_option": "fans",
+        "oracle_margin": 0.5274265187939499,
+        "abs_delta_p": [
+          2.7002133971235076e-05,
+          6.716686642898283e-06,
+          3.559339247355842e-05,
+          0.004924954918714364,
+          2.2078762502466143e-05,
+          1.911523295621085e-06,
+          3.803752762962997e-06,
+          1.4684895439159504e-06,
+          0.0003108823453821536,
+          4.585971392281158e-06,
+          1.1924499910882726e-05,
+          4.04753975654054e-06,
+          0.00011919275906877459,
+          4.326711382468583e-06,
+          9.013770101921458e-08,
+          2.313428070202907e-05,
+          2.7659076058389053e-06,
+          2.609963680315873e-06,
+          7.836010477837562e-06,
+          1.653683084648118e-05,
+          3.584982496886548e-05,
+          5.593050534835565e-05,
+          0.00012064638669512847,
+          0.004960603926504992,
+          2.216773939077172e-05,
+          6.695798024967427e-06,
+          6.0749731244638325e-05,
+          2.8265278136351164e-05
+        ],
+        "max_abs_delta_p": 0.004960603926504992,
+        "mean_abs_delta_p": 0.0003865132788617041,
+        "finite": true
+      }
+    ]
+  },
+  "engine": {
+    "calls": 4,
+    "expected_calls": 4,
+    "calls_completed": 4,
+    "one_token_calls": 4,
+    "id_zero_text_matches": 4,
+    "passed_calls": 4,
+    "engines": {
+      "coreai-pipelined": {
+        "calls": 2,
+        "passed_calls": 2
+      },
+      "coreai-sequential": {
+        "calls": 2,
+        "passed_calls": 2
+      }
+    }
+  },
+  "engine_probability_gate_executed": false,
+  "benchmark": "llm-benchmark.json",
+  "round2_max_abs_delta_p": 0.010874179835726139,
+  "round3_max_abs_delta_p_difference": 2.8358202774914076e-07,
+  "oracle_references": {
+    "canonical_fixture_and_card_table": "Author's unmerged PEFT model, CPU FP32; accepted round2 fixture retained byte-identical",
+    "linked_readout_transcript": "Freshly recomputed merged model, CPU FP32; author's unchanged encode/score_options/softmax",
+    "merged_vs_peft_max_abs_delta_scalar": 3.343820571899414e-05,
+    "merged_vs_peft_max_abs_delta_p": 2.6363841504339902e-06,
+    "merged_vs_peft_argmax_agreement": 48
+  },
+  "readout_reproduction": {
+    "result": "PASS",
+    "canonical": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/readout_int8lin.json",
+    "candidate": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/readout_int8lin.json",
+    "canonical_argmax_agreement": 48,
+    "candidate_argmax_agreement": 48,
+    "canonical_max_abs_delta_p": 0.010874179835726139,
+    "candidate_max_abs_delta_p": 0.010874463417753888,
+    "max_abs_delta_p_reproduction_error": 2.8358202774914076e-07,
+    "max_gpu_scalar_change": 0.0,
+    "mean_gpu_scalar_change": 0.0,
+    "tolerance": 1e-06
+  },
+  "coreai_kit_measurements": "measurements-coreai-kit.json",
+  "coreai_kit_measurements_by_this_run": false
+}

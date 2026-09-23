@@ -1,0 +1,279 @@
+{
+  "schema": "coreai-scalar-engine-load/1",
+  "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+  "runner_sha256": "9251aee20b044712fde01ddad41bdf4582b0bf09c1888f4dd822c486673422d2",
+  "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/oracle-fixtures.json",
+  "license": "cc-by-nc-4.0",
+  "selected_row_ids": [
+    "request-01-q01-option-00",
+    "request-01-q01-option-01"
+  ],
+  "selection": "first row and longest distinct row",
+  "protocol": "Two rows per bundle, both engines; --raw-tokens --max-tokens 1 --temperature 0.0 --warmup off; COREAI_CHUNK_THRESHOLD=1",
+  "scope": "Engine LOAD/completion and fresh-process reset only. A one-wide head always selects id 0; its generated text is meaningless. No Swift probability gate.",
+  "token_id_note": "Runner reports emitted text and generated-token count; no numeric generated token ID is logged.",
+  "timing": "contended; correctness only, no performance claim",
+  "environment": {
+    "round": 4,
+    "start_epoch": 1790125944.0,
+    "deadline_epoch": 1790131344.0,
+    "start_utc": "2026-09-23T01:12:24Z",
+    "deadline_utc": "2026-09-23T02:42:24Z",
+    "limit_seconds": 5400,
+    "fence": "OPEN",
+    "device": "Apple M4 Max, 128 GiB RAM, macOS 27.0 (26A428)",
+    "license": "cc-by-nc-4.0",
+    "timing": "Contended correctness only; round-3 quiet throughput retained, supervisor kit timings quoted as contended",
+    "result": "RUNNING",
+    "phase": "Round 4: restored venvs verified, int8lin readout and both engine checks in progress",
+    "updated_at_utc": "2026-09-23T01:23:35.080493+00:00",
+    "elapsed_seconds": 671.0806820392609,
+    "status": "RUNNING",
+    "started_epoch": 1790125944.0,
+    "started_utc": "2026-09-23T01:12:24Z",
+    "stop_after_seconds": 5400
+  },
+  "started_at": "2026-09-23T01:29:46+00:00",
+  "result": "PASS",
+  "wall_seconds_contended": 95.04211204196326,
+  "completed_at": "2026-09-23T01:31:21+00:00",
+  "mode": "int8lin",
+  "source_transcript": "results/round3/engine_load.json",
+  "calls": [
+    {
+      "id": "request-01-q01-option-00",
+      "question_id": "request-01-q01",
+      "tokens": 384,
+      "engine": "coreai-pipelined",
+      "mode": "int8lin",
+      "expected_text": "!",
+      "text": "!",
+      "returncode": 0,
+      "timed_out": false,
+      "started_at": "2026-09-23T01:30:47+00:00",
+      "wall_seconds_contended": 15.778589791967534,
+      "timeout_seconds": 600,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "--raw-tokens",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-00.json",
+        "--max-tokens",
+        "1",
+        "--temperature",
+        "0.0",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--warmup",
+        "off"
+      ],
+      "environment_overrides": {
+        "COREAI_CHUNK_THRESHOLD": "1"
+      },
+      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-int8lin-request-01-q01-option-00.log",
+      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-int8lin-request-01-q01-option-00.stderr.log",
+      "stdout_sha256": "c3a609e1f61be7a45100d93aac8f658964538146703b787e984d4f3f1e96ce2b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_tail": "",
+      "prepare_seconds_contended": 10.457,
+      "cache_hit": true,
+      "model_load_seconds_contended": 10.4573,
+      "generated_token_count": 1,
+      "text_matches_id_zero": true,
+      "passed": true
+    },
+    {
+      "id": "request-01-q01-option-01",
+      "question_id": "request-01-q01",
+      "tokens": 384,
+      "engine": "coreai-pipelined",
+      "mode": "int8lin",
+      "expected_text": "!",
+      "text": "!",
+      "returncode": 0,
+      "timed_out": false,
+      "started_at": "2026-09-23T01:31:03+00:00",
+      "wall_seconds_contended": 5.446729958057404,
+      "timeout_seconds": 600,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "--raw-tokens",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-01.json",
+        "--max-tokens",
+        "1",
+        "--temperature",
+        "0.0",
+        "--inference-engine-variant",
+        "coreai-pipelined",
+        "--warmup",
+        "off"
+      ],
+      "environment_overrides": {
+        "COREAI_CHUNK_THRESHOLD": "1"
+      },
+      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-int8lin-request-01-q01-option-01.log",
+      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-int8lin-request-01-q01-option-01.stderr.log",
+      "stdout_sha256": "9b56a15b094f2c3371f6ce12c66013703d0671ae267029f26f3ad714b0bb5e4d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_tail": "",
+      "prepare_seconds_contended": 0.776,
+      "cache_hit": true,
+      "model_load_seconds_contended": 0.7765,
+      "generated_token_count": 1,
+      "text_matches_id_zero": true,
+      "passed": true
+    },
+    {
+      "id": "request-01-q01-option-00",
+      "question_id": "request-01-q01",
+      "tokens": 384,
+      "engine": "coreai-sequential",
+      "mode": "int8lin",
+      "expected_text": "!",
+      "text": "!",
+      "returncode": 0,
+      "timed_out": false,
+      "started_at": "2026-09-23T01:31:09+00:00",
+      "wall_seconds_contended": 6.314723666990176,
+      "timeout_seconds": 600,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "--raw-tokens",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-00.json",
+        "--max-tokens",
+        "1",
+        "--temperature",
+        "0.0",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--warmup",
+        "off"
+      ],
+      "environment_overrides": {
+        "COREAI_CHUNK_THRESHOLD": "1"
+      },
+      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-int8lin-request-01-q01-option-00.log",
+      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-int8lin-request-01-q01-option-00.stderr.log",
+      "stdout_sha256": "dca04bfa1c6cd8425fb8700a49172136cfd7ce691e089552c7085e1d86970028",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_tail": "",
+      "prepare_seconds_contended": 0.801,
+      "cache_hit": true,
+      "model_load_seconds_contended": 0.8015,
+      "generated_token_count": 1,
+      "text_matches_id_zero": true,
+      "passed": true
+    },
+    {
+      "id": "request-01-q01-option-01",
+      "question_id": "request-01-q01",
+      "tokens": 384,
+      "engine": "coreai-sequential",
+      "mode": "int8lin",
+      "expected_text": "!",
+      "text": "!",
+      "returncode": 0,
+      "timed_out": false,
+      "started_at": "2026-09-23T01:31:15+00:00",
+      "wall_seconds_contended": 6.204708250006661,
+      "timeout_seconds": 600,
+      "command": [
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "--model",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "--raw-tokens",
+        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-01.json",
+        "--max-tokens",
+        "1",
+        "--temperature",
+        "0.0",
+        "--inference-engine-variant",
+        "coreai-sequential",
+        "--warmup",
+        "off"
+      ],
+      "environment_overrides": {
+        "COREAI_CHUNK_THRESHOLD": "1"
+      },
+      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-int8lin-request-01-q01-option-01.log",
+      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-int8lin-request-01-q01-option-01.stderr.log",
+      "stdout_sha256": "44b546bb236101bbcf85a47518165ae257e26610e5320b15e99a8db327b20ee2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_tail": "",
+      "prepare_seconds_contended": 0.793,
+      "cache_hit": true,
+      "model_load_seconds_contended": 0.7926,
+      "generated_token_count": 1,
+      "text_matches_id_zero": true,
+      "passed": true
+    }
+  ],
+  "summary": {
+    "calls": 4,
+    "expected_calls": 4,
+    "calls_completed": 4,
+    "one_token_calls": 4,
+    "id_zero_text_matches": 4,
+    "passed_calls": 4,
+    "engines": {
+      "coreai-pipelined": {
+        "calls": 2,
+        "passed_calls": 2
+      },
+      "coreai-sequential": {
+        "calls": 2,
+        "passed_calls": 2
+      }
+    }
+  },
+  "bundles": {
+    "int8lin": {
+      "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+      "logits_width": 1,
+      "expected_id": 0,
+      "expected_text": "!",
+      "metadata": {
+        "metadata_version": "0.2",
+        "kind": "llm",
+        "name": "system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "assets": {
+          "main": "system_one_qwen3_5_4b_scorer_decode_int8lin.aimodel"
+        },
+        "language": {
+          "tokenizer": "pngwn/system-one-qwen3.5-4b-scorer",
+          "vocab_size": 1,
+          "max_context_length": 4096,
+          "embedded_tokenizer": true,
+          "function_map": {
+            "main": [
+              "main"
+            ]
+          }
+        },
+        "source": {
+          "model_definition": "torch",
+          "hf_model_id": "pngwn/system-one-qwen3.5-4b-scorer",
+          "hf_revision": "e6464dce15f013c2ef641593a85cc6afcdaea928"
+        },
+        "compression": null,
+        "decision": {
+          "head": "scalar",
+          "temperature": 1.75,
+          "max_len": 384,
+          "layout": "state-question-option",
+          "base": "Qwen/Qwen3.5-4B-Base@1001bb4d826a52d1f399e183466143f4da7b741b",
+          "license": "cc-by-nc-4.0"
+        },
+        "compilation": {
+          "date": "2026-09-22T22:00:34.690514+00:00",
+          "targets": []
+        }
+      }
+    }
+  }
+}

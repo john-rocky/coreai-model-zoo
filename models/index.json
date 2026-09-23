@@ -4298,6 +4298,48 @@
    ]
   },
   {
+   "family": "system-one-scorer-4b",
+   "card": "models/system-one-scorer-4b/README.md",
+   "recipes": [
+    {
+     "name": "system-one-scorer-4b",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI",
+     "bundle": "gpu-pipelined/system_one_qwen3_5_4b_scorer_decode_int8lin",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run system-one-scorer-4b",
+     "gate_transcript": "models/system-one-scorer-4b/gate-system-one-scorer-4b.json",
+     "open_questions": []
+    },
+    {
+     "name": "system-one-scorer-4b-fp16",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI",
+     "bundle": "gpu-pipelined/system_one_qwen3_5_4b_scorer_decode_fp16",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run system-one-scorer-4b-fp16",
+     "gate_transcript": "models/system-one-scorer-4b/gate-system-one-scorer-4b-fp16.json",
+     "open_questions": []
+    }
+   ],
+   "repos": [
+    {
+     "id": "mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI",
+     "downloads_30d": 0,
+     "bundles": [
+      "gpu-pipelined/system_one_qwen3_5_4b_scorer_decode_fp16",
+      "gpu-pipelined/system_one_qwen3_5_4b_scorer_decode_int8lin"
+     ],
+     "tier1": {},
+     "smoke": []
+    }
+   ]
+  },
+  {
    "family": "timesfm",
    "card": "models/timesfm/README.md",
    "recipes": [

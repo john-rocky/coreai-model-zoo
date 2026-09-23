@@ -162,6 +162,7 @@ For the long-form version of the same material, read
   oracle (transformers 5.16.1 pinned); the `Shared state:` + JSON task turn under the chat template read at
   A–P; the 16-layer early-exit path left out; the fixture's short states and absent near ties, said plainly.
 - [`qwen3.5-2b-decision-port.md`](qwen3.5-2b-decision-port.md) — inverse MLX Qwen3.5 conv/RMSNorm layout, two-oracle proof, plain-text space-prefixed letter readout, Mac GPU gates and supervisor-supplied coreai-kit measurements.
+- [`system-one-scorer-4b-port.md`](system-one-scorer-4b-port.md) — pngwn/system-one-qwen3.5-4b-scorer (cc-by-nc-4.0): pinned LoRA merge, scalar-head export, distinct input-embedding/tokenizer/output widths, author truncation/readout, Mac GPU scalar gates and the limits of one-wide engine checks.
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
   converting the same minimal module under both versions, diffing the graph, and running the ones

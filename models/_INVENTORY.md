@@ -15,12 +15,12 @@ configuration; a single bundle answers that question by itself.
 
 | metric | count |
 | --- | --- |
-| published repos | 275 |
-| Core AI repos | 87 |
-| Core AI bundles inside them | 298 |
-| Core AI repos with a `models/<family>/` card | 80 |
-| repos covered by a recipe | 80 |
-| Core AI repos with 0 downloads in the last 30 days | 4 |
+| published repos | 276 |
+| Core AI repos | 88 |
+| Core AI bundles inside them | 300 |
+| Core AI repos with a `models/<family>/` card | 81 |
+| repos covered by a recipe | 81 |
+| Core AI repos with 0 downloads in the last 30 days | 5 |
 
 ## All repos, by 30-day downloads
 
@@ -299,6 +299,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/Mordant-3B-Think-LiteRT](https://huggingface.co/mlboydaisuke/Mordant-3B-Think-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/OpenThai-SystemOne-CoreAI](https://huggingface.co/mlboydaisuke/OpenThai-SystemOne-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [openthai-systemone](openthai-systemone/README.md) | `openthai-systemone`, `openthai-systemone-fp16` | — |
 | [mlboydaisuke/Qwen3.5-2B-Decision-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.5-2B-Decision-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [qwen3.5-2b-decision](qwen3.5-2b-decision/README.md) | `qwen3.5-2b-decision`, `qwen3.5-2b-decision-fp16` | — |
+| [mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI](https://huggingface.co/mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [system-one-scorer-4b](system-one-scorer-4b/README.md) | `system-one-scorer-4b`, `system-one-scorer-4b-fp16` | — |
 | [mlboydaisuke/Tashkeel-350M-v2-LiteRT](https://huggingface.co/mlboydaisuke/Tashkeel-350M-v2-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [ukint-vs/Nanbeige4.2-3B-CoreAI](https://huggingface.co/ukint-vs/Nanbeige4.2-3B-CoreAI) | 0 | 1 | coreai | port | 1 | **1 DIFF** | 1 deferred | [nanbeige4.2-3b](nanbeige4.2-3b/README.md) | `nanbeige4.2-3b` | `nanbeige4.2-3b` |
 
@@ -356,7 +357,7 @@ published configuration. **Do not guess their `args`.**
 
 ### 3. Recipes recorded, shipped configuration unknown
 
-6 of the 101 recipes carry `status = "unverified"`:
+6 of the 103 recipes carry `status = "unverified"`:
 the script is known, the arguments that produced the published bundle are not,
 and nothing in the repo records them. `zoo_convert.py` refuses to run these
 without `--force`. Each needs one answer from the owner.
