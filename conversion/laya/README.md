@@ -20,6 +20,7 @@ bundles go to `<ZOO_EXPORTS>/laya-multilingual/`):
 | reference | `uv run --python 3.12 conversion/laya/oracle_authored144_laya.py` | the publisher's answers on SemIf authored144 (T=1 and the fitted calibration, both windows) + SemIf `evaluate.py` |
 | fixture | `python3 conversion/laya/fixtures_laya.py [--check]` | writes `models/laya-multilingual/fixtures-laya-multilingual.json` (schema `coreai-encoder-fixtures/1`: 44 states + the 402 frozen rows) — what coreai-kit's `decide-cli parity` reads |
 | transcript | `python3 conversion/laya/transcript_laya.py` | writes `models/laya-multilingual/gate-laya-multilingual.json`: every gate's summary with the sha256 of its full record |
+| stage | `python3 conversion/laya/stage_hf_laya.py` | builds `<exports>/laya-multilingual/hf_stage/` for the Hugging Face repo (hard-linked gated folders, card, LICENSE, SHA256SUMS, STAGING.md); uploads nothing |
 
 Stage 2 (the host) is `_laya_host.py`: the NumPy gather / act features / temperature / decode that
 every stage above runs, and the algorithm the Swift side ports (HOST_CONTRACT §C–§D of the LiteRT lane).

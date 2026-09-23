@@ -5,7 +5,8 @@ JSON record, a conversation) and a typed question — `choice` (pick one of name
 (an ordered scale) or `noul` (yes/no) — and it returns a probability for every option, no generation.
 [`convaiinnovations/laya`](https://huggingface.co/convaiinnovations/laya), subfolder `multilingual/`
 (Apache-2.0, revision `1c5edc17…`, laya 0.3.4), as a static `.aimodel` for macOS 27 and, compiled ahead
-of time, for the iPhone 17 Pro. It is the catalog's first **encoder-type decision model**: the other
+of time, for the iPhone 17 Pro (not yet run on a device). It is the catalog's first **encoder-type
+decision model**: the other
 decision models here are language models read out after a prefill; this one scores every option at its
 own marker position in a single encoder call.
 
@@ -155,7 +156,26 @@ Convert yourself: [`conversion/laya/`](../../conversion/laya/README.md) — stag
 
 ## CoreAIKit (Swift)
 
-Not enrolled in the kit catalog in this revision of the card.
+Catalog id `laya-multilingual` (active once the kit's encoder backend is merged). `TypedDecisions` loads
+the bundle as an encoder backend — the same `decide` / `prefill` calls as the kit's language-model
+decision models — and runs it on the GPU; a Neural Engine preference is refused at load.
+
+Measured through the kit on the same Mac (M4 Max, macOS 27.0 26A428, the wfp16 bundles above, GPU lock
+held, 2026-09-23):
+
+- Parity on the 201 rows of each window: token ids and marker positions 201/201, argmax 81/81, max |Δp|
+  5e-6 on the GPU and 9e-6 with `cpuOnly`.
+- `decide-cli bench` (a 109-token state, 8 questions, warm): **11.5 ms** per decision at S=256 when the
+  state is tokenized once and shared, 12.1 ms when every decision tokenizes its row; 18.9 / 19.4 ms at S=512.
+- Load 1.06–1.16 s, of which the tokenizer (the 256,000-entry `tokenizer.json`) takes about 1.0 s and
+  145–162 MB; the whole process is 474–498 MB after the first decision.
+- SemIf authored144 at the kit's default temperature (the fitted calibration): argmax 144/144 with the
+  publisher's model at the same temperature, max |Δp| 2.9e-6; mean family balanced accuracy 0.6114,
+  accuracy 0.5903.
+- With a Neural Engine preference (measured before it was refused): 168–183 of 201 rows within the 1e-3
+  bar over four runs, max |Δp| 0.61.
+
+`measurements-coreai-kit.json` beside this card holds these numbers and the records they came from.
 
 ## The port in one lesson: a massive activation moves the layer bar
 
