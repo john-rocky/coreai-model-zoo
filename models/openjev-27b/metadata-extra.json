@@ -1,0 +1,14 @@
+{
+  "license": "CC BY-NC 4.0",
+  "decision": {
+    "head": "lm",
+    "readout": "letters",
+    "labels": "bare A-Z a-z",
+    "template": "chat",
+    "temperature": 0.85,
+    "noul": {
+      "t": 1.829074,
+      "bias": 0
+    }
+  }
+}

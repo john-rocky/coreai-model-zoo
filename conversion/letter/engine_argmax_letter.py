@@ -13,7 +13,7 @@
 Adapted from zoo 082fe55 and the sibling's two-engine gate. Every fixture row is
 sent to each Release engine in its own foreground process, warmup off, S=1,
 temperature zero. Expected text is tokenizer.decode([full_vocab_argmax_id])
-from this bundle's Python readout. Agreement with the fp32 oracle's best LABEL
+from this bundle's Python readout. Agreement with the fixture oracle's best LABEL
 is separately counted. Raw stdout bytes are retained, and generated whitespace
 is preserved by removing only the runner's exact framing. No mismatch retry.
 
@@ -131,8 +131,9 @@ def main() -> int:
     parser.add_argument("bundle")
     parser.add_argument("fixtures")
     parser.add_argument("--mode", default="int8hu", choices=("fp16", "int8hu"))
-    parser.add_argument("--label-style", choices=("plain", "space-prefixed"), default="plain")
-    parser.add_argument("--prompt-format", choices=("chat", "decision-function"), default="chat")
+    parser.add_argument("--label-style", choices=("plain", "space-prefixed", "bare"), default="plain")
+    parser.add_argument("--prompt-format", "--template", dest="prompt_format", choices=("chat", "decision-function"), default="chat")
+    parser.add_argument("--temperature", type=float, default=1.0, help="fixture readout temperature; generation stays 0")
     parser.add_argument("--readout", required=True)
     parser.add_argument("--runner", default=os.environ.get("ZOO_LLM_RUNNER"))
     parser.add_argument("--transcript")
@@ -158,7 +159,7 @@ def main() -> int:
     transcript = local_path(args.transcript or RUN / f"results/engine_argmax_{args.mode}.json")
     deadline = deadline_for(args.deadline_epoch)
     fx, readout = json.loads(fixtures_path.read_text()), json.loads(readout_path.read_text())
-    fixture_rows = validate_rows(fx, 4096, args.label_style, args.prompt_format)
+    fixture_rows = validate_rows(fx, 4096, args.label_style, args.prompt_format, args.temperature)
     assert readout["schema"] == "coreai-letter-readout-gate/1"
     assert local_path(readout["bundle"]) == bundle and readout["mode"] == args.mode
     assert readout["fixtures_sha256"] == sha256(fixtures_path)
@@ -169,9 +170,10 @@ def main() -> int:
     if missing:
         raise ValueError(f"Python readout missing fixture rows: {missing}")
     tokenizer = AutoTokenizer.from_pretrained(bundle / "tokenizer", local_files_only=True)
-    validate_tokenization(fixture_rows, tokenizer, args.prompt_format)
+    validate_tokenization(fixture_rows, tokenizer, args.prompt_format, args.label_style)
     record = {"schema": "coreai-letter-engine-gate/1", "mode": args.mode, "bundle": str(bundle),
               "label_style": args.label_style, "prompt_format": args.prompt_format, "source": fx["source"],
+              "license": fx.get("license"), "temperature": args.temperature,
               "runner": str(runner), "readout": str(readout_path), "fixtures": str(fixtures_path),
               "runner_sha256": sha256(runner), "fixtures_sha256": sha256(fixtures_path),
               "readout_sha256": sha256(readout_path), "readout_result": readout["result"],
@@ -204,7 +206,7 @@ def main() -> int:
                          "oracle_label_agrees": got["text"] == oracle_label,
                          "is_row_label": got["text"] in row["labels"], "oracle_margin": row["top2_margin"]}
                 if "p_author" in row:
-                    author_label = row["labels"][row["author_argmax"]]
+                    author_label = row["labels"][row.get("author_argmax", row["argmax"])]
                     value.update(author_argmax_label=author_label, author_label_agrees=got["text"] == author_label)
                 for key in ("kind", "request_id", "evidence_only"):
                     if key in row:

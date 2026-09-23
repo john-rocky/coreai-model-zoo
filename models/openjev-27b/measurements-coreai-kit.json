@@ -1,0 +1,179 @@
+{
+  "schema": "coreai-kit-measurements/1",
+  "source": "measured through coreai-kit; supervisor supplied in rounds/03.instruction.md",
+  "measured_by_this_run": false,
+  "instruction_sha256": "0872c09892ce0bc905693fab46736af639ca7ad4ec2a869a907698f2bde2aea6",
+  "date": "2026-09-23 11:40–12:17 JST",
+  "worktree_read_only_reference": "/Users/majimadaisuke/code/coreai-kit-models-wt",
+  "branch": "decision-models-5",
+  "device": "Apple M4 Max GPU, 128 GiB Mac",
+  "macos": "27.0 (26A428)",
+  "engine": "coreai-sequential",
+  "approx_resident_memory_gb": 28,
+  "format": "Decision.Format.letterList",
+  "rendering": "kit own rendering of the helper's text byte for byte under the chat template",
+  "source_hf_id": "openjev/openjev",
+  "source_revision": "5ec9e5fd2f80a6fff386779b1e5ac7e389971889",
+  "license": "CC-BY-NC-4.0",
+  "contended": true,
+  "timing_provenance": "GPU shared with this run's zoo gates; all kit times in this record are contended",
+  "parity": {
+    "command": "decide-cli parity",
+    "fixture": "fixtures-openjev-27b.json",
+    "canonical_fixture": "results/fixtures.json",
+    "fixture_schema": "coreai-letter-fixtures/1",
+    "reference": "author's unchanged helper over MLX BF16; noul compared after calibration against fixture.noul",
+    "label_style": "bare",
+    "template": "chat",
+    "temperature": 0.85,
+    "rows": 61,
+    "kinds": {
+      "choice": 35,
+      "noul": 14,
+      "score": 12
+    },
+    "choice_option_range": [
+      2,
+      52
+    ],
+    "noul_comparison": "AFTER helper calibration, against the fixture's noul",
+    "int8hu": {
+      "tokens_identical": 61,
+      "slots_identical": 61,
+      "option_argmax_agreement": 61,
+      "max_abs_delta_p": 0.0003,
+      "mean_abs_delta_p": 0.0001,
+      "median_question_ms": 9300,
+      "ordinary_row_token_range": [
+        90,
+        505
+      ],
+      "ordinary_row_median_tokens": 114,
+      "long_rows": {
+        "rows": 2,
+        "tokens_each": 1559,
+        "max_seconds": 137
+      }
+    },
+    "contended": true
+  },
+  "semif_authored144": {
+    "rows": 144,
+    "language": "en",
+    "options_per_row": 3,
+    "gold": "SemIf own gold labels",
+    "evaluator": "unchanged benchmarks/evaluate.py",
+    "rendering": "Each row is a choice in the helper's form",
+    "bundle": "int8hu",
+    "raw_correct": 134,
+    "mean_family_balanced_accuracy": 0.907,
+    "family_balanced_accuracy": {
+      "evidence_interpretation": 0.944,
+      "rule_application": 0.917,
+      "candidate_selection": 0.861
+    },
+    "median_decision_ms": 8300,
+    "approx_tokens_per_decision": 102,
+    "same_rows_evaluator_scale": {
+      "Qwen3.5-4B int8 zero-shot": 0.821,
+      "MiniCPM5-2B int8": 0.681,
+      "OpenThai-SystemOne": 0.725,
+      "APUS-OpenJev-v1-4B": 0.906,
+      "Qwen3.5-2B-Decision": 0.798,
+      "System One scorer 4B": 0.844
+    },
+    "comparison_policy": "Numbers on the same rows and evaluator, not a ranking.",
+    "contended": true
+  },
+  "three_question_request": {
+    "state": "Customer message: I was charged twice for my order last week and nobody has replied.",
+    "scope": "Separate README ask example; not part of the 61-row parity fixture or its maximum error",
+    "questions": [
+      {
+        "question": "Which team should handle this?",
+        "kind": "choice",
+        "options": [
+          "billing",
+          "shipping",
+          "technical"
+        ],
+        "reported_probabilities": {
+          "billing": 1.0
+        },
+        "helper_bf16_reported_probability": {
+          "billing": 0.9998
+        },
+        "question_ms": 5064,
+        "tokens": 70,
+        "tokens_note": "Same 70-token row as the helper's"
+      },
+      {
+        "question": "Is the customer angry?",
+        "kind": "noul",
+        "options": [
+          "yes",
+          "no"
+        ],
+        "yes_probability": 0.63,
+        "probability_stage": "calibrated yes/no output (noul)",
+        "helper_bf16_noul": 0.6183,
+        "question_ms": 4771,
+        "tokens": 74
+      },
+      {
+        "question": "How urgent is this?",
+        "kind": "score",
+        "options": [
+          "can wait",
+          "this week",
+          "today",
+          "right now"
+        ],
+        "expected_level": 2.08,
+        "reported_probabilities": {
+          "today": 0.675
+        },
+        "question_ms": 6198,
+        "tokens": 95
+      }
+    ],
+    "tokens_reused": 0,
+    "approx_ms_per_input_token": 70,
+    "reason": "This decode-only graph reads each complete question row on the sequential engine",
+    "contended": true
+  },
+  "letter_contract": {
+    "metadata_detection": {
+      "decision.readout": "letters"
+    },
+    "metadata_fields": [
+      "decision.readout",
+      "decision.temperature",
+      "decision.noul"
+    ],
+    "row_rendering": "Helper's text byte for byte, under the checkpoint chat template",
+    "label_style": "bare A-Z then a-z",
+    "max_options": 52,
+    "temperature": 0.85,
+    "noul": {
+      "t": 1.829074,
+      "bias": 0,
+      "clamp": [
+        0.0001,
+        0.9999
+      ],
+      "formula": "sigmoid(logit(clamp(p_yes))/1.829074 + 0)"
+    }
+  },
+  "catalog": {
+    "id": "openjev-27b",
+    "platform": "macOS only",
+    "license": "CC-BY-NC-4.0",
+    "revision_policy": "pinned to the Hub revision"
+  },
+  "throughput_proxy": {
+    "status": "NOT MEASURED",
+    "reason": "No quiet GPU window existed on 2026-09-23; shared Mac used by three lanes",
+    "blocker_record_retained_in_run_only": "results/llm-benchmark.json"
+  }
+}

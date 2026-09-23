@@ -37,6 +37,7 @@ quantizer silently skips shared parameters).
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 from pathlib import Path
 
@@ -104,6 +105,9 @@ def main() -> None:
                     choices=["fp16", "int8", "int8lin", "int8hu", "int4lin"])
     ap.add_argument("--hf-id", default="Qwen/Qwen3.5-0.8B")
     ap.add_argument("--out-dir", default="exports")
+    ap.add_argument("--name", help="override the generated bundle directory and asset name")
+    ap.add_argument("--revision", default=None, help="source revision recorded as metadata source.hf_revision")
+    ap.add_argument("--extra-metadata", type=Path, default=None, help="JSON object merged into the root bundle metadata")
     ap.add_argument("--max-ctx", type=int, default=4096)
     ap.add_argument("--head-quant", default="block32",
                     choices=["block32", "block16", "block8", "perchan"],
@@ -113,6 +117,9 @@ def main() -> None:
     ap.add_argument("--num-layers", type=int, default=None,
                     help="debug: truncated-layer export (engine-contract de-risk)")
     args = ap.parse_args()
+    extra_metadata = json.loads(args.extra_metadata.read_text()) if args.extra_metadata is not None else None
+    if extra_metadata is not None and not isinstance(extra_metadata, dict):
+        ap.error("--extra-metadata must contain a JSON object")
 
     short = args.hf_id.rsplit("/", 1)[-1].lower().replace(".", "_").replace("-", "_")
     name = f"{short}_decode_{args.mode}"
@@ -120,6 +127,9 @@ def main() -> None:
         name += f"_{args.head_quant}" + ("_sym" if args.head_sym else "")
     if args.num_layers is not None:
         name += f"_l{args.num_layers}"
+
+    if args.name:
+        name = args.name
 
     print(f"loading {args.hf_id} fp16 ...")
     try:
@@ -218,7 +228,10 @@ def main() -> None:
     print(f"saving {aimodel} ...")
     prog.save_asset(aimodel, rt.AIModelAssetMetadata())
 
-    write_bundle_metadata(out_dir, name, args.hf_id, cfg.vocab_size, args.max_ctx)
+    write_bundle_metadata(
+        out_dir, name, args.hf_id, cfg.vocab_size, args.max_ctx,
+        revision=args.revision, extra=extra_metadata,
+    )
     from transformers import AutoTokenizer
 
     AutoTokenizer.from_pretrained(args.hf_id).save_pretrained(out_dir / "tokenizer")

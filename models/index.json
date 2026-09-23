@@ -2689,6 +2689,25 @@
    ]
   },
   {
+   "family": "openjev-27b",
+   "card": "models/openjev-27b/README.md",
+   "recipes": [
+    {
+     "name": "openjev-27b",
+     "status": "verified",
+     "source_model": "openjev/openjev",
+     "source_model_from": "recipe",
+     "hf_repo": "mlboydaisuke/OpenJev-CoreAI",
+     "bundle": "gpu-pipelined/openjev_27b_decode_int8hu_block32_sym",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run openjev-27b",
+     "gate_transcript": "models/openjev-27b/gate-openjev-27b.json",
+     "open_questions": []
+    }
+   ],
+   "repos": []
+  },
+  {
    "family": "openthai-systemone",
    "card": "models/openthai-systemone/README.md",
    "recipes": [

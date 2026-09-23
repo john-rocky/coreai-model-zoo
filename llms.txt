@@ -157,6 +157,7 @@
 - [lfm2audio-port.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/lfm2audio-port.html): LFM2.5-Audio — unified speech↔speech (ASR + TTS) on Core AI (port notes)
 - [mineru-port.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/mineru-port.html): MinerU2.5-Pro → Core AI — port notes
 - [nanbeige4.2-coreai-support.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/nanbeige4.2-coreai-support.html): Nanbeige4.2-3B on Core AI
+- [openjev-27b-port.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/openjev-27b-port.html): OpenJev 27B port notes
 - [quant-d-fp4-qat-feasibility-and-plan.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/quant-d-fp4-qat-feasibility-and-plan.html): Stream D — Quantization (FP4 + QAT-int4): feasibility, first result, and plan
 - [raw-metal-loop-playbook.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/raw-metal-loop-playbook.html): Raw-Metal loop playbook — when leaving the engine pays, and when it doesn't
 - [spec-decode-c-feasibility-and-plan.md](https://john-rocky.github.io/coreai-model-zoo/knowledge/spec-decode-c-feasibility-and-plan.html): Stream C — Speculative decoding: feasibility verdict + implementation plan (2026-07-01)
