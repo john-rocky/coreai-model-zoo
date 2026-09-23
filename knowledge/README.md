@@ -164,13 +164,12 @@ For the long-form version of the same material, read
   the per-layer gate is two-tier (1e-4 absolute, 2e-4 relative); fp16 **compute** misses the bar while fp16
   **storage** with fp32 compute is exact (645 MB); the Mac GPU computes at fp32 precision, the Neural Engine
   preference gives non-deterministic answers on the fp32-compute graph; the Swift host's two Unicode traps.
-- [`apus-openjev-v1-4b-port.md`](apus-openjev-v1-4b-port.md) — **a letter-readout decision model as an HF-id swap**
+- [`apus-decision-v1-4b-port.md`](apus-decision-v1-4b-port.md) — **a letter-readout decision model as an HF-id swap**
   (apus-ailab/APUS-OpenJev-v1-4B): the unchanged Qwen3.5-4B exporter; the author's `openjet_runtime` as the fp32
   oracle (transformers 5.16.1 pinned); the `Shared state:` + JSON task turn under the chat template read at
   A–P; the 16-layer early-exit path left out; the fixture's short states and absent near ties, said plainly.
 - [`qwen3.5-2b-decision-port.md`](qwen3.5-2b-decision-port.md) — inverse MLX Qwen3.5 conv/RMSNorm layout, two-oracle proof, plain-text space-prefixed letter readout, Mac GPU gates and supervisor-supplied coreai-kit measurements.
 - [`system-one-scorer-4b-port.md`](system-one-scorer-4b-port.md) — pngwn/system-one-qwen3.5-4b-scorer (cc-by-nc-4.0): pinned LoRA merge, scalar-head export, distinct input-embedding/tokenizer/output widths, author truncation/readout, Mac GPU scalar gates and the limits of one-wide engine checks.
-- **CC BY-NC 4.0 — [`openjev-27b-port.md`](openjev-27b-port.md)**: openjev/openjev's unchanged helper as the BF16 oracle, bare-letter chat/Noul contract, 27B export and AOT memory limits, generic revision/extra-metadata flags, and supervisor-supplied coreai-kit parity/task measurements with contended times and about 28 GB sequential-engine residence; Mac only.
 - [`coreai-torch-042-lowering-changes.md`](coreai-torch-042-lowering-changes.md) — which of the
   nine semantic lowering changes in coreai-torch 0.4.2 can reach a shipped bundle, decided by
   converting the same minimal module under both versions, diffing the graph, and running the ones

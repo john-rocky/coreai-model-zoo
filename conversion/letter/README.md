@@ -1,4 +1,4 @@
-# letter — gates for OpenJev and plain decision-function letter readouts
+# letter — gates for the APUS decision model and plain decision-function letter readouts
 
 These gates cover `apus-ailab/APUS-OpenJev-v1-4B` at revision
 `65797c526c27c4d24f564333779162cd4a64328e`. This Qwen3.5-4B checkpoint retains its
@@ -66,18 +66,18 @@ export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 uv run conversion/letter/oracle_letter.py \
   --hf-id apus-ailab/APUS-OpenJev-v1-4B \
   --revision 65797c526c27c4d24f564333779162cd4a64328e \
-  --out models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json
+  --out models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json
 python conversion/letter/readout_gate_letter.py \
-  exports/apus_openjev_v1_4b_decode_int8hu_block32_sym \
-  models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json \
+  exports/apus_decision_v1_4b_decode_int8hu_block32_sym \
+  models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json \
   --snapshot "$PINNED_SNAPSHOT" \
-  --transcript models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-readout.json
+  --transcript models/apus-decision-v1-4b/gate-apus-decision-v1-4b-readout.json
 python conversion/letter/engine_argmax_letter.py \
-  exports/apus_openjev_v1_4b_decode_int8hu_block32_sym \
-  models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json \
-  --readout models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-readout.json \
+  exports/apus_decision_v1_4b_decode_int8hu_block32_sym \
+  models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json \
+  --readout models/apus-decision-v1-4b/gate-apus-decision-v1-4b-readout.json \
   --runner "$ZOO_LLM_RUNNER" \
-  --transcript models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-engine.json
+  --transcript models/apus-decision-v1-4b/gate-apus-decision-v1-4b-engine.json
 ```
 
 `--snapshot` can select a pinned local snapshot for the oracle too. Without it,
@@ -194,123 +194,3 @@ numpy 2.3.5 and tokenizers 0.23.2. `--author-python` and `--oracle-python` can
 select separate installed environments; `--prepare-only` verifies embedded
 inputs without running model inference. Gate environments retain the overlay
 pins listed above.
-
-## CC BY-NC 4.0 OpenJev: chat-template bare letters and calibrated noul
-
-The weights of `openjev/openjev` at revision
-`5ec9e5fd2f80a6fff386779b1e5ac7e389971889` are CC BY-NC 4.0. The unchanged
-`helper/` serving code is Apache-2.0, as is the named base
-`Qwen/Qwen3.8-27B` at revision `1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`.
-This is the 27B OpenJev source model; it is distinct from the APUS model above.
-The export is Mac-only and uses the author's unquantized bf16 helper readout as
-its reference. There is no fp16 reference bundle and no fp32 second oracle.
-
-`oracle_openjev.py` embeds the accepted 61 requests (61 rows, 51 distinct
-composed prompts). It imports the source's `helper/shim.py` unchanged only
-after checking SHA-256
-`81a22f1b1b8912a465059207ef9f60b7c6c16b4de6372305d867efbe38a1987a`.
-Every answer is produced by the helper's `answer_choice`, `answer_score`, or
-`answer_noul`, with `shim.client.chat.completions.create` replaced by the
-source's `shim_mlx.py` mechanism: `mlx_lm.load()` loads the pinned HF snapshot
-as bf16 and computes the full-vocabulary log-softmax at the last prompt
-position. The stand-in records the requested letter log-probabilities before
-temperature adjustment. The dtype assertion removes the `mlx.core.` prefix
-from `str(dtype)`; both names refer to the same MLX bfloat16 dtype.
-
-The SERVE settings are `READOUT_T=0.85`, `READOUT_NOUL_T=1.829074`,
-`READOUT_NOUL_BIAS=0`, `READOUT_TARGETED=1`, `READOUT_INSTR_STYLE=pyrepr`, and
-`READOUT_PERMS=1`. Optional padding, compaction, layout and loop-breaking
-transforms are off. Labels are the **bare** single tokens A–Z then a–z,
-without a leading space; all 52 IDs must be unique. The helper renders one
-user message as follows, with null descriptions rendered as an empty string:
-
-```text
-State:
-{state}
-
-Question: {instructions}
-Options:
-[A] {key_0}: {description_0}
-[B] {key_1}: {description_1}
-...
-
-Answer with the letter of the best option only.
-```
-
-The snapshot's own chat template is applied with
-`add_generation_prompt=True, enable_thinking=False`. The fixture stores the
-complete resulting `ids`; the runtime always executes these IDs verbatim as
-S=1 steps, and a separate tokenization check verifies that the bundle's
-retained template and tokenizer reproduce them. `with_image` leaves string
-states unchanged and serializes dict states with
-`json.dumps(..., ensure_ascii=False)`, retaining the `text` key of a
-`{"text": ...}` dict rather than unwrapping it.
-
-Choice is softmax of the selected raw letter log-probabilities divided by
-0.85. Score appends ` Rate along the ordered levels below (lowest first).`
-to the instructions, labels options with their integer indices, and returns
-Σ i·p(i). Noul uses yes/no options with the supplied true/false descriptions,
-or `The statement is true.` / `The statement is false.` by default. After
-`p_yes = p[0]`, it computes
-`sigmoid(logit(clamp(p_yes, 1e-4, 1-1e-4)) / 1.829074 + 0)`.
-The source API rounds probabilities and typed outputs to four decimals.
-The fixture retains those API answers verbatim and records the helper's
-unrounded restricted distribution separately; the readout gate compares
-unrounded values, including the calibrated noul value and its absolute error.
-
-The shared gates retain APUS's defaults (`plain`, `chat`, T=1, 32 layers,
-15 evaluations including reset, 90% label-argmax floor). They also retain the
-2B decision-function flags, its 24-layer config handling, fp16/int8hu modes,
-space-prefixed labels, independent author-reference columns and acceptance
-policy. OpenJev adds explicit bare labels and temperature, while `--template`
-is an alias for the existing `--prompt-format`. This model's commands use
-64 layers and at most six prompt evaluations per process, including reset;
-long rows run alone. The OpenJev full-vocabulary label fraction is recorded
-without a required floor (`--min-label-fraction 0`). Every oracle margin
-≥0.02 must match, all logits must be finite and nonconstant, and resets must
-be bit-identical. The max |Δp| ≤0.05 expectation is recorded without tuning;
-exceedance uses the existing chat `REVIEW_REQUIRED` policy. Near ties, the five
-worst rows, calibrated noul error, and peak process RSS are retained.
-
-From the zoo root, after restoring the separately verified pinned source
-weights if fresh oracle generation is needed:
-
-```sh
-export HF_HUB_OFFLINE=1 HF_HUB_DISABLE_XET=1 COREAI_CHUNK_THRESHOLD=1
-export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
-uv run --python 3.11 conversion/letter/oracle_openjev.py \
-  --snapshot "$PINNED_OPENJEV_SNAPSHOT" \
-  --out models/openjev-27b/fixtures-openjev-27b.json \
-  --work-dir "$OPENJEV_ORACLE_WORK"
-python conversion/letter/readout_gate_letter.py \
-  "$OPENJEV_BUNDLE" models/openjev-27b/fixtures-openjev-27b.json \
-  --mode int8hu --label-style bare --prompt-format chat --temperature 0.85 \
-  --snapshot "$PINNED_OPENJEV_SNAPSHOT" --num-layers 64 \
-  --max-prompt-evaluations 6 --min-label-fraction 0 \
-  --aot-asset "$OPENJEV_AOT_ASSET" --work-dir "$OPENJEV_GATE_WORK" \
-  --deadline-epoch "$GATE_DEADLINE" \
-  --transcript models/openjev-27b/gate-openjev-27b-readout-int8hu.json
-python conversion/letter/engine_argmax_letter.py \
-  "$OPENJEV_BUNDLE" models/openjev-27b/fixtures-openjev-27b.json \
-  --mode int8hu --label-style bare --prompt-format chat --temperature 0.85 \
-  --readout models/openjev-27b/gate-openjev-27b-readout-int8hu.json \
-  --runner "$ZOO_LLM_RUNNER" --work-dir "$OPENJEV_GATE_WORK" \
-  --deadline-epoch "$GATE_DEADLINE" \
-  --transcript models/openjev-27b/gate-openjev-27b-engine-int8hu.json
-```
-
-`--prepare-only` on the oracle checks the unchanged helper, all 61 embedded
-requests, IDs, option boundaries and fixture floors without loading weights.
-Write that output to a separate filename: its uniform dummy values are marked
-`PREPARED` and are not oracle evidence. The accepted fixtures came from the
-real bf16 inference in round 1. Round 2 validated the portable prepare-only
-inputs against every accepted input field and reran the readout and engine
-gates from this zoo layout. The weights had already been removed after round
-1, so this shipping round does not claim a re-export. The exporter diff and
-metadata contract are the reproduction evidence for the single successful
-export. The throughput measurement is a separate final quiet-window step.
-
-The oracle uv header pins the working Python 3.11 environment: mlx-lm 0.31.3,
-mlx 0.32.2, Transformers 5.17.0, openai 3.16.2, httpx 0.28.1, numpy 2.3.5,
-tokenizers 0.23.2, huggingface_hub 1.32.0 and safetensors 0.8.0. The readout
-and engine environments keep the overlay pins and frozen Python fork above.

@@ -18,7 +18,7 @@ is separately counted. Raw stdout bytes are retained, and generated whitespace
 is preserved by removing only the runner's exact framing. No mismatch retry.
 
   .venv/bin/python -B conversion/letter/engine_argmax_letter.py \
-    exports/apus_openjev_v1_4b_decode_int8hu_block32_sym results/fixtures.json \
+    exports/apus_decision_v1_4b_decode_int8hu_block32_sym results/fixtures.json \
     --readout results/readout_int8hu.json --runner <RUN Release llm-runner>
 """
 from __future__ import annotations

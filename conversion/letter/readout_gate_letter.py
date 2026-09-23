@@ -20,7 +20,7 @@ each zoo_only row has its own process. The first row is repeated again at the
 very end. Full-vocabulary logits are saved as .npy evidence, including repeats.
 
   .venv/bin/python -B conversion/letter/readout_gate_letter.py \
-    exports/apus_openjev_v1_4b_decode_int8hu_block32_sym results/fixtures.json
+    exports/apus_decision_v1_4b_decode_int8hu_block32_sym results/fixtures.json
 """
 from __future__ import annotations
 

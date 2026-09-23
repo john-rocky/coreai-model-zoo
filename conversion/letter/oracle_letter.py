@@ -2058,7 +2058,7 @@ def main():
     parser.add_argument("--hf-id", default=DEFAULT_HF_ID)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
     parser.add_argument("--snapshot", type=Path)
-    parser.add_argument("--out", type=Path, default=Path("fixtures-apus-openjev-v1-4b.json"))
+    parser.add_argument("--out", type=Path, default=Path("fixtures-apus-decision-v1-4b.json"))
     parser.add_argument("--work-dir", type=Path)
     parser.add_argument("--replay-fixtures", type=Path, help="validate/copy accepted fixture; no model inference")
     parser.add_argument("--threads", type=int, default=8)

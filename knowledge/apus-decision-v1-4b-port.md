@@ -2,9 +2,9 @@
 
 2026-09-23. Source `apus-ailab/APUS-OpenJev-v1-4B` at
 `65797c526c27c4d24f564333779162cd4a64328e`, checkpoint-5949 merged BF16, Apache-2.0.
-The [card](../models/apus-openjev-v1-4b/README.md),
-[recipe](../models/apus-openjev-v1-4b/recipe.toml) and
-[gate summary](../models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b.json) are the zoo record.
+The [card](../models/apus-decision-v1-4b/README.md),
+[recipe](../models/apus-decision-v1-4b/recipe.toml) and
+[gate summary](../models/apus-decision-v1-4b/gate-apus-decision-v1-4b.json) are the zoo record.
 Run evidence paths below are relative to
 `~/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/`.
 
@@ -56,7 +56,7 @@ from this conversion's comparison against the released merged checkpoint.
 
 ## Fixture and Mac gates
 
-The [fixture](../models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json) contains 48
+The [fixture](../models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json) contains 48
 requests / 48 rows: 28 choice (8 with 16 criteria, 8 with 2–3, 12 with 4–8), 12 noul and
 8 score_level; 16 requests include Chinese and 30 contain structured states as text.
 States are short: **34–66 tokens**. Compiled rows span **124–1,672 tokens**; two rows above
@@ -74,14 +74,14 @@ states and S=1 calls over the complete compiled ids. The Python runtime loads an
 15 prompts including resets, with each wide row separate. This follows the decider
 record's Python GPU JIT failure and IOSurface leak on **26A428**; those failure experiments
 were not repeated. Evidence: `results/readout_int8hu.json` and the
-[zoo-layout readout transcript](../models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-readout.json).
+[zoo-layout readout transcript](../models/apus-decision-v1-4b/gate-apus-decision-v1-4b-readout.json).
 
 Release `llm-runner` gets raw fixture ids, warmup off, one greedy token and
 `COREAI_CHUNK_THRESHOLD=1`. Both engines match the Python full-vocabulary argmax's decoded
 text **48/48** each (**96/96**); the same calls also match the oracle letter 96/96.
 The parser preserves output whitespace. Evidence: `results/engine_argmax_int8hu.json` and
-the [zoo-layout engine transcript](../models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-engine.json).
-The [alphabet gate](../models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-alphabet.json)
+the [zoo-layout engine transcript](../models/apus-decision-v1-4b/gate-apus-decision-v1-4b-engine.json).
+The [alphabet gate](../models/apus-decision-v1-4b/gate-apus-decision-v1-4b-alphabet.json)
 passed 16/16 tokens against the CPU fp32 overlay oracle on the raw alphabet prompt. Its unchanged
 generic tool writes `weights_pinned: false`; this run's offline `refs/main` resolves to the
 pinned source and all three restored LFS hashes match. Effective-pin evidence is
@@ -105,11 +105,11 @@ SemIf gold labels, unchanged `benchmarks/evaluate.py`, kit rendering as choice; 
 raw, **0.906 mean family balanced accuracy**, median **1.96 s/decision**. The kit README's
 same-row/evaluator figures are Qwen3.5-4B int8 zero-shot **0.821**, MiniCPM5-2B int8 **0.681**,
 and the OpenThai run **0.725**. These supervisor measurements were not re-derived here;
-see [kit record](../models/apus-openjev-v1-4b/measurements-coreai-kit.json).
+see [kit record](../models/apus-decision-v1-4b/measurements-coreai-kit.json).
 
 Trap: an earlier OpenThai `ask` measurement ignored `--bundle` and used the catalog default;
 the command was fixed, and every figure above printed
-`model: apus_openjev_… format: sharedState`.
+`model: apus_decision_… format: sharedState`.
 
 ## Measurement notes
 
@@ -130,4 +130,4 @@ A source copy adds only the benchmark engine-variant option and forwards it to
 Protocol: p=128 / g=256, two launches × three trials per engine, `COREAI_CHUNK_THRESHOLD=1`;
 load measured per launch excludes warmup. A decision costs one S=1 prefill of the whole row,
 so decode throughput is a **prefill-rate proxy**; kit time above measures decisions. Trials:
-[llm-benchmark.json](../models/apus-openjev-v1-4b/llm-benchmark.json). No phone result is claimed.
+[llm-benchmark.json](../models/apus-decision-v1-4b/llm-benchmark.json). No phone result is claimed.
