@@ -15,19 +15,18 @@ host's act features -> act head, exactly the deployed pipeline. Answer gate vs t
 (argmax on every choice/score row, max |dp| <= 1e-3 at T=1, |d act probability| <= 1e-3); tensor gate
 vs the oracle's official batch-1 run at the same window (marker |d| <= 1e-3, act relative <= 1e-4).
 
-Layer gate (fp32, the SUBSET rows): every saved hidden state (embeddings, 22 residual layers,
-final_norm, after type_emb, both head layers) at real positions, max |err| <= 1e-4 against the official
-SDPA path. Reported beside it for every row and state: the error against the official model run with
-eager attention (the same algorithm this graph authors), and the official model's own SDPA-vs-eager
-distance — from layer 11 on, the CLS position carries a ~1.4e4 activation (one fp32 ulp ~1e-3) and
-that distance alone exceeds 1e-4, so the bar is reported as measured, not moved. Pad positions are
-reported separately: no output reads them (every attention masks pad keys), the official SDPA path
-zeroes fully masked sliding rows while this graph's finite mask averages them, and a pad-isolation
-check shows real positions are bit-identical when the pad ids are replaced by random tokens.
+Layer gate (fp32 / wfp16, the SUBSET rows), two tiers against the official SDPA path at real positions
+(LAYER_POLICY): embeddings and layers 0–9 max |err| <= 1e-4; layer 10 through the second head layer
+max |err| / max |ref| <= 2e-4 — from layer 11 on the CLS position carries a ~1.4e4 activation (one fp32
+ulp ~1e-3), and the official model's own SDPA-vs-eager distance reaches 4.8e-2 absolute there and 1.2e-4
+in these relative terms (final_norm, S=256); the bar is twice that. Reported beside it for every row and state: the
+error against the official model run with eager attention (the algorithm this graph authors) and that
+SDPA-vs-eager distance. Pad positions are reported separately: no output reads them (every attention
+masks pad keys), the official SDPA path zeroes fully masked sliding rows while this graph's finite mask
+averages them, and a pad-isolation check shows real positions are bit-identical under random pad ids.
 
 Negative controls (fp32): all_global, all_local, window63, ignore_padding, no_type_emb must each be
-caught; the record says by which gate (layer gate inside the states where the clean graph is within
-1e-4, tensor gate, answer gate).
+caught; the record says by which gate (two-tier layer gate, tensor gate, answer gate) and where.
 """
 import argparse
 import json
@@ -45,8 +44,26 @@ from _gate_metrics import POLICY, evaluate_row, summarize  # noqa: E402
 from _laya_host import act_features, gather_markers  # noqa: E402
 from _laya_model import FP16_RECIPE, FP32_ISLANDS, MUTATIONS, load_laya  # noqa: E402
 
-LAYER_BAR = 1e-4
 STATES = ["embeddings", *[f"layer_{i:02d}" for i in range(22)], "final_norm", "head_input", "head_0", "head_1"]
+ABSOLUTE_BAR, RELATIVE_BAR = 1e-4, 2e-4
+ABSOLUTE_STATES = STATES[:11]   # embeddings, layer_00 … layer_09
+RELATIVE_STATES = STATES[11:]   # layer_10 … layer_21, final_norm, head_input, head_0, head_1
+LAYER_POLICY = {
+    "absolute": {"states": "embeddings, layer_00 … layer_09", "bar": "max |err| at real positions <= 1e-4"},
+    "relative": {"states": "layer_10 … layer_21, final_norm, head_input, head_0, head_1",
+                 "bar": "max |err| / max |ref| at the real positions of the same state and row <= 2e-4 (max over rows)"},
+    "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
+    "reason": ("From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp "
+               "there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) "
+               "differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at "
+               "final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 "
+               "(max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken "
+               "because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the "
+               "relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 "
+               "absolute."),
+    "decided": ("supervisor, 2026-09-23 round 2, after the implementer corrected a round-1 report that gave the "
+                "S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"),
+}
 
 
 def decode_config(source: Path) -> dict:
@@ -109,6 +126,9 @@ def layer_errors(model, rows, window, eager: bool = True) -> dict:
                 entry["max_abs_real_vs_eager"] = float(np.max(np.abs(a[:n] - eager_states[name][:n])))
                 entry["official_sdpa_vs_eager_max_abs_real"] = float(np.max(np.abs(
                     sdpa[name][:n].astype(np.float64) - eager_states[name][:n])))
+                entry["relative_real_vs_eager"] = entry["max_abs_real_vs_eager"] / entry["reference_abs_max_real"]
+                entry["official_sdpa_vs_eager_relative_real"] = (entry["official_sdpa_vs_eager_max_abs_real"]
+                                                                 / entry["reference_abs_max_real"])
             per_state[name] = entry
         out[row["row_id"]] = per_state
     return out
@@ -138,23 +158,29 @@ def pad_isolation(model, rows, window) -> dict:
 
 
 def summarize_layers(errors: dict) -> dict:
-    per_state = {name: {"max_abs_real": max(e[name]["max_abs_real"] for e in errors.values()),
-                        "max_relative_real": max(e[name]["max_abs_real"] / e[name]["reference_abs_max_real"] for e in errors.values()),
-                        "max_abs_pad": max((e[name].get("max_abs_pad", 0.0) for e in errors.values()), default=0.0)}
-                 for name in STATES}
+    """The two-tier layer gate (LAYER_POLICY) over the SUBSET rows."""
+    per_state = {}
     for name in STATES:
+        rows = errors.values()
+        entry = {"tier": "absolute" if name in ABSOLUTE_STATES else "relative",
+                 "max_abs_real": max(e[name]["max_abs_real"] for e in rows),
+                 "max_relative_real": max(e[name]["max_abs_real"] / e[name]["reference_abs_max_real"] for e in rows),
+                 "max_abs_pad": max((e[name].get("max_abs_pad", 0.0) for e in rows), default=0.0)}
         first = next(iter(errors.values()))[name]
         if "max_abs_real_vs_eager" in first:
-            per_state[name]["max_abs_real_vs_eager"] = max(e[name]["max_abs_real_vs_eager"] for e in errors.values())
-            per_state[name]["official_sdpa_vs_eager_max_abs_real"] = max(
-                e[name]["official_sdpa_vs_eager_max_abs_real"] for e in errors.values())
-    failures = [(row_id, name) for row_id, e in errors.items() for name in STATES if e[name]["max_abs_real"] > LAYER_BAR]
-    clean = [name for name in STATES if per_state[name]["max_abs_real"] <= LAYER_BAR]
-    return {"bar_max_abs_real": LAYER_BAR, "status": "PASS" if not failures else "FAIL",
-            "states_over_bar": [name for name in STATES if per_state[name]["max_abs_real"] > LAYER_BAR],
-            "failing_row_state_pairs": len(failures), "states_within_bar": clean,
+            for key in ("max_abs_real_vs_eager", "official_sdpa_vs_eager_max_abs_real", "relative_real_vs_eager",
+                        "official_sdpa_vs_eager_relative_real"):
+                entry[key] = max(e[name][key] for e in rows)
+        entry["value"] = entry["max_abs_real"] if entry["tier"] == "absolute" else entry["max_relative_real"]
+        entry["bar"] = ABSOLUTE_BAR if entry["tier"] == "absolute" else RELATIVE_BAR
+        entry["pass"] = entry["value"] <= entry["bar"]
+        per_state[name] = entry
+    failing = [name for name in STATES if not per_state[name]["pass"]]
+    return {"policy": LAYER_POLICY, "status": "PASS" if not failing else "FAIL", "states_failing": failing,
+            "max_absolute_tier": max(per_state[name]["value"] for name in ABSOLUTE_STATES),
+            "max_relative_tier": max(per_state[name]["value"] for name in RELATIVE_STATES),
             "all_pad_positions_finite": all(e[name].get("finite_pad", True) for e in errors.values() for name in STATES),
-            "per_state": per_state}
+            "per_state": per_state, "rows": errors}
 
 
 def main():
@@ -187,7 +213,11 @@ def main():
           f"tensor {summary['tensor_status']} (marker {summary['max_marker_abs_error']:.2e}, "
           f"act rel {summary['max_act_relative_error']:.2e})", flush=True)
     layers = summarize_layers(layer_errors(model, rows, args.window))
-    print(f"layers: {layers['status']} at the {LAYER_BAR:g} bar; over the bar: {layers['states_over_bar']}", flush=True)
+    worst_abs = max(ABSOLUTE_STATES, key=lambda n: layers["per_state"][n]["value"])
+    worst_rel = max(RELATIVE_STATES, key=lambda n: layers["per_state"][n]["value"])
+    print(f"layers: {layers['status']} (absolute max {layers['per_state'][worst_abs]['value']:.2e} at {worst_abs}, "
+          f"relative max {layers['per_state'][worst_rel]['value']:.2e} at {worst_rel}); failing {layers['states_failing']}",
+          flush=True)
     isolation = pad_isolation(model, rows, args.window) if args.dtype != "fp16" else None
     if isolation:
         print("pad isolation", isolation, flush=True)
@@ -201,18 +231,24 @@ def main():
             m_records = run_rows(mutated, rows, args.window, config, oracle)
             m_summary = summarize(m_records)
             m_layers = summarize_layers(layer_errors(mutated, rows, args.window, eager=False))
-            caught_by_layers = [name for name in layers["states_within_bar"] if m_layers["per_state"][name]["max_abs_real"] > LAYER_BAR]
-            caught = {"layer_gate": bool(caught_by_layers), "tensor_gate": m_summary["tensor_status"] == "FAIL",
+            failing = m_layers["states_failing"]
+            caught = {"layer_gate": bool(failing), "tensor_gate": m_summary["tensor_status"] == "FAIL",
                       "answer_gate": m_summary["answer_status"] == "FAIL"}
             controls[mutation] = {
                 "caught": any(caught.values()), "caught_by": caught,
-                "first_state_over_bar_where_clean_is_within": caught_by_layers[0] if caught_by_layers else None,
-                "layer_error_at_that_state": m_layers["per_state"][caught_by_layers[0]]["max_abs_real"] if caught_by_layers else None,
+                "first_failing_state": failing[0] if failing else None,
+                "first_failing_tier": m_layers["per_state"][failing[0]]["tier"] if failing else None,
+                "value_at_first_failing_state": m_layers["per_state"][failing[0]]["value"] if failing else None,
+                "layer_states_failing": len(failing),
+                "min_relative_tier_value": min(m_layers["per_state"][n]["value"] for n in RELATIVE_STATES),
+                "max_absolute_tier_value": max(m_layers["per_state"][n]["value"] for n in ABSOLUTE_STATES),
+                "min_relative_tier_value_over_bar": min(m_layers["per_state"][n]["value"] for n in RELATIVE_STATES) / RELATIVE_BAR,
                 "rows": {k: m_summary[k] for k in ("answer_status", "tensor_status", "argmax_identical", "choice_score_rows",
                                                    "max_probability_error", "max_marker_abs_error", "max_act_relative_error")},
                 "answer_failures": len(m_summary["answer_failures"]), "tensor_failures": len(m_summary["tensor_failures"]),
-                "per_state_max_abs_real": {name: m_layers["per_state"][name]["max_abs_real"] for name in STATES}}
-            print("NEGATIVE", mutation, json.dumps({k: controls[mutation][k] for k in ("caught_by", "first_state_over_bar_where_clean_is_within")}), flush=True)
+                "per_state_value": {name: m_layers["per_state"][name]["value"] for name in STATES}}
+            print("NEGATIVE", mutation, json.dumps({k: controls[mutation][k] for k in (
+                "caught_by", "first_failing_state", "value_at_first_failing_state", "layer_states_failing")}), flush=True)
             del mutated
 
     failures = []
@@ -222,7 +258,7 @@ def main():
         failures.append("tensor gate")
     if args.dtype != "fp16":
         if layers["status"] != "PASS":
-            failures.append(f"layer gate: {len(layers['states_over_bar'])} states over {LAYER_BAR:g} ({layers['states_over_bar'][0]} …)")
+            failures.append(f"layer gate: {layers['states_failing']}")
         if isolation["status"] != "PASS":
             failures.append("pad isolation")
         if args.negative_controls:
@@ -233,7 +269,6 @@ def main():
                 failures.append("window63 not caught by the layer gate")
     result = {
         "status": "FAIL" if failures else "PASS", "failures": failures,
-        "status_excluding_layer_gate": "PASS" if not [f for f in failures if not f.startswith("layer gate")] else "FAIL",
         "stage": "authoring", "model_sha": MODEL_SHA, "window": args.window, "precision": args.dtype,
         "fp32_islands": list(islands), "policy": POLICY, "summary": summary, "layer_gate": layers,
         "pad_isolation": isolation, "negative_controls": controls,

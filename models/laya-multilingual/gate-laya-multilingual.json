@@ -1,0 +1,2778 @@
+{
+ "model": "convaiinnovations/laya",
+ "subfolder": "multilingual",
+ "model_sha": "1c5edc17a7acd8701df6fc341c0d179f1c62c982",
+ "hf_repo": "mlboydaisuke/Laya-Multilingual-CoreAI",
+ "gate": "the publisher's laya 0.3.4 model (transformers 5.17.0, SDPA attention), CPU fp32, each question row alone (batch 1) right-padded to its window; answers from the frozen LiteRT-lane fixture: 201 rows per window (37 choice, 44 score, 120 noul), official Agent.predict answers at T=1",
+ "oracle": {
+  "status": "PASS",
+  "record": {
+   "path": "<work>/results/oracle.json",
+   "sha256": "cf01d29f5088920c0eb37b808835717963a6f58aea916394273e94b2d253fe58"
+  },
+  "sequence_identity": {
+   "256": 201,
+   "512": 201
+  },
+  "official_batched_rerun_exact_dicts": {
+   "256": 201,
+   "512": 201
+  },
+  "windows": {
+   "256": {
+    "vs_fixture": {
+     "argmax_identical": 81,
+     "choice_score_rows": 81,
+     "max_probability_error": 2.4437904357910156e-06
+    },
+    "vs_litert_capture": {
+     "max_marker_abs_error": 3.814697265625e-06,
+     "max_act_relative_error": 2.614759164992349e-07
+    }
+   },
+   "512": {
+    "vs_fixture": {
+     "argmax_identical": 81,
+     "choice_score_rows": 81,
+     "max_probability_error": 2.4437904357910156e-06
+    },
+    "vs_litert_capture": {
+     "max_marker_abs_error": 3.814697265625e-06,
+     "max_act_relative_error": 2.9425430221858915e-07
+    }
+   }
+  },
+  "code_path_diagnostics": {
+   "head_layers_without_fast_path": {
+    "256": {
+     "max_marker_abs": 0.0,
+     "max_act_relative": 0.0
+    },
+    "512": {
+     "max_marker_abs": 0.0,
+     "max_act_relative": 0.0
+    }
+   },
+   "encoder_eager_attention": {
+    "256": {
+     "max_marker_abs": 2.5153160095214844e-05,
+     "max_act_relative": 4.562667901425993e-07
+    },
+    "512": {
+     "max_marker_abs": 3.4332275390625e-05,
+     "max_act_relative": 9.639394387145895e-07
+    }
+   }
+  },
+  "environment": {
+   "date": "2026-09-23T13:27:51+09:00",
+   "machine": "Apple M4 Max",
+   "macos_version": "27.0",
+   "macos_build": "26A428",
+   "coreai_build": "coreai-build 3600.83.1",
+   "python": "3.12.11",
+   "packages": {
+    "torch": "2.12.1",
+    "transformers": "5.17.0",
+    "laya": "0.3.4",
+    "tokenizers": "0.23.2",
+    "safetensors": "0.8.0",
+    "numpy": "2.5.3",
+    "huggingface-hub": "1.32.0"
+   },
+   "argv": [
+    "conversion/laya/oracle_laya.py"
+   ]
+  }
+ },
+ "authoring": [
+  {
+   "precision": "fp32",
+   "window": 256,
+   "status": "PASS",
+   "failures": [],
+   "rows": {
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 5.7220458984375e-05,
+    "max_act_relative_error": 5.601309665091384e-06
+   },
+   "layer_gate": {
+    "status": "PASS",
+    "policy": {
+     "absolute": {
+      "states": "embeddings, layer_00 … layer_09",
+      "bar": "max |err| at real positions <= 1e-4"
+     },
+     "relative": {
+      "states": "layer_10 … layer_21, final_norm, head_input, head_0, head_1",
+      "bar": "max |err| / max |ref| at the real positions of the same state and row <= 2e-4 (max over rows)"
+     },
+     "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
+     "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
+     "decided": "supervisor, 2026-09-23 round 2, after the implementer corrected a round-1 report that gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+    },
+    "max_absolute_tier": 4.1961669921875e-05,
+    "max_relative_tier": 5.720494448104789e-05,
+    "per_state": {
+     "embeddings": {
+      "tier": "absolute",
+      "value": 9.5367431640625e-07,
+      "bar": 0.0001,
+      "max_abs_real": 9.5367431640625e-07,
+      "max_relative_real": 3.419806328160101e-08,
+      "relative_real_vs_eager": 3.419806328160101e-08,
+      "official_sdpa_vs_eager_relative_real": 0.0
+     },
+     "layer_00": {
+      "tier": "absolute",
+      "value": 1.049041748046875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.049041748046875e-05,
+      "max_relative_real": 2.1498644725436508e-07,
+      "relative_real_vs_eager": 2.3453066973203463e-07,
+      "official_sdpa_vs_eager_relative_real": 2.3453066973203463e-07
+     },
+     "layer_01": {
+      "tier": "absolute",
+      "value": 1.1444091796875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.1444091796875e-05,
+      "max_relative_real": 2.1691232107535295e-07,
+      "relative_real_vs_eager": 2.2178299332521904e-07,
+      "official_sdpa_vs_eager_relative_real": 2.2178299332521904e-07
+     },
+     "layer_02": {
+      "tier": "absolute",
+      "value": 1.9073486328125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.9073486328125e-05,
+      "max_relative_real": 3.9769103765068315e-07,
+      "relative_real_vs_eager": 3.1921503745429836e-07,
+      "official_sdpa_vs_eager_relative_real": 4.3584395188428054e-07
+     },
+     "layer_03": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.5465964850391554e-07,
+      "relative_real_vs_eager": 3.454128028406749e-07,
+      "official_sdpa_vs_eager_relative_real": 3.5765414929600074e-07
+     },
+     "layer_04": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.628148189535913e-07,
+      "relative_real_vs_eager": 3.628148189535913e-07,
+      "official_sdpa_vs_eager_relative_real": 3.6269365030050255e-07
+     },
+     "layer_05": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.547824556764365e-07,
+      "relative_real_vs_eager": 3.547824556764365e-07,
+      "official_sdpa_vs_eager_relative_real": 3.553800872955646e-07
+     },
+     "layer_06": {
+      "tier": "absolute",
+      "value": 1.9073486328125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.9073486328125e-05,
+      "max_relative_real": 2.9121196829936407e-07,
+      "relative_real_vs_eager": 3.4945436195923685e-07,
+      "official_sdpa_vs_eager_relative_real": 2.838251254063578e-07
+     },
+     "layer_07": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 2.675156088061858e-07,
+      "relative_real_vs_eager": 4.444213345350486e-07,
+      "official_sdpa_vs_eager_relative_real": 4.444213345350486e-07
+     },
+     "layer_08": {
+      "tier": "absolute",
+      "value": 3.4332275390625e-05,
+      "bar": 0.0001,
+      "max_abs_real": 3.4332275390625e-05,
+      "max_relative_real": 3.3287273609553596e-07,
+      "relative_real_vs_eager": 5.412897635971086e-07,
+      "official_sdpa_vs_eager_relative_real": 5.412897635971086e-07
+     },
+     "layer_09": {
+      "tier": "absolute",
+      "value": 4.1961669921875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 4.1961669921875e-05,
+      "max_relative_real": 4.2104886027049555e-07,
+      "relative_real_vs_eager": 5.626543782950447e-07,
+      "official_sdpa_vs_eager_relative_real": 5.626543782950447e-07
+     },
+     "layer_10": {
+      "tier": "relative",
+      "value": 8.14900899433286e-07,
+      "bar": 0.0002,
+      "max_abs_real": 8.296966552734375e-05,
+      "max_relative_real": 8.14900899433286e-07,
+      "relative_real_vs_eager": 1.0013068360262536e-06,
+      "official_sdpa_vs_eager_relative_real": 8.576079256694059e-07
+     },
+     "layer_11": {
+      "tier": "relative",
+      "value": 5.064645130445e-07,
+      "bar": 0.0002,
+      "max_abs_real": 0.0068359375,
+      "max_relative_real": 5.064645130445e-07,
+      "relative_real_vs_eager": 4.314276956303493e-07,
+      "official_sdpa_vs_eager_relative_real": 6.845235016693247e-07
+     },
+     "layer_12": {
+      "tier": "relative",
+      "value": 4.247435402134478e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.247435402134478e-06,
+      "relative_real_vs_eager": 1.989168507310592e-06,
+      "official_sdpa_vs_eager_relative_real": 3.544336613026146e-06
+     },
+     "layer_13": {
+      "tier": "relative",
+      "value": 4.2488606335218256e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.2488606335218256e-06,
+      "relative_real_vs_eager": 1.9897930130480496e-06,
+      "official_sdpa_vs_eager_relative_real": 3.5454493687037975e-06
+     },
+     "layer_14": {
+      "tier": "relative",
+      "value": 4.249308452288547e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.249308452288547e-06,
+      "relative_real_vs_eager": 1.989994164613475e-06,
+      "official_sdpa_vs_eager_relative_real": 3.5458077842203737e-06
+     },
+     "layer_15": {
+      "tier": "relative",
+      "value": 4.251563485218077e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.251563485218077e-06,
+      "relative_real_vs_eager": 1.9910165334012935e-06,
+      "official_sdpa_vs_eager_relative_real": 3.547629459515032e-06
+     },
+     "layer_16": {
+      "tier": "relative",
+      "value": 4.2550808210778516e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.2550808210778516e-06,
+      "relative_real_vs_eager": 1.9926526909977533e-06,
+      "official_sdpa_vs_eager_relative_real": 3.5596023071005316e-06
+     },
+     "layer_17": {
+      "tier": "relative",
+      "value": 4.2552677669067605e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.2552677669067605e-06,
+      "relative_real_vs_eager": 1.992673771840882e-06,
+      "official_sdpa_vs_eager_relative_real": 3.559639965152121e-06
+     },
+     "layer_18": {
+      "tier": "relative",
+      "value": 4.224839858537793e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224839858537793e-06,
+      "relative_real_vs_eager": 1.994974374554159e-06,
+      "official_sdpa_vs_eager_relative_real": 3.419420494391969e-06
+     },
+     "layer_19": {
+      "tier": "relative",
+      "value": 4.224791235218967e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224791235218967e-06,
+      "relative_real_vs_eager": 1.994953480178534e-06,
+      "official_sdpa_vs_eager_relative_real": 3.419335392940228e-06
+     },
+     "layer_20": {
+      "tier": "relative",
+      "value": 4.2257248138058216e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.2257248138058216e-06,
+      "relative_real_vs_eager": 1.995395482396122e-06,
+      "official_sdpa_vs_eager_relative_real": 3.420187094576284e-06
+     },
+     "layer_21": {
+      "tier": "relative",
+      "value": 4.229366107712183e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.229366107712183e-06,
+      "relative_real_vs_eager": 1.997078132044381e-06,
+      "official_sdpa_vs_eager_relative_real": 3.4230918251555154e-06
+     },
+     "final_norm": {
+      "tier": "relative",
+      "value": 5.660966694163652e-05,
+      "bar": 0.0002,
+      "max_abs_real": 0.00238800048828125,
+      "max_relative_real": 5.660966694163652e-05,
+      "relative_real_vs_eager": 6.239723672480703e-05,
+      "official_sdpa_vs_eager_relative_real": 0.00011900690366644355
+     },
+     "head_input": {
+      "tier": "relative",
+      "value": 5.720494448104789e-05,
+      "bar": 0.0002,
+      "max_abs_real": 0.00238800048828125,
+      "max_relative_real": 5.720494448104789e-05,
+      "relative_real_vs_eager": 6.305337330978122e-05,
+      "official_sdpa_vs_eager_relative_real": 0.00012025831779082912
+     },
+     "head_0": {
+      "tier": "relative",
+      "value": 8.777524228642945e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0050048828125,
+      "max_relative_real": 8.777524228642945e-06,
+      "relative_real_vs_eager": 6.676193362090123e-06,
+      "official_sdpa_vs_eager_relative_real": 1.2654873984857397e-05
+     },
+     "head_1": {
+      "tier": "relative",
+      "value": 2.744677252567743e-05,
+      "bar": 0.0002,
+      "max_abs_real": 0.021087646484375,
+      "max_relative_real": 2.744677252567743e-05,
+      "relative_real_vs_eager": 9.016522957060458e-06,
+      "official_sdpa_vs_eager_relative_real": 1.843024956861697e-05
+     }
+    }
+   },
+   "pad_isolation": {
+    "rows_checked": 8,
+    "rows_bit_identical_at_real_positions": 8,
+    "status": "PASS"
+   },
+   "negative_controls": {
+    "all_global": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_01",
+     "value_at_first_failing_state": 4.22044563293457,
+     "min_relative_tier_value": 0.07177273115447294,
+     "max_absolute_tier_value": 49.35246658325195
+    },
+    "all_local": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_00",
+     "value_at_first_failing_state": 11.125389099121094,
+     "min_relative_tier_value": 0.1144127815055051,
+     "max_absolute_tier_value": 23.613136291503906
+    },
+    "window63": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_01",
+     "value_at_first_failing_state": 1.2374134063720703,
+     "min_relative_tier_value": 0.0028839436394777224,
+     "max_absolute_tier_value": 2.2597217559814453
+    },
+    "ignore_padding": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_00",
+     "value_at_first_failing_state": 132.76068687438965,
+     "min_relative_tier_value": 0.5274932888490026,
+     "max_absolute_tier_value": 132.76068687438965
+    },
+    "no_type_emb": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "head_input",
+     "value_at_first_failing_state": 0.0660611065771984,
+     "min_relative_tier_value": 5.064645130445e-07,
+     "max_absolute_tier_value": 4.1961669921875e-05
+    }
+   },
+   "record": {
+    "path": "<work>/results/authoring_fp32_s256.json",
+    "sha256": "4cf069ca9b7a81a4840ec8de6b0b8199fd32a61a5219619f854f37dad027a7fc"
+   },
+   "environment": {
+    "date": "2026-09-23T14:24:30+09:00",
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1",
+    "python": "3.11.13",
+    "packages": {
+     "torch": "2.9.0",
+     "coreai-torch": "0.4.1",
+     "coreai-core": "1.0.0b2",
+     "numpy": "2.3.5",
+     "safetensors": "0.7.0"
+    },
+    "argv": [
+     "conversion/laya/gate_laya_authoring.py",
+     "--window",
+     "256",
+     "--negative-controls"
+    ]
+   }
+  },
+  {
+   "precision": "fp32",
+   "window": 512,
+   "status": "PASS",
+   "failures": [],
+   "rows": {
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 6.771087646484375e-05,
+    "max_act_relative_error": 5.601309665091384e-06
+   },
+   "layer_gate": {
+    "status": "PASS",
+    "policy": {
+     "absolute": {
+      "states": "embeddings, layer_00 … layer_09",
+      "bar": "max |err| at real positions <= 1e-4"
+     },
+     "relative": {
+      "states": "layer_10 … layer_21, final_norm, head_input, head_0, head_1",
+      "bar": "max |err| / max |ref| at the real positions of the same state and row <= 2e-4 (max over rows)"
+     },
+     "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
+     "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
+     "decided": "supervisor, 2026-09-23 round 2, after the implementer corrected a round-1 report that gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+    },
+    "max_absolute_tier": 4.9591064453125e-05,
+    "max_relative_tier": 7.761197617061503e-06,
+    "per_state": {
+     "embeddings": {
+      "tier": "absolute",
+      "value": 9.5367431640625e-07,
+      "bar": 0.0001,
+      "max_abs_real": 9.5367431640625e-07,
+      "max_relative_real": 3.419806328160101e-08,
+      "relative_real_vs_eager": 3.419806328160101e-08,
+      "official_sdpa_vs_eager_relative_real": 0.0
+     },
+     "layer_00": {
+      "tier": "absolute",
+      "value": 1.71661376953125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.71661376953125e-05,
+      "max_relative_real": 3.608309503790088e-07,
+      "relative_real_vs_eager": 2.3549551710733633e-07,
+      "official_sdpa_vs_eager_relative_real": 3.2073862255911896e-07
+     },
+     "layer_01": {
+      "tier": "absolute",
+      "value": 1.71661376953125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.71661376953125e-05,
+      "max_relative_real": 3.404672057447864e-07,
+      "relative_real_vs_eager": 3.6847898140618214e-07,
+      "official_sdpa_vs_eager_relative_real": 3.026375162175879e-07
+     },
+     "layer_02": {
+      "tier": "absolute",
+      "value": 1.9073486328125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.9073486328125e-05,
+      "max_relative_real": 3.9769103765068315e-07,
+      "relative_real_vs_eager": 3.347170536330524e-07,
+      "official_sdpa_vs_eager_relative_real": 4.3584395188428054e-07
+     },
+     "layer_03": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.5465964850391554e-07,
+      "relative_real_vs_eager": 3.454128028406749e-07,
+      "official_sdpa_vs_eager_relative_real": 3.659245765045099e-07
+     },
+     "layer_04": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.628148189535913e-07,
+      "relative_real_vs_eager": 3.628148189535913e-07,
+      "official_sdpa_vs_eager_relative_real": 3.6269365030050255e-07
+     },
+     "layer_05": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.547824556764365e-07,
+      "relative_real_vs_eager": 3.547824556764365e-07,
+      "official_sdpa_vs_eager_relative_real": 3.553800872955646e-07
+     },
+     "layer_06": {
+      "tier": "absolute",
+      "value": 2.09808349609375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.09808349609375e-05,
+      "max_relative_real": 2.9121196829936407e-07,
+      "relative_real_vs_eager": 3.4945436195923685e-07,
+      "official_sdpa_vs_eager_relative_real": 2.7647724557080937e-07
+     },
+     "layer_07": {
+      "tier": "absolute",
+      "value": 3.0517578125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 3.0517578125e-05,
+      "max_relative_real": 2.7062050440143956e-07,
+      "relative_real_vs_eager": 4.7141578259184084e-07,
+      "official_sdpa_vs_eager_relative_real": 4.444213345350486e-07
+     },
+     "layer_08": {
+      "tier": "absolute",
+      "value": 4.57763671875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 4.57763671875e-05,
+      "max_relative_real": 3.240931845688e-07,
+      "relative_real_vs_eager": 4.278561752909636e-07,
+      "official_sdpa_vs_eager_relative_real": 3.8945190291717003e-07
+     },
+     "layer_09": {
+      "tier": "absolute",
+      "value": 4.9591064453125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 4.9591064453125e-05,
+      "max_relative_real": 3.6339594291351633e-07,
+      "relative_real_vs_eager": 4.765160955224165e-07,
+      "official_sdpa_vs_eager_relative_real": 4.0097755655103433e-07
+     },
+     "layer_10": {
+      "tier": "relative",
+      "value": 1.0751587696481862e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0001506805419921875,
+      "max_relative_real": 1.0751587696481862e-06,
+      "relative_real_vs_eager": 7.213090479918211e-07,
+      "official_sdpa_vs_eager_relative_real": 8.571389387934227e-07
+     },
+     "layer_11": {
+      "tier": "relative",
+      "value": 7.774947775322386e-07,
+      "bar": 0.0002,
+      "max_abs_real": 0.0107421875,
+      "max_relative_real": 7.774947775322386e-07,
+      "relative_real_vs_eager": 5.295981031309083e-07,
+      "official_sdpa_vs_eager_relative_real": 7.068134341202169e-07
+     },
+     "layer_12": {
+      "tier": "relative",
+      "value": 4.871171402153695e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.06658935546875,
+      "max_relative_real": 4.871171402153695e-06,
+      "relative_real_vs_eager": 4.828755152547407e-06,
+      "official_sdpa_vs_eager_relative_real": 2.861799823112153e-06
+     },
+     "layer_13": {
+      "tier": "relative",
+      "value": 4.897226925267165e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.066925048828125,
+      "max_relative_real": 4.897226925267165e-06,
+      "relative_real_vs_eager": 4.854797690620527e-06,
+      "official_sdpa_vs_eager_relative_real": 2.862680712982121e-06
+     },
+     "layer_14": {
+      "tier": "relative",
+      "value": 4.9088667766252826e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.06707763671875,
+      "max_relative_real": 4.9088667766252826e-06,
+      "relative_real_vs_eager": 4.866433442341442e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8629591631799404e-06
+     },
+     "layer_15": {
+      "tier": "relative",
+      "value": 4.922441097484408e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.067230224609375,
+      "max_relative_real": 4.922441097484408e-06,
+      "relative_real_vs_eager": 4.8799869981416005e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8643739692281737e-06
+     },
+     "layer_16": {
+      "tier": "relative",
+      "value": 4.930924655578603e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.067291259765625,
+      "max_relative_real": 4.930924655578603e-06,
+      "relative_real_vs_eager": 4.888435962401281e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8667078325911426e-06
+     },
+     "layer_17": {
+      "tier": "relative",
+      "value": 4.935468139104437e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.067352294921875,
+      "max_relative_real": 4.935468139104437e-06,
+      "relative_real_vs_eager": 4.8929788347804745e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8667926860951597e-06
+     },
+     "layer_18": {
+      "tier": "relative",
+      "value": 4.224839858537793e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224839858537793e-06,
+      "relative_real_vs_eager": 3.891936552387347e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8348349106976766e-06
+     },
+     "layer_19": {
+      "tier": "relative",
+      "value": 4.224791235218967e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224791235218967e-06,
+      "relative_real_vs_eager": 3.900784535101006e-06,
+      "official_sdpa_vs_eager_relative_real": 2.834878246285466e-06
+     },
+     "layer_20": {
+      "tier": "relative",
+      "value": 4.2257248138058216e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.2257248138058216e-06,
+      "relative_real_vs_eager": 3.892752753345366e-06,
+      "official_sdpa_vs_eager_relative_real": 2.835660142040011e-06
+     },
+     "layer_21": {
+      "tier": "relative",
+      "value": 4.229366107712183e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.229366107712183e-06,
+      "relative_real_vs_eager": 3.905052088283768e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8380775451879424e-06
+     },
+     "final_norm": {
+      "tier": "relative",
+      "value": 7.75762723634137e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0003275955095887184,
+      "max_relative_real": 7.75762723634137e-06,
+      "relative_real_vs_eager": 9.007234140707586e-06,
+      "official_sdpa_vs_eager_relative_real": 1.6764861377048954e-05
+     },
+     "head_input": {
+      "tier": "relative",
+      "value": 7.761197617061503e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0003275945782661438,
+      "max_relative_real": 7.761197617061503e-06,
+      "relative_real_vs_eager": 9.011410776838674e-06,
+      "official_sdpa_vs_eager_relative_real": 1.6772608393900178e-05
+     },
+     "head_0": {
+      "tier": "relative",
+      "value": 4.166252108049169e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0025634765625,
+      "max_relative_real": 4.166252108049169e-06,
+      "relative_real_vs_eager": 5.2078151350614614e-06,
+      "official_sdpa_vs_eager_relative_real": 9.374067243110631e-06
+     },
+     "head_1": {
+      "tier": "relative",
+      "value": 3.879120742390519e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.00323486328125,
+      "max_relative_real": 3.879120742390519e-06,
+      "relative_real_vs_eager": 4.546497043672509e-06,
+      "official_sdpa_vs_eager_relative_real": 6.231595419898959e-06
+     }
+    }
+   },
+   "pad_isolation": {
+    "rows_checked": 14,
+    "rows_bit_identical_at_real_positions": 14,
+    "status": "PASS"
+   },
+   "negative_controls": {
+    "all_global": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_01",
+     "value_at_first_failing_state": 5.778507232666016,
+     "min_relative_tier_value": 0.10487529588058582,
+     "max_absolute_tier_value": 62.87897491455078
+    },
+    "all_local": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_00",
+     "value_at_first_failing_state": 11.542649269104004,
+     "min_relative_tier_value": 0.1144127815055051,
+     "max_absolute_tier_value": 33.688751220703125
+    },
+    "window63": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_01",
+     "value_at_first_failing_state": 0.840672492980957,
+     "min_relative_tier_value": 0.0028839436394777224,
+     "max_absolute_tier_value": 3.2085132598876953
+    },
+    "ignore_padding": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "layer_00",
+     "value_at_first_failing_state": 165.33848571777344,
+     "min_relative_tier_value": 0.5222277596079722,
+     "max_absolute_tier_value": 165.33848571777344
+    },
+    "no_type_emb": {
+     "caught": true,
+     "caught_by": {
+      "layer_gate": true,
+      "tensor_gate": true,
+      "answer_gate": true
+     },
+     "first_failing_state": "head_input",
+     "value_at_first_failing_state": 0.0660611065771984,
+     "min_relative_tier_value": 7.774947775322386e-07,
+     "max_absolute_tier_value": 4.9591064453125e-05
+    }
+   },
+   "record": {
+    "path": "<work>/results/authoring_fp32_s512.json",
+    "sha256": "22df54fd540cfdf6e3755772663592664306c15059b43bdf2887491a43a82341"
+   },
+   "environment": {
+    "date": "2026-09-23T14:27:42+09:00",
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1",
+    "python": "3.11.13",
+    "packages": {
+     "torch": "2.9.0",
+     "coreai-torch": "0.4.1",
+     "coreai-core": "1.0.0b2",
+     "numpy": "2.3.5",
+     "safetensors": "0.7.0"
+    },
+    "argv": [
+     "conversion/laya/gate_laya_authoring.py",
+     "--window",
+     "512",
+     "--negative-controls"
+    ]
+   }
+  },
+  {
+   "precision": "wfp16",
+   "window": 256,
+   "status": "PASS",
+   "failures": [],
+   "rows": {
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 5.7220458984375e-05,
+    "max_act_relative_error": 5.601309665091384e-06
+   },
+   "layer_gate": {
+    "status": "PASS",
+    "policy": {
+     "absolute": {
+      "states": "embeddings, layer_00 … layer_09",
+      "bar": "max |err| at real positions <= 1e-4"
+     },
+     "relative": {
+      "states": "layer_10 … layer_21, final_norm, head_input, head_0, head_1",
+      "bar": "max |err| / max |ref| at the real positions of the same state and row <= 2e-4 (max over rows)"
+     },
+     "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
+     "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
+     "decided": "supervisor, 2026-09-23 round 2, after the implementer corrected a round-1 report that gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+    },
+    "max_absolute_tier": 4.1961669921875e-05,
+    "max_relative_tier": 5.720494448104789e-05,
+    "per_state": {
+     "embeddings": {
+      "tier": "absolute",
+      "value": 9.5367431640625e-07,
+      "bar": 0.0001,
+      "max_abs_real": 9.5367431640625e-07,
+      "max_relative_real": 3.419806328160101e-08,
+      "relative_real_vs_eager": 3.419806328160101e-08,
+      "official_sdpa_vs_eager_relative_real": 0.0
+     },
+     "layer_00": {
+      "tier": "absolute",
+      "value": 1.049041748046875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.049041748046875e-05,
+      "max_relative_real": 2.1498644725436508e-07,
+      "relative_real_vs_eager": 2.3453066973203463e-07,
+      "official_sdpa_vs_eager_relative_real": 2.3453066973203463e-07
+     },
+     "layer_01": {
+      "tier": "absolute",
+      "value": 1.1444091796875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.1444091796875e-05,
+      "max_relative_real": 2.1691232107535295e-07,
+      "relative_real_vs_eager": 2.2178299332521904e-07,
+      "official_sdpa_vs_eager_relative_real": 2.2178299332521904e-07
+     },
+     "layer_02": {
+      "tier": "absolute",
+      "value": 1.9073486328125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.9073486328125e-05,
+      "max_relative_real": 3.9769103765068315e-07,
+      "relative_real_vs_eager": 3.1921503745429836e-07,
+      "official_sdpa_vs_eager_relative_real": 4.3584395188428054e-07
+     },
+     "layer_03": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.5465964850391554e-07,
+      "relative_real_vs_eager": 3.454128028406749e-07,
+      "official_sdpa_vs_eager_relative_real": 3.5765414929600074e-07
+     },
+     "layer_04": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.628148189535913e-07,
+      "relative_real_vs_eager": 3.628148189535913e-07,
+      "official_sdpa_vs_eager_relative_real": 3.6269365030050255e-07
+     },
+     "layer_05": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.547824556764365e-07,
+      "relative_real_vs_eager": 3.547824556764365e-07,
+      "official_sdpa_vs_eager_relative_real": 3.553800872955646e-07
+     },
+     "layer_06": {
+      "tier": "absolute",
+      "value": 1.9073486328125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.9073486328125e-05,
+      "max_relative_real": 2.9121196829936407e-07,
+      "relative_real_vs_eager": 3.4945436195923685e-07,
+      "official_sdpa_vs_eager_relative_real": 2.838251254063578e-07
+     },
+     "layer_07": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 2.675156088061858e-07,
+      "relative_real_vs_eager": 4.444213345350486e-07,
+      "official_sdpa_vs_eager_relative_real": 4.444213345350486e-07
+     },
+     "layer_08": {
+      "tier": "absolute",
+      "value": 3.4332275390625e-05,
+      "bar": 0.0001,
+      "max_abs_real": 3.4332275390625e-05,
+      "max_relative_real": 3.3287273609553596e-07,
+      "relative_real_vs_eager": 5.412897635971086e-07,
+      "official_sdpa_vs_eager_relative_real": 5.412897635971086e-07
+     },
+     "layer_09": {
+      "tier": "absolute",
+      "value": 4.1961669921875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 4.1961669921875e-05,
+      "max_relative_real": 4.2104886027049555e-07,
+      "relative_real_vs_eager": 5.626543782950447e-07,
+      "official_sdpa_vs_eager_relative_real": 5.626543782950447e-07
+     },
+     "layer_10": {
+      "tier": "relative",
+      "value": 8.14900899433286e-07,
+      "bar": 0.0002,
+      "max_abs_real": 8.296966552734375e-05,
+      "max_relative_real": 8.14900899433286e-07,
+      "relative_real_vs_eager": 1.0013068360262536e-06,
+      "official_sdpa_vs_eager_relative_real": 8.576079256694059e-07
+     },
+     "layer_11": {
+      "tier": "relative",
+      "value": 5.064645130445e-07,
+      "bar": 0.0002,
+      "max_abs_real": 0.0068359375,
+      "max_relative_real": 5.064645130445e-07,
+      "relative_real_vs_eager": 4.314276956303493e-07,
+      "official_sdpa_vs_eager_relative_real": 6.845235016693247e-07
+     },
+     "layer_12": {
+      "tier": "relative",
+      "value": 4.247435402134478e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.247435402134478e-06,
+      "relative_real_vs_eager": 1.989168507310592e-06,
+      "official_sdpa_vs_eager_relative_real": 3.544336613026146e-06
+     },
+     "layer_13": {
+      "tier": "relative",
+      "value": 4.2488606335218256e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.2488606335218256e-06,
+      "relative_real_vs_eager": 1.9897930130480496e-06,
+      "official_sdpa_vs_eager_relative_real": 3.5454493687037975e-06
+     },
+     "layer_14": {
+      "tier": "relative",
+      "value": 4.249308452288547e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.249308452288547e-06,
+      "relative_real_vs_eager": 1.989994164613475e-06,
+      "official_sdpa_vs_eager_relative_real": 3.5458077842203737e-06
+     },
+     "layer_15": {
+      "tier": "relative",
+      "value": 4.251563485218077e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.251563485218077e-06,
+      "relative_real_vs_eager": 1.9910165334012935e-06,
+      "official_sdpa_vs_eager_relative_real": 3.547629459515032e-06
+     },
+     "layer_16": {
+      "tier": "relative",
+      "value": 4.2550808210778516e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.2550808210778516e-06,
+      "relative_real_vs_eager": 1.9926526909977533e-06,
+      "official_sdpa_vs_eager_relative_real": 3.5596023071005316e-06
+     },
+     "layer_17": {
+      "tier": "relative",
+      "value": 4.2552677669067605e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.05712890625,
+      "max_relative_real": 4.2552677669067605e-06,
+      "relative_real_vs_eager": 1.992673771840882e-06,
+      "official_sdpa_vs_eager_relative_real": 3.559639965152121e-06
+     },
+     "layer_18": {
+      "tier": "relative",
+      "value": 4.224839858537793e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224839858537793e-06,
+      "relative_real_vs_eager": 1.994974374554159e-06,
+      "official_sdpa_vs_eager_relative_real": 3.419420494391969e-06
+     },
+     "layer_19": {
+      "tier": "relative",
+      "value": 4.224791235218967e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224791235218967e-06,
+      "relative_real_vs_eager": 1.994953480178534e-06,
+      "official_sdpa_vs_eager_relative_real": 3.419335392940228e-06
+     },
+     "layer_20": {
+      "tier": "relative",
+      "value": 4.2257248138058216e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.2257248138058216e-06,
+      "relative_real_vs_eager": 1.995395482396122e-06,
+      "official_sdpa_vs_eager_relative_real": 3.420187094576284e-06
+     },
+     "layer_21": {
+      "tier": "relative",
+      "value": 4.229366107712183e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.229366107712183e-06,
+      "relative_real_vs_eager": 1.997078132044381e-06,
+      "official_sdpa_vs_eager_relative_real": 3.4230918251555154e-06
+     },
+     "final_norm": {
+      "tier": "relative",
+      "value": 5.660966694163652e-05,
+      "bar": 0.0002,
+      "max_abs_real": 0.00238800048828125,
+      "max_relative_real": 5.660966694163652e-05,
+      "relative_real_vs_eager": 6.239723672480703e-05,
+      "official_sdpa_vs_eager_relative_real": 0.00011900690366644355
+     },
+     "head_input": {
+      "tier": "relative",
+      "value": 5.720494448104789e-05,
+      "bar": 0.0002,
+      "max_abs_real": 0.00238800048828125,
+      "max_relative_real": 5.720494448104789e-05,
+      "relative_real_vs_eager": 6.305337330978122e-05,
+      "official_sdpa_vs_eager_relative_real": 0.00012025831779082912
+     },
+     "head_0": {
+      "tier": "relative",
+      "value": 8.777524228642945e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0050048828125,
+      "max_relative_real": 8.777524228642945e-06,
+      "relative_real_vs_eager": 6.676193362090123e-06,
+      "official_sdpa_vs_eager_relative_real": 1.2654873984857397e-05
+     },
+     "head_1": {
+      "tier": "relative",
+      "value": 2.744677252567743e-05,
+      "bar": 0.0002,
+      "max_abs_real": 0.021087646484375,
+      "max_relative_real": 2.744677252567743e-05,
+      "relative_real_vs_eager": 9.016522957060458e-06,
+      "official_sdpa_vs_eager_relative_real": 1.843024956861697e-05
+     }
+    }
+   },
+   "pad_isolation": {
+    "rows_checked": 8,
+    "rows_bit_identical_at_real_positions": 8,
+    "status": "PASS"
+   },
+   "negative_controls": {},
+   "record": {
+    "path": "<work>/results/authoring_wfp16_s256.json",
+    "sha256": "72a3f31a980b4a4ffc0832c85410fed029083a42c24c5e72e7830de8cb573fea"
+   },
+   "environment": {
+    "date": "2026-09-23T14:28:01+09:00",
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1",
+    "python": "3.11.13",
+    "packages": {
+     "torch": "2.9.0",
+     "coreai-torch": "0.4.1",
+     "coreai-core": "1.0.0b2",
+     "numpy": "2.3.5",
+     "safetensors": "0.7.0"
+    },
+    "argv": [
+     "conversion/laya/gate_laya_authoring.py",
+     "--window",
+     "256",
+     "--dtype",
+     "wfp16"
+    ]
+   }
+  },
+  {
+   "precision": "wfp16",
+   "window": 512,
+   "status": "PASS",
+   "failures": [],
+   "rows": {
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 6.771087646484375e-05,
+    "max_act_relative_error": 5.601309665091384e-06
+   },
+   "layer_gate": {
+    "status": "PASS",
+    "policy": {
+     "absolute": {
+      "states": "embeddings, layer_00 … layer_09",
+      "bar": "max |err| at real positions <= 1e-4"
+     },
+     "relative": {
+      "states": "layer_10 … layer_21, final_norm, head_input, head_0, head_1",
+      "bar": "max |err| / max |ref| at the real positions of the same state and row <= 2e-4 (max over rows)"
+     },
+     "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
+     "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
+     "decided": "supervisor, 2026-09-23 round 2, after the implementer corrected a round-1 report that gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+    },
+    "max_absolute_tier": 4.9591064453125e-05,
+    "max_relative_tier": 7.761197617061503e-06,
+    "per_state": {
+     "embeddings": {
+      "tier": "absolute",
+      "value": 9.5367431640625e-07,
+      "bar": 0.0001,
+      "max_abs_real": 9.5367431640625e-07,
+      "max_relative_real": 3.419806328160101e-08,
+      "relative_real_vs_eager": 3.419806328160101e-08,
+      "official_sdpa_vs_eager_relative_real": 0.0
+     },
+     "layer_00": {
+      "tier": "absolute",
+      "value": 1.71661376953125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.71661376953125e-05,
+      "max_relative_real": 3.608309503790088e-07,
+      "relative_real_vs_eager": 2.3549551710733633e-07,
+      "official_sdpa_vs_eager_relative_real": 3.2073862255911896e-07
+     },
+     "layer_01": {
+      "tier": "absolute",
+      "value": 1.71661376953125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.71661376953125e-05,
+      "max_relative_real": 3.404672057447864e-07,
+      "relative_real_vs_eager": 3.6847898140618214e-07,
+      "official_sdpa_vs_eager_relative_real": 3.026375162175879e-07
+     },
+     "layer_02": {
+      "tier": "absolute",
+      "value": 1.9073486328125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 1.9073486328125e-05,
+      "max_relative_real": 3.9769103765068315e-07,
+      "relative_real_vs_eager": 3.347170536330524e-07,
+      "official_sdpa_vs_eager_relative_real": 4.3584395188428054e-07
+     },
+     "layer_03": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.5465964850391554e-07,
+      "relative_real_vs_eager": 3.454128028406749e-07,
+      "official_sdpa_vs_eager_relative_real": 3.659245765045099e-07
+     },
+     "layer_04": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.628148189535913e-07,
+      "relative_real_vs_eager": 3.628148189535913e-07,
+      "official_sdpa_vs_eager_relative_real": 3.6269365030050255e-07
+     },
+     "layer_05": {
+      "tier": "absolute",
+      "value": 2.288818359375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.288818359375e-05,
+      "max_relative_real": 3.547824556764365e-07,
+      "relative_real_vs_eager": 3.547824556764365e-07,
+      "official_sdpa_vs_eager_relative_real": 3.553800872955646e-07
+     },
+     "layer_06": {
+      "tier": "absolute",
+      "value": 2.09808349609375e-05,
+      "bar": 0.0001,
+      "max_abs_real": 2.09808349609375e-05,
+      "max_relative_real": 2.9121196829936407e-07,
+      "relative_real_vs_eager": 3.4945436195923685e-07,
+      "official_sdpa_vs_eager_relative_real": 2.7647724557080937e-07
+     },
+     "layer_07": {
+      "tier": "absolute",
+      "value": 3.0517578125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 3.0517578125e-05,
+      "max_relative_real": 2.7062050440143956e-07,
+      "relative_real_vs_eager": 4.7141578259184084e-07,
+      "official_sdpa_vs_eager_relative_real": 4.444213345350486e-07
+     },
+     "layer_08": {
+      "tier": "absolute",
+      "value": 4.57763671875e-05,
+      "bar": 0.0001,
+      "max_abs_real": 4.57763671875e-05,
+      "max_relative_real": 3.240931845688e-07,
+      "relative_real_vs_eager": 4.278561752909636e-07,
+      "official_sdpa_vs_eager_relative_real": 3.8945190291717003e-07
+     },
+     "layer_09": {
+      "tier": "absolute",
+      "value": 4.9591064453125e-05,
+      "bar": 0.0001,
+      "max_abs_real": 4.9591064453125e-05,
+      "max_relative_real": 3.6339594291351633e-07,
+      "relative_real_vs_eager": 4.765160955224165e-07,
+      "official_sdpa_vs_eager_relative_real": 4.0097755655103433e-07
+     },
+     "layer_10": {
+      "tier": "relative",
+      "value": 1.0751587696481862e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0001506805419921875,
+      "max_relative_real": 1.0751587696481862e-06,
+      "relative_real_vs_eager": 7.213090479918211e-07,
+      "official_sdpa_vs_eager_relative_real": 8.571389387934227e-07
+     },
+     "layer_11": {
+      "tier": "relative",
+      "value": 7.774947775322386e-07,
+      "bar": 0.0002,
+      "max_abs_real": 0.0107421875,
+      "max_relative_real": 7.774947775322386e-07,
+      "relative_real_vs_eager": 5.295981031309083e-07,
+      "official_sdpa_vs_eager_relative_real": 7.068134341202169e-07
+     },
+     "layer_12": {
+      "tier": "relative",
+      "value": 4.871171402153695e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.06658935546875,
+      "max_relative_real": 4.871171402153695e-06,
+      "relative_real_vs_eager": 4.828755152547407e-06,
+      "official_sdpa_vs_eager_relative_real": 2.861799823112153e-06
+     },
+     "layer_13": {
+      "tier": "relative",
+      "value": 4.897226925267165e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.066925048828125,
+      "max_relative_real": 4.897226925267165e-06,
+      "relative_real_vs_eager": 4.854797690620527e-06,
+      "official_sdpa_vs_eager_relative_real": 2.862680712982121e-06
+     },
+     "layer_14": {
+      "tier": "relative",
+      "value": 4.9088667766252826e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.06707763671875,
+      "max_relative_real": 4.9088667766252826e-06,
+      "relative_real_vs_eager": 4.866433442341442e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8629591631799404e-06
+     },
+     "layer_15": {
+      "tier": "relative",
+      "value": 4.922441097484408e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.067230224609375,
+      "max_relative_real": 4.922441097484408e-06,
+      "relative_real_vs_eager": 4.8799869981416005e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8643739692281737e-06
+     },
+     "layer_16": {
+      "tier": "relative",
+      "value": 4.930924655578603e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.067291259765625,
+      "max_relative_real": 4.930924655578603e-06,
+      "relative_real_vs_eager": 4.888435962401281e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8667078325911426e-06
+     },
+     "layer_17": {
+      "tier": "relative",
+      "value": 4.935468139104437e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.067352294921875,
+      "max_relative_real": 4.935468139104437e-06,
+      "relative_real_vs_eager": 4.8929788347804745e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8667926860951597e-06
+     },
+     "layer_18": {
+      "tier": "relative",
+      "value": 4.224839858537793e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224839858537793e-06,
+      "relative_real_vs_eager": 3.891936552387347e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8348349106976766e-06
+     },
+     "layer_19": {
+      "tier": "relative",
+      "value": 4.224791235218967e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.224791235218967e-06,
+      "relative_real_vs_eager": 3.900784535101006e-06,
+      "official_sdpa_vs_eager_relative_real": 2.834878246285466e-06
+     },
+     "layer_20": {
+      "tier": "relative",
+      "value": 4.2257248138058216e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.2257248138058216e-06,
+      "relative_real_vs_eager": 3.892752753345366e-06,
+      "official_sdpa_vs_eager_relative_real": 2.835660142040011e-06
+     },
+     "layer_21": {
+      "tier": "relative",
+      "value": 4.229366107712183e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.056640625,
+      "max_relative_real": 4.229366107712183e-06,
+      "relative_real_vs_eager": 3.905052088283768e-06,
+      "official_sdpa_vs_eager_relative_real": 2.8380775451879424e-06
+     },
+     "final_norm": {
+      "tier": "relative",
+      "value": 7.75762723634137e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0003275955095887184,
+      "max_relative_real": 7.75762723634137e-06,
+      "relative_real_vs_eager": 9.007234140707586e-06,
+      "official_sdpa_vs_eager_relative_real": 1.6764861377048954e-05
+     },
+     "head_input": {
+      "tier": "relative",
+      "value": 7.761197617061503e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0003275945782661438,
+      "max_relative_real": 7.761197617061503e-06,
+      "relative_real_vs_eager": 9.011410776838674e-06,
+      "official_sdpa_vs_eager_relative_real": 1.6772608393900178e-05
+     },
+     "head_0": {
+      "tier": "relative",
+      "value": 4.166252108049169e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.0025634765625,
+      "max_relative_real": 4.166252108049169e-06,
+      "relative_real_vs_eager": 5.2078151350614614e-06,
+      "official_sdpa_vs_eager_relative_real": 9.374067243110631e-06
+     },
+     "head_1": {
+      "tier": "relative",
+      "value": 3.879120742390519e-06,
+      "bar": 0.0002,
+      "max_abs_real": 0.00323486328125,
+      "max_relative_real": 3.879120742390519e-06,
+      "relative_real_vs_eager": 4.546497043672509e-06,
+      "official_sdpa_vs_eager_relative_real": 6.231595419898959e-06
+     }
+    }
+   },
+   "pad_isolation": {
+    "rows_checked": 14,
+    "rows_bit_identical_at_real_positions": 14,
+    "status": "PASS"
+   },
+   "negative_controls": {},
+   "record": {
+    "path": "<work>/results/authoring_wfp16_s512.json",
+    "sha256": "22c6215db4688c0a4ae42227169acc3c277f1597cb83c2216f0764abe86f7bc0"
+   },
+   "environment": {
+    "date": "2026-09-23T14:28:35+09:00",
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1",
+    "python": "3.11.13",
+    "packages": {
+     "torch": "2.9.0",
+     "coreai-torch": "0.4.1",
+     "coreai-core": "1.0.0b2",
+     "numpy": "2.3.5",
+     "safetensors": "0.7.0"
+    },
+    "argv": [
+     "conversion/laya/gate_laya_authoring.py",
+     "--window",
+     "512",
+     "--dtype",
+     "wfp16"
+    ]
+   }
+  }
+ ],
+ "export": [
+  {
+   "folder": "ios/wfp16-s256",
+   "status": "PASS",
+   "measure_only": false,
+   "bundle": "laya_ml_wfp16_s256.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "wfp16",
+   "window": 256,
+   "bytes": 644855189,
+   "torch_export_gate": {
+    "status": "PASS",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 5.7220458984375e-05,
+    "max_act_relative_error": 5.601309665091384e-06,
+    "tensor_status": "PASS"
+   },
+   "record": {
+    "path": "<exports>/ios/wfp16-s256/provenance/export-manifest.json",
+    "sha256": "5f160116bdd9392bbac125ee1676e056c01de03227d3650eb610c5dca1317c32"
+   },
+   "copied_from": "macos/wfp16-s256"
+  },
+  {
+   "folder": "ios/wfp16-s512",
+   "status": "PASS",
+   "measure_only": false,
+   "bundle": "laya_ml_wfp16_s512.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "wfp16",
+   "window": 512,
+   "bytes": 645772737,
+   "torch_export_gate": {
+    "status": "PASS",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 6.771087646484375e-05,
+    "max_act_relative_error": 5.601309665091384e-06,
+    "tensor_status": "PASS"
+   },
+   "record": {
+    "path": "<exports>/ios/wfp16-s512/provenance/export-manifest.json",
+    "sha256": "3536f972387e44957dd2efe26a04214665d90d365486442bcb5c949aee374098"
+   },
+   "copied_from": "macos/wfp16-s512"
+  },
+  {
+   "folder": "macos/fp16-s256",
+   "status": "FAIL",
+   "measure_only": true,
+   "bundle": "laya_ml_fp16_s256.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "fp16",
+   "window": 256,
+   "bytes": 644740721,
+   "torch_export_gate": {
+    "status": "FAIL",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 0.0034465491771698,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 0.10173845291137695,
+    "max_act_relative_error": 0.002429687035939753,
+    "tensor_status": "FAIL"
+   },
+   "record": {
+    "path": "<exports>/macos/fp16-s256/provenance/export-manifest.json",
+    "sha256": "bfdc3a5e835c743271abfcbc714fa4d43774db582fedc0a19d8240c3e4d37e07"
+   }
+  },
+  {
+   "folder": "macos/fp16-s512",
+   "status": "FAIL",
+   "measure_only": true,
+   "bundle": "laya_ml_fp16_s512.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "fp16",
+   "window": 512,
+   "bytes": 645658243,
+   "torch_export_gate": {
+    "status": "FAIL",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 0.004967451095581055,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 0.12394142150878906,
+    "max_act_relative_error": 0.002203615831121796,
+    "tensor_status": "FAIL"
+   },
+   "record": {
+    "path": "<exports>/macos/fp16-s512/provenance/export-manifest.json",
+    "sha256": "96b537414d62e623e01ef68bef51c04fbb3ebcd7cef4774f2591bd5fdb1cde4c"
+   }
+  },
+  {
+   "folder": "macos/fp32-s256",
+   "status": "PASS",
+   "measure_only": false,
+   "bundle": "laya_ml_fp32_s256.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "fp32",
+   "window": 256,
+   "bytes": 1288156432,
+   "torch_export_gate": {
+    "status": "PASS",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 5.7220458984375e-05,
+    "max_act_relative_error": 5.601309665091384e-06,
+    "tensor_status": "PASS"
+   },
+   "record": {
+    "path": "<exports>/macos/fp32-s256/provenance/export-manifest.json",
+    "sha256": "c056ac7ed99ea390c7414393c05b8abd974156f4b2cedd125506f8d637026065"
+   }
+  },
+  {
+   "folder": "macos/fp32-s512",
+   "status": "PASS",
+   "measure_only": false,
+   "bundle": "laya_ml_fp32_s512.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "fp32",
+   "window": 512,
+   "bytes": 1289073976,
+   "torch_export_gate": {
+    "status": "PASS",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 6.771087646484375e-05,
+    "max_act_relative_error": 5.601309665091384e-06,
+    "tensor_status": "PASS"
+   },
+   "record": {
+    "path": "<exports>/macos/fp32-s512/provenance/export-manifest.json",
+    "sha256": "683b8e65aef01c12756556c6d46cf87dc984a1907bf2a492b47a0d4a00aaf5cb"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s256",
+   "status": "PASS",
+   "measure_only": false,
+   "bundle": "laya_ml_wfp16_s256.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "wfp16",
+   "window": 256,
+   "bytes": 644855189,
+   "torch_export_gate": {
+    "status": "PASS",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 5.7220458984375e-05,
+    "max_act_relative_error": 5.601309665091384e-06,
+    "tensor_status": "PASS"
+   },
+   "record": {
+    "path": "<exports>/macos/wfp16-s256/provenance/export-manifest.json",
+    "sha256": "ae7a58df3e1b273bbe99936fd9f96301b88985d69ce4eda193001ebc19e44547"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s512",
+   "status": "PASS",
+   "measure_only": false,
+   "bundle": "laya_ml_wfp16_s512.aimodel",
+   "format": "JIT .aimodel (portable; multifunction main + act)",
+   "precision": "wfp16",
+   "window": 512,
+   "bytes": 645772737,
+   "torch_export_gate": {
+    "status": "PASS",
+    "record": "provenance/export-gate.json",
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 9.506940841674805e-06,
+    "max_act_probability_error": 0.0,
+    "max_marker_abs_error": 6.771087646484375e-05,
+    "max_act_relative_error": 5.601309665091384e-06,
+    "tensor_status": "PASS"
+   },
+   "record": {
+    "path": "<exports>/macos/wfp16-s512/provenance/export-manifest.json",
+    "sha256": "264333163ad46c2e1dd5d76d3c2f020fbd0968c7bc83397a916d22c7176bd10b"
+   }
+  }
+ ],
+ "runtime_rows": [
+  {
+   "folder": "macos/fp16-s256",
+   "compute": "cpu_only",
+   "status": "FAIL",
+   "findings": [
+    "tensor bar missed: marker 0.682 (bar 1e-3), act relative 0.0368 (bar 1e-4)"
+   ],
+   "measure_only_bundle": true,
+   "precision": "fp16",
+   "window": 256,
+   "argmax_identical": 80,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.04383277893066406,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.6821355819702148,
+   "max_act_relative_error": 0.03678127603672156,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 467.61537506245077,
+   "warm": {
+    "samples": 40,
+    "median_ms": 31.505646009463817,
+    "p10_ms": 30.71479967329651,
+    "p90_ms": 32.233975373674184,
+    "min_ms": 29.657332925125957,
+    "max_ms": 33.47099991515279,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": "cpu_only is the parity option; its time is a reference value, not a speed claim"
+   },
+   "gpu_lock": null,
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T13:57:10+09:00",
+   "record": {
+    "path": "<exports>/macos/fp16-s256/provenance/runtime-gate.json",
+    "sha256": "2ccc618ab7cf19efc749cd35f695e6186ca2c016865c0fd32f268cd168840fa4"
+   }
+  },
+  {
+   "folder": "macos/fp16-s256",
+   "compute": "neural_engine",
+   "status": "FAIL",
+   "findings": [
+    "tensor bar missed: marker 0.211 (bar 1e-3), act relative 0.00443 (bar 1e-4)"
+   ],
+   "measure_only_bundle": true,
+   "precision": "fp16",
+   "window": 256,
+   "argmax_identical": 80,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.018495678901672363,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.21076154708862305,
+   "max_act_relative_error": 0.004430410686080636,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 5918.96599996835,
+   "warm": {
+    "samples": 40,
+    "median_ms": 42.84589545568451,
+    "p10_ms": 38.8063249993138,
+    "p90_ms": 46.427920868154615,
+    "min_ms": 36.8494160939008,
+    "max_ms": 48.149292008019984,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 210.37898420798592,
+    "attempts": 8,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:44:41+09:00",
+   "record": {
+    "path": "<exports>/macos/fp16-s256/provenance/runtime-gate.json",
+    "sha256": "2ccc618ab7cf19efc749cd35f695e6186ca2c016865c0fd32f268cd168840fa4"
+   }
+  },
+  {
+   "folder": "macos/fp16-s256",
+   "compute": "gpu",
+   "status": "FAIL",
+   "findings": [
+    "tensor bar missed: marker 0.0721 (bar 1e-3), act relative 0.00526 (bar 1e-4)"
+   ],
+   "measure_only_bundle": true,
+   "precision": "fp16",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.005840897560119629,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.07205772399902344,
+   "max_act_relative_error": 0.0052578941584414856,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 657.0887080160901,
+   "warm": {
+    "samples": 40,
+    "median_ms": 10.39947901153937,
+    "p10_ms": 10.265079070813954,
+    "p90_ms": 10.515575320459902,
+    "min_ms": 10.171375004574656,
+    "max_ms": 10.625167051330209,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.06463683303445578,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:45:40+09:00",
+   "record": {
+    "path": "<exports>/macos/fp16-s256/provenance/runtime-gate.json",
+    "sha256": "2ccc618ab7cf19efc749cd35f695e6186ca2c016865c0fd32f268cd168840fa4"
+   }
+  },
+  {
+   "folder": "macos/fp16-s512",
+   "compute": "cpu_only",
+   "status": "FAIL",
+   "findings": [
+    "tensor bar missed: marker 0.682 (bar 1e-3), act relative 0.0368 (bar 1e-4)"
+   ],
+   "measure_only_bundle": true,
+   "precision": "fp16",
+   "window": 512,
+   "argmax_identical": 80,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.04383277893066406,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.6821355819702148,
+   "max_act_relative_error": 0.03678127603672156,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 165,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 489.05858397483826,
+   "warm": {
+    "samples": 40,
+    "median_ms": 110.9206669498235,
+    "p10_ms": 102.04580891877413,
+    "p90_ms": 122.56904967362061,
+    "min_ms": 97.6227920036763,
+    "max_ms": 126.63850001990795,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": "cpu_only is the parity option; its time is a reference value, not a speed claim"
+   },
+   "gpu_lock": null,
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:08:02+09:00",
+   "record": {
+    "path": "<exports>/macos/fp16-s512/provenance/runtime-gate.json",
+    "sha256": "25542128f84f7f971ea852ecc95ae40f15bcf6c7c97fb0afd217bde4b322cfb3"
+   }
+  },
+  {
+   "folder": "macos/fp16-s512",
+   "compute": "neural_engine",
+   "status": "FAIL",
+   "findings": [
+    "tensor bar missed: marker 0.681 (bar 1e-3), act relative 0.0052 (bar 1e-4)"
+   ],
+   "measure_only_bundle": true,
+   "precision": "fp16",
+   "window": 512,
+   "argmax_identical": 80,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.018495678901672363,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.6809854507446289,
+   "max_act_relative_error": 0.005197220736341831,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 165,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 5.122291971929371,
+   "warm": {
+    "samples": 40,
+    "median_ms": 67.71174998721108,
+    "p10_ms": 60.31988690374419,
+    "p90_ms": 77.75585874915123,
+    "min_ms": 58.372291969135404,
+    "max_ms": 88.38891598861665,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.0597269160207361,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T15:08:22+09:00",
+   "record": {
+    "path": "<exports>/macos/fp16-s512/provenance/runtime-gate.json",
+    "sha256": "25542128f84f7f971ea852ecc95ae40f15bcf6c7c97fb0afd217bde4b322cfb3"
+   }
+  },
+  {
+   "folder": "macos/fp32-s256",
+   "compute": "cpu_only",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "fp32",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 9.47713851928711e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 7.486343383789062e-05,
+   "max_act_relative_error": 1.8490182599027832e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 761.8704589549452,
+   "warm": {
+    "samples": 40,
+    "median_ms": 62.992437509819865,
+    "p10_ms": 59.53698743833229,
+    "p90_ms": 71.76202922128141,
+    "min_ms": 59.003249974921346,
+    "max_ms": 88.1866249255836,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": "cpu_only is the parity option; its time is a reference value, not a speed claim"
+   },
+   "gpu_lock": null,
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:31:58+09:00",
+   "record": {
+    "path": "<exports>/macos/fp32-s256/provenance/runtime-gate.json",
+    "sha256": "67371d1811e9be7e95d57e76f4bbe1d3880694e5b29773c504d1adaef6662de4"
+   }
+  },
+  {
+   "folder": "macos/fp32-s256",
+   "compute": "gpu",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "fp32",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 4.470348358154297e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 5.53131103515625e-05,
+   "max_act_relative_error": 2.603425618986136e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 852.9220829950646,
+   "warm": {
+    "samples": 40,
+    "median_ms": 10.377208527643234,
+    "p10_ms": 10.25534588843584,
+    "p90_ms": 10.542933002579957,
+    "min_ms": 10.179791948758066,
+    "max_ms": 10.698749916628003,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.05760362499859184,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:39:59+09:00",
+   "record": {
+    "path": "<exports>/macos/fp32-s256/provenance/runtime-gate.json",
+    "sha256": "67371d1811e9be7e95d57e76f4bbe1d3880694e5b29773c504d1adaef6662de4"
+   }
+  },
+  {
+   "folder": "macos/fp32-s256",
+   "compute": "neural_engine",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "fp32",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 4.470348358154297e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 5.53131103515625e-05,
+   "max_act_relative_error": 2.603425618986136e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 985.9268328873441,
+   "warm": {
+    "samples": 40,
+    "median_ms": 10.489125445019454,
+    "p10_ms": 10.267929802648723,
+    "p90_ms": 10.728624684270471,
+    "min_ms": 10.21158299408853,
+    "max_ms": 11.268082889728248,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.05949649994727224,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:40:08+09:00",
+   "record": {
+    "path": "<exports>/macos/fp32-s256/provenance/runtime-gate.json",
+    "sha256": "67371d1811e9be7e95d57e76f4bbe1d3880694e5b29773c504d1adaef6662de4"
+   }
+  },
+  {
+   "folder": "macos/fp32-s512",
+   "compute": "cpu_only",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "fp32",
+   "window": 512,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 9.47713851928711e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 6.67572021484375e-05,
+   "max_act_relative_error": 1.9409206401220967e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 166,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 719.5187089964747,
+   "warm": {
+    "samples": 40,
+    "median_ms": 84.20681196730584,
+    "p10_ms": 83.0338169587776,
+    "p90_ms": 85.4112624656409,
+    "min_ms": 82.44254102464765,
+    "max_ms": 86.75945806317031,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": "cpu_only is the parity option; its time is a reference value, not a speed claim"
+   },
+   "gpu_lock": null,
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:33:29+09:00",
+   "record": {
+    "path": "<exports>/macos/fp32-s512/provenance/runtime-gate.json",
+    "sha256": "89a55ee09c8a8c9fed89419f4302c3b885d57a66c58b6512dee768cd1cc4b259"
+   }
+  },
+  {
+   "folder": "macos/fp32-s512",
+   "compute": "gpu",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "fp32",
+   "window": 512,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 4.589557647705078e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.00010013580322265625,
+   "max_act_relative_error": 3.4712341586481813e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 166,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 981.7819580202922,
+   "warm": {
+    "samples": 40,
+    "median_ms": 17.23612449131906,
+    "p10_ms": 17.160241620149463,
+    "p90_ms": 17.363629187457263,
+    "min_ms": 17.060959013178945,
+    "max_ms": 17.41683401633054,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.05894699995405972,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:40:22+09:00",
+   "record": {
+    "path": "<exports>/macos/fp32-s512/provenance/runtime-gate.json",
+    "sha256": "89a55ee09c8a8c9fed89419f4302c3b885d57a66c58b6512dee768cd1cc4b259"
+   }
+  },
+  {
+   "folder": "macos/fp32-s512",
+   "compute": "neural_engine",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "fp32",
+   "window": 512,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 4.589557647705078e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.00010013580322265625,
+   "max_act_relative_error": 3.4712341586481813e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 166,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 1026.4154999749735,
+   "warm": {
+    "samples": 40,
+    "median_ms": 20.363354531582445,
+    "p10_ms": 17.220158607233316,
+    "p90_ms": 27.056641539093118,
+    "min_ms": 16.93745795637369,
+    "max_ms": 46.668582945130765,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.058670417056418955,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:40:35+09:00",
+   "record": {
+    "path": "<exports>/macos/fp32-s512/provenance/runtime-gate.json",
+    "sha256": "89a55ee09c8a8c9fed89419f4302c3b885d57a66c58b6512dee768cd1cc4b259"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s256",
+   "compute": "cpu_only",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "wfp16",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 9.47713851928711e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 7.486343383789062e-05,
+   "max_act_relative_error": 1.8490182599027832e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 720.061625004746,
+   "warm": {
+    "samples": 40,
+    "median_ms": 45.06843804847449,
+    "p10_ms": 43.78033723914996,
+    "p90_ms": 46.160825330298394,
+    "min_ms": 42.50512504950166,
+    "max_ms": 46.829957980662584,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": "cpu_only is the parity option; its time is a reference value, not a speed claim"
+   },
+   "gpu_lock": null,
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:29:27+09:00",
+   "record": {
+    "path": "<exports>/macos/wfp16-s256/provenance/runtime-gate.json",
+    "sha256": "35c106008a7bc13f5d7052f1c86d5301897893cadac1c253b72bc8e6aaf58bca"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s256",
+   "compute": "gpu",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "wfp16",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 4.470348358154297e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 5.53131103515625e-05,
+   "max_act_relative_error": 2.603425618986136e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 569.8139170417562,
+   "warm": {
+    "samples": 40,
+    "median_ms": 12.105062487535179,
+    "p10_ms": 12.002287188079208,
+    "p90_ms": 12.372154230251908,
+    "min_ms": 11.88262493815273,
+    "max_ms": 12.796874972991645,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 300.6407293329248,
+    "attempts": 11,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:39:11+09:00",
+   "record": {
+    "path": "<exports>/macos/wfp16-s256/provenance/runtime-gate.json",
+    "sha256": "35c106008a7bc13f5d7052f1c86d5301897893cadac1c253b72bc8e6aaf58bca"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s256",
+   "compute": "neural_engine",
+   "status": "FAIL",
+   "findings": [
+    "tensor bar missed: marker 0.821 (bar 1e-3), act relative 0.0432 (bar 1e-4)"
+   ],
+   "measure_only_bundle": false,
+   "precision": "wfp16",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.28958243131637573,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.8210742473602295,
+   "max_act_relative_error": 0.04319053600919763,
+   "repeat_max_abs": 90.326904296875,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 162,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 1186.1145419534296,
+   "warm": {
+    "samples": 40,
+    "median_ms": 12.740853999275714,
+    "p10_ms": 12.611532642040402,
+    "p90_ms": 12.984199728816748,
+    "min_ms": 12.502667028456926,
+    "max_ms": 13.185416930355132,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.058957999921403825,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:39:21+09:00",
+   "record": {
+    "path": "<exports>/macos/wfp16-s256/provenance/runtime-gate.json",
+    "sha256": "35c106008a7bc13f5d7052f1c86d5301897893cadac1c253b72bc8e6aaf58bca"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s512",
+   "compute": "cpu_only",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "wfp16",
+   "window": 512,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 9.47713851928711e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 6.67572021484375e-05,
+   "max_act_relative_error": 1.9409206401220967e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 166,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 599.5517499977723,
+   "warm": {
+    "samples": 40,
+    "median_ms": 86.16743749007583,
+    "p10_ms": 84.7546664183028,
+    "p90_ms": 88.0670327343978,
+    "min_ms": 84.19658406637609,
+    "max_ms": 89.53320898581296,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": "cpu_only is the parity option; its time is a reference value, not a speed claim"
+   },
+   "gpu_lock": null,
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:30:57+09:00",
+   "record": {
+    "path": "<exports>/macos/wfp16-s512/provenance/runtime-gate.json",
+    "sha256": "3f64c8bcd0881cd9d54ad5ba69310e94ba511ef5fa657f6bdfe2d61c0ea2425f"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s512",
+   "compute": "gpu",
+   "status": "PASS",
+   "findings": [],
+   "measure_only_bundle": false,
+   "precision": "wfp16",
+   "window": 512,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 4.589557647705078e-06,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 0.00010013580322265625,
+   "max_act_relative_error": 3.4712341586481813e-06,
+   "repeat_max_abs": 0.0,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 166,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 588.6900830082595,
+   "warm": {
+    "samples": 40,
+    "median_ms": 19.50945850694552,
+    "p10_ms": 19.29047495359555,
+    "p90_ms": 19.919820968061686,
+    "min_ms": 19.173417007550597,
+    "max_ms": 20.34925005864352,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.06256141699850559,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:39:35+09:00",
+   "record": {
+    "path": "<exports>/macos/wfp16-s512/provenance/runtime-gate.json",
+    "sha256": "3f64c8bcd0881cd9d54ad5ba69310e94ba511ef5fa657f6bdfe2d61c0ea2425f"
+   }
+  },
+  {
+   "folder": "macos/wfp16-s512",
+   "compute": "neural_engine",
+   "status": "FAIL",
+   "findings": [
+    "tensor bar missed: marker 7.76 (bar 1e-3), act relative 0.12 (bar 1e-4)"
+   ],
+   "measure_only_bundle": false,
+   "precision": "wfp16",
+   "window": 512,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.3429411053657532,
+   "max_act_probability_error": 0.0,
+   "max_marker_abs_error": 7.755965709686279,
+   "max_act_relative_error": 0.11980987058111088,
+   "repeat_max_abs": 202.3468017578125,
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "paired_rows": 200,
+    "rows_failing": 166,
+    "unpaired_rows": [
+     "ML_G02/label"
+    ]
+   },
+   "load_ms": 1188.1528749363497,
+   "warm": {
+    "samples": 40,
+    "median_ms": 20.144187030382454,
+    "p10_ms": 19.982345798052847,
+    "p90_ms": 20.444841647986323,
+    "min_ms": 19.886124995537102,
+    "max_ms": 20.593333058059216,
+    "what": "one question: main + host gather/act features + act, NumPy I/O included",
+    "note": null
+   },
+   "gpu_lock": {
+    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "waited_s": 0.06583495903760195,
+    "attempts": 1,
+    "other_openers_at_acquire": [],
+    "other_gpu_jobs_seen_during_run": []
+   },
+   "device": {
+    "machine": "Apple M4 Max",
+    "macos_version": "27.0",
+    "macos_build": "26A428",
+    "coreai_build": "coreai-build 3600.83.1"
+   },
+   "date": "2026-09-23T14:39:50+09:00",
+   "record": {
+    "path": "<exports>/macos/wfp16-s512/provenance/runtime-gate.json",
+    "sha256": "3f64c8bcd0881cd9d54ad5ba69310e94ba511ef5fa657f6bdfe2d61c0ea2425f"
+   }
+  }
+ ],
+ "aot": [
+  {
+   "folder": "ios-h18p/wfp16-s256",
+   "bundle": "laya_ml_wfp16_s256.h18p.aimodelc",
+   "preferred_compute": "gpu",
+   "seconds": 0.42936833400744945,
+   "bytes": 645117160,
+   "ane_in_this_bundle": {
+    "regions": 0,
+    "regions_listing_weights": 0,
+    "ir_bytes": 0,
+    "verdict": "0 ANE regions: nothing is compiled for the Neural Engine (coreai-build still exits 0)"
+   },
+   "neural_engine_probe": {
+    "regions": 1,
+    "regions_listing_weights": 0,
+    "ir_bytes": 5750,
+    "verdict": "1 ANE region(s), 5750 bytes of region IR; everything else stays in the MPSGraph (GPU) package",
+    "seconds": 1.2004331250209361
+   },
+   "source": "macos/wfp16-s256",
+   "record": {
+    "path": "<exports>/ios-h18p/wfp16-s256/provenance/aot-manifest.json",
+    "sha256": "f0fcb225c7fa9c4cf6ca40c13d8eb1262c75ef33322404fe046f11719473b4e5"
+   }
+  },
+  {
+   "folder": "ios-h18p/wfp16-s512",
+   "bundle": "laya_ml_wfp16_s512.h18p.aimodelc",
+   "preferred_compute": "gpu",
+   "seconds": 0.4393095000414178,
+   "bytes": 646034970,
+   "ane_in_this_bundle": {
+    "regions": 0,
+    "regions_listing_weights": 0,
+    "ir_bytes": 0,
+    "verdict": "0 ANE regions: nothing is compiled for the Neural Engine (coreai-build still exits 0)"
+   },
+   "neural_engine_probe": {
+    "regions": 1,
+    "regions_listing_weights": 0,
+    "ir_bytes": 5737,
+    "verdict": "1 ANE region(s), 5737 bytes of region IR; everything else stays in the MPSGraph (GPU) package",
+    "seconds": 1.07088916702196
+   },
+   "source": "macos/wfp16-s512",
+   "record": {
+    "path": "<exports>/ios-h18p/wfp16-s512/provenance/aot-manifest.json",
+    "sha256": "42b33221ef5ec07470798299bb9e8c303946973141ebbe443ada4fc27a9426f2"
+   }
+  }
+ ],
+ "authored144": {
+  "what": "the publisher's laya 0.3.4 model on SemIf authored144, one choice question per row",
+  "status": "PASS",
+  "gold_sha256": "8162d1c73f925af64453f1ec05ef36d583b3815bf698e60f0d454bd11537e079",
+  "runs": {
+   "laya-multilingual.s256.t1": {
+    "mean_family_balanced_accuracy": 0.6114239847985977,
+    "accuracy": 0.5902777777777778,
+    "mean_family_macro_f1": 0.5917255588301644,
+    "family_balanced_accuracy": {
+     "evidence_interpretation": 0.6190476190476191,
+     "rule_application": 0.6341269841269841,
+     "candidate_selection": 0.5810973512211902
+    },
+    "coverage": 1.0
+   },
+   "laya-multilingual.s256.cal": {
+    "mean_family_balanced_accuracy": 0.6114239847985977,
+    "accuracy": 0.5902777777777778,
+    "mean_family_macro_f1": 0.5917255588301644,
+    "family_balanced_accuracy": {
+     "evidence_interpretation": 0.6190476190476191,
+     "rule_application": 0.6341269841269841,
+     "candidate_selection": 0.5810973512211902
+    },
+    "coverage": 1.0
+   },
+   "laya-multilingual.s512.t1": {
+    "mean_family_balanced_accuracy": 0.6114239847985977,
+    "accuracy": 0.5902777777777778,
+    "mean_family_macro_f1": 0.5917255588301644,
+    "family_balanced_accuracy": {
+     "evidence_interpretation": 0.6190476190476191,
+     "rule_application": 0.6341269841269841,
+     "candidate_selection": 0.5810973512211902
+    },
+    "coverage": 1.0
+   },
+   "laya-multilingual.s512.cal": {
+    "mean_family_balanced_accuracy": 0.6114239847985977,
+    "accuracy": 0.5902777777777778,
+    "mean_family_macro_f1": 0.5917255588301644,
+    "family_balanced_accuracy": {
+     "evidence_interpretation": 0.6190476190476191,
+     "rule_application": 0.6341269841269841,
+     "candidate_selection": 0.5810973512211902
+    },
+    "coverage": 1.0
+   }
+  },
+  "record": {
+   "path": "<work>/authored144/authored144.json",
+   "sha256": "f71ea5ebc0081916a9195bd99d8dd683235a577e305da92c7cc294d326fcc543"
+  }
+ },
+ "fp16_recipe_torch_previews": [
+  {
+   "window": 256,
+   "fp32_islands": [
+    "layernorm",
+    "residual",
+    "rope",
+    "softmax"
+   ],
+   "status": "FAIL",
+   "rows": {
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 0.004931747913360596,
+    "max_marker_abs_error": 0.05321025848388672,
+    "max_act_relative_error": 0.0027329260305638094
+   },
+   "max_relative_by_state": {
+    "embeddings": 3.419806328160101e-08,
+    "layer_00": 0.00041781158846017585,
+    "layer_01": 0.0003324276540965639,
+    "layer_02": 0.00095786672672199,
+    "layer_03": 0.0006462509087903405,
+    "layer_04": 0.00042473986404568915,
+    "layer_05": 0.0004773406236264942,
+    "layer_06": 0.0004977282284290787,
+    "layer_07": 0.0004765221849690159,
+    "layer_08": 0.0006203908759647943,
+    "layer_09": 0.0006704857581739812,
+    "layer_10": 0.0007488476478231494,
+    "layer_11": 0.0010056088356602665,
+    "layer_12": 0.0033559822078198264,
+    "layer_13": 0.003357217256300788,
+    "layer_14": 0.003357643735945503,
+    "layer_15": 0.0033595345926100994,
+    "layer_16": 0.00336235031753086,
+    "layer_17": 0.0033623889320558123,
+    "layer_18": 0.003336130225881063,
+    "layer_19": 0.0033360554100309216,
+    "layer_20": 0.003336829027756892,
+    "layer_21": 0.0033404335639869182,
+    "final_norm": 0.074507274342202,
+    "head_input": 0.07529075372540348,
+    "head_0": 0.011106438737436865,
+    "head_1": 0.014282649008369161
+   },
+   "record": {
+    "path": "<work>/results/authoring_fp16_layernorm-residual-rope-softmax_s256.json",
+    "sha256": "369d55289db669b16b0b239c67c0b9f12981115d4dd40eb9a5967a352d86971e"
+   }
+  },
+  {
+   "window": 256,
+   "fp32_islands": [
+    "rope",
+    "softmax"
+   ],
+   "status": "FAIL",
+   "rows": {
+    "argmax_identical": 81,
+    "choice_score_rows": 81,
+    "max_probability_error": 0.0034465491771698,
+    "max_marker_abs_error": 0.10173845291137695,
+    "max_act_relative_error": 0.002429687035939753
+   },
+   "max_relative_by_state": {
+    "embeddings": 0.00027207979146841766,
+    "layer_00": 0.0006631393090696387,
+    "layer_01": 0.0009014283295533725,
+    "layer_02": 0.0011837356993445096,
+    "layer_03": 0.0011099536836210182,
+    "layer_04": 0.001177355356471326,
+    "layer_05": 0.0011573474224617212,
+    "layer_06": 0.0013542581838429006,
+    "layer_07": 0.0015010127886289591,
+    "layer_08": 0.0017190838419832517,
+    "layer_09": 0.0018310147081599885,
+    "layer_10": 0.0020952141267672375,
+    "layer_11": 0.001254449290747096,
+    "layer_12": 0.003309858854389393,
+    "layer_13": 0.003317916537661753,
+    "layer_14": 0.0032984967366990236,
+    "layer_15": 0.003353025693525359,
+    "layer_16": 0.0033561252948129654,
+    "layer_17": 0.003294396970903992,
+    "layer_18": 0.003258934483177721,
+    "layer_19": 0.0032538286760957365,
+    "layer_20": 0.003257614806155045,
+    "layer_21": 0.003255097010967114,
+    "final_norm": 0.1316122306541889,
+    "head_input": 0.13307807378341258,
+    "head_0": 0.019384576538521287,
+    "head_1": 0.01396861491023719
+   },
+   "record": {
+    "path": "<work>/results/authoring_fp16_s256.json",
+    "sha256": "8db8fb6894eba598dac75abcde75f73b381a4005b2b3617f8685c52e32c15c29"
+   }
+  }
+ ],
+ "repeat_runs": [
+  {
+   "what": "a second run of the same bundle and compute unit, to see whether a failure reproduces",
+   "bundle": "laya_ml_wfp16_s256.aimodel",
+   "compute": "neural_engine",
+   "status": "FAIL",
+   "window": 256,
+   "argmax_identical": 81,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.16371794044971466,
+   "max_marker_abs_error": 1.6562247276306152,
+   "max_act_relative_error": 0.039301538326755765,
+   "repeat_max_abs": 90.326904296875,
+   "load_ms": 4.775416920892894,
+   "date": "2026-09-23T15:07:21+09:00",
+   "record": {
+    "path": "<work>/results/runtime_wfp16_s256_neural_engine_repeat.json",
+    "sha256": "d43456e630a758260db6d2415a52e27a11ac584701f3a4c6622fc9ea7a207dba"
+   }
+  },
+  {
+   "what": "a second run of the same bundle and compute unit, to see whether a failure reproduces",
+   "bundle": "laya_ml_wfp16_s512.aimodel",
+   "compute": "neural_engine",
+   "status": "FAIL",
+   "window": 512,
+   "argmax_identical": 80,
+   "choice_score_rows": 81,
+   "max_probability_error": 0.23791638016700745,
+   "max_marker_abs_error": 11.417823791503906,
+   "max_act_relative_error": 0.05746284860570187,
+   "repeat_max_abs": 211.7386474609375,
+   "load_ms": 4.775208071805537,
+   "date": "2026-09-23T15:07:36+09:00",
+   "record": {
+    "path": "<work>/results/runtime_wfp16_s512_neural_engine_repeat.json",
+    "sha256": "c540703b80198706868b5ee3b041e3d2adefab8faaf04de61037e996b00d624e"
+   }
+  }
+ ]
+}

@@ -6,7 +6,7 @@
 """Stage 4 (Mac): the exported bundle on the Core AI runtime, per compute unit, vs the same 201 rows.
 
     python3 gate_laya_runtime.py <exports>/laya-multilingual/macos/fp32-s256 --compute cpu_only
-    python3 gate_laya_runtime.py <dir> --compute gpu              # takes the advisory GPU lock only when quiet
+    python3 gate_laya_runtime.py <dir> --compute gpu              # waits for the flock GPU lock, runs only when quiet
     python3 gate_laya_runtime.py <dir> --compute neural_engine
 
 The specialization options are always explicit (cpu_only(), or a preferred GPU / Neural Engine kind),
@@ -20,12 +20,15 @@ the frozen official answers; repeat drift <= 1e-6 on cpu_only (reported on the a
 wrong-pairing control (each row judged against another same-shape row's outputs) must FAIL. The
 tensor bar vs the official batch-1 run (marker |d| <= 1e-3, act relative <= 1e-4) is reported; a miss
 is recorded as a finding, not hidden and not re-tuned. Timing: load ms and >= 30 warm samples of one
-whole question (main + act). A number measured while another GPU job runs is not recorded.
+whole question (main + act). A number measured while another GPU job runs is not recorded: gpu and
+neural_engine runs hold the machine-wide flock on _GPU_LOCK for their whole duration, start only when
+no other GPU job is visible, and discard the result if one appears while they run.
 
 Results merge into <variant>/provenance/runtime-gate.json under the compute unit's key.
 """
 import argparse
 import asyncio
+import fcntl
 import json
 import os
 import subprocess
@@ -54,10 +57,92 @@ def options_for(compute: str):
     return rt.SpecializationOptions.from_preferred_compute_unit_kind(kind)
 
 
+GPU_JOB_PATTERN = r"readout_gate|coreai_gate|gate_.*\.py|export_.*\.py|llm-runner|llm-benchmark|dashboard_job\.py|decide-cli"
+
+
+def _ps(pid: int, field: str) -> str:
+    return subprocess.run(["ps", "-o", f"{field}=", "-p", str(pid)], capture_output=True, text=True).stdout.strip()
+
+
 def other_gpu_jobs() -> list[str]:
-    listing = subprocess.run(["pgrep", "-fl", r"readout_gate|coreai_gate|gate_.*\.py|export_.*\.py"],
-                             capture_output=True, text=True).stdout.splitlines()
-    return [line for line in listing if str(os.getpid()) != line.split()[0] and "claude" not in line]
+    """Other processes that may use the GPU. PIDs from `pgrep -f`, never its -l text: a Claude session's
+    argv holds its whole prompt (script names included, many lines). This process's own ancestors (the
+    shell that launched it matches the pattern too) and Claude processes are skipped."""
+    ancestors, pid = set(), os.getpid()
+    while pid > 1 and pid not in ancestors:
+        ancestors.add(pid)
+        parent = _ps(pid, "ppid")
+        pid = int(parent) if parent.isdigit() else 1
+    found = subprocess.run(["pgrep", "-f", GPU_JOB_PATTERN], capture_output=True, text=True).stdout.split()
+    jobs = []
+    for pid in (int(p) for p in found if p.isdigit()):
+        command = _ps(pid, "comm")
+        # A shell only carries the matching text in its argv (a pipeline's sibling subshells included); the job
+        # that would use the GPU is its child, which matches on its own argv.
+        if (pid in ancestors or not command or "claude" in command.lower()
+                or Path(command).name.lstrip("-") in ("zsh", "bash", "sh", "fish", "dash")):
+            continue
+        jobs.append(f"{pid} {command} {' '.join(_ps(pid, 'args').split())[:160]}")
+    return jobs
+
+
+def lock_openers(path: Path) -> list[str]:
+    pids = subprocess.run(["lsof", "-t", str(path)], capture_output=True, text=True).stdout.split()
+    return [f"{pid} {_ps(int(pid), 'comm')}" for pid in pids if pid.isdigit() and int(pid) != os.getpid()]
+
+
+def acquire_gpu_lock(max_wait_s: float):
+    """The machine-wide GPU lock is an fcntl.flock on _GPU_LOCK (coreai-kit scripts/with-gpu-lock.py); the
+    0-byte file stays after release, so its existence means nothing. Try LOCK_EX without blocking every
+    30 s; once held, run only if no other GPU job is visible. The file is never created fresh, touched
+    or removed here beyond open(); the lock is released when the handle closes."""
+    path = gpu_lock()
+    handle = open(path, "a")
+    started, attempts = time.monotonic(), 0
+    while True:
+        attempts += 1
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            if time.monotonic() - started > max_wait_s:
+                handle.close()
+                raise SystemExit(f"GPU lock still held after {max_wait_s:.0f} s: {lock_openers(path)}")
+            if attempts == 1 or attempts % 10 == 0:
+                print(f"GPU lock held ({lock_openers(path)}); retrying every 30 s", flush=True)
+            time.sleep(30)
+            continue
+        jobs = other_gpu_jobs()
+        if not jobs:
+            return handle, {"path": str(path), "waited_s": time.monotonic() - started, "attempts": attempts,
+                            "other_openers_at_acquire": lock_openers(path)}
+        fcntl.flock(handle, fcntl.LOCK_UN)
+        if time.monotonic() - started > max_wait_s:
+            handle.close()
+            raise SystemExit(f"other GPU jobs keep running without the lock: {jobs}")
+        print(f"lock free but other GPU jobs run ({jobs}); retrying in 30 s", flush=True)
+        time.sleep(30)
+
+
+class GpuWatch:
+    """Samples other_gpu_jobs() every few seconds while a GPU / Neural Engine gate runs."""
+
+    def __init__(self, every_s: float = 5.0):
+        import threading
+        self.seen, self.every_s, self._stop = [], every_s, threading.Event()
+        self._thread = threading.Thread(target=self._loop, daemon=True)
+
+    def _loop(self):
+        while not self._stop.wait(self.every_s):
+            self.seen.extend(job for job in other_gpu_jobs() if job not in self.seen)
+
+    def __enter__(self):
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exc):
+        self._stop.set()
+        self._thread.join()
+        self.seen.extend(job for job in other_gpu_jobs() if job not in self.seen)
 
 
 def row_arrays(row: dict, window: int) -> dict:
@@ -164,27 +249,34 @@ def main():
     parser.add_argument("--compute", choices=["cpu_only", "gpu", "neural_engine"], required=True)
     parser.add_argument("--repeats", type=int, default=2)
     parser.add_argument("--warm-samples", type=int, default=40)
+    parser.add_argument("--lock-wait-minutes", type=float, default=240, help="gpu / neural_engine: how long to wait for the GPU lock")
+    parser.add_argument("--output", type=Path, help="write the result here instead of merging into <variant>/provenance/runtime-gate.json")
     args = parser.parse_args()
     if args.warm_samples < 30:
         parser.error("at least 30 warm samples")
-    lock = None
+    handle, lock_record, watch = None, None, None
     if args.compute != "cpu_only":
-        if gpu_lock().exists():
-            raise SystemExit(f"{gpu_lock()} exists: another lane holds the GPU; not taking it and waiting")
-        others = other_gpu_jobs()
-        if others:
-            raise SystemExit(f"other GPU jobs are running, a timing now would not be a number: {others}")
-        lock = gpu_lock()
-        lock.write_text(f"laya runtime gate pid {os.getpid()} {args.variant_dir} {args.compute}\n")
+        handle, lock_record = acquire_gpu_lock(args.lock_wait_minutes * 60)
     try:
-        result = asyncio.run(run(args.variant_dir, args.compute, args.repeats, args.warm_samples))
+        if args.compute != "cpu_only":
+            with GpuWatch() as watch:
+                result = asyncio.run(run(args.variant_dir, args.compute, args.repeats, args.warm_samples))
+        else:
+            result = asyncio.run(run(args.variant_dir, args.compute, args.repeats, args.warm_samples))
     finally:
-        if lock is not None:
-            lock.unlink(missing_ok=True)
-    out = args.variant_dir / "provenance" / "runtime-gate.json"
-    merged = json.loads(out.read_text()) if out.exists() else {}
-    merged[args.compute] = result
-    write_json(out, merged)
+        if handle is not None:
+            handle.close()  # releases the flock; the file stays
+    if watch is not None:
+        result["gpu_lock"] = lock_record | {"other_gpu_jobs_seen_during_run": watch.seen}
+        if watch.seen:
+            raise SystemExit(f"another GPU job ran during the gate ({watch.seen}); the numbers are discarded, not recorded")
+    if args.output:
+        write_json(args.output, {args.compute: result})
+    else:
+        out = args.variant_dir / "provenance" / "runtime-gate.json"
+        merged = json.loads(out.read_text()) if out.exists() else {}
+        merged[args.compute] = result
+        write_json(out, merged)
     s = result["summary"]
     print(result["status"], args.compute, f"argmax {s['argmax_identical']}/{s['choice_score_rows']}",
           f"max dp {s['max_probability_error']:.2e}", f"act p {s['max_act_probability_error']:.2e}",

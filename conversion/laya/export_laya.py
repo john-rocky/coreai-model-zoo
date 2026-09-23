@@ -30,9 +30,9 @@ Precisions: fp32; wfp16 = fp16 weight storage (the checkpoint is F16, so exact) 
 half the bytes; fp16 = the fp16 recipe (fp16 compute, RoPE application and softmax in fp32), which
 misses the answer bar in torch — `--measure-only` builds it anyway, marked FAIL, never a candidate.
 
-Order: the authoring record for the window must exist with its row gate and negative controls passed
-(the layer-gate finding of 2026-09-23 is accepted only with --accept-layer-gate-finding, and the
-manifest says so). The graph is re-authored from the raw safetensors (`_laya_model.py`), never from
+Order: the authoring records for the window must PASS — the fp32 graph with its negative controls,
+and for wfp16 its own record too (rows, two-tier layer gate, pad isolation). The graph is re-authored
+from the raw safetensors (`_laya_model.py`), never from
 transformers. Both functions are torch-exported and decomposed with coreai_torch's table, and the
 decomposed programs run the same 201-row gate BEFORE conversion (fp32 / wfp16: answer + tensor gated;
 fp16: answer gated, tensor bar reported). Then TorchConverter (main + act) -> optimize -> save_asset.
@@ -229,8 +229,6 @@ def main():
     parser.add_argument("--fp32-islands", default=",".join(FP16_RECIPE),
                         help="fp16 only: the parts kept in fp32 (default: the recipe — RoPE application and softmax)")
     parser.add_argument("--target", choices=["macos", "ios"], default="macos")
-    parser.add_argument("--accept-layer-gate-finding", action="store_true",
-                        help="proceed although the authoring layer gate (1e-4) failed; recorded in the manifest")
     parser.add_argument("--measure-only", action="store_true",
                         help="convert even if the export gate fails; the manifest says FAIL and why")
     parser.add_argument("--overwrite", action="store_true")
@@ -241,18 +239,17 @@ def main():
     started = time.perf_counter()
     source = verify_source()
 
-    authoring_path = results_dir() / f"authoring_fp32_s{args.window}.json"
-    authoring = json.loads(authoring_path.read_text())
-    assert authoring["negative_controls_run"] and authoring["status_excluding_layer_gate"] == "PASS", \
-        "the authoring row gate and negative controls must pass before conversion"
-    verify_hashes(authoring["input_hashes"])
-    override = None
-    if authoring["status"] != "PASS":
-        if not args.accept_layer_gate_finding:
-            raise SystemExit(f"authoring gate is {authoring['status']}: {authoring['failures']} "
-                             "(pass --accept-layer-gate-finding to proceed and record it)")
-        override = {"authoring_status": authoring["status"], "authoring_failures": authoring["failures"],
-                    "states_over_bar": authoring["layer_gate"]["states_over_bar"], "accepted_by": "--accept-layer-gate-finding"}
+    authoring_paths = [results_dir() / f"authoring_fp32_s{args.window}.json"]
+    if args.dtype == "wfp16":
+        authoring_paths.append(results_dir() / f"authoring_wfp16_s{args.window}.json")
+    for path in authoring_paths:
+        authoring = json.loads(path.read_text())
+        if authoring["status"] != "PASS":
+            raise SystemExit(f"{path.name} is {authoring['status']}: {authoring['failures']} — the authoring gate must pass first")
+        verify_hashes(authoring["input_hashes"])
+    fp32_record = json.loads(authoring_paths[0].read_text())
+    assert fp32_record["negative_controls_run"] and all(c["caught"] for c in fp32_record["negative_controls"].values()), \
+        "the fp32 authoring record must carry caught negative controls"
 
     oracle_record = json.loads((results_dir() / "oracle.json").read_text())
     outputs = oracle_dir() / f"outputs_s{args.window}.npz"
@@ -320,10 +317,10 @@ def main():
                               **{k: summary.get(k) for k in ("argmax_identical", "choice_score_rows", "max_probability_error",
                                                              "max_act_probability_error", "max_marker_abs_error",
                                                              "max_act_relative_error", "tensor_status")}},
-        "authoring_record": str(authoring_path), "authoring_override": override,
+        "authoring_records": [str(p) for p in authoring_paths],
         "runtime_gate": "NOT RUN — gate_laya_runtime.py <this folder> --compute cpu_only|gpu|neural_engine",
         "environment": environment(),
-        "input_hashes": hashes([authoring_path, outputs, Path(__file__), Path(__file__).parent / "_laya_model.py",
+        "input_hashes": hashes([*authoring_paths, outputs, Path(__file__), Path(__file__).parent / "_laya_model.py",
                                 Path(__file__).parent / "_laya_host.py", Path(__file__).parent / "_gate_metrics.py"]),
     }
     record["bytes"] = sum(f["bytes"] for f in record["files"])

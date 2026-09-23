@@ -12,11 +12,14 @@ bundles go to `<ZOO_EXPORTS>/laya-multilingual/`):
 
 | Stage | Script | Gate |
 |---|---|---|
-| 0 oracle | `uv run --python 3.12 conversion/laya/oracle_laya.py` | the publisher's `laya.load(...)` model, CPU fp32: reproduces the frozen fixture (ids 402/402, batched answers and logits bit-exact), then every row alone, batch 1, padded to its window, vs the fixture (argmax, \|dp\| ≤ 1e-3) and the LiteRT lane's captures (marker ≤ 1e-3, act relative ≤ 1e-4); every hidden state for 14 rows |
-| 1 authoring | `python3 conversion/laya/gate_laya_authoring.py --window 256\|512 --negative-controls` | the re-authored graph vs the oracle: 201 rows (answer + tensor gates), every saved hidden state (1e-4 bar, with the official model's own SDPA-vs-eager distance beside it), pad isolation, five mutations that must be caught |
-| 3 export | `python3 conversion/laya/export_laya.py --window 256\|512 --dtype fp32\|wfp16\|fp16 --target macos\|ios` | torch-export + decomposition, the same 201-row gate before conversion, then one multifunction `.aimodel` (`main` + `act`) |
-| 4 runtime | `python3 conversion/laya/gate_laya_runtime.py <variant dir> --compute cpu_only\|gpu\|neural_engine` | the bundle on the Core AI runtime: 201 rows, repeat drift, wrong-pairing control, load + warm timings |
+| 0 oracle | `uv run --python 3.12 conversion/laya/oracle_laya.py` | the publisher's `laya.load(...)` model, CPU fp32: reproduces the frozen fixture (ids 402/402, batched answers and logits bit-exact), then every row alone, batch 1, padded to its window, vs the fixture (argmax, \|dp\| ≤ 1e-3) and the LiteRT lane's captures (marker ≤ 1e-3, act relative ≤ 1e-4); every hidden state for 14 rows, through SDPA (the package's path) and eager |
+| 1 authoring | `python3 conversion/laya/gate_laya_authoring.py --window 256\|512 [--dtype wfp16] [--negative-controls]` | the re-authored graph vs the oracle: 201 rows (answer + tensor gates); the two-tier layer gate (embeddings–layer 9 max \|err\| ≤ 1e-4; layer 10–head_1 max \|err\| / max \|ref\| ≤ 2e-4 = twice the official model's own SDPA-vs-eager spread); pad isolation; five mutations that must be caught |
+| 3 export | `python3 conversion/laya/export_laya.py --window 256\|512 --dtype fp32\|wfp16\|fp16 --target macos\|ios` | requires the authoring records to PASS; torch-export + decomposition, the same 201-row gate before conversion, then one multifunction `.aimodel` (`main` + `act`); `ios` = a byte copy of the gated macos folder |
+| 3b AOT | `python3 conversion/laya/aot_laya.py --window 256\|512 --dtype wfp16` | `coreai-build compile --preferred-compute gpu --architecture h18p` into `ios-h18p/`, after a neural-engine probe compile whose ANE regions are recorded as evidence |
+| 4 runtime | `python3 conversion/laya/gate_laya_runtime.py <variant dir> --compute cpu_only\|gpu\|neural_engine` | the bundle on the Core AI runtime: 201 rows, repeat drift, wrong-pairing control, load + warm timings; gpu / neural_engine hold the machine-wide flock GPU lock and discard the result if another GPU job appears |
+| reference | `uv run --python 3.12 conversion/laya/oracle_authored144_laya.py` | the publisher's answers on SemIf authored144 (T=1 and the fitted calibration, both windows) + SemIf `evaluate.py` |
 | fixture | `python3 conversion/laya/fixtures_laya.py [--check]` | writes `models/laya-multilingual/fixtures-laya-multilingual.json` (schema `coreai-encoder-fixtures/1`: 44 states + the 402 frozen rows) — what coreai-kit's `decide-cli parity` reads |
+| transcript | `python3 conversion/laya/transcript_laya.py` | writes `models/laya-multilingual/gate-laya-multilingual.json`: every gate's summary with the sha256 of its full record |
 
 Stage 2 (the host) is `_laya_host.py`: the NumPy gather / act features / temperature / decode that
 every stage above runs, and the algorithm the Swift side ports (HOST_CONTRACT §C–§D of the LiteRT lane).
@@ -52,11 +55,21 @@ fitted calibration of the LiteRT lane (bucket first, then per type).
 
 - **The layer bar meets a massive activation.** From layer 11 the CLS position carries values up to
   1.4e4 (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention
-  paths (SDPA, which `laya.load` uses, and eager) already differ by up to 4.8e-2 on those states; the
-  re-authored graph sits in the same band (relative error ≤ 8e-6) while its marker logits match to
-  7e-5. The 1e-4 layer bar holds on the embeddings and layers 0–9 and is where it catches
-  window63 / all_global / all_local / ignore_padding by 4–6 orders of magnitude; above that the
-  authoring record reports it as failed rather than moving it.
+  paths (SDPA, which `laya.load` uses, and eager) already differ by up to 4.8e-2 on those states — in
+  relative terms (max |err| / max |ref| per state and row) up to 1.2e-4 at final_norm (S=256). The
+  re-authored graph sits in the same band (relative ≤ 5.7e-5 at S=256, ≤ 7.8e-6 at S=512) while its
+  marker logits match to 7e-5. An absolute 1e-4 bar holds on the embeddings and layers 0–9, and that
+  is where it catches window63 / all_global / all_local / ignore_padding by 4–6 orders of magnitude.
+- **The Neural Engine takes only an fp16-compute graph.** Compiled for h18p with
+  `--preferred-compute neural-engine`, wfp16 (fp32 compute) gets one region of 5.7 KB IR and everything
+  else stays in the GPU package, while the fp16 recipe gets 47 regions; and fp16 compute is what misses the
+  answer bar (below). The iPhone folder is therefore the GPU compile, `ios-h18p/`, with the neural-engine
+  probe recorded in its manifest.
+- **Request the GPU explicitly.** On the Mac the GPU runs the fp32 and wfp16 graphs within 8e-5 of the
+  CPU (|dp| 4.5e-6), so it does not compute them in fp16. With the Neural Engine preference, fp32 returns
+  the GPU's results bit for bit, but wfp16 returns different results from run to run (repeat drift up to
+  202, |dp| up to 0.34) — do not run wfp16 with that preference. `coreai.runtime` reports no placement;
+  these readings come from the numbers.
 - **Pad positions differ, and nothing reads them.** SDPA returns exactly zero for a fully masked
   sliding row (a pad query more than 64 past the last real token); this graph's finite mask
   (−1e4, fp16-safe) averages instead. Every attention masks pad keys, so real positions are
