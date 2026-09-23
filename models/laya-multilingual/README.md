@@ -131,7 +131,9 @@ region count is recorded in its manifest.
 
 ## ⬇️ Bundle
 
-Hugging Face repo **mlboydaisuke/Laya-Multilingual-CoreAI** — upload pending. One folder per variant, each
+**[mlboydaisuke/Laya-Multilingual-CoreAI](https://huggingface.co/mlboydaisuke/Laya-Multilingual-CoreAI)**
+(revision `1175a4e6231fdfe8946e6566276f8d71eb8f02ef`, 2026-09-23; every file's sha256 and size checked against the
+staging manifest after the upload). One folder per variant, each
 self-contained: the bundle, `tokenizer/` (the checkpoint's files, unmodified), `metadata.json` (the
 decision contract), `reference.json` and `provenance/` (export manifest with per-file sha256, the export
 and runtime gate records).

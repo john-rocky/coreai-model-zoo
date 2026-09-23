@@ -108,6 +108,25 @@ Apple's repo; each recipe names the script it runs.
   fp16 0.005 / 0.00022, reset proof) → `slot/engine_argmax_slot.py` (Release `llm-runner`, both
   engines, the first greedy token = the decoded raw-slot argmax, 200/200). Card:
   [`../models/openthai-systemone/README.md`](../models/openthai-systemone/README.md).
+- **laya multilingual (encoder-type System One decision model, Convai Innovations; in [`laya/`](laya/)):
+  `laya/export_laya.py --window 256|512 --dtype wfp16|fp32 --target macos|ios`, then `laya/aot_laya.py` for
+  the iPhone 17 Pro** — mmBERT-base + a typed decision head re-authored from the raw safetensors
+  (`_laya_model.py`: the ModernBERT encoder with the inclusive radius-64 window, the type embedding, two
+  explicit head layers, the scorer at every position, the fp32 act head as a second graph function). Five
+  stages, each gated on the one before: `oracle_laya.py` (the publisher's own laya 0.3.4 package in its own
+  `uv run` environment — transformers 5.17 — reproducing the LiteRT lane's frozen 201 rows × 2 windows bit
+  for bit, and dumping every hidden state of 14 rows) → `gate_laya_authoring.py --negative-controls` (row
+  gate on all 201 rows; a two-tier layer gate, 1e-4 absolute through layer 9 and 2e-4 relative above, where
+  the [CLS] position carries a ~1.4e4 activation and the official model's own two attention paths differ by
+  1.2e-4 relative; five mutations must fail) → `export_laya.py` (torch-export + decomposition gated before
+  conversion; one multifunction bundle, `main` + `act`; `wfp16` = fp16 weight storage with fp32 compute,
+  `fp32` the reference, the fp16-compute recipe built only with `--measure-only` because it misses the bar)
+  → `gate_laya_runtime.py <folder> --compute cpu_only|gpu|neural_engine` (the `.aimodel` on the runtime
+  under the machine-wide fcntl GPU lock: gate + determinism + wrong-pairing control + warm timings) →
+  `aot_laya.py` (h18p GPU compile, with a neural-engine probe whose region count is recorded).
+  `oracle_authored144_laya.py` runs the publisher's model on SemIf authored144 as the kit's reference;
+  `transcript_laya.py` writes the card's gate transcript; `fixtures_laya.py` the kit's parity fixture;
+  `stage_hf_laya.py` the Hub folder. Published: [`models/laya-multilingual/`](../models/laya-multilingual/README.md).
 - **APUS-OpenJev-v1-4B (letter-readout decision model, apus-ailab; the unchanged Qwen3.5 exporter + [`letter/`](letter/)): `export_qwen3_5_decode_pipelined.py int8hu --head-sym --hf-id apus-ailab/APUS-OpenJev-v1-4B`** — Qwen3.5-4B / agents-a1-4b HF-id swap with the default loader. `oracle_letter.py` uses the author's pinned `openjet_runtime` and transformers 5.16.1 to record 48 compiled chat rows; `readout_gate_letter.py` runs AOT h16c, fresh states and S=1 steps, gathers A–P label ids and softmaxes at T=1 (uncalibrated): argmax 48/48, max |Δp| 0.005302, mean 0.000127, reset proof. `engine_argmax_letter.py` checks both Release Swift engines against the full-vocabulary Python argmax, 96/96. The vocabulary LM head remains; the alphabet transcript records the ordinary LM gate. Card: [`../models/apus-openjev-v1-4b/README.md`](../models/apus-openjev-v1-4b/README.md).
 - **Jev-Style-Qwen3.5-2B-Decision (chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-MLX-bf16)** — [`export_qwen3_5_decision_mlx_decode_pipelined.py`](export_qwen3_5_decision_mlx_decode_pipelined.py) and [`mlx_to_hf_qwen3_5.py`](mlx_to_hf_qwen3_5.py) invert the MLX conv/norm conventions before the unchanged Qwen3.5 graph/quantization recipe. `int8hu --head-sym` ships; `fp16` is the reference. [`letter/oracle_decision_function.py`](letter/oracle_decision_function.py) embeds 22 requests/58 rows and both author BF16 / converted FP32 oracles; the letter gates use plain text and space-prefixed labels, T=1: 58/58 each, max|Δp|0.007586 /0.005788 vs FP32, engines 232/232. Card: [`../models/qwen3.5-2b-decision/README.md`](../models/qwen3.5-2b-decision/README.md).
 - **pngwn/system-one-qwen3.5-4b-scorer** (cc-by-nc-4.0) — [`merge_system_one_scorer.py`](merge_system_one_scorer.py) merges the pinned rank-16 LoRA and scalar head; [`export_system_one_scorer_decode_pipelined.py`](export_system_one_scorer_decode_pipelined.py) exports the merged Qwen3.5 text tower with a one-wide head. int8lin ships, fp16 is the reference. [`scalar/README.md`](scalar/README.md) gives the author's per-option State/Question/Option readout, T=1.75, 20 requests / 48 questions / 280 rows; both bundles retain all 48 argmaxes. Engine id0 text only checks load completion. Measured through coreai-kit using `Decision.Format.scalar`: tokens/slots 280/280, question argmax 48/48 both; SemIf authored144 mean family balanced accuracy 0.844. Kit catalog id `system-one-scorer-4b` (macOS only, `license: CC-BY-NC-4.0`). Card: [`../models/system-one-scorer-4b/README.md`](../models/system-one-scorer-4b/README.md).

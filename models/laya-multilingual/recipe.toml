@@ -4,13 +4,14 @@
 #
 # Every entry assumes the oracle has run first in its own environment (`needs` below) and that the
 # authoring gate passed its row gate and negative controls for the window: conversion/laya/README.md
-# lists the stages in order. Which precision is published is not decided yet (status "unverified").
+# lists the stages in order. wfp16 is the published precision (fp16 weight storage, fp32 compute);
+# fp32 folders are the reference. The Mac gates were re-run by the maintainer (2026-09-23).
 
 ["laya-multilingual"]
 card = "README.md"
 hf_repo = "mlboydaisuke/Laya-Multilingual-CoreAI"
 source_hf_id = "convaiinnovations/laya"
-status = "unverified"
+status = "verified"
 steps = [
   { script = "laya/gate_laya_authoring.py", args = ["--window", "256", "--negative-controls"] },
   { script = "laya/gate_laya_authoring.py", args = ["--window", "512", "--negative-controls"] },
@@ -43,10 +44,7 @@ notes = [
   "Runtime gate (not a recipe step): gate_laya_runtime.py <folder> --compute cpu_only|gpu|neural_engine;",
   "results merge into provenance/runtime-gate.json.",
 ]
-open_questions = [
-  "wfp16 is the ship candidate and fp32 the reference (macOS only); the final choice waits for the Mac GPU",
-  "and Neural Engine runtime gates.",
-]
+open_questions = []
 
 ["laya-multilingual-ios"]
 card = "README.md"

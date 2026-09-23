@@ -157,6 +157,13 @@ For the long-form version of the same material, read
   `model.*` weights, a resized embedding, `vocab_size` 256 as the logits width; temperatures from the
   checkpoint tensor, not the author's card; the author's one-pass API differs from independent rows
   (max |Δp| 0.375); and the Swift tokenizer's grapheme-cluster cut of Thai, fixed in the kit.
+- [`laya-multilingual-port.md`](laya-multilingual-port.md) — **an encoder-type decision model on Core AI**
+  (convaiinnovations/laya, multilingual): one forward pass per question, options read at mask markers; the
+  publisher's own package as the oracle (frozen fixture reproduced bit for bit); a **massive [CLS]
+  activation (~1.4e4) from layer 11** puts the official model's own two attention paths 4.8e-2 apart, so
+  the per-layer gate is two-tier (1e-4 absolute, 2e-4 relative); fp16 **compute** misses the bar while fp16
+  **storage** with fp32 compute is exact (645 MB); the Mac GPU computes at fp32 precision, the Neural Engine
+  preference gives non-deterministic answers on the fp32-compute graph; the Swift host's two Unicode traps.
 - [`apus-openjev-v1-4b-port.md`](apus-openjev-v1-4b-port.md) — **a letter-readout decision model as an HF-id swap**
   (apus-ailab/APUS-OpenJev-v1-4B): the unchanged Qwen3.5-4B exporter; the author's `openjet_runtime` as the fp32
   oracle (transformers 5.16.1 pinned); the `Shared state:` + JSON task turn under the chat template read at
