@@ -1,10 +1,10 @@
 {
  "schema": "coreai-letter-engine-gate/1",
  "mode": "int8hu",
- "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+ "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
  "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
- "readout": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-readout.json",
- "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json",
+ "readout": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-decision-v1-4b/gate-apus-decision-v1-4b-readout.json",
+ "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json",
  "runner_sha256": "c05e1fca4cd99502da85eaee94b570aadcedfd86ae39f5e1a46d2b883829b60e",
  "fixtures_sha256": "e708dcc54a528cee7a61882fa7af7ed01791496dfe89a1158a605183af70a2d6",
  "readout_sha256": "363101d356d32270cb17877e5cdf8a1b35ae303e013991b856ba565ba31369ce",
@@ -38,7 +38,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_01.json",
     "--max-tokens",
@@ -83,7 +83,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_02.json",
     "--max-tokens",
@@ -128,7 +128,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_03.json",
     "--max-tokens",
@@ -173,7 +173,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_04.json",
     "--max-tokens",
@@ -218,7 +218,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_05.json",
     "--max-tokens",
@@ -263,7 +263,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_06.json",
     "--max-tokens",
@@ -308,7 +308,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_07.json",
     "--max-tokens",
@@ -353,7 +353,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_08.json",
     "--max-tokens",
@@ -398,7 +398,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_01.json",
     "--max-tokens",
@@ -443,7 +443,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_02.json",
     "--max-tokens",
@@ -488,7 +488,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_03.json",
     "--max-tokens",
@@ -533,7 +533,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_04.json",
     "--max-tokens",
@@ -578,7 +578,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_05.json",
     "--max-tokens",
@@ -623,7 +623,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_06.json",
     "--max-tokens",
@@ -668,7 +668,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_07.json",
     "--max-tokens",
@@ -713,7 +713,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_08.json",
     "--max-tokens",
@@ -758,7 +758,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_01.json",
     "--max-tokens",
@@ -803,7 +803,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_02.json",
     "--max-tokens",
@@ -848,7 +848,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_03.json",
     "--max-tokens",
@@ -893,7 +893,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_04.json",
     "--max-tokens",
@@ -938,7 +938,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_05.json",
     "--max-tokens",
@@ -983,7 +983,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_06.json",
     "--max-tokens",
@@ -1028,7 +1028,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_07.json",
     "--max-tokens",
@@ -1073,7 +1073,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_08.json",
     "--max-tokens",
@@ -1118,7 +1118,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_09.json",
     "--max-tokens",
@@ -1163,7 +1163,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_10.json",
     "--max-tokens",
@@ -1208,7 +1208,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_11.json",
     "--max-tokens",
@@ -1253,7 +1253,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_12.json",
     "--max-tokens",
@@ -1298,7 +1298,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_01.json",
     "--max-tokens",
@@ -1343,7 +1343,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_02.json",
     "--max-tokens",
@@ -1388,7 +1388,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_03.json",
     "--max-tokens",
@@ -1433,7 +1433,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_04.json",
     "--max-tokens",
@@ -1478,7 +1478,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_05.json",
     "--max-tokens",
@@ -1523,7 +1523,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_06.json",
     "--max-tokens",
@@ -1568,7 +1568,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_07.json",
     "--max-tokens",
@@ -1613,7 +1613,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_08.json",
     "--max-tokens",
@@ -1658,7 +1658,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_09.json",
     "--max-tokens",
@@ -1703,7 +1703,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_10.json",
     "--max-tokens",
@@ -1748,7 +1748,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_11.json",
     "--max-tokens",
@@ -1793,7 +1793,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_12.json",
     "--max-tokens",
@@ -1838,7 +1838,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_01.json",
     "--max-tokens",
@@ -1883,7 +1883,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_02.json",
     "--max-tokens",
@@ -1928,7 +1928,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_03.json",
     "--max-tokens",
@@ -1973,7 +1973,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_04.json",
     "--max-tokens",
@@ -2018,7 +2018,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_05.json",
     "--max-tokens",
@@ -2063,7 +2063,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_06.json",
     "--max-tokens",
@@ -2108,7 +2108,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_07.json",
     "--max-tokens",
@@ -2153,7 +2153,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_08.json",
     "--max-tokens",
@@ -2198,7 +2198,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_01.json",
     "--max-tokens",
@@ -2243,7 +2243,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_02.json",
     "--max-tokens",
@@ -2288,7 +2288,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_03.json",
     "--max-tokens",
@@ -2333,7 +2333,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_04.json",
     "--max-tokens",
@@ -2378,7 +2378,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_05.json",
     "--max-tokens",
@@ -2423,7 +2423,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_06.json",
     "--max-tokens",
@@ -2468,7 +2468,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_07.json",
     "--max-tokens",
@@ -2513,7 +2513,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice16_08.json",
     "--max-tokens",
@@ -2558,7 +2558,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_01.json",
     "--max-tokens",
@@ -2603,7 +2603,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_02.json",
     "--max-tokens",
@@ -2648,7 +2648,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_03.json",
     "--max-tokens",
@@ -2693,7 +2693,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_04.json",
     "--max-tokens",
@@ -2738,7 +2738,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_05.json",
     "--max-tokens",
@@ -2783,7 +2783,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_06.json",
     "--max-tokens",
@@ -2828,7 +2828,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_07.json",
     "--max-tokens",
@@ -2873,7 +2873,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_small_08.json",
     "--max-tokens",
@@ -2918,7 +2918,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_01.json",
     "--max-tokens",
@@ -2963,7 +2963,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_02.json",
     "--max-tokens",
@@ -3008,7 +3008,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_03.json",
     "--max-tokens",
@@ -3053,7 +3053,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_04.json",
     "--max-tokens",
@@ -3098,7 +3098,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_05.json",
     "--max-tokens",
@@ -3143,7 +3143,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_06.json",
     "--max-tokens",
@@ -3188,7 +3188,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_07.json",
     "--max-tokens",
@@ -3233,7 +3233,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_08.json",
     "--max-tokens",
@@ -3278,7 +3278,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_09.json",
     "--max-tokens",
@@ -3323,7 +3323,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_10.json",
     "--max-tokens",
@@ -3368,7 +3368,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_11.json",
     "--max-tokens",
@@ -3413,7 +3413,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/choice_mid_12.json",
     "--max-tokens",
@@ -3458,7 +3458,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_01.json",
     "--max-tokens",
@@ -3503,7 +3503,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_02.json",
     "--max-tokens",
@@ -3548,7 +3548,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_03.json",
     "--max-tokens",
@@ -3593,7 +3593,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_04.json",
     "--max-tokens",
@@ -3638,7 +3638,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_05.json",
     "--max-tokens",
@@ -3683,7 +3683,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_06.json",
     "--max-tokens",
@@ -3728,7 +3728,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_07.json",
     "--max-tokens",
@@ -3773,7 +3773,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_08.json",
     "--max-tokens",
@@ -3818,7 +3818,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_09.json",
     "--max-tokens",
@@ -3863,7 +3863,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_10.json",
     "--max-tokens",
@@ -3908,7 +3908,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_11.json",
     "--max-tokens",
@@ -3953,7 +3953,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/noul_12.json",
     "--max-tokens",
@@ -3998,7 +3998,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_01.json",
     "--max-tokens",
@@ -4043,7 +4043,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_02.json",
     "--max-tokens",
@@ -4088,7 +4088,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_03.json",
     "--max-tokens",
@@ -4133,7 +4133,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_04.json",
     "--max-tokens",
@@ -4178,7 +4178,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_05.json",
     "--max-tokens",
@@ -4223,7 +4223,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_06.json",
     "--max-tokens",
@@ -4268,7 +4268,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_07.json",
     "--max-tokens",
@@ -4313,7 +4313,7 @@
    "command": [
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build/out/Products/Release/llm-runner",
     "--model",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
     "--raw-tokens",
     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/results/engine_inputs/score_level_08.json",
     "--max-tokens",

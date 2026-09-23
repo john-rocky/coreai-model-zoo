@@ -1,7 +1,7 @@
 {
   "result": "PASS",
   "arch": "qwen3.5",
-  "bundle": "apus_openjev_v1_4b_decode_int8hu_block32_sym",
+  "bundle": "apus_decision_v1_4b_decode_int8hu_block32_sym",
   "artifact": null,
   "source_model": {
     "hf_id": "apus-ailab/APUS-OpenJev-v1-4B",

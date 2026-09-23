@@ -1,8 +1,8 @@
 Core AI is Apple's on-device ML runtime in iOS 27 / macOS 27 and the successor to Core ML: PyTorch models are exported with Apple's `coreai-torch` (LLMs: `coreai.llm.export`) into `.aimodel` bundles that run on the GPU or the Neural Engine, e.g. Qwen3-8B 4-bit decodes at 94 tok/s on an M4 Max GPU, MLX 90 under the same protocol ([apple-silicon-llm-bench](https://github.com/john-rocky/apple-silicon-llm-bench), macOS 27 beta 26A5353q, 2026-06-11).
 
-# APUS-OpenJev-v1-4B — Core AI
+# APUS-Decision-v1-4B — Core AI
 
-[🤗 mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI](https://huggingface.co/mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI) · Apache-2.0 · source [apus-ailab/APUS-OpenJev-v1-4B](https://huggingface.co/apus-ailab/APUS-OpenJev-v1-4B/tree/65797c526c27c4d24f564333779162cd4a64328e), revision `65797c526c27c4d24f564333779162cd4a64328e` · base Qwen/Qwen3.5-4B
+[🤗 mlboydaisuke/APUS-Decision-v1-4B-CoreAI](https://huggingface.co/mlboydaisuke/APUS-Decision-v1-4B-CoreAI) · Apache-2.0 · source [apus-ailab/APUS-OpenJev-v1-4B](https://huggingface.co/apus-ailab/APUS-OpenJev-v1-4B/tree/65797c526c27c4d24f564333779162cd4a64328e), revision `65797c526c27c4d24f564333779162cd4a64328e` · base Qwen/Qwen3.5-4B
 
 A decision model for browser-action selection, workflow routing and proposition judgments.
 The source contains checkpoint-5949 merged BF16 weights from a Qwen3.5-4B fine-tune. Each
@@ -74,7 +74,7 @@ Both `noul` and `score_level` require these exact criteria; the proposition goes
 rows. That path needs its own graph and is not exported. Low-effort logits and probabilities
 are retained only as fixture evidence; the bundle and gate use `effort="high"` (32 layers).
 
-The [fixture](fixtures-apus-openjev-v1-4b.json) has **48 requests / 48 rows**: 28 choice,
+The [fixture](fixtures-apus-decision-v1-4b.json) has **48 requests / 48 rows**: 28 choice,
 12 noul and 8 score_level; eight choice rows have 16 criteria, eight have 2–3 and twelve have
 4–8. Sixteen requests contain Chinese and thirty have structured states serialized as text.
 States are **34–66 tokens**, compiled rows **124–1,672 tokens**; two rows above 1,024 tokens
@@ -104,16 +104,16 @@ states for each row and S=1 steps over the complete compiled ids. The output is 
 `[1,1,248320]`; label gathering and softmax run in float32. Processes evaluate at most
 15 prompts including resets; the two wide rows run separately. All readout values are finite.
 
-The [readout transcript](gate-apus-openjev-v1-4b-readout.json) and
-[engine transcript](gate-apus-openjev-v1-4b-engine.json) are the zoo-layout execution proofs;
-the [summary](gate-apus-openjev-v1-4b.json) also records the kit parity facts.
-The separate round-two [alphabet gate](gate-apus-openjev-v1-4b-alphabet.json) passed **16/16**
+The [readout transcript](gate-apus-decision-v1-4b-readout.json) and
+[engine transcript](gate-apus-decision-v1-4b-engine.json) are the zoo-layout execution proofs;
+the [summary](gate-apus-decision-v1-4b.json) also records the kit parity facts.
+The separate round-two [alphabet gate](gate-apus-decision-v1-4b-alphabet.json) passed **16/16**
 tokens on `The alphabet begins A, B, C, D, E, F,` against a CPU fp32 overlay oracle; both
 sides produced ` G, H, I, J, K, L, M, N,`.
 That transcript is separate from the letter-probability gate. The unmodified generic gate
 reports `weights_pinned: false` because its loader has no revision argument; this invocation
 used `HF_HUB_OFFLINE=1`, the pinned local `refs/main`, and three matching Hub LFS hashes.
-The effective-pin receipts are described in the [port notes](../../knowledge/apus-openjev-v1-4b-port.md).
+The effective-pin receipts are described in the [port notes](../../knowledge/apus-decision-v1-4b-port.md).
 
 Throughput uses Release `llm-benchmark`, p=128 / g=256, two launches × three trials per engine,
 `COREAI_CHUNK_THRESHOLD=1`, Xcode 27.0 (27A266a); median (range):
@@ -157,8 +157,8 @@ fixture and evaluator. [Supervisor-supplied kit record](measurements-coreai-kit.
 ## Bundle
 
 The staged Hub path is
-`gpu-pipelined-b2/apus_openjev_v1_4b_decode_int8hu_block32_sym/` under
-[mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI](https://huggingface.co/mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI).
+`gpu-pipelined-b2/apus_decision_v1_4b_decode_int8hu_block32_sym/` under
+[mlboydaisuke/APUS-Decision-v1-4B-CoreAI](https://huggingface.co/mlboydaisuke/APUS-Decision-v1-4B-CoreAI).
 The LanguageBundle is **5,770,814,417 bytes**, 11 files: `.aimodel`, `metadata.json` and
 `tokenizer/`. `main.mlirb` is **5,742,220,411 bytes**, SHA-256
 `7b719b75f6782d60ff0e082230e464f041927ef7bbd3ffb5cfbd2a9352e32f23`.
@@ -187,34 +187,34 @@ resolves to that revision before running the unchanged exporter offline.
 `HF_HUB_DISABLE_XET=1`, a run-local cache and Xcode 27 are required for this recorded run.
 
 ```bash
-HF_HUB_OFFLINE=1 python3 conversion/zoo_convert.py run apus-openjev-v1-4b
+HF_HUB_OFFLINE=1 python3 conversion/zoo_convert.py run apus-decision-v1-4b
 # Equivalent exporter invocation:
 HF_HUB_OFFLINE=1 python3 conversion/export_qwen3_5_decode_pipelined.py int8hu --head-sym \
     --hf-id apus-ailab/APUS-OpenJev-v1-4B --out-dir exports
 
 SNAPSHOT="$HF_HOME/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e"
 uv run conversion/letter/oracle_letter.py --snapshot "$SNAPSHOT" \
-    --out models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json
+    --out models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json
 
 python3 conversion/letter/readout_gate_letter.py \
-    exports/apus_openjev_v1_4b_decode_int8hu_block32_sym \
-    models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json \
+    exports/apus_decision_v1_4b_decode_int8hu_block32_sym \
+    models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json \
     --snapshot "$SNAPSHOT" \
-    --transcript models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-readout.json
+    --transcript models/apus-decision-v1-4b/gate-apus-decision-v1-4b-readout.json
 
 python3 conversion/letter/engine_argmax_letter.py \
-    exports/apus_openjev_v1_4b_decode_int8hu_block32_sym \
-    models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json \
-    --readout models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-readout.json \
+    exports/apus_decision_v1_4b_decode_int8hu_block32_sym \
+    models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json \
+    --readout models/apus-decision-v1-4b/gate-apus-decision-v1-4b-readout.json \
     --runner <fork>/.build/release/llm-runner \
-    --transcript models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-engine.json
+    --transcript models/apus-decision-v1-4b/gate-apus-decision-v1-4b-engine.json
 ```
 
 For the recorded round-two layout proof, the oracle command used `--replay-fixtures` to
 validate and copy the accepted fixture byte-for-byte, and the readout used `--aot-asset` to
 reuse the round-one h16c asset. The commands above describe fresh reproduction.
 [Letter-gate instructions](../../conversion/letter/README.md) describe the pinned oracle,
-AOT cache and two-engine check. [Port notes](../../knowledge/apus-openjev-v1-4b-port.md)
+AOT cache and two-engine check. [Port notes](../../knowledge/apus-decision-v1-4b-port.md)
 record runtime traps and fixture coverage.
 
 ## License

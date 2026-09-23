@@ -1,8 +1,8 @@
 {
  "schema": "coreai-letter-readout-gate/1",
  "mode": "int8hu",
- "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym",
- "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json",
+ "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+ "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json",
  "fixtures_sha256": "e708dcc54a528cee7a61882fa7af7ed01791496dfe89a1158a605183af70a2d6",
  "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
  "max_ctx": 4096,
@@ -3888,7 +3888,7 @@
     15
    ],
    "pid": 49023,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
    "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:47:58+00:00",
    "phase": "complete",
@@ -3949,7 +3949,7 @@
     29
    ],
    "pid": 55347,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
    "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:50:25+00:00",
    "phase": "complete",
@@ -4010,7 +4010,7 @@
     43
    ],
    "pid": 59628,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
    "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:52:01+00:00",
    "phase": "complete",
@@ -4061,7 +4061,7 @@
     47
    ],
    "pid": 61896,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
    "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:52:53+00:00",
    "phase": "complete",
@@ -4109,7 +4109,7 @@
     6
    ],
    "pid": 62850,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
    "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:53:15+00:00",
    "phase": "complete",
@@ -4157,7 +4157,7 @@
     7
    ],
    "pid": 66714,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
    "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:54:41+00:00",
    "phase": "complete",
@@ -4205,7 +4205,7 @@
     0
    ],
    "pid": 70820,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
    "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:56:06+00:00",
    "phase": "complete",
@@ -4247,12 +4247,12 @@
   }
  ],
  "result": "PASS",
- "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+ "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
  "aot": {
   "reused": true,
   "result": "PASS",
-  "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_openjev_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-  "source": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_openjev_v1_4b_decode_int8hu_block32_sym/apus_openjev_v1_4b_decode_int8hu_block32_sym.aimodel",
+  "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+  "source": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym/apus_decision_v1_4b_decode_int8hu_block32_sym.aimodel",
   "selection": "explicit existing AOT asset",
   "flags": [
    "--platform",

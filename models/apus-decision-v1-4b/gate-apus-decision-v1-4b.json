@@ -1,7 +1,7 @@
 {
   "schema": "coreai-letter-gate-summary/1",
   "result": "PASS",
-  "recipe": "apus-openjev-v1-4b",
+  "recipe": "apus-decision-v1-4b",
   "source": {
     "hf_id": "apus-ailab/APUS-OpenJev-v1-4B",
     "revision": "65797c526c27c4d24f564333779162cd4a64328e"
@@ -18,7 +18,7 @@
     "dtype": "float32",
     "vendor_evidence": "results/oracle_vendor.json"
   },
-  "bundle": "gpu-pipelined-b2/apus_openjev_v1_4b_decode_int8hu_block32_sym",
+  "bundle": "gpu-pipelined-b2/apus_decision_v1_4b_decode_int8hu_block32_sym",
   "protocol": {
     "prompt_version": "jev.dynamic.prompt.v2",
     "effort": "high",
@@ -30,17 +30,17 @@
     "chat_template": "one user turn; add_generation_prompt=True; enable_thinking=False"
   },
   "fixtures": {
-    "path": "fixtures-apus-openjev-v1-4b.json",
+    "path": "fixtures-apus-decision-v1-4b.json",
     "sha256": "e708dcc54a528cee7a61882fa7af7ed01791496dfe89a1158a605183af70a2d6",
     "rows": 48
   },
   "transcripts": {
-    "readout": "gate-apus-openjev-v1-4b-readout.json",
-    "engine": "gate-apus-openjev-v1-4b-engine.json",
-    "alphabet": "gate-apus-openjev-v1-4b-alphabet.json"
+    "readout": "gate-apus-decision-v1-4b-readout.json",
+    "engine": "gate-apus-decision-v1-4b-engine.json",
+    "alphabet": "gate-apus-decision-v1-4b-alphabet.json"
   },
   "readout": {
-    "transcript": "models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-readout.json",
+    "transcript": "models/apus-decision-v1-4b/gate-apus-decision-v1-4b-readout.json",
     "rows": 48,
     "expected_rows": 48,
     "argmax_agreement": 48,
@@ -581,7 +581,7 @@
     "result": "PASS"
   },
   "engine": {
-    "transcript": "models/apus-openjev-v1-4b/gate-apus-openjev-v1-4b-engine.json",
+    "transcript": "models/apus-decision-v1-4b/gate-apus-decision-v1-4b-engine.json",
     "engines": {
       "coreai-pipelined": {
         "rows": 48,
@@ -716,10 +716,10 @@
     "max_abs_dp": 0.0055,
     "mean_abs_dp": 0.0002,
     "skipped_score_level_rows": 8,
-    "record": "models/apus-openjev-v1-4b/measurements-coreai-kit.json",
+    "record": "models/apus-decision-v1-4b/measurements-coreai-kit.json",
     "provenance": "measured through coreai-kit; supervisor-provided, not re-derived"
   },
-  "fixture": "models/apus-openjev-v1-4b/fixtures-apus-openjev-v1-4b.json",
+  "fixture": "models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json",
   "generated_from": "the two executed letter transcripts' summary blocks; shape follows d6ca61a:models/openthai-systemone/gate-openthai-systemone.json",
   "benchmark": "llm-benchmark.json",
   "scope": "Mac GPU full-depth path; no low-effort graph, phone gate, upload, or registry mutation."

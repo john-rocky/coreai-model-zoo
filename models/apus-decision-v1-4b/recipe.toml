@@ -1,12 +1,12 @@
 # HF-id swap of the unchanged qwen3.5-4b / agents-a1-4b recipe.
-["apus-openjev-v1-4b"]
+["apus-decision-v1-4b"]
 script = "export_qwen3_5_decode_pipelined.py"
 args = ["int8hu", "--head-sym", "--hf-id", "apus-ailab/APUS-OpenJev-v1-4B"]
 card = "README.md"
-hf_repo = "mlboydaisuke/APUS-OpenJev-v1-4B-CoreAI"
+hf_repo = "mlboydaisuke/APUS-Decision-v1-4B-CoreAI"
 source_hf_id = "apus-ailab/APUS-OpenJev-v1-4B"
 source_revision = "65797c526c27c4d24f564333779162cd4a64328e"
-bundle = "gpu-pipelined-b2/apus_openjev_v1_4b_decode_int8hu_block32_sym"
+bundle = "gpu-pipelined-b2/apus_decision_v1_4b_decode_int8hu_block32_sym"
 status = "verified"
 overlay = true
 runtime_patches = ["apps/coreai-pipelined-extra-states.patch"]
