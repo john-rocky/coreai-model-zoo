@@ -4,8 +4,8 @@ A **typed decision model** that answers in one forward pass: give it a state (a 
 JSON record, a conversation) and a typed question — `choice` (pick one of named options), `score`
 (an ordered scale) or `noul` (yes/no) — and it returns a probability for every option, no generation.
 [`convaiinnovations/laya`](https://huggingface.co/convaiinnovations/laya), subfolder `multilingual/`
-(Apache-2.0, revision `1c5edc17…`, laya 0.3.4), as a static `.aimodel` for macOS 27 and, compiled ahead
-of time, for the iPhone 17 Pro (not yet run on a device). It is the catalog's first **encoder-type
+(Apache-2.0, revision `1c5edc17…`, laya 0.3.4), as a static `.aimodel` for macOS 27 and for the iPhone
+17 Pro (run there 2026-09-23: the same 201 rows pass, 47 ms per decision on the GPU). It is the catalog's first **encoder-type
 decision model**: the other
 decision models here are language models read out after a prefill; this one scores every option at its
 own marker position in a single encoder call.
@@ -72,8 +72,24 @@ On the CPU, wfp16 and fp32 return bit-identical marker and act logits on all 402
 weights in fp16 — exact, the checkpoint is F16 — and computes in fp32. On this Mac's GPU both stay within
 1e-4 of the CPU run as well. **Use the GPU, and request it explicitly**: with the Neural Engine preference
 the Mac returned the GPU's results bit for bit for fp32, but for wfp16 it returned different results that
-changed from run to run (next section). **iPhone: not measured** — the `ios-h18p/` and `ios/` folders have
-not run on a device yet.
+changed from run to run (next section). **iPhone 17 Pro** (iOS 27.0 24A437, the `ios/wfp16-s256` JIT bundle,
+2026-09-23, a headless harness over CoreAIKit's `EncoderDecider.decideRow` on the 201 fixture rows, the
+fixture's own token ids, T = 1): on the GPU **201/201 rows within 1e-3, argmax 81/81, max |Δp| 8.1e-6**,
+act probability delta 0, no drift over three passes; CPU-only the same verdict at 9.4e-6. The kit's builder
+renders every row identically on the phone (201/201 tokens and markers). One decision on the phone's GPU:
+**53 ms median** (p90 57 ms, 30 warm-up calls, 603 timed calls) with the row's tokens given, 69–70 ms
+through `TypedDecisions` with the state's tokens kept (the question tokenized on the phone, 5 ms median),
+73 ms CPU-only; the bundle loads in 1.2–2.5 s, the process peaks at 357 MB (670 MB CPU-only). With a Neural
+Engine preference the phone misses the bar the way the Mac does — 196/201 within 1e-3, argmax 80/81, max
+|Δp| 0.33 on five rows — at 82 ms and 1.4 GB, so the kit keeps refusing that preference for this bundle.
+Thermal state during those runs: "fair" for the GPU rows, "serious" for the CPU-only and Neural Engine
+rows; the GPU gate run again at "nominal" (2026-09-24) gave the same verdict at 54.5 ms median (p90 59.6),
+so the row cost is not thermal-bound. Through the kit's own `decide-cli bench --repeat 3` on the cool phone
+(a 109-token state, eight questions, the measure of the Mac's 11.5 ms): **47.1 ms per decision** with the
+state shared, 46.4 from scratch, 390 / 458 ms for the state and its eight. `gate-laya-multilingual-iphone-gpu.json`
+is the first GPU run's record. The AOT `ios-h18p/wfp16-s256` bundle, run the same way on the cool phone
+(2026-09-24): the same verdict (201/201, argmax 81/81, max |Δp| 8.1e-6) at **51.0 ms** median (p90 54.4), first call
+68.6 ms after a 1.7 s load, peak 357 MB — no faster to load or to run than the JIT bundle the catalog ships.
 
 The publisher's own model on the SemIf `authored144` fixture (144 three-option evidence / rule /
 candidate questions it was not trained for), as `laya.load(...).predict` answers them: mean family
@@ -192,8 +208,8 @@ at the final norm (0.13 at S=256 in torch), the state that normalizes those larg
 
 ## License and limits
 
-Apache-2.0 at the pinned upstream revision. Not tested: any iPhone (the device gate is pending), other
-Macs or OS builds, dynamic or batched shapes, windows other than 256 and 512, more than 20 options, the
+Apache-2.0 at the pinned upstream revision. Not tested: the 512 window on the phone (the 256 window was, JIT
+and AOT h18p, on one iPhone 17 Pro), other Macs or OS builds, dynamic or batched shapes, windows other than 256 and 512, more than 20 options, the
 fitted calibration's quality at S = 512, languages beyond the fixture's English, Japanese and mixed rows,
 sustained thermals. The act probability is saturated at 1.0 on every fixture row, in the publisher's
 model as here: it is carried through the graph, not evidence of when to escalate.

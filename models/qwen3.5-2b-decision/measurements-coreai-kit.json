@@ -98,5 +98,80 @@
     ],
     "sequential_ms_per_token_approx": 10,
     "reason": "Recurrent hybrid re-prefills every row."
+  },
+  "iphone": {
+    "device": "iPhone 17 Pro (iPhone18,1), iOS 27.0 24A437, wired, 2026-09-23 22:23–22:43 JST, thermal state serious throughout",
+    "harness": "<work>/systemone-iphone/decide-gate (DecideGate: Examples/Decide/CLI/main.swift's commands inside an app with the Decide example's bundle id; --model loads the sideloaded ModelStore bundle)",
+    "bundle": "gpu-pipelined/qwen3_5_2b_decision_decode_int8hu_block32_sym (sha256 of every file equal to Hub revision 3b79912)",
+    "parity": {
+      "rows": 58,
+      "tokens_identical": 58,
+      "label_slots_identical": 58,
+      "option_argmax_agreement": 58,
+      "max_abs_delta_p": 0.007,
+      "mean_abs_delta_p": 0.0016,
+      "median_question_ms": 11319.3,
+      "max_question_ms": 154898.0,
+      "long_rows_ran": true,
+      "load_s": 16
+    },
+    "three_question_request": {
+      "state": "Shares of the chipmaker jumped 8% after it raised its revenue forecast.",
+      "questions": [
+        "choice: Which news section does this article belong to? | Business | Science/Technology | World | Sports",
+        "noul: Is this good news for the company's shareholders?",
+        "score: How significant is this news for the company? | negligible | minor | moderate | major | critical"
+      ],
+      "phone_probabilities": {
+        "Business": 0.729,
+        "Science/Technology": 0.254,
+        "World": 0.012,
+        "Sports": 0.005
+      },
+      "phone_noul": 0.976,
+      "phone_score": 2.6,
+      "mac_same_rows_probabilities": {
+        "Business": 0.731,
+        "Science/Technology": 0.253,
+        "World": 0.012,
+        "Sports": 0.005
+      },
+      "row_tokens": [
+        80,
+        71,
+        82
+      ],
+      "phone_row_wall_ms": [
+        2691.9,
+        6035.8,
+        7393.7
+      ],
+      "mac_row_wall_ms_contended": [
+        1708.0,
+        1393.5,
+        1616.1
+      ],
+      "tokens_reused": [
+        0,
+        0,
+        0
+      ],
+      "note": "the card example's 0.684 is a different (82-token) row; on the same rows the phone and the Mac agree within 0.002"
+    },
+    "records": [
+      "gate-qwen3.5-2b-decision-iphone-parity.json"
+    ],
+    "bench_cool": {
+      "date": "2026-09-24 00:20–00:26 JST",
+      "thermal": "nominal at start and end",
+      "tool": "decide-cli bench --repeat 3 (inside DecideGate)",
+      "state_tokens": 139,
+      "questions": 8,
+      "ms_per_decision_shared": 6062.5,
+      "ms_per_decision_direct": 6149.8,
+      "ms_per_state_prefill_plus_8_shared": 53203,
+      "ms_per_state_prefill_plus_8_direct": 54203,
+      "reused_tokens": 0
+    }
   }
 }

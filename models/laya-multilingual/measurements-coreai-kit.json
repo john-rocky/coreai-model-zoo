@@ -1,65 +1,259 @@
 {
- "source": "coreai-kit lane measurements (worktree ~/code/coreai-kit-encoder-wt, branch decide-encoder), read from its scratch records and re-checked in this lane against the zoo's own references; not re-run here",
- "records": "coreai-kit lane scratchpad r2/ (parity-*.txt, bench-*.txt, load-*.txt, tokenizer-footprint-release.txt, gpu-session.log, ids-*.txt) and <work>/laya-multilingual/authored144/kit.*",
- "reported_time_jst": "2026-09-23 14:26–14:36",
- "catalog_id": "laya-multilingual (valid once the kit pull request lands)",
- "engine": "EncoderDecider (TypedDecisions encoder backend), GraphModel over the multifunction .aimodel",
- "device": "Apple M4 Max, macOS 27.0 26A428",
- "bundles": {
-  "wfp16-s256": {"export_manifest_time": "2026-09-23 14:28:56", "main_hash": "ea3dd8178f562ffd", "mlirb_bytes": 644854735},
-  "wfp16-s512": {"export_manifest_time": "2026-09-23 14:30:00", "main_hash": "3dd13911fa46cb77", "mlirb_bytes": 645772283}
- },
- "gpu_conditions": "machine-wide GPU lock held (scripts/with-gpu-lock.py) and no other GPU job visible when the runs started (gpu-session.log 14:33:57)",
- "parity": {
-  "fixture": "coreai-encoder-fixtures/1 (models/laya-multilingual/fixtures-laya-multilingual.json), T = [1,1,1]",
-  "gpu": {
-   "s256": {"rows": 201, "tokens_identical": 201, "markers_identical": 201, "argmax_choice_score": "81/81", "max_abs_dp": 5e-06, "max_act_probability_delta": 0.0, "within_1e-3": 201},
-   "s512": {"rows": 201, "tokens_identical": 201, "markers_identical": 201, "argmax_choice_score": "81/81", "max_abs_dp": 5e-06, "max_act_probability_delta": 0.0, "within_1e-3": 201}
+  "source": "coreai-kit lane measurements (worktree ~/code/coreai-kit-encoder-wt, branch decide-encoder), read from its scratch records and re-checked in this lane against the zoo's own references; not re-run here",
+  "records": "coreai-kit lane scratchpad r2/ (parity-*.txt, bench-*.txt, load-*.txt, tokenizer-footprint-release.txt, gpu-session.log, ids-*.txt) and <work>/laya-multilingual/authored144/kit.*",
+  "reported_time_jst": "2026-09-23 14:26–14:36",
+  "catalog_id": "laya-multilingual (valid once the kit pull request lands)",
+  "engine": "EncoderDecider (TypedDecisions encoder backend), GraphModel over the multifunction .aimodel",
+  "device": "Apple M4 Max, macOS 27.0 26A428",
+  "bundles": {
+    "wfp16-s256": {
+      "export_manifest_time": "2026-09-23 14:28:56",
+      "main_hash": "ea3dd8178f562ffd",
+      "mlirb_bytes": 644854735
+    },
+    "wfp16-s512": {
+      "export_manifest_time": "2026-09-23 14:30:00",
+      "main_hash": "3dd13911fa46cb77",
+      "mlirb_bytes": 645772283
+    }
   },
-  "cpu_only": {
-   "s256": {"rows": 201, "tokens_identical": 201, "markers_identical": 201, "argmax_choice_score": "81/81", "max_abs_dp": 9e-06, "within_1e-3": 201},
-   "s512": {"rows": 201, "tokens_identical": 201, "markers_identical": 201, "argmax_choice_score": "81/81", "max_abs_dp": 9e-06, "within_1e-3": 201}
+  "gpu_conditions": "machine-wide GPU lock held (scripts/with-gpu-lock.py) and no other GPU job visible when the runs started (gpu-session.log 14:33:57)",
+  "parity": {
+    "fixture": "coreai-encoder-fixtures/1 (models/laya-multilingual/fixtures-laya-multilingual.json), T = [1,1,1]",
+    "gpu": {
+      "s256": {
+        "rows": 201,
+        "tokens_identical": 201,
+        "markers_identical": 201,
+        "argmax_choice_score": "81/81",
+        "max_abs_dp": 5e-06,
+        "max_act_probability_delta": 0.0,
+        "within_1e-3": 201
+      },
+      "s512": {
+        "rows": 201,
+        "tokens_identical": 201,
+        "markers_identical": 201,
+        "argmax_choice_score": "81/81",
+        "max_abs_dp": 5e-06,
+        "max_act_probability_delta": 0.0,
+        "within_1e-3": 201
+      }
+    },
+    "cpu_only": {
+      "s256": {
+        "rows": 201,
+        "tokens_identical": 201,
+        "markers_identical": 201,
+        "argmax_choice_score": "81/81",
+        "max_abs_dp": 9e-06,
+        "within_1e-3": 201
+      },
+      "s512": {
+        "rows": 201,
+        "tokens_identical": 201,
+        "markers_identical": 201,
+        "argmax_choice_score": "81/81",
+        "max_abs_dp": 9e-06,
+        "within_1e-3": 201
+      }
+    },
+    "neural_engine": {
+      "s256_runs": [
+        {
+          "argmax_choice_score": "79/81",
+          "max_abs_dp": 0.151871,
+          "within_1e-3": 177
+        },
+        {
+          "argmax_choice_score": "80/81",
+          "max_abs_dp": 0.607071,
+          "within_1e-3": 183
+        },
+        {
+          "argmax_choice_score": "79/81",
+          "max_abs_dp": 0.244537,
+          "within_1e-3": 168
+        }
+      ],
+      "s512_runs": [
+        {
+          "argmax_choice_score": "80/81",
+          "max_abs_dp": 0.446902,
+          "within_1e-3": 183
+        }
+      ],
+      "kit_behaviour": "TypedDecisions refuses a .neuralEngine preference for an encoder bundle at load (DecisionError.unsupportedModel; coreai-kit commit c01edc8 on decide-encoder, with a test); the default is .gpu"
+    }
   },
-  "neural_engine": {
-   "s256_runs": [
-    {"argmax_choice_score": "79/81", "max_abs_dp": 0.151871, "within_1e-3": 177},
-    {"argmax_choice_score": "80/81", "max_abs_dp": 0.607071, "within_1e-3": 183},
-    {"argmax_choice_score": "79/81", "max_abs_dp": 0.244537, "within_1e-3": 168}
-   ],
-   "s512_runs": [
-    {"argmax_choice_score": "80/81", "max_abs_dp": 0.446902, "within_1e-3": 183}
-   ],
-   "kit_behaviour": "TypedDecisions refuses a .neuralEngine preference for an encoder bundle at load (DecisionError.unsupportedModel; coreai-kit commit c01edc8 on decide-encoder, with a test); the default is .gpu"
+  "latency": {
+    "tool": "decide-cli bench, wfp16, GPU, warm, 3 repeats",
+    "state_tokens": 109,
+    "questions": 8,
+    "s256": {
+      "ms_per_decision_shared_state": 11.5,
+      "ms_per_decision_direct": 12.1,
+      "ms_per_state_prefill_plus_8_shared": 100,
+      "ms_per_state_prefill_plus_8_direct": 185
+    },
+    "s512": {
+      "ms_per_decision_shared_state": 18.9,
+      "ms_per_decision_direct": 19.4,
+      "ms_per_state_prefill_plus_8_shared": 160,
+      "ms_per_state_prefill_plus_8_direct": 240
+    },
+    "note": "shared = the state tokenized once and reused (prefill); direct = every decision tokenizes its whole row. The graph runs the whole window either way; the difference is host tokenization."
+  },
+  "load": {
+    "gpu_load_ms": [
+      1060.1,
+      1161.5
+    ],
+    "first_call_ms": [
+      33.7,
+      40.2
+    ],
+    "tokenizer_load_s": [
+      0.99,
+      1.06
+    ],
+    "tokenizer_resident_mb": [
+      144.9,
+      161.7
+    ],
+    "process_footprint_after_first_decision_mb": [
+      473.6,
+      498.0
+    ],
+    "runs": 7,
+    "note": "ranges over the runs in load-gpu.txt / tokenizer-footprint-release.txt; the tokenizer (256,000-entry tokenizer.json) is most of the load time"
+  },
+  "semif": {
+    "dataset": "authored144",
+    "rows": 144,
+    "options": 3,
+    "evaluator": "unchanged SemIf benchmarks/evaluate.py",
+    "temperature": "the fitted calibration in metadata.json (the kit's default)",
+    "argmax_agreement_with_official": "144/144 (both windows)",
+    "max_abs_dp_vs_official_at_the_same_temperature": 2.862e-06,
+    "max_abs_dp_vs_official_at_T1": 0.1015,
+    "mean_family_balanced_accuracy": 0.6114,
+    "accuracy": 0.5903,
+    "official_reference": "<work>/laya-multilingual/authored144/laya-multilingual.s{256,512}.cal.jsonl (the publisher's laya.load(...).predict with the calibration set as agent.temperature)"
+  },
+  "iphone": {
+    "device": "iPhone 17 Pro (iPhone18,1), iOS 27.0 24A437, wired, 2026-09-23 22:14–22:16 JST",
+    "harness": "<work>/laya-multilingual/ios-gate (LayaGate: EncoderDecider.decideRow on the fixture's own token ids; --typed = TypedDecisions on the rows that carry their state)",
+    "bundle": "ios/wfp16-s256 (the catalog's iOS bundle; sha256 of every file equal to the Hub revision 1175a4e6)",
+    "reference": "fixtures-laya-multilingual.json (coreai-encoder-fixtures/1), T = 1",
+    "gpu": {
+      "rows": 201,
+      "tokens_identical": 201,
+      "markers_identical": 201,
+      "within_1e-3": 201,
+      "argmax_choice_score": "81/81",
+      "max_abs_dp": 8.08e-06,
+      "max_act_dp": 0.0,
+      "repeat_drift": 0.0,
+      "warm_calls": 30,
+      "passes": 3,
+      "ms_per_decision_row_tokens_given": {
+        "median": 53.3,
+        "p90": 56.6,
+        "min": 46.1,
+        "max": 197.5,
+        "n": 603
+      },
+      "ms_per_decision_typed_state_tokens_kept": {
+        "median": 69.3,
+        "p90": 71.0,
+        "wall_median": 70.0,
+        "rows": 201,
+        "rows_reusing_state_tokens": 157
+      },
+      "render_ms_median": 5.2,
+      "load_ms": [
+        2475.0,
+        1223.1
+      ],
+      "first_call_ms_after_load": [
+        1996.4,
+        68.7
+      ],
+      "footprint_peak_mb": 357,
+      "thermal": "fair",
+      "record": "gate-laya-multilingual-iphone-gpu.json"
+    },
+    "cpuonly": {
+      "within_1e-3": 201,
+      "argmax_choice_score": "81/81",
+      "max_abs_dp": 9.44e-06,
+      "ms_per_decision_median": 73.1,
+      "p90": 84.1,
+      "load_ms": 2297.0,
+      "footprint_peak_mb": 670,
+      "thermal": "serious",
+      "warm_calls": 10,
+      "passes": 1
+    },
+    "neural_engine_preference": {
+      "verdict": "FAIL",
+      "within_1e-3": 196,
+      "argmax_choice_score": "80/81",
+      "max_abs_dp": 0.331,
+      "failed_rows": [
+        "ML_A06/urgency",
+        "ML_B07/category",
+        "ML_B09/category",
+        "ML_C06/is_urgent",
+        "ML_C08/refund_requested"
+      ],
+      "ms_per_decision_median": 82.1,
+      "load_ms": 3330.1,
+      "footprint_peak_mb": 1378,
+      "thermal": "serious",
+      "note": "the same failure as the Mac's Neural Engine preference; the kit refuses .neuralEngine for encoder bundles"
+    },
+    "not_run": "the 512 window on the phone",
+    "gpu_cool_rerun": {
+      "date": "2026-09-24 00:26 JST",
+      "thermal": "nominal throughout",
+      "verdict": "PASS 201/201 within 1e-3, argmax 81/81, max |Δp| 8.08e-6",
+      "ms_per_decision_row_tokens_given": {
+        "median": 54.5,
+        "p90": 59.6,
+        "n": 603
+      },
+      "first_call_ms": 78.8,
+      "load_ms": 1899,
+      "record": "laya-gate-laya-ml-wfp16-s256-gpu-20260924-002602.json (standup record)"
+    },
+    "bench_cool": {
+      "date": "2026-09-24 00:17 JST",
+      "thermal": "nominal",
+      "tool": "decide-cli bench --repeat 3 (inside DecideGate, --model laya-multilingual from the sideloaded store)",
+      "state_tokens": 109,
+      "questions": 8,
+      "ms_per_decision_shared": 47.1,
+      "ms_per_decision_direct": 46.4,
+      "ms_per_state_prefill_plus_8_shared": 390,
+      "ms_per_state_prefill_plus_8_direct": 458,
+      "reused_tokens": 109
+    },
+    "aot_h18p_gpu": {
+      "date": "2026-09-24 00:28 JST",
+      "bundle": "ios-h18p/wfp16-s256 (AOT .aimodelc, sha256 of every file equal to the Hub revision)",
+      "thermal": "nominal",
+      "verdict": "PASS 201/201 within 1e-3, argmax 81/81, max |Δp| 8.08e-6",
+      "ms_per_decision_row_tokens_given": {
+        "median": 51.0,
+        "p90": 54.4,
+        "n": 603
+      },
+      "first_call_ms": 68.6,
+      "load_ms": 1743,
+      "footprint_peak_mb": 357,
+      "record": "laya-gate-laya-ml-wfp16-s256-h18p-gpu-20260924-002825.json (standup record)"
+    }
   }
- },
- "latency": {
-  "tool": "decide-cli bench, wfp16, GPU, warm, 3 repeats",
-  "state_tokens": 109,
-  "questions": 8,
-  "s256": {"ms_per_decision_shared_state": 11.5, "ms_per_decision_direct": 12.1, "ms_per_state_prefill_plus_8_shared": 100, "ms_per_state_prefill_plus_8_direct": 185},
-  "s512": {"ms_per_decision_shared_state": 18.9, "ms_per_decision_direct": 19.4, "ms_per_state_prefill_plus_8_shared": 160, "ms_per_state_prefill_plus_8_direct": 240},
-  "note": "shared = the state tokenized once and reused (prefill); direct = every decision tokenizes its whole row. The graph runs the whole window either way; the difference is host tokenization."
- },
- "load": {
-  "gpu_load_ms": [1060.1, 1161.5],
-  "first_call_ms": [33.7, 40.2],
-  "tokenizer_load_s": [0.99, 1.06],
-  "tokenizer_resident_mb": [144.9, 161.7],
-  "process_footprint_after_first_decision_mb": [473.6, 498.0],
-  "runs": 7,
-  "note": "ranges over the runs in load-gpu.txt / tokenizer-footprint-release.txt; the tokenizer (256,000-entry tokenizer.json) is most of the load time"
- },
- "semif": {
-  "dataset": "authored144",
-  "rows": 144,
-  "options": 3,
-  "evaluator": "unchanged SemIf benchmarks/evaluate.py",
-  "temperature": "the fitted calibration in metadata.json (the kit's default)",
-  "argmax_agreement_with_official": "144/144 (both windows)",
-  "max_abs_dp_vs_official_at_the_same_temperature": 2.862e-06,
-  "max_abs_dp_vs_official_at_T1": 0.1015,
-  "mean_family_balanced_accuracy": 0.6114,
-  "accuracy": 0.5903,
-  "official_reference": "<work>/laya-multilingual/authored144/laya-multilingual.s{256,512}.cal.jsonl (the publisher's laya.load(...).predict with the calibration set as agent.temperature)"
- }
 }

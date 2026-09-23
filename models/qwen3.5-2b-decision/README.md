@@ -83,6 +83,20 @@ SemIf's authored144 uses 144 English rows, three options each, SemIf's gold labe
 
 On the author's chipmaker-news example, the kit's int8hu probabilities were **Business 0.684 / Science/Technology 0.309 / World 0.005 / Sports 0.002**; the author's MLX BF16 card quotes **0.70 / 0.29 / 0.005 / 0.002**. A three-question request on that sentence (Choice, yes/no, five-level Score) took **817 / 633 / 766 ms** for its **82 / 73 / 88-token** rows, with **0 tokens reused**. This recurrent hybrid re-prefills each row, about **10 ms per token** on the sequential engine. [Supervisor-supplied record](measurements-coreai-kit.json).
 
+**iPhone 17 Pro** (iOS 27.0 24A437, the same int8hu bundle sideloaded into the kit's ModelStore, sha256 equal to the
+Hub revision, 2026-09-23, a headless harness that runs the kit's own `decide-cli parity` / `ask` inside an app; the
+phone reported thermal state "serious" throughout): `parity` on all 58 fixture rows matched tokens **58/58**, label
+slots **58/58** and option argmax **58/58** against FP32 B, max |Δp| / mean **0.0070 / 0.0016** — the two
+1,700-token rows included, this bundle's context takes them. The chipmaker sentence with a Choice over the four
+sections, a yes/no and a five-level Score came back **Business 0.729 / Science/Technology 0.254 / World 0.012 /
+Sports 0.005** on the phone and 0.731 / 0.253 / 0.012 / 0.005 on the Mac for the same three rows (the card
+example's own row is two tokens longer, hence its 0.684). Time is the S=1 prefill at the phone's rate: **2.7 / 6.0 /
+7.4 s** for those 80-, 71- and 82-token rows (the per-token cost rose within the run, 34 → 90 ms), **11.3 s median
+per fixture question** (Mac 986 ms), the 1,743-token row 155 s. Cooled to thermal state "nominal" (2026-09-24, the same
+`decide-cli bench --repeat 3` as the kit's table, a 139-token state and eight questions): **6,063 ms per decision** with the
+state shared, 6,150 from scratch, 53 s for the state and its eight — about 30 ms per token, half the hot figures. Load 16 s;
+process footprint 276 MB (the weights are mapped). Record: [`gate-qwen3.5-2b-decision-iphone-parity.json`](https://github.com/john-rocky/coreai-model-zoo/blob/main/models/qwen3.5-2b-decision/gate-qwen3.5-2b-decision-iphone-parity.json).
+
 ## Bundle
 
 Both bundles are staged under `gpu-pipelined/` in [mlboydaisuke/Qwen3.5-2B-Decision-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.5-2B-Decision-CoreAI). int8hu ships; fp16 is its reference.

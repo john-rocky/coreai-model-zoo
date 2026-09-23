@@ -84,5 +84,46 @@
       ]
     },
     "fix": "Cut each text segment with the same Split regex using ICU on UTF-16, then encode each piece."
+  },
+  "iphone": {
+    "device": "iPhone 17 Pro (iPhone18,1), iOS 27.0 24A437, wired, 2026-09-23 22:40–22:5x JST, thermal state serious throughout",
+    "harness": "<work>/systemone-iphone/decide-gate (DecideGate; see the qwen3.5-2b-decision record)",
+    "bundle": "gpu-pipelined/openthai_systemone_decode_int8lin (sha256 of every file equal to Hub revision e48583d)",
+    "parity": {
+      "rows": 50,
+      "tokens_equal": 50,
+      "slots_equal": 50,
+      "option_argmax_equal": 50,
+      "max_abs_dp": 0.021,
+      "mean_abs_dp": 0.0009,
+      "max_abs_dabstain": 0.0213,
+      "median_question_ms": 1892.7,
+      "wide_255_row_s": 40.8,
+      "load_s": 6.6
+    },
+    "records": [
+      "gate-openthai-systemone-iphone-parity.json"
+    ],
+    "semif": {
+      "dataset": "authored144",
+      "rows": 144,
+      "raw_correct": 109,
+      "mean_family_balanced_accuracy": 0.7249,
+      "median_decision_ms": 2073.9,
+      "evaluator": "unchanged benchmarks/evaluate.py",
+      "note": "identical to the Mac's 109/144 and 0.7249"
+    },
+    "bench_cool": {
+      "date": "2026-09-24 00:18–00:20 JST",
+      "thermal": "nominal at start and end",
+      "tool": "decide-cli bench --repeat 3 (inside DecideGate)",
+      "state_tokens": 111,
+      "questions": 8,
+      "ms_per_decision_shared": 1527.4,
+      "ms_per_decision_direct": 1712.8,
+      "ms_per_state_prefill_plus_8_shared": 13461,
+      "ms_per_state_prefill_plus_8_direct": 15183,
+      "reused_tokens": 0
+    }
   }
 }

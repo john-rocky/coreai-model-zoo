@@ -1,0 +1,460 @@
+{
+ "schema": "coreai-kit-iphone-parity/1",
+ "catalog_id": "decider-0.8b",
+ "date": "2026-09-23 22:51–22:54 JST",
+ "source": "decide-cli parity (coreai-kit main c5ce759, Decision.Format.decider with the 255-option label table) run inside DecideGate on the iPhone 17 Pro; the bundle is the Hub revision ff60ccf's gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym sideloaded into the kit's ModelStore",
+ "header": {
+  "device": "device=iPhone18,1 os=Version 27.0 (Build 24A437) build=24A437 thermal=serious footprint=11MB available=6430MB",
+  "app_state": "app_state=inactive screen_brightness=0.60 protected_data=true",
+  "model": "model: decider-0.8b (decider_0_8b_decode_int8hu_block32_sym)   format: decider   temperature: 1.03 (fixture 1.03)",
+  "done": "DONE tag=parity-decider-0.8b seconds=164.5 peak_footprint_MB=261 least_available_MB=6180 thermal=serious app_state=active changes="
+ },
+ "summary": {
+  "rows checked": "rows checked: 44   tokens identical: 44/44   slot + labels identical: 44/44",
+  "argmax agreement with the fp32 readout": "argmax agreement with the fp32 readout: 44/44",
+  "|Δp| vs the fp32 readout": "|Δp| vs the fp32 readout: max 0.0092, mean 0.0010",
+  "ms per question (all rows of a score question summed)": "ms per question (all rows of a score question summed): median 2078.2, max 69851.5"
+ },
+ "rows": [
+  {
+   "row_id": "r01-route",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0021,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r01-condition",
+   "type": "choice",
+   "options": 4,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0003,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r01-refund",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r02-action",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r02-lamp",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r02-cold",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0021,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r03-color",
+   "type": "choice",
+   "options": 6,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0008,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r03-shape",
+   "type": "choice",
+   "options": 8,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0003,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r03-wet",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r04-drawer",
+   "type": "choice",
+   "options": 7,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r04-material",
+   "type": "choice",
+   "options": 10,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0005,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r04-key",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0013,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r05-task",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r05-leaves",
+   "type": "choice",
+   "options": 4,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r05-dry",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0002,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r06-phase",
+   "type": "choice",
+   "options": 4,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0004,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r06-priority",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0003,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r06-approved",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r07-contents",
+   "type": "choice",
+   "options": 4,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r07-location",
+   "type": "choice",
+   "options": 5,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0004,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r07-seal",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0002,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r08-direction",
+   "type": "choice",
+   "options": 5,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0092,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r08-surface",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r08-open",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0002,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-liquid",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0003,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-valve",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0003,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-clarity",
+   "type": "choice",
+   "options": 4,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-fill-level0",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0002,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-fill-level1",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0079,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-fill-level2",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0004,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-fill-level3",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0092,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r09-fill-level4",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-surface",
+   "type": "choice",
+   "options": 4,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0001,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-color",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0006,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-count",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0008,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-damage-level0",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0007,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-damage-level1",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-damage-level2",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-damage-level3",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r10-damage-level4",
+   "type": "score",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r11-bin",
+   "type": "choice",
+   "options": 11,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0006,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r12-slot",
+   "type": "choice",
+   "options": 255,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0025,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r13-status",
+   "type": "choice",
+   "options": 3,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0,
+   "flag": "ok"
+  },
+  {
+   "row_id": "r13-restart",
+   "type": "noul",
+   "options": 2,
+   "tokens_identical": true,
+   "slot_identical": true,
+   "argmax_identical": true,
+   "max_abs_dp": 0.0004,
+   "flag": "ok"
+  }
+ ]
+}

@@ -117,7 +117,17 @@ On SemIf's authored144 — 144 English rows with three options, SemIf's gold lab
 **109/144** raw and **0.7249 mean family balanced accuracy**. The kit README reports **0.681**
 for MiniCPM5-2B int8 and **0.821** for Qwen3.5-4B int8 on the same rows and evaluator.
 [Kit measurement record](https://github.com/john-rocky/coreai-model-zoo/blob/main/models/openthai-systemone/measurements-coreai-kit.json).
-No phone gate is claimed for this port.
+**iPhone 17 Pro** (iOS 27.0 24A437, the same int8lin bundle sideloaded into the kit's ModelStore, sha256 equal to
+the Hub revision, 2026-09-23, a headless harness that runs the kit's own `decide-cli parity` / `oracle` inside an
+app; thermal state "serious" throughout): `parity` matched tokens **50/50**, answer slots **50/50** and option
+argmax **50/50**, the 40- and 255-option rows included (the 1,449-token row fits this bundle's context); max |Δp|
+**0.0210**, mean **0.0009**, max |Δabstain| **0.0213**. Median wall time per fixture question **1,893 ms** (Mac
+354 ms); the 255-option row **40.8 s** (Mac 7.2 s). On SemIf's authored144 through `oracle` on the phone: **109/144**
+raw and **0.7249** mean family balanced accuracy — the Mac's figures exactly — at **2,074 ms** median per decision.
+Cooled to thermal state "nominal" (2026-09-24, `decide-cli bench --repeat 3`, a 111-token state and eight questions):
+**1,527 ms per decision** with the state shared, 1,713 from scratch, 13.5 s for the state and its eight (0 tokens
+reused). Load 6.6 s. Records: the SemIf rows in the standup record, and
+[`gate-openthai-systemone-iphone-parity.json`](https://github.com/john-rocky/coreai-model-zoo/blob/main/models/openthai-systemone/gate-openthai-systemone-iphone-parity.json).
 
 ## Bundle
 

@@ -104,8 +104,15 @@ PipelinedBench rows mode (raw ids in, one greedy token out) — **43/43 rows tha
 oracle's label**, engine load 2.5 s; the 255-option row (1,965 tokens) is rejected with
 `InferenceRuntimeError.contextLengthExceeded(0, 1024)` because the frozen fork's pipelined engine
 caps the iOS growing KV cache at 1,024 tokens
-([`gate-decider-0.8b-iphone-argmax.json`](gate-decider-0.8b-iphone-argmax.json)). Phone
-probabilities wait for the read-last-logits primitive above.
+([`gate-decider-0.8b-iphone-argmax.json`](gate-decider-0.8b-iphone-argmax.json)).
+
+**iPhone 17 Pro through coreai-kit (iOS 27.0, GPU, the kit's logits engine, 2026-09-23):** the same 44 rows
+through `decide-cli parity` run inside an app, with the kit's `Decision.Format.decider` and its 255-option
+label table — tokens **44/44**, slots and labels **44/44**, option argmax **44/44** against the author's fp32
+readout, max |Δp| **0.0092**, mean 0.0010, at the card's temperature 1.03; the 255-option row (1,965 tokens)
+answered in **69.9 s** — the 1,024-token limit above is the pipelined engine's growing cache, not the
+phone's. Median **2,078 ms** per question (all rows of a score question summed) with the phone at thermal
+state "serious" ([`gate-decider-0.8b-iphone-parity.json`](gate-decider-0.8b-iphone-parity.json)).
 
 ## ⬇️ Bundle
 
