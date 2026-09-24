@@ -20,6 +20,10 @@ packages:
   MisakiSwift:
     url: https://github.com/mlalma/MisakiSwift
     revision: 6835a1ce4a8854075c89f18ff75c74b13ef58e15
+  # 8-speaker diarization for the Transcribe tab (Nemotron-3-Diarization host: mel, streaming loop,
+  # speaker cache) and its gate metrics for DIARIZE_SELFTEST. Local package in this repo.
+  NemotronDiarizer:
+    path: ../../conversion/nemotron3_diar/swift
 
 # Release: the engine's per-token host work is ~3x slower unoptimized.
 schemes:
@@ -47,6 +51,7 @@ targets:
           - StableAudioAssets  # 3 bundles + t5_tokenizer + metadata (~1 GB) — dev symlink, loaded via #filePath
           - SeparateAssets     # mbr_full_fp16 bundle + metadata + golden_*.f32 (~0.5 GB) — dev symlink, loaded via #filePath
           - DiarizeAssets      # sortformer_float16 bundle + mel filters + golden_*.f32 + demo wav (~0.24 GB) — dev symlink, loaded via #filePath
+          - N3DAssets          # n3d_streaming / n3d_offline bundles + 4 host .f32le + metadata (~0.8 GB) — dev symlink, loaded via #filePath
           - VibeVoiceAssets    # 6 .aimodelc bundles + device_bundle + golden.f32 (~2.8 GB) — dev symlink / iOS sideload, loaded at runtime
       - path: Sources/KokoroResources   # vocab/voices/l_linear/demo_phrases — bundled into the app
         type: folder
@@ -59,6 +64,10 @@ targets:
         product: MisakiSwift
         embed: true
         link: true
+      - package: NemotronDiarizer
+        product: NemotronDiarizer
+      - package: NemotronDiarizer
+        product: N3DGateSupport
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.coreaiaudio

@@ -46,6 +46,8 @@ conversion/voxcpm/scratch_*.py
 
 # VoxCPM dev asset symlink (points at conversion artifacts; machine-specific)
 apps/coreai-audio/Sources/VoxCPMAssets
+# Nemotron-3-Diarization dev asset symlink (points at conversion/nemotron3_diar/_work/ship; machine-specific)
+apps/coreai-audio/Sources/N3DAssets
 
 # Working logs from device builds / smoke gates (local R&D artifacts)
 *.log

@@ -15,13 +15,23 @@ import Accelerate
 import CoreAIKitVision
 import Foundation
 
-/// One speaker turn: `speaker` (0..<4) is active over `[startSec, endSec)` (frames are 80 ms).
+/// One speaker turn: `speaker` is active over `[startSec, endSec)`. Frames are `frameSec` long: 80 ms here
+/// (speakers 0..<4), 10 ms for the 8-speaker NemotronDiarizerBridge.
 struct SpeakerSegment: Sendable, Hashable {
     let speaker: Int
     let startFrame: Int
     let endFrame: Int          // exclusive
-    var startSec: Double { Double(startFrame) * SortformerDiarizer.frameSec }
-    var endSec: Double { Double(endFrame) * SortformerDiarizer.frameSec }
+    let frameSec: Double
+
+    init(speaker: Int, startFrame: Int, endFrame: Int, frameSec: Double = SortformerDiarizer.frameSec) {
+        self.speaker = speaker
+        self.startFrame = startFrame
+        self.endFrame = endFrame
+        self.frameSec = frameSec
+    }
+
+    var startSec: Double { Double(startFrame) * frameSec }
+    var endSec: Double { Double(endFrame) * frameSec }
 }
 
 // MARK: - NeMo 128-mel frontend (normalize=NA)
