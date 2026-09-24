@@ -1,0 +1,46 @@
+# N3DGate — iPhone gate of the Nemotron-3-Diarization Core AI port (conversion/nemotron3_diar).
+# The app is a thin shell: the host (NemotronDiarizer) and the gate metrics (N3DGateSupport) come from
+# the conversion's Swift package by path, so the phone runs the code the Mac self-test runs.
+# Build: ./_build.sh (xcodegen generate + xcodebuild Release, generic iOS). Assets are sideloaded, not bundled.
+name: N3DGate
+options:
+  bundleIdPrefix: com.daisukemajima
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: "27.0"
+packages:
+  NemotronDiarizer:
+    path: ../../conversion/nemotron3_diar/swift
+schemes:
+  N3DGate:
+    build:
+      targets:
+        N3DGate: all
+    run:
+      config: Release
+targets:
+  N3DGate:
+    type: application
+    platform: iOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: NemotronDiarizer
+        product: NemotronDiarizer
+      - package: NemotronDiarizer
+        product: N3DGateSupport
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.n3dgate
+        DEVELOPMENT_TEAM: MFN25KNUGJ
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: N3DGate
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"

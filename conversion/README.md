@@ -475,6 +475,17 @@ Apple's repo; each recipe names the script it runs.
   before writing a bundle. Ported by [Rahul Rachuri](https://github.com/RahulRachuri). See
   [`../models/pocket-tts/README.md`](../models/pocket-tts/README.md).
 
+- **Nemotron-3-Diarization (8-speaker streaming speaker diarization, NVIDIA, in [`nemotron3_diar/`](nemotron3_diar/)):
+  `nemotron3_diar/export_n3d.py --dtype float16 [--profile offline]`** — the per-chunk network re-authored
+  from the raw safetensors as one graph: `packed [1, T, 512]` + `valid [1, T]` → `logits [1, T·8, 8]`, rows
+  left-packed so T = 541 serves all three streaming modes and T = 684 the offline profile. The host keeps
+  the log-mel, the 8-frame projection and the speaker cache, ported line by line from transformers
+  (scores in float64: the reference's own top-k sits 2 ulp from its boundary in 3 of 16 compressions).
+  Gated one chunk at a time and on whole clips against transformers fp32, in NumPy and in Swift
+  (`swift/`, bit-identical logits), with poisoned-loop controls; `apps/N3DGate` runs the same gate on the
+  iPhone. See [`nemotron3_diar/README.md`](nemotron3_diar/README.md) and
+  [`../models/nemotron-3-diarization/README.md`](../models/nemotron-3-diarization/README.md).
+
 ## Reproduce (env)
 
 Convert/verify needs the `coreai-core` + `coreai-torch` + `coreai-opt` Python env (macOS; the

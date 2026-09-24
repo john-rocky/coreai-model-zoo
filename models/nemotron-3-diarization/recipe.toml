@@ -1,0 +1,44 @@
+# Recipe for nemotron-3-diarization — the configuration that produced each staged bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# Both graphs come from one exporter: re-authored in plain PyTorch from model.safetensors at
+# f667ed73aee57d40cc39428eb768b4fd87a0a29e (the script pins the revision and checks the sha256).
+# The steps below are the fp16 ship bundles; `--dtype float32` of the same commands builds the parity
+# bundles the gates load on the CPU. conversion/nemotron3_diar/README.md lists the gates in order.
+
+["nemotron-3-diarization"]
+card = "README.md"
+hf_repo = "mlboydaisuke/Nemotron-3-Diarization-CoreAI"
+source_hf_id = "nvidia/Nemotron-3-Diarization"
+status = "verified"
+steps = [
+  { script = "nemotron3_diar/export_n3d.py", args = ["--dtype", "float16"], bundle = "n3d_streaming_float16.aimodel" },
+  { script = "nemotron3_diar/export_n3d.py", args = ["--dtype", "float16", "--profile", "offline", "--skip-assets"], bundle = "n3d_offline_float16.aimodel" },
+]
+needs = [
+  "Stage 0 first, in the oracle venv (Python 3.12, torch 2.9.0, transformers from git main, gated at 4b28d51):",
+  "`python conversion/nemotron3_diar/make_reference.py` writes _work/chunk_io_*.npz and _work/fe_constants.npz.",
+  "export_n3d.py re-checks the eager graph against those captures before it exports, and asserts the mel",
+  "filterbank and the Hann window bit-identical to the transformers feature extractor's.",
+  "The fixture audio in <work root>/_n3d/fixtures/: diarization_example_16k.wav (97.6 s, the transformers",
+  "integration-test clip) and test_multispk_16k.wav (21.5 s).",
+]
+aot = "xcrun coreai-build compile n3d_<streaming|offline>_float16.aimodel --output <dir> --platform iOS --architecture h18p --preferred-compute gpu --min-deployment-version 27.0"
+notes = [
+  "The first step also writes the host constants beside the bundle: embedder_projection.f32le,",
+  "silence_embeds.f32le, mel_filters_128x257.f32le and hann_window_400.f32le.",
+  "Host constants (profiles, speaker cache, mel parameters) and every asset's sha256 are in metadata.json.",
+  "The published one comes from export_n3d.py --metadata --ship after the AOT compiles: its bundles are the four",
+  "shipped ones (tree sha256, size, target, compute preference). --metadata alone describes every local bundle.",
+  "T = 541 serves the three streaming modes (low / very low / ultra low latency); T = 684 is offline.",
+  "The iOS .h18p.aimodelc bundles come from aot_compile.py (streaming: the default run's ios_gpu target;",
+  "offline: --bundle _work/artifacts/n3d_offline_float16.aimodel --tag offline --targets ios_gpu).",
+  "stage_ship.py lays out the Hugging Face repo in _work/ship/ and checks it against metadata.json.",
+  "iPhone 17 Pro gate (apps/N3DGate, iOS 27.0 build 24A437, 2026-09-24, run 20260924-174829): both h18p GPU",
+  "bundles pass (97.6 s low latency 99.9987 %, offline 99.9987 %); the Neural Engine compile reaches 99.7758 %",
+  "on the same clip, below the 99.9 % bar, and is not shipped.",
+  "Published 2026-09-24 at revision 4642a67f2e42582df89e367afa76d340a7ac121f (31 files + SHA256SUMS, 794.8 MB);",
+  "mirrored to coreai-community/Nemotron-3-Diarization-CoreAI.",
+]
+open_questions = []

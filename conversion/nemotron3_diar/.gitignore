@@ -1,0 +1,12 @@
+_work/
+__pycache__/
+*.npz
+*.npy
+*.wav
+*.mp3
+*.f32le
+*.aimodel/
+*.aimodelc/
+*.log
+swift/.build/
+swift/.swiftpm/

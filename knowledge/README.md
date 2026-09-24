@@ -384,6 +384,10 @@ For the long-form version of the same material, read
 - [`sortformer-speaker-diarization.md`](sortformer-speaker-diarization.md) — streaming **speaker
   diarization**: export only the neural core, port the streaming loop + AOSC speaker cache to the
   host.
+- [`nemotron3-diarization-port.md`](nemotron3-diarization-port.md) — Nemotron-3-Diarization, the
+  8-speaker successor: speaker-cache rules taken from transformers, not from the 4-speaker port; one
+  left-packed graph for three streaming modes; padding rows zeroed before the Conv1d; a 2-ulp compression
+  tie that forces float64 scores; and why the Neural Engine error is not LayerNorm overflow.
 - [`vibevoice-multispeaker-tts.md`](vibevoice-multispeaker-tts.md) — VibeVoice, the zoo's first
   **multi-speaker / dialogue TTS**: dual-LM **next-token diffusion**, why the speech feedback loop
   forces fp16, and why the `expectFrequentReshapes` hint must be off on iOS.
