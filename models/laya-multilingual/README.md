@@ -113,6 +113,21 @@ exclusive GPU window (contended), with this model's server running alone. JevBen
 (Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not
 comparable to these accuracies.
 
+**iPhone 17 Pro (2026-09-24)**
+
+| | easy 48 | standard 72 | hard 111 |
+|---|---:|---:|---:|
+| accuracy | 0.896 | 0.403 | 0.342 |
+| p50 | 0.05 s | 0.05 s | 0.07 s |
+| p95 | 0.05 s | 0.05 s | 0.26 s |
+| p50 / p95 over | 48 rows, nominal | 72 rows, nominal | 111 rows, nominal |
+
+The phone (iOS 27.0 24A437) received the same request bodies as the Mac run, one question per request. A
+headless harness app answered each with coreai-kit 0.7.1, through the call the kit's System One server makes.
+It ran the `ios/wfp16-s256` bundle; the Mac run used `macos/wfp16-s256`. Every bundle file on the phone
+matched the Hub revision by hash. Every answer's argmax equals the Mac run's. p50 and p95 are the kit's time
+per request. A nominal row started and ended with the phone on its battery at thermal state nominal.
+
 ## Numerics gate
 
 The oracle is the publisher's package itself (`laya.load(<pinned snapshot>, subfolder="multilingual")`,

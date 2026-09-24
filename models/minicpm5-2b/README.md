@@ -101,6 +101,17 @@ Gate transcript: [`gate-minicpm5-2b.json`](gate-minicpm5-2b.json) (`cli/coreai_v
 
 The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench) `2fa63fa`, v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755` `decide-cli serve` with the `int8/` bundle, one question per request. This chat model was asked zero-shot under the kit's JSON decision prompt, with the catalog's calibration temperature 2.93 (fit on SemIf perturbations108). Accuracy per tier and the hard tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured without an exclusive GPU window (contended), with this model's server running alone. JevBench's published scores (Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not comparable to these accuracies.
 
+**iPhone 17 Pro (2026-09-24)**
+
+| | easy 48 | standard 72 | hard 111 |
+|---|---:|---:|---:|
+| accuracy | 0.979 | 0.708 | 0.459 |
+| p50 | 0.22 s | 0.17 s | 0.63 s |
+| p95 | 0.25 s | 0.25 s | 3.49 s |
+| p50 / p95 over | 48 rows, nominal | 72 rows, nominal | 111 rows, nominal |
+
+The phone (iOS 27.0 24A437) received the same request bodies as the Mac run, one question per request. A headless harness app answered each with coreai-kit 0.7.1, through the call the kit's System One server makes. It ran the same `int8/` bundle as the Mac run, not `ios-ane-h18p/`. Every bundle file on the phone matched the Hub revision by hash. Every answer's argmax equals the Mac run's. p50 and p95 are the kit's time per request. A nominal row started and ended with the phone on its battery at thermal state nominal.
+
 ## Conversion
 
 - **`llama → mistral` remap** — MiniCPM5-2B is a plain `LlamaForCausalLM` (GQA 16:2, `head_dim` 128, RoPE θ 5e6, no scaling, untied 130560-vocab head); the stock exporter has no `llama` graph family, but the Mistral builder is architecturally identical (GQA, no qkv bias, no qk-norm, explicit `head_dim`). The one-line remap that ships the 1B, untouched.

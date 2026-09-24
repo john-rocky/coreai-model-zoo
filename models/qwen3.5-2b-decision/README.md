@@ -81,6 +81,17 @@ A decision costs one S=1 prefill of the **whole question row**, so these are **p
 
 The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench) `2fa63fa`, v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755` `decide-cli serve` with the ship bundle, one question per request. Accuracy per tier and the hard tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured without an exclusive GPU window (contended), with two other model servers running on the same GPU (a solo re-check of 30 items returned bit-identical probabilities); the graph's prefill is S=1, and at that kit commit the state was prefilled again for every question. JevBench's published scores (Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not comparable to these accuracies.
 
+**iPhone 17 Pro (2026-09-24)**
+
+| | easy 48 | standard 72 | hard 20 |
+|---|---:|---:|---:|
+| accuracy | 1.000 | 0.778 | 0.400 |
+| p50 | 3.64 s | 3.95 s | 18.09 s |
+| p95 | 4.04 s | 4.66 s | 24.06 s |
+| p50 / p95 over | 48 rows, nominal | 72 rows, nominal | 18 of 20 rows, nominal |
+
+The phone (iOS 27.0 24A437) received the same request bodies as the Mac run, one question per request. A headless harness app answered each with coreai-kit 0.7.1, through the call the kit's System One server makes. Every bundle file on the phone matched the Hub revision by hash. Every answer's argmax equals the Mac run's. The hard column is the middle 20 of the 111 hard items by state length. The Mac run scored 0.400 on the same 20. p50 and p95 are the kit's time per request: the state's prefill plus the decision. A nominal row started and ended with the phone on its battery at thermal state nominal. The other two hard rows started or ended at thermal state fair and are left out of p50 and p95.
+
 ## Through the kit
 
 **Measured through coreai-kit** by the supervisor, using `Decision.Format.decisionFunction`, the sequential engine and the kit's own rendering of the author's plain-text prompt. No kit measurement was re-derived by this run.

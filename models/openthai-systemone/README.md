@@ -116,6 +116,24 @@ graph's prefill is S=1, and at that kit commit the state was prefilled again for
 question. JevBench's published scores (Intelligence and the rest) are chance-corrected over 534
 items, sealed ones included, and are not comparable to these accuracies.
 
+**iPhone 17 Pro (2026-09-24)**
+
+| | easy 48 | standard 72 | hard 20 |
+|---|---:|---:|---:|
+| accuracy | 1.000 | 0.819 | 0.200 |
+| p50 | 0.88 s | 0.99 s | 5.77 s |
+| p95 | 1.29 s | 1.28 s | 7.28 s |
+| p50 / p95 over | 48 rows, hot | 24 of 72 rows, nominal | 20 rows, nominal |
+
+The phone (iOS 27.0 24A437) received the same request bodies as the Mac run, one question
+per request. A headless harness app answered each with coreai-kit 0.7.1, through the call the
+kit's System One server makes. Every bundle file on the phone matched the Hub revision by
+hash. Every answer's argmax equals the Mac run's. The hard column is the middle 20 of the 111
+hard items by state length. The Mac run scored 0.200 on the same 20. p50 and p95 are the kit's
+time per request: the state's prefill plus the decision. A nominal row started and ended with
+the phone on its battery at thermal state nominal. A hot row started or ended at fair or worse.
+The easy tier and the first 48 standard rows ran on the charger.
+
 ## Through the kit
 
 **Measured through coreai-kit**, using its sequential engine and tokenizer: `decide-cli parity`
