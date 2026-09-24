@@ -38,7 +38,8 @@ notes = [
   "iPhone 17 Pro gate (apps/N3DGate, iOS 27.0 build 24A437, 2026-09-24, run 20260924-174829): both h18p GPU",
   "bundles pass (97.6 s low latency 99.9987 %, offline 99.9987 %); the Neural Engine compile reaches 99.7758 %",
   "on the same clip, below the 99.9 % bar, and is not shipped.",
-  "Published 2026-09-24 at revision 4642a67f2e42582df89e367afa76d340a7ac121f (31 files + SHA256SUMS, 794.8 MB);",
-  "mirrored to coreai-community/Nemotron-3-Diarization-CoreAI.",
+  "Published 2026-09-24; pin revision 8dc6258987e69fc7addadd240df0998b6ae131c0 (36 files + SHA256SUMS, 797.0 MB: the",
+  "bundles, the four host constants and metadata.json at the root and again under host/, the directory CoreAIKit",
+  "fetches); mirrored to coreai-community/Nemotron-3-Diarization-CoreAI.",
 ]
 open_questions = []

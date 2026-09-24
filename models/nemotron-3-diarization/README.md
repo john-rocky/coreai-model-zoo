@@ -10,7 +10,7 @@ It succeeds the 4-speaker [Streaming Sortformer port](../sortformer-diar/README.
 conversion of this checkpoint exists:
 [smdesai/Nemotron-3-Diarization-CoreAI](https://huggingface.co/smdesai/Nemotron-3-Diarization-CoreAI).
 
-- 🤗 [mlboydaisuke/Nemotron-3-Diarization-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Diarization-CoreAI) (revision `4642a67`, 2026-09-24; mirror:
+- 🤗 [mlboydaisuke/Nemotron-3-Diarization-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Diarization-CoreAI) (revision `8dc6258`, 2026-09-24; mirror:
   [coreai-community/Nemotron-3-Diarization-CoreAI](https://huggingface.co/coreai-community/Nemotron-3-Diarization-CoreAI)).
 - Conversion, gates and the Swift host: [`conversion/nemotron3_diar`](../../conversion/nemotron3_diar).
 - iPhone gate app: [`apps/N3DGate`](../../apps/N3DGate).

@@ -40,6 +40,13 @@ FILES = {  # repo path -> source
     "mel_filters_128x257.f32le": A / "mel_filters_128x257.f32le",
     "hann_window_400.f32le": A / "hann_window_400.f32le",
     "metadata.json": A / "metadata.ship.json",          # export_n3d.py --metadata --ship: bundles = the 4 shipped
+    # the same five host files again under host/: one directory a client can fetch as a unit (CoreAIKit resolves a
+    # catalog variant by a directory path on the Hub; single files at the repo root are not listable that way)
+    "host/embedder_projection.f32le": A / "embedder_projection.f32le",
+    "host/silence_embeds.f32le": A / "silence_embeds.f32le",
+    "host/mel_filters_128x257.f32le": A / "mel_filters_128x257.f32le",
+    "host/hann_window_400.f32le": A / "hann_window_400.f32le",
+    "host/metadata.json": A / "metadata.ship.json",
     "config.json": Path(hf_snapshot(REPO_ID, "config.json", revision=REVISION)),
     "processor_config.json": Path(hf_snapshot(REPO_ID, "processor_config.json", revision=REVISION)),
     "LICENSE": LEGAL / "LICENSE",
@@ -76,12 +83,13 @@ def main() -> None:
     if not card.is_file():
         raise SystemExit(f"no card draft at {card}")
     SHIP.mkdir(parents=True, exist_ok=True)
-    keep = set(FILES) | {"README.md"}
+    keep = {k.split("/", 1)[0] for k in FILES} | {"README.md"}
     for item in SHIP.iterdir():  # anything else in the staging dir would be uploaded by mistake
         if item.name not in keep and item.name != "SHA256SUMS":
             raise SystemExit(f"unexpected item in {SHIP}: {item.name} (remove it or add it to FILES)")
     for name, src in FILES.items():
         dst = SHIP / name
+        dst.parent.mkdir(parents=True, exist_ok=True)
         if dst.is_dir():
             shutil.rmtree(dst)
         elif dst.exists():
