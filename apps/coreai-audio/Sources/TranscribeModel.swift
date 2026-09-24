@@ -57,6 +57,10 @@ final class TranscribeModel: ObservableObject {
     @Published var diarizedLines: [DiarizedLine] = []
     @Published var diarizeSummary = ""
     let timeline = DiarizeTimeline()
+    /// The live screen (DiarizeLiveView) of a playback-synced run; `liveScreen`: a chosen file's run shows it full
+    /// screen over the tab until Close.
+    let diarizeLive = DiarizeLive()
+    @Published var liveScreen = false
 
     private var whisper: KitWhisperModel?
     private var asr: KitASRModel?
@@ -294,8 +298,11 @@ final class TranscribeModel: ObservableObject {
 
     func transcribeClip() async {
         guard loaded, let samples, !busy, !live else { return }
-        // a chosen file plays with the speaker timeline (a mic recording is diarized after the fact)
-        if diarize && diarizesEightSpeakers && clipURL != nil { await transcribeDiarizedSynced(samples); return }
+        // a chosen file plays on the live screen (a mic recording is diarized after the fact)
+        if diarize && diarizesEightSpeakers && clipURL != nil {
+            await transcribeDiarizedSynced(samples, fullScreen: true)
+            return
+        }
         playClip(samples)   // hear the clip you picked, in sync with transcription
         if diarize { await transcribeDiarized(samples); return }
         busy = true
@@ -403,25 +410,33 @@ final class TranscribeModel: ObservableObject {
         return try await ensureNemotronDiarizer().diarize(samples).turns
     }
 
-    /// Diarize while the clip plays: each 0.72 s chunk goes through the graph once its audio, look-ahead
-    /// included, has played, and its frames extend the timeline about a second behind what you hear. When
-    /// the clip ends, every turn goes through the selected ASR into a colored line, then the summary line.
+    /// Diarize while the clip plays, on the live screen (DiarizeLiveView): each 0.72 s chunk goes through the
+    /// graph once its audio, look-ahead included, has played, and its frames extend the lanes about a second
+    /// behind what you hear. When the clip ends, every turn goes through the selected ASR into a colored line
+    /// (`withTranscript`), then the summary line. `fullScreen` (a chosen file): the live screen goes up over the
+    /// tab until Close, READY for half a second before the clip plays, as LiveView.kt does for a picked clip.
     /// Returns the run's numbers (nil when it failed; the status line says why).
     @discardableResult
-    func transcribeDiarizedSynced(_ samples: [Float]) async -> DiarizeRunStats? {
+    func transcribeDiarizedSynced(_ samples: [Float], withTranscript: Bool = true, fullScreen: Bool = false) async
+        -> DiarizeRunStats? {
         busy = true; transcript = ""; language = ""
         clearDiarization()
         defer { busy = false }
-        var stats = DiarizeRunStats(clipSeconds: Double(samples.count) / 16000, engine: engine.title)
+        var stats = DiarizeRunStats(clipSeconds: Double(samples.count) / 16000,
+                                    engine: withTranscript ? engine.title : nil)
+        diarizeLive.setClip(samples)
+        if fullScreen { liveScreen = true }
         do {
             let bridge = try await ensureNemotronDiarizer()
             let stream = NemotronDiarizerStream(bridge: bridge, samples: samples)
             let playback = try DiarizePlayback(samples: samples, volume: DiarizeDemoOptions.current?.volume ?? 1)
             self.playback = playback
+            if fullScreen { try? await Task.sleep(for: .milliseconds(500)) }
             showsDiarization = true
             timeline.start(duration: stats.clipSeconds, playhead: { [weak playback] in playback?.position ?? 0 })
             status = "Listening — speakers appear as they talk."
             try playback.play()
+            diarizeLive.start { [weak playback] in playback?.position ?? 0 }
             stats.playStart = Date()
             var probs: [Float] = []
             probs.reserveCapacity(stream.clipFrames * NemotronDiarizerBridge.speakers)
@@ -431,6 +446,8 @@ final class TranscribeModel: ObservableObject {
                 let late = playback.position - due
                 let step = try await stream.step()
                 timeline.append(probs: step.probs, frames: step.frames)
+                diarizeLive.append(probs: step.probs, frames: step.frames)
+                diarizeLive.chunkDone(k, seconds: step.graphSeconds + step.hostSeconds)
                 probs.append(contentsOf: step.probs)
                 let at = playback.position, f = NemotronDiarizerBridge.frameSec
                 stats.addChunk(late: late, graph: step.graphSeconds, host: step.hostSeconds,
@@ -440,14 +457,18 @@ final class TranscribeModel: ObservableObject {
             await playback.waitUntilEnded()
             stats.playEnd = Date()
             timeline.finish()
+            diarizeLive.finish()
+            stats.screen = [diarizeLive.latencyText, diarizeLive.stepText]
 
             let turns = NemotronDiarizerBridge.turns(from: probs, frames: stream.clipFrames)
             stats.turns = turns.count
             stats.speakers = timeline.speakerCount
-            stats.asrStart = Date()
-            stats.asrTurns = try await transcribeTurns(turns, samples)
-            stats.asrEnd = Date()
-            stats.lines = diarizedLines.count
+            if withTranscript {
+                stats.asrStart = Date()
+                stats.asrTurns = try await transcribeTurns(turns, samples)
+                stats.asrEnd = Date()
+                stats.lines = diarizedLines.count
+            }
             diarizeSummary = Self.summaryLine(seconds: stats.clipSeconds, speakers: stats.speakers, turns: stats.turns)
             stats.summary = diarizeSummary
             status = "Done."
@@ -455,6 +476,8 @@ final class TranscribeModel: ObservableObject {
         } catch {
             playback?.stop()
             timeline.finish()
+            diarizeLive.fail(error.localizedDescription)
+            if fullScreen { liveScreen = false }
             status = "Diarized transcription failed: \(error.localizedDescription)"
             return nil
         }

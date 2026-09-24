@@ -1,14 +1,18 @@
 #!/bin/zsh
 # Record the Diarize demo from the Mac: QuickTime mirrors the USB-connected iPhone (screen and sound), the app
-# plays N3DAssets/demo/<clip>.wav by itself (DIARIZE_DEMO, Sources/DiarizeDemo.swift): the speaker lanes grow
-# with the audio, then the transcript and the summary line. The recording is exported to ~/Desktop and cut for X.
-#   ./record-demo.sh [clip]                 default demo_clip
+# plays N3DAssets/demo/<clip>.wav by itself on its full-screen live screen (DIARIZE_DEMO, Sources/DiarizeDemo.swift):
+# READY, then the speaker lanes grow with the audio (LIVE), then DONE. The recording is exported to ~/Desktop and cut
+# for X.
+#   ./record-demo.sh [clip]                 default n3d_meeting_16k
 #   TRIGGER=1 ./record-demo.sh [clip]       load before recording: the app waits for a trigger file, then a launch
 #                                           without --terminate-existing brings it to the front (when a terminate
 #                                           launch leaves the home screen showing)
 #   ./record-demo.sh --cut <raw.mov> [t1 t2]   cut a recording for X again (t1..t2 = the part played at 3x)
-# Knobs: UDID, ENGINE (parakeet | whisper | nemotron | qwen3asr), SLOW (the transcript part plays at 3x when it
-# takes longer than this, default 10 s), HOLD (seconds kept after DONE, default 4), CAP (5 s polls, default 120).
+#   ./record-demo.sh --captions <in.mp4> [out.mp4]   burn in the captions (default out: <in>-captions.mp4): the top
+#                                           line all through, the two credit lines at the bottom for the last 3 s
+# Knobs: UDID, TRANSCRIPT=1 (the transcript under the lanes once DONE; off for the video), ENGINE (its ASR: parakeet |
+# whisper | nemotron | qwen3asr), SLOW (the transcript part plays at 3x when it takes longer than this, default 10 s),
+# HOLD (seconds kept after DONE, default 4), CAP (5 s polls, default 120).
 # Before: the phone unlocked, on USB, in airplane mode (no banners), with the app, Library/Application Support/
 # N3DAssets (demo/<clip>.wav inside) and an ASR on it (Documents/Models/Parakeet, else Nemotron; Whisper would have
 # to download). QuickTime's last movie-recording source must be the iPhone, as camera and as microphone.
@@ -75,6 +79,41 @@ report_x() {
   say "X: $1 ($(du -h "$1" | cut -f1), ${d} s$( (( ${d%.*} > 140 )) && echo '; over the 2:20 X limit' ))"
 }
 
+# captions_png <W> <H> <top.png> <end.png>: the caption overlays as transparent PNGs (brew ffmpeg has no drawtext),
+# drawn like the LiteRT demo's overlay_n3d.py on its 1080 x 2340 frame (Helvetica, white on a translucent black box,
+# the address in light blue), scaled to the video's width; the credit lines keep their distance from the bottom edge
+captions_png() {
+  python3 - "$@" <<'PY'
+import sys
+from PIL import Image, ImageDraw, ImageFont
+W, H = int(sys.argv[1]), int(sys.argv[2])
+u = W / 1080
+FONT = "/System/Library/Fonts/Helvetica.ttc"
+WHITE, ACCENT, BOX = (255, 255, 255, 255), (138, 180, 248, 255), (0, 0, 0, 150)
+
+def boxed(draw, y, text, size, min_size, fill):
+    size, min_size = round(size * u), round(min_size * u)
+    while True:  # the largest size that fits the width
+        font = ImageFont.truetype(FONT, size)
+        l, t, r, b = draw.textbbox((0, 0), text, font=font)
+        if r - l <= W - 80 * u or size <= min_size:
+            break
+        size -= 1
+    x, pad = (W - (r - l)) / 2, 22 * u
+    draw.rounded_rectangle((x - pad, y - pad, x + r - l + pad, y + b - t + pad), radius=16 * u, fill=BOX)
+    draw.text((x - l, y - t), text, font=font, fill=fill)
+
+top = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+boxed(ImageDraw.Draw(top), 128 * u, "Who spoke when, on-device — up to 8 speakers, streaming", 54, 30, WHITE)
+top.save(sys.argv[3])
+end = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+d = ImageDraw.Draw(end)
+boxed(d, H - (2340 - 2118) * u, "Nemotron 3 Diarization on Core AI GPU", 50, 30, WHITE)
+boxed(d, H - (2340 - 2208) * u, "huggingface.co/mlboydaisuke/Nemotron-3-Diarization-CoreAI", 44, 30, ACCENT)
+end.save(sys.argv[4])
+PY
+}
+
 if [[ "${1:-}" == "--cut" ]]; then
   RAW=${2:?usage: record-demo.sh --cut <raw.mov> [t1 t2]}
   XOUT=${RAW:r}-x.mp4
@@ -82,10 +121,31 @@ if [[ "${1:-}" == "--cut" ]]; then
   exit
 fi
 
-CLIP=${1:-demo_clip}
+if [[ "${1:-}" == "--captions" ]]; then
+  IN=${2:?usage: record-demo.sh --captions <in.mp4> [out.mp4]}
+  OUT=${3:-${IN:r}-captions.mp4}
+  # the frame as ffmpeg decodes it (a rotated movie turns upright)
+  WH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0:s=x "$IN" | head -1)
+  ROT=$(ffprobe -v error -select_streams v:0 -show_entries stream_side_data=rotation -of csv=p=0 "$IN" | head -1)
+  W=${WH%x*} H=${WH#*x}
+  [[ "${ROT#-}" == 90 || "${ROT#-}" == 270 ]] && { S=$W; W=$H; H=$S; }
+  DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$IN")
+  T3=$(printf %.3f $(( DUR - 3 )))
+  captions_png $W $H $WORK/top.png $WORK/end.png || { say "ERROR captions need python3 with PIL"; exit 1; }
+  ffmpeg -v error -y -i "$IN" -loop 1 -i $WORK/top.png -loop 1 -i $WORK/end.png -filter_complex \
+    "[0:v][1:v]overlay=0:0[v1];[v1][2:v]overlay=0:0:enable='gte(t,$T3)'[v]" \
+    -map "[v]" -map "0:a?" -t $DUR -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a copy \
+    -movflags +faststart "$OUT" && say "captions: $OUT (${W}x${H}, $(printf %.2f $DUR) s, credit lines from $T3 s)"
+  code=$?
+  rm -rf $WORK
+  exit $code
+fi
+
+CLIP=${1:-n3d_meeting_16k}
 RAW=$HOME/Desktop/coreai-audio-diarize-$TS.mov
 XOUT=$HOME/Desktop/coreai-audio-diarize-$TS-x.mp4
 ENVJ="\"DIARIZE_DEMO_LOG\":\"1\"${ENGINE:+,\"DIARIZE_DEMO_ENGINE\":\"$ENGINE\"}"
+[[ "${TRANSCRIPT:-0}" == 1 ]] && ENVJ="$ENVJ,\"DIARIZE_DEMO_TRANSCRIPT\":\"1\""
 dc() { xcrun devicectl device $1 $2 --device $UDID "${@:3}"; }   # --device before a launch's bundle id
 
 # preflight: nobody else on the phone, no devicectl running, the clip is in the app's container

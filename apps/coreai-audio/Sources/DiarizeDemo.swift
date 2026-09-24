@@ -1,17 +1,21 @@
-// DiarizeDemo — the Transcribe tab's 8-speaker Diarize as a hands-off run, for a screen recording
-// (record-demo.sh), plus the pieces the playback-synced run uses: the clip player, the device name and the
-// run's numbers. Launch environment:
-//   DIARIZE_DEMO=<clip>        open Transcribe, turn Diarize on, load the ASR and the diarizer, wait 2 s, then play
-//                              <clips>/<clip>.wav with the speaker timeline, the transcript and the summary line
+// DiarizeDemo — the Transcribe tab's 8-speaker Diarize as a hands-off run on the full-screen live screen
+// (DiarizeLiveView), for a screen recording (record-demo.sh), plus the pieces the playback-synced run uses: the clip
+// player, the device name and the run's numbers. Launch environment:
+//   DIARIZE_DEMO=<clip>        show only the live screen: read <clips>/<clip>.wav, load the diarizer (READY), wait
+//                              2 s, then play the clip with the lanes growing (LIVE) to the end (DONE)
+//   DIARIZE_DEMO_TRANSCRIPT=1  also load the ASR, and once the clip is done put "who said what" under the lanes
 //   DIARIZE_DEMO_TRIGGER=1     after loading, wait for Documents/autoplay-<clip>-<epoch>.trigger files (put there by
 //                              `devicectl device copy to`); each new one plays its clip, 2 s after it appears
 //   DIARIZE_DEMO_LOG=1         mirror the numbers to Documents/diarize_demo/<launch epoch>.log (`devicectl device
 //                              copy from`); "DONE <clip>" after each clip, "ERROR …" when something fails
-//   DIARIZE_DEMO_ENGINE=…      parakeet | whisper | nemotron | qwen3asr (default: Parakeet; on iPhone only when it is
-//                              sideloaded, else a sideloaded Nemotron, else Whisper from the Hub)
+//   DIARIZE_DEMO_ENGINE=…      the transcript's ASR: parakeet | whisper | nemotron | qwen3asr (default: Parakeet;
+//                              on iPhone only when it is sideloaded, else a sideloaded Nemotron, else Whisper from
+//                              the Hub)
 //   N3D_DEMO=<dir>             the clips (default <N3DAssets>/demo); DIARIZE_DEMO_VOLUME=0 plays silently (Mac checks)
-//   DIARIZE_DEMO_SNAPSHOTS=1   the result view rendered off-screen every 2 s of a clip's run and at its end, as PNGs in
-//                              Documents/diarize_demo/snapshots (no window needed: a locked Mac makes none)
+//   DIARIZE_DEMO_SNAPSHOTS=1   the live screen rendered off-screen as the iPhone 17 Pro shows it (402 x 874 pt at
+//                              3x) when the clip is read (READY), at 0, 20, 45, 64 and 74 s of playback and once it
+//                              is done, as PNGs in Documents/diarize_demo/snapshots (no window needed: a locked Mac
+//                              makes none)
 // DIARIZE_DEMO_TRIGGER, DIARIZE_DEMO_LOG and DIARIZE_DEMO_SNAPSHOTS also take a directory path instead of 1. The run
 // reads a file and plays it; it never touches the microphone.
 import AVFoundation
@@ -45,6 +49,7 @@ struct DiarizeDemoOptions: Sendable {
     let clips: URL
     let volume: Float
     let snapshots: URL?
+    var transcript: Bool { DiarizeLive.showsTranscript }
 
     /// Nil unless the launch asked for the demo (DIARIZE_DEMO or DIARIZE_DEMO_TRIGGER).
     static let current: DiarizeDemoOptions? = {
@@ -100,10 +105,11 @@ final class DiarizeDemoLog {
     }
 }
 
-/// A playback-synced run's numbers, for the log (the screen shows only the summary line).
+/// A playback-synced run's numbers, for the log (the live screen shows only its latency and per-chunk lines).
 struct DiarizeRunStats {
     let clipSeconds: Double
-    let engine: String
+    /// The ASR that transcribed the turns; nil: no transcript.
+    let engine: String?
     var chunks = 0
     var frames = 0
     var graphMs: [Double] = []
@@ -119,8 +125,10 @@ struct DiarizeRunStats {
     var asrTurns: [DiarizedTurn] = []
     var playStart: Date?, playEnd: Date?, asrStart: Date?, asrEnd: Date?
     var summary = ""
+    /// The live screen's two lines of numbers at the end of the clip.
+    var screen: [String] = []
 
-    init(clipSeconds: Double, engine: String) {
+    init(clipSeconds: Double, engine: String?) {
         self.clipSeconds = clipSeconds
         self.engine = engine
     }
@@ -148,6 +156,14 @@ struct DiarizeRunStats {
             guard let a, let b else { return 0 }
             return b.timeIntervalSince(a)
         }
+        let asr = engine.map {
+            String(format: "turns %d, speakers %d, transcript lines %d; ASR %@ %.2f s for %d calls (%.2f s median)",
+                   turns, speakers, lines, $0, span(asrStart, asrEnd), calls.count, median(calls))
+        } ?? String(format: "turns %d, speakers %d; no transcript (DIARIZE_DEMO_TRANSCRIPT not set)",
+                    turns, speakers)
+        // the asr marks only when there was a transcript (record-demo.sh speeds that part up)
+        let marks = "marks play_start=\(epoch(playStart)) play_end=\(epoch(playEnd))"
+            + (asrStart == nil ? "" : " asr_start=\(epoch(asrStart)) asr_end=\(epoch(asrEnd))")
         return [
             String(format: "streaming: %d chunks, %d frames; graph %.2f ms median (p90 %.2f, max %.2f), host %.2f ms median; "
                    + "chunk start after its audio %.1f ms median (max %.1f)",
@@ -157,9 +173,9 @@ struct DiarizeRunStats {
                    + "(medians; max %.2f / %.2f); clip %.2f s played in %.2f s",
                    median(behindFirst), median(behindLast), behindFirst.max() ?? 0, behindLast.max() ?? 0,
                    clipSeconds, span(playStart, playEnd)),
-            String(format: "turns %d, speakers %d, transcript lines %d; ASR %@ %.2f s for %d calls (%.2f s median)",
-                   turns, speakers, lines, engine, span(asrStart, asrEnd), calls.count, median(calls)),
-            "marks play_start=\(epoch(playStart)) play_end=\(epoch(playEnd)) asr_start=\(epoch(asrStart)) asr_end=\(epoch(asrEnd))",
+            "screen: \(screen.joined(separator: " | "))",
+            asr,
+            marks,
             "summary \(summary)",
         ] + asrTurns.enumerated().map { i, t in
             String(format: "turn %d: Speaker %d %.2f-%.2f s: %@", i + 1, t.speaker, t.start, t.end,
@@ -267,8 +283,8 @@ enum DeviceName {
 }
 
 extension TranscribeModel {
-    /// The Transcribe tab's model on a DIARIZE_DEMO launch. The App's init starts the run on it before any window
-    /// exists (a Mac app launched while the screen is locked makes none), and the tab shows this same instance.
+    /// The model of a DIARIZE_DEMO launch. The App's init starts the run on it before any window exists (a Mac app
+    /// launched while the screen is locked makes none), and the live screen, the window's only view, shows it.
     static let demo: TranscribeModel? = DiarizeDemoOptions.current == nil ? nil : TranscribeModel()
     private static var demoStarted = false
 
@@ -283,19 +299,32 @@ extension TranscribeModel {
         setvbuf(stdout, nil, _IOLBF, 0)
         let log = DiarizeDemoLog(directory: options.logDirectory)
         log.write("start: clip \(options.clip ?? "-"), trigger \(options.trigger?.path ?? "off"), clips \(options.clips.path), "
+                  + "transcript \(options.transcript ? "on" : "off"), "
                   + "device \(DeviceName.current) (\(DeviceName.machine))")
         guard diarizesEightSpeakers else {
             status = "The 8-speaker diarizer is not staged at \(NemotronDiarizerBridge.location.path)."
+            diarizeLive.fail(status)
             log.write("ERROR \(status)")
             return
         }
-        let (choice, why) = options.engine.map { ($0, "DIARIZE_DEMO_ENGINE") } ?? Self.demoEngine()
-        if engine != choice { engine = choice }
+        // the clip first, so the READY screen has its time axis while the models load
+        var first: [Float]?
+        if options.trigger == nil, let clip = options.clip {
+            guard let pcm = readDemoClip(clip, take: nil, options: options, log: log) else { return }
+            first = pcm
+        }
         diarize = true
-        let t0 = Date()
-        await load()
-        guard loaded else { log.write("ERROR ASR: \(status)"); return }
-        log.write(String(format: "asr %@ (%@) loaded in %.2f s", engine.title, why, Date().timeIntervalSince(t0)))
+        if options.transcript {
+            let (choice, why) = options.engine.map { ($0, "DIARIZE_DEMO_ENGINE") } ?? Self.demoEngine()
+            if engine != choice { engine = choice }
+            let t0 = Date()
+            await load()
+            guard loaded else { diarizeLive.fail(status); log.write("ERROR ASR: \(status)"); return }
+            log.write(String(format: "asr %@ (%@) loaded in %.2f s", engine.title, why,
+                             Date().timeIntervalSince(t0)))
+        } else {
+            log.write("asr: none (the live screen only; DIARIZE_DEMO_TRANSCRIPT=1 adds who said what)")
+        }
         do {
             let bridge = try await ensureNemotronDiarizer()
             log.write(String(format: "diarizer %@ loaded in %.2f s (graph %.2f s), first call %.2f s",
@@ -304,15 +333,17 @@ extension TranscribeModel {
             status = "Model ready."
         } catch {
             status = "Diarizer load failed: \(error.localizedDescription)"
+            diarizeLive.fail(status)
             log.write("ERROR \(status)")
             return
         }
         if let directory = options.trigger {
             await watchTriggers(in: directory, log: log) { clip, take in
-                await self.playDemoClip(clip, take: take, options: options, log: log)
+                guard let pcm = self.readDemoClip(clip, take: take, options: options, log: log) else { return }
+                await self.playDemoClip(pcm, clip: clip, take: take, options: options, log: log)
             }
-        } else if let clip = options.clip {
-            await playDemoClip(clip, take: nil, options: options, log: log)
+        } else if let clip = options.clip, let pcm = first {
+            await playDemoClip(pcm, clip: clip, take: nil, options: options, log: log)
         }
     }
 
@@ -355,35 +386,42 @@ extension TranscribeModel {
         }
     }
 
-    private func playDemoClip(_ clip: String, take: String?, options: DiarizeDemoOptions, log: DiarizeDemoLog) async {
+    /// Reads <clips>/<clip>.wav and puts it on the READY screen; nil (logged) when it cannot.
+    private func readDemoClip(_ clip: String, take: String?, options: DiarizeDemoOptions,
+                              log: DiarizeDemoLog) -> [Float]? {
         let file = clip.hasSuffix(".wav") ? clip : clip + ".wav"
         let url = options.clips.appendingPathComponent(file)
-        let done = "\(clip)\(take.map { " " + $0 } ?? "")"
         guard let pcm = AudioLoader.load16kMono(url), !pcm.isEmpty else {
             status = "Could not decode \(file)."
-            log.write("ERROR cannot read \(url.path) (\(done))")
-            return
+            diarizeLive.fail(status)
+            log.write("ERROR cannot read \(url.path) (\(clip)\(take.map { " " + $0 } ?? ""))")
+            return nil
         }
         setClip(pcm, from: url)
+        diarizeLive.setClip(pcm)
         log.write(String(format: "clip %@: %.2f s (%d samples)%@", file, Double(pcm.count) / 16000, pcm.count,
                          take.map { ", take \($0)" } ?? ""))
-        try? await Task.sleep(for: .seconds(2))
+        return pcm
+    }
+
+    private func playDemoClip(_ pcm: [Float], clip: String, take: String?, options: DiarizeDemoOptions,
+                              log: DiarizeDemoLog) async {
+        let done = "\(clip)\(take.map { " " + $0 } ?? "")"
         let name = "\(clip)\(take.map { "_" + $0 } ?? "")"
         var snapper: Task<Void, Never>?
         if let dir = options.snapshots {
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            snapper = Task {
-                var n = 0
-                while !Task.isCancelled {
-                    n += 1
-                    writeSnapshot(to: dir.appendingPathComponent(String(format: "%@_%03d.png", name, n)))
-                    try? await Task.sleep(for: .seconds(2))
-                }
-            }
+            writeSnapshot(to: dir.appendingPathComponent("\(name)_ready.png"))
+            snapper = Task { await self.snapshotWhilePlaying(name, in: dir) }
         }
-        let stats = await transcribeDiarizedSynced(pcm)
+        try? await Task.sleep(for: .seconds(2))
+        let stats = await transcribeDiarizedSynced(pcm, withTranscript: options.transcript)
         snapper?.cancel()
-        if let dir = options.snapshots { writeSnapshot(to: dir.appendingPathComponent("\(name)_final.png")) }
+        if let dir = options.snapshots {
+            writeSnapshot(to: dir.appendingPathComponent("\(name)_done.png"))
+            // what the Choose… run's full-screen sheet adds once done
+            writeSnapshot(to: dir.appendingPathComponent("\(name)_done_close.png"), onClose: {})
+        }
         guard let stats else {
             log.write("ERROR \(status) (\(done))")
             return
@@ -392,15 +430,27 @@ extension TranscribeModel {
         log.write("DONE \(done)")
     }
 
-    /// The Diarize result view rendered off-screen at phone width (402 pt, light) to a PNG.
-    private func writeSnapshot(to url: URL) {
-        let content = DiarizeResultView(model: self, scrolls: false)
-            .padding(20)
-            .frame(width: 402)
-            .background(Color.white)
-            .environment(\.colorScheme, .light)
+    /// The live screen at 0, 20, 45, 64 and 74 s of playback (64 s: the LiteRT demo's still; a shorter clip: its
+    /// last tenth of a second instead).
+    private func snapshotWhilePlaying(_ name: String, in dir: URL) async {
+        for t in [0.0, 20, 45, 64, 74] {
+            let at = min(t, diarizeLive.duration - 0.1)
+            while !(diarizeLive.phase == .live && diarizeLive.seconds >= at) {
+                if Task.isCancelled || diarizeLive.phase == .done { return }
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            writeSnapshot(to: dir.appendingPathComponent(String(format: "%@_%02.0fs.png", name, t)))
+        }
+    }
+
+    /// The live screen as the iPhone 17 Pro shows it (402 x 874 pt at 3x), rendered off-screen to a PNG.
+    private func writeSnapshot(to url: URL, onClose: (() -> Void)? = nil) {
+        let content = DiarizeLiveScreen(model: self, seconds: diarizeLive.seconds, onClose: onClose, scrolls: false,
+                                        pixelScale: 3)
+            .frame(width: 402, height: 874)
+            .environment(\.colorScheme, .dark)
         let renderer = ImageRenderer(content: content)
-        renderer.scale = 2
+        renderer.scale = 3
         guard let image = renderer.cgImage,
               let dest = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil)
         else { return }

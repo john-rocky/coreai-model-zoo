@@ -108,5 +108,16 @@ struct TranscribeView: View {
         ) { result in
             if case .success(let urls) = result, let url = urls.first { model.loadFile(url) }
         }
+        // 8-speaker Diarize of a chosen file: the live screen over everything until Close
+        #if os(iOS)
+        .fullScreenCover(isPresented: $model.liveScreen) {
+            DiarizeLiveView(model: model) { model.liveScreen = false }
+        }
+        #else
+        .sheet(isPresented: $model.liveScreen) {
+            DiarizeLiveView(model: model) { model.liveScreen = false }
+                .frame(width: 402, height: 874)
+        }
+        #endif
     }
 }
