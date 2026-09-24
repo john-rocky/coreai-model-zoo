@@ -56,8 +56,8 @@ bundle, so `gemma-4-E2B-CoreAI` is deliberately unmapped.
 Refreshing after a new measurement drop (GM day): sync the board's data files, then
 
 ```bash
-env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards --write --push \
-  && python3 tools/devicemark_row.py --go
+# the two runs under Usage, each with --write --push, then:
+python3 tools/devicemark_row.py --go
 ```
 
 (`gen_cards` rewrites both blocks on the enrolled cards; the tool covers the rest of the own
@@ -68,24 +68,38 @@ turn, so a tool commit landing in between would be overwritten.
 ## Usage
 
 Use an isolated checkout of the configured public release; do not switch a shared
-checkout away from someone else's work. For the current pin:
+checkout away from someone else's work. For the current pin, clone into a folder named
+`coreai-kit`:
 
 ```bash
-git clone --branch 0.4.1 --depth 1 https://github.com/john-rocky/coreai-kit ~/code/coreai-kit-cards
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit ~/code/coreai-kit-cards/coreai-kit
 ```
 
-For **0.4.1**, leave `DEVELOPMENT_TEAM` unset during this generator run. The
-committed example projects keep the `${DEVELOPMENT_TEAM}` placeholder; a literal
-team ID would make the lockfile guard report a signing-only difference. macOS smoke
-builds disable signing. Set your own development team separately when installing the
-example on an iPhone. For another release, check whether its committed projects use
-a placeholder or a literal team ID before regenerating.
+The folder name is part of the gate. Twelve runners depend on the kit by path (`../..`), and
+SwiftPM and xcodegen both name that package after its folder: under any other name the CLI
+build cannot find package `coreai-kit`, and the lockfile guard sees a renamed reference.
+
+So is `DEVELOPMENT_TEAM`. The committed ChatDemo and Speak projects keep the
+`${DEVELOPMENT_TEAM}` placeholder; the other twelve runners carry the literal team ID
+(`grep -m1 'DEVELOPMENT_TEAM = ' <runner>/<name>.xcodeproj/project.pbxproj`). Fresh `xcodegen`
+output matches each only under its own setting, so run the generator twice, split by model id.
+macOS smoke builds disable signing; set your own team separately when installing an example on
+an iPhone. For another release, check both again before regenerating.
 
 ```bash
-env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards  # verify (dry-run)
-env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards --write        # apply zoo cards
-env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit ~/code/coreai-kit-cards --write --push # + HF upload
+K=~/code/coreai-kit-cards/coreai-kit
+P="…"   # the ids whose runner is ChatDemo or Speak (not nanbeige4.2-3b, below), and the app-door ids
+L="…"   # every other id
+env -u DEVELOPMENT_TEAM python3 scripts/gen-cards/gen_cards.py --kit $K $P   # verify (dry-run)
+DEVELOPMENT_TEAM=<team> python3 scripts/gen-cards/gen_cards.py --kit $K $L
+# then both again with --write (apply zoo cards), then with --write --push (+ HF upload)
 ```
+
+`nanbeige4.2-3b` is enrolled for its zoo card, but its HF repo belongs to the contributor
+(`ukint-vs/Nanbeige4.2-3B-CoreAI`) and has no markers. Every run that includes it fails there,
+and with `--write` or `--push` that failure stops the writes for every model after it. Leave it
+out of the two runs and give it a run of its own, `--write nanbeige4.2-3b`: its zoo card is
+written, then the run reports the missing HF markers and exits 1.
 
 Exit 0 = all cards clean. Exit 1 = drift (rerun with `--write`) or a gate failure.
 
