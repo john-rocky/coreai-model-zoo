@@ -4,8 +4,11 @@ import SwiftUI
 
 @main
 struct CoreAIAudioApp: App {
-    /// DIARIZE_DEMO opens on the Transcribe tab (DiarizeDemo.swift).
-    @State private var tab = DiarizeDemoOptions.current == nil ? 0 : 1
+    @State private var tab = 0
+    #if os(iOS)
+    /// The Diarize live screen is portrait only.
+    @UIApplicationDelegateAdaptor(DiarizeOrientation.self) private var orientation
+    #endif
 
     init() {
         // Headless ASR self-test: kicked from init() (not .task) so it runs without the GUI window
@@ -50,25 +53,16 @@ struct CoreAIAudioApp: App {
 
     var body: some Scene {
         WindowGroup("coreai-audio") {
-            TabView(selection: $tab) {
-                ContentView()
-                    .tabItem { Label("Understand", systemImage: "ear") }.tag(0)
-                TranscribeView()
-                    .tabItem { Label("Transcribe", systemImage: "text.bubble") }.tag(1)
-                KokoroView()
-                    .tabItem { Label("Speak", systemImage: "speaker.wave.2") }.tag(2)
-                VoxCPMView()
-                    .tabItem { Label("Voice", systemImage: "waveform") }.tag(3)
-                VoxCPM2View()
-                    .tabItem { Label("Voice 2B", systemImage: "waveform.badge.plus") }.tag(4)
-                DotsView()
-                    .tabItem { Label("Voice ML", systemImage: "globe") }.tag(5)
-                MusicGenView()
-                    .tabItem { Label("Music", systemImage: "music.note") }.tag(6)
-                SeparateView()
-                    .tabItem { Label("Separate", systemImage: "music.mic") }.tag(7)
-                DialogueView()
-                    .tabItem { Label("Dialogue", systemImage: "person.2.wave.2") }.tag(8)
+            Group {
+                if let demo = TranscribeModel.demo {
+                    // DIARIZE_DEMO: the Diarize live screen and nothing else (DiarizeDemo.swift)
+                    DiarizeLiveView(model: demo)
+                    #if os(macOS)
+                        .frame(width: 402, height: 874)
+                    #endif
+                } else {
+                    tabs
+                }
             }
             // Non-blocking self-test (KOKORO_SELFTEST=1): the iOS launch watchdog
             // kills any main-thread block, so run it as a normal async task.
@@ -89,5 +83,28 @@ struct CoreAIAudioApp: App {
         #if os(macOS)
             .defaultSize(width: 560, height: 520)
         #endif
+    }
+
+    private var tabs: some View {
+        TabView(selection: $tab) {
+            ContentView()
+                .tabItem { Label("Understand", systemImage: "ear") }.tag(0)
+            TranscribeView()
+                .tabItem { Label("Transcribe", systemImage: "text.bubble") }.tag(1)
+            KokoroView()
+                .tabItem { Label("Speak", systemImage: "speaker.wave.2") }.tag(2)
+            VoxCPMView()
+                .tabItem { Label("Voice", systemImage: "waveform") }.tag(3)
+            VoxCPM2View()
+                .tabItem { Label("Voice 2B", systemImage: "waveform.badge.plus") }.tag(4)
+            DotsView()
+                .tabItem { Label("Voice ML", systemImage: "globe") }.tag(5)
+            MusicGenView()
+                .tabItem { Label("Music", systemImage: "music.note") }.tag(6)
+            SeparateView()
+                .tabItem { Label("Separate", systemImage: "music.mic") }.tag(7)
+            DialogueView()
+                .tabItem { Label("Dialogue", systemImage: "person.2.wave.2") }.tag(8)
+        }
     }
 }
