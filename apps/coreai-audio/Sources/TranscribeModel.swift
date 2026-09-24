@@ -48,7 +48,8 @@ final class TranscribeModel: ObservableObject {
     @Published var transcript = ""
     @Published var language = ""
     /// Diarize mode: label each speaker turn ("who said what") by running the chosen ASR on every
-    /// Sortformer speaker turn. Available only when the Diarize bundle is staged.
+    /// speaker turn — from the 8-speaker Nemotron-3 diarizer when its bundle is staged, else from the
+    /// 4-speaker Sortformer. Available only when one of the two bundles is staged.
     @Published var diarize = false
 
     private var whisper: KitWhisperModel?
@@ -56,14 +57,17 @@ final class TranscribeModel: ObservableObject {
     private var parakeet: KitParakeetModel?
     private var nemotron: KitNemotronModel?
     private var diarizer: SortformerDiarizer?
+    private var nemotronDiarizer: NemotronDiarizerBridge?
     private var samples: [Float]?
     /// Plays the chosen clip aloud when transcription starts, so you can hear what you picked
     /// (the file importer gives no preview). 16 kHz mono — the same PCM fed to the model. Recreated
     /// per clip so a fresh Transcribe restarts audio instead of queueing behind the previous clip.
     private var player = AudioPlayer()
 
-    /// Whether the Sortformer diarize bundle is present (dev symlink on macOS / sideload on device).
-    var diarizeAvailable: Bool { DiarizeAssets.root != nil }
+    /// Whether a diarize bundle is present (dev symlink on macOS / sideload on device).
+    var diarizeAvailable: Bool { NemotronDiarizerBridge.staged != nil || DiarizeAssets.root != nil }
+    /// The toggle runs the 8-speaker Nemotron-3 diarizer whenever it is staged (else the Sortformer).
+    var diarizesEightSpeakers: Bool { NemotronDiarizerBridge.staged != nil }
     private let recorder = MicRecorder()
     private let micStreamer = MicStreamer()
     private var liveTask: Task<Void, Never>?
@@ -305,16 +309,16 @@ final class TranscribeModel: ObservableObject {
 
     // MARK: - Diarized transcription ("who said what")
 
-    /// Diarize the clip into speaker turns (Streaming Sortformer on Core AI), then transcribe each
-    /// turn's audio slice with the selected ASR engine and stitch a "Speaker N [t0–t1]: text"
-    /// transcript. No ASR word timestamps are needed — the diarizer supplies the turn boundaries.
+    /// Diarize the clip into speaker turns (Nemotron-3 Diarization or Streaming Sortformer on Core AI),
+    /// then transcribe each turn's audio slice with the selected ASR engine and stitch a
+    /// "Speaker N [t0–t1]: text" transcript. No ASR word timestamps are needed — the diarizer supplies
+    /// the turn boundaries.
     private func transcribeDiarized(_ samples: [Float]) async {
         busy = true; transcript = ""; language = ""
         defer { busy = false }
         status = "Diarizing — who spoke when…"
         do {
-            let diar = try await ensureDiarizer()
-            let (segs, _) = try await diar.diarize(samples)
+            let segs = try await diarizeTurns(samples)
             guard !segs.isEmpty else { transcript = "(no speech detected)"; status = "Done."; return }
 
             let sr = 16000.0
@@ -342,6 +346,20 @@ final class TranscribeModel: ObservableObject {
         } catch {
             status = "Diarized transcription failed: \(error.localizedDescription)"
         }
+    }
+
+    /// Speaker turns of the clip: the 8-speaker Nemotron-3 diarizer when it is staged, else the Sortformer.
+    private func diarizeTurns(_ samples: [Float]) async throws -> [SpeakerSegment] {
+        guard diarizesEightSpeakers else { return try await ensureDiarizer().diarize(samples).segments }
+        return try await ensureNemotronDiarizer().diarize(samples).turns
+    }
+
+    /// Lazily load the 8-speaker diarizer from the staged bundle (GPU on Mac / device).
+    private func ensureNemotronDiarizer() async throws -> NemotronDiarizerBridge {
+        if let d = nemotronDiarizer { return d }
+        let d = try await NemotronDiarizerBridge.load()
+        nemotronDiarizer = d
+        return d
     }
 
     /// Lazily build the diarizer from the staged bundle (GPU on Mac / device).

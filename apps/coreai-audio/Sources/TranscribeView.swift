@@ -30,7 +30,9 @@ struct TranscribeView: View {
                     Label("Diarize — who said what", systemImage: "person.2.wave.2")
                 }
                 .disabled(model.busy || model.recording || model.live)
-                Text("Streaming Sortformer labels each speaker turn, then \(model.engine.title) transcribes it.")
+                Text(model.diarizesEightSpeakers
+                     ? "Nemotron-3 Diarization labels each speaker turn (up to 8 speakers), then \(model.engine.title) transcribes it."
+                     : "Streaming Sortformer labels each speaker turn, then \(model.engine.title) transcribes it.")
                     .font(.caption).foregroundStyle(.secondary)
             }
 

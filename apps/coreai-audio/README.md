@@ -16,11 +16,20 @@ Four tabs, all fully on-device:
     encoder + LSTM predictor + joint, 3 graphs driven by a host greedy TDT loop), via
     `KitParakeetModel`. 25 EU languages, ≤30 s; **iPhone 17 Pro 47.9× real-time**. See
     [`models/parakeet/README.md`](../../models/parakeet/README.md).
-  - **Diarize — who said what** (toggle): **Streaming Sortformer 4-spk v2** (NVIDIA, CC-BY-4.0) labels
-    each speaker turn on Core AI, then the chosen ASR transcribes it → *"Speaker 1 [0.3–4.1s]: …"*.
-    A pure host port (NeMo 128-mel + streaming loop + AOSC speaker-cache compression) driving the
-    fixed-buffer graph; byte-gated **100% speaker-activity agreement** vs NeMo. See
-    [`conversion/sortformer_diar/HANDOFF.md`](../../conversion/sortformer_diar/HANDOFF.md).
+  - **Diarize — who said what** (toggle): **Nemotron-3-Diarization** (NVIDIA, OpenMDW-1.1) finds who
+    spoke when for up to **8 speakers**, then the chosen ASR transcribes each turn →
+    *"Speaker 1 [0.3–4.1s]: …"*. One fp16 graph runs on the GPU. The Swift package
+    [`NemotronDiarizer`](../../conversion/nemotron3_diar/swift) does the rest: the log-mel, 0.72 s
+    streaming chunks with 0.32 s look-ahead, and the speaker cache. On a 97.6 s clip it matches
+    transformers fp32 on **99.9987 %** of the frame × speaker decisions (1 of 78,072 differs). That
+    holds on the M4 Max GPU and on the iPhone 17 Pro GPU. A chunk takes **15.4–15.9 ms** on the M4 Max
+    and **30.1 ms** on the iPhone. The iPhone numbers come from the gate app
+    [`apps/N3DGate`](../N3DGate), which runs the same package and graph. For the transcript, each 10 ms
+    frame goes to its most probable speaker above 0.5. One speaker's turns at most 0.48 s apart merge
+    into one. See [`models/nemotron-3-diarization`](../../models/nemotron-3-diarization/README.md).
+    Without its bundle the toggle uses **Streaming Sortformer 4-spk v2** (NVIDIA, CC-BY-4.0, 4 speakers;
+    byte-gated **100% speaker-activity agreement** vs NeMo, see
+    [`conversion/sortformer_diar/HANDOFF.md`](../../conversion/sortformer_diar/HANDOFF.md)).
 - **Voice** — **VoxCPM-0.5B** diffusion text-to-speech (MiniCPM4 LM + LocDiT flow-matching +
   AudioVAE), streaming int8. See [🤗 VoxCPM-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VoxCPM-0.5B-CoreAI).
 - **Speak** — **Kokoro-82M** (StyleTTS2 + iSTFTNet) text-to-speech on Core AI: pick a voice and a
@@ -82,3 +91,16 @@ First launch **downloads ~5 GB** from
 
 Audio understanding here is GPU-pipelined (an ANE static-shape rework for lower power is a follow-up).
 Any clip is decoded to 16 kHz mono.
+
+The app does not download the Diarize bundle. On macOS, `Sources/N3DAssets` is a git-ignored symlink to
+a folder with the files of
+[🤗 Nemotron-3-Diarization-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Diarization-CoreAI).
+On iPhone, sideload the same files to `Library/Application Support/N3DAssets/`; the app loads the
+`.h18p.aimodelc` graph there. The headless check runs both diarizers against their reference outputs and
+exits 0 only when both pass. `N3D_GOLDEN` is the folder `conversion/nemotron3_diar/export_golden.py`
+writes; `N3D_FIXTURES` holds `test_multispk_16k.wav` and `diarization_example_16k.wav`.
+
+```sh
+DIARIZE_SELFTEST=1 DIAR_RESULT=/tmp/d.txt N3D_GOLDEN=<golden folder> N3D_FIXTURES=<wav folder> \
+  DYLD_FRAMEWORK_PATH=<app>/Contents/Frameworks <app>/Contents/MacOS/coreai-audio
+```
