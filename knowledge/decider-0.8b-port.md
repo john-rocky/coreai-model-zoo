@@ -48,6 +48,7 @@ greedy transcript:
   trips): 43/43 rows under the cap emit the oracle's label, load 2.5 s; the 1,965-token row is
   rejected with `contextLengthExceeded(0, 1024)` — `models/decider-0.8b/gate-decider-0.8b-iphone-argmax.json`.
 
+- That cap is the pipelined engine's, not the phone's: through the kit's logits engine (`TypedDecisions`, `decide-cli parity` run inside an app on the iPhone 17 Pro, 2026-09-23) the same 255-option row, 1,965 tokens, answered in 69.9 s with the fp32 argmax, 44/44 rows — `models/decider-0.8b/gate-decider-0.8b-iphone-parity.json`.
 ## Python runtime traps on macOS 27.0 (26A428)
 
 - **The GPU JIT of this 0.8B graph is wrong.** Loading the `.aimodel` with
