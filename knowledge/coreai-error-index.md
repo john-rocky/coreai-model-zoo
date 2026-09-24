@@ -1211,6 +1211,40 @@ down.) Record: [`bitvla-1.58bit-vla.md`](bitvla-1.58bit-vla.md), `~/code/coreai/
   log `sim_build.log` 2026-09-10; SDK / runtime listings the same day.
 - **OS / toolchain:** macOS 27 26A5416b, Xcode 27 beta 5, coreai-models 0.2.4-zoo via CoreAIKit 0.4.1.
 
+## 'Float16' is unavailable in macOS
+
+`xcodebuild` (Release, universal) of a macOS app that links CoreAIKit fails in
+`SwiftCompile normal x86_64 (in target 'CoreAILanguageModels' from project 'coreai-models')` with 39
+errors of this string; `swift build` (arm64) of the same tree passes.
+
+- **When:** any macOS app project that links CoreAIKit 0.7.0 (coreai-models 0.2.6-zoo / 0.2.7-zoo) built
+  in Release with the default universal architectures — the seven CoreAIKit-linking example runners in
+  the zoo's card gate, and a minimal URL-pinned app (2026-09-24). Apps that link only CoreAIKitVision /
+  CoreAIKitEmbeddings pass.
+- **Verified cause:** fork PR #2 (0.2.6-zoo) lowered the package floor to macOS 26, so the x86_64 slice
+  of `CoreAILanguageModels` compiles; three upstream-derived files (`RepetitionPenaltyGPUState`,
+  `CoreAISequentialVLMEngine`, `Handlers/StateHandler+NDArray`) lacked the guard upstream uses in ten
+  other files, `#if !((os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64))`. App-level
+  `ARCHS` / `EXCLUDED_ARCHS` / `ONLY_ACTIVE_ARCH` do not reach SwiftPM package targets (five variants
+  tried, all exit 65); only a command-line `ARCHS=arm64` passes, which a reader's Xcode Run does not use.
+- **Fix:** coreai-models 0.2.8-zoo (3dc4ceb) adds the guard to the three files; CoreAIKit 0.7.1 pins it
+  and its CI now builds one example app in Release universal (`example-app-release`). Evidence:
+  `~/code/coreai/_decide_checkpoint/2026-09-24/CARDS-GATE.md` §8; kit PR #48 (red run 35953104057, green
+  run 35953547324). Xcode 27A266a, macOS 27.0 26A428.
+
+## Shape at dimension 1 of 34 is not a valid substitution for source shape 1
+
+`ChatSession(model:)` (or `init(bundleAt:)`) on a zoo decode-only chat bundle stops the process with
+this fatal error on the first prompt; the number is the prompt's token count.
+
+- **When:** CoreAIKit ≤ 0.7.1, the default `.auto` engine, a `_decode_` (S=1) bundle such as
+  `qwen3.5-2b` (2026-09-24). `TypedDecisions` and an explicit `.pipelined` engine were unaffected.
+- **Verified cause:** `ModelRuntime(bundleAt:)` raised `COREAI_CHUNK_THRESHOLD=1` only when `.pipelined`
+  was requested, so `.auto` fed a multi-token prefill to a graph whose sequence axis is 1.
+- **Fix:** CoreAIKit 0.7.2 (PR #51) forces single-token prefill for `_decode_` bundles on every engine
+  (`ModelRuntimeTests`, `ChatSessionSmokeTests` with `KIT_SMOKE_BUNDLE=qwen3.5-2b`). Evidence:
+  `~/code/coreai/_decide_checkpoint/2026-09-24/CARDS-GATE.md` §9, §11; kit CI run 35960733794.
+
 ## When there is no string
 
 Some aborts print nothing useful. What was learned about each:
