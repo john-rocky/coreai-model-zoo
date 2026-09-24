@@ -46,6 +46,10 @@ struct NemotronDiarizerBridge: Sendable {
     }()
 
     let diarizer: N3DDiarizer
+    // The host front end and the silence row again, for NemotronDiarizerStream (the package keeps its own private).
+    let mel: N3DMel
+    let embedder: N3DEmbedder
+    let silence: [Float]
 
     /// Loads the staged streaming graph on the GPU (the configuration the Mac and iPhone gates passed).
     static func load() async throws -> NemotronDiarizerBridge {
@@ -55,7 +59,9 @@ struct NemotronDiarizerBridge: Sendable {
         do {
             let diarizer = try await N3DDiarizer(assets: assets, computeUnits: .gpu,
                                                  profile: .streamingProfile(mode: mode))
-            return NemotronDiarizerBridge(diarizer: diarizer)
+            return NemotronDiarizerBridge(diarizer: diarizer,
+                                          mel: N3DMel(melFilters: assets.melFilters, hannWindow: assets.hannWindow),
+                                          embedder: N3DEmbedder(projection: assets.projection), silence: assets.silence)
         } catch let error as N3DError {
             throw NemotronDiarizeError(message: "Nemotron-3 diarizer: \(error)")
         }
@@ -80,6 +86,12 @@ struct NemotronDiarizerBridge: Sendable {
         let frames = input.count == samples.count
             ? output.frames : min(output.frames, samples.count / N3DMel.hop)
         return (Self.turns(from: output.probs, frames: frames), output)
+    }
+
+    /// A `diarize` output's probabilities cut to the clip ([frames, 8]; a padded clip's frames stop at its end).
+    static func clipProbs(_ output: N3DOutput, samples: Int) -> (probs: [Float], frames: Int) {
+        let frames = min(output.frames, samples / N3DMel.hop)
+        return (Array(output.probs[0..<(frames * speakers)]), frames)
     }
 
     /// Frame-major probabilities [frames, 8] -> turns (the rule above).
@@ -113,6 +125,115 @@ struct NemotronDiarizerBridge: Sendable {
             }
         }
         return turns
+    }
+}
+
+/// The low-latency loop one chunk at a time, for the Transcribe tab's playback-synced run: chunk k goes through the
+/// graph once its audio, look-ahead included, has played (`readsUpTo(step:)`). The chunks, mel, packed rows and
+/// speaker-cache update are those of `N3DDiarizer.process(samples:)` (DIARIZE_SELFTEST checks that the logits are
+/// bit-equal); the graph call is the package's `runGraph`. An actor, so the host work stays off the main thread.
+actor NemotronDiarizerStream {
+    /// One chunk's emitted frames, cut to the clip.
+    struct Step: Sendable {
+        let firstFrame: Int
+        let frames: Int
+        let probs: [Float]              // [frames, 8]
+        let graphSeconds: Double
+        let hostSeconds: Double         // mel + embed + packing + cache update
+    }
+
+    nonisolated let chunks: [N3DChunk]
+    /// The clip's own samples and 10 ms frames (a clip shorter than the first chunk is padded like `diarize`).
+    nonisolated let clipSamples: Int
+    nonisolated let clipFrames: Int
+
+    private let bridge: NemotronDiarizerBridge
+    private let samples: [Float]
+    private let profile: N3DProfile
+    private var cache: N3DSpeakerCache
+    private var packed: [Float]
+    private var valid: [Float]
+    private var next = 0
+    /// Every emitted frame's logits so far, padding included [frames, 8] (what `process` returns).
+    private(set) var logits: [Float] = []
+
+    init(bridge: NemotronDiarizerBridge, samples: [Float]) {
+        var input = samples
+        if input.count < NemotronDiarizerBridge.minimumSamples {
+            input.append(contentsOf: repeatElement(0, count: NemotronDiarizerBridge.minimumSamples - input.count))
+        }
+        let p = bridge.diarizer.profile
+        let chunks = N3DMel.streamChunks(samples: input.count, chunkFrames: p.chunkFrames, lookaheadFrames: p.lookaheadFrames)
+        // what the loop emits: chunk * 8 frames per chunk, the last chunk's own mel frames
+        let last = chunks[chunks.count - 1]
+        let lastFrames = max(0, N3DMel.validFrames(samples: last.end - min(last.start, last.end), center: last.isFirst))
+        let emitted = (chunks.count - 1) * p.chunkFrames * N3DMel.stack + lastFrames
+        self.bridge = bridge
+        self.samples = input
+        self.profile = p
+        self.chunks = chunks
+        clipSamples = samples.count
+        clipFrames = input.count == samples.count ? emitted : min(emitted, samples.count / N3DMel.hop)
+        cache = N3DSpeakerCache(fifoLength: p.fifoLength, updatePeriod: p.updatePeriod)
+        packed = [Float](repeating: 0, count: p.graphLength * N3DSpeakerCache.hidden)
+        valid = [Float](repeating: 0, count: p.graphLength)
+    }
+
+    /// The clip sample chunk `k` reads up to: it can run once playback has passed it.
+    nonisolated func readsUpTo(step k: Int) -> Int { min(chunks[k].end, clipSamples) }
+
+    /// Runs the next chunk (`host_loop.run`'s step body).
+    func step() async throws -> Step {
+        precondition(next < chunks.count, "every chunk has run")
+        let t0 = ContinuousClock.now
+        let chunk = chunks[next]
+        let H = N3DSpeakerCache.hidden, S = N3DSpeakerCache.numSpeakers, sub = N3DSpeakerCache.subsampling
+        let end = min(chunk.end, samples.count), start = min(chunk.start, end)
+        let (m, F) = bridge.mel.logMel(samples[start..<end], center: chunk.isFirst)
+        let (emb, _) = bridge.embedder.embed(mel: m, frames: F)
+        let lookahead = chunk.isLast ? 0 : profile.lookaheadFrames
+        let emitFrames = chunk.isLast ? F : profile.chunkFrames * N3DMel.stack
+        guard chunk.isLast || F == (profile.chunkFrames + profile.lookaheadFrames) * N3DMel.stack else {
+            throw NemotronDiarizeError(message: "Nemotron-3 diarizer: chunk \(next) has \(F) mel frames")
+        }
+        let nCache = cache.cacheFrames, nFifo = cache.fifoFrames
+        let rows = cache.rows + emb
+        let L = rows.count / H
+        guard L <= profile.graphLength else {
+            throw NemotronDiarizeError(message: "Nemotron-3 diarizer: step \(next): \(L) rows > T=\(profile.graphLength)")
+        }
+        packed.replaceSubrange(0..<rows.count, with: rows)
+        for j in rows.count..<packed.count { packed[j] = 0 }
+        for j in 0..<profile.graphLength { valid[j] = j < L ? 1 : 0 }
+        var host = Self.seconds(since: t0)
+
+        let g0 = ContinuousClock.now
+        let full: [Float]
+        do {
+            full = try await bridge.diarizer.runGraph(packed: packed, valid: valid)
+        } catch let error as N3DError {
+            throw NemotronDiarizeError(message: "Nemotron-3 diarizer: \(error)")
+        }
+        let graph = Self.seconds(since: g0)
+
+        let h0 = ContinuousClock.now
+        let stepLogits = Array(full[0..<(L * sub * S)])
+        let nChunk = emb.count / H - lookahead
+        cache.update(rows: rows, logits: stepLogits, frames: L, silence: bridge.silence, chunkFrames: nChunk)
+        let s = (nCache + nFifo) * sub
+        let e = s + min(nChunk * sub, emitFrames)
+        let first = logits.count / S
+        logits.append(contentsOf: stepLogits[(s * S)..<(e * S)])
+        next += 1
+        let kept = max(0, min(first + e - s, clipFrames) - first)
+        let probs = stepLogits[(s * S)..<((s + kept) * S)].map { N3DSpeakerCache.sigmoid($0) }
+        host += Self.seconds(since: h0)
+        return Step(firstFrame: first, frames: kept, probs: probs, graphSeconds: graph, hostSeconds: host)
+    }
+
+    private static func seconds(since t: ContinuousClock.Instant) -> Double {
+        let d = ContinuousClock.now - t
+        return Double(d.components.seconds) + Double(d.components.attoseconds) * 1e-18
     }
 }
 

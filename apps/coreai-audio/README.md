@@ -17,10 +17,12 @@ Four tabs, all fully on-device:
     `KitParakeetModel`. 25 EU languages, ≤30 s; **iPhone 17 Pro 47.9× real-time**. See
     [`models/parakeet/README.md`](../../models/parakeet/README.md).
   - **Diarize — who said what** (toggle): **Nemotron-3-Diarization** (NVIDIA, OpenMDW-1.1) finds who
-    spoke when for up to **8 speakers**, then the chosen ASR transcribes each turn →
-    *"Speaker 1 [0.3–4.1s]: …"*. One fp16 graph runs on the GPU. The Swift package
+    spoke when for up to **8 speakers**, one timeline lane each. Then the chosen ASR transcribes each
+    turn into *"Speaker 1: …"*, the label in the lane's color. One fp16 graph runs on the GPU. The Swift package
     [`NemotronDiarizer`](../../conversion/nemotron3_diar/swift) does the rest: the log-mel, 0.72 s
-    streaming chunks with 0.32 s look-ahead, and the speaker cache. On a 97.6 s clip it matches
+    streaming chunks with 0.32 s look-ahead, and the speaker cache. A chosen file plays while its lanes
+    grow. Each chunk runs once its audio and look-ahead have played, so a lane trails the sound by
+    0.4–1.1 s. A mic recording gets its timeline after it stops. On a 97.6 s clip it matches
     transformers fp32 on **99.9987 %** of the frame × speaker decisions (1 of 78,072 differs). That
     holds on the M4 Max GPU and on the iPhone 17 Pro GPU. A chunk takes **15.4–15.9 ms** on the M4 Max
     and **30.1 ms** on the iPhone. The iPhone numbers come from the gate app
@@ -103,4 +105,16 @@ writes; `N3D_FIXTURES` holds `test_multispk_16k.wav` and `diarization_example_16
 ```sh
 DIARIZE_SELFTEST=1 DIAR_RESULT=/tmp/d.txt N3D_GOLDEN=<golden folder> N3D_FIXTURES=<wav folder> \
   DYLD_FRAMEWORK_PATH=<app>/Contents/Frameworks <app>/Contents/MacOS/coreai-audio
+```
+
+`DIARIZE_DEMO=<clip>` runs the Diarize tab by itself for a screen recording. It turns Diarize on, loads
+the ASR and the diarizer, and plays `N3DAssets/demo/<clip>.wav` with the timeline, then the transcript.
+The options (a trigger file, a log, off-screen snapshots) are listed at the top of
+`Sources/DiarizeDemo.swift`. [`record-demo.sh`](record-demo.sh) records the run on an iPhone through
+QuickTime and cuts an MP4 for X. On a Mac the run starts in the app's init, so it goes on without a
+window, for example on a locked screen:
+
+```sh
+open -n --env DIARIZE_DEMO=test_multispk_16k --env N3D_DEMO=<wav folder> \
+  --env DYLD_FRAMEWORK_PATH=<app>/Contents/Frameworks <app>
 ```

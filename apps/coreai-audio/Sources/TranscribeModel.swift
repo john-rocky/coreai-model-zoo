@@ -51,6 +51,12 @@ final class TranscribeModel: ObservableObject {
     /// speaker turn — from the 8-speaker Nemotron-3 diarizer when its bundle is staged, else from the
     /// 4-speaker Sortformer. Available only when one of the two bundles is staged.
     @Published var diarize = false
+    /// An 8-speaker Diarize result replaces the plain transcript: the speaker timeline, one colored
+    /// "Speaker N: text" line per turn, and a summary line ("90.0 s · 4 speakers · 50 turns · iPhone 17 Pro").
+    @Published var showsDiarization = false
+    @Published var diarizedLines: [DiarizedLine] = []
+    @Published var diarizeSummary = ""
+    let timeline = DiarizeTimeline()
 
     private var whisper: KitWhisperModel?
     private var asr: KitASRModel?
@@ -58,7 +64,12 @@ final class TranscribeModel: ObservableObject {
     private var nemotron: KitNemotronModel?
     private var diarizer: SortformerDiarizer?
     private var nemotronDiarizer: NemotronDiarizerBridge?
+    /// The 8-speaker diarizer's load and its first (warm-up) call, in seconds, for the demo log.
+    private(set) var diarizerLoadSeconds = (load: 0.0, firstCall: 0.0)
     private var samples: [Float]?
+    /// The file `samples` came from (nil for a mic recording): with 8-speaker Diarize a file plays with the timeline.
+    private(set) var clipURL: URL?
+    private var playback: DiarizePlayback?
     /// Plays the chosen clip aloud when transcription starts, so you can hear what you picked
     /// (the file importer gives no preview). 16 kHz mono — the same PCM fed to the model. Recreated
     /// per clip so a fresh Transcribe restarts audio instead of queueing behind the previous clip.
@@ -144,7 +155,7 @@ final class TranscribeModel: ObservableObject {
     /// A sideloaded bundle in `Documents/Models/<name>` — the AOT-encoder path for iPhone, where
     /// the big encoder graphs' on-device JIT specialization stalls. Returns the directory if it
     /// holds any graph (`.aimodelc` AOT or `.aimodel`), else nil (→ Hub download).
-    private static func sideloadedBundle(named name: String) -> URL? {
+    static func sideloadedBundle(named name: String) -> URL? {
         let fm = FileManager.default
         let dir = fm.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appending(path: "Models/\(name)")
@@ -165,6 +176,7 @@ final class TranscribeModel: ObservableObject {
         nemotron = nil
         loaded = false
         transcript = ""; language = ""
+        clearDiarization()
         status = "Engine: \(engine.title). Tap “Load model”."
     }
 
@@ -173,10 +185,26 @@ final class TranscribeModel: ObservableObject {
             status = "Could not decode \(url.lastPathComponent)."
             return
         }
-        samples = pcm
-        transcript = ""; language = ""
-        clipName = "\(url.lastPathComponent)  (\(String(format: "%.1f", Double(pcm.count) / 16000))s)"
+        setClip(pcm, from: url)
         status = "Audio loaded. Tap Transcribe."
+        // 8-speaker Diarize: a chosen file starts right away, playing with the speaker timeline.
+        if diarize && diarizesEightSpeakers && loaded && !busy && !live && !recording {
+            Task { await transcribeClip() }
+        }
+    }
+
+    func setClip(_ pcm: [Float], from url: URL) {
+        samples = pcm
+        clipURL = url
+        transcript = ""; language = ""
+        clearDiarization()
+        clipName = "\(url.lastPathComponent)  (\(String(format: "%.1f", Double(pcm.count) / 16000))s)"
+    }
+
+    private func clearDiarization() {
+        showsDiarization = false
+        diarizedLines = []
+        diarizeSummary = ""
     }
 
     func toggleRecord() {
@@ -187,6 +215,7 @@ final class TranscribeModel: ObservableObject {
                 Task { @MainActor in
                     guard let self else { return }
                     self.samples = pcm
+                    self.clipURL = nil
                     self.clipName = String(format: "Mic clip (%.1fs)", Double(pcm.count) / 16000)
                     self.status = pcm.isEmpty ? "No audio captured." : "Recorded. Tap Transcribe."
                 }
@@ -194,6 +223,7 @@ final class TranscribeModel: ObservableObject {
         } else {
             recording = true
             transcript = ""; language = ""
+            clearDiarization()
             clipName = "Recording… tap Stop when done."
             status = "Listening…"
             recorder.start { [weak self] error in
@@ -216,6 +246,7 @@ final class TranscribeModel: ObservableObject {
         guard engine == .nemotron, let nemotron, !busy, !recording else { return }
         live = true
         transcript = ""; language = ""
+        clearDiarization()
         clipName = "Live — speak; tap Stop when done."
         status = "Listening… (streaming on-device)"
         liveTask = Task { [weak self] in
@@ -263,10 +294,13 @@ final class TranscribeModel: ObservableObject {
 
     func transcribeClip() async {
         guard loaded, let samples, !busy, !live else { return }
+        // a chosen file plays with the speaker timeline (a mic recording is diarized after the fact)
+        if diarize && diarizesEightSpeakers && clipURL != nil { await transcribeDiarizedSynced(samples); return }
         playClip(samples)   // hear the clip you picked, in sync with transcription
         if diarize { await transcribeDiarized(samples); return }
         busy = true
         transcript = ""; language = ""
+        clearDiarization()
         // Nemotron streams — no bucket, feed the whole clip; the batch engines cap at 30 s.
         let clip = engine == .nemotron ? samples : Array(samples.prefix(16000 * maxClipSeconds))
         status = "Transcribing… (on-device)"
@@ -315,9 +349,24 @@ final class TranscribeModel: ObservableObject {
     /// the turn boundaries.
     private func transcribeDiarized(_ samples: [Float]) async {
         busy = true; transcript = ""; language = ""
+        clearDiarization()
         defer { busy = false }
         status = "Diarizing — who spoke when…"
         do {
+            if diarizesEightSpeakers {
+                // 8 speakers: the whole timeline at once, then the colored lines
+                let bridge = try await ensureNemotronDiarizer()
+                status = "Diarizing — who spoke when…"
+                let (turns, out) = try await bridge.diarize(samples)
+                let clip = NemotronDiarizerBridge.clipProbs(out, samples: samples.count)
+                showsDiarization = true
+                timeline.show(probs: clip.probs, frames: clip.frames, duration: Double(samples.count) / 16000)
+                _ = try await transcribeTurns(turns, samples)
+                diarizeSummary = Self.summaryLine(seconds: Double(samples.count) / 16000,
+                                                  speakers: timeline.speakerCount, turns: turns.count)
+                status = "Done."
+                return
+            }
             let segs = try await diarizeTurns(samples)
             guard !segs.isEmpty else { transcript = "(no speech detected)"; status = "Done."; return }
 
@@ -354,10 +403,109 @@ final class TranscribeModel: ObservableObject {
         return try await ensureNemotronDiarizer().diarize(samples).turns
     }
 
-    /// Lazily load the 8-speaker diarizer from the staged bundle (GPU on Mac / device).
-    private func ensureNemotronDiarizer() async throws -> NemotronDiarizerBridge {
+    /// Diarize while the clip plays: each 0.72 s chunk goes through the graph once its audio, look-ahead
+    /// included, has played, and its frames extend the timeline about a second behind what you hear. When
+    /// the clip ends, every turn goes through the selected ASR into a colored line, then the summary line.
+    /// Returns the run's numbers (nil when it failed; the status line says why).
+    @discardableResult
+    func transcribeDiarizedSynced(_ samples: [Float]) async -> DiarizeRunStats? {
+        busy = true; transcript = ""; language = ""
+        clearDiarization()
+        defer { busy = false }
+        var stats = DiarizeRunStats(clipSeconds: Double(samples.count) / 16000, engine: engine.title)
+        do {
+            let bridge = try await ensureNemotronDiarizer()
+            let stream = NemotronDiarizerStream(bridge: bridge, samples: samples)
+            let playback = try DiarizePlayback(samples: samples, volume: DiarizeDemoOptions.current?.volume ?? 1)
+            self.playback = playback
+            showsDiarization = true
+            timeline.start(duration: stats.clipSeconds, playhead: { [weak playback] in playback?.position ?? 0 })
+            status = "Listening — speakers appear as they talk."
+            try playback.play()
+            stats.playStart = Date()
+            var probs: [Float] = []
+            probs.reserveCapacity(stream.clipFrames * NemotronDiarizerBridge.speakers)
+            for k in 0..<stream.chunks.count {
+                let due = Double(stream.readsUpTo(step: k)) / 16000
+                await playback.wait(untilSecond: due)
+                let late = playback.position - due
+                let step = try await stream.step()
+                timeline.append(probs: step.probs, frames: step.frames)
+                probs.append(contentsOf: step.probs)
+                let at = playback.position, f = NemotronDiarizerBridge.frameSec
+                stats.addChunk(late: late, graph: step.graphSeconds, host: step.hostSeconds,
+                               behindFirst: at - Double(step.firstFrame) * f,
+                               behindLast: at - Double(step.firstFrame + step.frames) * f, frames: step.frames)
+            }
+            await playback.waitUntilEnded()
+            stats.playEnd = Date()
+            timeline.finish()
+
+            let turns = NemotronDiarizerBridge.turns(from: probs, frames: stream.clipFrames)
+            stats.turns = turns.count
+            stats.speakers = timeline.speakerCount
+            stats.asrStart = Date()
+            stats.asrTurns = try await transcribeTurns(turns, samples)
+            stats.asrEnd = Date()
+            stats.lines = diarizedLines.count
+            diarizeSummary = Self.summaryLine(seconds: stats.clipSeconds, speakers: stats.speakers, turns: stats.turns)
+            stats.summary = diarizeSummary
+            status = "Done."
+            return stats
+        } catch {
+            playback?.stop()
+            timeline.finish()
+            status = "Diarized transcription failed: \(error.localizedDescription)"
+            return nil
+        }
+    }
+
+    /// Every turn through the selected ASR as a colored "Speaker N: text" line (N = the turn's lane on the
+    /// timeline), streamed into `diarizedLines`. Sliced like the 4-speaker path: 0.1 s padding, turns too short
+    /// to transcribe and empty results skipped. Returns what happened to each turn (the demo log lists them).
+    private func transcribeTurns(_ turns: [SpeakerSegment], _ samples: [Float]) async throws -> [DiarizedTurn] {
+        let sr = 16000.0
+        let pad = 0.1
+        let minTurn = Int(0.3 * sr)
+        var done: [DiarizedTurn] = []
+        for (i, seg) in turns.enumerated() {
+            status = "Transcribing turn \(i + 1)/\(turns.count)…"
+            let number = timeline.number(forSpeaker: seg.speaker) ?? timeline.speakerCount + 1
+            let a = max(0, Int((seg.startSec - pad) * sr))
+            let b = min(samples.count, Int((seg.endSec + pad) * sr))
+            guard b - a >= minTurn else {
+                done.append(DiarizedTurn(speaker: number, start: seg.startSec, end: seg.endSec, seconds: nil, text: ""))
+                continue
+            }
+            let t0 = Date()
+            let text = try await transcribeSlice(Array(samples[a..<b]))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            done.append(DiarizedTurn(speaker: number, start: seg.startSec, end: seg.endSec,
+                                     seconds: Date().timeIntervalSince(t0), text: text))
+            guard !text.isEmpty else { continue }
+            diarizedLines.append(DiarizedLine(id: diarizedLines.count, speaker: number, text: text))
+        }
+        return done
+    }
+
+    /// "90.0 s · 4 speakers · 50 turns · iPhone 17 Pro": the clip, the speakers on the timeline, the diarizer's
+    /// turns, and this device.
+    static func summaryLine(seconds: Double, speakers: Int, turns: Int) -> String {
+        String(format: "%.1f s · %d speaker%@ · %d turn%@ · %@", seconds, speakers, speakers == 1 ? "" : "s",
+               turns, turns == 1 ? "" : "s", DeviceName.current)
+    }
+
+    /// Lazily load the 8-speaker diarizer from the staged bundle (GPU on Mac / device), then one call on a
+    /// silent clip: the graph's first call after a load is slow (2.7 s on the iPhone gate), and a playing clip
+    /// must not wait for it.
+    func ensureNemotronDiarizer() async throws -> NemotronDiarizerBridge {
         if let d = nemotronDiarizer { return d }
+        status = "Loading Nemotron-3 diarizer…"
+        let t0 = Date()
         let d = try await NemotronDiarizerBridge.load()
+        let t1 = Date()
+        _ = try await d.diarize([])
+        diarizerLoadSeconds = (t1.timeIntervalSince(t0), Date().timeIntervalSince(t1))
         nemotronDiarizer = d
         return d
     }

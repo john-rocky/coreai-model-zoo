@@ -6,7 +6,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct TranscribeView: View {
-    @StateObject private var model = TranscribeModel()
+    @StateObject private var model = TranscribeModel.demo ?? TranscribeModel()
     @State private var showImporter = false
 
     var body: some View {
@@ -22,8 +22,10 @@ struct TranscribeView: View {
             .pickerStyle(.segmented)
             .disabled(model.busy || model.recording)
 
-            Text(model.engine.blurb)
-                .font(.callout).foregroundStyle(.secondary)
+            if !model.showsDiarization {   // a phone needs the room for the timeline
+                Text(model.engine.blurb)
+                    .font(.callout).foregroundStyle(.secondary)
+            }
 
             if model.diarizeAvailable {
                 Toggle(isOn: $model.diarize) {
@@ -77,13 +79,17 @@ struct TranscribeView: View {
 
             if model.busy { ProgressView().controlSize(.small) }
 
-            ScrollView {
-                Text(model.transcript.isEmpty ? " " : model.transcript)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
-                    .padding(10)
-                    .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
-            }.frame(minHeight: 110)
+            if model.showsDiarization {
+                DiarizeResultView(model: model)
+            } else {
+                ScrollView {
+                    Text(model.transcript.isEmpty ? " " : model.transcript)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                        .padding(10)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+                }.frame(minHeight: 110)
+            }
 
             if !model.language.isEmpty {
                 Text("Detected language: \(model.language)")

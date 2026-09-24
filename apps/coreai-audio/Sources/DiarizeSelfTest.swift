@@ -96,7 +96,8 @@ private func runSortformerDiarizeGate(log: (String) -> Void) async -> Int32 {
 /// probabilities. agreement@0.5 over every frame x 8 speakers with n3d-selftest's metric (N3DGateSupport),
 /// bar 99.9 % and the same frame count; turns, segments and wall are reported. A 0.8 s clip and an empty
 /// one (padded by the bridge) must give turns inside the clip; the 0.8 s clip also takes the first call
-/// after the load, so the fixture walls are warm.
+/// after the load, so the fixture walls are warm. On every clip the playback-synced run's chunk-at-a-time
+/// loop must give bit-equal logits and the same turns.
 ///   golden: $N3D_GOLDEN (default <N3DAssets>/golden), <fixture>_ll_{probs,logits}.f32le of
 ///           conversion/nemotron3_diar/export_golden.py
 ///   wavs:   $N3D_FIXTURES (default <N3DAssets>/fixtures), <fixture>_16k.wav
@@ -123,14 +124,16 @@ private func runNemotronDiarizeGate(log: (String) -> Void) async -> Int32 {
         }
         for n in [12_800, 0] {
             let s0 = ContinuousClock().now
-            let (turns, out) = try await bridge.diarize(Array(first.prefix(n)))
+            let clip = Array(first.prefix(n))
+            let (turns, out) = try await bridge.diarize(clip)
             let lastFrame = n / N3DMel.hop
             let ok = turns.allSatisfy { $0.startFrame < $0.endFrame && $0.endFrame <= lastFrame }
             log(String(format: "[8spk short] %.2fs clip (padded to %.2fs): %d steps, turns %d, last turn end %.2fs <= %.2fs, %.2fs  -> %@",
                        Double(n) / 16000, Double(NemotronDiarizerBridge.minimumSamples) / 16000, out.steps,
                        turns.count, turns.last?.endSec ?? 0, Double(lastFrame) * NemotronDiarizerBridge.frameSec,
                        secs(since: s0), ok ? "OK" : "FAIL"))
-            allPass = allPass && ok
+            let stepwise = try await stepwiseCheck(bridge, clip, out, turns, label: "short \(String(format: "%.2fs", Double(n) / 16000))", log: log)
+            allPass = allPass && ok && stepwise
         }
 
         for (label, fixture) in [("21.5s", "test_multispk"), ("97.6s", "diarization_example")] {
@@ -168,11 +171,28 @@ private func runNemotronDiarizeGate(log: (String) -> Void) async -> Int32 {
             for t in turns.prefix(6) {
                 log(String(format: "      spk%d  %.2f–%.2fs", t.speaker, t.startSec, t.endSec))
             }
-            allPass = allPass && pass
+            let stepwise = try await stepwiseCheck(bridge, wav, out, turns, label: label, log: log)
+            allPass = allPass && pass && stepwise
         }
         log(missing ? "[8spk] FAIL (golden or wav missing)" : allPass ? "[8spk] PASS" : "[8spk] CHECK (below the bar)")
         return missing ? 2 : allPass ? 0 : 3
     } catch { log("[8spk] FAIL: \(error)"); return 4 }
+}
+
+/// The playback-synced run's chunk-at-a-time loop (NemotronDiarizerStream) over the same clip, without waiting for
+/// playback: its logits must be bit-equal to `diarize`'s (N3DDiarizer.process) and its turns the same.
+private func stepwiseCheck(_ bridge: NemotronDiarizerBridge, _ samples: [Float], _ out: N3DOutput, _ turns: [SpeakerSegment],
+                           label: String, log: (String) -> Void) async throws -> Bool {
+    let stream = NemotronDiarizerStream(bridge: bridge, samples: samples)
+    var probs: [Float] = []
+    for _ in stream.chunks { probs.append(contentsOf: try await stream.step().probs) }
+    let logits = await stream.logits
+    let equal = logits.count == out.logits.count
+        ? zip(logits, out.logits).filter { $0.bitPattern == $1.bitPattern }.count : 0
+    let sameTurns = NemotronDiarizerBridge.turns(from: probs, frames: stream.clipFrames) == turns
+    let pass = equal == out.logits.count && sameTurns
+    log("[8spk \(label)] step by step (the playback-synced loop): \(stream.chunks.count) steps, logits bit-equal in \(equal) of \(out.logits.count), turns \(sameTurns ? "same" : "DIFFER")  -> \(pass ? "PASS" : "FAIL")")
+    return pass
 }
 
 /// cos over the aligned [128, minT] region of two mel-major buffers.
