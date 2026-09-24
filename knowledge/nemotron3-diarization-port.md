@@ -120,3 +120,22 @@ compiled bundle. A plain file count
 triples: one region shows up as a `.bc` directory, its `.bc.weights` and a `.mlir.bc`. The MPSGraph
 manifest's `mps.fullyPlacedOnANE` and `mps.noGPUActivity` flags confirm full placement. This graph
 compiles to one region, fully placed, for both iOS h18p and macOS h16c.
+
+## 11. Host constants for CoreAIKit: put them in a directory on the Hub
+
+CoreAIKit resolves a catalog variant through the Hub's tree API with a directory path (`entry.modelID(path:)`), so
+single files at the repo root (`embedder_projection.f32le` …) are not fetchable that way — the kit reported
+`variantNotFound`. The fix was on the Hub, not in the kit: the five host files (four `.f32le` + `metadata.json`)
+are published again under `host/`, and the catalog entry `nemotron-3-diarization` fetches `host` beside the
+graph (revision `8dc6258`). Do this in the first upload of any non-LLM port with host constants.
+
+## 12. The demo that was accepted
+
+The first demo screen (a light Form, a thin timeline, a grey transcript box) was rejected. The accepted one
+mirrors the LiteRT zoo's demo of the same model: dark full screen, READY / LIVE / DONE pill with the playback
+clock and the speaker count, one latency line ("latency 1.04 s + on-device 0.05 s"), the waveform colored by the
+assigned speaker, eight lanes with a playhead, a time axis, a small chunk line — `apps/coreai-audio/Sources/
+DiarizeLiveView.swift`, run unattended with `DIARIZE_DEMO=<clip>` and recorded through QuickTime by
+`apps/coreai-audio/record-demo.sh`. Demo audio is a synthetic 8-person meeting (the zoo's Kokoro TTS, fictional
+names), never a CC BY corpus. On the iPhone 17 Pro the lanes trail the audio by 1.10 s (the 1.04 s look-ahead
+plus the chunk), the graph takes 44 ms per 0.72 s chunk when paced by playback (30 ms back to back).
