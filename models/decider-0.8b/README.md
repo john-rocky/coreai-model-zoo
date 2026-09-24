@@ -105,15 +105,16 @@ ones included, and are not comparable to these accuracies.
 
 ## Swift side
 
-`coreai-kit` has no `systemOne` op yet. The design —
-`CoreAI.systemOne(state:questions:options:)` mirroring the author's wire shape, the prompt
-builder port line by line, a tokenizer-parity contract on the 44 fixture rows, and the readout
-primitive (recommended: a completion-synchronized read-last-logits call on the pipelined engine,
-whose `decodeLogitsBuffers` already hold the fp16 logits; fallback: the zoo's N-state low-level
-runner) — is in
-[`knowledge/decider-systemone-op-design.md`](../../knowledge/decider-systemone-op-design.md).
-Until it exists the Swift engine gives the **argmax** only (the first greedy token), and the
-probabilities come from the Python runtime.
+CoreAIKit 0.7.0 reads this model as the catalog decision model `decider-0.8b`
+(`Decision.Format.decider`): the kit renders the model's own prompt form, reads the answer slot
+at the card's temperature and returns each option's probability. In Swift (`import CoreAIOps`),
+`CoreAI.decide(state, questions, options: .model("decider-0.8b"))` asks typed questions of one
+state, and `CoreAI.systemOne(json:)` answers a `/v1/systemone` request as a client sent it (with
+`"model": "decider-0.8b"`), the typed answers beside the wire object. Over HTTP, in the hosted
+API's forms: `brew install john-rocky/tap/systemone && systemone serve --model decider-0.8b`, or
+`decide-cli serve --model decider-0.8b` in the kit's `Examples/Decide`. The calls, the other
+decision models and the kit's measurements are in
+[System One, on device](https://github.com/john-rocky/coreai-kit/blob/0.7.0/docs/SYSTEM_ONE.md).
 
 **iPhone 17 Pro (iOS 27.0, GPU, pipelined engine, AOT h18p, 2026-09-21):** the same 44 rows through a
 PipelinedBench rows mode (raw ids in, one greedy token out) — **43/43 rows that fit emit the
