@@ -4,6 +4,9 @@ import SwiftUI
 
 @main
 struct CoreAIAudioApp: App {
+    /// DIARIZE_DEMO opens on the Transcribe tab (DiarizeDemo.swift).
+    @State private var tab = DiarizeDemoOptions.current == nil ? 0 : 1
+
     init() {
         // Headless ASR self-test: kicked from init() (not .task) so it runs without the GUI window
         // appearing — reliable for a CLI-launched verification run.
@@ -41,29 +44,31 @@ struct CoreAIAudioApp: App {
         if ProcessInfo.processInfo.environment["ENCBENCH_SELFTEST"] != nil {
             Task.detached { await runEncoderBenchSelfTest() }
         }
+        // DIARIZE_DEMO: from init() too, on the model the Transcribe tab shows (it needs no window to run)
+        TranscribeModel.demo?.startDiarizeDemoIfRequested()
     }
 
     var body: some Scene {
         WindowGroup("coreai-audio") {
-            TabView {
+            TabView(selection: $tab) {
                 ContentView()
-                    .tabItem { Label("Understand", systemImage: "ear") }
+                    .tabItem { Label("Understand", systemImage: "ear") }.tag(0)
                 TranscribeView()
-                    .tabItem { Label("Transcribe", systemImage: "text.bubble") }
+                    .tabItem { Label("Transcribe", systemImage: "text.bubble") }.tag(1)
                 KokoroView()
-                    .tabItem { Label("Speak", systemImage: "speaker.wave.2") }
+                    .tabItem { Label("Speak", systemImage: "speaker.wave.2") }.tag(2)
                 VoxCPMView()
-                    .tabItem { Label("Voice", systemImage: "waveform") }
+                    .tabItem { Label("Voice", systemImage: "waveform") }.tag(3)
                 VoxCPM2View()
-                    .tabItem { Label("Voice 2B", systemImage: "waveform.badge.plus") }
+                    .tabItem { Label("Voice 2B", systemImage: "waveform.badge.plus") }.tag(4)
                 DotsView()
-                    .tabItem { Label("Voice ML", systemImage: "globe") }
+                    .tabItem { Label("Voice ML", systemImage: "globe") }.tag(5)
                 MusicGenView()
-                    .tabItem { Label("Music", systemImage: "music.note") }
+                    .tabItem { Label("Music", systemImage: "music.note") }.tag(6)
                 SeparateView()
-                    .tabItem { Label("Separate", systemImage: "music.mic") }
+                    .tabItem { Label("Separate", systemImage: "music.mic") }.tag(7)
                 DialogueView()
-                    .tabItem { Label("Dialogue", systemImage: "person.2.wave.2") }
+                    .tabItem { Label("Dialogue", systemImage: "person.2.wave.2") }.tag(8)
             }
             // Non-blocking self-test (KOKORO_SELFTEST=1): the iOS launch watchdog
             // kills any main-thread block, so run it as a normal async task.
