@@ -73,6 +73,14 @@ Release `llm-benchmark`, int8hu only, `-p 128 -g 256 -n 3`, two alternating laun
 
 A decision costs one S=1 prefill of the **whole question row**, so these are **prefill-rate proxies**, not per-decision latencies. Synthetic decode does not represent text generation by this decision API. [Per-trial rates, launch load times and process snapshots](llm-benchmark.json).
 
+### JevBench public 231 (Mac, 2026-09-24)
+
+| easy 48 | standard 72 | hard 111 | ECE hard | p50 | p95 | hard max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1.000 | 0.778 | 0.405 | 0.235 | 3.24 s | 92.89 s | 138.5 s |
+
+The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench) `2fa63fa`, v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755` `decide-cli serve` with the ship bundle, one question per request. Accuracy per tier and the hard tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured without an exclusive GPU window (contended), with two other model servers running on the same GPU (a solo re-check of 30 items returned bit-identical probabilities); the graph's prefill is S=1, and at that kit commit the state was prefilled again for every question. JevBench's published scores (Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not comparable to these accuracies.
+
 ## Through the kit
 
 **Measured through coreai-kit** by the supervisor, using `Decision.Format.decisionFunction`, the sequential engine and the kit's own rendering of the author's plain-text prompt. No kit measurement was re-derived by this run.

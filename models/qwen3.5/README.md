@@ -256,6 +256,26 @@ for big bundles: failed cold specializations leave partial caches that eat
 disk and turn later attempts into `NSPOSIXErrorDomain code=2` at engine
 create — uninstall the app to reclaim.
 
+### JevBench public 231, Qwen3.5-2B (Mac, 2026-09-24)
+
+| easy 48 | standard 72 | hard 111 | ECE hard | p50 | p95 | hard max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1.000 | 0.750 | 0.441 | 0.245 | 2.74 s | 50.22 s | 62.3 s |
+
+The benchmark's own harness
+([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench) `2fa63fa`,
+v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755`
+`decide-cli serve` with the kit catalog's Mac bundle
+(`gpu-pipelined/qwen3_5_2b_decode_int8hu_block32_sym`), one question per request. This
+chat model was asked zero-shot under the kit's JSON decision prompt, with no calibration
+(temperature 1). Accuracy per tier and the hard tier's ECE are JevBench's own scoring
+(argmax of the returned probabilities); p50 and p95 are per-request latency over all 231
+requests, hard max the maximum over the hard tier. Latency was measured without an
+exclusive GPU window (contended), with this model's server running alone; the graph's
+prefill is S=1, and at that kit commit the state was prefilled again for every question.
+JevBench's published scores (Intelligence and the rest) are chance-corrected over 534
+items, sealed ones included, and are not comparable to these accuracies.
+
 ## Conversion status (macOS, vs HF eager)
 
 - Prefill + stateful decode: **cosine 1.0 / top-1 100%** (fp32).

@@ -70,6 +70,14 @@ Release `llm-benchmark`, **int8lin only**, `-p 128 -g 256 -n 3`, two alternating
 
 This is an **S=1 prefill-rate proxy** over synthetic 128-token inputs, not per-question latency: every option requires processing its own entire row. With the one-wide output metadata the benchmark samples id 0 for its synthetic inputs and emits id 0 for its 256 decode steps. The generated tokens are meaningless as text; decode is recorded only as a rate. Load time is measured once per launch and excludes warmup. [All trials, process snapshots and interpretation](llm-benchmark.json).
 
+### JevBench public 231 (Mac, 2026-09-24)
+
+| easy 48 | standard 72 | hard 111 | ECE hard | p50 | p95 | hard max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1.000 | 0.861 | 0.505 | 0.164 | 8.96 s | 61.61 s | 72.0 s |
+
+The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench) `2fa63fa`, v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755` `decide-cli serve` with the ship bundle, one question per request. The kit followed the author's encode, which cuts the state from its end so that each row (state + question + option) fits 384 tokens; on 70 of the 111 hard items the state was cut. Accuracy per tier and the hard tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured without an exclusive GPU window (contended), with two other model servers running on the same GPU (a solo re-check of 30 items returned bit-identical probabilities); the graph's prefill is S=1, and at that kit commit the state was prefilled again for every question. JevBench's published scores (Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not comparable to these accuracies.
+
 ## Through the kit
 
 **Measured through coreai-kit** by the supervisor on **2026-09-23 09:05–09:25 JST**, in worktree `~/code/coreai-kit-models-wt` on branch `decision-models-4`, using **`Decision.Format.scalar`**, the sequential engine and the kit's own rendering of the author's rows. **All times in this section are contended:** the GPU was shared with two conversion runs. These supplied measurements were not re-derived by this conversion run.

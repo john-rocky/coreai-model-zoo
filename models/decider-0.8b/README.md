@@ -87,6 +87,22 @@ a CPU-bound job from another lane ran on the same machine during the measurement
 prefill is S=1 on this graph, a System One request costs about `rows × (state + question
 tokens) / decode rate` — ten independent questions over a 300-token state are ~3,500 steps.
 
+### JevBench public 231 (Mac, 2026-09-24)
+
+| easy 48 | standard 72 | hard 111 | ECE hard | p50 | p95 | hard max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1.000 | 0.833 | 0.414 | 0.320 | 1.69 s | 29.10 s | 90.6 s |
+
+The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench)
+`2fa63fa`, v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755`
+`decide-cli serve` with the ship bundle, one question per request. Accuracy per tier and the hard
+tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are
+per-request latency over all 231 requests, hard max the maximum over the hard tier. Latency was
+measured without an exclusive GPU window (contended), with this model's server running alone; the
+graph's prefill is S=1, and at that kit commit the state was prefilled again for every question.
+JevBench's published scores (Intelligence and the rest) are chance-corrected over 534 items, sealed
+ones included, and are not comparable to these accuracies.
+
 ## Swift side
 
 `coreai-kit` has no `systemOne` op yet. The design —

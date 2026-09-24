@@ -131,6 +131,24 @@ sequential engine measured through coreai-kit below, so the decode number is a
 copy only adds its engine-variant option and forwards `EngineOptions.variant`.
 [Trials, load times and environment](llm-benchmark.json).
 
+### JevBench public 231 (Mac, 2026-09-24)
+
+| easy 48 | standard 72 | hard 111 | ECE hard | p50 | p95 | hard max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1.000 | 0.986 | 0.559 | 0.347 | 5.94 s | 142.09 s | 217.6 s |
+
+The benchmark's own harness
+([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench) `2fa63fa`, v1.4.0,
+`typesafe` adapter) ran the 231 public items against coreai-kit `adbc755` `decide-cli serve`
+with the ship bundle, one question per request. Accuracy per tier and the hard tier's ECE are
+JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request
+latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured
+without an exclusive GPU window (contended), with two other model servers running on the same
+GPU (a solo re-check of 30 items returned bit-identical probabilities); the graph's prefill is
+S=1, and at that kit commit the state was prefilled again for every question. JevBench's
+published scores (Intelligence and the rest) are chance-corrected over 534 items, sealed ones
+included, and are not comparable to these accuracies.
+
 ## Through the kit
 
 **Measured through coreai-kit**, using `Decision.Format.sharedState`, the sequential engine

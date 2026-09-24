@@ -77,6 +77,14 @@ Three bundles were measured on the Mac before picking this one (`llm-benchmark`,
 
 Gate transcript: [`gate-minicpm5-2b.json`](gate-minicpm5-2b.json) (`cli/coreai_verify.py`, fp32 oracle, margin-aware).
 
+### JevBench public 231 (Mac, 2026-09-24)
+
+| easy 48 | standard 72 | hard 111 | ECE hard | p50 | p95 | hard max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.979 | 0.708 | 0.459 | 0.241 | 0.14 s | 1.19 s | 1.8 s |
+
+The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench) `2fa63fa`, v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755` `decide-cli serve` with the `int8/` bundle, one question per request. This chat model was asked zero-shot under the kit's JSON decision prompt, with the catalog's calibration temperature 2.93 (fit on SemIf perturbations108). Accuracy per tier and the hard tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured without an exclusive GPU window (contended), with this model's server running alone. JevBench's published scores (Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not comparable to these accuracies.
+
 ## Conversion
 
 - **`llama → mistral` remap** — MiniCPM5-2B is a plain `LlamaForCausalLM` (GQA 16:2, `head_dim` 128, RoPE θ 5e6, no scaling, untied 130560-vocab head); the stock exporter has no `llama` graph family, but the Mistral builder is architecturally identical (GQA, no qkv bias, no qk-norm, explicit `head_dim`). The one-line remap that ships the 1B, untouched.

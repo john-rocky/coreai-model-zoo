@@ -96,6 +96,23 @@ candidate questions it was not trained for), as `laya.load(...).predict` answers
 balanced accuracy **0.6114**, accuracy 0.5903 (the same at T = 1 and with the fitted calibration, and at
 both windows). That is the reference a port's decisions are compared with, not a claim about the port.
 
+### JevBench public 231 (Mac, 2026-09-24)
+
+| easy 48 | standard 72 | hard 111 | ECE hard | p50 | p95 | hard max |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.896 | 0.403 | 0.342 | 0.273 | 0.02 s | 0.20 s | 0.3 s |
+
+The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstandhartinger/jevbench)
+`2fa63fa`, v1.4.0, `typesafe` adapter) ran the 231 public items against coreai-kit `adbc755`
+`decide-cli serve` with the `macos/wfp16-s256` bundle, one question per request. The bundle's input
+window is 256 tokens: 95 of the 111 hard items were truncated to it (hard states are up to 3,677 tokens
+long), and no easy or standard item was (the longest is 107 tokens). Accuracy per tier and the hard
+tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request
+latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured without an
+exclusive GPU window (contended), with this model's server running alone. JevBench's published scores
+(Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not
+comparable to these accuracies.
+
 ## Numerics gate
 
 The oracle is the publisher's package itself (`laya.load(<pinned snapshot>, subfolder="multilingual")`,
