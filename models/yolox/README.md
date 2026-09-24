@@ -18,6 +18,8 @@ reported number).
 <!-- gen-cards:use-it begin id=yolox-s (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
 
@@ -25,20 +27,23 @@ reported number).
 let boxes = try await CoreAI.detect(inImageAt: url, options: .model("yolox-s"))
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [DetectCamera runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/DetectCamera)
+▶️ **Run it (source)** — the [DetectCamera runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/DetectCamera)
 (real-time object detection on the zero-copy camera path):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/DetectCamera/DetectCamera.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/DetectCamera/DetectCamera.xcodeproj
 # → Run, then pick "YOLOX" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/DetectCamera
-swift run detect-cli --model yolox-s --image Resources/gate_image.jpg
+swift run -c release detect-cli --model yolox-s --image Resources/gate_image.jpg
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
@@ -51,7 +56,7 @@ let detections = try await detector.detect(in: image.cgImage)
 // detections: [Detection] — label, score, normalized box (top-left origin)
 ```
 
-The take-home is [`Examples/DetectCamera/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/DetectCamera/Sources/QuickStart.swift)
+The take-home is [`Examples/DetectCamera/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/DetectCamera/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI runs the same detector per camera frame on a zero-copy pixel-buffer fast path.
 YOLOX is a dense detector — `KitDetector` runs the obj·cls threshold + per-class NMS
@@ -59,10 +64,10 @@ host-side; the DETR family needs none. Same `detect(in:)` either way.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKitVision**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKitVision**
 - Info.plist: `NSCameraUsageDescription` — only for the live camera; the snippet needs none
 - Entitlements: none needed
-- First run downloads the model — 0.0 GB (Mac) / 0.0 GB (iPhone) — then it loads from the
+- First run downloads the model — ~36 MB (Mac) / ~36 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

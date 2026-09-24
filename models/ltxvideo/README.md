@@ -18,6 +18,8 @@ and `stg_scale=0`, so the DiT runs batch-1, single-conditioning.
 <!-- gen-cards:use-it begin id=ltx-video-2b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
 ▶️ **Run it (source)** — [`apps/CoreAIVideo`](https://github.com/john-rocky/coreai-model-zoo/tree/main/apps/CoreAIVideo),
 the zoo app that ships this model (text → video on Mac: T5 + 8-step flow-matching DiT + causal video VAE, host FlowMatch sampler; build & run steps in its README).
 

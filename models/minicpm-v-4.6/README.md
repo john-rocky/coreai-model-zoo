@@ -27,6 +27,8 @@ original `…_int8lin` decoder + fp16 `minicpmv46_vision` kept for compatibility
 <!-- gen-cards:use-it begin id=minicpm-v-4.6 (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
 
@@ -34,20 +36,23 @@ original `…_int8lin` decoder + fp16 `minicpmv46_vision` kept for compatibility
 let caption = try await CoreAI.caption(imageAt: url, options: .model("minicpm-v-4.6"))
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [VLChat runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/VLChat)
+▶️ **Run it (source)** — the [VLChat runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/VLChat)
 (GUI + CLI, one app for every vision-language model in the catalog):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/VLChat/VLChat.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/VLChat/VLChat.xcodeproj
 # → Run, then pick "MiniCPM-V 4.6" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/VLChat
-swift run vlchat-cli --model minicpm-v-4.6 --image sample.jpg --prompt "What is in this image?"
+swift run -c release vlchat-cli --model minicpm-v-4.6 --image sample.jpg --prompt "What is in this image?"
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
@@ -65,7 +70,7 @@ let reply = try await session.respond(to: Prompt {
 // reply.content: the answer about the image, generated fully on-device
 ```
 
-The take-home is [`Examples/VLChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/VLChat/Sources/QuickStart.swift)
+The take-home is [`Examples/VLChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/VLChat/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `KitVisionModel(catalog:)` behind a `LanguageModelSession`.
 Multi-turn about the same image? Hold the `LanguageModelSession` and call `respond(to:)`
@@ -74,10 +79,10 @@ per turn. The photo picker / file chooser is your app's own chrome — `ImageFil
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
 - Info.plist: `NSPhotoLibraryUsageDescription` — only if you use PhotosPicker
 - Entitlements (iOS): `com.apple.developer.kernel.increased-memory-limit`
-- First run downloads the model — 2.1 GB (Mac) / 2.1 GB (iPhone) — then it loads from the
+- First run downloads the model — ~2,145 MB (Mac) / ~2,145 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

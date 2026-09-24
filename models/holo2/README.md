@@ -13,18 +13,23 @@ Catalog id: **`holo2-4b`**.
 <!-- gen-cards:use-it begin id=holo2-4b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-▶️ **Run it (source)** — the [VLChat runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/VLChat)
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
+▶️ **Run it (source)** — the [VLChat runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/VLChat)
 (GUI + CLI, one app for every vision-language model in the catalog):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/VLChat/VLChat.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/VLChat/VLChat.xcodeproj
 # → Run, then pick "Holo2 4B" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/VLChat
-swift run vlchat-cli --model holo2-4b --image screenshot.png --prompt "Localize an element on the GUI image according to my instructions and output a click position as Click(x, y) with x num pixels from the left edge and y num pixels from the top edge. Instruction: click the Submit button."
+swift run -c release vlchat-cli --model holo2-4b --image screenshot.png --prompt "Localize an element on the GUI image according to my instructions and output a click position as Click(x, y) with x num pixels from the left edge and y num pixels from the top edge. Instruction: click the Submit button."
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
@@ -43,7 +48,7 @@ let reply = try await session.respond(to: Prompt {
 // or a plain answer for a normal question - all generated on-device
 ```
 
-The take-home is [`Examples/VLChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/VLChat/Sources/QuickStart.swift)
+The take-home is [`Examples/VLChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/VLChat/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `KitVisionModel(catalog:)` behind a `LanguageModelSession`.
 Holo2 is a GUI-grounding model: feed a screenshot and H Company's localization prompt
@@ -53,10 +58,10 @@ questions like its Qwen3-VL base.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
 - Info.plist: `NSPhotoLibraryUsageDescription` — only if you use PhotosPicker
 - Entitlements (iOS): `com.apple.developer.kernel.increased-memory-limit`
-- First run downloads the model — 5.5 GB (Mac) / 5.5 GB (iPhone) — then it loads from the
+- First run downloads the model — ~5,484 MB (Mac) / ~5,484 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

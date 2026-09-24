@@ -14,18 +14,23 @@ Bundle: [🤗 mlboydaisuke/LLaDA-8B-dLLM-CoreAI](https://huggingface.co/mlboydai
 <!-- gen-cards:use-it begin id=llada-8b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-▶️ **Run it (source)** — the [DiffuseChat runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/DiffuseChat)
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
+▶️ **Run it (source)** — the [DiffuseChat runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/DiffuseChat)
 (GUI + CLI, one app for every diffusion LM in the catalog):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/DiffuseChat/DiffuseChat.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/DiffuseChat/DiffuseChat.xcodeproj
 # → Run, then pick "LLaDA-8B (diffusion)" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/DiffuseChat
-swift run diffuse-cli --model llada-8b --prompt "What is the capital of France?"
+swift run -c release diffuse-cli --model llada-8b --prompt "What is the capital of France?"
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
@@ -38,7 +43,7 @@ let reply = try await dlm.reply(to: prompt)
 // (still-masked positions as ░), in parallel, not left-to-right
 ```
 
-The take-home is [`Examples/DiffuseChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/DiffuseChat/Sources/QuickStart.swift)
+The take-home is [`Examples/DiffuseChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/DiffuseChat/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI renders the same live canvas.
 The canvas is fixed (S=256 ≈ 210 generated tokens) and the whole history must fit — no
@@ -47,10 +52,10 @@ Pass `onStep: nil` if you only want the final text.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
 - Info.plist: none needed
 - Entitlements: none needed
-- First run downloads the model — 5.3 GB (Mac) — then it loads from the
+- First run downloads the model — ~5,265 MB (Mac) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

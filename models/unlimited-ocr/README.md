@@ -19,6 +19,8 @@ port that the runtime can run as-is.
 <!-- gen-cards:use-it begin id=unlimited-ocr (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
 
@@ -26,20 +28,23 @@ port that the runtime can run as-is.
 let markdown = try await CoreAI.read(documentAt: url, options: .model("unlimited-ocr"))
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [ReadDoc runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ReadDoc)
+▶️ **Run it (source)** — the [ReadDoc runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ReadDoc)
 (GUI + CLI, one app for every document-OCR model in the catalog):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/ReadDoc/ReadDoc.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/ReadDoc/ReadDoc.xcodeproj
 # → Run, then pick "Unlimited-OCR" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/ReadDoc
-swift run readdoc-cli --model unlimited-ocr --image sample.png
+swift run -c release readdoc-cli --model unlimited-ocr --image sample.png
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
@@ -52,7 +57,7 @@ let markdown = try await reader.read(imageAt: imageURL)
 // <|det|> layout boxes, reading order — fully on-device
 ```
 
-The take-home is [`Examples/ReadDoc/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/ReadDoc/Sources/QuickStart.swift)
+The take-home is [`Examples/ReadDoc/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/ReadDoc/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `KitDocReader(catalog:)` on the image you pick.
 One `read(imageAt:)` call per page; chunk a PDF into page images first. The output keeps
@@ -61,10 +66,10 @@ strip or render it as your app prefers.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
 - Info.plist: none needed
 - Entitlements: none needed
-- First run downloads the model — 4.5 GB (Mac) — then it loads from the
+- First run downloads the model — ~4,532 MB (Mac) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

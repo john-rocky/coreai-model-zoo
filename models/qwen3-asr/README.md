@@ -14,6 +14,8 @@ is the first on the new **Core AI** runtime and a CoreAIKit drop-in.)
 <!-- gen-cards:use-it begin id=qwen3-asr-1.7b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
 
@@ -21,20 +23,23 @@ is the first on the new **Core AI** runtime and a CoreAIKit drop-in.)
 let text = try await CoreAI.transcribe(audioURL, options: .model("qwen3-asr-1.7b"))
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [Transcribe runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Transcribe)
+▶️ **Run it (source)** — the [Transcribe runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/Transcribe)
 (GUI + CLI, one app for every speech-to-text model in the catalog):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/Transcribe/Transcribe.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/Transcribe/Transcribe.xcodeproj
 # → Run, then pick "Qwen3-ASR 1.7B" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/Transcribe
-swift run transcribe-cli --model qwen3-asr-1.7b --audio sample.wav
+swift run -c release transcribe-cli --model qwen3-asr-1.7b --audio sample.wav
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
@@ -47,17 +52,17 @@ let result = try await transcriber.transcribe(samples: samples)
 // result.text, result.language (52 languages)
 ```
 
-The take-home is [`Examples/Transcribe/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/Transcribe/Sources/QuickStart.swift)
+The take-home is [`Examples/Transcribe/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/Transcribe/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; both the runner's GUI and its CLI call it.
 Recording? `MicRecorder` (kit API) captures mic audio as 16 kHz mono `[Float]` — the record
 button and permission prompt are your app's own chrome.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
 - Info.plist: `NSMicrophoneUsageDescription` — only if you record
 - Entitlements: none needed (macOS)
-- First run downloads the model — 3.1 GB (Mac) — then it loads from the
+- First run downloads the model — ~3,100 MB (Mac) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

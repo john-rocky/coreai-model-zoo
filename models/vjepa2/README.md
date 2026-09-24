@@ -14,6 +14,8 @@ alongside. Catalog id: **`vjepa2-vitl-ssv2`**.
 <!-- gen-cards:use-it begin id=vjepa2-vitl-ssv2 (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
 ⚡ **One line** — this model is the default behind the kit's task op
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
 
@@ -21,20 +23,23 @@ alongside. Catalog id: **`vjepa2-vitl-ssv2`**.
 let actions = try await CoreAI.recognizeAction(videoAt: videoURL)
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [ActionCamera runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ActionCamera)
+▶️ **Run it (source)** — the [ActionCamera runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ActionCamera)
 (live camera action recognition, one app for every video model in the catalog):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/ActionCamera/ActionCamera.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/ActionCamera/ActionCamera.xcodeproj
 # → Run, then pick "V-JEPA 2 ViT-L (SSv2)" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/ActionCamera
-swift run action-cli --model vjepa2-vitl-ssv2 --video sample.mp4
+swift run -c release action-cli --model vjepa2-vitl-ssv2 --video sample.mp4
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
@@ -47,7 +52,7 @@ let actions = try await recognizer.classify(videoAt: videoURL, topK: 3)
 // .probability; 174 SSv2 classes, fully on-device
 ```
 
-The take-home is [`Examples/ActionCamera/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/ActionCamera/Sources/QuickStart.swift)
+The take-home is [`Examples/ActionCamera/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/ActionCamera/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI classifies a rolling 16-frame clip from `CameraFeed`.
 Live camera? Keep the last 16 `CameraFeed` frames and call `classify(frames:)` — other
@@ -56,10 +61,10 @@ clip (a hand pushing a block); point `--video` at real footage for real results.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKitVision**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKitVision**
 - Info.plist: `NSCameraUsageDescription` — only for the live camera; the snippet needs none
 - Entitlements: none needed
-- First run downloads the model — 0.7 GB (Mac) / 0.7 GB (iPhone) — then it loads from the
+- First run downloads the model — ~708 MB (Mac) / ~710 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

@@ -20,6 +20,8 @@ extra-states patch budget (≤2). No engine changes needed beyond the existing p
 <!-- gen-cards:use-it begin id=lfm2.5-1.2b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
+**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+
 **Measured decode** — iPhone 17 Pro: 45.5 tok/s · Mac (M4 Max): 277 tok/s
 ([DeviceMark](https://devicemark.github.io/) row `lfm2.5-1.2b`, `int8hu` bundle ·
 [data](https://huggingface.co/datasets/devicemark/results))
@@ -31,34 +33,48 @@ extra-states patch budget (≤2). No engine changes needed beyond the existing p
 let tldr = try await CoreAI.summarize(text, options: .model("lfm2.5-1.2b"))
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/main/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/main/Examples/ChatDemo)
+▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo)
 (GUI + CLI, one app for every chat model in the catalog):
 
 ```bash
-git clone https://github.com/john-rocky/coreai-kit
-open coreai-kit/Examples/ChatDemo/ChatDemo.xcodeproj
+git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/ChatDemo/ChatDemo.xcodeproj
 # → Run, then pick "LFM2.5 1.2B" in the model picker
 
 # agents / headless (macOS):
 cd coreai-kit/Examples/ChatDemo
-swift run chat-cli --model lfm2.5-1.2b --prompt "What can you do, offline?"
+swift run -c release chat-cli --model lfm2.5-1.2b --prompt "What can you do, offline?"
 ```
+
+Use Xcode build **27A266a** from the release's `.xcode-pin`; adjust the app path if your installation is named differently.
 
 💻 **Build with it** — complete; the glue is kit API, copy-paste runs:
 
 ```swift
 import CoreAIKit
 
-let chat = try await ChatSession(catalog: "lfm2.5-1.2b")
+let id = "lfm2.5-1.2b"
+let chat: ChatSession
+if id == "qwen3-0.6b" {
+    // Freeze the release starter; other selections retain the live catalog's
+    // model-specific dispatch (including paired Gemma bundles).
+    guard let model = ModelCatalog.builtin.entry(id: id)?.modelID else {
+        throw CoreAIKitError.modelNotAvailableOnPlatform(id: id)
+    }
+    chat = try await ChatSession(model: model)
+} else {
+    chat = try await ChatSession(catalog: "lfm2.5-1.2b")
+}
 let reply = try await chat.respond(to: prompt)
 // reply: the answer, generated fully on-device
 ```
 
-**When Apple's FoundationModels built-in model isn't enough, keep your session code and swap the model — one line.** CoreAIKit's [`KitLanguageModel`](https://github.com/john-rocky/coreai-kit#when-foundationmodels-isnt-enough) plugs this bundle into the same system `LanguageModelSession`; your `Tool`s, `@Generable` types and transcripts work unchanged, and capabilities (tool calling, guided generation) auto-detect per model.
+**When Apple's FoundationModels built-in model isn't enough, keep your session code and swap the model — one line.** CoreAIKit's [`KitLanguageModel`](https://github.com/john-rocky/coreai-kit#works-with-apples-foundationmodels-api) plugs supported chat bundles into the system `LanguageModelSession`. Tool calling depends on the model's dialect; guided generation also requires a compatible sequential engine. Check the linked support matrix before using either capability.
 
-The take-home is [`Examples/ChatDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/main/Examples/ChatDemo/Sources/QuickStart.swift)
+The take-home is [`Examples/ChatDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/ChatDemo/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `ChatSession` across turns for its transcript.
 Multi-turn? Hold the `ChatSession` and call `respond(to:)` per turn — it keeps the
@@ -66,10 +82,10 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
 - Info.plist: none needed
 - Entitlements: none needed
-- First run downloads the model — 1.6 GB (Mac) / 1.6 GB (iPhone) — then it loads from the
+- First run downloads the model — ~1,623 MB (Mac) / ~1,623 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

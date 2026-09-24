@@ -1,6 +1,6 @@
 {
   "kitURL": "https://github.com/john-rocky/coreai-kit",
-  "kitVersion": "0.4.1",
+  "kitVersion": "0.7.1",
   "starterID": "qwen3-0.6b",
   "starterRunner": "Examples/ChatDemo",
   "zooURL": "https://github.com/john-rocky/coreai-model-zoo",
