@@ -23,7 +23,7 @@ eliminated by `optimize()` because only `depth`/`depth_conf` are graph outputs.
 <!-- gen-cards:use-it begin id=depth-anything-3-small (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+**New to Core AI? [Start with CoreAIKit 0.7.3](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
 
 ⚡ **One line** — this model is the default behind the kit's task op
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
@@ -32,13 +32,13 @@ eliminated by `optimize()` because only `depth`/`depth_conf` are graph outputs.
 let map = try await CoreAI.estimateDepth(in: image)
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.3/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [DepthCamera runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/DepthCamera)
+▶️ **Run it (source)** — the [DepthCamera runner](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/DepthCamera)
 (live camera depth, one app for every depth model in the catalog):
 
 ```bash
-git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+git clone --branch 0.7.3 --depth 1 https://github.com/john-rocky/coreai-kit
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/DepthCamera/DepthCamera.xcodeproj
 # → Run, then pick "Depth Anything 3 Small" in the model picker
@@ -61,7 +61,7 @@ let depth = try await estimator.estimateDepth(for: image.cgImage)
 // depth: DepthMap — .cgImage() renders it, .values are the raw floats
 ```
 
-The take-home is [`Examples/DepthCamera/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/DepthCamera/Sources/QuickStart.swift)
+The take-home is [`Examples/DepthCamera/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.3/Examples/DepthCamera/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI runs the same estimator on every camera frame (`CameraFeed`, ~10 lines).
 Live camera? `CameraFeed` (kit API) streams frames — feed each one to
@@ -69,10 +69,10 @@ Live camera? `CameraFeed` (kit API) streams frames — feed each one to
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKitVision**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.3**) → product **CoreAIKitVision**
 - Info.plist: `NSCameraUsageDescription` — only for the live camera; the snippet needs none
 - Entitlements: none needed
-- First run downloads the model — ~54 MB (Mac) / ~54 MB (iPhone) — then it loads from the
+- First run downloads the model — ~55 MB (Mac) / ~55 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

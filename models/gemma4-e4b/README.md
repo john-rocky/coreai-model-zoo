@@ -15,7 +15,7 @@ plus the QAT gather tables under `ios-frontend/gemma4_e4b_qat_gather_raw/`.
 <!-- gen-cards:use-it begin id=gemma-4-e4b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+**New to Core AI? [Start with CoreAIKit 0.7.3](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
 
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
@@ -24,13 +24,13 @@ plus the QAT gather tables under `ios-frontend/gemma4_e4b_qat_gather_raw/`.
 let tldr = try await CoreAI.summarize(text, options: .model("gemma-4-e4b"))
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.3/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo)
+▶️ **Run it (source)** — the [ChatDemo runner](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo)
 (GUI + CLI, one app for every chat model in the catalog):
 
 ```bash
-git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+git clone --branch 0.7.3 --depth 1 https://github.com/john-rocky/coreai-kit
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/ChatDemo/ChatDemo.xcodeproj
 # → Run, then pick "Gemma 4 E4B" in the model picker
@@ -65,7 +65,7 @@ let reply = try await chat.respond(to: prompt)
 
 **When Apple's FoundationModels built-in model isn't enough, keep your session code and swap the model — one line.** CoreAIKit's [`KitGemmaModel`](https://github.com/john-rocky/coreai-kit#works-with-apples-foundationmodels-api) plugs supported chat bundles into the system `LanguageModelSession`. Tool calling depends on the model's dialect; guided generation also requires a compatible sequential engine. Check the linked support matrix before using either capability.
 
-The take-home is [`Examples/ChatDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/ChatDemo/Sources/QuickStart.swift)
+The take-home is [`Examples/ChatDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.3/Examples/ChatDemo/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `ChatSession` across turns for its transcript.
 Multi-turn? Hold the `ChatSession` and call `respond(to:)` per turn — it keeps the
@@ -73,10 +73,10 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.3**) → product **CoreAIKit**
 - Info.plist: none needed
 - Entitlements: none needed (macOS)
-- First run downloads the model — ~7,589 MB (Mac) — then it loads from the
+- First run downloads the model — ~7,590 MB (Mac) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

@@ -21,13 +21,13 @@ Two graphs (two encoders, shared backbone), one per modality.
 <!-- gen-cards:use-it begin id=colmodernvbert (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+**New to Core AI? [Start with CoreAIKit 0.7.3](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
 
-▶️ **Run it (source)** — the [DocSearch runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/DocSearch)
+▶️ **Run it (source)** — the [DocSearch runner](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/DocSearch)
 (visual page search over bundled sample pages; the GUI (iPhone) adds tiled where-it-matched highlights):
 
 ```bash
-git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+git clone --branch 0.7.3 --depth 1 https://github.com/john-rocky/coreai-kit
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/DocSearch/DocSearch.xcodeproj
 # → Run, then pick "ColModernVBERT" in the model picker
@@ -54,7 +54,7 @@ let hits = try await retriever.retrieve(query: query, over: corpus, topK: pages.
 // hits: pages ranked by MaxSim, best match first — no OCR, pages are matched as pictures
 ```
 
-The take-home is [`Examples/DocSearch/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/DocSearch/Sources/QuickStart.swift)
+The take-home is [`Examples/DocSearch/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.3/Examples/DocSearch/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `VisualDocumentRetriever(catalog:)` with tiled per-page encoding.
 Encode your corpus once and keep the `PageEmbedding`s — scoring a query is then host-side
@@ -62,10 +62,10 @@ MaxSim, no model call per page. `encodeTiled(page:)` localizes *where* a query m
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKitEmbeddings**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.3**) → product **CoreAIKitEmbeddings**
 - Info.plist: `NSPhotoLibraryUsageDescription` — only if you use PhotosPicker to import pages
 - Entitlements: none needed
-- First run downloads the model — ~741 MB (Mac) / ~741 MB (iPhone) — then it loads from the
+- First run downloads the model — ~743 MB (Mac) / ~743 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

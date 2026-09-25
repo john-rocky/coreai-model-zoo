@@ -14,7 +14,7 @@ expansion `L = Σ pred_dur`. The model is cut at that boundary into **three
 <!-- gen-cards:use-it begin id=kokoro-82m (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+**New to Core AI? [Start with CoreAIKit 0.7.3](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
 
 ⚡ **One line** — run the kit's task op on this model
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
@@ -23,13 +23,13 @@ expansion `L = Σ pred_dur`. The model is cut at that boundary into **three
 let audio = try await CoreAI.speak(text, options: .model("kokoro-82m"))
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.3/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [Speak runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/Speak)
+▶️ **Run it (source)** — the [Speak runner](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/Speak)
 (GUI + CLI, one app for every text-to-speech model in the catalog):
 
 ```bash
-git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+git clone --branch 0.7.3 --depth 1 https://github.com/john-rocky/coreai-kit
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/Speak/Speak.xcodeproj
 # → Run, then pick "Kokoro 82M" in the model picker
@@ -51,7 +51,7 @@ let audio = try await speaker.synthesize(text)
 // audio.samples: 24 kHz mono PCM in [-1, 1] — play it or write a WAV
 ```
 
-The take-home is [`Examples/Speak/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/Speak/Sources/QuickStart.swift)
+The take-home is [`Examples/Speak/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.3/Examples/Speak/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `KitSpeaker(catalog:)` and plays the samples.
 English-first: G2P is a dictionary over the bundled misaki lexicons (~180k words);
@@ -61,10 +61,10 @@ label. Streaming? `synthesizeStreaming(_:onChunk:)` hands you a chunk per senten
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.3**) → product **CoreAIKit**
 - Info.plist: none needed
 - Entitlements: none needed
-- First run downloads the model — ~341 MB (Mac) — then it loads from the
+- First run downloads the model — ~361 MB (Mac) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->

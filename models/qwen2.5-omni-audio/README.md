@@ -12,7 +12,7 @@ iPhone 17 Pro (A19 Pro) and M4 Max.**
 <!-- gen-cards:use-it begin id=qwen2.5-omni-3b-audio (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+**New to Core AI? [Start with CoreAIKit 0.7.3](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
 
 ⚡ **One line** — this model is the default behind the kit's task op
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
@@ -21,13 +21,13 @@ iPhone 17 Pro (A19 Pro) and M4 Max.**
 let scene = try await CoreAI.describeAudio(audioURL)
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.3/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [AudioChat runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/AudioChat)
+▶️ **Run it (source)** — the [AudioChat runner](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/AudioChat)
 (GUI + CLI, one app for every audio-understanding model in the catalog):
 
 ```bash
-git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+git clone --branch 0.7.3 --depth 1 https://github.com/john-rocky/coreai-kit
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/AudioChat/AudioChat.xcodeproj
 # → Run, then pick "Qwen2.5-Omni 3B Audio" in the model picker
@@ -52,7 +52,7 @@ let reply = try await session.respond(to: question)
 // reply.content: what the model heard, described fully on-device
 ```
 
-The take-home is [`Examples/AudioChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/AudioChat/Sources/QuickStart.swift)
+The take-home is [`Examples/AudioChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.3/Examples/AudioChat/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `KitAudioModel(catalog:)` behind a `LanguageModelSession`.
 Live mic? `MicRecorder` (kit API) captures 16 kHz mono `[Float]` — attach that instead.
@@ -60,7 +60,7 @@ One clip per session; attach a new clip to ask about different audio.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.3**) → product **CoreAIKit**
 - Info.plist: `NSMicrophoneUsageDescription` — only if you record
 - Entitlements: none needed (macOS)
 - First run downloads the model — ~5,485 MB (Mac) — then it loads from the

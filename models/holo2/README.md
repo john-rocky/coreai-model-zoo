@@ -13,13 +13,13 @@ Catalog id: **`holo2-4b`**.
 <!-- gen-cards:use-it begin id=holo2-4b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+**New to Core AI? [Start with CoreAIKit 0.7.3](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
 
-▶️ **Run it (source)** — the [VLChat runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/VLChat)
+▶️ **Run it (source)** — the [VLChat runner](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/VLChat)
 (GUI + CLI, one app for every vision-language model in the catalog):
 
 ```bash
-git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+git clone --branch 0.7.3 --depth 1 https://github.com/john-rocky/coreai-kit
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/VLChat/VLChat.xcodeproj
 # → Run, then pick "Holo2 4B" in the model picker
@@ -48,7 +48,7 @@ let reply = try await session.respond(to: Prompt {
 // or a plain answer for a normal question - all generated on-device
 ```
 
-The take-home is [`Examples/VLChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/VLChat/Sources/QuickStart.swift)
+The take-home is [`Examples/VLChat/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.3/Examples/VLChat/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI drives the same `KitVisionModel(catalog:)` behind a `LanguageModelSession`.
 Holo2 is a GUI-grounding model: feed a screenshot and H Company's localization prompt
@@ -58,7 +58,7 @@ questions like its Qwen3-VL base.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKit**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.3**) → product **CoreAIKit**
 - Info.plist: `NSPhotoLibraryUsageDescription` — only if you use PhotosPicker
 - Entitlements (iOS): `com.apple.developer.kernel.increased-memory-limit`
 - First run downloads the model — ~5,484 MB (Mac) / ~5,484 MB (iPhone) — then it loads from the

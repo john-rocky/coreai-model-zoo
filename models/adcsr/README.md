@@ -9,7 +9,7 @@ no prompt, no noise — so it is fast and small enough to run fully on-device, i
 <!-- gen-cards:use-it begin id=adcsr-x4 (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
 
-**New to Core AI? [Start with CoreAIKit 0.7.1](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
+**New to Core AI? [Start with CoreAIKit 0.7.3](https://github.com/john-rocky/coreai-kit#readme).** Follow its requirements and first-run steps for `qwen3-0.6b`, then open the same release's [ChatDemo](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/ChatDemo). The README records the tested OS/SDK and download size; model and device coverage is stated per example.
 
 ⚡ **One line** — this model is the default behind the kit's task op
 (`import CoreAIOps`; no session, no model plumbing, downloads on first use):
@@ -18,13 +18,13 @@ no prompt, no noise — so it is fast and small enough to run fully on-device, i
 let big = try await CoreAI.upscale(image)
 ```
 
-Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.1/docs/COOKBOOK.md).
+Every op, one shape — [Cookbook](https://github.com/john-rocky/coreai-kit/blob/0.7.3/docs/COOKBOOK.md).
 
-▶️ **Run it (source)** — the [UpscaleDemo runner](https://github.com/john-rocky/coreai-kit/tree/0.7.1/Examples/UpscaleDemo)
+▶️ **Run it (source)** — the [UpscaleDemo runner](https://github.com/john-rocky/coreai-kit/tree/0.7.3/Examples/UpscaleDemo)
 (pick a photo, upscale it ×4 on-device):
 
 ```bash
-git clone --branch 0.7.1 --depth 1 https://github.com/john-rocky/coreai-kit
+git clone --branch 0.7.3 --depth 1 https://github.com/john-rocky/coreai-kit
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 open -a /Applications/Xcode-27.0.0-RC.app coreai-kit/Examples/UpscaleDemo/UpscaleDemo.xcodeproj
 # → Run, pick a photo — the app loads AdcSR ×4 (the catalog's superResolution entry) automatically
@@ -47,7 +47,7 @@ let upscaled = try await resolver.upscale(image.cgImage)
 // upscaled: CGImage — 4× the input's pixels
 ```
 
-The take-home is [`Examples/UpscaleDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.1/Examples/UpscaleDemo/Sources/QuickStart.swift)
+The take-home is [`Examples/UpscaleDemo/Sources/QuickStart.swift`](https://github.com/john-rocky/coreai-kit/blob/0.7.3/Examples/UpscaleDemo/Sources/QuickStart.swift)
 — this exact code as one typed function, no UI; the CLI is an argument shell over it, and
 the GUI runs the same resolver on the photo you pick.
 Big photos? Inputs are tiled and feather-blended internally; `maxInputSide` (default 512)
@@ -55,10 +55,10 @@ caps the input first so a full-res phone photo can't produce a gigapixel result.
 
 **Integration checklist**
 
-- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.1**) → product **CoreAIKitVision**
+- SPM: `https://github.com/john-rocky/coreai-kit` (exact **0.7.3**) → product **CoreAIKitVision**
 - Info.plist: none needed
 - Entitlements: none needed
-- First run downloads the model — ~1,740 MB (Mac) / ~1,740 MB (iPhone) — then it loads from the
+- First run downloads the model — ~1,825 MB (Mac) / ~1,825 MB (iPhone) — then it loads from the
   local cache (Application Support; progress via the `downloadProgress` callback)
 - Measure in Release — Debug is ~3× slower on per-token host work
 <!-- gen-cards:use-it end -->
