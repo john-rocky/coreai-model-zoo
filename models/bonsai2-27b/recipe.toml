@@ -1,0 +1,25 @@
+# Recipe for Bonsai 2 27B — the configuration that produced the published bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+
+["bonsai2-27b"]
+script = "export_bonsai2_27b_decode_pipelined.py"
+args = ["--chunk", "64", "--chunks", "16"]
+card = "README.md"
+hf_repo = "rahulrachuri/ternary-bonsai-2-27b-coreai"
+source_hf_id = "prism-ml/Ternary-Bonsai-2-27B-gguf"
+source_revision = "6ed5e12bf84b7a63069882c91dd9e9218647d17b"
+bundle = "bonsai2_27b_decode_pq2_0_pf64"
+status = "verified"
+overlay = true
+aot = "xcrun coreai-build compile exports/bonsai2_27b_decode_pq2_0_pf64/bonsai2_27b_decode_pq2_0_pf64.aimodel --platform macOS --architecture h16s --preferred-compute gpu --expect-frequent-reshapes"
+needs = [
+  "The PrismML PQ2_0 GGUF downloads from Hugging Face unless --gguf supplies a local copy.",
+  "The tokenizer is loaded from Qwen/Qwen3.8-27B at export time.",
+]
+notes = [
+  "The published artifact revision is 0391d83323b76e58fe3167caef5a3ce994e5d4aa.",
+  "main is static S=1 with fused GatedDeltaNet and a next_token output; prefill is S=64,",
+  "and prefill16 is S=16. All functions share the same packed weights and four states.",
+  "The host and validation fixtures are in RahulRachuri/bonsai-swift v0.1.0.",
+]
