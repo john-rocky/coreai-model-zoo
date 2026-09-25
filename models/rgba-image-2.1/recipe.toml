@@ -1,4 +1,4 @@
-# Recipe for rgba-image-2.1 — the configuration that produced each staged bundle.
+# Recipe for rgba-image-2.1 — the configuration that produced each published bundle.
 # Schema and the rules for `status`: ../README.md.
 # Run it with:  python3 ../../conversion/zoo_convert.py run <name>
 #
@@ -10,7 +10,7 @@
 card = "README.md"
 hf_repo = "mlboydaisuke/RGBA-Image-2.1-CoreAI"
 source_hf_id = "Qwen/Qwen-Image-2.1"
-status = "unverified"
+status = "verified"
 steps = [
   { script = "qwenimage21/export_dit.py", args = [], bundle = "qi21_dit_full_bf16_dyn_iofp32.aimodel" },
   { script = "qwenimage21/export_encoder.py", args = ["--aot", "--w16a32"], bundle = "qi21_encoder_dynL_w16a32_ids_iofp32.aimodel" },
@@ -29,6 +29,8 @@ needs = [
 ]
 aot = "xcrun coreai-build compile <bundle>.aimodel --output <dir> --platform macOS --architecture h16c --preferred-compute gpu --expect-frequent-reshapes"
 notes = [
+  "Published 2026-09-25 as revision a9b5c9493571a8c4087dde0f4a191803feb0fd69: all 34 files verified",
+  "against the staged bundles (LFS sha256 + size from the Hub's file metadata; small files by download).",
   "The arguments are the ones the logged runs used (2026-09-25, macOS 27.0 26A428, M4 Max, from",
   "conversion/qwenimage21/): export_dit.py with no arguments = all 32 blocks, text axis 8..512, image",
   "axis 64..4096; export_encoder.py --aot --w16a32 = bf16 weights, fp32 compute, L 16..512. The 256",
@@ -46,8 +48,6 @@ notes = [
   "<|im_start|> tokens (quant_export_*.py, round 4 in conversion/qwenimage21/QWENIMAGE21_STATE.md).",
 ]
 open_questions = [
-  "Not published yet. The status becomes verified once the uploaded files are checked against these",
-  "bundles (each main.hash is the sha256 of its main.mlirb).",
   "Swift host: does GraphModel(computeUnits: .gpu) run the DiT .aimodel just-in-time, or does it hit",
   "the same Neural Engine region as the Python runtime and need the efr .aimodelc? Untested.",
 ]

@@ -96,7 +96,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/APUS-Decision-v1-4B-CoreAI",
-     "downloads_30d": 29,
+     "downloads_30d": 30,
      "bundles": [
       "gpu-pipelined-b2/apus_decision_v1_4b_decode_int8hu_block32_sym"
      ],
@@ -290,7 +290,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/decider-0.8b-CoreAI",
-     "downloads_30d": 33,
+     "downloads_30d": 40,
      "bundles": [
       "gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym"
      ],
@@ -1109,7 +1109,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/GLiNER2-PII-CoreAI",
-     "downloads_30d": 65,
+     "downloads_30d": 64,
      "bundles": [
       "ios/gliner2-pii_float16_s256_t96_m16.aimodel",
       "macos/gliner2-pii_float16_s256_t96_m16.aimodel"
@@ -1203,7 +1203,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/GLM-Image-CoreAI",
-     "downloads_30d": 59,
+     "downloads_30d": 57,
      "bundles": [
       "glm_image_ar.aimodelc",
       "glm_image_dit_1024.aimodelc",
@@ -1433,7 +1433,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI",
-     "downloads_30d": 61,
+     "downloads_30d": 182,
      "bundles": [
       "ios/fp32-s128/granite97m_fp32_s128_bound.h18p.aimodelc",
       "ios/fp32-s512/granite97m_fp32_s512_bound.h18p.aimodelc",
@@ -1601,7 +1601,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Laya-Multilingual-CoreAI",
-     "downloads_30d": 31,
+     "downloads_30d": 38,
      "bundles": [
       "ios-h18p/wfp16-s256",
       "ios-h18p/wfp16-s512",
@@ -1708,7 +1708,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/LFM2.5-2.6B-CoreAI",
-     "downloads_30d": 1297,
+     "downloads_30d": 1299,
      "bundles": [
       "gpu-pipelined/lfm2_5_2_6b_decode_int4lin",
       "gpu-pipelined/lfm2_5_2_6b_decode_int8hu_block32_sym"
@@ -2085,7 +2085,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MelBandRoformer-Vocal-CoreAI",
-     "downloads_30d": 55,
+     "downloads_30d": 56,
      "bundles": [
       "mbr_full_fp16.aimodel",
       "mbr_full_fp16.h18p.aimodelc"
@@ -2331,7 +2331,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MiniCPM5-2B-CoreAI",
-     "downloads_30d": 1191,
+     "downloads_30d": 1506,
      "bundles": [
       "int8",
       "ios-ane-h18p",
@@ -2372,7 +2372,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Muse-Glimmer-30B-CoreAI",
-     "downloads_30d": 1410,
+     "downloads_30d": 1414,
      "bundles": [
       "gpu-pipelined/muse_glimmer_30b_decode_int4hu_block32_sym"
      ],
@@ -2511,7 +2511,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Nemotron-3-Diarization-CoreAI",
-     "downloads_30d": 0,
+     "downloads_30d": 16,
      "bundles": [
       "n3d_offline_float16.aimodel",
       "n3d_offline_float16.h18p.aimodelc",
@@ -2543,7 +2543,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Nemotron-3-Nano-4B-CoreAI",
-     "downloads_30d": 17422,
+     "downloads_30d": 17195,
      "bundles": [
       "gpu-pipelined/nemotron_3_nano_4b_decode_int8hu",
       "ios-h18p/nemotron_3_nano_4b_decode_int8hu"
@@ -2817,7 +2817,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/OpenThai-SystemOne-CoreAI",
-     "downloads_30d": 16,
+     "downloads_30d": 20,
      "bundles": [
       "gpu-pipelined/openthai_systemone_decode_fp16",
       "gpu-pipelined/openthai_systemone_decode_int8lin"
@@ -3755,7 +3755,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Qwen3.5-2B-Decision-CoreAI",
-     "downloads_30d": 29,
+     "downloads_30d": 33,
      "bundles": [
       "gpu-pipelined/qwen3_5_2b_decision_decode_fp16",
       "gpu-pipelined/qwen3_5_2b_decision_decode_int8hu_block32_sym"
@@ -3785,7 +3785,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/qwen3.5-4B-CoreAI",
-     "downloads_30d": 747,
+     "downloads_30d": 750,
      "bundles": [
       "gpu-pipelined-b2/qwen3_5_4b_decode_int8hu_block32_sym"
      ],
@@ -4148,7 +4148,7 @@
    "recipes": [
     {
      "name": "rgba-image-2.1",
-     "status": "unverified",
+     "status": "verified",
      "source_model": null,
      "source_model_from": null,
      "hf_repo": "mlboydaisuke/RGBA-Image-2.1-CoreAI",
@@ -4157,8 +4157,6 @@
      "run": "python3 conversion/zoo_convert.py run rgba-image-2.1",
      "gate_transcript": null,
      "open_questions": [
-      "Not published yet. The status becomes verified once the uploaded files are checked against these",
-      "bundles (each main.hash is the sha256 of its main.mlirb).",
       "Swift host: does GraphModel(computeUnits: .gpu) run the DiT .aimodel just-in-time, or does it hit",
       "the same Neural Engine region as the Python runtime and need the efr .aimodelc? Untested."
      ]
@@ -4168,7 +4166,13 @@
     {
      "id": "mlboydaisuke/RGBA-Image-2.1-CoreAI",
      "downloads_30d": 0,
-     "bundles": [],
+     "bundles": [
+      "qi21_dit_full_bf16_dyn_iofp32.aimodel",
+      "qi21_encoder_dynL_w16a32_ids_iofp32.aimodel",
+      "qi21_vae_1024_fp32.aimodel",
+      "qi21_vae_256_fp32.aimodel",
+      "qi21_vae_512_fp32.aimodel"
+     ],
      "tier1": {},
      "smoke": []
     }
@@ -4241,7 +4245,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/S1-mini-CoreAI",
-     "downloads_30d": 1319,
+     "downloads_30d": 1683,
      "bundles": [
       "gpu-pipelined/s1_mini_decode_int8lin"
      ],
@@ -4360,7 +4364,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Streaming-Sortformer-Diar-CoreAI",
-     "downloads_30d": 96,
+     "downloads_30d": 67,
      "bundles": [
       "sortformer_float16.aimodel",
       "sortformer_float16.h18p.aimodelc"
@@ -4661,7 +4665,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI",
-     "downloads_30d": 63,
+     "downloads_30d": 64,
      "bundles": [
       "ios/vibevoice_connector_fp16.h18p.aimodelc",
       "ios/vibevoice_decoder_fp16_t64.h18p.aimodelc",
@@ -5253,7 +5257,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Z-Image-Turbo-CoreAI",
-     "downloads_30d": 50,
+     "downloads_30d": 49,
      "bundles": [
       "glue/zimage_t_embedder_fp32/zimage_t_embedder_fp32.aimodel",
       "zimage_dit_512_cap32_full_native_bf16_dyncap_dynimg_iofp32.aimodel",
