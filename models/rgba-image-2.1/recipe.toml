@@ -1,0 +1,53 @@
+# Recipe for rgba-image-2.1 — the configuration that produced each staged bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# Three exporters over the Qwen/Qwen-Image-2.1 snapshot the scripts pin (revision 790c926). The DiT
+# and the text encoder are re-authored in plain PyTorch (qi21_dit.py, qi21_text.py); the VAE wraps the
+# diffusers-main class. conversion/qwenimage21/README.md lists the gates in order.
+
+["rgba-image-2.1"]
+card = "README.md"
+hf_repo = "mlboydaisuke/RGBA-Image-2.1-CoreAI"
+source_hf_id = "Qwen/Qwen-Image-2.1"
+status = "unverified"
+steps = [
+  { script = "qwenimage21/export_dit.py", args = [], bundle = "qi21_dit_full_bf16_dyn_iofp32.aimodel" },
+  { script = "qwenimage21/export_encoder.py", args = ["--aot", "--w16a32"], bundle = "qi21_encoder_dynL_w16a32_ids_iofp32.aimodel" },
+  { script = "qwenimage21/export_vae.py", args = ["--size", "256"], bundle = "qi21_vae_256_fp32.aimodel" },
+  { script = "qwenimage21/export_vae.py", args = ["--size", "512", "--aot"], bundle = "qi21_vae_512_fp32.aimodel" },
+  { script = "qwenimage21/export_vae.py", args = ["--size", "1024", "--aot"], bundle = "qi21_vae_1024_fp32.aimodel" },
+]
+needs = [
+  "The Qwen/Qwen-Image-2.1 snapshot at revision 790c92633540aa0cb11d9abf19eb46d861714758 in the Hugging",
+  "Face cache (33.1 GB). The scripts find it through _paths.hf_snapshot and do not download it.",
+  "Two venvs, because coreai-opt 0.2.1 pins safetensors<=0.7.0 and diffusers main needs >=0.8.0.",
+  "export_dit.py and export_encoder.py ran in the coreai-models base venv (torch 2.9.0, coreai-torch",
+  "0.4.1, coreai-core 1.0.0b2, coreai-opt 0.2.1). export_vae.py ran in a second venv (Python 3.11,",
+  "torch 2.9.0, transformers 5.17.0, diffusers main 4295ee3, coreai-torch 0.4.1, coreai-core 1.0.0b2).",
+  "zoo_convert.py runs every step with one interpreter, so run the three VAE steps with the second one.",
+]
+aot = "xcrun coreai-build compile <bundle>.aimodel --output <dir> --platform macOS --architecture h16c --preferred-compute gpu --expect-frequent-reshapes"
+notes = [
+  "The arguments are the ones the logged runs used (2026-09-25, macOS 27.0 26A428, M4 Max, from",
+  "conversion/qwenimage21/): export_dit.py with no arguments = all 32 blocks, text axis 8..512, image",
+  "axis 64..4096; export_encoder.py --aot --w16a32 = bf16 weights, fp32 compute, L 16..512. The 256",
+  "VAE was exported first and compiled by a second run with --aot-only. The names invert to the flags:",
+  "qi21_dit_{full|L<n>}_bf16_dyn_iofp32, qi21_encoder_dynL_{bf16|bf16_r32|w16a32}_ids_iofp32,",
+  "qi21_vae_<size>_fp32.",
+  "GPU runs need the AOT compile above. JIT crashes on the 32-block DiT in the Python runtime",
+  "(MPSGraph forms a Neural Engine region; ANERegion.mm:414 ... Code=-19), and so does a plain h16c",
+  "compile without --expect-frequent-reshapes. The compiled bundle is <dir>/<name>.h16c.aimodelc,",
+  "loaded with SpecializationOptions.default(): DiT 2 min 9 s and 27 GB, encoder 16 s and 14.10 GiB.",
+  "The DiT was compiled by hand with that command; --aot in export_encoder.py / export_vae.py runs it.",
+  "The Hugging Face repo carries the .aimodel bundles, not the .aimodelc, plus host/ written by",
+  "make_host_consts.py (RoPE tables, scheduler.json) and host_contract.md.",
+  "No quantized variant: the int8 DiT fails the efr compile, and int8 encoder weights break the",
+  "<|im_start|> tokens (quant_export_*.py, round 4 in conversion/qwenimage21/QWENIMAGE21_STATE.md).",
+]
+open_questions = [
+  "Not published yet. The status becomes verified once the uploaded files are checked against these",
+  "bundles (each main.hash is the sha256 of its main.mlirb).",
+  "Swift host: does GraphModel(computeUnits: .gpu) run the DiT .aimodel just-in-time, or does it hit",
+  "the same Neural Engine region as the Python runtime and need the efr .aimodelc? Untested.",
+]

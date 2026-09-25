@@ -1,0 +1,8 @@
+oracle/
+_work/
+__pycache__/
+*.f32
+*.i32
+*.log
+*.aimodel/
+*.aimodelc/

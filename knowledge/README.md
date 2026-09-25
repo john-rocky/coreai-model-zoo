@@ -329,6 +329,10 @@ For the long-form version of the same material, read
   (9B GLM-4 AR writes visual prior tokens → 7B flow-matching DiT renders).
 - [`flux2-in-context-editing.md`](flux2-in-context-editing.md) — FLUX.2 [klein] **instruction
   editing + multi-reference composition** with no separate editing model and no ControlNet.
+- [`qwenimage21-port.md`](qwenimage21-port.md) — Qwen-Image-2.1 (RGBA-Image-2.1), a 7B
+  block-causal DiT with an RGBA VAE: the DiT runs on the GPU only after an
+  `--expect-frequent-reshapes` AOT compile, the text encoder's `<|im_start|>` tokens need fp32 compute, and
+  the 512² image forks inside the model's own bf16 band.
 
 ## Audio (the new modality — model-specific port notes)
 - [`qwen2.5-omni-audio-understanding.md`](qwen2.5-omni-audio-understanding.md) — Qwen2.5-Omni's
