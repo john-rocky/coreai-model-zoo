@@ -485,6 +485,20 @@ Apple's repo; each recipe names the script it runs.
   (`swift/`, bit-identical logits), with poisoned-loop controls; `apps/N3DGate` runs the same gate on the
   iPhone. See [`nemotron3_diar/README.md`](nemotron3_diar/README.md) and
   [`../models/nemotron-3-diarization/README.md`](../models/nemotron-3-diarization/README.md).
+- **RGBA-Image-2.1 (Qwen-Image-2.1 text-to-image with RGBA output, Alibaba Qwen, in [`qwenimage21/`](qwenimage21/)):
+  `qwenimage21/export_dit.py`, `qwenimage21/export_encoder.py --aot --w16a32`,
+  `qwenimage21/export_vae.py --size {256,512,1024} --aot`** — the 7B block-causal DiT and the
+  Qwen3-VL-8B text path re-authored in plain PyTorch with the checkpoints' parameter names
+  (`qi21_dit.py`, `qi21_text.py`): block-causal attention as two SDPA calls per block, RoPE as real
+  cos/sin tables from the host, the prefix KV cache replaced by a full recompute each step. The DiT
+  is bf16 with an fp32 boundary. The encoder stores bf16 weights and computes in fp32, because its
+  `<|im_start|>` tokens lose precision in bf16. The VAE decoder wraps the diffusers-main class
+  and exports from a second venv (diffusers main and coreai-opt pin incompatible safetensors). Every
+  stage is gated against an fp32 CPU oracle (`capture_oracle.py`); the host sampler and tokenizer
+  twins match the reference exactly. GPU runs need an AOT compile with `--expect-frequent-reshapes`: JIT
+  crashes on the full DiT in an ANE region. `make_host_consts.py` writes the RoPE tables and the
+  scheduler constants a Swift host needs. See [`qwenimage21/README.md`](qwenimage21/README.md) and
+  [`../models/rgba-image-2.1/README.md`](../models/rgba-image-2.1/README.md).
 
 ## Reproduce (env)
 
