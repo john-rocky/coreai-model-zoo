@@ -2,7 +2,8 @@
 
 The zoo's first **multi-speaker / dialogue (podcast-style)** TTS.
 [`microsoft/VibeVoice-Realtime-0.5B`](https://huggingface.co/microsoft/VibeVoice-Realtime-0.5B)
-(MIT, EN/ZH) as five Core AI graphs plus a host generate loop — iPhone (AOT h18p) and Mac, all fp16.
+(MIT, EN/ZH) as five Core AI graphs plus a host generate loop — iPhone and Mac, all fp16 (the iPhone rows
+below are the h18p AOT bundles on a 17 Pro).
 
 > **Not a "first on-device" claim.** Other CoreML/GGUF VibeVoice ports exist. What's new here is the
 > zoo's first *multi-speaker* TTS, app-integrated, and the other half of a **generate → diarize**
@@ -87,5 +88,8 @@ bash conversion/vibevoice/sideload_ios.sh <device-udid>                 # then V
 ```
 
 - 🤗 [VibeVoice-Realtime-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI)
-  — 5 macOS `.aimodel` + 5 iOS `.h18p.aimodelc` + voice presets + host embedding table.
+  — `macos/` and `ios/` each hold the 5 JIT `.aimodel` (every iPhone generation specializes them on its first
+  load), `ios-h18p/` the 5 `.h18p.aimodelc` compiled for the iPhone 17 Pro (that phone only; they sat in `ios/`
+  until Hub revision `b4480f87`, 2026-09-26) + voice presets + host embedding table. No iPhone 18 Pro
+  measurement yet.
 - Base model: [microsoft/VibeVoice-Realtime-0.5B](https://huggingface.co/microsoft/VibeVoice-Realtime-0.5B) (MIT).

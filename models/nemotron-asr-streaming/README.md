@@ -89,7 +89,10 @@ transcribes files of any length. vs. Apple's stock `SpeechAnalyzer`: open weight
 ## ⬇️ Bundle
 
 **[mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI)**
-— platform subtrees (`macos/` JIT, `ios/` AOT-h18p conformer halves), six graphs + tokenizer.
+— platform subtrees: `macos/` and `ios/` hold the six JIT graphs + tokenizer (every iPhone generation
+specializes them on its first load), `ios-h18p/` the conformer halves compiled for the iPhone 17 Pro beside the
+four small JIT graphs (that phone only; `ios/` carried them until Hub revision `73c45366`, 2026-09-26). The
+iPhone rows above are the h18p AOT halves; no iPhone 18 Pro measurement yet.
 CoreAIKit drop-in: `KitNemotronModel` (`makeSession(language:)` for live, `transcribe(samples:)`
 for files). OpenMDW-1.1, LICENSE included.
 

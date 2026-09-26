@@ -79,7 +79,8 @@ so audio starts before the whole clip exists. The WAV container is your app's te
 | `macos/voxcpm_feat_decoder_fp16/` | LocDiT CFM diffusion decoder (10-step euler + CFG, unrolled), fp16 |
 | `macos/voxcpm_feat_encoder_fp16/` | LocEnc + projection (per-frame feedback embed), fp16 |
 | `macos/voxcpm_vocoder_fp16_t12/` | AudioVAE decoder (DAC-style, 640× upsample), fp16 |
-| `ios/*.h18p.aimodelc/` | The same bundles (5 + the 2 int8 prefill), AOT-compiled for iOS (h18p) |
+| `ios/<name>/<name>.aimodel/` | The same 7 JIT bundles, laid out as `macos/` (every iPhone generation specializes them on its first load; Hub revision `38fc0aea`, 2026-09-26) |
+| `ios-h18p/*.h18p.aimodelc/` | The same 7 bundles AOT-compiled for the iPhone 17 Pro (that phone only; they sat in `ios/` before `38fc0aea`) |
 | `voxcpm_host_glue/` | Token-embedding table + dit/FSQ/stop-head weights (run host-side via Accelerate) |
 | `tokenizer/` | Llama tokenizer (`tokenizer.json` + config) |
 
@@ -93,7 +94,7 @@ Easiest path is the **[coreai-model-zoo](https://github.com/john-rocky/coreai-mo
 import CoreAIKit
 
 let tts = try await VoxCPMTTS(paths: .standard(artifactsRoot: modelRoot))   // macOS (.aimodel)
-// let tts = try await VoxCPMTTS(paths: .aot(root: modelRoot, arch: "h18p")) // iOS (.aimodelc)
+// let tts = try await VoxCPMTTS(paths: .aot(root: modelRoot))               // iOS with ios-h18p/ (.aimodelc; arch defaults to this device's from the next kit release)
 let pcm = try await tts.synthesize("On device speech synthesis, running entirely on your iPhone.")
 // pcm: [Float] @ 16 kHz mono
 

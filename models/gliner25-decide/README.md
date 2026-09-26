@@ -111,6 +111,10 @@ the thermal state still reads fair; the cause was not isolated.
 
 Bundles: `.aimodel` 873.0 MB (S = 256) and 874.6 MB (S = 512); `.h19p.aimodelc` 974.0 MB and
 975.6 MB, 0 Neural Engine regions (GPU preferred). AOT compile 3–4 s each with coreai-build 3600.83.1.
+Layout since Hub revision `820d4e90` (2026-09-26): `macos/` and `ios/` hold the two JIT `.aimodel` (the
+iPhone 18 Pro specializes them itself: first load 1.48 / 2.32 s, 0.36 / 0.13 s on relaunch, the same decisions;
+[`knowledge/gliner25-decide.md`](../../knowledge/gliner25-decide.md) §7), `ios-h19p/` the two
+`.h19p.aimodelc` (iPhone 18 Pro only). Until then `ios/` carried the h19p bundles.
 
 ## Reproduce
 
