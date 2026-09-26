@@ -92,7 +92,9 @@ transcribes files of any length. vs. Apple's stock `SpeechAnalyzer`: open weight
 — platform subtrees: `macos/` and `ios/` hold the six JIT graphs + tokenizer (every iPhone generation
 specializes them on its first load), `ios-h18p/` the conformer halves compiled for the iPhone 17 Pro beside the
 four small JIT graphs (that phone only; `ios/` carried them until Hub revision `73c45366`, 2026-09-26). The
-iPhone rows above are the h18p AOT halves; no iPhone 18 Pro measurement yet.
+iPhone rows above are the h18p AOT halves. On the iPhone 18 Pro (h19p) the JIT halves loaded in 1.37 / 1.44 s on a
+fresh install, ran a first call in 0.93 / 0.32 s and loaded in 0.44 / 0.46 s on relaunch (load-only check,
+2026-09-26).
 CoreAIKit drop-in: `KitNemotronModel` (`makeSession(language:)` for live, `transcribe(samples:)`
 for files). OpenMDW-1.1, LICENSE included.
 
