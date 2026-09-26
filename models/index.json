@@ -1142,7 +1142,7 @@
    "recipes": [
     {
      "name": "gliner25-decide",
-     "status": "unverified",
+     "status": "verified",
      "source_model": null,
      "source_model_from": null,
      "hf_repo": "mlboydaisuke/GLiNER2.5-Decide-CoreAI",
@@ -1150,12 +1150,23 @@
      "steps": 4,
      "run": "python3 conversion/zoo_convert.py run gliner25-decide",
      "gate_transcript": "models/gliner25-decide/gate-gliner25-decide.json",
-     "open_questions": [
-      "published revision pending: upload waits for the owner's GO"
-     ]
+     "open_questions": []
     }
    ],
-   "repos": []
+   "repos": [
+    {
+     "id": "mlboydaisuke/GLiNER2.5-Decide-CoreAI",
+     "downloads_30d": 0,
+     "bundles": [
+      "ios/gliner25-decide_float16_s256_m32.h19p.aimodelc",
+      "ios/gliner25-decide_float16_s512_m32.h19p.aimodelc",
+      "macos/gliner25-decide_float16_s256_m32.aimodel",
+      "macos/gliner25-decide_float16_s512_m32.aimodel"
+     ],
+     "tier1": {},
+     "smoke": []
+    }
+   ]
   },
   {
    "family": "glm-4.7-flash",

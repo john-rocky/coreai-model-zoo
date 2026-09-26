@@ -11,7 +11,7 @@
 card = "README.md"
 hf_repo = "mlboydaisuke/GLiNER2.5-Decide-CoreAI"
 source_hf_id = "fastino/GLiNER2.5-Decide"
-status = "unverified"
+status = "verified"
 steps = [
   { command = ["uv", "run", "--python", "3.12", "gliner25_decide_oracle.py"] },
   { command = ["uv", "run", "--python", "3.12", "gliner25_decide_oracle.py", "--sets", "fast_decisions", "-S", "512", "--min-len", "257", "--per-domain", "10"] },
@@ -55,5 +55,8 @@ notes = [
   "out identical to the gated ones.",
   "conversion/gliner25_decide/stage_ship.py lays out the Hugging Face repo in <work>/_gliner25_decide/ship/, checks",
   "each file against the record of the gate that ran it, and writes SHA256SUMS; `--check <dir>` verifies a download.",
+  "Published 2026-09-26; pin revision 7464c910699075674e00c5f423ca11a3a64eb26b (41 files + SHA256SUMS, 3.72 GB: every",
+  "LFS file's Hub sha256 and every small file's download equal the staging SHA256SUMS); mirrored to",
+  "coreai-community/GLiNER2.5-Decide-CoreAI.",
 ]
-open_questions = ["published revision pending: upload waits for the owner's GO"]
+open_questions = []

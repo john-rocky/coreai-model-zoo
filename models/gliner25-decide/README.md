@@ -13,7 +13,8 @@ English DeBERTa-v3 tokenizer instead of mDeBERTa's. Other conversions of this pa
 [nishparadox/gliner2.5-decide-onnx](https://huggingface.co/nishparadox/gliner2.5-decide-onnx).
 
 - 🤗 [mlboydaisuke/GLiNER2.5-Decide-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2.5-Decide-CoreAI)
-  (mirror: [coreai-community/GLiNER2.5-Decide-CoreAI](https://huggingface.co/coreai-community/GLiNER2.5-Decide-CoreAI)).
+  (revision `7464c91`, 2026-09-26; mirror:
+  [coreai-community/GLiNER2.5-Decide-CoreAI](https://huggingface.co/coreai-community/GLiNER2.5-Decide-CoreAI)).
 - Oracle, export and gates: [`conversion/gliner25_decide_oracle.py`](../../conversion/gliner25_decide_oracle.py),
   [`conversion/export_gliner25_decide.py`](../../conversion/export_gliner25_decide.py); the Swift graph
   runner, AOT compile and staging: [`conversion/gliner25_decide/`](../../conversion/gliner25_decide/).
