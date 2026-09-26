@@ -17,7 +17,7 @@ configuration; a single bundle answers that question by itself.
 | --- | --- |
 | published repos | 282 |
 | Core AI repos | 92 |
-| Core AI bundles inside them | 322 |
+| Core AI bundles inside them | 344 |
 | Core AI repos with a `models/<family>/` card | 85 |
 | repos covered by a recipe | 85 |
 | Core AI repos with 0 downloads in the last 30 days | 4 |
@@ -27,9 +27,9 @@ configuration; a single bundle answers that question by itself.
 | repo | 30d DL | ♥ | fmt | role | bundles | tier-1 | tier-0 load | model | recipe | kit |
 | --- | ---: | ---: | --- | --- | ---: | --- | --- | --- | --- | --- |
 | [mlboydaisuke/Nemotron-3-Nano-4B-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Nano-4B-CoreAI) | 17195 | 0 | coreai | port | 2 | 2 pass | 1 load (26A428) 1 device-only | [nemotron-3-nano](nemotron-3-nano/README.md) | `nemotron-3-nano-4b` | `nemotron-3-nano-4b` |
-| [mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI) | 16557 | 2 | coreai | port | 12 | 12 pass | 6 load (26A428) 6 device-only | [nemotron-asr-streaming](nemotron-asr-streaming/README.md) | `nemotron-3.5-asr-streaming` | `nemotron-3.5-asr-streaming-0.6b` |
+| [mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI) | 16557 | 2 | coreai | port | 18 | 12 pass | 6 load (26A428) 6 device-only | [nemotron-asr-streaming](nemotron-asr-streaming/README.md) | `nemotron-3.5-asr-streaming` | `nemotron-3.5-asr-streaming-0.6b` |
 | [mlboydaisuke/Qwen2.5-Omni-3B-Audio-CoreAI](https://huggingface.co/mlboydaisuke/Qwen2.5-Omni-3B-Audio-CoreAI) | 16514 | 2 | coreai | port | 3 | 3 pass | 2 load (26A428) 1 deferred | [qwen2.5-omni-audio](qwen2.5-omni-audio/README.md) | `qwen2.5-omni-3b-audio` | `qwen2.5-omni-3b-audio` |
-| [mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI](https://huggingface.co/mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI) | 4123 | 1 | coreai | port | 2 | 1 pass 1 skipped | 1 load (26A428) 1 device-only | [vjepa2](vjepa2/README.md) | `vjepa2-vitl-ssv2` | `vjepa2-vitl-ssv2` |
+| [mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI](https://huggingface.co/mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI) | 4123 | 1 | coreai | port | 3 | 1 pass 1 skipped | 1 load (26A428) 1 device-only | [vjepa2](vjepa2/README.md) | `vjepa2-vitl-ssv2` | `vjepa2-vitl-ssv2` |
 | [mlboydaisuke/S1-mini-CoreAI](https://huggingface.co/mlboydaisuke/S1-mini-CoreAI) | 1683 | 0 | coreai | port | 1 | 1 pass | 1 load (26A428) | [s1-mini](s1-mini/README.md) | `s1-mini` | `s1-mini` |
 | [mlboydaisuke/LFM2.5-8B-A1B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-8B-A1B-CoreAI) | 1647 | 2 | coreai | port | 1 | **1 DIFF** | 1 load (26A428) | [lfm2.5-8b-a1b-moe](lfm2.5-8b-a1b-moe/README.md) | `lfm2.5-8b-a1b` | `lfm2.5-8b-a1b` |
 | [mlboydaisuke/MiniCPM5-2B-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM5-2B-CoreAI) | 1506 | 0 | coreai | port | 3 | 1 pass | 1 deferred | [minicpm5-2b](minicpm5-2b/README.md) | `minicpm5-2b`, `minicpm5-2b-ane` | `minicpm5-2b` |
@@ -51,10 +51,10 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/qwen3-1.7b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-1.7b-CoreAI-official) | 668 | 1 | coreai | official | 1 | — | 1 deferred | [qwen3-1.7b-official](qwen3-1.7b-official/README.md) | `qwen3-1.7b-official-ane` | — |
 | [mlboydaisuke/RWKV7-Goose-1.5B-CoreAI](https://huggingface.co/mlboydaisuke/RWKV7-Goose-1.5B-CoreAI) | 597 | 0 | coreai | port | 2 | 2 skipped | 2 deferred | [rwkv7-goose](rwkv7-goose/README.md) | `rwkv7-goose-1.5b` | — |
 | [mlboydaisuke/BitCPM-8B-CoreAI](https://huggingface.co/mlboydaisuke/BitCPM-8B-CoreAI) | 531 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [bitcpm-8b](bitcpm-8b/README.md) | `bitcpm-8b` | — |
-| [mlboydaisuke/qwen3.5-2B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreML) | 471 | 1 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/qwen3.5-0.8B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreML) | 458 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen3.5-2B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreML) | 472 | 1 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/MiniCPM5-2B-LiteRT](https://huggingface.co/mlboydaisuke/MiniCPM5-2B-LiteRT) | 437 | 1 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Pocket-TTS-LiteRT](https://huggingface.co/mlboydaisuke/Pocket-TTS-LiteRT) | 350 | 6 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen3.5-0.8B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreML) | 306 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Whisper-tiny-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-tiny-ExecuTorch) | 291 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/EdgeTAM-ExecuTorch](https://huggingface.co/mlboydaisuke/EdgeTAM-ExecuTorch) | 272 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Florence-2-base-ExecuTorch](https://huggingface.co/mlboydaisuke/Florence-2-base-ExecuTorch) | 245 | 0 | other | port | 0 | — | — | — | — | — |
@@ -96,9 +96,9 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/S1-mini-LiteRT](https://huggingface.co/mlboydaisuke/S1-mini-LiteRT) | 109 | 3 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Falcon3-3B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/Falcon3-3B-Instruct-LiteRT) | 108 | 3 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/granite-4.0-h-CoreAI](https://huggingface.co/mlboydaisuke/granite-4.0-h-CoreAI) | 108 | 0 | coreai | port | 4 | 4 pass | 4 deferred | [granite-4.0-h](granite-4.0-h/README.md) | `granite-4.0-h-1b`, `granite-4.0-h-350m` | `granite-4.0-h-1b` |
-| [mlboydaisuke/qwen3-vl-2b-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-2b-coreml) | 106 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/qwen3.5-2B-CoreAI](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreAI) | 103 | 1 | coreai | port | 4 | 4 pass | 4 deferred | [qwen3.5](qwen3.5/README.md) | `qwen3.5-0.8b`, `qwen3.5-2b` | `qwen3.5-2b` |
 | [mlboydaisuke/Qwen3-4B-LiteRT-gpu-composites](https://huggingface.co/mlboydaisuke/Qwen3-4B-LiteRT-gpu-composites) | 102 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen3-vl-2b-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-2b-coreml) | 99 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/qwen3-vl-8b-stateful-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-8b-stateful-coreml) | 99 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch) | 98 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Agents-A1-4B-CoreAI](https://huggingface.co/mlboydaisuke/Agents-A1-4B-CoreAI) | 96 | 0 | coreai | port | 1 | — | — | [agents-a1-4b](agents-a1-4b/README.md) | `agents-a1-4b` | — |
@@ -116,7 +116,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/RF-DETR-CoreAI](https://huggingface.co/mlboydaisuke/RF-DETR-CoreAI) | 87 | 3 | coreai | port | 14 | 10 pass 4 skipped | 14 deferred | [rf-detr](rf-detr/README.md) | `rf-detr` | `rf-detr` |
 | [mlboydaisuke/DIS-ISNet-ExecuTorch](https://huggingface.co/mlboydaisuke/DIS-ISNet-ExecuTorch) | 86 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/qwen3-4b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-4b-CoreAI-official) | 86 | 0 | coreai | official | 2 | — | 2 deferred | [qwen3-4b-official](qwen3-4b-official/README.md) | `qwen3-4b-official-ane` | `qwen3-4b` |
-| [mlboydaisuke/VoxCPM-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VoxCPM-0.5B-CoreAI) | 86 | 1 | coreai | port | 14 | 14 pass | 14 deferred | [voxcpm](voxcpm/README.md) | `voxcpm-0.5b` | `voxcpm-0.5b` |
+| [mlboydaisuke/VoxCPM-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VoxCPM-0.5B-CoreAI) | 86 | 1 | coreai | port | 21 | 14 pass | 14 deferred | [voxcpm](voxcpm/README.md) | `voxcpm-0.5b` | `voxcpm-0.5b` |
 | [mlboydaisuke/6DRepNet-HeadPose-ExecuTorch](https://huggingface.co/mlboydaisuke/6DRepNet-HeadPose-ExecuTorch) | 84 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/AdcSR-CoreAI](https://huggingface.co/mlboydaisuke/AdcSR-CoreAI) | 84 | 4 | coreai | port | 1 | 1 pass | 1 deferred | [adcsr](adcsr/README.md) | `adcsr-x4` | `adcsr-x4` |
 | [mlboydaisuke/multilingual-e5-base-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-base-ExecuTorch) | 84 | 0 | other | port | 0 | — | — | — | — | — |
@@ -165,7 +165,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/embeddinggemma-300m-CoreAI](https://huggingface.co/mlboydaisuke/embeddinggemma-300m-CoreAI) | 64 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3-embedding](qwen3-embedding/README.md) | `embeddinggemma-300m`, `qwen3-embedding-0.6b` | `embeddinggemma-300m` |
 | [mlboydaisuke/GLiNER2-PII-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2-PII-CoreAI) | 64 | 0 | coreai | port | 3 | 2 pass | 2 deferred | [gliner2-pii](gliner2-pii/README.md) | `gliner2-pii` | — |
 | [mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch](https://huggingface.co/mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch) | 64 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI) | 64 | 1 | coreai | port | 10 | 10 pass | 10 deferred | [vibevoice](vibevoice/README.md) | `vibevoice-realtime-0.5b` | `vibevoice-realtime-0.5b` |
+| [mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI) | 64 | 1 | coreai | port | 15 | 10 pass | 10 deferred | [vibevoice](vibevoice/README.md) | `vibevoice-realtime-0.5b` | `vibevoice-realtime-0.5b` |
 | [mlboydaisuke/TripoSplat-CoreAI](https://huggingface.co/mlboydaisuke/TripoSplat-CoreAI) | 63 | 7 | coreai | port | 6 | 6 pass | 6 deferred | [triposplat](triposplat/README.md) | `triposplat` | — |
 | [mlboydaisuke/qwen3-8b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-8b-CoreAI-official) | 62 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `qwen3-8b` |
 | [mlboydaisuke/RAFT-small-OpticalFlow-ExecuTorch](https://huggingface.co/mlboydaisuke/RAFT-small-OpticalFlow-ExecuTorch) | 62 | 0 | other | port | 0 | — | — | — | — | — |
@@ -182,7 +182,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/LFM2.5-VL-450M-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-VL-450M-CoreAI) | 58 | 0 | coreai | port | 6 | 6 pass | 6 deferred | [lfm2.5-vl](lfm2.5-vl/README.md) | `lfm2.5-vl-3b`, `lfm2.5-vl-3b-int4`, `lfm2.5-vl-3b-textcore`, `lfm2.5-vl-450m`, `lfm2.5-vl-450m-textcore` | `lfm2.5-vl-450m` |
 | [mlboydaisuke/GLM-Image-CoreAI](https://huggingface.co/mlboydaisuke/GLM-Image-CoreAI) | 57 | 2 | coreai | port | 5 | 5 skipped | 5 deferred | [glm-image](glm-image/README.md) | `glm-image` | — |
 | [mlboydaisuke/Matcha-TTS-LiteRT](https://huggingface.co/mlboydaisuke/Matcha-TTS-LiteRT) | 57 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/TimesFM-2.5-200M-CoreAI](https://huggingface.co/mlboydaisuke/TimesFM-2.5-200M-CoreAI) | 57 | 1 | coreai | port | 2 | 2 pass | 2 deferred | [timesfm](timesfm/README.md) | `timesfm-2.5-200m` | `timesfm-2.5-200m` |
+| [mlboydaisuke/TimesFM-2.5-200M-CoreAI](https://huggingface.co/mlboydaisuke/TimesFM-2.5-200M-CoreAI) | 57 | 1 | coreai | port | 3 | 2 pass | 2 deferred | [timesfm](timesfm/README.md) | `timesfm-2.5-200m` | `timesfm-2.5-200m` |
 | [mlboydaisuke/bge-small-en-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-small-en-v1.5-ExecuTorch) | 56 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/MelBandRoformer-Vocal-CoreAI](https://huggingface.co/mlboydaisuke/MelBandRoformer-Vocal-CoreAI) | 56 | 1 | coreai | port | 2 | 2 pass | 2 deferred | [melband-roformer](melband-roformer/README.md) | `melband-roformer-vocal` | `melband-roformer-vocal` |
 | [mlboydaisuke/mistral-7b-v0.3-CoreAI-official](https://huggingface.co/mlboydaisuke/mistral-7b-v0.3-CoreAI-official) | 56 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `mistral-7b-v0.3` |
@@ -267,13 +267,13 @@ configuration; a single bundle answers that question by itself.
 | [rahulrachuri/parakeet-tdt-0.6b-v2-coreai](https://huggingface.co/rahulrachuri/parakeet-tdt-0.6b-v2-coreai) | 13 | 0 | coreai | port | 3 | 3 pass | 3 deferred | [parakeet-v2](parakeet-v2/README.md) | `parakeet-tdt-0.6b-v2` | — |
 | [mlboydaisuke/Hyper-SD-1step-CoreML](https://huggingface.co/mlboydaisuke/Hyper-SD-1step-CoreML) | 12 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/PE-Core-base-patch16-224-LiteRT](https://huggingface.co/mlboydaisuke/PE-Core-base-patch16-224-LiteRT) | 12 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/qwen2.5-0.5b-coreml](https://huggingface.co/mlboydaisuke/qwen2.5-0.5b-coreml) | 12 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-1.7B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-1.7B-ExecuTorch) | 12 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch) | 12 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/RTMW-m-WholeBody-ExecuTorch](https://huggingface.co/mlboydaisuke/RTMW-m-WholeBody-ExecuTorch) | 12 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/vdsr-litert](https://huggingface.co/mlboydaisuke/vdsr-litert) | 12 | 1 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/EfficientAD-CoreML](https://huggingface.co/mlboydaisuke/EfficientAD-CoreML) | 11 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/MoGe-2-LiteRT](https://huggingface.co/mlboydaisuke/MoGe-2-LiteRT) | 11 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen2.5-0.5b-coreml](https://huggingface.co/mlboydaisuke/qwen2.5-0.5b-coreml) | 11 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen2.5-1.5B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen2.5-1.5B-ExecuTorch) | 11 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLOv10n-CoreML](https://huggingface.co/mlboydaisuke/YOLOv10n-CoreML) | 11 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/yolox-tiny-litert](https://huggingface.co/mlboydaisuke/yolox-tiny-litert) | 11 | 0 | litert | port | 0 | — | — | — | — | — |
@@ -299,7 +299,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/gemma-4-E2B-stateful-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E2B-stateful-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/gemma-4-E4B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E4B-coreml) | 0 | 2 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/gemma-4-E4B-multimodal-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E4B-multimodal-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/GLiNER2.5-Decide-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2.5-Decide-CoreAI) | 0 | 0 | coreai | port | 4 | — | — | [gliner25-decide](gliner25-decide/README.md) | `gliner25-decide` | — |
+| [mlboydaisuke/GLiNER2.5-Decide-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2.5-Decide-CoreAI) | 0 | 0 | coreai | port | 6 | — | — | [gliner25-decide](gliner25-decide/README.md) | `gliner25-decide` | — |
 | [mlboydaisuke/lfm2.5-350m-coreml](https://huggingface.co/mlboydaisuke/lfm2.5-350m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/magenta-arbitrary-style-transfer-litert](https://huggingface.co/mlboydaisuke/magenta-arbitrary-style-transfer-litert) | 0 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Mordant-3B-Think-LiteRT](https://huggingface.co/mlboydaisuke/Mordant-3B-Think-LiteRT) | 0 | 1 | litert | port | 0 | — | — | — | — | — |

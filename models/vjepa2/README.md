@@ -8,8 +8,9 @@ rolling…). A 16-frame clip goes in, an action label comes out — the zoo's **
 understanding model**, a category with no MLX port and no Apple stock path.
 
 Bundle: [🤗 mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI](https://huggingface.co/mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI)
-— macOS (~708 MB fp16 JIT) + iOS (~1.4 GB, AOT-precompiled for iPhone), `labels.json`
-alongside. Catalog id: **`vjepa2-vitl-ssv2`**.
+— `macos/` and `ios/` each hold the fp16 JIT `.aimodel` (~708 MB; every iPhone generation specializes it on
+its first load), `ios-h18p/` the AOT bundle compiled for the iPhone 17 Pro (~710 MB, that phone only; it sat in
+`ios/` until Hub revision `672f4a0c`, 2026-09-26), `labels.json` alongside. No iPhone 18 Pro measurement yet. Catalog id: **`vjepa2-vitl-ssv2`**.
 
 <!-- gen-cards:use-it begin id=vjepa2-vitl-ssv2 (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
