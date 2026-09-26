@@ -3,7 +3,8 @@
 Measured 2026-09-26 on an iPhone 18 Pro (iPhone19,2, iOS 27.0 24A437, Core AI architecture `h19p`) with
 `apps/DecideGate` in its load-only mode (`DECIDE_LOAD_ONLY`: `AIModel(contentsOf:options:)` with the GPU preferred, the
 function `main`, one call on all-zero inputs, then a second load; no memory entitlement; thermal state nominal
-throughout). The bundles are the shipped Hub bytes (each `main.hash` equals the SHA-256 of its `main.mlirb`).
+throughout). The bundles are the shipped Hub bytes (for each JIT bundle, `main.hash` equals the SHA-256 of its
+`main.mlirb`; an AOT package's `main.hash` is that of its `main-<arch>.mlirb`).
 
 ## The question
 
@@ -39,18 +40,21 @@ Runs `20260926-162943` (fresh install: the app and its container removed first, 
   ([coreai-error-index.md](coreai-error-index.md): `std::bad_alloc` on SAM 3, `LLVM ERROR: Failed to allocate
   mmap'd buffer` on the Gemma 4 E2B decoder) are the ~2 GB-of-constants decoders and a dynamic-shape segmenter;
   the LLM-class bundles keep their AOT form ([aot-and-specialization.md](aot-and-specialization.md), the 4B wall).
-- **The specialization does not run inside the app.** The app's footprint peaked at 64–92 MB during the loads
-  (whisper: 78 MB, then 177 MB on the first call) and `os_proc_available_memory` never fell below 3.4 GB, so the
-  app's jetsam limit is not what bounds the on-device compile. The result lands in the app container's Core AI
-  cache (`Library/Caches/coreai-cache/<OS build>/…`) at about the size of the IR (whisper: 1.75 GB for a 1.62 GB
-  `main.mlirb`), keyed by `main.hash`, and every later launch reads it.
-- **The first load pays once per install.** With the cache present, `AIModel(contentsOf:)` returns in
-  milliseconds and the load time moves into `loadFunction(named:)` (0.16–0.50 s here); the first call drops from
-  1.1–2.1 s to 72–317 ms.
+- **The app's own memory barely moves while the phone specializes.** The app's `phys_footprint` peaked at
+  64–92 MB during the loads (whisper: 78 MB, then 177 MB on the first call) and `os_proc_available_memory` never
+  fell below 3.4 GB. Where the compile's memory is accounted (another process, or memory the footprint does not
+  count) was not isolated; what is measured is that the app did not approach its own limit. The result lands in
+  the app container's Core AI cache (`Library/Caches/coreai-cache/<OS build>/…`) at about the size of the IR
+  (whisper: 1.75 GB for a 1.62 GB `main.mlirb`), keyed by `main.hash`, and the next launch read it.
+- **The first load pays once per install and OS build** (one relaunch measured; the cache path carries the OS
+  build, so an OS update should compile again — not measured). With the cache present, `AIModel(contentsOf:)`
+  returns in milliseconds and the load time moves into `loadFunction(named:)` (0.16–0.50 s here); the first call
+  drops from 1.1–2.1 s to 72–317 ms.
 - **A directory that carries the JIT files next to another architecture's AOT files is not a fallback.** The
   shipped GLiNER2-PII `ios/` bundle (JIT IR plus `h18p` delegates, the layout `coreai-build compile` leaves when it
-  writes into the `.aimodel` directory) is refused on the 18 Pro exactly like a pure `h18p` `.aimodelc`: the
-  runtime validates the compiled asset first and never reaches the IR. It loaded only when the container already
+  writes into the `.aimodel` directory) is refused on the 18 Pro exactly like a pure `h18p` `.aimodelc` — the same
+  error in 2 ms, so the IR beside the delegates is not used as a fallback (the runtime's internal order is not
+  observed, only that outcome). It loaded only when the container already
   held the specialization of the same `main.hash` (0.08 s, right after the JIT-only copy had been loaded). This
   corrects [gliner25-decide.md](gliner25-decide.md) §7 arm C, whose "the runtime ignored the delegates" was that
   warm-cache case — arm B had written the cache minutes earlier under the same hash.

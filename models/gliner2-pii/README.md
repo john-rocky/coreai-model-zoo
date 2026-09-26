@@ -69,6 +69,10 @@ Byte-gated against reference GLiNER2 `ext.extract` at every tier — the Swift c
   (credentials, org/money/date/location) also match `ext.extract` exactly.
 - **iPhone 17 Pro** (A19 Pro, AOT h18p) — same suite, `GATE_RESULT: PASS`. Load ~1.8 s; extraction
   ~22–32 ms per text (warm).
+- **iPhone 18 Pro** (A20 Pro, h19p) — the `ios/` JIT `.aimodel` loads in 0.75 s on the first launch (the
+  phone specializes it itself) and 0.09 s after; first call 1.4 s, then warm. Load-only measurement
+  (2026-09-26, [`knowledge/jit-distribution.md`](../../knowledge/jit-distribution.md)); the extraction suite
+  was not re-run on this phone.
 
 Reproduce (Mac):
 
@@ -83,5 +87,8 @@ Porting lessons (disentangled-attention export, the swift-transformers tokenizer
 schema-agnostic collator): [`knowledge/gliner2-pii.md`](../../knowledge/gliner2-pii.md).
 
 - 🤗 [GLiNER2-PII-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2-PII-CoreAI)
-  — `macos/` JIT `.aimodel` (fp16) + `ios/` AOT h18p bundle, each with `tokenizer/` + `extractor.json`.
+  — `macos/` and `ios/` each hold the JIT `.aimodel` (fp16, 611 MB; every iPhone generation specializes it on
+  its first load) + `tokenizer/` + `extractor.json`; `ios-h18p/` keeps the AOT-compiled h18p bundle for the
+  iPhone 17 Pro (revision `887627e`, 2026-09-26; before it `ios/` carried the h18p bundle, which the iPhone 18 Pro
+  refuses).
 - Base model: [fastino/gliner2-privacy-filter-PII-multi](https://huggingface.co/fastino/gliner2-privacy-filter-PII-multi) (Apache-2.0).
