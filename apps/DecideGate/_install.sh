@@ -5,6 +5,8 @@
 # `devicectl device copy to` can exit 0 with a file cut short, hence the pull.
 #   ./_install.sh <udid>                       normally from ./_gate.sh, which holds the phone
 #   DECIDE_SKIP_APP=1 ./_install.sh <udid>     assets only (the app is already installed)
+#   DECIDE_SKIP_PUSH=1 ./_install.sh <udid>    no whole-directory push (the assets are already there): the md5
+#                                              check below still pulls everything back and re-pushes what differs
 # Never passes --remove-existing-content (it wipes the whole app container, not the destination). The destination
 # names the pushed directory itself (.../DecideAssets, and .../<file> on a re-push): a push onto a parent flattens a
 # bundle's tree and the load fails (failedToSpecialize).
@@ -58,8 +60,12 @@ push() {  # push <local path> <container path>
 }
 
 # 2. the assets, the whole directory in one push
-say "pushing $S ($(du -sh $S | cut -f1), $(grep -c . $S/MD5SUMS) files) -> $DEST"
-push $S "$DEST"
+if [ "${DECIDE_SKIP_PUSH:-0}" != 1 ]; then
+  say "pushing $S ($(du -sh $S | cut -f1), $(grep -c . $S/MD5SUMS) files) -> $DEST"
+  push $S "$DEST"
+else
+  say "no whole-directory push (DECIDE_SKIP_PUSH=1): checking what is on the phone against $S/MD5SUMS"
+fi
 
 # 3. pull back, compare with MD5SUMS; re-push what is missing or differs, one file at a time
 BAD=()

@@ -7,7 +7,8 @@
 #   ./_run.sh --summary <result.json>                print the summary of a pulled result again
 # Normally from ./_gate.sh, which holds the phone; refuses without this lane's hold, and (when DECIDE_ALLOWED_DEVICES
 # is set) on a device it does not list.
-# App knobs (GateRunner.swift): DECIDE_STAGES, DECIDE_BENCH, DECIDE_UNIT, DECIDE_ASSETS.
+# App knobs (GateRunner.swift): DECIDE_STAGES, DECIDE_BENCH, DECIDE_UNIT, DECIDE_ASSETS, DECIDE_WAIT_NOMINAL,
+# DECIDE_BENCH_FIRST.
 # Poll cap: DECIDE_CAP polls of 10 s (default 180 = 30 min).
 # Output: _work/device_runs/<run id>/{result.json,result.log,run.out,launch.log}
 set -u
@@ -48,8 +49,12 @@ for k in r.get("stage_order", []):
               f"{v['bit_equal']}/{v['elements']}, decisions equal {v['decisions_equal_tasks']}/{v['tasks']}")
     b = s.get("bench")
     if b:
-        print(f"  bench: {b['ms_median']:.2f} ms median, p90 {b['ms_p90']:.2f}, min {b['ms_min']:.2f}, max {b['ms_max']:.2f} "
-              f"({b['calls']} calls after {b['warmup']} warm-up) | thermal {b['thermal_start']} -> {b['thermal_end']}")
+        w = b.get("wait_nominal")
+        wt = (f" | waited {w['waited_s']:.1f} s for nominal ({w['state_before']} -> {w['state_after']}, cap {w['cap_s']:.0f} s)"
+              if w else "")
+        print(f"  bench ({b.get('position', 'after the cases')}): {b['ms_median']:.2f} ms median, p90 {b['ms_p90']:.2f}, "
+              f"min {b['ms_min']:.2f}, max {b['ms_max']:.2f} ({b['calls']} calls after {b['warmup']} warm-up) | thermal "
+              f"{b['thermal_start']} -> {b['thermal_end']}{wt}")
     if "error" in s: print(f"  ERROR {s['error']}")
     th = s.get("thermal", [])
     if th: print("  thermal: " + ", ".join(f"{t['at']} {t['state']}" for t in th))

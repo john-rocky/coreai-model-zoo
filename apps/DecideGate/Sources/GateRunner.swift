@@ -1,9 +1,9 @@
 // GateRunner — the iPhone half of the GLiNER2.5-Decide gate. The graph host (DecideGraph), the fixtures and the
 // metrics (DecideGateSupport) are the ones decide-selftest runs on the Mac (conversion/gliner25_decide/swift),
-// here driving the sideloaded AOT h18p bundles. Added for the device: load times (first and second load in this
-// process), the first call, the app footprint, a bench, the thermal state around every step, and the device / OS
-// identity. Results: Documents/decide_gate/result.json (rewritten after every stage, "status" running -> done)
-// and result.log (one line per event).
+// here driving the sideloaded AOT bundles of the phone's architecture. Added for the device: load times (first and
+// second load in this process), the first call, the app footprint, a bench, the thermal state around every step,
+// and the device / OS identity. Results: Documents/decide_gate/result.json (rewritten after every stage, "status"
+// running -> done) and result.log (one line per event).
 //
 // Assets: Library/Application Support/DecideAssets/ (../_stage.sh lays it out, ../_install.sh pushes it):
 //   gliner25-decide_float16_s256_m32.<arch>.aimodelc/  AOT, preferred gpu        -> stage <unit>_s256
@@ -21,6 +21,9 @@
 //   DECIDE_BENCH     graph calls timed after 5 warm-up calls (default 100; 0 = no bench)
 //   DECIDE_UNIT      gpu | default | cpuOnly (default gpu)
 //   DECIDE_ASSETS    assets directory relative to the app's home (default Library/Application Support/DecideAssets)
+//   DECIDE_WAIT_NOMINAL  seconds: before each stage's bench, poll the thermal state every 5 s until it is nominal,
+//                        at most this long (default 0 = no wait); the wait and the states go into result.json
+//   DECIDE_BENCH_FIRST   1 = the bench right after load 2, before the case loop (default: after the case loop)
 
 import DecideGateSupport
 import DecideGraph
@@ -33,6 +36,8 @@ struct GateConfig: Sendable {
     let stages: [String]
     let benchCalls: Int
     let unit: DecideComputeUnits
+    let waitNominalSeconds: Double
+    let benchFirst: Bool
 
     static func fromEnvironment() -> GateConfig {
         let env = ProcessInfo.processInfo.environment
@@ -50,7 +55,9 @@ struct GateConfig: Sendable {
             out: docs.appendingPathComponent("decide_gate"),
             stages: stages,
             benchCalls: Int(env["DECIDE_BENCH"] ?? "") ?? 100,
-            unit: DecideComputeUnits(rawValue: env["DECIDE_UNIT"] ?? "gpu") ?? .gpu)
+            unit: DecideComputeUnits(rawValue: env["DECIDE_UNIT"] ?? "gpu") ?? .gpu,
+            waitNominalSeconds: max(0, Double(env["DECIDE_WAIT_NOMINAL"] ?? "") ?? 0),
+            benchFirst: env["DECIDE_BENCH_FIRST"] == "1")
     }
 }
 
@@ -111,7 +118,8 @@ actor GateRunner {
                   "launch_index": launchIndex, "device": device, "model": DecideModel.id, "model_rev": DecideModel.revision,
                   "gate": "decisions 100 % equal to the gliner2 2.0.0 fp32 oracle on every task, every row finite",
                   "config": ["assets": config.assets.path, "stages": config.stages, "bench_calls": config.benchCalls,
-                             "unit": config.unit.rawValue]]
+                             "unit": config.unit.rawValue, "wait_nominal_s": config.waitNominalSeconds,
+                             "bench_first": config.benchFirst]]
         line("DecideGate run \(config.runID) (launch \(launchIndex) in this container)")
         line("device \(device["machine"] ?? "?"), \(device["os"] ?? "?") (build \(device["os_build"] ?? "?")), Core AI arch "
              + "\(DecideGraph.deviceArchitecture), thermal \(DeviceInfo.thermal()), low power \(device["low_power_mode"] ?? "?")")
@@ -217,6 +225,11 @@ actor GateRunner {
             line("\(spec.key): load \(String(format: "%.2f", load1)) s (first in this process), first call "
                  + "\(String(format: "%.1f", firstCall)) ms (\(cases[0].id)), load \(String(format: "%.2f", load2)) s (second); "
                  + "footprint \(String(format: "%.0f", footprint)) MB; \(graph.contractDescription)")
+            if config.benchFirst && config.benchCalls > 0 {
+                mark("before bench")
+                j["bench"] = try await bench(spec.key, graph, cases, position: "after load 2, before the cases")
+                mark("after bench")
+            }
 
             var mac: [String: [Double]] = [:]
             do {
@@ -252,18 +265,10 @@ actor GateRunner {
                  + "decisions equal \(v["decisions_equal_tasks"] ?? 0)/\(v["tasks"] ?? 0)")
             writePartial(spec.key, j, thermal)
 
-            if config.benchCalls > 0 {
-                let thermalStart = DeviceInfo.thermal()
-                let ts = try await benchCalls(graph, cases, calls: config.benchCalls)
-                var b = benchJSON(ts)
-                b["thermal_start"] = thermalStart
-                b["thermal_end"] = DeviceInfo.thermal()
-                j["bench"] = b
+            if !config.benchFirst && config.benchCalls > 0 {
+                mark("before bench")
+                j["bench"] = try await bench(spec.key, graph, cases, position: "after the cases")
                 mark("after bench")
-                line("\(spec.key) bench: \(String(format: "%.2f", b["ms_median"] as? Double ?? .nan)) ms median, p90 "
-                     + "\(String(format: "%.2f", b["ms_p90"] as? Double ?? .nan)), min \(String(format: "%.2f", b["ms_min"] as? Double ?? .nan)), "
-                     + "max \(String(format: "%.2f", b["ms_max"] as? Double ?? .nan)) (\(ts.count) calls after 5 warm-up) | thermal "
-                     + "\(thermalStart) -> \(DeviceInfo.thermal())")
             }
             j["footprint_mb_end"] = DeviceInfo.footprintMB()
         } catch {
@@ -276,6 +281,44 @@ actor GateRunner {
         j["pass"] = pass
         line("\(spec.key): \(pass ? "PASS" : "FAIL") (decisions 100 % equal to the oracle, every row finite)")
         return j
+    }
+
+    /// DECIDE_WAIT_NOMINAL (when set), then warm-up 5 + DECIDE_BENCH calls on fixture inputs.
+    func bench(_ key: String, _ graph: DecideGraph, _ cases: [DecideCase], position: String) async throws -> [String: Any] {
+        let wait = config.waitNominalSeconds > 0 ? await waitForNominal(key) : nil
+        let thermalStart = DeviceInfo.thermal()
+        let ts = try await benchCalls(graph, cases, calls: config.benchCalls)
+        var b = benchJSON(ts)
+        b["thermal_start"] = thermalStart
+        b["thermal_end"] = DeviceInfo.thermal()
+        b["position"] = position
+        if let w = wait { b["wait_nominal"] = w }
+        line("\(key) bench (\(position)): \(String(format: "%.2f", b["ms_median"] as? Double ?? .nan)) ms median, p90 "
+             + "\(String(format: "%.2f", b["ms_p90"] as? Double ?? .nan)), min \(String(format: "%.2f", b["ms_min"] as? Double ?? .nan)), "
+             + "max \(String(format: "%.2f", b["ms_max"] as? Double ?? .nan)) (\(ts.count) calls after 5 warm-up) | thermal "
+             + "\(thermalStart) -> \(DeviceInfo.thermal())")
+        return b
+    }
+
+    /// Polls ProcessInfo.thermalState every 5 s until it is nominal, at most DECIDE_WAIT_NOMINAL seconds.
+    func waitForNominal(_ key: String) async -> [String: Any] {
+        let cap = config.waitNominalSeconds
+        let before = DeviceInfo.thermal()
+        let t0 = ContinuousClock.now
+        var polls = 0
+        if before != "nominal" { line("\(key): thermal \(before) before the bench; waiting for nominal (5 s steps, cap \(Int(cap)) s)") }
+        while DeviceInfo.thermal() != "nominal" && seconds(since: t0) < cap {
+            try? await Task.sleep(for: .seconds(5))
+            polls += 1
+        }
+        let waited = seconds(since: t0)
+        let after = DeviceInfo.thermal()
+        if before != "nominal" {
+            line("\(key): thermal \(after) after \(String(format: "%.1f", waited)) s"
+                 + (after == "nominal" ? "" : " (cap reached: the bench runs anyway)"))
+        }
+        return ["cap_s": cap, "state_before": before, "state_after": after, "waited_s": waited, "polls": polls,
+                "reached_nominal": after == "nominal"]
     }
 
     // MARK: - helpers

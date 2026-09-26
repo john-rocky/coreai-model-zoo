@@ -41,7 +41,11 @@ build and the Core AI architecture name.
    `_work/device_runs/<run id>/`.
 8. Exit codes: 0 = every stage passed, 3 = a stage failed, 1 = no result, 2 = the device is busy, held or refused.
 9. Reruns: `DECIDE_SKIP_INSTALL=1 ./_gate.sh <udid> '"DECIDE_STAGES":"s512"'` (knobs are in
-   `Sources/GateRunner.swift`). Reprint a result: `./_run.sh --summary <result.json>`.
+   `Sources/GateRunner.swift`); a new app build on assets already there: `DECIDE_SKIP_PUSH=1 ./_gate.sh <udid>`.
+   Reprint a result: `./_run.sh --summary <result.json>`.
+10. The phone slows down as it heats (the thermal state goes from nominal to fair within a minute of back-to-back
+    calls). For a nominal-state bench: `'"DECIDE_WAIT_NOMINAL":"600","DECIDE_BENCH_FIRST":"1"'` waits (5 s steps, up
+    to 600 s) for nominal before each stage's bench and runs the bench before the case loop.
 
 `_work` is `conversion/gliner25_decide/_work` (git-ignored). Never load an iPhone bundle (`.h18p`, `.h19p`) on a Mac: the host
 refuses one by path.
