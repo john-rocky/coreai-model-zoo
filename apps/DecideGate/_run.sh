@@ -8,7 +8,7 @@
 # Normally from ./_gate.sh, which holds the phone; refuses without this lane's hold, and (when DECIDE_ALLOWED_DEVICES
 # is set) on a device it does not list.
 # App knobs (GateRunner.swift): DECIDE_STAGES, DECIDE_BENCH, DECIDE_UNIT, DECIDE_ASSETS, DECIDE_WAIT_NOMINAL,
-# DECIDE_BENCH_FIRST, DECIDE_BUNDLE_KIND.
+# DECIDE_BENCH_FIRST, DECIDE_BUNDLE_KIND, DECIDE_LOAD_ONLY.
 # Poll cap: DECIDE_CAP polls of 10 s (default 180 = 30 min).
 # A run that does not end "done" (the app gone, or the cap) also lists the phone's crash logs and copies the ones of
 # today that name DecideGate or a jetsam event into crash/.
@@ -32,8 +32,28 @@ print(f"run {r.get('run_id')}: status {r.get('status')}, pass {r.get('pass')}, {
 if r.get("fatal"): print("FATAL", r["fatal"])
 a = r.get("assets", {})
 print(f"assets: {a.get('md5sums_listed')} files listed, missing {len(a.get('missing', []))}")
+num = lambda v, f: (f % v) if isinstance(v, (int, float)) and not isinstance(v, bool) else "-"
+mbv = lambda b: num(b / 1e6 if isinstance(b, (int, float)) else None, "%.1f")
 for k in r.get("stage_order", []):
     s = r["stages"][k]
+    if s.get("mode") == "load_only":
+        # one line: bundle, load 1 (wall, peak footprint, least available), first call, load 2, container cache, error
+        if s.get("partial"): state = f"STOPPED during {s.get('step', '?')} (partial record: the app did not finish the stage)"
+        elif s.get("pass"): state = "OK"
+        else: state = f"ERROR at {s.get('error_step', '?')}"
+        call = (f"first call {num(s.get('first_call_ms'), '%.1f')} ms" if "first_call_ms" in s
+                else f"first call skipped ({s['first_call_skipped']})" if "first_call_skipped" in s else "first call -")
+        out = (f"{k}: {state} | {s.get('bundle')} {num(s.get('bundle_mb'), '%.1f')} MB | load 1 {num(s.get('load_first_wall_s'), '%.2f')} s "
+               f"wall, peak footprint {num(s.get('load_first_peak_footprint_mb'), '%.0f')} MB, least available "
+               f"{num(s.get('load_first_min_available_mb'), '%.0f')} MB (before {num(s.get('available_mb_before_load'), '%.0f')}) | "
+               f"{call} | load 2 {num(s.get('load_second_s'), '%.2f')} s | coreai-cache MB {mbv(s.get('cache_bytes_before_load'))} -> "
+               f"{mbv(s.get('cache_bytes_after_load'))} after load 1 -> {mbv(s.get('cache_bytes_after_load_2'))} after load 2")
+        if "error_detail" in s:
+            e = s["error_detail"]
+            out += f" | error {e.get('type')} | NSError {e.get('ns_domain')} {e.get('ns_code')} | {e.get('reflecting')}"
+        elif "error" in s: out += f" | error {s['error']}"
+        print(out[:900])
+        continue
     if "error" in s and "summary" not in s: print(f"{k}: ERROR {s['error']}"); continue
     tag = " (partial: cases done, bench running)" if s.get("partial") else ""
     print(f"{k}: {'PASS' if s.get('pass') else 'FAIL'}{tag} | {s.get('bundle')} {s.get('bundle_mb', 0):.1f} MB, unit {s.get('unit')} | "
