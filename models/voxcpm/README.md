@@ -79,7 +79,7 @@ so audio starts before the whole clip exists. The WAV container is your app's te
 | `macos/voxcpm_feat_decoder_fp16/` | LocDiT CFM diffusion decoder (10-step euler + CFG, unrolled), fp16 |
 | `macos/voxcpm_feat_encoder_fp16/` | LocEnc + projection (per-frame feedback embed), fp16 |
 | `macos/voxcpm_vocoder_fp16_t12/` | AudioVAE decoder (DAC-style, 640× upsample), fp16 |
-| `ios/<name>/<name>.aimodel/` | The same 7 JIT bundles, laid out as `macos/` (every iPhone generation specializes them on its first load; Hub revision `38fc0aea`, 2026-09-26) |
+| `ios/<name>/<name>.aimodel/` | The same 7 JIT bundles, laid out as `macos/` (every iPhone generation specializes them on its first load; Hub revision `38fc0aea`, 2026-09-26). iPhone 18 Pro, first load with no specialization of them in the app container: base decode / prefill 1.13 / 1.19 s, feat decoder 1.06 s, the rest 0.09–0.19 s; 0.04–0.27 s on relaunch (load-only check) |
 | `ios-h18p/*.h18p.aimodelc/` | The same 7 bundles AOT-compiled for the iPhone 17 Pro (that phone only; they sat in `ios/` before `38fc0aea`) |
 | `voxcpm_host_glue/` | Token-embedding table + dit/FSQ/stop-head weights (run host-side via Accelerate) |
 | `tokenizer/` | Llama tokenizer (`tokenizer.json` + config) |

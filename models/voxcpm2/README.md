@@ -70,7 +70,8 @@ so audio starts before the whole clip exists. The WAV container is your app's te
 | dir | contents |
 |---|---|
 | `macos/` | JIT `.aimodel` bundles (Mac): int8 base/res decode + prefill, fp16 feat_decoder / feat_encoder / vocoder |
-| `ios/` | AOT `.aimodelc` bundles (iOS `h18p`, GPU): same five + the two int8 prefill bundles |
+| `ios/` | the same 7 JIT bundles as `macos/` (`<name>/<name>.aimodel/`); every iPhone generation specializes them on its first load. iPhone 18 Pro, fresh install: base decode / prefill 3.20 / 3.49 s, feat decoder 5.64 s, feat encoder 1.17 s, res 0.73–0.79 s, vocoder 0.16 s; 0.06–1.25 s on relaunch (load-only check, 2026-09-26) |
+| `ios-h18p/` | AOT `.aimodelc` bundles compiled for the iPhone 17 Pro (h18p, GPU): the same 7 (they sat in `ios/` until Hub revision `192cc99f`, 2026-09-26; the 17 Pro numbers below are theirs) |
 | `voxcpm2_host_glue/` | embed table + projections / FSQ-512 / stop-head / fusion (`.bin` + manifest) |
 | `tokenizer/` | the VoxCPM2 tokenizer (Llama fast) |
 

@@ -72,7 +72,7 @@ deterministic host arithmetic (identical Mac ↔ device).
 | context / horizon | 2048 (64 patches of 32) / 128 steps, 10 quantiles |
 | **Mac GPU (M4 Max)** | **~7 ms/graph → ~14 ms per 128-step forecast** (flip = 2 calls) |
 | **iPhone 17 Pro (AOT h18p GPU)** | **~25 ms/forecast warm** (54 ms cold, ~0.8 s very-first-run = one-time shader compile), **device-verified in-app** |
-| layout since Hub revision `2a0801a1` (2026-09-26) | `ios/` = the JIT `.aimodel` (same bytes as the root graph; every iPhone generation specializes it on its first load), `ios-h18p/` = the h18p AOT bundle above (iPhone 17 Pro only). No iPhone 18 Pro measurement of this graph yet. |
+| layout since Hub revision `2a0801a1` (2026-09-26) | `ios/` = the JIT `.aimodel` (same bytes as the root graph; every iPhone generation specializes it on its first load), `ios-h18p/` = the h18p AOT bundle above (iPhone 17 Pro only). On the iPhone 18 Pro (h19p) the JIT graph loaded in 1.54 s the first time an app container held no specialization of it, ran a first call in 0.75 s and loaded in 0.44 s on relaunch (load-only check, 2026-09-26). |
 | parity vs HF fp32 oracle | graph **cos 1.0000000**; end-to-end fp16 **cos 0.9999999**, values match to 2–3 dp (incl. front-padded short context); **iPhone in-app == Mac to 3 dp** |
 
 ## Gate ladder (vs `TimesFm2_5ModelForPrediction` fp32)

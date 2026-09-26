@@ -10,7 +10,8 @@ understanding model**, a category with no MLX port and no Apple stock path.
 Bundle: [🤗 mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI](https://huggingface.co/mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI)
 — `macos/` and `ios/` each hold the fp16 JIT `.aimodel` (~708 MB; every iPhone generation specializes it on
 its first load), `ios-h18p/` the AOT bundle compiled for the iPhone 17 Pro (~710 MB, that phone only; it sat in
-`ios/` until Hub revision `672f4a0c`, 2026-09-26), `labels.json` alongside. No iPhone 18 Pro measurement yet. Catalog id: **`vjepa2-vitl-ssv2`**.
+`ios/` until Hub revision `672f4a0c`, 2026-09-26), `labels.json` alongside. On the iPhone 18 Pro (h19p) the JIT bundle loaded in 2.22 s the first time an app container held no specialization of
+it, ran a first call in 1.19 s and loaded in 0.56 s on relaunch (load-only check, 2026-09-26). Catalog id: **`vjepa2-vitl-ssv2`**.
 
 <!-- gen-cards:use-it begin id=vjepa2-vitl-ssv2 (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it

@@ -1,8 +1,9 @@
 # Granite-Embedding-97M-Multilingual-R2 — Core AI
 
 IBM's 97M-parameter **multilingual text embedder** — a ModernBERT encoder, 384-d CLS-pooled
-unit vectors, Japanese and English among its languages — as a static `.aimodel` for macOS 27
-and, ahead-of-time compiled, for the iPhone 17 Pro.
+unit vectors, Japanese and English among its languages — as a static `.aimodel` for macOS 27 and
+iOS 27 (every iPhone generation specializes it on its first load), with an ahead-of-time compiled
+twin for the iPhone 17 Pro beside it.
 [`ibm-granite/granite-embedding-97m-multilingual-r2`](https://huggingface.co/ibm-granite/granite-embedding-97m-multilingual-r2)
 (Apache-2.0, revision `835ad1408…`) is the **smallest embedder in this catalog** (390 MB fp32,
 against 1.2 GB for EmbeddingGemma-300m and 1.1 GB for Qwen3-Embedding-0.6B) and its **first
@@ -117,17 +118,25 @@ platform → folder.
 |---|---|---|---|---:|
 | `macos/fp32-s512/` **(default)** | macOS 27 | JIT `.aimodel` | `granite97m_fp32_s512_bound.aimodel` | 390,431,506 |
 | `macos/fp32-s128/` | macOS 27 | JIT `.aimodel` | `granite97m_fp32_s128_bound.aimodel` | 389,989,146 |
-| `ios/fp32-s512/` **(default)** | iOS 27, **h18p only** | AOT `.aimodelc` | `granite97m_fp32_s512_bound.h18p.aimodelc` | 390,308,788 |
-| `ios/fp32-s128/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_fp32_s128_bound.h18p.aimodelc` | 390,081,410 |
+| `ios/fp32-s512/` **(default)** | iOS 27 | JIT `.aimodel` (same bytes as `macos/`) | `granite97m_fp32_s512_bound.aimodel` | 390,431,506 |
+| `ios/fp32-s128/` | iOS 27 | JIT `.aimodel` (same bytes as `macos/`) | `granite97m_fp32_s128_bound.aimodel` | 389,989,146 |
+| `ios-h18p/fp32-s512/` | iOS 27, **h18p only** | AOT `.aimodelc` | `granite97m_fp32_s512_bound.h18p.aimodelc` | 390,308,788 |
+| `ios-h18p/fp32-s128/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_fp32_s128_bound.h18p.aimodelc` | 390,081,410 |
 | `macos/w8-fp32table-s512/` | macOS 27 (CPU-gated) | JIT `.aimodel` | `granite97m_w8_fp32table_s512.aimodel` | 305,569,358 |
 | `macos/w8-fp32table-s128/` | macOS 27 (CPU-gated) | JIT `.aimodel` | `granite97m_w8_fp32table_s128.aimodel` | 305,126,985 |
-| `ios/w8-fp32table-s512/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_w8_fp32table_s512_r02.h18p.aimodelc` | 305,479,184 |
-| `ios/w8-fp32table-s128/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_w8_fp32table_s128_r02.h18p.aimodelc` | 305,251,774 |
+| `ios/w8-fp32table-s512/` | iOS 27 | JIT `.aimodel` (same bytes as `macos/`) | `granite97m_w8_fp32table_s512.aimodel` | 305,569,358 |
+| `ios/w8-fp32table-s128/` | iOS 27 | JIT `.aimodel` (same bytes as `macos/`) | `granite97m_w8_fp32table_s128.aimodel` | 305,126,985 |
+| `ios-h18p/w8-fp32table-s512/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_w8_fp32table_s512_r02.h18p.aimodelc` | 305,479,184 |
+| `ios-h18p/w8-fp32table-s128/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_w8_fp32table_s128_r02.h18p.aimodelc` | 305,251,774 |
 
-The `ios/` bundles are compiled for one device architecture (`h18p`, the iPhone 17 Pro) with
-`xcrun coreai-build compile --platform iOS --min-deployment-version 27.0 --preferred-compute gpu
---architecture h18p` (coreai-build 3600.83.1). **Never load an iOS bundle on a Mac.** Other
-phones need their own compile from the recipe; the source IR is reproducible, not shipped.
+Since Hub revision `a27dc73e` (2026-09-26) `ios/` holds the JIT graphs and the `ios-h18p/` bundles are the
+ones compiled for one device architecture (`h18p`, the iPhone 17 Pro) with `xcrun coreai-build compile
+--platform iOS --min-deployment-version 27.0 --preferred-compute gpu --architecture h18p` (coreai-build
+3600.83.1), from a separate iOS export; the iPhone 18 Pro refuses them (`incompatibleCompiledAssetArchitecture`).
+The iPhone rows above were measured on those h18p bundles. The `ios/` JIT graphs were load-and-call checked on
+the iPhone 18 Pro (first load 0.33–1.01 s, first call 88–619 ms, a finite 384-value embedding; 2026-09-26,
+[`knowledge/jit-distribution.md`](../../knowledge/jit-distribution.md)) and not re-gated for embedding parity
+there. **Never load an iOS AOT bundle on a Mac.**
 
 Convert yourself: [`conversion/granite_embedding/`](../../conversion/granite_embedding/README.md)
 — five staged scripts, `recipe.toml` here names the commands.

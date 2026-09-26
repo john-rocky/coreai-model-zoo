@@ -90,6 +90,7 @@ bash conversion/vibevoice/sideload_ios.sh <device-udid>                 # then V
 - 🤗 [VibeVoice-Realtime-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI)
   — `macos/` and `ios/` each hold the 5 JIT `.aimodel` (every iPhone generation specializes them on its first
   load), `ios-h18p/` the 5 `.h18p.aimodelc` compiled for the iPhone 17 Pro (that phone only; they sat in `ios/`
-  until Hub revision `b4480f87`, 2026-09-26) + voice presets + host embedding table. No iPhone 18 Pro
-  measurement yet.
+  until Hub revision `b4480f87`, 2026-09-26) + voice presets + host embedding table. On the iPhone 18 Pro (h19p)
+  the five JIT graphs loaded in 0.04–1.78 s the first time an app container held no specialization of them (decoder
+  1.78 s, ttslm 1.36 s) and in 0.01–0.50 s on relaunch (load-only check, 2026-09-26).
 - Base model: [microsoft/VibeVoice-Realtime-0.5B](https://huggingface.co/microsoft/VibeVoice-Realtime-0.5B) (MIT).

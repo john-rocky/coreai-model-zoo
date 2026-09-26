@@ -31,6 +31,29 @@ Runs `20260926-162943` (fresh install: the app and its container removed first, 
 `163212` (relaunch), `163809` (the PII JIT files, then the shipped PII bundle right after); raw under
 `conversion/gliner25_decide/_work/device_runs/` and `~/code/coreai/_jit_distribution/results/` (lane data).
 
+### The rest of the zoo's non-LLM iOS graphs, same phone, same mode (runs `20260926-185357`, `185441`, `191440`, `191523`)
+
+Every JIT graph that replaced an h18p bundle in `ios/` on 2026-09-26, plus the two repositories still to switch,
+loaded and ran once on the iPhone 18 Pro; nothing crashed and the thermal state stayed nominal. The Granite and
+VoxCPM2 rows come from a fresh container (run `185357`); the other rows from a later launch of the same container
+that held no specialization of those graphs yet (run `191440`), so their first load is cold for the graph, not for
+the app. One measurement each; the graphs that hold state (the VoxCPM / VoxCPM2 / VibeVoice language-model graphs)
+were loaded only.
+
+| repository (JIT graph) | size | first load | first call | load on relaunch |
+|---|---|---|---|---|
+| TimesFM-2.5-200M | 463 MB | 1.54 s | 0.75 s | 0.44 s |
+| VJEPA2-ViTL-SSv2 | 708 MB | 2.22 s | 1.19 s (app peak 244 MB) | 0.56 s |
+| Nemotron-3.5-ASR-Streaming conformer a / b | 605 / 615 MB | 1.37 / 1.44 s | 0.93 / 0.32 s | 0.44 / 0.46 s |
+| VibeVoice-Realtime-0.5B decoder / ttslm / mainlm / head / connector | 688 / 597 / 120 / 84 / 2 MB | 1.78 / 1.36 / 0.20 / 0.17 / 0.04 s | 1.18 s / state / state / 0.42 s / 0.09 s | 0.08 / 0.50 / 0.07 / 0.06 / 0.01 s |
+| VoxCPM-0.5B base decode / prefill / feat decoder / feat encoder / res ×2 / vocoder | 360 / 360 / 129 / 122 / 90 / 54 MB | 1.13 / 1.19 / 1.06 / 0.17 / 0.19 / 0.09 s | state / state / 0.76 s / 0.18 s / state / 0.18 s | 0.27 / 0.27 / 0.10 / 0.08 / 0.06 / 0.04 s |
+| VoxCPM2 base prefill / decode (int8 static LM, 1.32 GB each) / feat decoder / feat encoder / res ×2 / vocoder | 1,324 / 1,324 / 426 / 420 / 378 / 92 MB | 3.49 / 3.20 / 5.64 / 1.17 / 0.79 / 0.16 s | state / state / 1.74 s / 0.65 s / state / 0.68 s | 1.25 / 0.97 / 0.36 / 0.30 / 0.31 / 0.06 s |
+| Granite-Embedding-97M `macos/` graphs fp32 s128 / s512, w8 s128 / s512 | 390 / 390 / 305 / 306 MB | 1.01 / 0.40 / 0.63 / 0.33 s | 0.62 / 0.09 / 0.13 / 0.09 s | 0.26 / 0.26 / 0.21 / 0.21 s |
+
+The Granite graphs are the macOS export; its iPhone gate had run on a separate iOS export compiled to h18p, so
+these four are load-and-call checked on the phone, not re-gated for embedding parity. The two 1.32 GB VoxCPM2
+language-model graphs are the largest int8 static graphs the phone has specialized here.
+
 ## What the numbers say
 
 - **A 1.6 GB static graph specializes on the phone.** The whisper encoder-decoder (fp16, fixed 128-token window)
@@ -67,9 +90,12 @@ Runs `20260926-162943` (fresh install: the app and its container removed first, 
    specializes the graph itself on its first load. Laya-Multilingual has shipped this way since 2026-09-23.
 2. **AOT stays for the LLM-class bundles** (the pipelined decoders, ~2 GB of constants and up, dynamic shapes),
    one `ios-<arch>/` subtree per device generation, never inside `ios/`.
-3. **An AOT bundle that still exists for a non-LLM graph moves to `ios-<arch>/`** (`ios-h18p/…h18p.aimodelc`), so a
-   caller who has measured that the AOT form is worth its second on a given phone can pin it by path; it is not the
-   default.
+3. **An AOT bundle that still exists for a non-LLM graph moves to `ios-<arch>/`** (`ios-h18p/…h18p.aimodelc`), as a
+   complete subtree: the same relative names as `ios/` (a loader that opens a fixed name, such as
+   `KitWhisperModel`'s `…fixed128.aimodel`, must find it there too) plus the tokenizer, manifests and host files
+   beside it. Since CoreAIKit PR #59 (2026-09-26) an iPhone whose `AIModel.deviceArchitectureName` matches an
+   `ios-<arch>/` on the Hub downloads that subtree by default and falls back to `ios/`; a kit built before it, and
+   any other phone, take `ios/`.
 4. **A loader picks the AOT form only when its architecture is the device's** (`AIModel.deviceArchitectureName`,
    the `<arch>` in `<name>.<arch>.aimodelc`); otherwise the `.aimodel`. "AOT wins over JIT when both are present"
    is wrong on a phone of another generation.
