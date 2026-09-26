@@ -154,6 +154,16 @@ iterative denoising. See [`CoreAIUpscale/README.md`](CoreAIUpscale/).
 A single-model transcriber (also available as a tab in [`coreai-audio`](coreai-audio/) alongside
 Qwen3-ASR and Parakeet). Stock runtime, one 30 s window. See [`CoreAITranscribe/README.md`](CoreAITranscribe/).
 
+### Device gates
+
+Headless apps that run a port's Mac self-test on the iPhone with the same Swift package and fixtures. No UI input;
+results in `Documents/<gate>/result.json`.
+
+| App | Model | What it checks on the phone |
+|---|---|---|
+| [`N3DGate/`](N3DGate/) | **Nemotron-3-Diarization** | the streaming and offline h18p GPU bundles against transformers fp32 on two clips (agreement ≥ 99.9 %), plus load, first call, footprint, a bench and the thermal state |
+| [`DecideGate/`](DecideGate/) | **GLiNER2.5-Decide** | the S = 256 / 512 GPU bundles compiled for the phone's own architecture (h19p on the iPhone 18 Pro) against the gliner2 fp32 oracle on 454 texts, plus load, first call, footprint, a bench and the thermal state |
+
 ## Model delivery
 
 On first launch each app offers an **in-app download** of the published `.aimodel` set from the

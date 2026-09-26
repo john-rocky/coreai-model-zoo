@@ -1,0 +1,664 @@
+{
+ "schema": "gliner25-decide-gate/1",
+ "what": "The classification graph of fastino/GLiNER2.5-Decide against the gliner2 2.0.0 fp32 oracle on the Mac: GATE-1 re-authored fp32 torch, GATE-2 poisoned label_idx, GATE-3 the fp16 bundle on the Mac GPU (Python runtime), and the Swift graph runner on the same bundles",
+ "model": "fastino/GLiNER2.5-Decide",
+ "model_rev": "7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6",
+ "model_safetensors_sha256": "40a5a23ff860dc3dff426cecd1048cacdd29c648c96db209dad818e9686dc997",
+ "hf_repo": "mlboydaisuke/GLiNER2.5-Decide-CoreAI",
+ "gate": {
+  "GATE-1": "fp32 re-authored module vs oracle: decisions equal on every task and max |dlogit| <= 1e-3",
+  "GATE-2": "label_idx + 1 (each label's first sub-word instead of its [L] marker) must change >= 1 decision",
+  "GATE-3": "fp16 bundle vs oracle: decisions equal on every task, every row finite; max |dlogit| and max |dprob| reported, not bounded"
+ },
+ "oracle": {
+  "package": "gliner2 2.0.0",
+  "device": "cpu",
+  "dtype": "float32",
+  "batch": 1,
+  "attn_implementation": "eager",
+  "path": "model.encoder(input_ids, attention_mask).last_hidden_state -> processor.extract_embeddings_from_batch -> classifier(stack(embs)[1:]).squeeze(-1)",
+  "decision_rule": "class_act auto: multi_label -> sigmoid, prob >= cls_threshold (none -> argmax 1); single -> softmax, argmax",
+  "versions": {
+   "python": "3.12.13",
+   "torch": "2.12.1",
+   "transformers": "4.57.6",
+   "gliner2": "2.0.0",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0",
+   "numpy": "2.5.3",
+   "huggingface_hub": "0.36.2",
+   "torch_threads": 12,
+   "machine": "arm64",
+   "platform": "macOS-27.0-arm64-arm-64bit"
+  },
+  "script": "conversion/gliner25_decide_oracle.py",
+  "self_consistency": "every case's decision equals model.classify_text(...) on every task, probabilities equal (max |dprob| 0.0 on all 787 tasks)",
+  "external_check": {
+   "what": "onnx-community/GLiNER2.5-Decide-ONNX conversion/reference.json: token ids and probabilities that author recorded from gliner2 2.0.0 on their own machine",
+   "cases": 6,
+   "input_ids_equal": "6/6",
+   "decisions_equal": "13/13",
+   "max_abs_dprob": 4.768e-07
+  }
+ },
+ "fixtures": [
+  {
+   "set": "readme21",
+   "cases": 21,
+   "tasks": 26,
+   "sha256": "8b756164f153395805fc4c89b029352c441e25a6c4006c2b1572d7f427f53396",
+   "selection": "all 21 classify_text examples of the model card at model_rev, verbatim",
+   "oracle_self_check": {
+    "cases": 21,
+    "tasks": 26,
+    "decisions_equal_tasks": 26,
+    "max_abs_prob_diff": 0.0
+   }
+  },
+  {
+   "set": "fast_decisions_s256",
+   "cases": 340,
+   "tasks": 580,
+   "sha256": "7b017250d6a2bfdd9952f799ebb777ba074d277052d9aa6fd486edfcb8e09f71",
+   "selection": "per domain (dataset card order), rows in file order; keep a row when its collated input_ids length <= 256 and its total label count <= 32; first 20 kept rows. tasks = {task: {labels, multi_label}} for all heads of the row, cls_threshold default 0.5",
+   "oracle_self_check": {
+    "cases": 340,
+    "tasks": 580,
+    "decisions_equal_tasks": 580,
+    "max_abs_prob_diff": 0.0
+   },
+   "dataset": {
+    "id": "fastino/fast-decisions",
+    "revision": "1a33070cabf94ce2e29105482dd2ef6c157ad7f2",
+    "license": "apache-2.0"
+   }
+  },
+  {
+   "set": "fast_decisions_long",
+   "cases": 93,
+   "tasks": 181,
+   "sha256": "967c3d87734a3c939b8f73c66ae7b7c41cf3e5061191eeeba3d6f4a9729b26c2",
+   "selection": "per domain (dataset card order), rows in file order; keep a row when its 257 <= collated input_ids length <= 512 and its total label count <= 32; up to 10 kept rows. tasks = {task: {labels, multi_label}} for all heads of the row, cls_threshold default 0.5",
+   "oracle_self_check": {
+    "cases": 93,
+    "tasks": 181,
+    "decisions_equal_tasks": 181,
+    "max_abs_prob_diff": 0.0
+   },
+   "dataset": {
+    "id": "fastino/fast-decisions",
+    "revision": "1a33070cabf94ce2e29105482dd2ef6c157ad7f2",
+    "license": "apache-2.0"
+   }
+  }
+ ],
+ "graph": {
+  "inputs": "input_ids [1,S] int32, attention_mask [1,S] int32, label_idx [1,32] int32",
+  "outputs": "logits [1,32] float32",
+  "body": "DebertaV2Model (24 layers, hidden 1024, transformers 4.57.6, 390 tensors strict-loaded) -> index_select of the [L] rows -> Linear(1024,2048) > ReLU > Linear(2048,1)",
+  "precision": "float16 (module.half(); the relative-position embeddings included)"
+ },
+ "environment": {
+  "machine": "Apple M4 Max (Mac16,9)",
+  "os": "macOS 27.0 (26A428)",
+  "python": "3.11.13",
+  "torch": "2.9.0",
+  "transformers": "4.57.6",
+  "numpy": "2.3.5",
+  "coreai-torch": "0.4.1",
+  "coreai-core": "1.0.0b2",
+  "xcode": "27.0.0 RC",
+  "coreai-build": "3600.83.1"
+ },
+ "timing_note": "the Mac GPU was shared with other sessions: call times are contended wall times, not benchmarks",
+ "shapes": {
+  "256": {
+   "bundle": "gliner25-decide_float16_s256_m32.aimodel",
+   "bytes": 872988957,
+   "main_mlirb_sha256": "65dc8934552fa866bb70cd5e3d7c65b2b08a51b0d38f7c21098f5bec17aa940d",
+   "fixture_sets": [
+    "readme21",
+    "fast_decisions_s256"
+   ],
+   "relative_position": "baked: int64 table [1,256,256] computed with transformers build_relative_position at export, asserted equal to encoder.get_rel_pos",
+   "convert_times_s": {
+    "export_s": 3.6,
+    "to_coreai_s": 0.6,
+    "optimize_s": 0.1,
+    "save_s": 0.7,
+    "total_s": 5.0
+   },
+   "gate1_fp32_torch_cpu": {
+    "pass": true,
+    "summary": {
+     "cases": 361,
+     "tasks": 606,
+     "decisions_equal_tasks": 606,
+     "decisions_equal_pct": 100.0,
+     "cases_with_changed_decision": 0,
+     "max_abs_dlogit": 1.239776611328125e-05,
+     "max_abs_dprob": 2.21187331606032e-06,
+     "min_cos": 0.9999999999989033
+    }
+   },
+   "gate2_poisoned_label_idx_torch_cpu": {
+    "pass": true,
+    "summary": {
+     "cases": 361,
+     "tasks": 606,
+     "decisions_equal_tasks": 269,
+     "decisions_equal_pct": 44.389,
+     "cases_with_changed_decision": 229,
+     "max_abs_dlogit": 13.59489130973816,
+     "max_abs_dprob": 0.9695969232842163,
+     "min_cos": -0.9899525527120805
+    }
+   },
+   "gate3_fp16_mac_gpu_python": {
+    "pass": true,
+    "path": "JIT, SpecializationOptions.from_preferred_compute_unit_kind(gpu)",
+    "load_s": 1.3,
+    "summary": {
+     "cases": 361,
+     "tasks": 606,
+     "decisions_equal_tasks": 606,
+     "decisions_equal_pct": 100.0,
+     "cases_with_changed_decision": 0,
+     "max_abs_dlogit": 0.014045238494873047,
+     "max_abs_dprob": 0.002152930992668056,
+     "min_cos": 0.9999992434846182,
+     "nonfinite_cases": 0,
+     "all_zero_cases": 0
+    },
+    "worst_task": {
+     "case": "fd/support_intent/025",
+     "seq_len": 236,
+     "task": "intent",
+     "max_abs_dlogit": 0.014045238494873047
+    },
+    "by_fixture_set": {
+     "readme21": {
+      "cases": 21,
+      "tasks": 26,
+      "decisions_equal_tasks": 26,
+      "max_abs_dlogit": 0.00519813597202301
+     },
+     "fast_decisions_s256": {
+      "cases": 340,
+      "tasks": 580,
+      "decisions_equal_tasks": 580,
+      "max_abs_dlogit": 0.014045238494873047
+     }
+    },
+    "contended_call_ms": {
+     "first_call_ms": 70.41,
+     "warm_call_ms_median": 28.08,
+     "warm_call_ms_p90": 28.37,
+     "warm_call_ms_max": 29.03
+    },
+    "poisoned_label_idx": {
+     "cases_with_changed_decision": 229,
+     "cases": 361,
+     "decisions_equal_tasks": 270,
+     "tasks": 606,
+     "max_abs_dlogit": 13.59512710571289
+    }
+   },
+   "swift_decide_selftest": [
+    {
+     "what": "conversion/gliner25_decide/swift decide-selftest, JIT .aimodel, GPU",
+     "bundle": "gliner25-decide_float16_s256_m32.aimodel",
+     "unit": "gpu",
+     "pass": true,
+     "reference_inputs_bit_equal": {
+      "case": "fd/screen_tags/017",
+      "seq_len": 249,
+      "input_ids_attention_mask_label_idx": true,
+      "task_slices": true
+     },
+     "summary": {
+      "cases": 361,
+      "tasks": 606,
+      "decisions_equal_tasks": 606,
+      "max_abs_dlogit": 0.014045238494873047,
+      "max_abs_dprob": 0.002152930992668056,
+      "min_cos": 0.9999992434846182,
+      "nonfinite_cases": 0
+     },
+     "vs_python_mac_gpu_logits": {
+      "bit_equal": "4376/4376",
+      "max_abs_diff": 0
+     },
+     "decision_rule_on_python_logits": {
+      "decisions_identical": "606/606",
+      "per_task_metrics_bit_equal": true
+     },
+     "load_s": 0.187,
+     "bench_contended_ms": {
+      "ms_median": 28.14,
+      "ms_p90": 28.46,
+      "ms_min": 27.79,
+      "ms_max": 28.84
+     }
+    },
+    {
+     "what": "the same, AOT .aimodelc compiled for this Mac (macOS h16c), default specialization",
+     "bundle": "gliner25-decide_float16_s256_m32.h16c.aimodelc",
+     "unit": "default",
+     "pass": true,
+     "reference_inputs_bit_equal": {
+      "case": "fd/screen_tags/017",
+      "seq_len": 249,
+      "input_ids_attention_mask_label_idx": true,
+      "task_slices": true
+     },
+     "summary": {
+      "cases": 361,
+      "tasks": 606,
+      "decisions_equal_tasks": 606,
+      "max_abs_dlogit": 0.014045238494873047,
+      "max_abs_dprob": 0.002152930992668056,
+      "min_cos": 0.9999992434846182,
+      "nonfinite_cases": 0
+     },
+     "vs_python_mac_gpu_logits": {
+      "bit_equal": "4376/4376",
+      "max_abs_diff": 0
+     },
+     "decision_rule_on_python_logits": {
+      "decisions_identical": "606/606",
+      "per_task_metrics_bit_equal": true
+     },
+     "load_s": 0.188
+    },
+    {
+     "what": "--poison (label_idx + 1): must fail",
+     "pass": false,
+     "summary": {
+      "cases_with_changed_decision": 229,
+      "cases": 361,
+      "decisions_equal_tasks": 270,
+      "tasks": 606,
+      "max_abs_dlogit": 13.59512710571289
+     }
+    }
+   ],
+   "aot": {
+    "ios_gpu": {
+     "architecture": "h18p",
+     "exit": 0,
+     "wall_s": 4.2,
+     "bytes": 974005777,
+     "ane_regions": 0,
+     "status": "iPhone 17 Pro target: compiled only, not run on a device, not shipped"
+    },
+    "mac_gpu": {
+     "architecture": "h16c",
+     "exit": 0,
+     "wall_s": 2.7,
+     "bytes": 973986067,
+     "ane_regions": 0,
+     "status": "this Mac: gated by decide-selftest (below), not shipped"
+    },
+    "ios_gpu_h19p": {
+     "architecture": "h19p",
+     "exit": 0,
+     "wall_s": 2.9,
+     "bytes": 974005777,
+     "ane_regions": 0,
+     "status": "iPhone 18 Pro target: device-gated, shipped as ios/"
+    }
+   }
+  },
+  "512": {
+   "bundle": "gliner25-decide_float16_s512_m32.aimodel",
+   "bytes": 874561440,
+   "main_mlirb_sha256": "b5e22f647c7de2bff26d2036341eaac0944e12be364efdbf7cc72434f45f563d",
+   "fixture_sets": [
+    "readme21",
+    "fast_decisions_s256",
+    "fast_decisions_long"
+   ],
+   "relative_position": "baked: int64 table [1,512,512] computed with transformers build_relative_position at export, asserted equal to encoder.get_rel_pos",
+   "convert_times_s": {
+    "export_s": 3.5,
+    "to_coreai_s": 0.5,
+    "optimize_s": 0.2,
+    "save_s": 0.6,
+    "total_s": 4.9
+   },
+   "gate1_fp32_torch_cpu": {
+    "pass": true,
+    "summary": {
+     "cases": 454,
+     "tasks": 787,
+     "decisions_equal_tasks": 787,
+     "decisions_equal_pct": 100.0,
+     "cases_with_changed_decision": 0,
+     "max_abs_dlogit": 1.239776611328125e-05,
+     "max_abs_dprob": 2.4678522072552056e-06,
+     "min_cos": 0.9999999999990296
+    }
+   },
+   "gate2_poisoned_label_idx_torch_cpu": {
+    "pass": true,
+    "summary": {
+     "cases": 454,
+     "tasks": 787,
+     "decisions_equal_tasks": 349,
+     "decisions_equal_pct": 44.346,
+     "cases_with_changed_decision": 289,
+     "max_abs_dlogit": 13.594894409179688,
+     "max_abs_dprob": 0.9695968829091777,
+     "min_cos": -0.9899523915479308
+    }
+   },
+   "gate3_fp16_mac_gpu_python": {
+    "pass": true,
+    "path": "JIT, SpecializationOptions.from_preferred_compute_unit_kind(gpu)",
+    "load_s": 1.28,
+    "summary": {
+     "cases": 454,
+     "tasks": 787,
+     "decisions_equal_tasks": 787,
+     "decisions_equal_pct": 100.0,
+     "cases_with_changed_decision": 0,
+     "max_abs_dlogit": 0.018367767333984375,
+     "max_abs_dprob": 0.0024842999692951673,
+     "min_cos": 0.9999983929516647,
+     "nonfinite_cases": 0,
+     "all_zero_cases": 0
+    },
+    "worst_task": {
+     "case": "fd/benefits_request/016",
+     "seq_len": 242,
+     "task": "program",
+     "max_abs_dlogit": 0.018367767333984375
+    },
+    "by_fixture_set": {
+     "readme21": {
+      "cases": 21,
+      "tasks": 26,
+      "decisions_equal_tasks": 26,
+      "max_abs_dlogit": 0.010072469711303711
+     },
+     "fast_decisions_s256": {
+      "cases": 340,
+      "tasks": 580,
+      "decisions_equal_tasks": 580,
+      "max_abs_dlogit": 0.018367767333984375
+     },
+     "fast_decisions_long": {
+      "cases": 93,
+      "tasks": 181,
+      "decisions_equal_tasks": 181,
+      "max_abs_dlogit": 0.012295722961425781
+     }
+    },
+    "contended_call_ms": {
+     "first_call_ms": 163.24,
+     "warm_call_ms_median": 51.99,
+     "warm_call_ms_p90": 52.49,
+     "warm_call_ms_max": 53.38
+    },
+    "poisoned_label_idx": {
+     "cases_with_changed_decision": 289,
+     "cases": 454,
+     "decisions_equal_tasks": 349,
+     "tasks": 787,
+     "max_abs_dlogit": 13.59317398071289
+    }
+   },
+   "swift_decide_selftest": [
+    {
+     "what": "conversion/gliner25_decide/swift decide-selftest, JIT .aimodel, GPU",
+     "bundle": "gliner25-decide_float16_s512_m32.aimodel",
+     "unit": "gpu",
+     "pass": true,
+     "reference_inputs_bit_equal": {
+      "case": "fd/restaurant_review/084",
+      "seq_len": 304,
+      "input_ids_attention_mask_label_idx": true,
+      "task_slices": true
+     },
+     "summary": {
+      "cases": 454,
+      "tasks": 787,
+      "decisions_equal_tasks": 787,
+      "max_abs_dlogit": 0.018367767333984375,
+      "max_abs_dprob": 0.0024842999692951673,
+      "min_cos": 0.9999983929516647,
+      "nonfinite_cases": 0
+     },
+     "vs_python_mac_gpu_logits": {
+      "bit_equal": "5749/5749",
+      "max_abs_diff": 0
+     },
+     "decision_rule_on_python_logits": {
+      "decisions_identical": "787/787",
+      "per_task_metrics_bit_equal": true
+     },
+     "load_s": 0.189,
+     "bench_contended_ms": {
+      "ms_median": 51.6,
+      "ms_p90": 51.9,
+      "ms_min": 51.11,
+      "ms_max": 52.77
+     }
+    },
+    {
+     "what": "the same, AOT .aimodelc compiled for this Mac (macOS h16c), default specialization",
+     "bundle": "gliner25-decide_float16_s512_m32.h16c.aimodelc",
+     "unit": "default",
+     "pass": true,
+     "reference_inputs_bit_equal": {
+      "case": "fd/restaurant_review/084",
+      "seq_len": 304,
+      "input_ids_attention_mask_label_idx": true,
+      "task_slices": true
+     },
+     "summary": {
+      "cases": 454,
+      "tasks": 787,
+      "decisions_equal_tasks": 787,
+      "max_abs_dlogit": 0.018367767333984375,
+      "max_abs_dprob": 0.0024842999692951673,
+      "min_cos": 0.9999983929516647,
+      "nonfinite_cases": 0
+     },
+     "vs_python_mac_gpu_logits": {
+      "bit_equal": "5749/5749",
+      "max_abs_diff": 0
+     },
+     "decision_rule_on_python_logits": {
+      "decisions_identical": "787/787",
+      "per_task_metrics_bit_equal": true
+     },
+     "load_s": 0.189
+    }
+   ],
+   "aot": {
+    "ios_gpu": {
+     "architecture": "h18p",
+     "exit": 0,
+     "wall_s": 3.7,
+     "bytes": 975579352,
+     "ane_regions": 0,
+     "status": "iPhone 17 Pro target: compiled only, not run on a device, not shipped"
+    },
+    "mac_gpu": {
+     "architecture": "h16c",
+     "exit": 0,
+     "wall_s": 2.7,
+     "bytes": 975559448,
+     "ane_regions": 0,
+     "status": "this Mac: gated by decide-selftest (below), not shipped"
+    },
+    "ios_gpu_h19p": {
+     "architecture": "h19p",
+     "exit": 0,
+     "wall_s": 2.9,
+     "bytes": 975579352,
+     "ane_regions": 0,
+     "status": "iPhone 18 Pro target: device-gated, shipped as ios/"
+    }
+   }
+  }
+ },
+ "negative_evidence_runtime_relative_positions": {
+  "what": "the stock DebertaV2Model.forward (relative-position buckets computed inside the graph), S=256 fp16 on the Mac GPU: coreai-torch 0.4.1 lowers aten.div.Tensor(int64, int64) to integer division (coreai.decomposable.broadcasting_divide si32), so make_log_bucket_position's abs_pos / mid puts every distance 129..255 in bucket +-128",
+  "bucket_table_s256": {
+   "entries": 65536,
+   "mismatched": 16256,
+   "first_wrong_distance": 129,
+   "max_bucket_diff": 64,
+   "same_on_cpu_only": true
+  },
+  "gate3": {
+   "cases": 361,
+   "tasks": 606,
+   "decisions_equal_tasks": 604,
+   "decisions_equal_pct": 99.67,
+   "cases_with_changed_decision": 2,
+   "max_abs_dlogit": 0.7334914207458496,
+   "max_abs_dprob": 0.17069478827946039,
+   "min_cos": 0.9966930462614417,
+   "nonfinite_cases": 0,
+   "all_zero_cases": 0
+  },
+  "worst_task": {
+   "case": "fd/ticket_route/017",
+   "seq_len": 224,
+   "task": "contains_pii",
+   "max_abs_dlogit": 0.7334914207458496
+  },
+  "flipped_tasks": [
+   {
+    "case": "fd/email_triage/013",
+    "seq_len": 222,
+    "task": "action",
+    "oracle_margin": 0.03430885076522827,
+    "max_abs_dlogit": 0.05930352210998535
+   },
+   {
+    "case": "fd/clinic_request/007",
+    "seq_len": 179,
+    "task": "request",
+    "oracle_margin": 0.3073381185531616,
+    "max_abs_dlogit": 0.17900621891021729
+   }
+  ],
+  "fix": "the table is computed in torch at export (S is fixed) and passed to DebertaV2Encoder.forward(relative_pos=)"
+ },
+ "coverage_fast_decisions_dev_split": {
+  "rows": 1700,
+  "le_256": 1502,
+  "le_512": 1700,
+  "max_seq_len": 431,
+  "max_labels": 28,
+  "fits_S_and_MMAX": 1502,
+  "le_256_pct": 88.4
+ },
+ "task_accuracy_vs_gold": {
+  "note": "the oracle's decisions against the dataset's gold labels on this fixture subset (development split, one call per row with all of its heads, default threshold). Not the publisher's 60.2 % (held-out test split, its own protocol); not comparable",
+  "fast_decisions_s256": {
+   "rows": 340,
+   "heads": 580,
+   "micro_head_acc_pct": 63.45,
+   "macro_head_acc_pct": 64.07,
+   "micro_row_acc_pct": 49.71,
+   "macro_row_acc_pct": 49.71
+  },
+  "fast_decisions_long": {
+   "rows": 93,
+   "heads": 181,
+   "micro_head_acc_pct": 62.98,
+   "macro_head_acc_pct": 63.09,
+   "micro_row_acc_pct": 48.39,
+   "macro_row_acc_pct": 48.06
+  }
+ },
+ "card_examples_equal_to_card_potential_output": "12/21 (the card calls its outputs potential results)",
+ "records": [
+  {
+   "path": "<work>/_gliner25_decide/fixtures/fast_decisions_long.json",
+   "sha256": "967c3d87734a3c939b8f73c66ae7b7c41cf3e5061191eeeba3d6f4a9729b26c2"
+  },
+  {
+   "path": "<work>/_gliner25_decide/fixtures/fast_decisions_s256.json",
+   "sha256": "7b017250d6a2bfdd9952f799ebb777ba074d277052d9aa6fd486edfcb8e09f71"
+  },
+  {
+   "path": "<work>/_gliner25_decide/fixtures/readme21.json",
+   "sha256": "8b756164f153395805fc4c89b029352c441e25a6c4006c2b1572d7f427f53396"
+  },
+  {
+   "path": "<work>/_gliner25_decide/logs/prior_art_check.log",
+   "sha256": "ae1f37f5238fcd22f281060f58ef728cfef23899514e4f13b0fab46b7d1c347e"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/lengths.json",
+   "sha256": "18b871a466bd3a5def89dc476c4f14a663da67ce7346d3941210a8c4c0e22af1"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/own_subset_accuracy.json",
+   "sha256": "577b7b81af8c74339ce72a02385e9877b880ac7dfc54e6720b48feead620cce2"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/own_subset_accuracy_long.json",
+   "sha256": "e55a44176e7bc02969e58a534990aa28f552f3a66e10db7d0264cffd0acb1821"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/diag_relpos_buckets.json",
+   "sha256": "a8eae62a27d9e936b22a6af622df9f7fcb439d224f976f30c25a00655a905fb3"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/gate_s256_fp32.json",
+   "sha256": "01510a4d138c4d3015703311d4bee578540969dc564ba39f2489a801a622c641"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/gate_s256_gpu.json",
+   "sha256": "7e95a7488ad81b2ad83198215284d18df4ba80df27437313d23b092ca506944a"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/gate_s256_gpu_runtime_relpos.json",
+   "sha256": "ed4864b9bbb1537605648cba35318d2425ea32ff080be308363a5cc510b38df2"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/gate_s512_fp32.json",
+   "sha256": "104e5014fd208b5203abb43068fc8eb30d8d26f4e99f37d88e8b3d8160645256"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/gate_s512_gpu.json",
+   "sha256": "6dfbe8ca9d14bf353f29ca43ceb1f1cd44dcea54f01f3aa138719b56f14f6f8a"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/selftest_s256.json",
+   "sha256": "fc4004f3ee63ec289904a82919dc9a8de3c9224c4200dfaf8ddb812d6cd7ae36"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/selftest_s256_aot_h16c.json",
+   "sha256": "7afcc6f4227410c8b3fa5daee77834a074a7b0f602d446af8455b203a6f7f23c"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/selftest_s256_poison.json",
+   "sha256": "4fdb1b3dc25eabcc4d14e15ceb851ea50ddd9210f221db385108a780de8cba3a"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/selftest_s512.json",
+   "sha256": "a22471afaae272ef7adbd84ecae7825d3a399616d8bb90b0771d8d843efd33c6"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/selftest_s512_aot_h16c.json",
+   "sha256": "65a910c2cea53acb24236485003d2d2089711af9c615092457c7a10a34205695"
+  },
+  {
+   "path": "conversion/gliner25_decide/_work/aot/aot_compile_s256.json",
+   "sha256": "6a61f44b1dd0eec48a889c64643c45fa3ff92986cb75c93ac67e81e34dccd7a2"
+  },
+  {
+   "path": "conversion/gliner25_decide/_work/aot/aot_compile_s512.json",
+   "sha256": "0164792917520d8620a7c007a35344c4ac6a5805c8e9c295f62984bf060b73bb"
+  }
+ ]
+}
