@@ -138,10 +138,16 @@ GLiNER2-PII `ios/` bundle.
 The device JIT did not fail, needed under 200 MB of headroom (available memory stayed above 3.3 GB), and
 produced the same decisions; its logits differ from the AOT bundle's by up to 0.016 and from the oracle's by
 0.016 (AOT: 0.019). Both kinds write a bundle-sized specialization into the app container on first load, keyed by
-`main.hash`, so a relaunch is fast either way. The mixed directory loaded with no error and its logits equal arm
-B's bit for bit: the runtime ignored the `h18p` delegates and compiled the IR. So for a graph of this size, one
+`main.hash`, so a relaunch is fast either way. Arm C loaded with no error and its logits equal arm B's bit for
+bit — because arm B had written the specialization of the same `main.hash` into the container minutes earlier:
+on a fresh container the same layout (the shipped GLiNER2-PII `ios/` bundle) is refused with
+`incompatibleCompiledAssetArchitecture` before any IR is compiled, so the `h18p` delegates are not ignored, they
+are validated first ([jit-distribution.md](jit-distribution.md), runs `20260926-162943` and `163809`). So for a
+graph of this size, one
 `.aimodel` serves every device at the cost of about a second on the first run; the per-architecture `.aimodelc`
 buys back at most that second and needs one artifact per device generation. The LLM-class bundles (over 1 GB,
-dynamic shapes) are a different case: there the device JIT is known to abort, and AOT stays required. Evidence:
+dynamic shapes) are a different case: there the device JIT is known to abort, and AOT stays required; a 1.6 GB
+static graph (whisper-large-v3-turbo) does specialize on the 18 Pro ([jit-distribution.md](jit-distribution.md)).
+Evidence:
 `_gliner25_decide/results/ROUND5.md`, device runs `20260926-152949` (B), `153200` (B relaunch), `153844` and
 `154639` (A), `154103` (C).

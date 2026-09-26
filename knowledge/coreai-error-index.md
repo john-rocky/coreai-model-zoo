@@ -475,6 +475,14 @@ in 0.04 s; there is no fallback to another architecture and no on-device compile
   output `<name>.<arch>.aimodelc`, and let the app pick its file from
   `AIModel.deviceArchitectureName`. Record: [`gliner25-decide.md`](gliner25-decide.md) (§3),
   `apps/DecideGate` run `20260926-123409`.
+- **A `.aimodel` directory that carries the JIT files next to another architecture's AOT files raises the same
+  string** (the shipped GLiNER2-PII `ios/` bundle: `main.mlirb` + `main.hash` + `metadata.json` beside
+  `main-h18p.mlirb`, `main-h18p-delegates/`, `stats.json`): the runtime validates the compiled asset before it
+  looks at the IR. It loads only when the app container already holds a specialization of the same `main.hash`
+  (a warm cache is not a fallback path). **Fix for a non-LLM graph:** ship the three JIT files alone in `ios/` —
+  the 18 Pro specializes graphs up to the 1.6 GB whisper itself (4.4 s first load, 0.3 s after) — and keep any AOT
+  form under `ios-<arch>/`. Record: [`jit-distribution.md`](jit-distribution.md), `apps/DecideGate` load-only runs
+  `20260926-162943` and `163809`.
 - **OS · toolchain:** iOS 27.0 (24A437) on iPhone19,2; `coreai-build` 3600.83.1; 2026-09-26.
 
 ## LLVM ERROR: Failed to allocate mmap'd buffer:

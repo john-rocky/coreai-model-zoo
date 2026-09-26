@@ -100,6 +100,10 @@ For the long-form version of the same material, read
 - [`aot-and-specialization.md`](aot-and-specialization.md) — specialization, `AIModelCache` /
   `AIModel.specialize()`, and AOT compile (`xcrun coreai-build compile` → `.aimodelc`,
   `--preferred-compute neural-engine`). The first-run-latency mitigation path.
+- [`jit-distribution.md`](jit-distribution.md) — **one `.aimodel` for every iPhone generation**: the 18 Pro
+  specializes shipped graphs up to the 1.6 GB whisper itself (4.4 s first load, 0.3 s after, the app's footprint
+  untouched), an AOT bundle of another architecture is refused — also when the JIT files sit beside it — and
+  the layout rule that follows (`ios/` = JIT IR, `ios-<arch>/` = AOT for the LLM class only).
 - [`compression-reference.md`](compression-reference.md) — `coreai-opt` quantization & palettization
   API reference (int4/int8, granularity, mixed-precision, joint); the LM-head/embedding lever.
 - [`ane-silicon-reference.md`](ane-silicon-reference.md) — **the ANE silicon map**, distilled from the
