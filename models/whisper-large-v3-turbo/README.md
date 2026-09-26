@@ -6,8 +6,11 @@ detection**, ≤30 s window per decode. Runs fully on device on the **stock** Co
 (no engine patch), **token-for-token identical** to the PyTorch greedy reference.
 
 Bundle: [🤗 mlboydaisuke/whisper-large-v3-turbo-CoreAI-official](https://huggingface.co/mlboydaisuke/whisper-large-v3-turbo-CoreAI-official)
-— macOS (~1.6 GB fp16) + iOS (~3.2 GB, AOT-precompiled for iPhone). Catalog id:
-**`whisper-large-v3-turbo`**.
+— `macos/` and `ios/` each hold the fp16 JIT `.aimodel` (~1.6 GB; every iPhone generation specializes it on its
+first load: iPhone 18 Pro 4.37 s, first call 2.11 s, 0.26 s on relaunch, 2026-09-26), `ios-h18p/` the bundle
+compiled for the iPhone 17 Pro (~3.2 GB, that phone only; it sat in `ios/` until Hub revision `171153c6`,
+2026-09-26, and comes from a separate export of 2026-06-28). Catalog id: **`whisper-large-v3-turbo`** (its
+pin still points at the previous layout until the next kit release).
 
 <!-- gen-cards:use-it begin id=whisper-large-v3-turbo (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ![Whisper large-v3-turbo demo](https://huggingface.co/mlboydaisuke/whisper-large-v3-turbo-CoreAI-official/resolve/main/demo.gif)

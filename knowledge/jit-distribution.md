@@ -34,9 +34,11 @@ Runs `20260926-162943` (fresh install: the app and its container removed first, 
 ### The rest of the zoo's non-LLM iOS graphs, same phone, same mode (runs `20260926-185357`, `185441`, `191440`, `191523`)
 
 Every JIT graph that replaced an h18p bundle in `ios/` on 2026-09-26, plus the two repositories still to switch,
-loaded and ran once on the iPhone 18 Pro from a fresh container; nothing crashed and the thermal state stayed
-nominal. One measurement each; the graphs that hold state (the VoxCPM / VoxCPM2 / VibeVoice language-model
-graphs) were loaded only.
+loaded and ran once on the iPhone 18 Pro; nothing crashed and the thermal state stayed nominal. The Granite and
+VoxCPM2 rows come from a fresh container (run `185357`); the other rows from a later launch of the same container
+that held no specialization of those graphs yet (run `191440`), so their first load is cold for the graph, not for
+the app. One measurement each; the graphs that hold state (the VoxCPM / VoxCPM2 / VibeVoice language-model graphs)
+were loaded only.
 
 | repository (JIT graph) | size | first load | first call | load on relaunch |
 |---|---|---|---|---|
