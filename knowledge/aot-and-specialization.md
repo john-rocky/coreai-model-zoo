@@ -111,6 +111,12 @@ The `--architecture` h-numbers follow the hardware **device-identifier major ver
 - **iPhone 17 Pro = `iPhone18,1` → `h18p`.** An `h17p` `.aimodelc` pushed to it fails to load with
   `invalidCompiledModel`; the same model compiled `--architecture h18p` loads + runs (validated with the
   gemma4 int4km head, `AIModel(contentsOf:)` in CoreAIChat).
+- **iPhone 18 Pro = `iPhone19,2` → `h19p`** (validated 2026-09-26, iOS 27.0 24A437). An `h18p` bundle
+  fails in 0.04 s with `incompatibleCompiledAssetArchitecture(device: "h19p", asset: ["h18p"])`
+  ([error index](coreai-error-index.md)); the same `.aimodel` compiled `--architecture h19p` loads and
+  runs (GLiNER2.5-Decide, `apps/DecideGate`). Xcode 27 RC's `coreai-build` lists nine iOS
+  neural-engine archs (`h13g h14g h15g h16g h16p h17g h17p h18p h19p`). Every `ios/` subtree this zoo
+  published before that date is `h18p` only.
 - **M4 Max Mac = `Mac16,x` → `h16c`.** Of all 20 macOS archs, only `h16c` loads in the Python runtime on an
   M4 Max (`ondevice/_aimodelc_head_check.py`); h17*/h16g/h16s all raise RuntimeError.
 - **`coreai-build compile` EXITs 0 for ANY requested arch** — a successful compile does NOT validate the

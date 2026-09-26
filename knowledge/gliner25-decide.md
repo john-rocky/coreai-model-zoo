@@ -118,3 +118,30 @@ the label does not follow the slowdown one to one. The cause is not isolated.
 What worked: rest the phone for 5 minutes or more, run the bench right after loading and before the long case loop
 (`DECIDE_BENCH_FIRST=1` in `apps/DecideGate`), and record the thermal state before and after it. Waiting for the
 label to return to nominal (`DECIDE_WAIT_NOMINAL`) can run to its cap while the phone is already fast again.
+
+## 7. The phone compiles a 0.9 GB graph itself: JIT distribution is enough at this size
+
+Measured 2026-09-26 on the iPhone 18 Pro (iPhone19,2, iOS 27.0 24A437, h19p) with `apps/DecideGate`
+(`DECIDE_BUNDLE_KIND=jit|aot|mixed`), the phone rested and thermal state nominal around every bench, decisions
+recomputed from the device logits. Three arms: A = the shipped `.h19p.aimodelc`; B = the macOS `.aimodel` (JIT IR,
+873 / 875 MB) loaded as is; C = the JIT IR with an `h18p` delegates directory beside it, the layout of the
+GLiNER2-PII `ios/` bundle.
+
+| arm, S | first load after install | peak footprint during load | first call | load on relaunch | per call, median | decisions | container cache written |
+|---|---|---|---|---|---|---|---|
+| A aot h19p, 256 | 1.56 s (container cold; 1.29 s on a fresh install, run 124014) | 117 MB | 65 ms (1.23 s on the fresh install) | 0.69 s | 37.8 ms | 606/606 | +974 MB |
+| A aot h19p, 512 | 1.63 s (1.82 s fresh) | 172 MB | 106 ms (0.41 s fresh) | 0.60 s | 93.5 ms | 787/787 | +976 MB |
+| B jit, 256 | 1.48 s (fresh install) | 101 MB | 1.39 s | 0.36 s | 35.9 ms | 606/606 | +974 MB |
+| B jit, 512 | 2.32 s | 186 MB | 0.49 s | 0.13 s | 87.2 ms | 787/787 | +976 MB |
+| C mixed, 256 | 0.67 s (reused B's cache) | 112 MB | 55 ms | 0.12 s | — | 606/606 | +0 |
+
+The device JIT did not fail, needed under 200 MB of headroom (available memory stayed above 3.3 GB), and
+produced the same decisions; its logits differ from the AOT bundle's by up to 0.016 and from the oracle's by
+0.016 (AOT: 0.019). Both kinds write a bundle-sized specialization into the app container on first load, keyed by
+`main.hash`, so a relaunch is fast either way. The mixed directory loaded with no error and its logits equal arm
+B's bit for bit: the runtime ignored the `h18p` delegates and compiled the IR. So for a graph of this size, one
+`.aimodel` serves every device at the cost of about a second on the first run; the per-architecture `.aimodelc`
+buys back at most that second and needs one artifact per device generation. The LLM-class bundles (over 1 GB,
+dynamic shapes) are a different case: there the device JIT is known to abort, and AOT stays required. Evidence:
+`_gliner25_decide/results/ROUND5.md`, device runs `20260926-152949` (B), `153200` (B relaunch), `153844` and
+`154639` (A), `154103` (C).
