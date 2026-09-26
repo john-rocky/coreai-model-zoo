@@ -77,7 +77,10 @@ Runs `20260926-162943` (fresh install: the app and its container removed first, 
    bundle that loads on one phone generation only.
 
 Which shipped repositories were in the AOT-only iOS form on 2026-09-26 is read from `models/index.json` (`bundles`
-containing `.h18p.aimodelc` or `ios-h18p/`); the fix per repository is the layout above.
+containing `.h18p.aimodelc` or `ios-h18p/`) plus the Hub listing of every `ios/*.aimodel`: a directory named
+`.aimodel` can hold `main-h18p.mlirb` + `main-h18p-delegates/` and no `main.mlirb` at all (whisper-large-v3-turbo's
+`ios/`, 3.2 GB), which is the AOT form under a JIT name and refused the same way. The fix per repository is the
+layout above.
 
 ## Not measured
 
