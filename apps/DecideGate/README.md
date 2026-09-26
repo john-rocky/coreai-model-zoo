@@ -15,12 +15,22 @@ fails at load with `incompatibleCompiledAssetArchitecture`.
 | `gpu_s256` | `gliner25-decide_float16_s256_m32.<arch>.aimodelc` | README examples 21 + fast-decisions 340 (≤ 256 tokens): 606 tasks |
 | `gpu_s512` | `gliner25-decide_float16_s512_m32.<arch>.aimodelc` | the same + 93 fast-decisions rows of 257–431 tokens: 787 tasks |
 
+`DECIDE_BUNDLE_KIND` picks another bundle for the same stages: `jit` loads `gliner25-decide_float16_<tag>_m32.aimodel`
+(the JIT bundle, as `macos/` ships it: the phone specializes it at the first load), `mixed` loads
+`gliner25-decide_float16_<tag>_m32.mixed.aimodel` (the JIT files with another architecture's AOT files beside them:
+`main-h18p.mlirb`, `main-h18p-delegates/`, `stats.json`, the shape of GLiNER2-PII-CoreAI's `ios/` bundle). Stage it
+with `DECIDE_KINDS=aot,jit,mixed ./_stage.sh`.
+
 A stage passes when every task's decision equals the oracle's (single label: softmax argmax; multi label: sigmoid
 ≥ the task's threshold, none above → argmax) and every logits row is finite. Each stage also records the first
 and second load time, the first call, the app footprint, max|Δlogit| and max|Δprob| against the oracle, the
 distance to the Mac GPU's logits for the same fp16 bundle, and a bench of 5 warm-up calls and 100 timed calls on
 fixture inputs. The thermal state is logged around every step, with the device model (`utsname.machine`), the OS
-build and the Core AI architecture name.
+build, the Core AI architecture name and the battery. Each load and the first call run under a 100 ms memory
+sampler on its own thread (peak footprint, least `os_proc_available_memory`, a 1 s series, a progress line every
+10 s), and the container's caches are sized before load 1, after load 1, after the first call, after load 2 and at
+the end (`Library/Caches/coreai-cache` = the container half of Core AI's specialization cache; the system half is out
+of the app's reach).
 
 ## Steps (Mac, then the phone)
 
@@ -43,6 +53,9 @@ build and the Core AI architecture name.
 9. Reruns: `DECIDE_SKIP_INSTALL=1 ./_gate.sh <udid> '"DECIDE_STAGES":"s512"'` (knobs are in
    `Sources/GateRunner.swift`); a new app build on assets already there: `DECIDE_SKIP_PUSH=1 ./_gate.sh <udid>`.
    Reprint a result: `./_run.sh --summary <result.json>`.
+   A cold first load: `DECIDE_FRESH=1 ./_gate.sh <udid> ...` uninstalls first (the data container goes with the app,
+   the container's Core AI cache with it), then installs and pushes everything again. A run that does not end
+   `done` leaves the phone's crash-log listing, and copies of today's DecideGate / jetsam reports, in the run directory.
 10. The phone slows down as it heats (the thermal state goes from nominal to fair within a minute of back-to-back
     calls). For a nominal-state bench: `'"DECIDE_WAIT_NOMINAL":"600","DECIDE_BENCH_FIRST":"1"'` waits (5 s steps, up
     to 600 s) for nominal before each stage's bench and runs the bench before the case loop.

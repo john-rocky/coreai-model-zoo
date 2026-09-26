@@ -8,9 +8,11 @@
 # Normally from ./_gate.sh, which holds the phone; refuses without this lane's hold, and (when DECIDE_ALLOWED_DEVICES
 # is set) on a device it does not list.
 # App knobs (GateRunner.swift): DECIDE_STAGES, DECIDE_BENCH, DECIDE_UNIT, DECIDE_ASSETS, DECIDE_WAIT_NOMINAL,
-# DECIDE_BENCH_FIRST.
+# DECIDE_BENCH_FIRST, DECIDE_BUNDLE_KIND.
 # Poll cap: DECIDE_CAP polls of 10 s (default 180 = 30 min).
-# Output: _work/device_runs/<run id>/{result.json,result.log,run.out,launch.log}
+# A run that does not end "done" (the app gone, or the cap) also lists the phone's crash logs and copies the ones of
+# today that name DecideGate or a jetsam event into crash/.
+# Output: _work/device_runs/<run id>/{result.json,result.log,run.out,launch.log[,crash/]}
 set -u
 export DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode-27.0.0-RC.app/Contents/Developer}
 BID=com.daisukemajima.decidegate
@@ -37,6 +39,15 @@ for k in r.get("stage_order", []):
     print(f"{k}: {'PASS' if s.get('pass') else 'FAIL'}{tag} | {s.get('bundle')} {s.get('bundle_mb', 0):.1f} MB, unit {s.get('unit')} | "
           f"load {s.get('load_first_s', 0):.2f} s first / {s.get('load_second_s', 0):.2f} s second, first call "
           f"{s.get('first_call_ms', 0):.1f} ms, footprint {s.get('footprint_mb_after_load', 0):.0f} MB")
+    if "load_first_memory" in s:
+        mb = lambda b: f"{(b or 0) / 1e6:.1f}"
+        print(f"  kind {s.get('bundle_kind')} | load 1 wall {s.get('load_first_wall_s', 0):.2f} s: peak footprint "
+              f"{s.get('load_first_peak_footprint_mb', -1):.0f} MB, least available {s.get('load_first_min_available_mb', -1):.0f} MB "
+              f"(before {s.get('available_mb_before_load', -1):.0f} MB) | peak first call "
+              f"{s.get('first_call_peak_footprint_mb', -1):.0f} MB, load 2 {s.get('load_second_peak_footprint_mb', -1):.0f} MB")
+        print(f"  coreai-cache MB: before load 1 {mb(s.get('cache_bytes_before_load'))}, after load 1 {mb(s.get('cache_bytes_after_load'))} "
+              f"({s.get('cache_files_after_load', 0)} files), after first call {mb(s.get('cache_bytes_after_first_call'))}, after load 2 "
+              f"{mb(s.get('cache_bytes_after_load_2'))}, end {mb(s.get('cache_bytes_end'))}")
     m = s.get("summary")
     if m:
         print(f"  cases {m['cases']}, tasks {m['tasks']}: decisions equal {m['decisions_equal_tasks']}/{m['tasks']} "
@@ -56,6 +67,9 @@ for k in r.get("stage_order", []):
               f"min {b['ms_min']:.2f}, max {b['ms_max']:.2f} ({b['calls']} calls after {b['warmup']} warm-up) | thermal "
               f"{b['thermal_start']} -> {b['thermal_end']}{wt}")
     if "error" in s: print(f"  ERROR {s['error']}")
+    if "error_detail" in s:
+        e = s["error_detail"]
+        print(f"  error {e.get('type')} | NSError {e.get('ns_domain')} {e.get('ns_code')} | {e.get('reflecting')}"[:400])
     th = s.get("thermal", [])
     if th: print("  thermal: " + ", ".join(f"{t['at']} {t['state']}" for t in th))
 print("summary:", " ".join(r.get("summary", [])))
@@ -130,6 +144,21 @@ for i in $(seq 1 $CAP); do
   fi
 done
 say "state: ${state:-no result.json} after $((i * 10)) s"
+if [[ $state != done ]]; then
+  # crash reports: the listing, then today's files that name the app or a jetsam event
+  CL=$(xcrun devicectl device info files --device $UDID --domain-type systemCrashLogs 2>&1)
+  echo "$CL" > $OUT/crashlogs_listing.txt
+  names=(${(f)"$(echo "$CL" | grep -oE "[A-Za-z0-9._+-]*(DecideGate|JetsamEvent)[A-Za-z0-9._+-]*$(date +%Y-%m-%d)[A-Za-z0-9._+-]*" | sort -u)"})
+  if (( ${#names} )); then
+    mkdir -p $OUT/crash
+    for n in $names; do
+      xcrun devicectl device copy from --device $UDID --domain-type systemCrashLogs --source "$n" --destination "$OUT/crash/$n" \
+        >> $OUT/crash/copy.log 2>&1 && say "crash log: $OUT/crash/$n" || say "crash log $n: copy failed (see crash/copy.log)"
+    done
+  else
+    say "no crash log of today names DecideGate or a jetsam event (listing: crashlogs_listing.txt)"
+  fi
+fi
 [ -f $OUT/result.log ] && { echo "--- last lines of result.log"; tail -8 $OUT/result.log | cut -c1-220; }
 [ -f $OUT/result.json ] && { echo "--- summary"; summary $OUT/result.json $RUN_ID | tee -a $OUT/run.out; }
 echo "files: $OUT"
