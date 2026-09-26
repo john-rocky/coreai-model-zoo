@@ -21,6 +21,8 @@
 //                                                      shape of GLiNER2-PII-CoreAI's ios/ bundle   (kind mixed)
 //   fixtures/{readme21,fast_decisions_s256,fast_decisions_long}.json   gliner2 2.0.0 fp32 oracle cases
 //   golden/pygpu_s256.json  golden/pygpu_s512.json    case id -> the Mac GPU logits of the same fp16 bundles
+//   extra/<label>/<name>.aimodel|.aimodelc/            any other bundle, for DECIDE_LOAD_ONLY (DECIDE_EXTRA in
+//                                                      ../_stage.sh): one bundle per label
 //   MD5SUMS
 //
 // Launch environment (devicectl device process launch --environment-variables), all optional:
@@ -33,6 +35,9 @@
 //                        at most this long (default 0 = no wait); the wait and the states go into result.json
 //   DECIDE_BENCH_FIRST   1 = the bench right after load 2, before the case loop (default: after the case loop)
 //   DECIDE_BUNDLE_KIND   aot | jit | mixed (default aot): which of the bundles above each stage loads
+//   DECIDE_LOAD_ONLY     <label>,...: instead of the GLiNER stages (DECIDE_STAGES is ignored), one load-only stage
+//                        per label, in the order given (key load_<label>): the bundle in extra/<label>/ loaded with
+//                        preferred gpu, one call on zero inputs, loaded again; the load records of runStage
 
 import DecideGateSupport
 import DecideGraph
@@ -50,6 +55,8 @@ struct GateConfig: Sendable {
     let bundleKindName: String
     /// nil when DECIDE_BUNDLE_KIND names no kind (the run stops with a fatal line)
     let bundleKind: BundleKind?
+    /// DECIDE_LOAD_ONLY labels, in order, each once (empty: the GLiNER stages run)
+    let loadOnly: [String]
 
     static func fromEnvironment() -> GateConfig {
         let env = ProcessInfo.processInfo.environment
@@ -62,6 +69,11 @@ struct GateConfig: Sendable {
         let stages = (env["DECIDE_STAGES"] ?? "s256,s512").split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
         let kind = env["DECIDE_BUNDLE_KIND"] ?? BundleKind.aot.rawValue
+        var loadOnly: [String] = []
+        for label in (env["DECIDE_LOAD_ONLY"] ?? "").split(separator: ",").map({ $0.trimmingCharacters(in: .whitespaces) })
+        where !label.isEmpty && !loadOnly.contains(label) {
+            loadOnly.append(label)
+        }
         return GateConfig(
             runID: env["DECIDE_RUN_ID"] ?? stamp,
             assets: assets,
@@ -72,7 +84,8 @@ struct GateConfig: Sendable {
             waitNominalSeconds: max(0, Double(env["DECIDE_WAIT_NOMINAL"] ?? "") ?? 0),
             benchFirst: env["DECIDE_BENCH_FIRST"] == "1",
             bundleKindName: kind,
-            bundleKind: BundleKind(rawValue: kind))
+            bundleKind: BundleKind(rawValue: kind),
+            loadOnly: loadOnly)
     }
 }
 
@@ -156,7 +169,8 @@ actor GateRunner {
                   "gate": "decisions 100 % equal to the gliner2 2.0.0 fp32 oracle on every task, every row finite",
                   "config": ["assets": config.assets.path, "stages": config.stages, "bench_calls": config.benchCalls,
                              "unit": config.unit.rawValue, "wait_nominal_s": config.waitNominalSeconds,
-                             "bench_first": config.benchFirst, "bundle_kind": config.bundleKindName]]
+                             "bench_first": config.benchFirst, "bundle_kind": config.bundleKindName,
+                             "load_only": config.loadOnly]]
         line("DecideGate run \(config.runID) (launch \(launchIndex) in this container)")
         line("device \(device["machine"] ?? "?"), \(device["os"] ?? "?") (build \(device["os_build"] ?? "?")), Core AI arch "
              + "\(DecideGraph.deviceArchitecture), thermal \(DeviceInfo.thermal()), low power \(device["low_power_mode"] ?? "?"), "
@@ -192,6 +206,19 @@ actor GateRunner {
         report["fixtures"] = fixtureFiles
 
         var allOK = true
+        if !config.loadOnly.isEmpty {
+            line("load-only mode (DECIDE_LOAD_ONLY): \(config.loadOnly.joined(separator: ", ")); the GLiNER stages do not run")
+            for label in config.loadOnly {
+                let key = "load_\(label)"
+                setStage(key)
+                let result = await runLoadOnly(label)
+                stageResults[key] = result
+                stageOrder.append(key)
+                allOK = allOK && (result["pass"] as? Bool ?? false)
+                writeReport()
+            }
+            return finish(ok: allOK, fatal: nil)
+        }
         for spec in stageSpecs(kind) {
             setStage(spec.key)
             let result = await runStage(spec, fixtures: fixtures)
@@ -379,6 +406,153 @@ actor GateRunner {
         j["thermal"] = thermal
         j["pass"] = pass
         line("\(spec.key): \(pass ? "PASS" : "FAIL") (decisions 100 % equal to the oracle, every row finite)")
+        return j
+    }
+
+    // MARK: - a load-only stage: any bundle, loaded twice, one call on zero inputs
+
+    /// DECIDE_LOAD_ONLY: the one .aimodel / .aimodelc directory in extra/<label>/, on the AIModel API alone
+    /// (LoadOnlyBundle: no DecideGraph, whose contract is GLiNER2.5-Decide's), preferred gpu. The load part of
+    /// runStage under the same record names: load 1 under the sampler, the first call (every input all zeros; skipped
+    /// when a shape is dynamic), load 2 once the first model is gone, the container's cache around each step. A partial
+    /// record's "step" names the step that was running when it was written (a load that kills the app leaves it).
+    func runLoadOnly(_ label: String) async -> [String: Any] {
+        let key = "load_\(label)"
+        var j: [String: Any] = ["label": label, "mode": "load_only", "unit": "gpu", "function": LoadOnlyBundle.functionName]
+        var thermal: [[String: Any]] = []
+        func mark(_ at: String) { thermal.append(["at": at, "state": DeviceInfo.thermal(), "t_s": elapsed()]) }
+        mark("start")
+        let batteryStart = await DeviceInfo.battery()
+        j["battery_start"] = ["level": batteryStart.level, "state": batteryStart.state]
+
+        // the container's caches at each step: "before_load_1", "after_load_1", "after_first_call", "after_load_2", "end"
+        var storage: [String: Any] = [:]
+        func snapshot(_ at: String) -> (bytes: Int, files: Int) {
+            let s = DeviceInfo.storageSnapshot()
+            storage[at] = s
+            j["storage"] = storage
+            let c = s["coreai_cache"] as? [String: Any] ?? [:]
+            return (c["bytes"] as? Int ?? 0, c["files"] as? Int ?? 0)
+        }
+        func mb(_ bytes: Int) -> String { String(format: "%.1f", Double(bytes) / 1e6) }
+        func num(_ v: Any?, _ format: String) -> String { String(format: format, v as? Double ?? -1) }
+
+        var ok = false
+        var step = "find the bundle"
+        do {
+            guard label.range(of: #"^[A-Za-z0-9_-]+$"#, options: .regularExpression) != nil else {
+                throw LoadOnlyError.bundle("label '\(label)': letters, digits, _ and - only")
+            }
+            let dir = config.assets.appendingPathComponent("extra/\(label)")
+            let names = (try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? []
+            let bundles = names.filter { $0.hasSuffix(".aimodel") || $0.hasSuffix(".aimodelc") }.sorted()
+            guard bundles.count == 1 else {
+                throw LoadOnlyError.bundle(bundles.isEmpty
+                    ? "no .aimodel / .aimodelc in extra/\(label)/ (\(names.count) entries: \(names.sorted().prefix(5).joined(separator: ", ")))"
+                    : "\(bundles.count) bundles in extra/\(label)/: \(bundles.joined(separator: ", ")) (want one)")
+            }
+            let url = dir.appendingPathComponent(bundles[0])
+            let (bytes, files) = DeviceInfo.tree(url)
+            let entries = ((try? FileManager.default.contentsOfDirectory(atPath: url.path)) ?? []).sorted()
+            j["bundle"] = bundles[0]
+            j["bundle_bytes"] = bytes
+            j["bundle_mb"] = Double(bytes) / 1e6
+            j["bundle_files"] = files
+            j["bundle_entries"] = entries
+            line("\(key): extra/\(label)/\(bundles[0]) (\(mb(bytes)) MB, \(files) files; \(entries.joined(separator: ", "))), "
+                 + "preferred gpu, load only")
+
+            let cache0 = snapshot("before_load_1")
+            let footprint0 = DeviceInfo.footprintMB(), available0 = DeviceInfo.availableMB()
+            j["cache_bytes_before_load"] = cache0.bytes
+            j["cache_files_before_load"] = cache0.files
+            j["footprint_mb_before_load"] = footprint0
+            j["available_mb_before_load"] = available0
+            line("\(key): load 1 starting; coreai-cache \(mb(cache0.bytes)) MB in \(cache0.files) files; footprint "
+                 + "\(String(format: "%.0f", footprint0)) MB, available \(String(format: "%.0f", available0)) MB")
+            step = "load 1"
+            j["step"] = step
+            writePartial(key, j, thermal)                   // a load that is killed still leaves this much
+            // load 1 = the first load of this bundle in this process (caches from earlier launches may remain)
+            let (loaded1, memory1, wall1) = await sampled("\(key) load 1") { try await LoadOnlyBundle(contentsOf: url) }
+            j["load_first_memory"] = memory1
+            j["load_first_peak_footprint_mb"] = memory1["peak_footprint_mb"]
+            j["load_first_min_available_mb"] = memory1["min_available_mb"]
+            j["load_first_wall_s"] = wall1
+            j["available_mb_after_load"] = DeviceInfo.availableMB()
+            mark("after load 1")
+            let cache1 = snapshot("after_load_1")
+            j["cache_bytes_after_load"] = cache1.bytes
+            j["cache_files_after_load"] = cache1.files
+            line("\(key): load 1 \(loaded1.isSuccess ? "done" : "FAILED") after \(String(format: "%.2f", wall1)) s; peak "
+                 + "footprint \(num(memory1["peak_footprint_mb"], "%.0f")) MB, least available "
+                 + "\(num(memory1["min_available_mb"], "%.0f")) MB; coreai-cache \(mb(cache1.bytes)) MB in \(cache1.files) files")
+            var first: LoadOnlyBundle? = try loaded1.get()
+            j["load_first_s"] = first!.loadSeconds
+            j["load_first_model_s"] = first!.modelSeconds
+            j["load_first_function_s"] = first!.functionSeconds
+            j["contract"] = first!.contractDescription
+            j["contract_detail"] = first!.contractJSON
+            line("\(key): \(first!.contractDescription) (functions: \(first!.functionNames.joined(separator: ", ")))")
+
+            step = "first call"
+            j["step"] = step
+            writePartial(key, j, thermal)
+            if let reason = first!.callSkipReason {
+                j["first_call_skipped"] = reason
+                line("\(key): first call skipped: \(reason)")
+            } else {
+                let (called, memoryCall, callWall) = await sampled("\(key) first call") { [first] in try await first!.runZeros() }
+                j["first_call_memory"] = memoryCall
+                j["first_call_peak_footprint_mb"] = memoryCall["peak_footprint_mb"]
+                let call = try called.get()
+                j["first_call_ms"] = callWall * 1e3
+                j["first_call_run_ms"] = call.runSeconds * 1e3
+                j["first_call_outputs"] = call.outputs.map(\.json)
+                line("\(key): first call \(String(format: "%.1f", callWall * 1e3)) ms (run \(String(format: "%.1f", call.runSeconds * 1e3)) ms) "
+                     + "on zero inputs; peak footprint \(num(memoryCall["peak_footprint_mb"], "%.0f")) MB; outputs "
+                     + call.outputs.map { o in "\(o.name) \(o.scalarType) \(o.shape) non-finite \(o.nonFinite.map { "\($0)" } ?? "-")" }
+                        .joined(separator: ", "))
+            }
+            mark("after first call")
+            let cacheCall = snapshot("after_first_call")
+            j["cache_bytes_after_first_call"] = cacheCall.bytes
+
+            step = "load 2"
+            j["step"] = step
+            writePartial(key, j, thermal)
+            first = nil                                            // load 2 is a new model, the first one gone
+            let (loaded2, memory2, wall2) = await sampled("\(key) load 2") { try await LoadOnlyBundle(contentsOf: url) }
+            j["load_second_memory"] = memory2
+            j["load_second_peak_footprint_mb"] = memory2["peak_footprint_mb"]
+            j["load_second_wall_s"] = wall2
+            let second = try loaded2.get()
+            j["load_second_s"] = second.loadSeconds
+            mark("after load 2")
+            let cache2 = snapshot("after_load_2")
+            j["cache_bytes_after_load_2"] = cache2.bytes
+            let footprint = DeviceInfo.footprintMB()
+            j["footprint_mb_after_load"] = footprint
+            line("\(key): load \(num(j["load_first_s"], "%.2f")) s (first in this process), load "
+                 + "\(String(format: "%.2f", second.loadSeconds)) s (second); footprint \(String(format: "%.0f", footprint)) MB; "
+                 + "coreai-cache \(mb(cache2.bytes)) MB")
+            step = "done"
+            j["step"] = step
+            ok = true
+        } catch {
+            line("\(key): ERROR at \(step): \(error)")
+            j["error"] = "\(error)"
+            j["error_step"] = step
+            j["error_detail"] = Self.describe(error)
+        }
+        mark("end")
+        j["cache_bytes_end"] = snapshot("end").bytes
+        let batteryEnd = await DeviceInfo.battery()
+        j["battery_end"] = ["level": batteryEnd.level, "state": batteryEnd.state]
+        j["thermal"] = thermal
+        j["pass"] = ok
+        line("\(key): " + (ok ? "OK (loaded twice\(j["first_call_skipped"] == nil ? ", called once" : ", no call") with no error)"
+                              : "ERROR at \(step)"))
         return j
     }
 

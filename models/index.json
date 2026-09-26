@@ -1111,6 +1111,7 @@
      "id": "mlboydaisuke/GLiNER2-PII-CoreAI",
      "downloads_30d": 64,
      "bundles": [
+      "ios-h18p/gliner2-pii_float16_s256_t96_m16.h18p.aimodelc",
       "ios/gliner2-pii_float16_s256_t96_m16.aimodel",
       "macos/gliner2-pii_float16_s256_t96_m16.aimodel"
      ],
@@ -3036,7 +3037,7 @@
    "repos": [
     {
      "id": "rahulrachuri/pocket-tts-coreai",
-     "downloads_30d": 13,
+     "downloads_30d": 34,
      "bundles": [
       "flow_decoder_float16_lsd1.aimodel",
       "flow_decoder_float32_lsd1.aimodel",

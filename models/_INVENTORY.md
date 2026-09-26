@@ -17,7 +17,7 @@ configuration; a single bundle answers that question by itself.
 | --- | --- |
 | published repos | 282 |
 | Core AI repos | 92 |
-| Core AI bundles inside them | 321 |
+| Core AI bundles inside them | 322 |
 | Core AI repos with a `models/<family>/` card | 85 |
 | repos covered by a recipe | 85 |
 | Core AI repos with 0 downloads in the last 30 days | 4 |
@@ -163,7 +163,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/LFM2.5-VL-3B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-VL-3B-CoreAI) | 66 | 0 | coreai | port | 6 | 6 pass | 6 deferred | [lfm2.5-vl](lfm2.5-vl/README.md) | `lfm2.5-vl-3b`, `lfm2.5-vl-3b-int4`, `lfm2.5-vl-3b-textcore`, `lfm2.5-vl-450m`, `lfm2.5-vl-450m-textcore` | `lfm2.5-vl-3b` |
 | [mlboydaisuke/North-Micro-Vision-CoreAI](https://huggingface.co/mlboydaisuke/North-Micro-Vision-CoreAI) | 66 | 0 | coreai | port | 5 | **2 DIFF** 3 pass | 5 deferred | [north-micro-vision](north-micro-vision/README.md) | `north-micro-vision`, `north-micro-vision-textcore` | `north-micro-vision` |
 | [mlboydaisuke/embeddinggemma-300m-CoreAI](https://huggingface.co/mlboydaisuke/embeddinggemma-300m-CoreAI) | 64 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3-embedding](qwen3-embedding/README.md) | `embeddinggemma-300m`, `qwen3-embedding-0.6b` | `embeddinggemma-300m` |
-| [mlboydaisuke/GLiNER2-PII-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2-PII-CoreAI) | 64 | 0 | coreai | port | 2 | 2 pass | 2 deferred | [gliner2-pii](gliner2-pii/README.md) | `gliner2-pii` | — |
+| [mlboydaisuke/GLiNER2-PII-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2-PII-CoreAI) | 64 | 0 | coreai | port | 3 | 2 pass | 2 deferred | [gliner2-pii](gliner2-pii/README.md) | `gliner2-pii` | — |
 | [mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch](https://huggingface.co/mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch) | 64 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI) | 64 | 1 | coreai | port | 10 | 10 pass | 10 deferred | [vibevoice](vibevoice/README.md) | `vibevoice-realtime-0.5b` | `vibevoice-realtime-0.5b` |
 | [mlboydaisuke/TripoSplat-CoreAI](https://huggingface.co/mlboydaisuke/TripoSplat-CoreAI) | 63 | 7 | coreai | port | 6 | 6 pass | 6 deferred | [triposplat](triposplat/README.md) | `triposplat` | — |
@@ -211,6 +211,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/MatAnyone-CoreML](https://huggingface.co/mlboydaisuke/MatAnyone-CoreML) | 36 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Mimi-LiteRT](https://huggingface.co/mlboydaisuke/Mimi-LiteRT) | 36 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/TableTransformer-ExecuTorch](https://huggingface.co/mlboydaisuke/TableTransformer-ExecuTorch) | 36 | 0 | other | port | 0 | — | — | — | — | — |
+| [rahulrachuri/pocket-tts-coreai](https://huggingface.co/rahulrachuri/pocket-tts-coreai) | 34 | 0 | coreai | port | 5 | 5 pass | 5 deferred | [pocket-tts](pocket-tts/README.md) | `pocket-tts` | — |
 | [mlboydaisuke/Qwen3.5-2B-Decision-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.5-2B-Decision-CoreAI) | 33 | 0 | coreai | port | 2 | — | — | [qwen3.5-2b-decision](qwen3.5-2b-decision/README.md) | `qwen3.5-2b-decision`, `qwen3.5-2b-decision-fp16` | — |
 | [mlboydaisuke/CLAP-HTSAT-fused-ExecuTorch](https://huggingface.co/mlboydaisuke/CLAP-HTSAT-fused-ExecuTorch) | 32 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/ViTPose-plus-base-ExecuTorch](https://huggingface.co/mlboydaisuke/ViTPose-plus-base-ExecuTorch) | 32 | 0 | other | port | 0 | — | — | — | — | — |
@@ -264,7 +265,6 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/YOLO-World-V2-S-CoreML](https://huggingface.co/mlboydaisuke/YOLO-World-V2-S-CoreML) | 13 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/yolox-nano-litert](https://huggingface.co/mlboydaisuke/yolox-nano-litert) | 13 | 0 | litert | port | 0 | — | — | — | — | — |
 | [rahulrachuri/parakeet-tdt-0.6b-v2-coreai](https://huggingface.co/rahulrachuri/parakeet-tdt-0.6b-v2-coreai) | 13 | 0 | coreai | port | 3 | 3 pass | 3 deferred | [parakeet-v2](parakeet-v2/README.md) | `parakeet-tdt-0.6b-v2` | — |
-| [rahulrachuri/pocket-tts-coreai](https://huggingface.co/rahulrachuri/pocket-tts-coreai) | 13 | 0 | coreai | port | 5 | 5 pass | 5 deferred | [pocket-tts](pocket-tts/README.md) | `pocket-tts` | — |
 | [mlboydaisuke/Hyper-SD-1step-CoreML](https://huggingface.co/mlboydaisuke/Hyper-SD-1step-CoreML) | 12 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/PE-Core-base-patch16-224-LiteRT](https://huggingface.co/mlboydaisuke/PE-Core-base-patch16-224-LiteRT) | 12 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/qwen2.5-0.5b-coreml](https://huggingface.co/mlboydaisuke/qwen2.5-0.5b-coreml) | 12 | 0 | coreml | port | 0 | — | — | — | — | — |

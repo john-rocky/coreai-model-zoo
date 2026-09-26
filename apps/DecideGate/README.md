@@ -60,5 +60,22 @@ of the app's reach).
     calls). For a nominal-state bench: `'"DECIDE_WAIT_NOMINAL":"600","DECIDE_BENCH_FIRST":"1"'` waits (5 s steps, up
     to 600 s) for nominal before each stage's bench and runs the bench before the case loop.
 
+## Load-only mode: any other bundle
+
+The same app measures whether the phone loads a bundle of another model at all, and at what cost. Stage the bundles
+with no GLiNER2.5-Decide bundle: `DECIDE_KINDS=none DECIDE_EXTRA="<label>=<path>,..." ./_stage.sh` clones each path (a
+`.aimodel` or `.aimodelc` directory, as shipped) to `DecideAssets/extra/<label>/`; `DECIDE_EXTRA_JIT="<label>=<path>"`
+stages only the JIT files (`main.mlirb`, `main.hash`, `metadata.json`) of a `.aimodel` that also carries AOT files. Then
+run with `'"DECIDE_LOAD_ONLY":"<label>,..."'`: one stage `load_<label>` per label in the order given, and no GLiNER
+stage.
+
+Each stage loads the bundle with `AIModel(contentsOf:options:)`, preferred gpu, and the function `main`, under the
+memory sampler (load 1: wall seconds, peak footprint, least available memory, the container's Core AI cache before and
+after); calls `main` once with every input all zeros (skipped, and said so, when an input has a dynamic shape, is not
+an array, or the function has states); drops the model and loads it again (load 2). A load that fails records the
+error (`error_detail`: type, NSError domain and code, `String(reflecting:)`); a load that kills the app leaves the
+stage's partial record in `result.json`, its `step` naming the step that was running, and `./_run.sh` copies the
+crash logs. `./_run.sh --summary` prints one line per load-only stage.
+
 `_work` is `conversion/gliner25_decide/_work` (git-ignored). Never load an iPhone bundle (`.h18p`, `.h19p`) on a Mac: the host
 refuses one by path.
