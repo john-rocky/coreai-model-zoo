@@ -325,6 +325,12 @@ def write_side_files(out_dir, snapshot, S, MMAX, dtype, ref_case, ref_inputs, re
     added = {v["content"]: int(k) for k, v in tcfg["added_tokens_decoder"].items()}
     for m, i in MARKER_IDS.items():
         assert added.get(m) == i, (m, added.get(m), i)
+    # Route DebertaV2Tokenizer -> XLMRobertaTokenizer for swift-transformers (as export_gliner2_pii.py does): it
+    # has no DeBERTa-v2 class (AutoTokenizer.from(modelFolder:) throws unsupportedTokenizer; non-strict falls back
+    # to BPE), and DeBERTa-v3's SentencePiece Unigram model is the one it runs under that name. tokenizer.json is
+    # unchanged; with it the kit's TextClassifier collates all 454 oracle cases bit-identical (_gliner25_decide/kit_r3).
+    tcfg["tokenizer_class"] = "XLMRobertaTokenizer"
+    (tok_dir / "tokenizer_config.json").write_text(json.dumps(tcfg, indent=2, ensure_ascii=False))
     ii, am, li = ref_inputs
     ref_name = f"reference_s{S}.json"
     (out_dir / ref_name).write_text(json.dumps({
