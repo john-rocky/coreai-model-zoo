@@ -254,6 +254,11 @@ For the long-form version of the same material, read
   attention with an absorbed flash-decode kernel.
 - [`diffusion-llms-dllm.md`](diffusion-llms-dllm.md) — masked-**diffusion** LLMs (LLaDA): parallel
   canvas denoising, bidirectional attention, no KV cache — and how that maps to Core AI graphs.
+- [`gliner25-decide.md`](gliner25-decide.md) — GLiNER2.5-Decide, zero-shot classification: only the classification
+  path as one DeBERTa-v3 graph (labels as `[L]` positions, S = 256 / 512); **coreai-torch 0.4.1 divides `int / int` as
+  integers**, which silently breaks DeBERTa's relative-position buckets beyond 128 tokens (bake the table); the iPhone
+  18 Pro is h19p, not h18p; the oracle's self-consistency and an outside check; three things a bit-exact Swift host
+  needed; measure the phone after a rest.
 - [`gliner2-pii.md`](gliner2-pii.md) — DeBERTa-v3 (disentangled attention) NER / schema-driven
   zero-shot extraction; the on-device PII-redaction model.
 - [`glm-ocr-port.md`](glm-ocr-port.md) / [`mineru-port.md`](mineru-port.md) /

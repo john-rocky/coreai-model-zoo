@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25",
+ "generated": "2026-09-26",
  "how_to_use": {
   "list": "python3 conversion/zoo_convert.py list",
   "show": "python3 conversion/zoo_convert.py show <recipe>",
@@ -1133,6 +1133,38 @@
        "date": "2026-09-15"
       }
      ]
+    }
+   ]
+  },
+  {
+   "family": "gliner25-decide",
+   "card": "models/gliner25-decide/README.md",
+   "recipes": [
+    {
+     "name": "gliner25-decide",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/GLiNER2.5-Decide-CoreAI",
+     "bundle": null,
+     "steps": 4,
+     "run": "python3 conversion/zoo_convert.py run gliner25-decide",
+     "gate_transcript": "models/gliner25-decide/gate-gliner25-decide.json",
+     "open_questions": []
+    }
+   ],
+   "repos": [
+    {
+     "id": "mlboydaisuke/GLiNER2.5-Decide-CoreAI",
+     "downloads_30d": 0,
+     "bundles": [
+      "ios/gliner25-decide_float16_s256_m32.h19p.aimodelc",
+      "ios/gliner25-decide_float16_s512_m32.h19p.aimodelc",
+      "macos/gliner25-decide_float16_s256_m32.aimodel",
+      "macos/gliner25-decide_float16_s512_m32.aimodel"
+     ],
+     "tier1": {},
+     "smoke": []
     }
    ]
   },
@@ -3004,7 +3036,7 @@
    "repos": [
     {
      "id": "rahulrachuri/pocket-tts-coreai",
-     "downloads_30d": 32,
+     "downloads_30d": 13,
      "bundles": [
       "flow_decoder_float16_lsd1.aimodel",
       "flow_decoder_float32_lsd1.aimodel",

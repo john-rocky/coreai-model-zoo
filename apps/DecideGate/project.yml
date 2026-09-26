@@ -1,0 +1,46 @@
+# DecideGate — iPhone gate of the GLiNER2.5-Decide Core AI port (conversion/gliner25_decide).
+# The app is a thin shell: the graph host (DecideGraph) and the gate metrics (DecideGateSupport) come from the
+# conversion's Swift package by path, so the phone runs the code the Mac self-test runs.
+# Build: ./_build.sh (xcodegen generate + xcodebuild Release, generic iOS). Assets are sideloaded, not bundled.
+name: DecideGate
+options:
+  bundleIdPrefix: com.daisukemajima
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: "27.0"
+packages:
+  GLiNERDecide:
+    path: ../../conversion/gliner25_decide/swift
+schemes:
+  DecideGate:
+    build:
+      targets:
+        DecideGate: all
+    run:
+      config: Release
+targets:
+  DecideGate:
+    type: application
+    platform: iOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: GLiNERDecide
+        product: DecideGraph
+      - package: GLiNERDecide
+        product: DecideGateSupport
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.decidegate
+        DEVELOPMENT_TEAM: MFN25KNUGJ
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: DecideGate
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"

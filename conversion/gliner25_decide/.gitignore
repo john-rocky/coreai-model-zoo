@@ -1,0 +1,7 @@
+_work/
+__pycache__/
+*.aimodel/
+*.aimodelc/
+*.log
+swift/.build/
+swift/.swiftpm/

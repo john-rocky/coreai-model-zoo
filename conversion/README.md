@@ -499,6 +499,19 @@ Apple's repo; each recipe names the script it runs.
   crashes on the full DiT in an ANE region. `make_host_consts.py` writes the RoPE tables and the
   scheduler constants a Swift host needs. See [`qwenimage21/README.md`](qwenimage21/README.md) and
   [`../models/rgba-image-2.1/README.md`](../models/rgba-image-2.1/README.md).
+- **GLiNER2.5-Decide (zero-shot text classification, Fastino; [`export_gliner25_decide.py`](export_gliner25_decide.py) and [`gliner25_decide/`](gliner25_decide/)):
+  `export_gliner25_decide.py --fixtures <fixture json …> -S 256|512 --mmax 32 --dtype float16 --poison`** — the
+  classification path only, re-authored from the safetensors: transformers `DebertaV2Model` (390 encoder tensors,
+  strict load), a gather of the `[L]` marker rows (`label_idx [1, 32]`, positions from the host) and the 1024→2048→1
+  head, `logits [1, 32]`; the span and count heads are left out. The fixtures come from
+  [`gliner25_decide_oracle.py`](gliner25_decide_oracle.py), which runs `gliner2` 2.0.0 in its own environment
+  (`uv run --python 3.12`) and asserts that its decisions equal `classify_text`'s. The export gates against them in
+  fp32 torch, with a poisoned `label_idx` that must fail, and in fp16 on the Mac GPU; `gliner25_decide/swift` repeats
+  the gate in Swift, bit-equal to the Python engine, and `apps/DecideGate` on the iPhone. The relative-position bucket
+  table is computed at export, because coreai-torch 0.4.1 divides `int / int` as integers and so breaks DeBERTa's
+  buckets beyond 128 tokens. `gliner25_decide/aot_compile.py` compiles for the iPhone 18 Pro (h19p);
+  `gliner25_decide/stage_ship.py` lays out the Hub folder. See [`gliner25_decide/README.md`](gliner25_decide/README.md)
+  and [`../models/gliner25-decide/README.md`](../models/gliner25-decide/README.md).
 
 ## Reproduce (env)
 

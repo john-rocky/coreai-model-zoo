@@ -1,0 +1,113 @@
+{
+ "schema": "gliner25-decide-kit-gate/1",
+ "what": "CoreAIKit TextClassifier (Swift: tokenizer, schema layout, [L] positions, shape choice, decision rule) against the gliner2 2.0.0 oracle fixtures, on the Mac GPU with the macos/ bundles",
+ "kit": {
+  "worktree_branch": "gliner-decide",
+  "base": "origin/main f38ccb8",
+  "swift_transformers": "1.3.3",
+  "files": [
+   "Sources/CoreAIKitEmbeddings/TextClassifier.swift",
+   "Examples/TextClassify/",
+   "Tests/CoreAIKitTests/TextClassifierTests.swift",
+   "Tests/CoreAIKitTests/Fixtures/gliner25_decide_readme21_schema.json"
+  ],
+  "tokenizer": "tokenizer_config.json declares XLMRobertaTokenizer (swift-transformers has no DeBERTa-v2 class); tokenizer.json is the source's"
+ },
+ "machine": "Apple M4 Max, macOS 27.0 (26A428), Xcode 27.0.0 RC, JIT GPU (shared with other sessions)",
+ "command": "textclassify-cli --bundle <work>/_gliner25_decide/exports --gate fixtures/readme21.json fixtures/fast_decisions_s256.json fixtures/fast_decisions_long.json --pygpu results/gate_s256_gpu.json results/gate_s512_gpu.json",
+ "collate": {
+  "cases_equal": "454/454",
+  "compared": "input_ids, subword pieces, schema_tokens_list, [P]/[L] positions, word count, S"
+ },
+ "decisions": {
+  "tasks_equal": "787/787",
+  "max_abs_dlogit_vs_oracle": 0.01405,
+  "worst_case": "fd/support_intent/025",
+  "by_shape": {
+   "256": {
+    "cases": 361,
+    "tasks_equal": "606/606",
+    "max_abs_dlogit_vs_oracle": 0.01405
+   },
+   "512": {
+    "cases": 93,
+    "tasks_equal": "181/181",
+    "max_abs_dlogit_vs_oracle": 0.0123
+   }
+  }
+ },
+ "vs_python_mac_gpu": {
+  "cases": 454,
+  "bit_equal": "5749/5749",
+  "max_abs_diff": 0.0
+ },
+ "card_examples": {
+  "decide_as_oracle": "21/21",
+  "equal_to_card_potential_output": "12/21"
+ },
+ "hermetic_tests": {
+  "command": "swift test --filter TextClassifier",
+  "passed": "4/4"
+ },
+ "negative_controls": [
+  {
+   "what": "word regex with ICU \\w (InformationExtractor's) instead of Python's \\w = [\\p{L}\\p{N}_]",
+   "collate_cases_equal": "451/454",
+   "failing": [
+    "fd/paper_field/009",
+    "fd/paper_field/012",
+    "fd/paper_field/040"
+   ]
+  },
+  {
+   "what": "tokenizer_config.json left as DebertaV2Tokenizer",
+   "result": "unsupportedTokenizer(\"DebertaV2Tokenizer\")"
+  }
+ ],
+ "beyond_fixture_probe": {
+  "what": "37 cases built with gliner2's own collate (scripts, marks, Σ / İ / ẞ, ZWJ emoji, ten whitespace kinds, URL / email case, number forms, odd labels and prompts, two truncations)",
+  "input_ids_equal": "37/37",
+  "piece_strings_equal": "35/37",
+  "difference": "a run of unknown characters ('²³') is one piece in gliner2 and '²' in swift-transformers; both are one [UNK] id"
+ },
+ "rerun_by_supervisor": "the same gate re-run from a clean build gave the same summary line",
+ "timing": "not measured (GPU shared)",
+ "not_measured": [
+  "TextClassifier on the iPhone",
+  "ModelID / Hub download (no published revision yet)"
+ ],
+ "records": [
+  {
+   "path": "<work>/_gliner25_decide/kit_r3/logs/collate_poison_debertav2_cfg.err",
+   "sha256": "6967826937ffd2ac11383a00a463149c154b1c8d45a4656bb9b677ff40ba0234"
+  },
+  {
+   "path": "<work>/_gliner25_decide/kit_r3/logs/collate_poison_icu_w.err",
+   "sha256": "f312e51b82758f1ce9eaeb8c19781523379287366ddbbfa09639ccaf0412f8cd"
+  },
+  {
+   "path": "<work>/_gliner25_decide/kit_r3/logs/final_gate.err",
+   "sha256": "d060cc7e3764951cd16647faffc3d79bc767e1ec3ac626d64cdbc89d40813533"
+  },
+  {
+   "path": "<work>/_gliner25_decide/kit_r3/logs/final_gate.out",
+   "sha256": "08db3ecb190fca7f8540b951969b14002977a6ede2a04877241b1a409be68ba2"
+  },
+  {
+   "path": "<work>/_gliner25_decide/kit_r3/logs/final_readme.err",
+   "sha256": "6ad146f1a1477eb454e4fcbc2e4b6ad9f01743075790f197be9b30761d70b6b3"
+  },
+  {
+   "path": "<work>/_gliner25_decide/kit_r3/logs/final_swift_test.log",
+   "sha256": "a4cd4973e5adf41798472c10a190d1c826f8303d5aaeac9484a187b60188fe6f"
+  },
+  {
+   "path": "<work>/_gliner25_decide/kit_r3/logs/probe_collate.err",
+   "sha256": "4da39c41128cf6cbb447ed0064ff83791442097b4ab2f79fb07532b4fd462557"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results_sup/kit_gate.out",
+   "sha256": "16d7fc8af3093184f267db0a63e438ee6f6caed69cb215fe303d309dd29163d8"
+  }
+ ]
+}

@@ -1,0 +1,817 @@
+{
+ "schema": "gliner25-decide-device-gate/1",
+ "what": "The h19p AOT bundles on an iPhone 18 Pro GPU against the gliner2 2.0.0 fp32 oracle: every fixture case once (token ids from the fixture), then warm calls",
+ "model": "fastino/GLiNER2.5-Decide",
+ "model_rev": "7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6",
+ "hf_repo": "mlboydaisuke/GLiNER2.5-Decide-CoreAI",
+ "gate": "decisions 100 % equal to the gliner2 2.0.0 fp32 oracle on every task, every row finite",
+ "device": {
+  "name": "iPhone 18 Pro",
+  "machine": "iPhone19,2",
+  "hw_model": "V63AP",
+  "os": "iOS 27.0.0",
+  "os_build": "24A437",
+  "coreai_architecture": "h19p",
+  "processor_count": 6,
+  "low_power_mode": false,
+  "physical_memory_gb": 11.27,
+  "connection": "USB"
+ },
+ "harness": "apps/DecideGate: package conversion/gliner25_decide/swift (DecideGraph over the system CoreAI framework; DecideGateSupport = the export's host side, graph inputs and decision rule). Assets pushed with devicectl and pulled back for an md5 check against MD5SUMS before every run",
+ "bundles": {
+  "256": {
+   "name": "gliner25-decide_float16_s256_m32.h19p.aimodelc",
+   "compiled_with": "xcrun coreai-build compile <macos bundle> --platform iOS --architecture h19p --preferred-compute gpu --min-deployment-version 27.0 (coreai-build 3600.83.1)"
+  },
+  "512": {
+   "name": "gliner25-decide_float16_s512_m32.h19p.aimodelc",
+   "compiled_with": "xcrun coreai-build compile <macos bundle> --platform iOS --architecture h19p --preferred-compute gpu --min-deployment-version 27.0 (coreai-build 3600.83.1)"
+  }
+ },
+ "fixture_sets": {
+  "gpu_s256": [
+   "readme21",
+   "fast_decisions_s256"
+  ],
+  "gpu_s512": [
+   "readme21",
+   "fast_decisions_s256",
+   "fast_decisions_long"
+  ]
+ },
+ "runs": [
+  {
+   "run_id": "20260926-124014",
+   "role": "the first run after installing the assets: decisions, first load, first call; the bench ran after the case loop",
+   "launch_index": 2,
+   "started_utc": "2026-09-26T03:40:14Z",
+   "finished_utc": "2026-09-26T03:41:46Z",
+   "elapsed_s": 91.5,
+   "config": {
+    "bench_calls": 100,
+    "stages": [
+     "s256",
+     "s512"
+    ],
+    "unit": "gpu"
+   },
+   "thermal_start": "nominal",
+   "thermal_end": "fair",
+   "pass": true,
+   "stage_order": [
+    "gpu_s256",
+    "gpu_s512"
+   ],
+   "stages": {
+    "gpu_s256": {
+     "bundle": "gliner25-decide_float16_s256_m32.h19p.aimodelc",
+     "bundle_bytes": 974005777,
+     "bundle_files": 7,
+     "contract": "input_ids int32 [1, 256], attention_mask int32 [1, 256], label_idx int32 [1, 32] -> logits float32 [1, 32]",
+     "pass": true,
+     "summary": {
+      "all_zero_cases": 0,
+      "cases": 361,
+      "cases_with_changed_decision": 0,
+      "decisions_equal_pct": 100,
+      "decisions_equal_tasks": 606,
+      "max_abs_dlogit": 0.018723011016845703,
+      "max_abs_dprob": 0.0022479328030988732,
+      "min_cos": 0.9999965303679494,
+      "nonfinite_cases": 0,
+      "tasks": 606
+     },
+     "worst_task": {
+      "case": "fd/banking_intent/012",
+      "seq_len": 196,
+      "task": "intent",
+      "max_abs_dlogit": 0.018723011016845703
+     },
+     "recomputed_here": {
+      "decisions_equal": "606/606",
+      "fields_differing_from_device": 0
+     },
+     "vs_mac_gpu_same_bundle_source": {
+      "bit_equal": "2068/4376",
+      "max_abs_diff": 0.015625,
+      "decisions_equal": "606/606"
+     },
+     "load_first_s": 1.29,
+     "load_second_s": 0.124,
+     "first_call_ms": 1230.5,
+     "first_call_case": "readme/01-customer-support-intent",
+     "footprint_mb_after_load": 223.0,
+     "footprint_mb_end": 224.4,
+     "bench": {
+      "position": "after the cases",
+      "warmup": 5,
+      "calls": 100,
+      "inputs": "fixture cases, (7 k) mod n",
+      "ms_median": 38.1,
+      "ms_p90": 38.36,
+      "ms_min": 37.93,
+      "ms_max": 38.47,
+      "thermal_start": "nominal",
+      "thermal_end": "nominal"
+     },
+     "case_loop_call_ms": {
+      "warm_call_ms_median": 37.93,
+      "warm_call_ms_p90": 38.21,
+      "warm_call_ms_max": 38.42
+     },
+     "thermal": [
+      {
+       "at": "start",
+       "state": "nominal",
+       "t_s": 0.1
+      },
+      {
+       "at": "after load 1",
+       "state": "nominal",
+       "t_s": 1.4
+      },
+      {
+       "at": "after first call",
+       "state": "nominal",
+       "t_s": 2.6
+      },
+      {
+       "at": "after load 2",
+       "state": "nominal",
+       "t_s": 2.7
+      },
+      {
+       "at": "after cases",
+       "state": "nominal",
+       "t_s": 16.4
+      },
+      {
+       "at": "after bench",
+       "state": "nominal",
+       "t_s": 20.5
+      },
+      {
+       "at": "end",
+       "state": "nominal",
+       "t_s": 20.5
+      }
+     ]
+    },
+    "gpu_s512": {
+     "bundle": "gliner25-decide_float16_s512_m32.h19p.aimodelc",
+     "bundle_bytes": 975579352,
+     "bundle_files": 7,
+     "contract": "input_ids int32 [1, 512], attention_mask int32 [1, 512], label_idx int32 [1, 32] -> logits float32 [1, 32]",
+     "pass": true,
+     "summary": {
+      "all_zero_cases": 0,
+      "cases": 454,
+      "cases_with_changed_decision": 0,
+      "decisions_equal_pct": 100,
+      "decisions_equal_tasks": 787,
+      "max_abs_dlogit": 0.018723011016845703,
+      "max_abs_dprob": 0.0022479328030988732,
+      "min_cos": 0.9999965303679494,
+      "nonfinite_cases": 0,
+      "tasks": 787
+     },
+     "worst_task": {
+      "case": "fd/banking_intent/012",
+      "seq_len": 196,
+      "task": "intent",
+      "max_abs_dlogit": 0.018723011016845703
+     },
+     "recomputed_here": {
+      "decisions_equal": "787/787",
+      "fields_differing_from_device": 0
+     },
+     "vs_mac_gpu_same_bundle_source": {
+      "bit_equal": "2824/5749",
+      "max_abs_diff": 0.015625,
+      "decisions_equal": "787/787"
+     },
+     "load_first_s": 1.825,
+     "load_second_s": 0.127,
+     "first_call_ms": 409.2,
+     "first_call_case": "readme/01-customer-support-intent",
+     "footprint_mb_after_load": 374.3,
+     "footprint_mb_end": 385.5,
+     "bench": {
+      "position": "after the cases",
+      "warmup": 5,
+      "calls": 100,
+      "inputs": "fixture cases, (7 k) mod n",
+      "ms_median": 147.61,
+      "ms_p90": 150.69,
+      "ms_min": 143.0,
+      "ms_max": 151.81,
+      "thermal_start": "fair",
+      "thermal_end": "fair"
+     },
+     "case_loop_call_ms": {
+      "warm_call_ms_median": 110.49,
+      "warm_call_ms_p90": 151.22,
+      "warm_call_ms_max": 153.13
+     },
+     "thermal": [
+      {
+       "at": "start",
+       "state": "nominal",
+       "t_s": 20.5
+      },
+      {
+       "at": "after load 1",
+       "state": "nominal",
+       "t_s": 22.3
+      },
+      {
+       "at": "after first call",
+       "state": "nominal",
+       "t_s": 22.7
+      },
+      {
+       "at": "after load 2",
+       "state": "nominal",
+       "t_s": 22.8
+      },
+      {
+       "at": "after cases",
+       "state": "fair",
+       "t_s": 75.9
+      },
+      {
+       "at": "after bench",
+       "state": "fair",
+       "t_s": 91.4
+      },
+      {
+       "at": "end",
+       "state": "fair",
+       "t_s": 91.4
+      }
+     ]
+    }
+   }
+  },
+  {
+   "run_id": "20260926-125706",
+   "role": "the speed run: the phone rested 7.5 min (last run ended 12:48:34, hold taken 12:56:05 JST); DECIDE_BENCH_FIRST=1 (bench right after load 2) and DECIDE_WAIT_NOMINAL=600; the fourth launch of this build, so load and first call are warm-cache values",
+   "launch_index": 4,
+   "started_utc": "2026-09-26T03:57:07Z",
+   "finished_utc": "2026-09-26T03:58:37Z",
+   "elapsed_s": 90.6,
+   "config": {
+    "bench_calls": 100,
+    "bench_first": true,
+    "stages": [
+     "s256",
+     "s512"
+    ],
+    "unit": "gpu",
+    "wait_nominal_s": 600
+   },
+   "thermal_start": "nominal",
+   "thermal_end": "fair",
+   "pass": true,
+   "stage_order": [
+    "gpu_s256",
+    "gpu_s512"
+   ],
+   "stages": {
+    "gpu_s256": {
+     "bundle": "gliner25-decide_float16_s256_m32.h19p.aimodelc",
+     "bundle_bytes": 974005777,
+     "bundle_files": 7,
+     "contract": "input_ids int32 [1, 256], attention_mask int32 [1, 256], label_idx int32 [1, 32] -> logits float32 [1, 32]",
+     "pass": true,
+     "summary": {
+      "all_zero_cases": 0,
+      "cases": 361,
+      "cases_with_changed_decision": 0,
+      "decisions_equal_pct": 100,
+      "decisions_equal_tasks": 606,
+      "max_abs_dlogit": 0.018723011016845703,
+      "max_abs_dprob": 0.0022479328030988732,
+      "min_cos": 0.9999965303679494,
+      "nonfinite_cases": 0,
+      "tasks": 606
+     },
+     "worst_task": {
+      "case": "fd/banking_intent/012",
+      "seq_len": 196,
+      "task": "intent",
+      "max_abs_dlogit": 0.018723011016845703
+     },
+     "recomputed_here": {
+      "decisions_equal": "606/606",
+      "fields_differing_from_device": 0
+     },
+     "vs_mac_gpu_same_bundle_source": {
+      "bit_equal": "2068/4376",
+      "max_abs_diff": 0.015625,
+      "decisions_equal": "606/606"
+     },
+     "load_first_s": 0.141,
+     "load_second_s": 0.126,
+     "first_call_ms": 69.5,
+     "first_call_case": "readme/01-customer-support-intent",
+     "footprint_mb_after_load": 219.6,
+     "footprint_mb_end": 224.2,
+     "bench": {
+      "position": "after load 2, before the cases",
+      "warmup": 5,
+      "calls": 100,
+      "inputs": "fixture cases, (7 k) mod n",
+      "ms_median": 37.79,
+      "ms_p90": 38.05,
+      "ms_min": 37.57,
+      "ms_max": 38.16,
+      "thermal_start": "nominal",
+      "thermal_end": "nominal",
+      "wait_nominal": {
+       "cap_s": 600,
+       "polls": 0,
+       "reached_nominal": true,
+       "state_after": "nominal",
+       "state_before": "nominal",
+       "waited_s": 2.5000000000000004e-07
+      }
+     },
+     "case_loop_call_ms": {
+      "warm_call_ms_median": 38.12,
+      "warm_call_ms_p90": 38.43,
+      "warm_call_ms_max": 39.45
+     },
+     "thermal": [
+      {
+       "at": "start",
+       "state": "nominal",
+       "t_s": 0.0
+      },
+      {
+       "at": "after load 1",
+       "state": "nominal",
+       "t_s": 0.2
+      },
+      {
+       "at": "after first call",
+       "state": "nominal",
+       "t_s": 0.3
+      },
+      {
+       "at": "after load 2",
+       "state": "nominal",
+       "t_s": 0.4
+      },
+      {
+       "at": "before bench",
+       "state": "nominal",
+       "t_s": 0.4
+      },
+      {
+       "at": "after bench",
+       "state": "nominal",
+       "t_s": 4.4
+      },
+      {
+       "at": "after cases",
+       "state": "nominal",
+       "t_s": 18.2
+      },
+      {
+       "at": "end",
+       "state": "nominal",
+       "t_s": 18.2
+      }
+     ]
+    },
+    "gpu_s512": {
+     "bundle": "gliner25-decide_float16_s512_m32.h19p.aimodelc",
+     "bundle_bytes": 975579352,
+     "bundle_files": 7,
+     "contract": "input_ids int32 [1, 512], attention_mask int32 [1, 512], label_idx int32 [1, 32] -> logits float32 [1, 32]",
+     "pass": true,
+     "summary": {
+      "all_zero_cases": 0,
+      "cases": 454,
+      "cases_with_changed_decision": 0,
+      "decisions_equal_pct": 100,
+      "decisions_equal_tasks": 787,
+      "max_abs_dlogit": 0.018723011016845703,
+      "max_abs_dprob": 0.0022479328030988732,
+      "min_cos": 0.9999965303679494,
+      "nonfinite_cases": 0,
+      "tasks": 787
+     },
+     "worst_task": {
+      "case": "fd/banking_intent/012",
+      "seq_len": 196,
+      "task": "intent",
+      "max_abs_dlogit": 0.018723011016845703
+     },
+     "recomputed_here": {
+      "decisions_equal": "787/787",
+      "fields_differing_from_device": 0
+     },
+     "vs_mac_gpu_same_bundle_source": {
+      "bit_equal": "2824/5749",
+      "max_abs_diff": 0.015625,
+      "decisions_equal": "787/787"
+     },
+     "load_first_s": 0.842,
+     "load_second_s": 0.132,
+     "first_call_ms": 100.9,
+     "first_call_case": "readme/01-customer-support-intent",
+     "footprint_mb_after_load": 376.2,
+     "footprint_mb_end": 392.6,
+     "bench": {
+      "position": "after load 2, before the cases",
+      "warmup": 5,
+      "calls": 100,
+      "inputs": "fixture cases, (7 k) mod n",
+      "ms_median": 92.94,
+      "ms_p90": 94.48,
+      "ms_min": 88.88,
+      "ms_max": 96.67,
+      "thermal_start": "nominal",
+      "thermal_end": "nominal",
+      "wait_nominal": {
+       "cap_s": 600,
+       "polls": 0,
+       "reached_nominal": true,
+       "state_after": "nominal",
+       "state_before": "nominal",
+       "waited_s": 8.3e-08
+      }
+     },
+     "case_loop_call_ms": {
+      "warm_call_ms_median": 130.39,
+      "warm_call_ms_p90": 178.73,
+      "warm_call_ms_max": 181.25
+     },
+     "thermal": [
+      {
+       "at": "start",
+       "state": "nominal",
+       "t_s": 18.2
+      },
+      {
+       "at": "after load 1",
+       "state": "nominal",
+       "t_s": 19.0
+      },
+      {
+       "at": "after first call",
+       "state": "nominal",
+       "t_s": 19.1
+      },
+      {
+       "at": "after load 2",
+       "state": "nominal",
+       "t_s": 19.3
+      },
+      {
+       "at": "before bench",
+       "state": "nominal",
+       "t_s": 19.3
+      },
+      {
+       "at": "after bench",
+       "state": "nominal",
+       "t_s": 29.0
+      },
+      {
+       "at": "after cases",
+       "state": "fair",
+       "t_s": 90.5
+      },
+      {
+       "at": "end",
+       "state": "fair",
+       "t_s": 90.6
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "logits_bit_equal_run_124014_vs_125706": {
+  "gpu_s256": "4376/4376",
+  "gpu_s512": "5749/5749"
+ },
+ "logits_bit_equal_s256_vs_s512_on_the_361_shared_cases": "4376/4376",
+ "all_runs": [
+  {
+   "run_id": "20260926-123409",
+   "pass": false,
+   "config": {
+    "bench_calls": 100,
+    "stages": [
+     "s256",
+     "s512"
+    ],
+    "unit": "gpu"
+   },
+   "stages": {
+    "gpu_s256": {
+     "error": "incompatibleCompiledAssetArchitecture(device: \"h19p\", asset: [\"h18p\"])"
+    },
+    "gpu_s512": {
+     "error": "incompatibleCompiledAssetArchitecture(device: \"h19p\", asset: [\"h18p\"])"
+    }
+   }
+  },
+  {
+   "run_id": "20260926-124014",
+   "pass": true,
+   "config": {
+    "bench_calls": 100,
+    "stages": [
+     "s256",
+     "s512"
+    ],
+    "unit": "gpu"
+   },
+   "stages": {
+    "gpu_s256": {
+     "decisions_equal": "606/606",
+     "thermal_at_start": "nominal",
+     "case_loop_fifths_ms": [
+      37.7,
+      37.8,
+      37.9,
+      37.9,
+      38.0
+     ],
+     "bench_ms_median": 38.1,
+     "bench_ms_p90": 38.36,
+     "bench_position": "after the cases",
+     "bench_thermal": "nominal -> nominal"
+    },
+    "gpu_s512": {
+     "decisions_equal": "787/787",
+     "thermal_at_start": "nominal",
+     "case_loop_fifths_ms": [
+      92.2,
+      95.4,
+      110.1,
+      137.0,
+      151.2
+     ],
+     "bench_ms_median": 147.61,
+     "bench_ms_p90": 150.69,
+     "bench_position": "after the cases",
+     "bench_thermal": "fair -> fair"
+    }
+   }
+  },
+  {
+   "run_id": "20260926-124700",
+   "pass": true,
+   "config": {
+    "bench_calls": 100,
+    "stages": [
+     "s512",
+     "s256"
+    ],
+    "unit": "gpu"
+   },
+   "stages": {
+    "gpu_s256": {
+     "decisions_equal": "606/606",
+     "thermal_at_start": "fair",
+     "case_loop_fifths_ms": [
+      57.6,
+      66.6,
+      72.5,
+      80.0,
+      85.1
+     ],
+     "bench_ms_median": 84.35,
+     "bench_ms_p90": 86.22,
+     "bench_position": "after the cases",
+     "bench_thermal": "fair -> fair"
+    },
+    "gpu_s512": {
+     "decisions_equal": "787/787",
+     "thermal_at_start": "nominal",
+     "case_loop_fifths_ms": [
+      91.3,
+      91.8,
+      92.2,
+      93.2,
+      96.3
+     ],
+     "bench_ms_median": 106.3,
+     "bench_ms_p90": 121.65,
+     "bench_position": "after the cases",
+     "bench_thermal": "fair -> fair"
+    }
+   }
+  },
+  {
+   "run_id": "20260926-125706",
+   "pass": true,
+   "config": {
+    "bench_calls": 100,
+    "bench_first": true,
+    "stages": [
+     "s256",
+     "s512"
+    ],
+    "unit": "gpu",
+    "wait_nominal_s": 600
+   },
+   "stages": {
+    "gpu_s256": {
+     "decisions_equal": "606/606",
+     "thermal_at_start": "nominal",
+     "case_loop_fifths_ms": [
+      37.9,
+      38.0,
+      38.1,
+      38.1,
+      38.3
+     ],
+     "bench_ms_median": 37.79,
+     "bench_ms_p90": 38.05,
+     "bench_position": "after load 2, before the cases",
+     "bench_thermal": "nominal -> nominal",
+     "wait_nominal": {
+      "cap_s": 600,
+      "polls": 0,
+      "reached_nominal": true,
+      "state_after": "nominal",
+      "state_before": "nominal",
+      "waited_s": 0.0
+     }
+    },
+    "gpu_s512": {
+     "decisions_equal": "787/787",
+     "thermal_at_start": "nominal",
+     "case_loop_fifths_ms": [
+      96.4,
+      100.6,
+      130.0,
+      170.6,
+      178.0
+     ],
+     "bench_ms_median": 92.94,
+     "bench_ms_p90": 94.48,
+     "bench_position": "after load 2, before the cases",
+     "bench_thermal": "nominal -> nominal",
+     "wait_nominal": {
+      "cap_s": 600,
+      "polls": 0,
+      "reached_nominal": true,
+      "state_after": "nominal",
+      "state_before": "nominal",
+      "waited_s": 0.0
+     }
+    }
+   }
+  },
+  {
+   "run_id": "20260926-125925",
+   "pass": true,
+   "config": {
+    "bench_calls": 100,
+    "bench_first": false,
+    "stages": [
+     "s512"
+    ],
+    "unit": "gpu",
+    "wait_nominal_s": 300
+   },
+   "stages": {
+    "gpu_s512": {
+     "decisions_equal": "787/787",
+     "thermal_at_start": "fair",
+     "case_loop_fifths_ms": [
+      91.8,
+      92.5,
+      93.5,
+      96.2,
+      125.8
+     ],
+     "bench_ms_median": 91.7,
+     "bench_ms_p90": 92.4,
+     "bench_position": "after the cases",
+     "bench_thermal": "fair -> fair",
+     "wait_nominal": {
+      "cap_s": 300,
+      "polls": 59,
+      "reached_nominal": false,
+      "state_after": "fair",
+      "state_before": "serious",
+      "waited_s": 304.0
+     }
+    }
+   }
+  }
+ ],
+ "case_loop_fifths_note": "median call ms of each fifth of the case loop, in case order, first call excluded",
+ "speed_note": "Calls slowed during long continuous stretches and came back after a rest even while the thermal state still read fair (20260926-125925). The cause is not isolated. Speed numbers for a card: the bench of 20260926-125706 (rested phone, bench before the case loop).",
+ "not_measured": [
+  "the h18p bundle (iPhone 17 Pro) on a device",
+  "CoreAIKit's TextClassifier on the iPhone",
+  "inputs longer than 512 tokens"
+ ],
+ "device_discipline": {
+  "device": "only this phone (a UDID allowlist in the scripts)",
+  "hold": [
+   {
+    "taken": "2026-09-26 12:32:08",
+    "gate_exit": 3,
+    "released": "2026-09-26 12:34:20"
+   },
+   {
+    "taken": "2026-09-26 12:37:18",
+    "gate_exit": 0,
+    "released": "2026-09-26 12:41:48"
+   },
+   {
+    "taken": "2026-09-26 12:47:00",
+    "gate_exit": 0,
+    "released": "2026-09-26 12:48:34"
+   },
+   {
+    "taken": "2026-09-26 12:56:05",
+    "gate_exit": 0,
+    "released": "2026-09-26 12:58:40"
+   },
+   {
+    "taken": "2026-09-26 12:59:25",
+    "gate_exit": 0,
+    "released": "2026-09-26 13:05:30"
+   }
+  ],
+  "asset_md5_checks": [
+   {
+    "log": "device_install_20260926-123208.log",
+    "pushed": true,
+    "verified": "19 files md5-equal, MD5SUMS equal at 12:34:08"
+   },
+   {
+    "log": "device_install_20260926-123718.log",
+    "pushed": true,
+    "verified": "19 files md5-equal, MD5SUMS equal at 12:40:14"
+   },
+   {
+    "log": "device_install_20260926-125605.log",
+    "pushed": false,
+    "verified": "19 files md5-equal, MD5SUMS equal at 12:57:06"
+   }
+  ]
+ },
+ "records": [
+  {
+   "path": "<work>/_gliner25_decide/fixtures/fast_decisions_long.json",
+   "sha256": "967c3d87734a3c939b8f73c66ae7b7c41cf3e5061191eeeba3d6f4a9729b26c2"
+  },
+  {
+   "path": "<work>/_gliner25_decide/fixtures/fast_decisions_s256.json",
+   "sha256": "7b017250d6a2bfdd9952f799ebb777ba074d277052d9aa6fd486edfcb8e09f71"
+  },
+  {
+   "path": "<work>/_gliner25_decide/fixtures/readme21.json",
+   "sha256": "8b756164f153395805fc4c89b029352c441e25a6c4006c2b1572d7f427f53396"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/20260926-123409/result.json",
+   "sha256": "5f0a801fb9d69956e4cf23205ed995fb641c384e149d2060435dd342be1278ed"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/20260926-124014/result.json",
+   "sha256": "911c6b317e0c97a17c57cf8d362a28c50c3cd923899a04e19e40b15b77111b0e"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/20260926-124700/result.json",
+   "sha256": "65527b6eb5baa594c1ee7c22a631e69793e5ac6b386b7609c9cd291455d38f64"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/20260926-125706/result.json",
+   "sha256": "da2af7719ce858e861fa21837fe290a13ae8e1939f059c44c2c029a8f5d75388"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/20260926-125925/result.json",
+   "sha256": "3804096822669cd877fbbceb82d0aea8a08fff60d56de321acd6522f0b5d357f"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/device_install_20260926-123208.log",
+   "sha256": "3922d470c43c5cbe77d090db4716b3fee1fca755a12f834b232d13ed9d371aa1"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/device_install_20260926-123718.log",
+   "sha256": "7b85d31102153a668a38f5879fd17077a07870894b483497963396935be3654a"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/device_install_20260926-125605.log",
+   "sha256": "7547149d1027e036c21fecaae41a3acfac77b28c978d282656d2c6c4f17b024c"
+  },
+  {
+   "path": "<work>/_gliner25_decide/results/round2/device/hold.log",
+   "sha256": "f2021807a6e3f64aa6ae67e2d0debc16c646af9ad6fc03ff37d3beb41dec54d6"
+  }
+ ]
+}

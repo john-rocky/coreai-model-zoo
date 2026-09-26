@@ -1,0 +1,62 @@
+# Recipe for gliner25-decide — the configuration that produced each staged bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# The classification path of fastino/GLiNER2.5-Decide, re-authored from model.safetensors at
+# 7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6: transformers DebertaV2Model and the label head, strict load (the export
+# pins the revision). Steps 1-2 build the gliner2 2.0.0 fp32 oracle fixtures in their own environment; steps 3-4
+# export the two shapes and gate each against them. conversion/gliner25_decide/README.md lists the gates in order.
+
+["gliner25-decide"]
+card = "README.md"
+hf_repo = "mlboydaisuke/GLiNER2.5-Decide-CoreAI"
+source_hf_id = "fastino/GLiNER2.5-Decide"
+status = "verified"
+steps = [
+  { command = ["uv", "run", "--python", "3.12", "gliner25_decide_oracle.py"] },
+  { command = ["uv", "run", "--python", "3.12", "gliner25_decide_oracle.py", "--sets", "fast_decisions", "-S", "512", "--min-len", "257", "--per-domain", "10"] },
+  { script = "export_gliner25_decide.py", args = ["--fixtures", "../../_gliner25_decide/fixtures/readme21.json", "../../_gliner25_decide/fixtures/fast_decisions_s256.json", "-S", "256", "--mmax", "32", "--dtype", "float16", "--poison", "--output-dir", "../../_gliner25_decide/exports"], bundle = "macos/gliner25-decide_float16_s256_m32.aimodel" },
+  { script = "export_gliner25_decide.py", args = ["--fixtures", "../../_gliner25_decide/fixtures/readme21.json", "../../_gliner25_decide/fixtures/fast_decisions_s256.json", "../../_gliner25_decide/fixtures/fast_decisions_long.json", "-S", "512", "--mmax", "32", "--dtype", "float16", "--poison", "--output-dir", "../../_gliner25_decide/exports"], bundle = "macos/gliner25-decide_float16_s512_m32.aimodel" },
+]
+needs = [
+  "The source checkpoint and the fixture dataset in the Hugging Face cache, which every step reads offline:",
+  "`hf download fastino/GLiNER2.5-Decide --revision 7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6` and",
+  "`hf download fastino/fast-decisions --repo-type dataset --revision 1a33070cabf94ce2e29105482dd2ef6c157ad7f2`;",
+  "point HF_HUB_CACHE (or HF_HOME) at that cache and set HF_HUB_OFFLINE=1.",
+  "Steps 1-2 run in the oracle's own environment through `uv run` (Python 3.12, gliner2 2.0.0, torch 2.12.1 and the",
+  "rest pinned in the script header): the zoo venv has gliner2 1.3.2, which cannot read this checkpoint.",
+  "Steps 3-4 run in the zoo venv (coreai-torch 0.4.1, coreai-core 1.0.0b2, torch 2.9.0, transformers 4.57.6).",
+  "zoo_convert.py runs every step in conversion/; from there ../../_gliner25_decide is the lane directory under the",
+  "default work root (conversion/_paths.py: the repository's parent), where steps 1-2 write. With ZOO_WORK_ROOT set,",
+  "point these paths there.",
+]
+aot = "xcrun coreai-build compile gliner25-decide_float16_s<256|512>_m32.aimodel --output <dir> --platform iOS --architecture h19p --preferred-compute gpu --min-deployment-version 27.0"
+notes = [
+  "Graph: input_ids / attention_mask [1, S] int32 and label_idx [1, 32] int32 (the [L] marker positions of every task,",
+  "in task order) -> logits [1, 32] float32; fp16 weights. The span and count heads are not in it. Two shapes: the",
+  "host runs the smallest S the tokens fit. Of the 1,700 fast-decisions development rows, 88.4 % fit S = 256 and all",
+  "fit S = 512 (the longest is 431 tokens); no row asks for more than 28 labels, so MMAX = 32.",
+  "Relative positions are baked: coreai-torch 0.4.1 lowers aten.div.Tensor(int, int) to integer division, which puts",
+  "every token distance of 129 and more in DeBERTa's bucket +-128. The export computes the bucket table in torch (S is",
+  "fixed) and passes it to DebertaV2Encoder.forward(relative_pos=). `--relpos runtime` keeps the stock forward as",
+  "negative evidence: 604/606 decisions at S = 256, max |dlogit| 0.733.",
+  "Each export also writes the host files beside the bundles: tokenizer/ (tokenizer_config.json declares",
+  "XLMRobertaTokenizer, so swift-transformers loads the SentencePiece model), classifier.json (every baked shape in",
+  "the output directory, the marker ids, the host rules) and reference_s<S>.json.",
+  "The iOS bundles are compiled for h19p, the iPhone 18 Pro (iPhone19,2): conversion/gliner25_decide/aot_compile.py",
+  "--tag s256|s512 --targets ios_gpu_h19p. An h18p compile (the iPhone 17 Pro, target ios_gpu) builds as well but has",
+  "not run on a device and is not staged; the iPhone 18 Pro refuses it with incompatibleCompiledAssetArchitecture.",
+  "Gates, all against the gliner2 2.0.0 fp32 oracle on 454 texts / 787 decisions: gate-gliner25-decide.json (Mac: fp32",
+  "torch, poisoned label_idx, fp16 on the GPU, the Swift runner), gate-gliner25-decide-iphone-gpu.json (iPhone 18 Pro,",
+  "iOS 27.0 build 24A437, 2026-09-26: 606/606 and 787/787 decisions, max |dlogit| 0.019; rested-phone bench 37.8 ms at",
+  "S = 256 and 92.9 ms at S = 512 per call, run 20260926-125706), gate-gliner25-decide-coreai-kit.json (CoreAIKit",
+  "TextClassifier: token ids 454/454, decisions 787/787).",
+  "Steps 1-2 were re-run with uv on 2026-09-26 into a scratch work directory: every case of the three fixtures came",
+  "out identical to the gated ones.",
+  "conversion/gliner25_decide/stage_ship.py lays out the Hugging Face repo in <work>/_gliner25_decide/ship/, checks",
+  "each file against the record of the gate that ran it, and writes SHA256SUMS; `--check <dir>` verifies a download.",
+  "Published 2026-09-26; pin revision 7464c910699075674e00c5f423ca11a3a64eb26b (41 files + SHA256SUMS, 3.72 GB: every",
+  "LFS file's Hub sha256 and every small file's download equal the staging SHA256SUMS); mirrored to",
+  "coreai-community/GLiNER2.5-Decide-CoreAI.",
+]
+open_questions = []
