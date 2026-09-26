@@ -446,7 +446,9 @@ The `LanguageBundle` / `llm-runner` face of an AOT bundle the runtime will not a
 
 - **(a) The wrong `--architecture` for the device.** Arch names track the device-identifier major
   version, not the marketing name: iPhone 17 Pro is `iPhone18,1` → `h18p`, and an `h17p` bundle
-  pushed to it fails with this string (validated 2026-06-10). On an M4 Max (`Mac16,x`) only `h16c`
+  pushed to it fails with this string (validated 2026-06-10); iPhone 18 Pro is `iPhone19,2` →
+  `h19p`, and the release runtime reports the mismatch as
+  `incompatibleCompiledAssetArchitecture` (next entry, 2026-09-26). On an M4 Max (`Mac16,x`) only `h16c`
   loads; `h16s`, `h16g`, `h17*` all raise in the Python runtime. `coreai-build compile` exits 0
   for **any** requested arch — a successful compile validates nothing; only a device load does.
   Record: [`aot-and-specialization.md`](aot-and-specialization.md) (Architecture names). `coreai
@@ -460,6 +462,20 @@ The `LanguageBundle` / `llm-runner` face of an AOT bundle the runtime will not a
   177729331 ("AOT compilation might fail unexpectedly for certain models") — that is the note's
   attribution, not a measurement ([`spec-decode-c1-handoff-2026-07-03.md`](spec-decode-c1-handoff-2026-07-03.md)).
 - **OS · toolchain:** macOS 27.0 26A5353q, `coreai-build` 3600.67.5.8.1; iOS 27 beta, 2026-06-10.
+
+## incompatibleCompiledAssetArchitecture(device: "h19p", asset: ["h18p"])
+
+The raw `AIModel(contentsOf:options:)` face of the arch mismatch above on the iOS 27.0 release
+runtime: it names the device's architecture and the ones the `.aimodelc` carries. The load fails
+in 0.04 s; there is no fallback to another architecture and no on-device compile.
+
+- **The iPhone 18 Pro is `iPhone19,2` → `h19p`.** Every `ios/` bundle this zoo had compiled
+  until 2026-09-26 targets `h18p` (the iPhone 17 Pro), so on the 18 Pro they raise this string.
+  **Fix:** compile once per device generation (`--architecture h19p` for the 18 Pro), name the
+  output `<name>.<arch>.aimodelc`, and let the app pick its file from
+  `AIModel.deviceArchitectureName`. Record: [`gliner25-decide.md`](gliner25-decide.md) (§3),
+  `apps/DecideGate` run `20260926-123409`.
+- **OS · toolchain:** iOS 27.0 (24A437) on iPhone19,2; `coreai-build` 3600.83.1; 2026-09-26.
 
 ## LLVM ERROR: Failed to allocate mmap'd buffer:
 
