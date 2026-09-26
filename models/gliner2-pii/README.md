@@ -90,5 +90,6 @@ schema-agnostic collator): [`knowledge/gliner2-pii.md`](../../knowledge/gliner2-
   — `macos/` and `ios/` each hold the JIT `.aimodel` (fp16, 611 MB; every iPhone generation specializes it on
   its first load) + `tokenizer/` + `extractor.json`; `ios-h18p/` keeps the AOT-compiled h18p bundle for the
   iPhone 17 Pro (revision `887627e`, 2026-09-26; before it `ios/` carried the h18p bundle, which the iPhone 18 Pro
-  refuses).
+  refuses). The h18p package dates from the 2026-07-07 export and was not recompiled after the 2026-07-20
+  coreai-torch 0.4.1 re-export that the JIT `.aimodel` carries.
 - Base model: [fastino/gliner2-privacy-filter-PII-multi](https://huggingface.co/fastino/gliner2-privacy-filter-PII-multi) (Apache-2.0).
