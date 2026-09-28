@@ -1,0 +1,119 @@
+# Recipe for decider-2b-vision — the configuration that produced each staged bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# A decision needs one decoder and one tower. The decoder is this port's authoring
+# (conversion/decider_vision/qwen3_5_vl_pipelined.py: ids in, the tower rows as a static input, M-RoPE in the
+# graph); the towers are the overlay's qwen3_5_vision.py through the Qwen3.8-27B vision exporter with the grid
+# and the dtype set. conversion/decider_vision/README.md lists the oracle and the gates in order.
+
+["decider-2b-vision"]
+script = "decider_vision/export_decoder.py"
+args = ["int8mix", "--fp16-layers", "0,2,5", "--prefill-chunk", "16", "--aot"]
+card = "README.md"
+hf_repo = "mlboydaisuke/decider-2b-vision-CoreAI"
+source_hf_id = "Mapika/decider-2b-vision"
+source_revision = "863e290863655f1d6b69324d77d09ac972d21609"
+bundle = "gpu-pipelined/decider_2b_vision_decode_int8mix_pf16"
+status = "verified"
+overlay = true
+runtime_patches = []
+needs = [
+  "The source snapshot at 863e290863655f1d6b69324d77d09ac972d21609 in the Hugging Face cache; the script defaults",
+  "HF_HOME to $ZOO_WORK_ROOT/_decider2bv/hf and sets HF_HUB_OFFLINE=1 / HF_HUB_DISABLE_XET=1.",
+  "The overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0, transformers 4.57.6)",
+  "and, for --aot, Xcode 27.0 RC as DEVELOPER_DIR.",
+]
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes"
+notes = [
+  "The ship decoder. The arguments are the logged run's (2026-09-29 02:04 JST, macOS 27.0 26A428, M4 Max); that",
+  "run also passed --record <work>/_decider2bv/logs/r6_export_int8mix_pf16.json, which writes a log and does not",
+  "change the bundle. Output: $ZOO_WORK_ROOT/_decider2bv/exports/bundles/<name>/; --aot adds",
+  "bundles_aotc/<name>.h16c.aimodelc (10,176,020,956 B), which the Python gates load and which is not shipped.",
+  "int8mix = every linear int8 per block of 32 (symmetric_with_clipping, weight only) except the 24 linears of",
+  "layers 0, 2 and 5, which stay fp16; the tied embedding / head, conv1d and norms stay fp16. The layer set came",
+  "from int8_bisect_torch.py on four fixture runs (rule: r29 |dp| <= 0.010, no run worse than int8lin, at most",
+  "four layers, the smallest set). Two functions sharing the weights: main (S=1) and prefill (S=16, GDN unrolled).",
+  "main.mlirb 2,644,272,749 B, sha256 a82f61ae00eb2b968072d45cb9abd71e2c079b6ec2e736b68721c706785bce75;",
+  "metadata.json sha256 d134b009c4153a420150b4f87b00f1ca866c1277668d3976e1789019f59710fb.",
+  "Gates vs the author's fp32 readout (bar max |dp| 0.02, mean of run means 0.002): decoder alone 157/157, max",
+  "0.0094; end to end 98/98, max 0.0096; held out 497/497 + 3/3 near-ties, max 0.0146, mean 0.00144; Swift AOT",
+  "108/108, max 0.0096; Swift JIT of the .aimodel 108/108, max 0.0103. iPhone not measured yet.",
+  "No engine: both hosts drive the low-level runtime and read the logits at every slot. An engine run would need",
+  "apps/coreai-pipelined-extra-states.patch and apps/coreai-pipelined-static-inputs.patch (four states, four static",
+  "inputs) and COREAI_CHUNK_THRESHOLD=1; not tested here, and the pipelined engine returns no logits.",
+  "Uploaded 2026-09-29, Hub revision 4948e3231035df85c7b03c90b766eb17a08d9451 (the bundle upload); all 24 files verified by size and sha256 after the upload.",
+]
+
+["decider-2b-vision-fp16"]
+script = "decider_vision/export_decoder.py"
+args = ["fp16", "--prefill-chunk", "16", "--aot"]
+card = "README.md"
+hf_repo = "mlboydaisuke/decider-2b-vision-CoreAI"
+source_hf_id = "Mapika/decider-2b-vision"
+source_revision = "863e290863655f1d6b69324d77d09ac972d21609"
+bundle = "gpu-pipelined/decider_2b_vision_decode_fp16_pf16"
+status = "verified"
+overlay = true
+runtime_patches = []
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes"
+notes = [
+  "The fp16 reference decoder, same graph and functions as the ship bundle. The arguments are the logged run's",
+  "(2026-09-29 01:39 JST; also --record <work>/_decider2bv/logs/r6_export_fp16_pf16.json). That run used",
+  "export_decoder.py before the int8mix mode was added to it (file last modified 01:43 JST). The current file",
+  "reproduces the bundle: a re-export on 2026-09-29 04:00 JST gave main.mlirb 3,765,759,216 B (sha256",
+  "97a845813d7148ca24b753ee1ed047508631633f9ca4935ee3e6b73f65dd1a83) whose first 3,765,663,633 bytes equal the staged",
+  "file's and whose last 95,583 bytes (IR serialization) differ; metadata.json differs only in its date. Its AOT h16c",
+  "(11,297,479,109 B) through the same B1 (111 runs, chunk 16) gives the staged bundle's letter probabilities bit",
+  "for bit on all 157 slots (lane readout_r10/gate-decider-2b-vision-readout-fp16_pf16-reexport.json, sha256",
+  "318057445c1e822cd1ff2468e85736480da09d249c091f6fb67b076a8a0d35f8). The staged bytes are the original export's.",
+  "main.mlirb 3,765,759,218 B, sha256 a0461812914fe7f3a7f26ea9d0f5454503f550e31564982f30b1789e4be0e04d;",
+  "metadata.json sha256 98127ee1196503b4a68dc4c5c680d583e2e35dbb360ee2f5a2da1b39ec9c3da9. AOT h16c 11,297,479,003 B.",
+  "Gates: decoder alone 157/157, max |dp| 0.0101; end to end 98/98, max 0.0085; held out 497/497 + 3/3, max",
+  "0.0131, mean 0.00061; Swift AOT 108/108, max 0.0085.",
+]
+
+["decider-2b-vision-tower-g256"]
+script = "export_qwen38vl_pipelined.py"
+args = ["--hf-id", "Mapika/decider-2b-vision", "--name", "decider_2b_vision_g256", "--grid-h", "8", "--grid-w", "8", "--skip-decoder", "--vision-dtype", "fp16w32", "--out-dir", "../../_decider2bv/exports"]
+card = "README.md"
+hf_repo = "mlboydaisuke/decider-2b-vision-CoreAI"
+source_hf_id = "Mapika/decider-2b-vision"
+source_revision = "863e290863655f1d6b69324d77d09ac972d21609"
+bundle = "gpu-pipelined/decider_2b_vision_g256_vision_fp16w32/decider_2b_vision_g256_vision_fp16w32.aimodel"
+status = "verified"
+overlay = true
+runtime_patches = []
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "The 256x256 tower: 16x16 patches, 8x8 merged = 64 image rows. patches [256, 1536] f32 -> image_embeds [64, 2048]",
+  "f32. --vision-dtype fp16w32 = parameters stored fp16 and read through a .float() cast, math and the baked",
+  "positional buffers fp32 (the fp16 tower's worst row cosine was 0.849 on the fixture).",
+  "The arguments are the logged run's (2026-09-28 23:56 JST); --out-dir was the absolute lane path, written",
+  "here relative to conversion/, where zoo_convert.py runs the script (the default work root's",
+  "_decider2bv/exports). Set HF_HOME to the cache holding the pinned snapshot (the run used",
+  "$ZOO_WORK_ROOT/_decider2bv/hf, HF_HUB_OFFLINE=1). export_qwen38vl_pipelined.py sha256 at the run:",
+  "e80515f9e1c2476b992167115364b1a8957f6196ba4e8e210940e43ac4350bec (unchanged since).",
+  "main.mlirb 660,263,631 B, sha256 4a0de69836ef3eefe2288be07adf43f1f463d4575d2ba53760019b884a0cede1.",
+  "Gate vs the author's fp32 tower on 29 fixture images: worst image cosine 0.99999992, worst row 0.9999975.",
+]
+
+["decider-2b-vision-tower-g448"]
+script = "export_qwen38vl_pipelined.py"
+args = ["--hf-id", "Mapika/decider-2b-vision", "--name", "decider_2b_vision_g448", "--grid-h", "14", "--grid-w", "14", "--skip-decoder", "--vision-dtype", "fp16w32", "--out-dir", "../../_decider2bv/exports"]
+card = "README.md"
+hf_repo = "mlboydaisuke/decider-2b-vision-CoreAI"
+source_hf_id = "Mapika/decider-2b-vision"
+source_revision = "863e290863655f1d6b69324d77d09ac972d21609"
+bundle = "gpu-pipelined/decider_2b_vision_g448_vision_fp16w32/decider_2b_vision_g448_vision_fp16w32.aimodel"
+status = "verified"
+overlay = true
+runtime_patches = []
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "The 448x448 tower: 28x28 patches, 14x14 merged = 196 image rows. patches [784, 1536] f32 -> image_embeds",
+  "[196, 2048] f32, fp16w32 as above (the fp16 tower's worst row cosine was 0.528 on the fixture).",
+  "The arguments are the logged run's (2026-09-28 23:56 JST); --out-dir and HF_HOME as for the g256 tower.",
+  "main.mlirb 662,696,647 B, sha256 9bf6023d9ec6e25e2c28c7b022f56bf523fbd514b2f4861606fb4c0d508d9bdd.",
+  "Gate vs the author's fp32 tower on 29 fixture images: worst image cosine 0.99999997, worst row 0.9999957.",
+]

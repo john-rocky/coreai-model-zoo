@@ -1,0 +1,54 @@
+# DeciderVisionGate — device gate of the decider-2b-vision Core AI port (conversion/decider_vision) on the Swift
+# read-out apps/DeciderVision. The app is a thin shell: the decision path is the library's (VisionDecider: Pillow-order
+# bicubic, the fixed-grid vision tower, the author's prompt, the 2-function decoder in its chunk order, the letter
+# softmax), taken by path from ../DeciderVision. One target for iOS and macOS, so the phone and the Mac run the same gate
+# code. Build: ./_build.sh (iOS) or ./_build.sh --mac (xcodegen generate + xcodebuild Release). Assets are sideloaded,
+# not bundled. The target asks for com.apple.developer.kernel.increased-memory-limit (DeciderVisionGate.entitlements): the
+# decoder's cold JIT specialization aborts with std::bad_alloc at the default limit (run 20260929-034405). A new bundle id
+# signs with that entitlement only after its App ID has the capability (Xcode, the team's account, one ⌘B);
+# ./_build.sh --no-iml builds without it (the team's wildcard profile). See README "Signing".
+name: DeciderVisionGate
+options:
+  bundleIdPrefix: com.daisukemajima
+  createIntermediateGroups: true
+packages:
+  DeciderVision:
+    path: ../DeciderVision
+schemes:
+  DeciderVisionGate:
+    build:
+      targets:
+        DeciderVisionGate: all
+    run:
+      config: Release
+targets:
+  DeciderVisionGate:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    deploymentTarget:
+      iOS: "27.0"
+      macOS: "27.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: DeciderVision
+        product: DeciderVision
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.decidervisiongate
+        DEVELOPMENT_TEAM: MFN25KNUGJ
+        CODE_SIGN_STYLE: Automatic
+        # iOS only (the Mac build has no memory limit to raise)
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": DeciderVisionGate.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: DeciderVisionGate
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        # macOS: the gate reads the stage directory and writes its results where DV_ASSETS / DV_OUT point.
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: NO
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"

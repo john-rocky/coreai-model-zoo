@@ -156,6 +156,15 @@ For the long-form version of the same material, read
   line by line, tokenizer parity on the 44 fixture rows, and the readout primitive (recommended: a
   completion-synchronized read-last-logits call on the pipelined engine; fallback: the zoo's
   N-state low-level runner). Not implemented.
+- [`decider-2b-vision-port.md`](decider-2b-vision-port.md) — **an image-input decision model on Core AI**
+  (Mapika/decider-2b-vision): the overlay's Qwen3.5 tower at a fixed grid plus a new ids-input Qwen3.5
+  hybrid decoder that takes the image rows as a static input and derives M-RoPE in the graph
+  (`image_rc` lets one decoder take any grid up to 256 tokens). Positions are gated by exact plane
+  equality, because a 1-D position error moves this fixture's p by ≤ 0.0012; the fp16 tower fails (worst
+  row cosine 0.528) and fp16 storage with fp32 math passes; Pillow's resize pass order is worth up to 17
+  levels; the int8 body error sits in layers 0–11 and three fp16 layers {0, 2, 5} fix it, confirmed on 500
+  held-out photo runs; coreai-opt's `symmetric_with_clipping` does not clip; the `prefill` function
+  grows the AOT compile by 3.8 GB but not the `.aimodel`; Swift's JIT of the `.aimodel` reads correctly.
 - [`openthai-systemone-port.md`](openthai-systemone-port.md) — **a slot-head decision model on Core AI**
   (iapp/OpenThai-SystemOne): the LM head replaced by a 256-way head read at a control token —
   `model.*` weights, a resized embedding, `vocab_size` 256 as the logits width; temperatures from the

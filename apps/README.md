@@ -117,6 +117,16 @@ and [`models/depth-anything-3/README.md`](../models/depth-anything-3/README.md).
 Photo-attach visual Q&A on the strongest tiny VLM. (Qwen3-VL and Gemma 4 E2B VL are also reachable
 from CoreAIChat's vision modes.)
 
+### Image decisions
+
+| App | Model | Device |
+|---|---|---|
+| [`DeciderVision/`](DeciderVision/) | **decider-2b-vision** (an image + lettered questions → the probability of every option) — [HF bundle](https://huggingface.co/mlboydaisuke/decider-2b-vision-CoreAI) | macOS + iOS 27 (the iPhone 18 Pro gate runs it through [`DeciderVisionGate/`](DeciderVisionGate/): 108/108, 0.75 s per 256×256 decision) |
+
+A Swift package and Mac CLI on the low-level runtime, no engine: the host (Pillow-order bicubic, the author's
+prompt, the slot rule), the tower, the two-function decoder and the letter softmax. It is the reference the card's
+Swift numbers come from. See [`DeciderVision/README.md`](DeciderVision/).
+
 ### Document OCR
 
 | App | Model | Device |
@@ -163,6 +173,7 @@ results in `Documents/<gate>/result.json`.
 |---|---|---|
 | [`N3DGate/`](N3DGate/) | **Nemotron-3-Diarization** | the streaming and offline h18p GPU bundles against transformers fp32 on two clips (agreement ≥ 99.9 %), plus load, first call, footprint, a bench and the thermal state |
 | [`DecideGate/`](DecideGate/) | **GLiNER2.5-Decide** | the S = 256 / 512 GPU bundles compiled for the phone's own architecture (h19p on the iPhone 18 Pro) against the gliner2 fp32 oracle on 454 texts, plus load, first call, footprint, a bench and the thermal state |
+| [`DeciderVisionGate/`](DeciderVisionGate/) | **decider-2b-vision** | the ship pair (int8mix two-function decoder + fp16w32 towers, `.aimodel` specialized on the phone, increased-memory-limit) through the same `DeciderVision` library the Mac CLI uses, over the 76 fixture runs against the author's fp32 readout and the Mac Swift run; load per graph, first decision, footprint, a bench per grid and the thermal state |
 | [`Audio8Gate/`](Audio8Gate/) | **Audio8-TTS-Preview-0.6b** | the DualAR asset (prefill / frame / first_frame, sampler in the graph) and the codec decoder through the kit's `Audio8TTS`, the oracle's recorded draws replayed over the 18 fixtures: codes against the Python engine run, eos reached, prefill / frame / codec time, RTF, time to first audio, load, footprint, a bench and the thermal state; the wavs for the ASR round trip |
 
 ## Model delivery

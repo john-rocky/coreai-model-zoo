@@ -58,17 +58,43 @@ GRID = 16  # default merged grid side: 16x16 = 256 tokens = a 512x512 tile
 # --grid-h/--grid-w override it: the tower authoring is generic over the grid,
 # so a portrait document page can bake its own aspect instead of being squashed
 # into the square tile (OvisOCR2 ships 28x40 = 1120 tokens = 896x1280).
+VISION_DTYPES = {"fp16": DTYPE, "fp32": torch.float32, "fp16w32": torch.float32}
+
+
+class _Upcast(torch.nn.Module):
+    def forward(self, w: torch.Tensor) -> torch.Tensor:
+        return w.float()
+
+
+def fp16_storage_fp32_compute(module: torch.nn.Module) -> torch.nn.Module:
+    """Keep every parameter as fp16 and hand the forward an fp32 copy.
+
+    Copied from conversion/funasr_nano/export_encoder.py (the Fun-ASR encoder's `fp16w32` ship
+    form), not imported across families. The graph holds fp16 constants plus a cast — unless
+    the optimizer folds the cast, which would bring the size back to the fp32 bundle's.
+    Buffers (the tower's baked positional constants) are left as they are.
+    """
+    import torch.nn.utils.parametrize as P
+
+    for m in list(module.modules()):
+        for name, param in list(m.named_parameters(recurse=False)):
+            setattr(m, name, torch.nn.Parameter(param.detach().half(), requires_grad=False))
+            P.register_parametrization(m, name, _Upcast(), unsafe=True)
+    return module
 
 
 def export_vision(args) -> None:
-    name = f"{args.name}_vision_fp16"
+    dtype = VISION_DTYPES[args.vision_dtype]
+    name = f"{args.name}_vision_{args.vision_dtype}"
     out_dir = Path(args.out_dir) / name
-    print(f"loading vision tower ({args.hf_id}) ...")
+    print(f"loading vision tower ({args.hf_id}, {args.vision_dtype}) ...")
     vis = Qwen3_5VisionEncoder.from_hf(
-        args.hf_id, target_dtype=DTYPE, grid_h=args.grid_h, grid_w=args.grid_w)
+        args.hf_id, target_dtype=dtype, grid_h=args.grid_h, grid_w=args.grid_w)
+    if args.vision_dtype == "fp16w32":
+        vis = fp16_storage_fp32_compute(vis)   # positional buffers, input and output stay fp32
     patch_dim = (vis.vcfg["in_channels"] * vis.vcfg["temporal_patch_size"]
                  * vis.vcfg["patch_size"] ** 2)
-    patches = torch.zeros(vis.n_patches, patch_dim, dtype=DTYPE)
+    patches = torch.zeros(vis.n_patches, patch_dim, dtype=dtype)
 
     print("exporting vision graph ...")
     prog = export_to_coreai(
@@ -160,6 +186,11 @@ def main() -> None:
     ap.add_argument("--max-ctx", type=int, default=4096)
     ap.add_argument("--skip-vision", action="store_true")
     ap.add_argument("--skip-decoder", action="store_true")
+    ap.add_argument("--vision-dtype", default="fp16", choices=sorted(VISION_DTYPES),
+                    help="tower dtype (<name>_vision_<dtype>): fp16 = weights and math fp16; "
+                         "fp32 = both fp32; fp16w32 = parameters stored fp16 and read through a "
+                         ".float() cast, math and positional buffers fp32 (the Fun-ASR encoder's "
+                         "ship form) — for a checkpoint whose tower misses the fp16 bar")
     ap.add_argument("--no-prefill", action="store_true",
                     help="export ONLY the S=1 'main' function. One static shape means the AOT "
                          "needs no --expect-frequent-reshapes, which is what the flag's ~4.7x "
