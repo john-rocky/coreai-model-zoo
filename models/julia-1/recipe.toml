@@ -1,0 +1,53 @@
+# Recipe for julia-1 — the configuration that produces each bundle folder.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# Every entry assumes the oracle has run first in its own environment (`needs` below) and that the
+# authoring gate passed its row gate and negative controls for the window: conversion/julia/README.md
+# lists the stages in order. fp32 is the published precision (the checkpoint's F32 weights as they are).
+
+["julia-1"]
+card = "README.md"
+hf_repo = "mlboydaisuke/Julia-1-CoreAI"
+source_hf_id = "SupersonicLabs/Julia-1"
+status = "verified"
+steps = [
+  { script = "julia/gate_julia_authoring.py", args = ["--window", "1024", "--negative-controls"] },
+  { script = "julia/gate_julia_authoring.py", args = ["--window", "512", "--negative-controls"] },
+  { script = "julia/export_julia.py", args = ["--window", "1024", "--dtype", "fp32", "--rows-stride", "4"], bundle = "macos/fp32-s1024/julia1_fp32_s1024.aimodel" },
+  { script = "julia/export_julia.py", args = ["--window", "512", "--dtype", "fp32", "--rows-stride", "4"], bundle = "macos/fp32-s512/julia1_fp32_s512.aimodel" },
+]
+needs = [
+  "Stage 0 first, in its own environment: `uv run --python 3.12 conversion/julia/oracle_julia.py` and",
+  "`uv run --python 3.12 conversion/julia/oracle_named_julia.py` (torch 2.14.0, transformers 5.0.0, pyarrow from the",
+  "script headers — the publisher's pins; the zoo venv's transformers 4.57.6 cannot read this encoder's v5 config).",
+  "They write the oracle rows, the hidden-state dumps and results/oracle.json the gates read; the pinned",
+  "typed-decisions parquet and Julia-1-ONNX parity-cases.json are fetched by sha256 when missing.",
+  "Stage 1a in the same environment: `uv run --python 3.12 conversion/julia/gate_julia_exactness.py --window 1024|512`.",
+]
+notes = [
+  "One JIT .aimodel per folder with one function, `main`: input_ids / attention_mask int32 [1,S], qtype_onehot",
+  "[1,3] -> token_logits [1,S]. The checkpoint's act_head and temperature buffer ([1,1,1]) are not exported:",
+  "the publisher's inference API reads neither.",
+  "fp32 only: fp16 weight storage (the checkpoint is F32, so the weights are rounded) keeps every argmax but moves",
+  "probabilities by up to 0.023 (results/authoring_wfp16_s1024.json FAIL); build it with",
+  "`gate_julia_authoring.py --window 1024 --dtype wfp16` to see the record, it is never exported.",
+  "The authoring layer gate has two tiers: embeddings and layers 0-9 max |err| <= 1e-4; layer 10 through the",
+  "second head layer max |err| / max |ref| <= 5e-4 = twice the publisher's own SDPA-vs-eager distance (2.87e-4",
+  "at final_norm, S=1024), rounded down. The first runs used laya's 2e-4 and were re-judged (`--rejudge`) under",
+  "5e-4 with their rows and states unchanged; the records name the file and policy they were computed with.",
+  "The export gate checks every 4th row plus every SUBSET and window-filling row before conversion; the runtime",
+  "gate then runs every row on the bundle (gate_julia_runtime.py <folder> --compute cpu_only|gpu).",
+  "After the gates, three description texts were corrected (strict encoding refuses text holding the literal",
+  "'<mask>'; only the non-strict builder turns it into a space): the metadata.json `sequence` field (rewritten in",
+  "both folders from the fixed export_julia.py, +79 bytes each), the _julia_host.py docstring and the Swift header",
+  "comment. No code path changed; the records' input_hashes name the earlier file versions.",
+  "Published: mlboydaisuke/Julia-1-CoreAI revision d1e943545c64e20e73a88ae1f890227c349e22ba (2026-09-30), macos/fp32-s1024 and macos/fp32-s512,",
+  "every file's sha256 and size checked against the staging SHA256SUMS after the upload (26/26).",
+  "Upstream revision a85b127321d580d65176c89ced8273f305745d85 is pinned in conversion/julia/_common.py and",
+  "verified by sha256 on every load.",
+]
+open_questions = [
+  "iPhone: no bundle or measurement (the portable .aimodel is not gated on a device); the Neural Engine is not used",
+  "(a Neural Engine preference runs the fp32 graph on the GPU; an fp16-compute variant is not built).",
+]

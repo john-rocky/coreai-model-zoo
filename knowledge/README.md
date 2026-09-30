@@ -177,6 +177,12 @@ For the long-form version of the same material, read
   the per-layer gate is two-tier (1e-4 absolute, 2e-4 relative); fp16 **compute** misses the bar while fp16
   **storage** with fp32 compute is exact (645 MB); the Mac GPU computes at fp32 precision, the Neural Engine
   preference gives non-deterministic answers on the fp32-compute graph; the Swift host's two Unicode traps.
+- [`julia-1-port.md`](julia-1-port.md) — **the laya decision head on mmBERT-small** (SupersonicLabs/Julia-1):
+  the host is where it differs (options are the criteria text as given, strict encoding refuses instead of
+  cutting, T = 1, no act head); the publisher's CPU result reproduced three ways; the layer bar re-measured
+  (the publisher's own SDPA-vs-eager distance is 2.9e-4 at the final norm, so laya's 2e-4 does not carry over)
+  and the residual traced to the final LayerNorm of a different torch build; fp16 storage is not free on an
+  F32 checkpoint (|Δp| 0.023); the Neural Engine does not take the fp32 graph.
 - [`apus-decision-v1-4b-port.md`](apus-decision-v1-4b-port.md) — **a letter-readout decision model as an HF-id swap**
   (apus-ailab/APUS-OpenJev-v1-4B): the unchanged Qwen3.5-4B exporter; the author's `openjet_runtime` as the fp32
   oracle (transformers 5.16.1 pinned); the `Shared state:` + JSON task turn under the chat template read at
