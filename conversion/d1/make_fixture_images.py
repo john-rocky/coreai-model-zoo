@@ -28,7 +28,19 @@ part of the published fixture (a third-party photo).
 
     python make_fixture_images.py     # -> $ZOO_WORK_ROOT/_d1_3b/fixtures/{images/*.png, images/meta.json, image_records.json}
 
-The drawing is deterministic: a re-run reproduces each picture's raw-RGB sha256 (the PNG bytes depend on zlib).
+Two more sets for the Swift host's pixel gate (`gate_swift_pixels.py`); neither adds a record:
+
+    --random   images_random/random_<w>x<h>.png: the six random pictures test_vision_host.py draws (NumPy
+               default_rng(0), rng.integers(0, 256, (h, w, 3), uint8) in RANDOM_SIZES order), stored losslessly
+    --exif     images_exif/<id>_rot90_o6.jpg: a drawn picture turned 90 degrees clockwise and saved as a JPEG (Pillow,
+               quality 95) whose EXIF Orientation is 6, so a reader that applies the tag turns it another 90 degrees
+               clockwise (the card's `load_image` = `ImageOps.exif_transpose` then `convert("RGB")`: img01 rotated
+               180 degrees); <id>_rot90_o6.png = exactly those decoded and transposed pixels, lossless, no EXIF, to
+               tell a decoder's difference from an orientation error. img01 (384x384, the pair the launch names) is
+               square, so its crop plan cannot show a wrong orientation; img04 (640x480 -> stored 480x640) can.
+
+The drawing is deterministic: a re-run reproduces each picture's raw-RGB sha256 (the PNG bytes depend on zlib, the
+JPEG bytes on Pillow's libjpeg).
 """
 from __future__ import annotations
 
@@ -306,9 +318,99 @@ def write_if_changed(path: Path, data: bytes) -> bool:
     return True
 
 
+def write_json(path: Path, obj) -> bool:
+    return write_if_changed(path, (json.dumps(obj, indent=1, ensure_ascii=False) + "\n").encode())
+
+
+# --------------------------------------------------------------------------- --random / --exif
+RANDOM_SEED = 0
+RANDOM_SIZES = [(384, 384), (384, 256), (640, 480), (1024, 768), (1600, 1200), (2048, 1536)]   # w x h, drawing order
+EXIF_SOURCES = ["img01_shapes_384x384", "img04_scatter_640x480"]
+EXIF_ORIENTATION = 6
+JPEG_QUALITY = 95
+
+
+def write_random(out: Path) -> list[str]:
+    """test_vision_host.py's six random pictures (same generator, seed and order), as PNG."""
+    import numpy as np
+
+    d = out / "images_random"
+    d.mkdir(parents=True, exist_ok=True)
+    rng = np.random.default_rng(RANDOM_SEED)
+    meta, changed = [], []
+    for w, h in RANDOM_SIZES:
+        arr = rng.integers(0, 256, (h, w, 3), dtype=np.uint8)
+        name = f"random_{w}x{h}"
+        buf = io.BytesIO()
+        Image.fromarray(arr).save(buf, format="PNG")
+        png = buf.getvalue()
+        assert np.array_equal(np.asarray(Image.open(io.BytesIO(png)).convert("RGB")), arr), name   # lossless
+        if write_if_changed(d / f"{name}.png", png):
+            changed.append(f"{name}.png")
+        meta.append({"id": name, "path": f"images_random/{name}.png", "size": [w, h],
+                     "sha256": hashlib.sha256(png).hexdigest(), "rgb_sha256": hashlib.sha256(arr.tobytes()).hexdigest(),
+                     "generator": {"script": "conversion/d1/make_fixture_images.py --random",
+                                   "rng": f"numpy.random.default_rng({RANDOM_SEED})",
+                                   "draw": "rng.integers(0, 256, (h, w, 3), dtype=uint8), one call per size in this order",
+                                   "same_as": "test_vision_host.py RANDOM_SIZES with --seed 0"},
+                     "license": LICENSE})
+    if write_json(d / "meta.json", {"license": LICENSE, "generator": "conversion/d1/make_fixture_images.py --random",
+                                    "images": meta}):
+        changed.append("images_random/meta.json")
+    return changed
+
+
+def write_exif(out: Path) -> list[str]:
+    """A drawn picture turned 90 degrees clockwise in a JPEG tagged Orientation 6, and the pixels a reader that
+    applies the tag decodes from it (Pillow: `ImageOps.exif_transpose`, `convert("RGB")`), as PNG."""
+    from PIL import ImageOps
+
+    d = out / "images_exif"
+    d.mkdir(parents=True, exist_ok=True)
+    meta, changed = [], []
+    for src in EXIF_SOURCES:
+        fn, seed = IMAGES[src][0], IMAGES[src][1]
+        im = fn(seed).im
+        stored = im.transpose(Image.Transpose.ROTATE_270)          # 90 degrees clockwise
+        exif = Image.Exif()
+        exif[0x0112] = EXIF_ORIENTATION
+        buf = io.BytesIO()
+        stored.save(buf, format="JPEG", quality=JPEG_QUALITY, exif=exif.tobytes())
+        jpg = buf.getvalue()
+        name = src.split("_")[0] + "_rot90_o6"
+        shown = ImageOps.exif_transpose(Image.open(io.BytesIO(jpg))).convert("RGB")
+        buf = io.BytesIO()
+        shown.save(buf, format="PNG")
+        png = buf.getvalue()
+        assert Image.open(io.BytesIO(png)).convert("RGB").tobytes() == shown.tobytes(), name   # lossless
+        assert Image.open(io.BytesIO(jpg)).getexif().get(0x0112) == EXIF_ORIENTATION, name
+        for ext, data in (("jpg", jpg), ("png", png)):
+            if write_if_changed(d / f"{name}.{ext}", data):
+                changed.append(f"{name}.{ext}")
+        meta.append({"id": name, "jpg": f"images_exif/{name}.jpg", "png": f"images_exif/{name}.png",
+                     "source": {"id": src, "size": list(im.size), "rgb_sha256": hashlib.sha256(im.tobytes()).hexdigest()},
+                     "stored": {"size": list(stored.size), "transform": "PIL transpose ROTATE_270 (90 degrees clockwise)",
+                                "rgb_sha256": hashlib.sha256(stored.tobytes()).hexdigest(),
+                                "jpeg": {"quality": JPEG_QUALITY, "exif_orientation": EXIF_ORIENTATION,
+                                         "encoder": "Pillow " + Image.__version__ + " defaults otherwise"}},
+                     "shown": {"size": list(shown.size),
+                               "what": f"{src} rotated 180 degrees (orientation 6 turns the stored picture another "
+                                       "90 degrees clockwise), as Pillow decodes the JPEG",
+                               "rgb_sha256": hashlib.sha256(shown.tobytes()).hexdigest()},
+                     "sha256": {"jpg": hashlib.sha256(jpg).hexdigest(), "png": hashlib.sha256(png).hexdigest()},
+                     "license": LICENSE})
+    if write_json(d / "meta.json", {"license": LICENSE, "generator": "conversion/d1/make_fixture_images.py --exif",
+                                    "reader": "transformers.image_utils.load_image: ImageOps.exif_transpose, then "
+                                              "convert('RGB')", "images": meta}):
+        changed.append("images_exif/meta.json")
+    return changed
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out-dir", default=str(work_path("_d1_3b", "fixtures")))
+    ap.add_argument("--random", action="store_true", help="also write images_random/ (no records)")
+    ap.add_argument("--exif", action="store_true", help="also write images_exif/ (no records)")
     args = ap.parse_args()
     out = Path(args.out_dir).expanduser()
     (out / "images").mkdir(parents=True, exist_ok=True)
@@ -358,9 +460,15 @@ def main() -> int:
     for path, obj in ((out / "images" / "meta.json", {"license": LICENSE, "generator": "conversion/d1/make_fixture_images.py",
                                                        "images": meta}),
                       (out / "image_records.json", doc)):
-        if write_if_changed(path, (json.dumps(obj, indent=1, ensure_ascii=False) + "\n").encode()):
+        if write_json(path, obj):
             changed.append(path.name)
     print(f"{len(meta)} pictures, {len(records)} records ({n_q} questions on own pictures) -> {out}")
+    if args.random:
+        changed += write_random(out)
+        print(f"{len(RANDOM_SIZES)} random pictures -> {out / 'images_random'}")
+    if args.exif:
+        changed += write_exif(out)
+        print(f"{len(EXIF_SOURCES)} JPEG + PNG pairs (EXIF orientation {EXIF_ORIENTATION}) -> {out / 'images_exif'}")
     print(f"files rewritten: {changed if changed else 'none (all byte-identical)'}")
     return 0
 

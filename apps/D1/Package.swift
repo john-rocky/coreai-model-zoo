@@ -39,5 +39,11 @@ let package = Package(
             dependencies: ["D1"],
             path: "Sources/d1-cli"
         ),
+        // the pixel path's test CLI (ImagePixels.swift -> raw files for conversion/d1/gate_swift_pixels.py)
+        .executableTarget(
+            name: "d1-pixels-test",
+            dependencies: ["D1"],
+            path: "Sources/d1-pixels-test"
+        ),
     ]
 )
