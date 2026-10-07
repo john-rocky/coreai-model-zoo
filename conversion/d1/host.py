@@ -52,6 +52,14 @@ written out, and `test_host.py` gates it against that code and transformers' tok
        score   [encode(str(i))[0]] for i in 0..K-1 (each must be one token)
      keys (the order probabilities come in): noul ["yes", "no"] (probabilities[0] = P(yes)); choice the labels in
      request order; score "0" .. "K-1"
+     option table: a host holds the tied embedding rows of a fixed id set only (the bundle's head/option_rows, written
+             by export_option_rows.py): the single-token strings among A..Z, a..z, 0..9, 00..99, 100..999, AA..ZZ,
+             #0..#199, the " " + code form of each, and yes / Yes / YES / no / No / NO. A request any of whose readout
+             ids is not in the table is refused whole (`option_table_check`, `build_request(..., table_ids=)`):
+             "questions.<name>: the token id <N> of label '<label>' is not in the option table". That reaches a
+             one-letter native label outside A..Z / a..z ("あ", "é"); a choice of more options than the alias pool
+             holds is refused before it by the alias rule. The provider's code reads any id: this refusal is the
+             host's own (the fixture's readout ids are all in the table, results/r2a_option_rows_check.json).
 
 4. Tokens and rows (`runner.SystemOne`)
 
@@ -352,11 +360,25 @@ def trunk_split(tok, state: Any, questions: list[dict], bos: str = BOS) -> dict:
             "input_tokens": len(trunk) + sum(len(b) for b in branches)}
 
 
-def build_request(request: Any, tok, bos: str = BOS) -> dict:
+def option_table_check(questions: list[dict], table_ids) -> None:
+    """Section 3's option table: ValueError for the first readout id outside it (the request is refused whole)."""
+    have = {int(i) for i in table_ids}
+    for q in questions:
+        for key, g in zip(q["keys"], q["groups"]):
+            for i in g:
+                if int(i) not in have:
+                    raise ValueError(f"questions.{q['name']}: the token id {int(i)} of label {key!r} is not in the "
+                                     "option table")
+
+
+def build_request(request: Any, tok, bos: str = BOS, table_ids=None) -> dict:
     """request -> {"state", "questions": [build_question ...], "path": "row" | "tree", "trunk": trunk_split | None,
-    "shared": _logz_ids' trunk over the rows, "input_tokens"}."""
+    "shared": _logz_ids' trunk over the rows, "input_tokens"}. With `table_ids` (the bundle's option-row ids) a request
+    reading an id outside them is refused (option_table_check)."""
     req = validate_request(request)
     qs = [build_question(tok, req["state"], n, q, bos) for n, q in req["questions"]]
+    if table_ids is not None:
+        option_table_check(qs, table_ids)
     tree = trunk_split(tok, req["state"], qs, bos) if len(qs) > 1 else None
     return {"state": req["state"], "questions": qs, "validated": req["questions"], "path": "tree" if tree else "row",
             "trunk": tree, "shared": shared_prefix([q["row_ids"] for q in qs]),
