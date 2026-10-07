@@ -28,7 +28,7 @@
 #
 #   inputs  input_ids     [1, S]        int32  static; ids < V are tokens, V + slot reads image_embeds[slot]
 #           position_ids  [1, seq]      int32  dynamic; the cache ramp 0..seq-1 (offset = seq - S)
-#           image_embeds  [256, 2048]   fp16   static; zeros for a text row
+#           image_embeds  [2816, 2048]  fp16   static; zeros for a text row
 #   states  keyCache / valueCache [8, 1, 8, ctx, 64] (ctx dynamic), convState [22, 1, 2048, 2]
 #   output  hidden        [1, S, 2048]  final-norm hidden at every position
 #
@@ -36,6 +36,17 @@
 # with position_ids 0..cS+S-1, the last call is padded with <|pad|> (124893) and the padded
 # positions' outputs are discarded (causal, so they cannot reach a real position). The host reads
 # the hidden row of the row's last real token (the answer slot) — `conversion/d1/host.py`.
+#
+# Image rows (N_IMAGE_TOKENS = 2,816 = 11 x 256): the k-th <image> of a row, counted over every
+# picture and every crop in text order, is sent as V + k and reads image_embeds[k]; rows 0..n-1 are
+# the crops' tower rows (export_vision.py's bundle: each crop's first h * w / 4 rows) concatenated in
+# crop order, rows n..N-1 zero, the same buffer bound to every call of the row. One picture needs at
+# most 2,810 rows (10 tiles + a thumbnail, aspect up to 4:1 after the provider's cap_pixels;
+# vision_host.py, K/results/vision_grid_table.json), so N holds any one picture. A host refuses, before
+# any graph call, a request whose pictures need more than N rows together and a row over the position
+# bound (ceil(T / S) * S <= max_ctx - 1: 4,080 tokens at S = 16, max_ctx 4,096; host.graph_context_check).
+# A larger N costs a call no measurable time (the bound buffer is not copied per call:
+# K/results/r3b_image_rows_cost.json, a toy at the model's width).
 from __future__ import annotations
 
 import inspect
@@ -52,7 +63,7 @@ from coreai_models.models.macos.lfm2_vl import (
 )
 
 PREFILL_CHUNK = 16
-N_IMAGE_TOKENS = 256
+N_IMAGE_TOKENS = 2816     # 11 x 256 >= one picture's 2,810 image tokens
 PAD_ID = 124893            # <|pad|> (config pad_token_id); never read: its rows are dropped
 INPUT_NAMES = ("input_ids", "position_ids", "image_embeds")
 OUTPUT_NAMES = ("hidden",)

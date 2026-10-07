@@ -4,7 +4,7 @@
 The graph is `lfm2_d1_decoder.Lfm2D1Decoder` — the overlay's LFM2.5-VL text decoder on d1-3B's
 `model.language_model.*` weights with an Identity head (contract in that file's header):
 
-    input_ids [1,S] i32 (static), position_ids [1,seq] i32 (dynamic), image_embeds [256,2048] (static)
+    input_ids [1,S] i32 (static), position_ids [1,seq] i32 (dynamic), image_embeds [N,2048] (static, N = 2,816)
     + keyCache / valueCache [8,1,8,ctx,64] (ctx dynamic) / convState [22,1,2048,2] -> hidden [1,S,2048]
 
 One function, `main`, at static S = `--prefill-chunk` (16 by default; no S = 1 function). The externalized composites
@@ -26,15 +26,17 @@ After a quantized mode the int8 / int4 Linear names must equal the intended set 
 quantized), or the export stops. There is no lm_head in this graph; `.*lm_head$` stays in the name exclusions as in
 the recipe and matches nothing.
 
-The bundle is `<out-dir>/bundles/<name>/`, `<name>` = `d1_3b_decode_<mode>_pf<S>`:
+The bundle is `<out-dir>/bundles/<name>/`, `<name>` = `d1_3b_decode_<mode>[_n<N>]_pf<S>` (`_n<N>` when
+`--n-image-tokens` is not the default, `lfm2_d1_decoder.N_IMAGE_TOKENS` = 2,816):
 
     <name>.aimodel
     metadata.json        `_bundle.write_bundle_metadata`'s, `kind` rewritten to `decision-backbone`, `source` to the
                          checkpoint's provenance, `language.contract` (input / output / state names, shapes, dtypes; -1
                          = the dynamic axis), top-level `decision` (host.py's contract: request, prompt, option codes and
                          readout groups, rows and the static-S calls, the readout arithmetic, the response; the option
-                         rows), `vision` (extension ids V + slot, n_image_tokens, image_embeds; the grid rule: round 2b
-                         writes it), and for a quantized mode `compression`
+                         rows), `vision` (extension ids V + slot, the N image rows and how a host fills them from the
+                         tower bundle's crops, the limits a host refuses, the crop and token rules in short), and for
+                         a quantized mode `compression`
     tokenizer/           the pinned snapshot's tokenizer.json, tokenizer_config.json, chat_template.jinja, verbatim
                          (sha256 checked against the pins)
     head/                option_rows.safetensors + option_rows.json (export_option_rows.py: the tied embedding rows of
@@ -47,8 +49,9 @@ The bundle is `<out-dir>/bundles/<name>/`, `<name>` = `d1_3b_decode_<mode>_pf<S>
 which names the entry the Python runtime makes under ~/Library/Caches/coreai-cache/<build>/python/ when it loads it.
 
 `--toy` runs the same path with no checkpoint: toy_graph_check.py's toy config (hidden 64, layers conv / attention /
-conv, vocabulary 256, 8 image slots) and seeded random weights (`--toy-seed`, 0 = round 1's toy, checked bit for bit),
-name `d1_toy_decode_<mode>_pf<S>`, bundles under `<out-dir>/toy_bundles/` and `<out-dir>/toy_bundles_aotc/`. Its head/
+conv, vocabulary 256, 8 image slots unless `--n-image-tokens` says otherwise: N adds no weight) and seeded random weights
+(`--toy-seed`, 0 = round 1's toy, checked bit for bit), name `d1_toy_decode_<mode>[_n<N>]_pf<S>`, bundles under
+`<out-dir>/toy_bundles/` and `<out-dir>/toy_bundles_aotc/`. Its head/
 holds the toy embedding's rows (fp32) at the real candidate ids folded into the toy vocabulary (id % 256); tokenizer/,
 LICENSE and the metadata writer are the real ones, and metadata.json carries a `toy` block saying so.
 
@@ -153,14 +156,15 @@ def now() -> str:
 
 
 # --------------------------------------------------------------------------- the toy
-def toy_model(seed: int = 0):
-    """toy_graph_check.toy_model at any seed: the toy config, seeded random weights, the norm gains around 1 (fp32)."""
+def toy_model(seed: int = 0, n_image_tokens: int | None = None):
+    """toy_graph_check.toy_model at any seed and image-row count (N adds no parameter: the same seed gives the same
+    weights at every N): the toy config, seeded random weights, the norm gains around 1 (fp32)."""
     import torch
     from lfm2_d1_decoder import Lfm2D1Decoder
     from toy_graph_check import N_IMG, toy_config
 
     torch.manual_seed(seed)
-    model = Lfm2D1Decoder(toy_config(), n_image_tokens=N_IMG).float().eval()
+    model = Lfm2D1Decoder(toy_config(), n_image_tokens=N_IMG if n_image_tokens is None else n_image_tokens).float().eval()
     with torch.no_grad():
         for name, p in model.named_parameters():
             if name.endswith("norm.weight") or name.endswith("layernorm.weight"):
@@ -408,14 +412,37 @@ def decision_block(S: int, max_ctx: int, hidden: int, table: dict, capacity: dic
 
 
 def vision_block(cfg, n_img: int) -> dict:
+    """How a host turns pictures into the graph's image rows and extension ids — vision_host.py's contract (gated bit for
+    bit against transformers 5.19's processor), K/results/vision_rules.md, the tower's in lfm2_vl_tower.py."""
     return {
         "image_token": {"token": SPECIAL["image"][0], "id": SPECIAL["image"][1]},
-        "extension_ids": f"the host sends an image token as id V + slot (V = vocab_size {cfg.vocab_size}, slot "
-                         f"0..{n_img - 1}); the graph reads image_embeds[slot] for it",
+        "extension_ids": f"the k-th <image> of the row (k counted over every picture and every crop, in text order) is "
+                         f"sent as id V + k (V = vocab_size {cfg.vocab_size}, k < {n_img}); the graph reads "
+                         "image_embeds[k] for it",
         "n_image_tokens": n_img,
         "image_embeds": [[n_img, cfg.hidden_size], "float16"],
+        "rows": "rows 0 .. n - 1 (n = the row's <image> count) = the tower bundle's image_embeds of every crop, each "
+                "crop's first h w / 4 rows (its merged grid row-major), concatenated in crop order (pictures in text "
+                "order; per picture its tiles row-major, then the thumbnail), cast to float16; rows n .. N - 1 zero; "
+                "the same buffer is bound to every call of the row",
         "text_only": "image_embeds zero and no extension id",
-        "grid": "round 2b writes it (the vision encoder, the grid rule, the processor's image-token layout)",
+        "limits": {"one_picture": "at most 2,810 image tokens (10 tiles + a thumbnail, aspect up to 4:1 after "
+                                  "cap_pixels; K/results/vision_grid_table.json)",
+                   "refuse": f"a request whose pictures need more than {n_img} image tokens together, or whose row is "
+                             "over the position bound (host.graph_context_check), is refused whole before any graph call",
+                   "refusal_text": f"images: <n> image tokens over the graph's {n_img} image rows"},
+        "tower": {"bundle": "d1_3b_vision_<dtype> (export_vision.py; contract in lfm2_vl_tower.py's header)",
+                  "per_crop": "vision_host.tower_inputs(crop, position table) -> patches [1024, 768], pos_table [1024, d], "
+                              "key_bias [1024], unshuffle_idx [256, 4] int32 -> image_embeds [256, text hidden]; the "
+                              "crop's rows are the first h w / 4"},
+        "crops": "per picture (after cap_pixels): one crop at the smart size (aspect kept, sides multiples of 32, 64..256 "
+                 "image tokens) when max(16, round32(h)) * max(16, round32(w)) <= 524,288 px, else rows x cols tiles of "
+                 "512 x 512 (2 <= rows * cols <= 10, the closest aspect) then a thumbnail at the smart size",
+        "tokens": "<|image_start|> + (one crop: <image> x tokens | tiles: <|img_row_r_col_c|> + <image> x 256 per tile, "
+                  "then <|img_thumbnail|> + <image> x thumbnail tokens) + <|image_end|>; the prompt holds one '<image>' "
+                  "per picture after '<|im_start|>user\\n', replaced by that run (vision_host.prompt_ids)",
+        "spec": "conversion/d1/vision_host.py (sections 1-8; test_vision_host.py gates it against the provider's code "
+                "and transformers 5.19's processor)",
     }
 
 
@@ -485,6 +512,15 @@ def write_metadata(out_dir: Path, name: str, cfg, args, quant: dict | None, tabl
 
 
 # --------------------------------------------------------------------------- export
+def default_n_image_tokens(toy: bool) -> int:
+    """The image_embeds rows when --n-image-tokens is not given: the contract's N, or the toy's 8."""
+    if toy:
+        from toy_graph_check import N_IMG
+        return N_IMG
+    from lfm2_d1_decoder import N_IMAGE_TOKENS
+    return N_IMAGE_TOKENS
+
+
 def bundle_name(args) -> str:
     if args.name:
         return args.name
@@ -493,6 +529,8 @@ def bundle_name(args) -> str:
         suffix = "_l" + "-".join(str(i) for i in sorted(set(args.fp16_layers)))
     if args.mode == "int4lin" and args.quant_block != 32:
         suffix = f"_b{args.quant_block}"
+    if args.n_image_tokens != default_n_image_tokens(args.toy):
+        suffix += f"_n{args.n_image_tokens}"
     return f"{TOY_PREFIX if args.toy else NAME_PREFIX}_{args.mode}{suffix}_pf{args.prefill_chunk}"
 
 
@@ -539,7 +577,7 @@ def export(args, out_dir: Path, name: str) -> dict:
     t0 = time.monotonic()
     toy = None
     if args.toy:
-        base = toy_model(args.toy_seed)
+        base = toy_model(args.toy_seed, args.n_image_tokens)
         load = {"toy": True, **toy_round1_check(base, args.toy_seed),
                 "parameters": int(sum(p.numel() for p in base.parameters()))}
         model = typed_module(base, dtype)
@@ -674,7 +712,8 @@ def main() -> None:
     ap.add_argument("--prefill-chunk", type=int, default=16, help="static S of the one function 'main' (name _pf<S>)")
     ap.add_argument("--max-ctx", type=int, default=4096)
     ap.add_argument("--n-image-tokens", type=int, default=None,
-                    help="the image_embeds rows (default 256; the toy's 8)")
+                    help="the image_embeds rows N (default lfm2_d1_decoder.N_IMAGE_TOKENS; the toy's 8); a non-default "
+                         "N adds _n<N> to the name")
     ap.add_argument("--out-dir", default=str(LANE / "exports"),
                     help="bundles go to <out-dir>/bundles/<name>/ (the toy's to toy_bundles/), AOT assets to "
                          "<out-dir>/bundles_aotc/ (toy_bundles_aotc/)")
@@ -693,8 +732,9 @@ def main() -> None:
     if args.prefill_chunk < 2:
         ap.error("--prefill-chunk must be >= 2 (this graph has no S=1 function)")
     if args.n_image_tokens is None:
-        from toy_graph_check import N_IMG
-        args.n_image_tokens = N_IMG if args.toy else 256
+        args.n_image_tokens = default_n_image_tokens(args.toy)
+    if args.n_image_tokens < 1:
+        ap.error("--n-image-tokens must be >= 1")
     name = bundle_name(args)
     sub = "toy_bundles" if args.toy else "bundles"
     out_dir = Path(args.out_dir) / sub / name

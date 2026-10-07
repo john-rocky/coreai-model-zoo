@@ -18,18 +18,26 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 | `host.py` | the host specification (`tokenizers`, NumPy, json): the request checks, the prompt text, option codes and readout groups, the row and the Tree split, the readout arithmetic, the answers and the response, the graph's static-S rows |
 | `test_host.py` | `host.py` against the provider's code (through `oracle_d1.dry_run`) and transformers' tokenizer on every fixture question with two tokenizers; the tokenizer contract, the readout's equivalence on random full-vocabulary logits, a request table, negative controls, the fixture's lengths |
 | `oracle_d1.py` | the provider's code unchanged (`AutoModel` + `trust_remote_code`, fp32, CPU): the API path and the row form per question, Tree against row, the final-norm hook and its proof, determinism; `--dry-run` runs the same code on a stand-in backbone (no weights) |
-| `lfm2_d1_decoder.py` | the decoder module: `Lfm2VlPipelinedForCausalLM` with an Identity head, hidden `[1, S, 2048]` out, the static-S export spec; run as a script it checks the module against the checkpoint's config and safetensors header with no weights |
+| `lfm2_d1_decoder.py` | the decoder module: `Lfm2VlPipelinedForCausalLM` with an Identity head, hidden `[1, S, 2048]` out, `image_embeds [N_IMAGE_TOKENS, 2048]` in (the image-row contract in its header), the static-S export spec; run as a script it checks the module against the checkpoint's config and safetensors header with no weights |
 | `toy_graph_check.py` | the decoder class at a toy config through export, `optimize`, `save_asset` and the Python runtime on the CPU, against its eager forward; the extension-id image rows |
 | `export_decoder.py` | the bundle (round 3 with the weights): fp16 / int8lin / int8mix / int4lin, one static-S function `main`, the quantized set asserted equal to the recipe's; `metadata.json` (`decision-backbone`, the contract, `decision` with the option table, `vision`, `compression`), `tokenizer/` and `LICENSE` verbatim, `head/` the option rows; `--aot` compiles for the Mac GPU (h16c); `--toy` runs the same path on a toy config with random weights |
 | `export_option_rows.py` | the option table (round 3 with the weights): the tied embedding rows of every readout candidate id, bf16 to fp32, read one row at a time and checked by a second reader; `--check` holds every fixture readout id against the table and the host's refusals against their controls |
 | `readout_gate.py` | the gate (round 3 against the oracle): the AOT graph on the Mac GPU (`SpecializationOptions.default()`), the slot's hidden row through the host's readout, against the oracle; at most 40 rows a process and a re-run of its first row; the red arms with an oracle pre-check; `red`, `merge`, `red-records` |
 | `parity_decoder_torch.py` | the decoder module in fp32 torch driven as the graph runs (round 3 against the oracle): P1 every row through the host's readout, P2 the chunk order against one forward, P3 the chunk widths, P4 the red arms; `toy` runs all four on the toy |
 | `timing.py` | decision latency for the card's columns (round 3 on the model's bundle), inside a measurement window its caller holds; `--dry-run` prints the plan without a bundle |
+| `vision_host.py` | the image path's host specification (NumPy + Pillow): the provider's `cap_pixels`, the processor's crop plan (one crop or tiles + a thumbnail), torch's uint8 bicubic resize, patches and mask, the image token run and the extension ids, the position-table resize, the unshuffle index, the tower's four inputs per crop |
+| `test_vision_host.py` | `vision_host.py` against the provider's image path (`cap_pixels` → transformers 5.19's processor, the row / trunk split): ids, pixel_values bit for bit, spatial shapes, mask, the position table, the unshuffle, the tower contract on a small random SigLIP2, negative controls, and the grid table |
+| `make_fixture_images.py` | the CC0 fixture pictures (drawn shapes, seeded) and their records; the card's example picture as a URL only |
+| `lfm2_vl_tower.py` | the vision tower in its exact form: SigLIP2 + projector with the crop's grid as inputs (patches, pos_table, key_bias, unshuffle_idx → image_embeds), every shape static; `from_hf` with a load report, `typed` (fp16 / fp16w32 / fp32), the toy snapshot (`write-toy`) and the scout against the checkpoint's config and safetensors header (`scout`) |
+| `vision_toy_oracle.py` | the toy's oracle: transformers 5.19's own loader and `get_image_features` on the toy snapshot, every crop of the fixture's and the random pictures, with the host's four inputs per crop |
+| `export_vision.py` | the tower bundle: fp16 / fp16w32 / fp32, `metadata.json` (`vision-tower`: the inputs and the output, the host's rules in short), `host/position_embedding.safetensors`, `LICENSE`; `--aot` compiles for the Mac GPU (h16c, no `--expect-frequent-reshapes`); `--toy` |
+| `gate_tower.py` | the tower gate: the AOT asset on the Mac GPU, every oracle crop, against transformers' rows (cosine, lowest row cosine, max \|d\|), a re-run in a fresh process, and two negative controls (no padding mask, the unshuffle index transposed) |
 | `decide.py` | (later) the Python reference read-out on the graph: a request to a response |
 
 ## Environment
 
-- **The provider's code** (`oracle_d1.py`, `test_host.py`, `make_fixtures.py`): a private venv with transformers >= 5.14
+- **The provider's code and transformers' own image path** (`oracle_d1.py`, `test_host.py`, `make_fixtures.py`,
+  `test_vision_host.py`, `vision_toy_oracle.py`): a private venv with transformers >= 5.14
   (the checkpoint's tokenizer class `TokenizersBackend` and the provider's imports need transformers 5):
 
   ```bash
@@ -148,3 +156,55 @@ red on every arm that moves the oracle, and the graph's change must equal the or
 The option table covers every readout id the host's rules can produce for noul, score and ASCII-letter or positional
 choice questions, up to the alias pool's limit; a request that would read an id outside it (a one-letter native label
 in another script) is refused whole by the host (`host.py` section 3, `decision.option_table` in the metadata).
+
+## 3. Vision
+
+A picture reaches the decoder in three steps, each with its own gate:
+
+1. **The host** (`vision_host.py`): the picture becomes crops — one crop at the picture's aspect (at most 1024 patches,
+   both sides even), or 512 × 512 tiles plus a thumbnail — and each crop becomes the tower's four inputs. The prompt's
+   `<image>` becomes the picture's token run, and every `<image>` of the row becomes an extension id `V + k`, k counted
+   over every picture and crop. `test_vision_host.py` holds all of it against the provider's code and transformers'
+   processor.
+2. **The tower** (`lfm2_vl_tower.py`, one graph for every crop): `patches [1024, 768]` + `pos_table [1024, 1152]` (the
+   16 × 16 table resized to the crop's grid by the host) + `key_bias [1024]` (0 for a patch, -inf for padding) +
+   `unshuffle_idx [256, 4]` → `image_embeds [256, 2048]`, of which the first h·w/4 rows are the crop's tokens. The
+   bundle ships the position table next to the graph (`host/`). Three forms: fp16, fp16w32 (fp16 weights, fp32 math:
+   the form a tower whose fp16 math misses ships in), fp32.
+3. **The decoder's image rows**: `image_embeds [2816, 2048]` (N = `lfm2_d1_decoder.N_IMAGE_TOKENS`). One picture needs
+   at most 2,810 rows, so N holds any one picture; the crops' rows are concatenated in crop order, the rest is zero,
+   and the same buffer is bound to every call of the row. A request whose pictures need more than N rows together, and
+   a row over the position bound, are refused by the host before any graph call (`vision` in the decoder's metadata).
+
+### The tower on the toy
+
+The toy is a small SigLIP2 + projector at the checkpoint's patch size, position grid and activations, with the toy
+decoder's width; its snapshot is laid out like the checkpoint (the same tensor names, BF16), so the toy runs through the
+same `from_hf` as the model and transformers loads it with its own loader. The oracle is transformers 5.19's
+`get_image_features` on every crop of the fixture's 12 pictures and 6 random ones.
+
+```bash
+SNAP=<the pinned snapshot>   # hf_snapshot("LiquidAI/d1-3B", revision=...)
+$PY lfm2_vl_tower.py scout $SNAP/config.json <safetensors header json> --out $K/results/<tower scout>.json
+$PY lfm2_vl_tower.py write-toy --seed 0 --template-config $SNAP/config.json --out $K/oracle_toy_vision/toy_snapshot
+source $K/venv-oracle/bin/activate && python vision_toy_oracle.py     # -> $K/oracle_toy_vision/<picture>/<crop>.npz
+for d in fp32 fp16w32 fp16; do
+  $PY export_vision.py --toy --dtype $d --aot --record $K/results/<toy tower export $d>.json
+  $PY gate_tower.py run $K/exports/toy_vision/d1_toy_vision_$d --transcript $K/results/<toy tower gate $d>.json
+done
+```
+
+`gate_tower.py` writes its bar into the transcript before the first GPU process: fp32 must match transformers within
+fp32 rounding on every crop and reproduce itself bit for bit in a fresh process; fp16w32 must hold every crop's and
+every row's cosine; fp16 is recorded. Both negative controls must miss the bar on every crop they can move.
+
+### The tower on the model (needs `model.safetensors`)
+
+```bash
+$PY export_vision.py --dtype fp16w32 --aot --record $K/results/<tower export fp16w32>.json
+$PY export_vision.py --dtype fp16 --aot --record $K/results/<tower export fp16>.json
+```
+
+The model's tower oracle (transformers on the checkpoint, in the toy oracle's layout) comes with the weights;
+`gate_tower.py run <bundle> --oracle <its oracle.json>` reads it the same way. A decoder for another number of image
+rows takes `export_decoder.py --n-image-tokens N` (default N_IMAGE_TOKENS; another N adds `_n<N>` to the name).
