@@ -32,6 +32,7 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 | `vision_toy_oracle.py` | the toy's oracle: transformers 5.19's own loader and `get_image_features` on the toy snapshot, every crop of the fixture's and the random pictures, with the host's four inputs per crop |
 | `export_vision.py` | the tower bundle: fp16 / fp16w32 / fp32, `metadata.json` (`vision-tower`: the inputs and the output, the host's rules in short), `host/position_embedding.safetensors`, `LICENSE`; `--aot` compiles for the Mac GPU (h16c, no `--expect-frequent-reshapes`); `--toy` |
 | `gate_tower.py` | the tower gate: the AOT asset on the Mac GPU, every oracle crop, against transformers' rows (cosine, lowest row cosine, max \|d\|), a re-run in a fresh process, and two negative controls (no padding mask, the unshuffle index transposed) |
+| `gate_swift.py` | the Swift host `apps/D1` (its text side) against `host.py` / `vision_host.py` / `tokenizers`, bit for bit: the request checks and the rendered text, every row's ids and readout groups, a picture's crop plan and token run, the readout arithmetic and the answers, three negative controls and the bundle's contract checks (`source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift.py all`; the binary from `swift build -c release --package-path apps/D1 --scratch-path $ZOO_WORK_ROOT/_d1_3b/swift/.build`) |
 | `decide.py` | (later) the Python reference read-out on the graph: a request to a response |
 
 ## Environment
