@@ -8,18 +8,26 @@ the Mac CLI. `conversion/d1/host.py` (the text, the ids, the readout, the respon
 checks the copy against them and against HF `tokenizers` on the checkpoint's `tokenizer.json`, exactly: the same text,
 the same ids, the same readout bits, the same response bytes.
 
-This build is the text side. The decoder graph is not called yet: `D1Decider.decide` builds the rows and stops with
-`D1Error.graphNotWired`; `D1Decider.response(requestJSON:slotHidden:)` runs the readout and the answers from slot hidden
-rows the caller supplies. The pixels of a picture (decode, the processor's resize, patches, the position table) are not
-here either: `D1Vision` plans the crops and the image-token run from the picture's size.
+The text side and the graph side are here. `D1Decider.loadGraph` loads the decoder bundle's graph (and a tower bundle
+for pictures) and checks both against their `metadata.json`; `decide` then runs request → rows → graph → readout →
+response, the order of `conversion/d1/decide.py`, the Python reference it copies. A decider loaded without a graph
+builds the rows and stops with `D1Error.graphNotWired`; `D1Decider.response(requestJSON:slotHidden:)` runs the readout
+and the answers from slot hidden rows the caller supplies. A picture's pixels (decode, the processor's resize, patches,
+the position table) are not computed here yet: `D1Vision` plans the crops and the image-token run from the picture's
+size, and the four tower inputs of each crop are read from files (`D1TowerInputs`, what `vision_host.tower_inputs`
+writes).
 
 ```swift
 import D1
 
 let d1 = try await D1Decider(bundle: bundleDir)              // metadata.json, tokenizer/, head/option_rows checked
-let rows = try d1.rows(requestJSON: requestData)              // one row per question; the Tree's trunk / branches
-let body = try d1.response(requestJSON: requestData, slotHidden: hidden)   // hidden: one slot row per question
+try await d1.loadGraph(asset: .aot)                           // the decoder (.aimodelc; .jit = the bundle's .aimodel)
+let body = try await d1.decide(requestJSON: requestData)      // the System One response
 print(PythonFormat.dumps(body, indent: 2, asciiOnly: false))
+
+let rows = try d1.rows(requestJSON: requestData)              // the text side alone: one row per question
+let kept = try await d1.prepare(state: state)                 // a state run once ...
+let later = try await d1.decide(prepared: kept, questionsJSON: questionsData)   // ... and questions on it later
 ```
 
 ## What each part copies
@@ -32,7 +40,9 @@ print(PythonFormat.dumps(body, indent: 2, asciiOnly: false))
 | `Encoder.swift` | host.py §3–4: the ids of `tokenizers`' `encode(text, add_special_tokens=False)`, `aliases` with the fallback pool, `readout_groups`, `build_question` (row, slot), `build_request` (one question = its row; several = the Tree, trunk and branches encoded apart), `shared_prefix`, `option_table_check`, `graph_context_check` |
 | `Vision.swift` | vision_host.py §1, 2, 5, 6: `cap_size`, `smart_size`, `is_too_large`, the 26 target ratios and the tie-break, `plan`, `image_tokens`, `prompt_ids` (the text cut at each `<image>`), `extension_ids` (the k-th `<image>` → 128,000 + k) |
 | `Readout.swift` | host.py §5–6: z = h · E[id] in float64, the group max, the softmax with Python 3.12's `sum()`, `answer`, `response`; the option table |
-| `D1Decider.swift` | the glue in host.py's order; the bundle's `metadata.json` and `head/option_rows.{json,safetensors}` read and checked at load |
+| `D1Decider.swift` | the glue in host.py's order; the bundle's `metadata.json` and `head/option_rows.{json,safetensors}` read and checked at load; the graph's side of decide.py (`D1.build` / `decide` / `prepare` / `decide_prepared`): the rows in the graph's ids, the readout groups, the state's stable tokens Ls, direct / shared / prepared, the trace |
+| `Decoder.swift` | the decoder graph on the low-level runtime (apps/Kev's `KevDecoder`, itself apps/ClefFlash's): `AIModel` + `loadFunction("main")`, the descriptor checked against `metadata.json` `language.contract`, the three states allocated once at `max_context_length` and zeroed per row, the image rows written once per request and bound to every call, S-id calls with `position_ids` 0 ..< p + S, the pad, the shared prefix and the prepared state |
+| `Tower.swift` | the vision tower bundle (apps/ClefFlash's `VisionTower`): its contract from the tower's `metadata.json` `graph`, one call per crop, the float inputs cast to an fp16 tower's type, each crop's first h w / 4 rows cast to float16 into the image rows; `D1TowerInputs` reads a crop's four inputs from raw files |
 | `D1BLAS` (C) | the readout's products through the BLAS calls NumPy makes for `E @ h` (Accelerate's new interface, ILP64; operands on page-aligned copies) |
 
 ## The tokenizer: swift-transformers plus three steps
@@ -82,6 +92,40 @@ built against Accelerate — then the group max, `exp(s − max)` with the C lib
 boundary the last bits move), so the operands are copied to page-aligned buffers first, as NumPy's arrays of these
 sizes start on a page. The response's floats are not rounded and print as Python's `repr`.
 
+## The graph
+
+The decoder bundle (`conversion/d1/export_decoder.py`) holds one static-S function `main`: `input_ids [1, S]`,
+`position_ids [1, -1]` and `image_embeds [N, d]` in, the final-norm hidden state `hidden [1, S, d]` of every position
+out, and three states (`keyCache` / `valueCache` with a dynamic sequence axis, `convState`). Every name, shape and
+type of that contract is read from `metadata.json` `language.contract`, and the loaded function's descriptor must equal
+it; S, `max_context_length`, d, N and the pad id come from the same file. A different graph fails at load.
+
+- **A row.** The states are allocated once, with the sequence axis at `max_context_length`, and zeroed at the start of
+  every row. A row of T ids runs as ceil(T / S) calls; call c gets ids cS ..< cS + S with `position_ids` 0 ..< cS + S,
+  the last call padded with `<|pad|>`, and the padded positions' rows are dropped. The readout reads the row's last
+  position.
+- **The image rows.** One `image_embeds` buffer per decoder: a request with pictures writes every crop's first h w / 4
+  tower rows (crops in order, pictures in text order, cast to float16) at its top and zero after; a text request leaves
+  it zero and nothing is rewritten. The k-th `<image>` of a row is sent as 128,000 + k and reads row k.
+- **Shared and prepared.** Every row of a request starts with the same prefix (BOS, the user turn, the pictures, the state
+  block, `"\nQUESTION:\n"`). Its stable tokens Ls are the prefix's ids without the ids of its last pre-token: that piece
+  (`":\n"`) can merge with the question's first characters (`":\n\n"` is one token), nothing before it can. Shared runs
+  the first k = floor(Ls / S) · S ids once, copies the three states and runs every row's rest from a copy, positions
+  continuing at k: on a static-S graph these are the direct run's calls with the direct run's inputs, so the hidden rows
+  are the same bits. `prepare(state:)` runs those k ids once and keeps the states; `decide(prepared:questionsJSON:)`
+  answers questions on a copy of them later (a row that does not start with the kept ids runs whole). Pictures in a
+  prepared state are not supported here.
+- **AOT and JIT.** `loadGraph(asset: .aot)` loads `<bundles>_aotc/<name>.h16c.aimodelc` with
+  `SpecializationOptions.default`; `.jit` lets the runtime specialize the bundle's `.aimodel` here, GPU preferred with
+  `expectFrequentReshapes` (the exporter's AOT flags), and keeps the result under
+  `~/Library/Caches/coreai-cache/<OS build>/<process name>/`. The tower's JIT is GPU preferred without frequent reshapes
+  (its AOT flags).
+- **A toy bundle.** A bundle with a `toy` block in `metadata.json` (a 256-id vocabulary with random weights, for the
+  gates) gets every real id folded (id % V; 128,000 + k → V + k) and its pad from `toy.pad_folded`; its readout groups
+  are given by the caller (`groups:`) or folded the same way.
+- **The trace.** `trace(request:)` returns every row's ids in the graph's vocabulary, the slot, the hidden rows, the
+  logits and p, the response and each call's time; `gate_swift.py` compares them with `decide.py`'s on the same asset.
+
 ## Build and run (Mac)
 
 ```bash
@@ -100,9 +144,23 @@ $D1 readout-test --in cases.json --head <bundle>/head --hidden hidden.f32 --out 
 $D1 answers-test --in cases.json --out out.json
 $D1 bundle-check --bundle <bundle> --out out.json
 
-# the gate (the lane's venv: tokenizers, NumPy, safetensors)
+# the graph (the Mac GPU)
+$D1 decide --bundle <bundle> [--asset aot|jit] [--tower <tower bundle> --tower-inputs <dir>] --request req.json \
+    [--shared] [--groups groups.json] --out resp.json [--trace trace.json] [--reps N] [--warm]
+$D1 fixture --bundle <bundle> --records records.json [--groups groups.json] --arms direct,shared [--asset aot|jit] \
+    [--tower <tower bundle> --tower-inputs <dir> [--zero-image-control]] [--dump-hidden <dir>] --out pass.json
+$D1 prepare-test --bundle <bundle> --records records.json [--groups groups.json] --out out.json
+
+# the gates (the lane's venv: tokenizers, NumPy, safetensors; the graph sections after conversion/d1/decide.py's records)
 cd conversion/d1 && python gate_swift.py all        # -> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json
+~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph   # -> results/r3c_swift_graph.json
 ```
+
+`decide` answers one request (`images` in the request names pictures by file; their crops' inputs come from the
+`--tower-inputs` directory's `manifest.json`) and writes the response as `json.dumps(response, indent=2,
+ensure_ascii=False)`; `fixture` answers every record from its raw request, direct and shared, a refused request with
+its text and each of its questions alone, and re-runs the first record at the end; `prepare-test` checks prepare +
+decide(prepared) against shared. `_time_mac.sh` is the timing window's driver (apps/Kev's, not run in round 3c).
 
 `rows` validates each question alone (as `test_host.py` does) and then the whole request with the option table;
 `--plain` adds swift-transformers' own ids of every row. `readout-test` reads an option table as a bundle holds it and

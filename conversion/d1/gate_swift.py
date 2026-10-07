@@ -30,11 +30,27 @@ vision_host.py / `tokenizers` 0.23.2 on the snapshot's tokenizer.json, and compa
             head with the slot hidden rows round 2a's gate took from the Mac GPU (393 runs): p = the recorded p
   all       every section -> results/r3a_swift_text.json
 
+Round 3c, the graph side (`d1 fixture` / `prepare-test` on the toy bundles; the GPU: run under quiet_wait; the Python
+records first: decide.py check on the fp16 and int8lin toys, decide.py e2e --eager):
+  score     the fp16 toy's AOT asset, every fixture record from its raw request: G1 ids / slot / the toy's folded ids and
+            groups, G2 every row's hidden sha256 = round 2a's readout gate (393), G3 p bits = decide.py check and the gate,
+            the response bytes (361 records, the refusal's text), G4 shared = direct (hidden bits) and = decide.py's
+            shared, G5 the reset re-run, G6 finite
+  shared    `d1 prepare-test`: prepare(state) + decide(prepared) = shared (hidden, p, response; each question alone too)
+  jit       the bundle's .aimodel specialized by Swift (GPU + expectFrequentReshapes) against the AOT asset: hidden bits
+  e2e       round 3b's three picture rows: the Swift tower (the oracle's four inputs per crop) -> the toy decoder N=2,816
+            against decide.py e2e (hidden, tower outputs, p, response) and round 3b's numbers; the zero-image control red
+  tower     the 64 oracle crops through the Swift tower (fp32, fp16w32) = round 3b's tower gate's outputs (sha256)
+  int8      score and jit on the int8lin toy
+  graph     every graph section -> results/r3c_swift_graph.json; graph-inputs writes the CLI's inputs only
+
     cd conversion/d1
     source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift.py all
+    ~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph
     (the binary: swift build -c release --package-path apps/D1 --scratch-path $ZOO_WORK_ROOT/_d1_3b/swift/.build)
 
--> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json; the CLI's inputs and outputs under _d1_3b/swift/r3a/.
+-> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json, r3c_swift_graph.json; the CLI's inputs and outputs under
+_d1_3b/swift/r3a/, swift/r3c/.
 """
 from __future__ import annotations
 
@@ -847,6 +863,389 @@ def toy_slot_readout() -> dict:
             "pass": eq_rec == eq_now == len(runs)}
 
 
+# --------------------------------------------------------------------------- round 3c: the graph side
+# The Swift host's graph (`d1 fixture` / `prepare-test` on the toy bundles' AOT and JIT assets, the tower bundles) against
+# the Python runtime's records of the same assets: round 2a's readout gate (every row's hidden sha256 and p), decide.py
+# check (p bits, the response bytes, shared / prepared), round 3b's tower gate (every crop's output sha256) and decide.py
+# e2e (round 3b's three picture rows). The Swift passes run here when their file is missing (the GPU: run this under
+# quiet_wait); every section writes swift/r3c/section_<name>.json, `graph` all of them into results/r3c_swift_graph.json.
+GRAPH_WORK = SWIFT / "r3c"
+GRAPH_TRANSCRIPT = RESULTS / "r3c_swift_graph.json"
+EXPORTS = LANE / "exports"
+TOY_DECODERS = {"fp16": EXPORTS / "toy_bundles" / "d1_toy_decode_fp16_pf16_tbl2",
+                "int8lin": EXPORTS / "toy_bundles" / "d1_toy_decode_int8lin_pf16_tbl2"}
+E2E_DECODER = EXPORTS / "toy_bundles" / "d1_toy_decode_fp16_n2816_pf16"
+TOY_TOWERS = {"fp32": EXPORTS / "toy_vision" / "d1_toy_vision_fp32", "fp16w32": EXPORTS / "toy_vision" / "d1_toy_vision_fp16w32"}
+R2A = {"fp16": RESULTS / "r2a_toy_readout_fp16_tbl2.json", "int8lin": RESULTS / "r2a_toy_readout_int8lin_tbl2.json"}
+PY_CHECK = {"fp16": RESULTS / "r3c_py_check_fp16.json", "int8lin": RESULTS / "r3c_py_check_int8lin.json"}
+PY_E2E = RESULTS / "r3c_py_e2e.json"
+R3B_E2E = RESULTS / "r3b_toy_vlm_e2e.json"
+TOY_ORACLE = LANE / "oracle_toy_tbl2" / "records_oracle.json"
+ORACLE_VISION = LANE / "oracle_toy_vision"
+E2E_RECORDS = ("img01_shapes_384x384", "img06_grid_1024x768", "img12_small_300x300")
+E2E_BAR = {"answer_slot_cos": 0.999, "every_position_cos": 0.999}   # round 3b's
+E2E_FIELDS = ("answer_slot_cos", "answer_slot_max_abs", "answer_slot_rel_change", "every_position_cos_min",
+              "every_position_cos_argmin", "image_positions_cos_min", "text_positions_cos_min", "max_abs")
+
+
+def graph_inputs() -> dict:
+    """The CLI's inputs (no GPU): the toy's readout groups per record (round 2a's toy oracle), every oracle crop's four
+    tower inputs as raw little-endian files + manifest.json, the e2e records (round 3b's three picture rows: the first
+    question of img01 / img06 / img12) and the tower records (every oracle picture, one noul question)."""
+    GRAPH_WORK.mkdir(parents=True, exist_ok=True)
+    groups = {r["id"]: {q["name"]: q["groups"] for q in r["questions"]}
+              for r in json.loads(TOY_ORACLE.read_text())["records"]}
+    write_json(GRAPH_WORK / "toy_groups.json", groups)
+    sizes = {r["id"]: r["size_in"][0] for r in json.loads(VISION_HOST.read_text())["records"] if r["kind"] != "pair"}
+    oracle = json.loads((ORACLE_VISION / "oracle.json").read_text())
+    tin = GRAPH_WORK / "tower_inputs"
+    pics = []
+    for p in oracle["pictures"]:
+        crops = []
+        for c in p["crops"]:
+            z = np.load(c["npz"])
+            files = {}
+            for k in ("patches", "pos_table", "key_bias", "unshuffle_idx"):
+                a = z[k].astype("<i4" if k == "unshuffle_idx" else "<f4")
+                f = Path(p["id"]) / f"{c['crop']}.{k}.{'i32' if k == 'unshuffle_idx' else 'f32'}"
+                (tin / f).parent.mkdir(parents=True, exist_ok=True)
+                (tin / f).write_bytes(a.tobytes())
+                files[k] = str(f)
+            crops.append({"crop": c["crop"], "kind": c["kind"], "grid": c["grid"], "n_tokens": c["n_tokens"], **files})
+        pics.append({"id": p["id"], "size": sizes[p["id"]], "crops": crops})
+    write_json(tin / "manifest.json", {"schema": "d1-tower-inputs/1", "source": str(ORACLE_VISION / "oracle.json"),
+                                       "pictures": pics})
+    fx = {r["id"]: r for r in json.loads(IMAGE_FIXTURES.read_text())["records"]}
+    e2e = []
+    for rid in E2E_RECORDS:
+        name, q = next(iter(fx[rid]["request"]["questions"].items()))
+        e2e.append({"id": rid, "request": {"state": fx[rid]["request"]["state"], "questions": {name: q}}, "pictures": [rid]})
+    write_json(GRAPH_WORK / "e2e_records.json", {"records": e2e})
+    tower = [{"id": p["id"], "request": {"state": None, "questions": {"q": {"type": "noul", "instructions": "Is there a shape?"}}},
+              "pictures": [p["id"]]} for p in pics]
+    write_json(GRAPH_WORK / "tower_records.json", {"records": tower})
+    return {"groups_records": len(groups), "pictures": len(pics), "crops": sum(len(p["crops"]) for p in pics),
+            "e2e_records": len(e2e), "manifest": str(tin / "manifest.json")}
+
+
+def swift_pass(name: str, *cli: str) -> tuple[dict, float | None]:
+    """swift/r3c/<name>.json: the CLI's pass file (run here when it does not exist yet)."""
+    out = GRAPH_WORK / f"{name}.json"
+    secs = None
+    if not out.exists():
+        secs = run(*cli, "--out", str(out))
+    return json.loads(out.read_text()), secs
+
+
+def fixture_pass(mode: str, asset: str, arms: str = "direct,shared") -> tuple[dict, float | None]:
+    dump = GRAPH_WORK / f"hidden_{mode}_{asset}"
+    return swift_pass(f"pass_{mode}_{asset}", "fixture", "--bundle", str(TOY_DECODERS[mode]), "--records", str(FIXTURES),
+                      "--groups", str(GRAPH_WORK / "toy_groups.json"), "--arms", arms, "--asset", asset,
+                      "--dump-hidden", str(dump))
+
+
+def swift_rows(p: dict) -> dict:
+    """(record id, question name) -> the Swift row (accepted rows and a refused request's questions alone)."""
+    out = {}
+    for r in p["records"]:
+        for row in r.get("rows", r.get("sub", [])):
+            out[(r["id"], row["name"])] = row
+    return out
+
+
+def score_mode(mode: str, asset: str = "aot") -> dict:
+    """G1 ids / slot = render_ids (and the toy's folded ids = the toy oracle's), G2 hidden sha256 = round 2a's gate, G3 p
+    bits and the response bytes = decide.py check, G4 shared = direct (hidden bits) and = decide.py's shared, G5 the
+    reset re-run, G6 finite."""
+    p, secs = fixture_pass(mode, asset)
+    sw = swift_rows(p)
+    rid = {r["id"]: r for r in json.loads(RENDER_IDS.read_text())["records"]}
+    toy = {(r["id"], q["name"]): q for r in json.loads(TOY_ORACLE.read_text())["records"] for q in r["questions"]}
+    gate = {(r["id"], r["name"]): r for r in json.loads(R2A[mode].read_text())["runs"] if r.get("variant", "base") == "base"}
+    py = {r["id"]: r for r in json.loads(PY_CHECK[mode].read_text())["records"]}
+    py_rows = {(r["id"], row["name"]): row for r in py.values() for row in r.get("rows", r.get("sub", []))}
+    g1 = g2 = g3 = g3_rec = fin = 0
+    g1_bad, g2_bad, g3_bad, rec_bad = [], [], [], []
+    n_rows = 0
+    for r in rid.values():
+        for q in r["questions"]:
+            n_rows += 1
+            s = sw.get((r["id"], q["name"]))
+            if s is None:
+                g1_bad.append(f"{r['id']}/{q['name']}: missing")
+                continue
+            ok1 = (s["row_ids_sha256"] == hashlib.sha256(json.dumps(q["row_ids"]).encode()).hexdigest() and s["slot"] == q["slot"]
+                   and s["graph_ids_sha256"] == hashlib.sha256(json.dumps(toy[(r["id"], q["name"])]["row_ids"]).encode()).hexdigest()
+                   and s["read_groups"] == toy[(r["id"], q["name"])]["groups"])
+            g1 += ok1
+            if not ok1 and len(g1_bad) < 6:
+                g1_bad.append(f"{r['id']}/{q['name']}")
+            ok2 = s["hidden_sha256"] == gate[(r["id"], q["name"])]["hidden_sha256"]
+            g2 += ok2
+            if not ok2 and len(g2_bad) < 6:
+                g2_bad.append(f"{r['id']}/{q['name']}")
+            pr = py_rows.get((r["id"], q["name"]))
+            ok3 = (pr is not None and s["p_bits"] == pr["p_bits"] and s["hidden_sha256"] == pr["hidden_sha256"]
+                   and s["p_bits"] == [format(bits(x), "x") for x in gate[(r["id"], q["name"])]["probs"]])
+            g3 += ok3
+            if not ok3 and len(g3_bad) < 6:
+                g3_bad.append(f"{r['id']}/{q['name']}")
+            fin += bool(s["finite"]) and not s["all_zero"]
+    for r in p["records"]:
+        y = py[r["id"]]
+        if r["accepted"]:
+            ok = (y["accepted"] and r["response_indent2"] == y["response_indent2"] and r["answers_dumps"] == y["answers_dumps"]
+                  and r["input_tokens"] == y["input_tokens"] and r["state_tokens"] == y["state_tokens"]
+                  and r["input_tokens"] == rid[r["id"]].get("input_tokens"))
+        else:
+            ok = not y["accepted"] and r["error"] == y["error"]
+        g3_rec += ok
+        if not ok and len(rec_bad) < 6:
+            rec_bad.append(r["id"])
+    multi = [r for r in p["records"] if r["accepted"] and len(r["rows"]) > 1]
+    shared_all = [r for r in p["records"] if "shared" in r]
+    sh_multi = sum(all(r["shared"]["hidden_bit_equal_direct"]) for r in multi)
+    sh_all = sum(all(r["shared"]["hidden_bit_equal_direct"]) for r in shared_all)
+    sh_py = sum(r["shared"]["hidden_sha256"] == py[r["id"]]["shared"]["hidden_sha256"]
+                and [[x for x in b] for b in r["shared"]["p_bits"]] == py[r["id"]]["shared"]["p_bits"] for r in shared_all)
+    sh_resp = sum(r["shared"]["response_indent2_equal_direct"] for r in shared_all)
+    reset = p["reset_check"]
+    rec = {"pass_file": str(GRAPH_WORK / f"pass_{mode}_{asset}.json"), "swift_seconds": secs, "bundle": str(TOY_DECODERS[mode]),
+           "asset": p["graph"]["asset"], "asset_path": p["graph"]["asset_path"], "options": p["graph"]["options"],
+           "gate_transcript": str(R2A[mode]), "python_check": str(PY_CHECK[mode]),
+           "G1_ids_slot_groups": {"n": n_rows, "equal": g1, "first_differences": g1_bad},
+           "G2_hidden_sha256_equal_gate": {"n": n_rows, "equal": g2, "first_differences": g2_bad},
+           "G3_p_bits_equal_python": {"n": n_rows, "equal": g3, "first_differences": g3_bad},
+           "G3_records_response_bytes_equal_python": {"n": len(p["records"]), "equal": g3_rec, "first_differences": rec_bad,
+                                                      "refused": [{"id": r["id"], "error": r["error"]} for r in p["records"]
+                                                                  if not r["accepted"]]},
+           "G4_shared": {"multi_question_records": len(multi), "multi_hidden_bit_equal_direct": sh_multi,
+                         "all_accepted_records": len(shared_all), "all_hidden_bit_equal_direct": sh_all,
+                         "all_response_equal_direct": sh_resp, "all_hidden_and_p_equal_python_shared": sh_py,
+                         "calls_direct_multi": sum(r["direct"]["calls"] for r in multi),
+                         "calls_shared_multi": sum(r["shared"]["times"]["calls"] for r in multi)},
+           "G5_reset": reset, "G6_finite_rows": {"n": n_rows, "finite_not_zero": fin},
+           "load": {k: p["graph"][k] for k in ("text_load_s", "graph_load_s", "decoder_model_s", "decoder_function_s",
+                                               "state_allocation_s", "warm_up_s")},
+           "contended_ms": contended_ms(p), "coreai_cache": {k: p["graph"][k] for k in ("coreai_cache_before_load",
+                                                                                        "coreai_cache_after_load")}
+           | {"end": p.get("coreai_cache_end")}, "runs_wall_s": p["runs_wall_s"]}
+    rec["pass"] = (g1 == g2 == g3 == fin == n_rows == 393 and g3_rec == len(p["records"]) == 361 and sh_multi == len(multi)
+                   and sh_all == len(shared_all) == sh_py == sh_resp and reset["bit_equal"])
+    return rec
+
+
+def contended_ms(p: dict) -> dict:
+    calls = [m for r in p["records"] for m in (r.get("direct") or {}).get("call_ms", [])]
+    calls += [m for r in p["records"] for s in r.get("sub", []) for m in s["direct"]["call_ms"]]
+    resets = [r["direct"]["reset_s"] for r in p["records"] if "direct" in r]
+    a = np.asarray(calls)
+    return {"contended": True, "calls": int(a.size), "ms_per_call_median": float(np.median(a)) if a.size else None,
+            "ms_per_call_p90": float(np.quantile(a, 0.9)) if a.size else None,
+            "first_call_ms": float(a[0]) if a.size else None,
+            "state_zeroing_s_per_record_median": float(np.median(resets)) if resets else None}
+
+
+def section_score() -> dict:
+    return score_mode("fp16", "aot")
+
+
+def section_shared() -> dict:
+    """prepare(state) + decide(prepared) = shared (`d1 prepare-test`), and Python's shared = direct (decide.py check)."""
+    p, secs = swift_pass("prepare_fp16_aot", "prepare-test", "--bundle", str(TOY_DECODERS["fp16"]), "--records", str(FIXTURES),
+                         "--groups", str(GRAPH_WORK / "toy_groups.json"))
+    recs = [r for r in p["records"] if "refused" not in r]
+    py = json.loads(PY_CHECK["fp16"].read_text())
+    py_sum = py["summary"]
+    pyr = {r["id"]: r for r in py["records"]}
+    rec = {"swift_seconds": secs, "records": len(recs), "refused": [r for r in p["records"] if "refused" in r],
+           "prepared_hidden_bit_equal_shared": sum(all(r["hidden_bit_equal_shared"]) for r in recs),
+           "prepared_p_bit_equal_shared": sum(all(r["p_bit_equal_shared"]) for r in recs),
+           "prepared_single_hidden_bit_equal_shared": sum(all(r["single_hidden_bit_equal_shared"]) for r in recs),
+           "prepared_response_equal_shared": sum(r["response_indent2_equal_shared"] for r in recs),
+           "prepared_rows_run_whole": sum(r["prepared"]["rows_run_whole"] for r in recs),
+           "k_equal_shared": sum(r["k_shared"] == r["k_prepared"] for r in recs),
+           "swift_prepared_hidden_equal_python_shared": sum(r["hidden_sha256"] == pyr[r["id"]]["shared"]["hidden_sha256"]
+                                                            for r in recs),
+           "python": {k: py_sum[k] for k in py_sum if k.startswith(("shared", "prepared"))},
+           "rows": [{k: r[k] for k in ("id", "rows", "state_tokens", "k_shared", "k_prepared", "prepare_calls")}
+                    | {"calls_prepared": r["prepared"]["calls"], "calls_shared": r["shared"]["calls"]} for r in recs]}
+    rec["pass"] = (len(recs) > 0 and rec["prepared_hidden_bit_equal_shared"] == rec["prepared_p_bit_equal_shared"]
+                   == rec["prepared_single_hidden_bit_equal_shared"] == rec["prepared_response_equal_shared"] == len(recs)
+                   == rec["swift_prepared_hidden_equal_python_shared"]
+                   and py_sum["shared_multi_hidden_bit_equal_direct"] == py_sum["shared_multi_question_records"]
+                   and py_sum["prepared_hidden_bit_equal_shared"] == py_sum["prepared_records"])
+    return rec
+
+
+def jit_compare(mode: str) -> dict:
+    """The bundle's .aimodel specialized by Swift (GPU preferred + expectFrequentReshapes) against the AOT .aimodelc, the
+    same binary and records: hidden rows (sha256; max |d| from the dumps where they differ) and p."""
+    aot, _ = fixture_pass(mode, "aot")
+    jit, secs = fixture_pass(mode, "jit", arms="direct")
+    a, j = swift_rows(aot), swift_rows(jit)
+    eq = peq = 0
+    dmax = pmax = 0.0
+    unequal = []
+    for key, x in j.items():
+        y = a[key]
+        if x["hidden_sha256"] == y["hidden_sha256"]:
+            eq += 1
+        else:
+            rec_id, name = key
+            ra = next(r for r in aot["records"] if r["id"] == rec_id)
+            k = (f"{rec_id}__{[w['name'] for w in ra['rows']].index(name)}" if ra["accepted"] else f"{rec_id}__{name}")
+            hx = np.fromfile(GRAPH_WORK / f"hidden_{mode}_jit" / f"{k}.f16", np.float16).astype(np.float32)
+            hy = np.fromfile(GRAPH_WORK / f"hidden_{mode}_aot" / f"{k}.f16", np.float16).astype(np.float32)
+            d = float(np.max(np.abs(hx - hy)))
+            dmax = max(dmax, d)
+            if len(unequal) < 6:
+                unequal.append({"row": f"{rec_id}/{name}", "hidden_max_abs_diff": d})
+        peq += x["p_bits"] == y["p_bits"]
+        pmax = max(pmax, max(abs(u - v) for u, v in zip(x["p"], y["p"])))
+    resp = sum(r["response_indent2"] == q["response_indent2"] for r, q in zip(jit["records"], aot["records"]) if r["accepted"])
+    return {"mode": mode, "swift_seconds": secs, "jit_asset": jit["graph"]["asset_path"], "jit_options": jit["graph"]["options"],
+            "aot_asset": aot["graph"]["asset_path"], "rows": len(j), "hidden_sha256_equal": eq, "p_bit_equal": peq,
+            "p_max_abs_diff": pmax, "hidden_max_abs_diff_where_unequal": dmax, "first_unequal": unequal,
+            "responses_equal": resp, "accepted_records": sum(r["accepted"] for r in jit["records"]),
+            "jit_reset": jit["reset_check"], "load": {"jit": {k: jit["graph"][k] for k in ("graph_load_s", "decoder_model_s",
+                                                                                          "decoder_function_s")},
+                                                      "aot": {k: aot["graph"][k] for k in ("graph_load_s", "decoder_model_s",
+                                                                                          "decoder_function_s")}},
+            "coreai_cache": {"before_load": jit["graph"]["coreai_cache_before_load"],
+                             "after_load": jit["graph"]["coreai_cache_after_load"], "end": jit.get("coreai_cache_end")},
+            "contended_ms": contended_ms(jit), "pass": eq == len(j)}
+
+
+def section_jit() -> dict:
+    return jit_compare("fp16")
+
+
+def e2e_compare(got: np.ndarray, ref: np.ndarray, slots_pos: np.ndarray) -> dict:
+    """round 3b's comparison (r3b_toy_vlm_e2e.compare, decide.e2e_compare)."""
+    a, b = got.astype(np.float64), ref.astype(np.float64)
+    c = (a * b).sum(-1) / (np.linalg.norm(a, axis=-1) * np.linalg.norm(b, axis=-1))
+    d = np.abs(got.astype(np.float64) - ref.astype(np.float64))
+    t = len(c) - 1
+    img = c[slots_pos] if len(slots_pos) else np.array([1.0])
+    txt = np.delete(c, slots_pos) if len(slots_pos) else c
+    return {"answer_slot_cos": float(c[t]), "answer_slot_max_abs": float(d[t].max()),
+            "answer_slot_rel_change": float(np.linalg.norm(got[t].astype(np.float64) - ref[t]) / np.linalg.norm(ref[t])),
+            "every_position_cos_min": float(c.min()), "every_position_cos_argmin": int(c.argmin()),
+            "image_positions_cos_min": float(img.min()), "text_positions_cos_min": float(txt.min()),
+            "max_abs": float(d.max()), "finite": bool(np.isfinite(got.astype(np.float64)).all())}
+
+
+def section_e2e() -> dict:
+    """Round 3b's three picture rows: the Swift tower (fp32, the oracle's four inputs per crop) -> image rows -> the toy
+    decoder (N = 2,816) against decide.py e2e on the same assets (hidden sha256, image rows, tower outputs, p, the
+    response) and against round 3b's numbers (the torch fp32 eager composite, recomputed from the Swift hidden rows);
+    the image rows left zero must miss round 3b's bar."""
+    p, secs = swift_pass("pass_e2e", "fixture", "--bundle", str(E2E_DECODER), "--records", str(GRAPH_WORK / "e2e_records.json"),
+                         "--tower", str(TOY_TOWERS["fp32"]), "--tower-inputs", str(GRAPH_WORK / "tower_inputs"),
+                         "--arms", "direct,shared", "--zero-image-control", "--dump-hidden", str(GRAPH_WORK / "hidden_e2e"))
+    py = {r["id"]: r for r in json.loads(PY_E2E.read_text())["records"]}
+    r3b = {r["id"]: r for r in json.loads(R3B_E2E.read_text())["records"]}
+    rows = []
+    for r in p["records"]:
+        y = py[r["id"]]
+        s = r["rows"][0]
+        h = np.fromfile(GRAPH_WORK / "hidden_e2e" / f"{r['id']}__0.f16", np.float16).reshape(s["T"], -1)
+        hz = np.fromfile(GRAPH_WORK / "hidden_e2e" / f"{r['id']}__0__zero.f16", np.float16).reshape(s["T"], -1)
+        ref = np.load(y["eager"]["ref"])
+        # the image positions: the graph's extension ids (V + k; a tiled picture has row / column markers between them)
+        vocab = json.loads((E2E_DECODER / "metadata.json").read_text())["language"]["vocab_size"]
+        slot_pos = np.flatnonzero(np.load(y["arrays"])["graph_ids"] >= vocab)
+        lo, hi, n = y["eager"]["slots_pos"]
+        assert (len(slot_pos), int(slot_pos[0]), int(slot_pos[-1])) == (n, lo, hi), r["id"]
+        base, zero = e2e_compare(h, ref, slot_pos), e2e_compare(hz, ref, slot_pos)
+        zero_red = not (zero["finite"] and zero["answer_slot_cos"] >= E2E_BAR["answer_slot_cos"]
+                        and zero["every_position_cos_min"] >= E2E_BAR["every_position_cos"])
+        row = {"id": r["id"], "T": s["T"], "image_rows": r["image_rows"],
+               "hidden_sha256_equal_python": s["hidden_sha256"] == y["hidden_sha256"],
+               "tower_outputs_sha256_equal_python": r["tower_outputs_sha256"] == [c["output_sha256"] for c in y["crops"]],
+               "p_bits_equal_python": s["p_bits"] == y["p_bits"],
+               "response_equal_python": r["response_indent2"] == y["response_indent2"],
+               "input_tokens_equal_python": r["input_tokens"] == y["input_tokens"],
+               "zero_images_hidden_equal_python": r["zero_images"]["hidden_sha256"][0] == y["zero_images_hidden_sha256"],
+               "shared_hidden_bit_equal_direct": all(r["shared"]["hidden_bit_equal_direct"]),
+               "r3b_numbers_equal": {f: base[f] == r3b[r["id"]][f] for f in E2E_FIELDS},
+               "r3b_zero_control_numbers_equal": {f: zero[f] == r3b[r["id"]]["controls"]["image_embeds_zero"][f] for f in E2E_FIELDS},
+               "swift": base, "zero_control": zero, "zero_control_red": zero_red,
+               "pass_bar": base["finite"] and base["answer_slot_cos"] >= E2E_BAR["answer_slot_cos"]
+               and base["every_position_cos_min"] >= E2E_BAR["every_position_cos"]}
+        rows.append(row)
+    rec = {"swift_seconds": secs, "decoder": str(E2E_DECODER), "tower": str(TOY_TOWERS["fp32"]), "python_e2e": str(PY_E2E),
+           "r3b": str(R3B_E2E), "bar": E2E_BAR, "records": rows,
+           "python_inputs_equal_oracle_npz": [py[r]["inputs_equal_oracle_npz"] for r in E2E_RECORDS]}
+    rec["pass"] = all(x["hidden_sha256_equal_python"] and x["tower_outputs_sha256_equal_python"] and x["p_bits_equal_python"]
+                      and x["response_equal_python"] and x["zero_images_hidden_equal_python"] and x["pass_bar"]
+                      and x["zero_control_red"] and x["shared_hidden_bit_equal_direct"] for x in rows) and len(rows) == 3
+    return rec
+
+
+def section_tower() -> dict:
+    """Every oracle crop (18 pictures, 64 crops) through the Swift tower (fp32 / fp16w32 AOT) against round 3b's tower gate
+    on the same asset (gate_tower_toy/<bundle>/main_00.json: the Python runtime's output, sha256 of the fp32 [256, d])."""
+    out = {}
+    for dt, tb in TOY_TOWERS.items():
+        p, secs = swift_pass(f"pass_tower_{dt}", "fixture", "--bundle", str(E2E_DECODER), "--records",
+                             str(GRAPH_WORK / "tower_records.json"), "--tower", str(tb), "--tower-inputs",
+                             str(GRAPH_WORK / "tower_inputs"), "--arms", "direct")
+        g = json.loads((LANE / "gate_tower_toy" / tb.name / "main_00.json").read_text())
+        want = {c["key"]: c["sha256"] for c in g["calls"] if c["variant"] == "base"}
+        man = {pp["id"]: pp for pp in json.loads((GRAPH_WORK / "tower_inputs" / "manifest.json").read_text())["pictures"]}
+        n = eq = 0
+        bad = []
+        for r in p["records"]:
+            for c, sha in zip(man[r["id"]]["crops"], r.get("tower_outputs_sha256", [])):
+                n += 1
+                ok = want.get(f"{r['id']}/{c['crop']}") == sha
+                eq += ok
+                if not ok and len(bad) < 6:
+                    bad.append(f"{r['id']}/{c['crop']}")
+        out[dt] = {"swift_seconds": secs, "tower": str(tb), "gate_tower": str(LANE / "gate_tower_toy" / tb.name / "main_00.json"),
+                   "crops": n, "output_sha256_equal_gate": eq, "first_differences": bad,
+                   "options": p["graph"]["tower"]["options"], "tower_ms_median_contended":
+                   float(np.median([m for r in p["records"] for m in r["direct"]["tower_ms"]]))}
+    out["pass"] = all(v["crops"] == v["output_sha256_equal_gate"] == 64 for k, v in out.items() if k != "pass")
+    return out
+
+
+def section_int8() -> dict:
+    """The same score on the int8lin toy (round 2a's int8lin gate, decide.py check on int8lin) and its JIT against its AOT
+    (clef's int8mix JIT did not match its AOT: recorded either way)."""
+    s = score_mode("int8lin", "aot")
+    j = jit_compare("int8lin")
+    return {"score": s, "jit": j, "pass": s["pass"]}
+
+
+GRAPH_SECTIONS = {"score": section_score, "shared": section_shared, "jit": section_jit, "e2e": section_e2e,
+                  "tower": section_tower, "int8": section_int8}
+
+
+def graph_main(names: list[str], out_path: Path | None) -> int:
+    rec: dict = {"schema": "d1-swift-graph/1", "generated_at": now(),
+                 "gate": "apps/D1's graph side (`d1 fixture` / `prepare-test`, the toy bundles' AOT and JIT assets, the toy "
+                         "towers) vs the Python runtime's records of the same assets: round 2a's readout gate, decide.py check "
+                         "and e2e, round 3b's tower gate; exact (hidden sha256, p bits, response bytes)",
+                 "env": {"python": sys.version.split()[0], "numpy": np.__version__}, "package": package_record(),
+                 "inputs": graph_inputs(), "sections": {}}
+    for name in names:
+        t0 = time.time()
+        print(f"[{name}]", flush=True)
+        r = GRAPH_SECTIONS[name]()
+        r["seconds"] = round(time.time() - t0, 1)
+        rec["sections"][name] = r
+        print(f"[{name}] {'PASS' if r['pass'] else 'FAIL'} ({r['seconds']} s)", flush=True)
+        write_json(GRAPH_WORK / f"section_{name}.json", r)
+    rec["pass"] = all(r["pass"] for r in rec["sections"].values())
+    if out_path is not None:
+        out_path.write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n")
+        print(f"{'PASS' if rec['pass'] else 'FAIL'} -> {out_path}")
+    return 0 if rec["pass"] else 1
+
+
 # --------------------------------------------------------------------------- package / main
 def package_record() -> dict:
     files = sorted(p for p in PKG.rglob("*") if p.is_file() and ".build" not in p.parts and ".swiftpm" not in p.parts)
@@ -867,9 +1266,15 @@ SECTIONS = {"render": section_render, "ids": section_ids, "image": section_image
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("cmd", choices=[*SECTIONS, "all"])
-    ap.add_argument("--out", help="the transcript (all; default results/r3a_swift_text.json)")
+    ap.add_argument("cmd", choices=[*SECTIONS, "all", *GRAPH_SECTIONS, "graph", "graph-inputs"])
+    ap.add_argument("--out", help="the transcript (all: default results/r3a_swift_text.json; graph: results/r3c_swift_graph.json)")
     args = ap.parse_args()
+    if args.cmd == "graph-inputs":
+        print(json.dumps(graph_inputs()))
+        return 0
+    if args.cmd == "graph" or args.cmd in GRAPH_SECTIONS:
+        names = list(GRAPH_SECTIONS) if args.cmd == "graph" else [args.cmd]
+        return graph_main(names, (Path(args.out) if args.out else GRAPH_TRANSCRIPT) if args.cmd == "graph" else None)
     import tokenizers
     names = list(SECTIONS) if args.cmd == "all" else [args.cmd]
     rec: dict = {"schema": "d1-swift-text/1", "generated_at": now(),

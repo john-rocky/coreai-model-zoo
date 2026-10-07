@@ -32,8 +32,8 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 | `vision_toy_oracle.py` | the toy's oracle: transformers 5.19's own loader and `get_image_features` on the toy snapshot, every crop of the fixture's and the random pictures, with the host's four inputs per crop |
 | `export_vision.py` | the tower bundle: fp16 / fp16w32 / fp32, `metadata.json` (`vision-tower`: the inputs and the output, the host's rules in short), `host/position_embedding.safetensors`, `LICENSE`; `--aot` compiles for the Mac GPU (h16c, no `--expect-frequent-reshapes`); `--toy` |
 | `gate_tower.py` | the tower gate: the AOT asset on the Mac GPU, every oracle crop, against transformers' rows (cosine, lowest row cosine, max \|d\|), a re-run in a fresh process, and two negative controls (no padding mask, the unshuffle index transposed) |
-| `gate_swift.py` | the Swift host `apps/D1` (its text side) against `host.py` / `vision_host.py` / `tokenizers`, bit for bit: the request checks and the rendered text, every row's ids and readout groups, a picture's crop plan and token run, the readout arithmetic and the answers, three negative controls and the bundle's contract checks (`source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift.py all`; the binary from `swift build -c release --package-path apps/D1 --scratch-path $ZOO_WORK_ROOT/_d1_3b/swift/.build`) |
-| `decide.py` | (later) the Python reference read-out on the graph: a request to a response |
+| `gate_swift.py` | the Swift host `apps/D1` against `host.py` / `vision_host.py` / `tokenizers` / `decide.py`, bit for bit: the text side (`all`: the request checks and the rendered text, every row's ids and readout groups, a picture's crop plan and token run, the readout arithmetic and the answers, three negative controls and the bundle's contract checks) and the graph side (`graph`: every row's hidden rows, p and response against the readout gate and `decide.py` on the same assets, shared and prepared, JIT against AOT, the tower's outputs, the picture rows end to end; §4) |
+| `decide.py` | the Python reference read-out on the graph (the AOT assets, the Mac GPU): a request (with pictures: through the tower bundle) to rows, the decoder's calls direct, shared (the state's stable tokens once, the states copied per question) or on a prepared state, the readout and the response; `check` answers every fixture record from its raw request against the readout gate's transcript of the same asset, `e2e` runs round 3b's picture rows through the tower and the decoder; the specification `apps/D1`'s graph side copies |
 
 ## Environment
 
@@ -209,3 +209,40 @@ $PY export_vision.py --dtype fp16 --aot --record $K/results/<tower export fp16>.
 The model's tower oracle (transformers on the checkpoint, in the toy oracle's layout) comes with the weights;
 `gate_tower.py run <bundle> --oracle <its oracle.json>` reads it the same way. A decoder for another number of image
 rows takes `export_decoder.py --n-image-tokens N` (default N_IMAGE_TOKENS; another N adds `_n<N>` to the name).
+
+## 4. The hosts: `decide.py` and the Swift host
+
+`decide.py` is the whole read-out in Python on the AOT assets (the Mac GPU, `SpecializationOptions.default()`): the
+request → `host.build_request` → one row per question (with pictures: `vision_host` → the tower bundle per crop → the
+image rows, and each row's processor ids with `<image>` → 128,000 + k) → the decoder's S-id calls from zero states →
+the slot's hidden row → `host.readout` on the bundle's option table → `host.response`. Shared runs the state's first
+floor(Ls / S) · S ids once and every question's rest from a copy of the states: Ls is the prefix's ids without its last
+pre-token (`":\n"`, the one piece a question's first characters can change), so every row starts with those ids, and on
+a static-S graph the calls are the direct run's (the same hidden bits). `prepare` / `decide_prepared` split the same
+calls in two. A toy bundle folds every real id into its vocabulary (round 2a's gate: id % V; 128,000 + k → V + k) and
+reads the toy oracle's random groups (`--toy-oracle`).
+
+The Swift host `apps/D1` copies it (`D1Decider.loadGraph`, `decide` / `trace` / `prepare`; `Decoder.swift`,
+`Tower.swift`), and `gate_swift.py graph` compares the two on the same assets: every row's hidden rows (sha256 of the
+fp16 bytes) against the readout gate's transcript and `decide.py check`, p bit for bit, the response byte for byte,
+shared = direct and prepared = shared, the bundle's `.aimodel` specialized by Swift against the AOT asset, the tower's
+outputs against `gate_tower.py`'s, and round 3b's picture rows end to end.
+
+```bash
+PY=<coreai-models venv>/bin/python Q="$HOME/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 --"
+K=$ZOO_WORK_ROOT/_d1_3b
+$Q $PY decide.py run --bundle <bundle> --request req.json [--tower <tower bundle>] [--shared] --out resp.json --trace trace.json
+$Q $PY decide.py check --bundle $K/exports/toy_bundles/d1_toy_decode_fp16_pf16_tbl2 \
+    --toy-oracle $K/oracle_toy_tbl2/records_oracle.json --gate $K/results/<the readout gate's transcript> \
+    --out $K/results/<check>.json --shared-out $K/results/<shared vs direct>.json
+$Q $PY decide.py e2e --bundle $K/exports/toy_bundles/d1_toy_decode_fp16_n2816_pf16 \
+    --tower $K/exports/toy_vision/d1_toy_vision_fp32 --eager --out $K/results/<e2e>.json
+DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer \
+    swift build -c release --package-path ../../apps/D1 --scratch-path $K/swift/.build
+source $K/venv-oracle/bin/activate && $Q python gate_swift.py graph   # -> $K/results/r3c_swift_graph.json
+```
+
+`check` answers every fixture record from its raw request (a refused request: its text, and each of its questions
+alone), direct and shared (prepared on the requests of two or more questions), at most 40 records a process with a
+re-run of the process's first record at its end. `gate_swift.py graph` reads the Python records named in its header
+(`PY_CHECK`, `PY_E2E`, the readout gates' and the tower gates' transcripts) and runs the Swift passes it does not find.
