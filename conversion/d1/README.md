@@ -17,21 +17,23 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 | `make_fixtures.py` | the fixture: the Kev fixture's records as they are (its tweet_offensive records and its red arm left out), the model card's example requests, two long JSON states written for the port; `red_arms.json` (a word arm, two grammatical "not" arms, two state swaps) |
 | `host.py` | the host specification (`tokenizers`, NumPy, json): the request checks, the prompt text, option codes and readout groups, the row and the Tree split, the readout arithmetic, the answers and the response, the graph's static-S rows |
 | `test_host.py` | `host.py` against the provider's code (through `oracle_d1.dry_run`) and transformers' tokenizer on every fixture question with two tokenizers; the tokenizer contract, the readout's equivalence on random full-vocabulary logits, a request table, negative controls, the fixture's lengths |
-| `oracle_d1.py` | the provider's code unchanged (`AutoModel` + `trust_remote_code`, fp32, CPU): the API path and the row form per question, Tree against row, the final-norm hook and its proof, determinism; `--dry-run` runs the same code on a stand-in backbone (no weights) |
+| `oracle_d1.py` | the provider's code unchanged (`AutoModel` + `trust_remote_code`, fp32, CPU): the API path and the row form per question, Tree against row, the final-norm hook and its proof, determinism; `--dry-run` runs the same code on a stand-in backbone (no weights); --images runs the picture records through the provider's image path: the API path (one question = the whole prompt in one plain pass, several = the Tree), each question's plain pass, the image features and the final-norm rows of the --hidden records |
 | `lfm2_d1_decoder.py` | the decoder module: `Lfm2VlPipelinedForCausalLM` with an Identity head, hidden `[1, S, 2048]` out, `image_embeds [N_IMAGE_TOKENS, 2048]` in (the image-row contract in its header), the static-S export spec; run as a script it checks the module against the checkpoint's config and safetensors header with no weights |
 | `toy_graph_check.py` | the decoder class at a toy config through export, `optimize`, `save_asset` and the Python runtime on the CPU, against its eager forward; the extension-id image rows |
 | `export_decoder.py` | the bundle (round 3 with the weights): fp16 / int8lin / int8mix / int4lin, one static-S function `main`, the quantized set asserted equal to the recipe's; `metadata.json` (`decision-backbone`, the contract, `decision` with the option table, `vision`, `compression`), `tokenizer/` and `LICENSE` verbatim, `head/` the option rows; `--aot` compiles for the Mac GPU (h16c); `--toy` runs the same path on a toy config with random weights |
 | `export_option_rows.py` | the option table (round 3 with the weights): the tied embedding rows of every readout candidate id, bf16 to fp32, read one row at a time and checked by a second reader; `--check` holds every fixture readout id against the table and the host's refusals against their controls |
-| `readout_gate.py` | the gate (round 3 against the oracle): the AOT graph on the Mac GPU (`SpecializationOptions.default()`), the slot's hidden row through the host's readout, against the oracle; at most 40 rows a process and a re-run of its first row; the red arms with an oracle pre-check; `red`, `merge`, `red-records` |
+| `readout_gate.py` | the gate (round 3 against the oracle): the AOT graph on the Mac GPU (`SpecializationOptions.default()`), the slot's hidden row through the host's readout, against the oracle; at most 40 rows a process and a re-run of its first row; the red arms of `--arms` (default round 4's set) with an oracle pre-check on that set's own oracle; `red`, `merge`, `red-records` |
 | `parity_decoder_torch.py` | the decoder module in fp32 torch driven as the graph runs (round 3 against the oracle): P1 every row through the host's readout, P2 the chunk order against one forward, P3 the chunk widths, P4 the red arms; `toy` runs all four on the toy |
+| `int8_bisect_torch.py` | which layers carry int8lin's error: P1's fp32 instrument with each of the 134 int8lin linears holding its checkpoint weight or the exporter's own int8 weight (read back through the finalized module's dequantization), on the int8lin gate's worst rows; the selection rule written to a file before any result (`rule`, `dump`, `run`, `plan`, `merge`) |
 | `timing.py` | decision latency for the card's columns (round 3 on the model's bundle), inside a measurement window its caller holds; `--dry-run` prints the plan without a bundle |
 | `vision_host.py` | the image path's host specification (NumPy + Pillow): the provider's `cap_pixels`, the processor's crop plan (one crop or tiles + a thumbnail), torch's uint8 bicubic resize, patches and mask, the image token run and the extension ids, the position-table resize, the unshuffle index, the tower's four inputs per crop |
 | `test_vision_host.py` | `vision_host.py` against the provider's image path (`cap_pixels` → transformers 5.19's processor, the row / trunk split): ids, pixel_values bit for bit, spatial shapes, mask, the position table, the unshuffle, the tower contract on a small random SigLIP2, negative controls, and the grid table |
 | `make_fixture_images.py` | the CC0 fixture pictures (drawn shapes, seeded) and their records; the card's example picture as a URL only |
 | `lfm2_vl_tower.py` | the vision tower in its exact form: SigLIP2 + projector with the crop's grid as inputs (patches, pos_table, key_bias, unshuffle_idx → image_embeds), every shape static; `from_hf` with a load report, `typed` (fp16 / fp16w32 / fp32), the toy snapshot (`write-toy`) and the scout against the checkpoint's config and safetensors header (`scout`) |
-| `vision_toy_oracle.py` | the toy's oracle: transformers 5.19's own loader and `get_image_features` on the toy snapshot, every crop of the fixture's and the random pictures, with the host's four inputs per crop |
-| `export_vision.py` | the tower bundle: fp16 / fp16w32 / fp32, `metadata.json` (`vision-tower`: the inputs and the output, the host's rules in short), `host/position_embedding.safetensors`, `LICENSE`; `--aot` compiles for the Mac GPU (h16c, no `--expect-frequent-reshapes`); `--toy` |
-| `gate_tower.py` | the tower gate: the AOT asset on the Mac GPU, every oracle crop, against transformers' rows (cosine, lowest row cosine, max \|d\|), a re-run in a fresh process, and two negative controls (no padding mask, the unshuffle index transposed) |
+| `vision_oracle.py` | the tower's oracle: transformers 5.19's own loader (`Lfm2VlForConditionalGeneration.from_pretrained`, fp32, CPU) and `get_image_features` on d1-3B's checkpoint (`--toy`: the toy snapshot), every crop of the fixture's and the random pictures, with the host's four inputs per crop; the load report holds each of the checkpoint's 441 tower tensors against the loaded one, and the position table's sha256 ties the oracle to the tower bundle |
+| `export_vision.py` | the tower bundle: fp16 / fp16w32 / fp32, `metadata.json` (`vision-tower`: the inputs and the output, the host's rules in short), `host/position_embedding.safetensors`, `LICENSE`; `--aot` compiles for the Mac GPU (h16c, no `--expect-frequent-reshapes`); `--toy`; the record counts the checkpoint values that fp16 storage changes and lists the compiled asset's files (resources.bin: what an fp16w32 asset really stores) |
+| `gate_tower.py` | the tower gate: the AOT asset on the Mac GPU, every oracle crop, against transformers' rows (cosine, lowest row cosine, max \|d\|), a re-run in a fresh process, and two negative controls (no padding mask, the unshuffle index transposed); on the model: fp32 and fp16w32 hold every crop's and every row's cosine and re-run bit for bit, fp16 is recorded and stays a candidate only when every row's cosine holds 0.999; the oracle is tied to the bundle (the position table, the checkpoint) before any GPU process |
+| `readout_gate_vision.py` | the picture path end to end on the Mac GPU: a picture record's file → `vision_host` → the tower's AOT asset → `image_embeds` → the decoder's AOT asset → the host's readout, against the provider's fp32 oracle (`oracle_d1.py --images`) in its two forms (each question's plain pass, the API path); the host's ids, groups and keys checked against the oracle's; arms `zero` (image_embeds zero: must be red), `reversed` (the crops in reverse order) and `hf_rows` (the decoder alone on transformers' tower rows); the tower against transformers per crop, the hidden rows' per-position cosine, at most 700 decoder calls a process and a re-run of its first row |
 | `gate_swift.py` | the Swift host `apps/D1` against `host.py` / `vision_host.py` / `tokenizers` / `decide.py`, bit for bit: the text side (`all`: the request checks and the rendered text, every row's ids and readout groups, a picture's crop plan and token run, the readout arithmetic and the answers, three negative controls and the bundle's contract checks) and the graph side (`graph`: every row's hidden rows, p and response against the readout gate and `decide.py` on the same assets, shared and prepared, JIT against AOT, the tower's outputs, the picture rows end to end; §4) |
 | `gate_swift_pixels.py` | the Swift pixel path (`apps/D1/Sources/D1/ImagePixels.swift`, through the `d1-pixels-test` CLI) against `vision_host.tower_inputs`, bit for bit: 18 PNG pictures (64 crops) and two EXIF JPEG pairs, decode probes, the d = 1152 position table, three negative controls, the JPEG subsampling differences (`source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift_pixels.py all`) |
 | `make_fixture_images.py --random --exif` | the six random-size pictures of `test_vision_host.py` as PNG and two EXIF-orientation JPEG pairs (with their decoded PNG twins) |
@@ -40,7 +42,7 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 ## Environment
 
 - **The provider's code and transformers' own image path** (`oracle_d1.py`, `test_host.py`, `make_fixtures.py`,
-  `test_vision_host.py`, `vision_toy_oracle.py`): a private venv with transformers >= 5.14
+  `test_vision_host.py`, `vision_oracle.py`): a private venv with transformers >= 5.14
   (the checkpoint's tokenizer class `TokenizersBackend` and the provider's imports need transformers 5):
 
   ```bash
@@ -150,9 +152,11 @@ $PY timing.py run --dry-run
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 $PY export_option_rows.py --write $K/exports/head --check --out $K/results/<option rows check>.json
 $PY export_decoder.py fp16 --prefill-chunk 16 --aot --record $K/results/<fp16 record>.json
-$PY readout_gate.py red-records                    # -> $K/fixtures/red_arms_records.json, the arms for the oracle
+$PY readout_gate.py red-records                    # -> $K/fixtures/red_arms_records.json, round 1's arms for the oracle
 HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --threads 1 --fixtures $K/fixtures/red_arms_records.json \
     --out-dir $K/oracle/red --results-dir $K/oracle/red
+HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --threads 1 --fixtures $K/fixtures/red_arms_r4_records.json \
+    --out-dir $K/oracle/red_r4 --results-dir $K/oracle/red_r4     # round 4's arms (the gate's default set)
 for k in 0 1 2; do $PY parity_decoder_torch.py p1 --oracle <oracle> --hidden-npz $K/oracle/hidden \
     --shard $k --shards 3 --threads 1 & done; wait
 $PY parity_decoder_torch.py p2 --threads 1; $PY parity_decoder_torch.py p3 --threads 1
@@ -161,9 +165,6 @@ $PY parity_decoder_torch.py merge --oracle <oracle> --out $K/results/<parity>.js
 $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_fp16_pf16 --red --transcript $K/results/<gate fp16>.json
 $PY decide.py check --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 --gate $K/results/<gate fp16>.json \
     --records <the multi-question records> --out $K/results/<check>.json --shared-out $K/results/<shared vs direct>.json
-$PY export_decoder.py int8lin --prefill-chunk 16 --aot --record $K/results/<int8lin record>.json
-$PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8lin_pf16 --red \
-    --compare-with $K/results/<gate fp16>.json --transcript $K/results/<gate int8lin>.json
 <window holder> $PY timing.py run --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 \
     --gate-transcript $K/results/<gate fp16>.json --tag <tag>
 ```
@@ -177,6 +178,50 @@ argmax against the oracle on every question that is not a near-tie, max |dp| and
 every option, a bit-equal re-run of each process's first row, finite hidden rows. The red arms come first on the oracle:
 an arm that does not move the oracle's probabilities by the gate's own bar is listed for replacement, the graph must be
 red on every arm that moves the oracle, and the graph's change must equal the oracle's.
+
+The arms are `--arms` (`run --red` and `red`): by default `$K/fixtures/red_arms_r4.json`, round 4's set, in which the
+word arm moves the oracle (`$K/fixtures/red_arms.json`, round 1's set, stays as its record and is a toy bundle's
+default). Their oracle is the `$K/oracle/*/records_oracle.json` whose fixture file names the arms file's sha256
+(`--red-oracle` to name it); an oracle run on another arms file is refused. The transcript names the arms file and its
+sha256.
+
+### Quantized modes, the int8 bisect and int8mix (needs `model.safetensors`)
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+$PY export_decoder.py int8lin --prefill-chunk 16 --aot --record $K/results/<int8lin record>.json
+$PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8lin_pf16 --red \
+    --compare-with $K/results/<gate fp16>.json --transcript $K/results/<gate int8lin>.json
+$PY export_decoder.py int4lin --prefill-chunk 16 --aot --record $K/results/<int4lin record>.json   # --quant-block 16
+mv ~/Library/Caches/coreai-cache/<OS build>/python/<main.hash> <that path>__<mode>                  # see below
+$PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int4lin_pf16 --red \
+    --compare-with $K/results/<gate fp16>.json --transcript $K/results/<gate int4lin>.json
+# int8lin over the bar: which layers carry the error (fp32 torch, the exporter's own int8 weights)
+$PY int8_bisect_torch.py rule --gate $K/results/<gate int8lin>.json        # $K/bisect/rule.json, before any result
+$PY int8_bisect_torch.py dump
+$PY int8_bisect_torch.py run --part $K/bisect/parts/part_a.json --configs all_int8,exact,only_mlp_int8,only_conv_int8,..
+$PY int8_bisect_torch.py plan                                               # what the rule asks next
+$PY int8_bisect_torch.py merge --out $K/results/<bisect>.json
+$PY export_decoder.py int8mix --fp16-layers <the chosen layers> --prefill-chunk 16 --aot --record $K/results/<record>.json
+$PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8mix_l<..>_pf16 --red \
+    --compare-with $K/results/<gate fp16>.json --transcript $K/results/<gate int8mix>.json
+```
+
+The quantizer prints two warnings and only these: `Tensor size 1 along axis 1 is not divisible by block size 32.
+Skipping quantization.` (22 times, int8 and int4) and `dynamic_shapes is only supported in graph mode and will be
+ignored.` (coreai-opt's eager mode, which the weight-only recipe uses, does not read input shapes); any other warning,
+or a quantized set other than the recipe's, stops the export.
+
+The AOT asset's `main-h16c.mlirb` holds the function's type and the source files' paths and sha256, not the weights:
+int8lin and int4lin compile to the same `main.hash`, and the Python runtime names its cache entry by it
+(`~/Library/Caches/coreai-cache/<OS build>/python/<main.hash>/`). Loading the second mode's asset while the first
+mode's entry is there can run the first mode's graph. Before gating (or timing) another mode of the same graph,
+move the entry aside, and after the run check that the entry's `manifest.plist` has the asset's own sha256.
+
+`int8_bisect_torch.py` takes its rows from the int8lin gate (its worst rows, identical rows counted once) and writes
+the rule before any result: the bound on the worst row, no row worse than all-int8, the most fp16 layers, the
+smallest set, layers ranked by the mean over the rows. A set chosen outside the rule is only a candidate: the rows that
+chose it cannot test it, and it needs a held-out set.
 
 The option table covers every readout id the host's rules can produce for noul, score and ASCII-letter or positional
 choice questions, up to the alias pool's limit; a request that would read an id outside it (a one-letter native label
@@ -212,7 +257,7 @@ same `from_hf` as the model and transformers loads it with its own loader. The o
 SNAP=<the pinned snapshot>   # hf_snapshot("LiquidAI/d1-3B", revision=...)
 $PY lfm2_vl_tower.py scout $SNAP/config.json <safetensors header json> --out $K/results/<tower scout>.json
 $PY lfm2_vl_tower.py write-toy --seed 0 --template-config $SNAP/config.json --out $K/oracle_toy_vision/toy_snapshot
-source $K/venv-oracle/bin/activate && python vision_toy_oracle.py     # -> $K/oracle_toy_vision/<picture>/<crop>.npz
+source $K/venv-oracle/bin/activate && python vision_oracle.py --toy     # -> $K/oracle_toy_vision/<picture>/<crop>.npz
 for d in fp32 fp16w32 fp16; do
   $PY export_vision.py --toy --dtype $d --aot --record $K/results/<toy tower export $d>.json
   $PY gate_tower.py run $K/exports/toy_vision/d1_toy_vision_$d --transcript $K/results/<toy tower gate $d>.json
@@ -225,14 +270,42 @@ every row's cosine; fp16 is recorded. Both negative controls must miss the bar o
 
 ### The tower on the model (needs `model.safetensors`)
 
+transformers' own loader reads the checkpoint (the whole model, fp32, on the CPU; the language model is loaded and
+never runs) and `get_image_features` gives every crop's rows; the npz carry the host's four inputs made with the loaded
+position table, which is the table the bundle ships.
+
 ```bash
-$PY export_vision.py --dtype fp16w32 --aot --record $K/results/<tower export fp16w32>.json
-$PY export_vision.py --dtype fp16 --aot --record $K/results/<tower export fp16>.json
+source $K/venv-oracle/bin/activate && HF_HUB_OFFLINE=1 python vision_oracle.py   # -> $K/oracle/images/<picture>/<crop>.npz
+for d in fp16w32 fp16 fp32; do
+  $PY export_vision.py --dtype $d --aot --record $K/results/<tower export $d>.json
+  $PY gate_tower.py run $K/exports/vision/d1_3b_vision_$d --transcript $K/results/<tower gate $d>.json
+done
 ```
 
-The model's tower oracle (transformers on the checkpoint, in the toy oracle's layout) comes with the weights;
-`gate_tower.py run <bundle> --oracle <its oracle.json>` reads it the same way. A decoder for another number of image
-rows takes `export_decoder.py --n-image-tokens N` (default N_IMAGE_TOKENS; another N adds `_n<N>` to the name).
+On the model `gate_tower.py` holds fp32 and fp16w32 to every crop's and every row's cosine and a bit-for-bit re-run in a
+fresh process; fp16 is recorded and stays a candidate only when every row's cosine holds. It ties the oracle to the
+bundle (the position table and the checkpoint) before any GPU process. A decoder for another number of image rows takes
+`export_decoder.py --n-image-tokens N` (default N_IMAGE_TOKENS; another N adds `_n<N>` to the name).
+
+### The picture rows end to end (needs `model.safetensors`)
+
+The provider's own image path is the oracle: one question is the whole prompt in one plain pass, several questions one
+Tree over the processor's trunk; each question's plain pass is kept beside it.
+
+```bash
+source $K/venv-oracle/bin/activate && HF_HUB_OFFLINE=1 python oracle_d1.py --images --threads 1 \
+    --hidden img01_shapes_384x384,img06_grid_1024x768,img12_small_300x300 \
+    --summary $K/results/<image oracle summary>.json    # -> $K/oracle/records_oracle_images.json, oracle/images_hidden/
+$PY readout_gate_vision.py run --tower $K/exports/vision/d1_3b_vision_fp16w32 \
+    --decoder $K/exports/bundles/d1_3b_decode_fp16_pf16 --transcript $K/results/<e2e gate>.json
+$PY decide.py run --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 --tower $K/exports/vision/d1_3b_vision_fp16w32 \
+    --request <request JSON with "images": [paths]> --out <response>.json --trace <trace>.json
+```
+
+`readout_gate_vision.py` holds §2's bar against the oracle in both its forms; its `zero` arm (image_embeds zero, the
+extension ids kept) must fail it, and its `hf_rows` arm runs the decoder on transformers' tower rows, which splits an
+end-to-end error between the tower and the decoder. The card's example picture is a URL and is not fetched (its record
+is skipped by the oracle and the gate).
 
 ## 4. The hosts: `decide.py` and the Swift host
 

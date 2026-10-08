@@ -18,16 +18,20 @@ Bar, fixed before any result (the transcript is opened with it before the first 
   (e) every hidden value of every row finite (and no row all zero)
 plus every expected row present.
 
-Red arms (`--red`, their own process): the five arms of `fixtures/red_arms.json` (a word, two grammatical "not"s, two
-state swaps) rendered by the host from their requests with the bundle's tokenizer (`parity_decoder_torch.red_rows`,
-which also checks that the host reproduces the base records' rows), each perturbed row against its base row (the same
-question of the unperturbed record) run in the same process. An arm is red when the perturbed rows fail the gate's own
+Red arms (`--red`, their own process): the five arms of `--arms` (default `fixtures/red_arms_r4.json`, round 4's set:
+a word, two grammatical "not"s, two state swaps; `fixtures/red_arms.json` is round 1's set, kept as its record, and the
+default for a toy bundle, whose arms oracle is built from it) rendered by the host from their requests with the
+bundle's tokenizer (`parity_decoder_torch.red_rows`, which also checks that the host reproduces the base records' rows),
+each perturbed row against its base row (the same question of the unperturbed record) run in the same process. The
+transcript names the arms file and its sha256. An arm is red when the perturbed rows fail the gate's own
 bar against the base rows: an argmax moves on a non-near-tie question, or max |dp| > 0.02, or the mean of the rows'
 mean |dp| > 0.002. The base rows must equal the gate's runs of the same rows bit for bit (sha256 of the hidden rows).
-The oracle comes first (`--red-oracle`, the arms' oracle: oracle_d1.py run on `red-records`' file, or for a toy bundle the
-toy module's own forward, built when absent): the same rule on the oracle's probabilities (perturbed against base)
+The oracle comes first (`--red-oracle`, the arms' oracle: oracle_d1.py run on the arms' fixture records, or for a toy
+bundle the toy module's own forward, built when absent; by default the one `<work>/oracle/*/records_oracle.json` whose
+fixture file names the arms file's sha256): the same rule on the oracle's probabilities (perturbed against base)
 says which arms move the model at all; an arm that is not red on the oracle is listed under `replace` (swap it for one
-that moves) and is not asked of the graph. The graph must be red on every arm that is red on the oracle, and on every
+that moves) and is not asked of the graph. An arms oracle run on another arms file is refused. The graph must be red
+on every arm that is red on the oracle, and on every
 row the graph's dp (perturbed - base) must equal the oracle's within the gate's 0.02. Without an arms oracle the
 pre-check is reported as not run and every arm is asked of the graph.
 
@@ -47,8 +51,9 @@ of the real groups' shape from the toy table, probabilities by the host's arithm
     $Q $PY readout_gate.py run $ZOO_WORK_ROOT/_d1_3b/exports/toy_bundles/d1_toy_decode_fp16_pf16 \\
         --toy-oracle $ZOO_WORK_ROOT/_d1_3b/oracle_toy/records_oracle.json --red --transcript <json>
     $Q $PY readout_gate.py run $ZOO_WORK_ROOT/_d1_3b/exports/bundles/d1_3b_decode_fp16_pf16 --red --transcript <json>
-    $Q $PY readout_gate.py run .../d1_3b_decode_int8lin_pf16 --compare-with <fp16 transcript> --transcript <json>
+    $Q $PY readout_gate.py run .../d1_3b_decode_int8lin_pf16 --red --compare-with <fp16 transcript> --transcript <json>
     $Q $PY readout_gate.py red <bundle> --gate-transcript <json> --transcript <json>     # the arms alone
+    #   --arms $ZOO_WORK_ROOT/_d1_3b/fixtures/red_arms.json: round 1's set (its oracle: oracle/red/)
     $PY readout_gate.py red-records          # round 3: fixtures/red_arms_records.json, the arms for oracle_d1.py:
     #   oracle_d1.py --fixtures $K/fixtures/red_arms_records.json --out-dir $K/oracle/red --results-dir $K/oracle/red
     $Q $PY readout_gate.py merge <t1> <t2> .. --transcript <json>                    # disjoint row sets, one asset
@@ -83,6 +88,8 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 LANE = work_path("_d1_3b")
 ORACLE = LANE / "oracle" / "records_oracle.json"
+RED_ARMS = LANE / "fixtures" / "red_arms_r4.json"         # round 4's set: the default
+RED_ARMS_ROUND1 = LANE / "fixtures" / "red_arms.json"     # round 1's set: its record, and a toy bundle's default
 BAR = {"max_abs_dp": 0.02, "mean_of_run_mean_abs_dp": 0.002, "near_tie_top2_margin": 0.02,
        "argmax": "every question with an oracle top-2 margin above 0.02; near-ties listed apart",
        "max_abs_dp_applies_to": "every option of every question, near-ties included",
@@ -568,21 +575,65 @@ def red_spec_runs(red: dict, recs: dict) -> list[dict]:
     return runs
 
 
-def resolve_red_oracle(args, b: Bundle) -> tuple[Path, dict] | None:
+def arms_path(args, b: Bundle) -> Path:
+    """--arms, else round 4's set (a toy bundle: round 1's, the set its arms oracle is built from)."""
+    if args.arms:
+        return Path(args.arms).expanduser().resolve()
+    return RED_ARMS_ROUND1 if b.toy else RED_ARMS
+
+
+def load_red(args, b: Bundle, recs: dict, table: dict) -> dict:
+    """The arms' rows (`parity_decoder_torch.red_rows`) with the arms file's own path and sha256 (red_rows names
+    fixtures/red_arms.json whatever it is given)."""
+    from parity_decoder_torch import red_rows
+
+    path = arms_path(args, b)
+    if not path.exists():
+        raise SystemExit(f"no arms file {path}")
+    tok = host.load_tokenizer(b.dir / "tokenizer" / "tokenizer.json")
+    red = red_rows(json.loads(path.read_text()), recs, tok, fold_vocab=b.vocab if b.toy else None,
+                   table_ids=None if b.toy else list(table))
+    red["file"], red["file_sha256"] = str(path), sha256_file(path)
+    return red
+
+
+def oracle_arms_sha256(path: Path) -> str | None:
+    """The sha256 of the arms file an arms oracle was run on: a toy arms oracle names it (`red_arms`); an oracle_d1.py
+    run names its fixture file (`fixtures`, checked against its sha256), whose `red_arms` names the arms file."""
+    doc = json.loads(path.read_text())
+    if doc.get("red_arms"):
+        return doc["red_arms"].get("sha256")
+    fx = doc.get("fixtures") or {}
+    if not fx.get("path") or not Path(fx["path"]).exists() or sha256_file(Path(fx["path"])) != fx.get("sha256"):
+        return None
+    return (json.loads(Path(fx["path"]).read_text()).get("red_arms") or {}).get("sha256")
+
+
+def resolve_red_oracle(args, b: Bundle, red: dict) -> tuple[Path, dict] | None:
     """The arms' oracle: --red-oracle, else <toy oracle dir>/red/records_oracle.json for a toy bundle (built from the
-    toy module when absent), else <work>/oracle/red/records_oracle.json when it exists (round 3); None = no pre-check."""
+    toy module when absent), else the one <work>/oracle/*/records_oracle.json run on the arms file; None = no
+    pre-check. An oracle run on another arms file is refused."""
     from parity_decoder_torch import build_toy_red_oracle, load_oracle
 
     if args.red_oracle:
         path = Path(args.red_oracle).expanduser().resolve()
+        if not path.exists() and not b.toy:
+            raise SystemExit(f"no arms oracle {path}")
     elif b.toy:
         path = Path(args.toy_oracle).expanduser().resolve().parent / "red" / "records_oracle.json"
     else:
-        path = LANE / "oracle" / "red" / "records_oracle.json"
-    if not path.exists():
-        if not b.toy:
+        found = [p for p in sorted((LANE / "oracle").glob("*/records_oracle.json"))
+                 if oracle_arms_sha256(p) == red["file_sha256"]]
+        if len(found) > 1:
+            raise SystemExit(f"several arms oracles were run on {red['file']}: {[str(p) for p in found]}; pass --red-oracle")
+        if not found:
             return None
+        path = found[0]
+    if not path.exists():
         build_toy_red_oracle(int(b.toy["seed"]), Path(args.toy_oracle).expanduser().resolve(), path)
+    if oracle_arms_sha256(path) != red["file_sha256"]:
+        raise SystemExit(f"{path} was not run on {red['file']} (sha256 {red['file_sha256'][:16]}): pass the arms "
+                         "oracle of that file (--red-oracle) or the arms file of that oracle (--arms)")
     doc, recs = load_oracle(path)
     return path, recs
 
@@ -668,8 +719,6 @@ def open_transcript(path: Path, skeleton: dict) -> None:
 
 
 def gate(args) -> int:
-    from parity_decoder_torch import red_rows
-
     b = Bundle(args.bundle, args.aimodelc)
     if not b.aimodelc.exists():
         raise SystemExit(f"no AOT asset {b.aimodelc} (export_decoder.py --aot)")
@@ -685,18 +734,18 @@ def gate(args) -> int:
     tag = args.tag or b.name
     work = (LANE / ("readout_toy" if b.toy else "readout")) / tag
     work.mkdir(parents=True, exist_ok=True)
-    red = None
-    if args.red:
-        tok = host.load_tokenizer(b.dir / "tokenizer" / "tokenizer.json")
-        red = red_rows(json.loads((LANE / "fixtures" / "red_arms.json").read_text()), recs, tok,
-                       fold_vocab=b.vocab if b.toy else None, table_ids=None if b.toy else list(table))
-    red_oracle = resolve_red_oracle(args, b) if red else None
+    red = load_red(args, b, recs, table) if args.red else None
+    red_oracle = resolve_red_oracle(args, b, red) if red else None
+    arms = {"arms_file": red["file"], "arms_sha256": red["file_sha256"],
+            "red_oracle": None if red_oracle is None else {"path": str(red_oracle[0]),
+                                                           "sha256": sha256_file(red_oracle[0])}} if red else {}
     bundle_rec = b.record()
     skeleton = {"schema": "d1-decoder-readout-gate/1", "status": "running", "started": now(), "bar": BAR,
                 "red_rule": red["rule"] if red else None, "bundle": bundle_rec["name"],
                 "aimodelc_tree_sha256": bundle_rec["aimodelc"]["tree_sha256"],
                 "oracle": {"path": str(oracle_path), "sha256": sha256_file(oracle_path), "toy": bool(b.toy)},
-                "rows": len(expected), "processes": len(split(expected)), "red_arms": len(red["arms"]) if red else 0}
+                "rows": len(expected), "processes": len(split(expected)), "red_arms": len(red["arms"]) if red else 0,
+                **arms}
     if not args.rescore:
         open_transcript(out, skeleton)
     hidden_keep = {rid for rid in recs if hidden_dir is not None and (hidden_dir / f"{rid}.npz").exists()}
@@ -743,7 +792,7 @@ def gate(args) -> int:
     record = {
         "schema": "d1-decoder-readout-gate/1",
         "gate": "the decoder alone on the Mac GPU (the oracle's row ids), the fp16 slot hidden read out through host.py",
-        "bar": BAR, "red_rule": red_rec["rule"] if red_rec else None,
+        "bar": BAR, "red_rule": red_rec["rule"] if red_rec else None, **arms,
         "result": "PASS" if ok else "FAIL", "checks": checks,
         "bundle": bundle_rec, "chunk": b.S, "max_ctx": b.max_ctx, "readout": b.meta["decision"]["readout"],
         "descriptor": descs[0] if descs else None,
@@ -844,8 +893,6 @@ def compare_with(runs: list[dict], arrays: dict, other_path: Path) -> dict:
 
 def red_cmd(args) -> int:
     """The red arms alone, in their own process, against an existing gate transcript of the same asset."""
-    from parity_decoder_torch import red_rows
-
     b = Bundle(args.bundle, args.aimodelc)
     out = Path(args.transcript)
     if out.exists():
@@ -857,12 +904,12 @@ def red_cmd(args) -> int:
     if sha256_file(oracle_path) != gate_t["oracle"]["sha256"]:
         raise SystemExit("the gate transcript was read against another oracle")
     table = b.table()
-    tok = host.load_tokenizer(b.dir / "tokenizer" / "tokenizer.json")
-    red = red_rows(json.loads((LANE / "fixtures" / "red_arms.json").read_text()), recs, tok,
-                   fold_vocab=b.vocab if b.toy else None, table_ids=None if b.toy else list(table))
-    red_oracle = resolve_red_oracle(args, b)
+    red = load_red(args, b, recs, table)
+    red_oracle = resolve_red_oracle(args, b, red)
+    arms = {"arms_file": red["file"], "arms_sha256": red["file_sha256"],
+            "red_oracle": None if red_oracle is None else {"path": str(red_oracle[0]), "sha256": sha256_file(red_oracle[0])}}
     open_transcript(out, {"schema": "d1-decoder-readout-red-arms/1", "status": "running", "started": now(),
-                          "red_rule": red["rule"], "bar": BAR, "bundle": b.name})
+                          "red_rule": red["rule"], "bar": BAR, "bundle": b.name, **arms})
     work = (LANE / ("readout_toy" if b.toy else "readout")) / (args.tag or b.name)
     spec = {"aimodelc": str(b.aimodelc), "S": b.S, "max_ctx": b.max_ctx, "hidden": b.hidden, "pad_id": b.pad_id,
             "contract": b.contract, "runs": red_spec_runs(red, recs), "out": str(work / "red_arms_alone"), "keep_full": []}
@@ -874,7 +921,7 @@ def red_cmd(args) -> int:
     checks = {**red_checks(red_rec), "red_reset_bit_equal": red_rec["reset_bit_equal"]}
     ok = all(checks.values())
     record = {"schema": "d1-decoder-readout-red-arms/1", "red_rule": red_rec["rule"], "bar": BAR, "checks": checks,
-              "result": "PASS" if ok else "FAIL", "bundle": b.record(),
+              "result": "PASS" if ok else "FAIL", **arms, "bundle": b.record(),
               "gate_transcript": {"path": str(Path(args.gate_transcript).resolve()),
                                   "sha256": sha256_file(Path(args.gate_transcript)), "result": gate_t["result"]},
               "oracle": {"path": str(oracle_path), "sha256": sha256_file(oracle_path)},
@@ -956,7 +1003,7 @@ def main() -> int:
                    help="quick = the first record of every source (all of its questions)")
     a.add_argument("--rows", help='a JSON file {"rows": [[record id, question name], ...]}: only these rows, in order')
     a.add_argument("--records", help="comma list of record ids to keep")
-    a.add_argument("--red", action="store_true", help="add the five red arms (their own process)")
+    a.add_argument("--red", action="store_true", help="add the five red arms of --arms (their own process)")
     a.add_argument("--compare-with", help="another transcript of the same rows (another mode or width)")
     a.add_argument("--tag", help="shard directory name under readout[_toy]/ (default: the bundle name)")
     a.add_argument("--rescore", action="store_true", help="re-score existing shards, no GPU runs")
@@ -970,8 +1017,11 @@ def main() -> int:
         sp.add_argument("--oracle", default=str(ORACLE), help="records_oracle.json (oracle_d1.py; round 3)")
         sp.add_argument("--toy-oracle", help="a toy bundle's oracle JSON (built from the bundle when it does not exist)")
         sp.add_argument("--aimodelc", help="the compiled asset (default <bundles>_aotc/<name>.h16c.aimodelc)")
-        sp.add_argument("--red-oracle", help="the arms' oracle (default: <toy oracle dir>/red/ for a toy bundle, built "
-                                             "when absent; <work>/oracle/red/records_oracle.json for the model)")
+        sp.add_argument("--arms", help="the red arms file (default <work>/fixtures/red_arms_r4.json, round 4's set; a toy "
+                                       "bundle: <work>/fixtures/red_arms.json, round 1's set)")
+        sp.add_argument("--red-oracle", help="the arms' oracle, run on the --arms file (default: <toy oracle dir>/red/ for "
+                                             "a toy bundle, built when absent; for the model the one "
+                                             "<work>/oracle/*/records_oracle.json whose fixture file names the arms file)")
     rr = sub.add_parser("red-records", help="round 3: the arms' requests as fixture records for oracle_d1.py")
     rr.add_argument("--out", default=str(LANE / "fixtures" / "red_arms_records.json"))
     mg = sub.add_parser("merge", help="transcripts of one asset over disjoint row sets -> one")
