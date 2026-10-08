@@ -10,16 +10,19 @@ with no UI input. It writes `result.json` (rewritten when a stage starts, after 
 `result.log` (every line with the thermal state and the battery) and `memory.tsv` (every memory reading, written as
 taken, at least once a second while the app lives, so a killed process leaves its series and a still file means a frozen
 app): in `Documents/d1_gate/` on the iPhone, in `D1_OUT` on the Mac. `p_ref_jit.json` / `p_ref_aot.json` beside them
-keep every e2e row's p bits, hidden sha256 and row checks across launches.
+keep every e2e row's p bits, hidden sha256 and row checks across launches (`p_ref_<kind>_decoder_pf<S>.json` for a decoder
+directory other than `decoder/`: one file per bundle, so `D1_SKIP_DONE` and the union of the launches never mix chunk
+widths).
 
 What it loads (staged by `_stage.sh`):
 
 | path in the assets directory | what |
 |---|---|
 | `decoder/` | the bundle `d1_3b_decode_int8mlp_pf16`: `metadata.json`, `d1_3b_decode_int8mlp_pf16.aimodel` (`main`, S = 16, the MLP linears int8 per block of 32, final-norm hidden output), `tokenizer/`, `head/option_rows.{json,safetensors}` |
+| `decoder_pf32/`, `decoder_pf64/` | the same decoder exported at S = 32 / 64 (`d1_3b_decode_int8mlp_pf32` / `_pf64`), pushed apart (`_stage.sh --decoder`, `MD5SUMS_PF32` / `MD5SUMS_PF64`); `D1_DECODER` names the directory the gate loads (default `decoder`), the chunk width comes from its `metadata.json` |
 | `tower/` | the bundle `d1_3b_vision_fp16w32`: `metadata.json`, `d1_3b_vision_fp16w32.aimodel` (static, fp16 weights, fp32 compute), `host/position_embedding.safetensors` |
 | `aot/d1_3b_decode_int8mlp_pf16.h19p.aimodelc` | the iPhone 18 Pro's AOT of the decoder (`coreai-build compile --platform iOS --architecture h19p --preferred-compute gpu --expect-frequent-reshapes`), pushed apart (`_stage.sh --aot`, `MD5SUMS_AOT`) |
-| `fixtures/` | `requests.json` (373 records), `images/` (the 12 PNG files), `oracle_slim.json` (the provider's fp32 oracle per question: row ids, readout groups, keys, probabilities of the question's own row and of the API path, argmax, top-2 margin), `mac_ref.json` (the Mac's read-out of the same decoder asset, AOT h16c: hidden sha256 and p bits per question — round 5c's readout gate for the text, round 8's `decide.py run` for the pictures), `red_arms.json`, `bench.json` |
+| `fixtures/` | `requests.json` (373 records), `images/` (the 12 PNG files), `oracle_slim.json` (the provider's fp32 oracle per question: row ids, readout groups, keys, probabilities of the question's own row and of the API path, argmax, top-2 margin), `mac_ref.json` (the Mac's read-out of the same decoder asset, AOT h16c: hidden sha256 and p bits per question — round 5c's readout gate for the text, round 8's `decide.py run` for the pictures), `red_arms.json`, `bench.json`; for another decoder directory `mac_ref_pf<S>.json` (the Mac's read-out of that bundle: round 6a's readout gate for the text, `decide.py run` for the pictures) and `bench_pf<S>.json` (the same items, with the calls each makes at that S), chosen with `D1_MAC_REF` / `D1_BENCH` |
 
 ## Stages
 
@@ -81,8 +84,12 @@ iPhone 18 Pro (iOS 27.2) the key moved `os_proc_available_memory` at launch from
    `../D1` before and after.
 2. `./_stage.sh` gathers the assets into `_work/device_stage/D1Assets/` (4.4 GB, APFS clones) and writes `MD5SUMS`;
    `./_stage.sh --aot [<x.h19p…aimodelc>...] [--file <src> aot/<rel>]...` stages iPhone AOT assets apart (by default the
-   decoder's efr AOT) with `MD5SUMS_AOT` (`D1_AOT_STAGE` names another `_work/device_stage_aot*/D1Assets`). `D1_LANE`
-   (default `~/code/coreai/_d1_3b`) is the port's working directory.
+   decoder's efr AOT) with `MD5SUMS_AOT` (`D1_AOT_STAGE` names another `_work/device_stage_aot*/D1Assets`).
+   `./_stage.sh --decoder <bundle> --into decoder_pf<S> --mac-text <readout gate json> --mac-images <picture run json>`
+   stages the decoder at another chunk width apart, in `_work/device_stage_pf<S>/D1Assets/`: the bundle, the Mac's
+   read-out of that bundle as `fixtures/mac_ref_pf<S>.json` (every question of `oracle_slim.json` must be in it),
+   `fixtures/bench_pf<S>.json` (the main stage's `bench.json` items with `calls_expected` at that S) and `MD5SUMS_PF<S>`.
+   `D1_LANE` (default `~/code/coreai/_d1_3b`) is the port's working directory.
 3. The Mac: `./_run_mac.sh` runs the macOS build on the stage directory with the Mac's h16c assets (`D1_AOT`, the tower's
    beside its bundle), 20 text records and 3 picture records, only while no measurement window is open — it never takes
    the lock, and a window that opens while it runs stops the app until it closes; `./_run_mac.sh --red` runs the text
@@ -106,7 +113,12 @@ iPhone 18 Pro (iOS 27.2) the key moved `os_proc_available_memory` at launch from
    D1_PUSH_ONLY=aot/d1_3b_decode_int8mlp_pf16.h19p.aimodelc,MD5SUMS_AOT ./_gate.sh <udid>` (sizes checked from the
    phone's listing), then the stages `md5,load_aot,warm,e2e_aot,bench_aot` with `D1_MD5SUMS=MD5SUMS_AOT`, then `delete`
    with `D1_DELETE=aot/d1_3b_decode_int8mlp_pf16.h19p.aimodelc,cache:<its main.hash>`.
-6. Exit codes: 0 = the gate passed, 3 = a stage failed, 1 = no result, 2 = the device is busy, held or refused. A run that
+6. Another chunk width: `D1_INSTALL_ONLY=1 D1_SKIP_APP=1 D1_STAGE_DIR=_work/device_stage_pf64/D1Assets
+   D1_PUSH_ONLY=decoder_pf64,fixtures/mac_ref_pf64.json,fixtures/bench_pf64.json,MD5SUMS_PF64 ./_gate.sh <udid>` (sizes
+   from the phone's listing), then any stages with `D1_DECODER=decoder_pf64 D1_MAC_REF=mac_ref_pf64.json
+   D1_BENCH=bench_pf64.json` (the md5 stage with `D1_MD5SUMS=MD5SUMS,MD5SUMS_PF64` reads the bytes on the phone). The other
+   decoder directories stay where they are.
+7. Exit codes: 0 = the gate passed, 3 = a stage failed, 1 = no result, 2 = the device is busy, held or refused. A run that
    does not end `done` leaves the phone's crash-log listing, and copies of today's D1Gate / jetsam reports, in the run
    directory. Reprint a result: `./_run.sh --summary <result.json>`.
 
@@ -148,3 +160,23 @@ The iPhone 18 Pro again, with increased-memory-limit (6,432 MB available at laun
 - `r9a4-233426`: round 8's efr AOT (8.74 GB) loads with the key (17.4 s, cache +8,743 MB; without it: the SIGSEGV above), the
   first call after the load 9.7 s, then 55.9 ms per call; the fixture's first 20 questions pass (max |dp| 0.0075), p not
   bit-equal to the JIT's (max |dp| 0.0013).
+
+## Runs (2026-10-09): the chunk width on the phone
+
+The same phone, OS and entitled build family, the decoder's `.aimodel` at S = 64 and S = 32 (`decoder_pf64/`,
+`decoder_pf32/` beside round 8's `decoder/`), each frame a cold launch (the gate) and, after 60 s, a warm launch (the
+bench), round 9a's five bench items unchanged:
+
+- `r10a1c-012336` / `r10a1b-012912` (S = 64): the first load 28.1 s (Core AI cache +4,779 MB, the same as S = 16), warm
+  3.6 s; all 417 questions pass the bar (argmax 416/416 + near-tie 1/1, max |dp| 0.0186 on `semif_33d6e5da58f0fee2490d:answer`,
+  mean 0.00119), red arms 5/5, reset bit-equal, shared = direct. Bench (thermal nominal, USB power): `one_question` 48.0 ms,
+  `three_shared` 146.7 ms, `three_direct` 145.2 ms, `state_3_4k` 2,794.4 ms (55 calls), `image_384px` 570.0 ms (the tower's
+  crop 418.7 ms); every timed p equals the gate's row bit for bit. One S = 64 call costs about 1.2 times an S = 16 call
+  (49.4 / 41.1 ms) for a quarter of the calls: 2.6 times faster on one question, 3.3 times on the 3.4k-token state.
+- `r10a2c-014524` (S = 32): loads (28.0 s, cache +4,779 MB) and every check but one passes; one fixture row
+  (`semif_33d6e5da58f0fee2490d:answer`) lands at max |dp| 0.0223, over the 0.02 bar (the Mac's S = 32 on the same row: 0.0184;
+  every other question within the bar, the next 0.0137, argmax unchanged). The gate failing, no bench ran at S = 32.
+
+The int8mlp decoder's worst row is the same question at every chunk width and on both machines but the Mac's S = 16
+(0.0180 to 0.0223): the margin to the bar is thin. The phone's S = 32 sits 0.0039 above the Mac's S = 32 on that row (another
+GPU; the cause is not isolated).

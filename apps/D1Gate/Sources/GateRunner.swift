@@ -13,17 +13,22 @@
 // Results: <out>/result.json (rewritten when a stage starts, after every stage and every 5 records; "status" running ->
 // done), result.log (one line per event, each with the thermal state and the battery), memory.tsv (every memory reading,
 // written as taken); <out> = Documents/d1_gate on the iPhone. <out>/p_ref_<jit|aot>.json keeps every e2e row's p bits,
-// hidden sha256 and checks across launches (D1_SKIP_DONE, e2e_aot's comparison, the union of the launches' rows).
+// hidden sha256 and checks across launches (D1_SKIP_DONE, e2e_aot's comparison, the union of the launches' rows);
+// p_ref_<jit|aot>_<dir>.json for a decoder directory other than decoder/ (D1_DECODER: one file per bundle).
 //
 // Assets (<assets> = Library/Application Support/D1Assets on the iPhone; D1_ASSETS on the Mac), laid out by
 // ../_stage.sh and pushed by ../_install.sh:
 //   decoder/    the bundle d1_3b_decode_int8mlp_pf16: metadata.json, d1_3b_decode_int8mlp_pf16.aimodel (main S=16, MLP
 //               int8 per block of 32, the rest fp16, attention projections fp32), tokenizer/, head/option_rows.*
+//   decoder_pf32/, decoder_pf64/   the same bundle at S = 32 / 64 (d1_3b_decode_int8mlp_pf32 / _pf64), pushed apart
+//               with MD5SUMS_PF32 / MD5SUMS_PF64; D1_DECODER names the directory the decoder loads from (S comes from
+//               its metadata.json), D1_MAC_REF / D1_BENCH the fixtures' files for that bundle (mac_ref_pf64.json, ...)
 //   tower/      the bundle d1_3b_vision_fp16w32: metadata.json, d1_3b_vision_fp16w32.aimodel (static, fp16 weights,
 //               fp32 compute), host/position_embedding.safetensors
 //   aot/        d1_3b_decode_int8mlp_pf16.h19p.aimodelc (the iPhone 18 Pro's AOT of the decoder, compiled with
 //               --expect-frequent-reshapes; pushed apart with MD5SUMS_AOT; never opened on a Mac)
-//   fixtures/   requests.json, oracle_slim.json, mac_ref.json, red_arms.json, bench.json, images/ — Fixtures.swift
+//   fixtures/   requests.json, oracle_slim.json, mac_ref.json, red_arms.json, bench.json, images/ — Fixtures.swift;
+//               mac_ref_pf<S>.json / bench_pf<S>.json beside them for another chunk width's bundle
 //   MD5SUMS
 //
 // Stages, in the order D1_STAGES gives (default assets,load_jit,warm,red,e2e_images,e2e_fixture,reset):
@@ -83,7 +88,8 @@
 // and skips every later stage but reset, md5 and delete: a device window has an end.
 //
 // Environment (devicectl device process launch --environment-variables on the iPhone; the shell on the Mac), all
-// optional except D1_ASSETS on the Mac: D1_RUN_ID, D1_STAGES, D1_ASSETS, D1_OUT, D1_DECODER, D1_TOWER, D1_TOWER_ASSET,
+// optional except D1_ASSETS on the Mac: D1_RUN_ID, D1_STAGES, D1_ASSETS, D1_OUT, D1_DECODER, D1_MAC_REF, D1_BENCH,
+// D1_TOWER, D1_TOWER_ASSET,
 // D1_AOT, D1_LIMIT, D1_IDS, D1_IMAGE_LIMIT, D1_IMAGE_IDS, D1_SHARED (multi | none), D1_SKIP_DONE, D1_DEADLINE_S,
 // D1_RESERVE_S, D1_WARM, D1_WAIT_NOMINAL, D1_BENCH_REST, D1_BENCH_RUNS, D1_BENCH_ITEMS, D1_AOT_LIMIT, D1_MIN_FREE_GB,
 // D1_DISK_MARGIN_GB, D1_DELETE, D1_MD5SUMS (comma-separated lists: MD5SUMS = the files "assets" left), D1_ORACLE
@@ -144,6 +150,10 @@ struct GateConfig: Sendable {
     let deletePaths: [String]
     let md5Sums: String
     let oraclePath: String?
+    /// the fixtures' Mac reference and bench items for the decoder in use (file names under fixtures/: D1_MAC_REF,
+    /// D1_BENCH; another chunk width's bundle has its own, e.g. mac_ref_pf64.json / bench_pf64.json)
+    let macRefFile: String
+    let benchFile: String
     let recordPause: Double
     let retryDied: Bool
     let exitWhenDone: Bool
@@ -202,6 +212,8 @@ struct GateConfig: Sendable {
             deletePaths: list("D1_DELETE"),
             md5Sums: env["D1_MD5SUMS"] ?? "MD5SUMS",
             oraclePath: env["D1_ORACLE"],
+            macRefFile: env["D1_MAC_REF"] ?? "mac_ref.json",
+            benchFile: env["D1_BENCH"] ?? "bench.json",
             recordPause: max(0, Double(env["D1_RECORD_PAUSE"] ?? "") ?? 0),
             retryDied: env["D1_RETRY_DIED"] == "1",
             exitWhenDone: exitWhenDone,
@@ -218,7 +230,8 @@ struct GateConfig: Sendable {
          "skip_done": skipDone, "deadline_s": deadline ?? -1, "reserve_s": reserve, "warm_record": warmRecord,
          "wait_nominal_s": waitNominalSeconds, "bench_rest_s": benchRest, "bench_runs": benchRuns ?? -1,
          "bench_items": benchItems, "aot_limit": aotLimit, "min_free_gb": minFreeGB, "delete": deletePaths,
-         "md5sums": md5Sums, "oracle": oraclePath ?? "fixtures/oracle_slim.json", "record_pause_s": recordPause,
+         "md5sums": md5Sums, "oracle": oraclePath ?? "fixtures/oracle_slim.json", "mac_ref": "fixtures/\(macRefFile)",
+         "bench": "fixtures/\(benchFile)", "record_pause_s": recordPause,
          "retry_died": retryDied, "md5_small_limit_bytes": md5SmallLimit, "env": env]
     }
 }
@@ -357,8 +370,9 @@ actor GateRunner {
         device["container_bytes_at_launch"] = launchWrittenBytes
         report = ["app": "D1Gate", "run_id": config.runID, "status": "running", "started": Self.now(),
                   "launch_index": launchIndex, "device": device,
-                  "model": "d1-3B: decoder d1_3b_decode_int8mlp_pf16 (main S=16, MLP int8 per block of 32, hidden output) "
-                      + "+ tower d1_3b_vision_fp16w32 + the option readout on the host (float64), D1 library (D1Decider)",
+                  "model": "d1-3B: the decoder bundle in \(config.decoderPath)/ (its metadata.json names it and its chunk S; "
+                      + "decoder/ = d1_3b_decode_int8mlp_pf16, main S=16, MLP int8 per block of 32, hidden output) + tower "
+                      + "d1_3b_vision_fp16w32 + the option readout on the host (float64), D1 library (D1Decider)",
                   "options": ["decoder_jit": d1Describe(D1Paths.decoderJITOptions), "tower_jit": d1Describe(D1Paths.towerJITOptions),
                               "aot": d1Describe(SpecializationOptions.default),
                               "tower_aot": d1Describe(SpecializationOptions.default)],
@@ -406,7 +420,8 @@ actor GateRunner {
         }
         #endif
         do {
-            let fx = try Fixtures(root: fixturesDir, oracleOverride: config.oraclePath.map(assetURL))
+            let fx = try Fixtures(root: fixturesDir, oracleOverride: config.oraclePath.map(assetURL),
+                                  macRefFile: config.macRefFile, benchFile: config.benchFile)
             fixtures = fx
             report["fixtures"] = fx.files
             line("fixtures: \(fx.records.count) records (text \(fx.recordsOf(set: "fixture").count), pictures "
@@ -558,7 +573,8 @@ actor GateRunner {
         let required = ["metadata.json", "tokenizer/tokenizer.json", "tokenizer/tokenizer_config.json", "head/option_rows.json",
                         "head/option_rows.safetensors"].map { bundleURL.appendingPathComponent($0) }
             + ["metadata.json", "host/position_embedding.safetensors"].map { towerURL.appendingPathComponent($0) }
-            + ["requests.json", "oracle_slim.json", "mac_ref.json", "red_arms.json", "bench.json"].map { fixturesDir.appendingPathComponent($0) }
+            + ["requests.json", "oracle_slim.json", config.macRefFile, "red_arms.json", config.benchFile].map {
+                fixturesDir.appendingPathComponent($0) }
         let absent = required.filter { !fm.fileExists(atPath: $0.path) }.map(\.path)
         let free = DeviceInfo.freeGB(assets)
         j["md5sums_listed"] = listed
@@ -1695,7 +1711,7 @@ actor GateRunner {
             let shas = a1.outs.map { sha256Hex(of: $0) }
             try? Self.writeFloats(a1.outs, to: config.out.appendingPathComponent("tower_out_\(rec.id)_aot.f32"))
             var cmp: [String: Any] = [:]
-            if let m = Self.macTowerSHA(fixturesDir.appendingPathComponent("mac_ref.json"), record: rec.id) {
+            if let m = Self.macTowerSHA(fixturesDir.appendingPathComponent(config.macRefFile), record: rec.id) {
                 cmp["mac_sha256_equal"] = zip(shas, m).filter { $0.0 == $0.1 }.count
                 cmp["mac_sha256_crops"] = m.count
             }
@@ -1850,7 +1866,13 @@ actor GateRunner {
 
     // MARK: - p references across launches
 
-    private func prefURL(_ kind: String) -> URL { config.out.appendingPathComponent("p_ref_\(kind).json") }
+    /// p_ref_<kind>.json for decoder/ (rounds 8 / 9a), p_ref_<kind>_<dir>.json for another decoder directory
+    /// (D1_DECODER, e.g. decoder_pf64): rows of two chunk widths never share a file (D1_SKIP_DONE, the union summary)
+    private func prefURL(_ kind: String) -> URL {
+        let dir = config.decoderPath == "decoder" ? "" : "_" + config.decoderPath
+            .map { $0.isLetter || $0.isNumber ? String($0) : "_" }.joined()
+        return config.out.appendingPathComponent("p_ref_\(kind)\(dir).json")
+    }
 
     private func loadPRef(kind: String) -> [String: [String: Any]] {
         guard let d = try? Data(contentsOf: prefURL(kind)),

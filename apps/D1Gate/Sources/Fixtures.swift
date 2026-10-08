@@ -11,11 +11,12 @@
 //                     near_tie; and the names the provider refused
 //   mac_ref.json      per record, per question, the Mac's read-out of the same decoder asset (round 5c's readout gate,
 //                     AOT h16c, int8mlp pf16; the picture records: round 8's decide.py run with the tower fp16w32 AOT):
-//                     the sha256 of the hidden rows (fp16 [T, d] as stored) and p as float64 bit patterns (hex)
+//                     the sha256 of the hidden rows (fp16 [T, d] as stored) and p as float64 bit patterns (hex);
+//                     mac_ref_pf<S>.json the same for the bundle at S = 32 / 64 (GateConfig.macRefFile, D1_MAC_REF)
 //   red_arms.json     round 4's five red arms (fixtures/red_arms_r4.json): per arm its perturbed requests, each with
 //                     its base record, the compared questions and the provider's probabilities of the perturbed row
 //   bench.json        the timed items (round 7's: one_question, three_shared, three_direct, state_3_4k, image_384px) and
-//                     the AOT asset's subset
+//                     the AOT asset's subset; bench_pf<S>.json the same items for another chunk width (D1_BENCH)
 //
 // The bar (FACTS §7, readout_gate.py BAR, unchanged): argmax = the oracle's on every question whose oracle top-2 margin
 // is above 0.02 (the near-ties counted apart); max |dp| <= 0.02 over every option of every question; the mean over runs
@@ -134,7 +135,7 @@ struct Fixtures {
     let skipped: [String]
     let files: [String: Any]
 
-    init(root: URL, oracleOverride: URL?) throws {
+    init(root: URL, oracleOverride: URL?, macRefFile: String = "mac_ref.json", benchFile: String = "bench.json") throws {
         self.root = root
         func load(_ url: URL) throws -> (Data, JSONValue) {
             do {
@@ -194,7 +195,7 @@ struct Fixtures {
                                                           "questions": orc.values.reduce(0) { $0 + $1.questions.count }])
 
         // mac_ref.json
-        let macURL = root.appendingPathComponent("mac_ref.json")
+        let macURL = root.appendingPathComponent(macRefFile)
         let (macData, macDoc) = try load(macURL)
         var mr: [String: [String: MacRow]] = [:]
         for m in macDoc["records"]?.members ?? [] {
@@ -230,7 +231,7 @@ struct Fixtures {
         note("red_arms_json", redURL, redData, ["arms": arms.map(\.id)])
 
         // bench.json
-        let benchURL = root.appendingPathComponent("bench.json")
+        let benchURL = root.appendingPathComponent(benchFile)
         let (benchData, benchDoc) = try load(benchURL)
         func items(_ v: JSONValue?) throws -> [BenchItem] {
             try (v?.array ?? []).map { it in

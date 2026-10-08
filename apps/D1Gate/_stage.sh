@@ -12,6 +12,18 @@
 #                                    the same with these iPhone AOT assets under aot/ by their own names (e.g. the
 #                                    decoder without efr, the tower's AOT for load_tower_aot) and any small file at
 #                                    aot/<rel> (a Mac reference the app compares with); MD5SUMS_AOT lists every file
+#   ./_stage.sh --decoder <bundle> --into decoder_pf<S> --mac-text <readout gate json> --mac-images <images json>
+#                                    the same decoder at another chunk width S, apart: _work/device_stage_pf<S>/D1Assets/
+#                                    with decoder_pf<S>/ (the bundle), fixtures/mac_ref_pf<S>.json (the Mac's read-out of
+#                                    this bundle: its readout gate for the text, its decide.py run for the pictures),
+#                                    fixtures/bench_pf<S>.json (the staged bench.json's items, with the calls each item
+#                                    makes at this S from $L/results/r7_timing_plan.json) and MD5SUMS_PF<S> (every file
+#                                    of the three). Pushed into the installed app's D1Assets with D1_STAGE_DIR=…
+#                                    D1_PUSH_ONLY=decoder_pf<S>,fixtures/mac_ref_pf<S>.json,fixtures/bench_pf<S>.json,
+#                                    MD5SUMS_PF<S> D1_SKIP_APP=1 ./_install.sh (sizes from the phone's listing), read by
+#                                    the app with D1_DECODER=decoder_pf<S> D1_MAC_REF=mac_ref_pf<S>.json
+#                                    D1_BENCH=bench_pf<S>.json, its bytes checked on the phone by the md5 stage
+#                                    (D1_MD5SUMS=MD5SUMS,MD5SUMS_PF<S>)
 # Layout (GateRunner.swift / Fixtures.swift read it):
 #   decoder/    <- $L/exports/bundles/d1_3b_decode_int8mlp_pf16/{metadata.json, <name>.aimodel/, tokenizer/, head/, LICENSE}
 #   tower/      <- $L/exports/vision/d1_3b_vision_fp16w32/{metadata.json, <name>.aimodel/, host/, LICENSE}
@@ -62,6 +74,123 @@ if [ "${1:-}" = "--aot" ]; then
   (cd $SA && find aot -type f | LC_ALL=C sort | while read -r f; do nice -n 19 md5 -r "$f"; done > MD5SUMS_AOT)
   echo "staged $SA: $(grep -c . $SA/MD5SUMS_AOT) files, $(du -sh $SA | cut -f1)"
   cat $SA/MD5SUMS_AOT
+  exit 0
+fi
+
+if [ "${1:-}" = "--decoder" ]; then
+  B=${2:-} INTO="" MT="" MI=""
+  shift; (( $# )) && shift
+  while (( $# >= 2 )); do
+    case $1 in
+      --into) INTO=$2 ;;
+      --mac-text) MT=$2 ;;
+      --mac-images) MI=$2 ;;
+      *) echo "unknown argument $1"; exit 1 ;;
+    esac
+    shift 2
+  done
+  (( $# == 0 )) || { echo "a lone argument: $1"; exit 1; }
+  [ -n "$B" ] && [ -n "$INTO" ] && [ -n "$MT" ] && [ -n "$MI" ] \
+    || { echo "--decoder <bundle> --into decoder_pf<S> --mac-text <json> --mac-images <json>"; exit 1; }
+  [[ $INTO == decoder_pf[0-9]* && $INTO != */* ]] || { echo "--into $INTO: want decoder_pf<S>"; exit 1; }
+  BN=${B:t}
+  for f in metadata.json tokenizer/tokenizer.json tokenizer/tokenizer_config.json head/option_rows.json \
+    head/option_rows.safetensors $BN.aimodel/main.mlirb $BN.aimodel/main.hash; do need $B/$f; done
+  need $MT; need $MI; need $L/results/r7_timing_plan.json
+  junk=$(find $B \( -name '.*' -o -name '*.incomplete' -o -name '*.lock' -o -name '*.aria2' \) -print -quit)
+  [ -z "$junk" ] || { echo "$junk: a hidden or partial file (an export still running?)"; exit 1; }
+  # the fixtures it shares with decoder/ (requests, oracle, red arms, the bench items) are the main stage's, as pushed
+  M=$W/device_stage/D1Assets
+  need $M/MD5SUMS; need $M/fixtures/bench.json
+  SUF=${INTO#decoder_}
+  SD=$W/device_stage_$SUF/D1Assets
+  [[ $SD == */_work/device_stage_pf[0-9]*/D1Assets ]] || { echo "refusing to clear $SD"; exit 1; }
+  rm -rf $SD
+  mkdir -p $SD/$INTO $SD/fixtures
+  for e in metadata.json $BN.aimodel tokenizer head LICENSE; do [ -e $B/$e ] && cp -cR $B/$e $SD/$INTO/$e; done
+  /usr/bin/python3 - $L $B $MT $MI $M $SD $SUF <<'PY'
+import hashlib, json, struct, sys
+from pathlib import Path
+L, B, MT, MI, M, SD = (Path(x) for x in sys.argv[1:7])
+SUF = sys.argv[7]
+meta = json.load(open(B / "metadata.json"))
+S = meta["language"]["prefill_chunk"]
+assert SUF == f"pf{S}", (SUF, S)
+
+def sha(p):
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 24), b""):
+            h.update(b)
+    return h.hexdigest()
+
+def bits(x):
+    return format(struct.unpack("<Q", struct.pack("<d", float(x)))[0], "x")
+
+def md5(p):
+    h = hashlib.md5()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 24), b""):
+            h.update(b)
+    return h.hexdigest()
+
+# the main stage's shared fixtures, as staged (= the phone's D1Assets/fixtures)
+listed = dict(reversed(l.split(" ", 1)) for l in (M / "MD5SUMS").read_text().splitlines() if " " in l)
+for rel in ("fixtures/oracle_slim.json", "fixtures/bench.json"):
+    assert md5(M / rel) == listed[rel], f"{rel} differs from the main stage's MD5SUMS"
+oracle = json.load(open(M / "fixtures/oracle_slim.json"))["records"]
+
+# the Mac's read-out of this bundle: its readout gate (text) and its decide.py run (pictures)
+g = json.load(open(MT))
+assert g.get("result") == "PASS", (MT, g.get("result"))
+gb = (g.get("bundle") or {}).get("name")
+assert gb == B.name, f"{MT}: the readout gate ran {gb}, not {B.name}"
+mi = json.load(open(MI))
+assert mi.get("pass") is True, (MI, mi.get("pass"))
+assert all(Path(a[0]).name == B.name for a in mi["assets"]), f"{MI}: assets {mi['assets']} are not {B.name}"
+mac = {}
+for r in g["runs"]:
+    if r.get("variant", "base") != "base":
+        continue
+    mac.setdefault(r["id"], {"rows": {}})["rows"][r["name"]] = {"hidden_sha256": r["hidden_sha256"],
+                                                               "p_bits": [bits(x) for x in r["probs"]]}
+for rid, rec in mi["records"].items():
+    mac.setdefault(rid, {"rows": {}})
+    for name, row in rec["rows"].items():
+        mac[rid]["rows"][name] = {"hidden_sha256": row["hidden_sha256"], "p_bits": row["p_bits"]}
+    if rec.get("tower_outputs_sha256"):
+        mac[rid]["tower_outputs_sha256"] = rec["tower_outputs_sha256"]
+for rid, v in oracle.items():
+    have = set(mac.get(rid, {}).get("rows", {}))
+    want = {q["name"] for q in v["questions"]}
+    assert have == want, (rid, sorted(want - have), sorted(have - want))
+ref_name = f"mac_ref_{SUF}.json"
+json.dump({"schema": "d1-gate-mac-ref/1", "chunk": S,
+           "sources": {"mac_text": {"path": str(MT), "sha256": sha(MT)}, "mac_images": {"path": str(MI), "sha256": sha(MI)}},
+           "assets": {"text": g.get("bundle"), "pictures": mi.get("assets")}, "records": mac},
+          open(SD / "fixtures" / ref_name, "w"))
+
+# the bench items of the main stage (round 9a's, unchanged) with the calls each makes at this S
+plan = json.load(open(L / "results/r7_timing_plan.json"))
+bench = json.load(open(M / "fixtures/bench.json"))
+calls = {k: v[str(S)] for k, v in plan["calls"].items()}
+for it in bench["bench"] + bench["bench_aot"]:
+    assert it["name"] in calls, it["name"]
+    it["calls_expected"] = calls[it["name"]]
+bench["chunk"] = S
+bench["source"] += f"; the same items at S = {S} (calls_expected from results/r7_timing_plan.json, sha256 {sha(L / 'results/r7_timing_plan.json')[:16]})"
+json.dump(bench, open(SD / "fixtures" / f"bench_{SUF}.json", "w"), indent=1)
+nrows = sum(len(v["rows"]) for v in mac.values())
+print(f"S = {S}: {ref_name} {len(mac)} records, {nrows} rows (text {MT.name}, pictures {MI.name}); bench_{SUF}.json "
+      f"{[(it['name'], it['calls_expected']) for it in bench['bench']]}")
+PY
+  LST=MD5SUMS_${(U)SUF}
+  (cd $SD && find $INTO fixtures -type f | LC_ALL=C sort | while read -r f; do nice -n 19 md5 -r "$f"; done > $LST)
+  echo "staged $SD: $(grep -c . $SD/$LST) files in $LST, $(du -sh $SD | cut -f1) (push: D1_PUSH_ONLY=$INTO,fixtures/mac_ref_$SUF.json,fixtures/bench_$SUF.json,$LST)"
+  for d in $INTO fixtures; do
+    printf "  %-14s %10.1f MB  %4d files\n" $d $(( $(find $SD/$d -type f -exec stat -f %z {} + | paste -sd+ - | bc) / 1e6 )) \
+      $(find $SD/$d -type f | wc -l)
+  done
   exit 0
 fi
 
