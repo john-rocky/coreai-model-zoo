@@ -175,6 +175,10 @@ $D1 prepare-test --bundle <bundle> --records records.json [--groups groups.json]
 cd conversion/d1 && python gate_swift.py all        # -> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json
 ~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph   # -> results/r3c_swift_graph.json (the toys)
 python gate_swift.py real                           # -> results/r6b_swift_real.json (the model's bundles)
+
+# the timing window (the Release binary; it takes ~/code/coreai/_GPU_LOCK itself)
+D1_FORMS="fp16=d1_3b_decode_fp16_pf16 jit=d1_3b_decode_fp16_pf16@jit" D1_PYTIME=all D1_TAG="d1 timing" \
+    D1_GATES="fp16=<gate json>" D1_E2E="fp16=<e2e gate json>" D1_FORM_HOOK=<entry check> ./_time_mac.sh
 ```
 
 `decide` answers one request and writes the response as `json.dumps(response, indent=2, ensure_ascii=False)`; the
@@ -185,7 +189,9 @@ each alone), and re-runs the first record at the end; an image record's `images`
 default the records file's directory), and a URL is not fetched (the record is listed as skipped). `--dump-tower` writes
 every crop's tower output before the cast to the image rows; a refused record carries the decoder and tower calls made
 before its refusal. `prepare-test` checks prepare + decide(prepared) against shared. `_time_mac.sh` is the timing
-window's driver (apps/Kev's, not run in round 3c).
+window's driver (apps/Kev's): the AOT forms' `decide` processes A B .. A B .., one per item and form (the picture item
+with `--tower --images`), then `conversion/d1/timing.py` on every AOT form, then the `@jit` forms; a decision's time is
+its trace's images + graph + readout, timing.py's `latency_ms`.
 
 `rows` validates each question alone (as `test_host.py` does) and then the whole request with the option table;
 `--plain` adds swift-transformers' own ids of every row. `readout-test` reads an option table as a bundle holds it and

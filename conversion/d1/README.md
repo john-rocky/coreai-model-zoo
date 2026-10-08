@@ -26,7 +26,7 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 | `parity_decoder_torch.py` | the decoder module in fp32 torch driven as the graph runs (round 3 against the oracle): P1 every row through the host's readout, P2 the chunk order against one forward, P3 the chunk widths, P4 the red arms; `toy` runs all four on the toy |
 | `compute_unit_probe.py` | the speed ladder's compute-unit and AOT-flag facts (round 6a): `ane` compiles the decoder and the tower with the Neural Engine preferred, counts the Neural Engine regions, loads them with that preference and runs a fixed subset against the GPU assets' records and the oracle (plus the GPU assets loaded the same way); `noefr` compiles the decoder without `--expect-frequent-reshapes` and times each call of a row whose position length grows, twice in a process and in two processes; the transcript opens with the rules |
 | `int8_bisect_torch.py` | which layers carry int8lin's error: P1's fp32 instrument with each of the 134 int8lin linears holding its checkpoint weight or the exporter's own int8 weight (read back through the finalized module's dequantization), on the int8lin gate's worst rows; the selection rule written to a file before any result (`rule`, `dump`, `run`, `plan`, `merge`) |
-| `timing.py` | decision latency for the card's columns (round 3 on the model's bundle), inside a measurement window its caller holds; `--dry-run` prints the plan without a bundle |
+| `timing.py` | decision latency for the card's five columns (four text requests and one 384 px picture) on decide.py's path, inside a measurement window its caller holds, with every item's p and hidden rows checked against the gates' rows; `--dry-run` prints the plan (rows, calls) |
 | `vision_host.py` | the image path's host specification (NumPy + Pillow): the provider's `cap_pixels`, the processor's crop plan (one crop or tiles + a thumbnail), torch's uint8 bicubic resize, patches and mask, the image token run and the extension ids, the position-table resize, the unshuffle index, the tower's four inputs per crop |
 | `test_vision_host.py` | `vision_host.py` against the provider's image path (`cap_pixels` → transformers 5.19's processor, the row / trunk split): ids, pixel_values bit for bit, spatial shapes, mask, the position table, the unshuffle, the tower contract on a small random SigLIP2, negative controls, and the grid table |
 | `make_fixture_images.py` | the CC0 fixture pictures (drawn shapes, seeded) and their records; the card's example picture as a URL only |
@@ -186,8 +186,14 @@ $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_fp16_pf16 --red --transc
 $PY decide.py check --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 --gate $K/results/<gate fp16>.json \
     --records <the multi-question records> --out $K/results/<check>.json --shared-out $K/results/<shared vs direct>.json
 <window holder> $PY timing.py run --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 \
-    --gate-transcript $K/results/<gate fp16>.json --tag <tag>
+    --tower $K/exports/vision/d1_3b_vision_fp16w32 --gate-transcript $K/results/<gate fp16>.json \
+    --e2e-transcript $K/results/<e2e gate fp16w32>.json --tag <tag>
 ```
+
+`timing.py` runs decide.py's decisions (the picture item through the tower, its decoding and cutting once per process
+outside the timed decision) and names its bundle's cache entry the interpreter's way: forms whose AOT assets share a
+`main.hash` (int8mlp at block 32 and 16) are timed with their own entries, by the interpreter's file name
+(`.venv/bin/python3.11` keeps its entries in `python3-11/`) or by moving one entry aside, never with whichever is there.
 
 `parity_decoder_torch.py p1` runs every row of the oracle document it is given (`--oracle`, default
 `$K/oracle/records_oracle.json`): a subset is the same layout with fewer records (per source the first records, plus
