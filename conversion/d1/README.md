@@ -195,6 +195,8 @@ $PY decide.py check --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 --gate $K
 outside the timed decision) and names its bundle's cache entry the interpreter's way: forms whose AOT assets share a
 `main.hash` (int8mlp at block 32 and 16) are timed with their own entries, by the interpreter's file name
 (`.venv/bin/python3.11` keeps its entries in `python3-11/`) or by moving one entry aside, never with whichever is there.
+A bundle of the static form (below) is timed the same way: decide.py reads the form from its `metadata.json`, and its
+AOT asset (compiled without `--expect-frequent-reshapes`) loads with `SpecializationOptions.default()` like the others.
 
 `parity_decoder_torch.py p1` runs every row of the oracle document it is given (`--oracle`, default
 `$K/oracle/records_oracle.json`): a subset is the same layout with fewer records (per source the first records, plus
@@ -296,7 +298,9 @@ $PY compute_unit_probe.py ane --graphs tower --tower $K/exports/vision/d1_3b_vis
     --tower-gate $K/results/<gate tower fp16>.json --no-control --tag _fp16diag --transcript $K/results/<diag>.json
 ```
 
-Each S compiles to its own `main.hash` (the function's type holds S), but check the runtime cache entry before a gate
+The same commands make and gate a wider width (round 10b: int8mlp at S = 128, `--prefill-chunk 128`; the gate's
+`--compare-with` then names the S = 64 transcript). Each S compiles to its own `main.hash` (the function's type holds S),
+but check the runtime cache entry before a gate
 all the same (above). `compute_unit_probe.py ane` compiles the decoder (`--expect-frequent-reshapes`, as it ships) and
 the tower (without it, as it ships) with `--preferred-compute neural-engine` (the flag's values are `gpu`,
 `neural-engine` and `none`) into `$K/exports/probe_ane/`, counts the compiled asset's Neural Engine regions (the unique
@@ -346,7 +350,9 @@ $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8mlp_pf16_static --re
 
 The hosts read the form from `metadata.json` (`language.contract.static`): `decide.py`, `readout_gate.py` and
 `compute_unit_probe.py` send each call its own positions and allocate the states at their static shapes; a bundle of
-the dynamic form runs exactly as before. The Swift host in `apps/D1` reads the dynamic form only.
+the dynamic form runs exactly as before. The Swift host in `apps/D1` reads the form from the same field (round 10b): its
+hidden rows and probabilities equal decide.py's gate transcripts bit for bit on the static assets, and a bundle of the
+dynamic form runs there as before too.
 
 `--kv-write` chooses how the new keys and values enter the cache. `slice` (the default) writes them in place at slots
 p .. p+S-1 with `mutable_slice_update`, its begin index taken from `position_ids` at run time — the form zoo

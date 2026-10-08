@@ -9,6 +9,11 @@
 //            convState [n_conv, 1, d, w] f16 — allocated once, zeroed at the start of every row
 //   output   hidden [1, S, d] f16
 //
+//   The static form (metadata `language.contract.static`, conversion/d1/lfm2_d1_static.py) has no dynamic axis:
+//   position_ids [1, S] = the call's own positions p ..< p + S, keyCache / valueCache [n_full, 1, n_kv, C, head] with
+//   C = max_context_length slots (slot j holds position j; the graph masks every slot past a query's position), and a
+//   row fits when its padded end <= C (the dynamic form's position axis ends at max_context_length - 1).
+//
 // Every name, shape and type is the bundle's metadata.json `language.contract`; the loaded function's descriptor is
 // checked against it at load (a different graph fails there, not in a probability).
 //
@@ -45,6 +50,11 @@ public final class D1Decoder: @unchecked Sendable {
     public let hidden: Int
     public let imageRows: Int
     public let maxContext: Int
+    /// the static form (metadata `language.contract.static`): position_ids carry the call's own S positions
+    public let isStatic: Bool
+    /// the last padded position a row may reach: max_context_length - 1 (the dynamic form's position axis), or
+    /// max_context_length for the static form (its KV cache's slots); host.py `graph_context_check`
+    public var rowLimit: Int { isStatic ? maxContext : maxContext - 1 }
     public let padID: Int32
     public let functionNames: [String]
     public let loadSeconds: (model: Double, function: Double)
@@ -120,6 +130,7 @@ public final class D1Decoder: @unchecked Sendable {
         hidden = contract.hidden
         imageRows = contract.imageRows
         self.maxContext = maxContext
+        isStatic = contract.isStatic
         self.padID = Int32(padID)
         self.options = options
         loadSeconds = (tModel, tMain)
@@ -280,8 +291,8 @@ public final class D1Decoder: @unchecked Sendable {
     private func pieces(_ ids: [Int], from p0: Int, _ b: inout Buffers) async throws -> ([Float16], [Double]) {
         let n = (ids.count + chunk - 1) / chunk
         let end = p0 + n * chunk
-        guard end <= maxContext - 1 else {
-            throw D1Error.graphLimit("\(p0 + ids.count) ids (padded \(end)) > the graph's \(maxContext - 1) positions")
+        guard end <= rowLimit else {
+            throw D1Error.graphLimit("\(p0 + ids.count) ids (padded \(end)) > the graph's \(rowLimit) positions")
         }
         var out = [Float16]()
         out.reserveCapacity(ids.count * hidden)
@@ -298,13 +309,15 @@ public final class D1Decoder: @unchecked Sendable {
         return (out, secs)
     }
 
-    /// One call: S ids after p earlier ids (position_ids 0 ..< p + S), the states and the image rows in place ->
-    /// hidden [S * d] fp16.
+    /// One call: S ids after p earlier ids (position_ids 0 ..< p + S; the static form's p ..< p + S), the states and the
+    /// image rows in place -> hidden [S * d] fp16.
     private func call(_ x: [Int32], from p: Int, _ b: inout Buffers) async throws -> [Float16] {
         let end = p + chunk
+        let positionIDs = isStatic ? ND.make((p..<end).map { Int32($0) }, positions)
+            : ND.make((0..<end).map { Int32($0) }, positions.resolvingDynamicDimensions([1, end]))
         let inputs: [String: NDArray] = [
             "input_ids": ND.make(x, idsDescriptor),
-            "position_ids": ND.make((0..<end).map { Int32($0) }, positions.resolvingDynamicDimensions([1, end])),
+            "position_ids": positionIDs,
             "image_embeds": b.image,
         ]
         var states = InferenceFunction.MutableViews()
@@ -329,19 +342,21 @@ public final class D1Decoder: @unchecked Sendable {
 }
 
 /// A graph function's contract as metadata.json writes it: {name: [shape, dtype]} for inputs, outputs and states
-/// (-1 = a dynamic axis).
+/// (-1 = a dynamic axis), and `static` for a graph with no dynamic axis.
 public struct D1GraphContract: Sendable {
     public let function: String
     public let inputs: [String: D1TensorSpec]
     public let outputs: [String: D1TensorSpec]
     public let states: [String: D1TensorSpec]
+    /// `static`: position_ids [1, S] = the call's own positions, the KV caches at their slots (lfm2_d1_static.py)
+    public let isStatic: Bool
 
     /// The decoder's S (input_ids [1, S]), d (hidden [1, S, d]) and N (image_embeds [N, d]).
     public var chunk: Int { inputs["input_ids"]?.shape.last ?? 0 }
     public var hidden: Int { outputs["hidden"]?.shape.last ?? 0 }
     public var imageRows: Int { inputs["image_embeds"]?.shape.first ?? 0 }
 
-    /// `j` = {"function"?, "inputs": {...}, "outputs": {...}, "states"?: {...}}.
+    /// `j` = {"function"?, "inputs": {...}, "outputs": {...}, "states"?: {...}, "static"?: true}.
     public init(_ j: JSONValue, what: String) throws {
         func table(_ v: JSONValue?) throws -> [String: D1TensorSpec] {
             var out: [String: D1TensorSpec] = [:]
@@ -357,6 +372,7 @@ public struct D1GraphContract: Sendable {
         inputs = try table(j["inputs"])
         outputs = try table(j["outputs"])
         states = try table(j["states"])
+        isStatic = j["static"]?.boolValue ?? false
         guard !inputs.isEmpty, !outputs.isEmpty else { throw D1Error.bundle("\(what): no inputs / outputs") }
     }
 }

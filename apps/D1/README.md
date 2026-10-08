@@ -113,12 +113,17 @@ The decoder bundle (`conversion/d1/export_decoder.py`) holds one static-S functi
 `position_ids [1, -1]` and `image_embeds [N, d]` in, the final-norm hidden state `hidden [1, S, d]` of every position
 out, and three states (`keyCache` / `valueCache` with a dynamic sequence axis, `convState`). Every name, shape and
 type of that contract is read from `metadata.json` `language.contract`, and the loaded function's descriptor must equal
-it; S, `max_context_length`, d, N and the pad id come from the same file. A different graph fails at load.
+it; S, `max_context_length`, d, N and the pad id come from the same file. A different graph fails at load. A bundle of
+the static form (`export_decoder.py --static`, `conversion/d1/lfm2_d1_static.py`; `language.contract.static`) has no
+dynamic axis: `position_ids [1, S]` and both caches at `max_context_length` slots, checked against
+`max_context_length` at load.
 
 - **A row.** The states are allocated once, with the sequence axis at `max_context_length`, and zeroed at the start of
   every row. A row of T ids runs as ceil(T / S) calls; call c gets ids cS ..< cS + S with `position_ids` 0 ..< cS + S,
   the last call padded with `<|pad|>`, and the padded positions' rows are dropped. The readout reads the row's last
-  position.
+  position. On the static form call c gets `position_ids` cS ..< cS + S, its own positions; the graph hides every cache
+  slot past a query's position, and a row fits while its padded end is at most `max_context_length` (the dynamic form's
+  position axis ends one short of it).
 - **The pictures.** The request's files, in the order its `<image>` markers come: each decoded with its EXIF orientation,
   capped, planned and cut into crops (`D1Pixels`, `ImagePixels.swift`), every crop's four tower inputs made with the tower
   bundle's position table resized to the crop's grid, one tower call per crop.
@@ -191,7 +196,9 @@ every crop's tower output before the cast to the image rows; a refused record ca
 before its refusal. `prepare-test` checks prepare + decide(prepared) against shared. `_time_mac.sh` is the timing
 window's driver (apps/Kev's): the AOT forms' `decide` processes A B .. A B .., one per item and form (the picture item
 with `--tower --images`), then `conversion/d1/timing.py` on every AOT form, then the `@jit` forms; a decision's time is
-its trace's images + graph + readout, timing.py's `latency_ms`.
+its trace's images + graph + readout, timing.py's `latency_ms`. A static-form bundle or a wider S times the same way:
+`D1_FORMS` names the bundle, and `decide` opens its `<bundles>_aotc/<name>.h16c.aimodelc` (compiled without
+`--expect-frequent-reshapes` for the static form) with `SpecializationOptions.default`.
 
 `rows` validates each question alone (as `test_host.py` does) and then the whole request with the option table;
 `--plain` adds swift-transformers' own ids of every row. `readout-test` reads an option table as a bundle holds it and

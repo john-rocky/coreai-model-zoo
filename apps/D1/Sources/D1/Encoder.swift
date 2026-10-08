@@ -338,12 +338,14 @@ public final class D1Tokenizer: @unchecked Sendable {
         }
     }
 
-    /// `host.graph_context_check`: a row of `length` ids fits a static-S graph (its padded end <= maxContext - 1).
-    public static func graphContextCheck(length: Int, chunk: Int, maxContext: Int) throws {
+    /// `host.graph_context_check`: a row of `length` ids fits a static-S graph (its padded end <= maxContext - 1, the
+    /// dynamic form's position axis; <= maxContext for the static form, `isStatic`: its KV cache's slots).
+    public static func graphContextCheck(length: Int, chunk: Int, maxContext: Int, isStatic: Bool = false) throws {
         let padded = (length + chunk - 1) / chunk * chunk
-        if padded > maxContext - 1 {
+        let limit = isStatic ? maxContext : maxContext - 1
+        if padded > limit {
             throw D1Error.graphLimit("a row of \(length) tokens runs \(padded) padded positions, over the graph's "
-                + "\(maxContext - 1) (rows of at most \((maxContext - 1) / chunk * chunk) tokens at S = \(chunk))")
+                + "\(limit) (rows of at most \(limit / chunk * chunk) tokens at S = \(chunk))")
         }
     }
 

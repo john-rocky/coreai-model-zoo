@@ -15,9 +15,9 @@
 // Round 3a: everything but the graph; round 3c wires it (`loadGraph`, then `decide` / `trace` / `prepare`; a decider
 // loaded without a graph still stops with `D1Error.graphNotWired` after the rows). `response(requestJSON:slotHidden:)`
 // takes slot hidden rows from the caller (a file, a test) and runs the rest. Everything model-specific comes from the bundle:
-// metadata.json (`language.prefill_chunk` S, `max_context_length`, `decision.prompt.special`, `decision.option_table`,
-// `vision.image_token`), tokenizer/, head/option_rows.{json,safetensors}. A bundle that differs from the contract fails
-// at load, not in a probability.
+// metadata.json (`language.prefill_chunk` S, `max_context_length`, `language.contract` and its `static` form,
+// `decision.prompt.special`, `decision.option_table`, `vision.image_token`), tokenizer/, head/option_rows.{json,safetensors}.
+// A bundle that differs from the contract fails at load, not in a probability.
 
 import CoreAI
 import Foundation
@@ -29,6 +29,8 @@ public final class D1Decider: @unchecked Sendable {
         public let asset: String
         public let vocab: Int
         public let maxContext: Int
+        /// language.contract.static: the row limit is max_context_length (the KV cache's slots), not max_context_length - 1
+        public let isStatic: Bool
         public let chunk: Int
         /// decision.prompt.special: token -> id
         public let special: [String: Int]
@@ -60,6 +62,7 @@ public final class D1Decider: @unchecked Sendable {
             self.asset = asset
             self.vocab = vocab
             maxContext = ctx
+            isStatic = lang["contract"]?["static"]?.boolValue ?? false
             self.chunk = chunk
             self.special = sp
             optionFiles = files
@@ -112,7 +115,8 @@ public final class D1Decider: @unchecked Sendable {
         let request = try D1Request(data: data)
         let rows = try tokenizer.rows(request, table: table.idSet)
         for r in rows.rows {
-            try D1Tokenizer.graphContextCheck(length: r.ids.count, chunk: metadata.chunk, maxContext: metadata.maxContext)
+            try D1Tokenizer.graphContextCheck(length: r.ids.count, chunk: metadata.chunk, maxContext: metadata.maxContext,
+                                              isStatic: metadata.isStatic)
         }
         return rows
     }
@@ -167,6 +171,8 @@ public struct D1GraphMetadata: Sendable {
     /// language.prefill_chunk S (input_ids [1, S])
     public let chunk: Int
     public let maxContext: Int
+    /// the static form (`language.contract.static`): position_ids [1, S], the KV caches at max_context_length slots
+    public let isStatic: Bool
     /// d (hidden [1, S, d])
     public let hidden: Int
     /// N (image_embeds [N, d])
@@ -190,13 +196,23 @@ public struct D1GraphMetadata: Sendable {
               let ctx = lang["max_context_length"]?.intValue, let v = lang["vocab_size"]?.intValue
         else { throw D1Error.bundle("\(url.path): no language.contract / prefill_chunk / max_context_length / vocab_size") }
         let contract = try D1GraphContract(c, what: "\(url.lastPathComponent) language.contract")
+        let positionShape = contract.isStatic ? [1, s] : [1, -1]
         guard contract.chunk == s, contract.inputs["input_ids"] == D1TensorSpec(shape: [1, s], dtype: "int32"),
-              contract.inputs["position_ids"] == D1TensorSpec(shape: [1, -1], dtype: "int32"),
+              contract.inputs["position_ids"] == D1TensorSpec(shape: positionShape, dtype: "int32"),
               contract.outputs["hidden"] == D1TensorSpec(shape: [1, s, contract.hidden], dtype: "float16"),
               contract.inputs["image_embeds"] == D1TensorSpec(shape: [contract.imageRows, contract.hidden], dtype: "float16")
         else {
             throw D1Error.contract("\(url.lastPathComponent) language.contract: not input_ids [1, \(s)] int32, position_ids "
-                + "[1, -1] int32, image_embeds [N, d] float16 -> hidden [1, \(s), d] float16")
+                + "\(positionShape) int32, image_embeds [N, d] float16 -> hidden [1, \(s), d] float16")
+        }
+        if contract.isStatic {
+            // the static form's row limit is its KV caches' slots: they must be max_context_length, with no dynamic axis
+            guard let k = contract.states["keyCache"]?.shape, k.count == 5, k[3] == ctx,
+                  contract.states["valueCache"]?.shape == k, contract.states.values.allSatisfy({ !$0.shape.contains { $0 < 0 } })
+            else {
+                throw D1Error.contract("\(url.lastPathComponent) language.contract: static, but keyCache / valueCache are not "
+                    + "[n, 1, kv, \(ctx), head] with no dynamic axis")
+            }
         }
         guard let pad = special["<|pad|>"] else { throw D1Error.bundle("\(url.path): no <|pad|> in decision.prompt.special") }
         if let toy = j["toy"] {
@@ -230,6 +246,7 @@ public struct D1GraphMetadata: Sendable {
         self.contract = contract
         chunk = s
         maxContext = ctx
+        isStatic = contract.isStatic
         hidden = contract.hidden
         imageRows = n
         vocab = v
@@ -427,7 +444,9 @@ extension D1Decider {
             D1Row(name: $0.row.name, kind: $0.row.kind, text: $0.row.text, suffix: $0.row.suffix, ids: $0.row.ids,
                   codes: $0.row.codes, aliasIDs: $0.row.aliasIDs, groups: $0.readGroups, keys: $0.row.keys, levels: $0.row.levels)
         }, table: table.idSet)
-        for r in rows { try D1Tokenizer.graphContextCheck(length: r.ids.count, chunk: gm.chunk, maxContext: gm.maxContext) }
+        for r in rows {
+            try D1Tokenizer.graphContextCheck(length: r.ids.count, chunk: gm.chunk, maxContext: gm.maxContext, isStatic: gm.isStatic)
+        }
         let imageTokens = D1Vision.imageTokenCount(plans)
         try D1Tokenizer.imageRowsCheck(tokens: imageTokens, imageRows: gm.imageRows, refusal: gm.imageRefusal)
         let trunk = plans.isEmpty ? tokenizer.encode(prefix)

@@ -353,7 +353,8 @@ def ladder_rows(summary: dict, b, gate: dict | None, timing_json: str) -> list[s
         s = gate["summary"]
         par = (f"{gate['result']} argmax {s['argmax_equal_non_near_tie']}/{s['questions_non_near_tie']} non-near-tie, "
                f"max|Δp| {s['max_abs_dp']:.2g}")
-    form = f"{b.name} (AOT h16c efr, static S {b.S}" + (f", {b.meta['compression']['scheme']}" if b.meta.get("compression") else ", fp16")
+    aot = "AOT h16c without efr, the static form" if b.meta["language"]["contract"].get("static") else "AOT h16c efr"
+    form = f"{b.name} ({aot}, static S {b.S}" + (f", {b.meta['compression']['scheme']}" if b.meta.get("compression") else ", fp16")
     rows = []
     for it in summary["items"]:
         mode = "shared state" if it["shared"] else "direct"
