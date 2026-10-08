@@ -3,10 +3,10 @@
 # request checks, text and rows, the option table, the decoder `main` S=16 in its chunk order from zero states or the
 # shared prefix, the vision tower per crop, the float64 option readout, the answers), taken by path from ../D1. One
 # target for iOS and macOS, so the phone and the Mac run the same gate code. Build: ./_build.sh (iOS) or ./_build.sh
-# --mac (xcodegen generate + xcodebuild Release). Assets are sideloaded, not bundled. No entitlements: the bundle id is
-# new, and the team's only profile that lists the iPhone 18 Pro and fits a new id is the wildcard one, which cannot carry
-# com.apple.developer.kernel.increased-memory-limit (KevGate README "Signing"); the gate runs at the default memory
-# limit and records it.
+# --mac (xcodegen generate + xcodebuild Release). Assets are sideloaded, not bundled. Entitlements only on request:
+# D1_ENTITLED=1 ./_build.sh sets D1_ENTITLEMENTS_FILE=D1Gate.entitlements
+# (com.apple.developer.kernel.increased-memory-limit) for the iOS build; without it the setting is empty and the app runs
+# at the default memory limit (the wildcard profile signs it). Either way the gate records os_proc_available_memory.
 name: D1Gate
 options:
   bundleIdPrefix: com.daisukemajima
@@ -38,6 +38,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.d1gate
         DEVELOPMENT_TEAM: MFN25KNUGJ
         CODE_SIGN_STYLE: Automatic
+        # empty unless the build passes D1_ENTITLEMENTS_FILE (iOS only: the Mac build has no memory limit to raise)
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": "$(D1_ENTITLEMENTS_FILE)"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_CFBundleDisplayName: D1Gate

@@ -35,6 +35,8 @@ say() { echo "[$(date '+%H:%M:%S')] $*" | tee -a $OUT/run.out; }
 export D1_ASSETS=$S D1_OUT=$OUT D1_RUN_ID=$RUN_ID
 export D1_AOT=${D1_AOT:-$L/exports/bundles_aotc/d1_3b_decode_int8mlp_pf16.h16c.aimodelc}
 export D1_TOWER=${D1_TOWER:-$L/exports/vision/d1_3b_vision_fp16w32} D1_TOWER_ASSET=${D1_TOWER_ASSET:-aot}
+# load_tower_aot on the Mac: the tower's h16c AOT (the phone's h19p is refused here)
+export D1_TOWER_AOT=${D1_TOWER_AOT:-$L/exports/vision_aotc/d1_3b_vision_fp16w32.h16c.aimodelc}
 # 20 text records over every source, the red arms' bases, int8mlp's worst row (tv4x_composition_holdout_12), the refused
 # request (own_email_03), multi-question requests (shared), a 1.4k-token state (long_15k); round 3b's 3 picture records
 export D1_IDS=${D1_IDS:-tv4_000,tv4_001,tv4_002,tv4x_qnli_00,tv4x_paws_00,tv4x_emotion_00,tv4x_composition_holdout_12,tv4s_00,tv4s_01,semif_a3f18f3a63d45345942b,semif_0b43ea8e24e74d621f1b,semif_33d6e5da58f0fee2490d,semif_8e8c3804a3c15ebb31e3,own_ticket_01,own_email_03,own_order_06,own_fiveq_09,card_refund,card_ticket_00,long_15k}
@@ -45,6 +47,7 @@ else
   export D1_STAGES=${D1_STAGES:-load_aot,red,e2e_images,e2e_fixture,reset}
 fi
 [[ $D1_AOT == *.h16c.aimodelc ]] || { say "D1_AOT $D1_AOT: the Mac runs the h16c asset only"; exit 1; }
+[[ $D1_TOWER_AOT == *.h16c.aimodelc ]] || { say "D1_TOWER_AOT $D1_TOWER_AOT: the Mac runs the h16c asset only"; exit 1; }
 if (( RED )); then
   /usr/bin/python3 - $S/fixtures/oracle_slim.json $OUT/oracle_slim_red.json <<'PY'
 import json, sys

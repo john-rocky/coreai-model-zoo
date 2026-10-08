@@ -12,7 +12,7 @@
 # does not list. App knobs: the D1_* list at the top of Sources/GateRunner.swift.
 # Poll cap: D1_CAP polls of 10 s (default 150 = 25 min). When the phone stops answering (unplugged, locked up), the
 # script says so and keeps polling until the cap: reconnecting is a person's job.
-# A run that does not end "done" (the app gone, frozen, or the cap) also lists the phone's crash logs and copies the ones
+# A run that does not end "done" (the app gone, frozen, crashed, or the cap) also lists the phone's crash logs and copies the ones
 # of today that name D1Gate or a jetsam event into crash/.
 # Output: _work/device_runs/<run id>/{result.json,result.log,memory.tsv,run.out,launch.log[,crash/]}
 set -u
@@ -37,7 +37,10 @@ print(f"run {r.get('run_id')}: status {r.get('status')}, pass {r.get('pass')}, c
       f"Core AI arch {d.get('coreai_architecture')}), thermal {d.get('thermal')} -> {de.get('thermal')}, battery "
       f"{num(d.get('battery_level', -1) * 100, '%.0f')} % {d.get('battery_state')} ({d.get('power_source')}) -> "
       f"{num((de.get('battery_level') or -1) * 100, '%.0f')} %, low power {d.get('low_power_mode')}, free "
-      f"{num(d.get('free_gb'), '%.1f')} GB, available {num(d.get('available_mb'), '%.0f')} MB at launch")
+      f"{num(d.get('free_gb'), '%.1f')} GB, available {num(d.get('available_mb'), '%.0f')} MB at launch, increased-memory-limit "
+      f"{(d.get('entitlement_increased_memory_limit') or {}).get('signature', '-')} (signature) / "
+      f"{(d.get('entitlement_increased_memory_limit') or {}).get('profile', '-')} (profile)")
+if r.get("disk_stop"): print("DISK STOP", r["disk_stop"])
 p = r.get("previous_launch")
 if p:
     print(f"previous launch: run {p.get('run_id')} {p.get('status')}" + (f", died in {p['died_in_stage']}" if p.get("died_in_stage") else ""))
@@ -65,9 +68,31 @@ for k in r.get("stage_order", []):
     elif k == "md5":
         print(f"{tag} | {s.get('list')}: {len(s.get('files', []))} files, {num(s.get('bytes', 0) / 1e6, '%.0f')} MB in "
               f"{num(s.get('seconds'), '%.1f')} s, different {len(s.get('md5_mismatch', []))}{err}")
+    elif k == "load_tower_aot":
+        ld, cmp = s.get("load", {}), s.get("compare", {})
+        jt = cmp.get("jit") or {}
+        def cmpv(v):
+            if isinstance(v, dict) and "error" not in v:
+                return f"max|d| {num(v.get('max_abs'), '%.3g')}, cos {num(v.get('cos'), '%.10f')}, bit-different {v.get('bit_different')}"
+            return str(v)
+        print(f"{tag} | {s.get('asset', '').split('/')[-1]} {num(s.get('asset_bytes', 0) / 1e6, '%.0f')} MB: wall {num(ld.get('wall_s'))} s, "
+              f"peak {num((ld.get('memory') or {}).get('peak_footprint_mb'), '%.0f')} MB, cache +{num((ld.get('cache_bytes_added') or 0) / 1e6, '%.0f')} MB "
+              f"| {s.get('record')} {s.get('crops')} crops, ms {s.get('crop_ms', {}).get('first_run')}, re-run bit-equal {s.get('rerun_bit_equal')} "
+              f"| Mac sha256 {cmp.get('mac_sha256_equal')}/{cmp.get('mac_sha256_crops')} | Mac values {cmpv(cmp.get('mac_values'))} "
+              f"| JIT bit-equal {jt.get('bit_equal_crops')}, JIT vs AOT {cmpv(jt.get('vs_aot'))}{err}")
+    elif k == "probe_noefr":
+        for p in s.get("passes", []):
+            print(f"{tag} | pass {p.get('pass')}: {len(p.get('calls', []))} calls in {num(p.get('wall_s'), '%.1f')} s, new lengths "
+                  f"{p.get('new_lengths')} at {[round(x) for x in p.get('new_length_ms', [])]} ms, lengths run before: median "
+                  f"{num(p.get('seen_length_ms_median'), '%.1f')} ms, p = pass 1 {p.get('p_bit_equal_pass1')}, hidden = pass 1 "
+                  f"{p.get('hidden_sha256_equal_pass1')}, max|dp| {num((p.get('summary') or {}).get('max_abs_dp'), '%.6f')}, container "
+                  f"+{num((p.get('container_bytes_written') or 0) / 1e6, '%.0f')} MB, peak {num((p.get('memory') or {}).get('peak_footprint_mb'), '%.0f')} MB"
+                  + (f" | ERROR {p['error']}"[:300] if "error" in p else ""))
+        if not s.get("passes"):
+            print(f"{tag}{err}")
     elif k in ("load_jit", "load_aot"):
         t, tw, dc = s.get("text", {}), s.get("tower", {}), s.get("decoder", {})
-        print(f"{tag} | text {num(t.get('wall_s'))} s | tower {num(tw.get('wall_s'))} s, peak "
+        print(f"{tag} | efr {s.get('asset_efr', '-')} | text {num(t.get('wall_s'))} s | tower {num(tw.get('wall_s'))} s, peak "
               f"{num((tw.get('memory') or {}).get('peak_footprint_mb'), '%.0f')} MB, cache +{num((tw.get('cache_bytes_added') or 0) / 1e6, '%.0f')} MB "
               f"| decoder {s.get('asset', '').split('/')[-1]} {num(s.get('asset_bytes', 0) / 1e6, '%.0f')} MB: wall {num(dc.get('wall_s'))} s "
               f"(AIModel {num(dc.get('decoder_model_s'))} s, main {num(dc.get('decoder_function_s'))} s, tower {num(dc.get('tower_load_s'))} s), "
@@ -125,7 +150,24 @@ if [[ ",$D1_ALLOWED_DEVICES," != *",$UDID,"* ]]; then
   say "refusing device $UDID: not in D1_ALLOWED_DEVICES ($D1_ALLOWED_DEVICES)"; exit 2
 fi
 HOLD=${D1_HOLD_FILE:-$HOME/code/coreai/ondevice/.device_hold}
-if ! { [ -f $HOLD ] && head -1 $HOLD | grep -q "^d1-3b device gate"; }; then
+# this lane's hold: the gate's text line, or the JSON a keeper of this lane writes (other lanes' queue tools respect only the
+# JSON form): "script" = D1_HOLD_SCRIPT and a live "pid"
+hold_is_ours() {
+  [ -f $HOLD ] || return 1
+  head -1 $HOLD | grep -q "^d1-3b device gate" && return 0
+  [ -n "${D1_HOLD_SCRIPT:-}" ] || return 1
+  /usr/bin/python3 -c 'import json, os, sys
+try:
+    h = json.load(open(sys.argv[1])); p = h.get("pid")
+    if h.get("script") != sys.argv[2] or not isinstance(p, int):
+        sys.exit(1)
+    os.kill(p, 0)
+except PermissionError:
+    sys.exit(0)
+except Exception:
+    sys.exit(1)' $HOLD "$D1_HOLD_SCRIPT" 2>/dev/null
+}
+if ! hold_is_ours; then
   say "the phone is not held by this lane ($HOLD: $(head -c 200 $HOLD 2>/dev/null || echo absent)); go through ./_gate.sh"; exit 2
 fi
 say "hold: $(head -1 $HOLD)"
@@ -180,11 +222,30 @@ except Exception:
     pass
 PY
 }
-state=""; last=""; gone=0; silent=0; frozen=0
+# today's crash reports of this app written at or after the launch (names carry the time: D1Gate-YYYY-MM-DD-HHMMSS.ips)
+LAUNCH_HMS=$(date +%H%M%S)
+new_crash() {
+  xcrun devicectl device info files --device $UDID --domain-type systemCrashLogs 2>/dev/null \
+    | grep -oE "D1Gate-$(date +%Y-%m-%d)-[0-9]{6}\.ips" | sort -u \
+    | awk -v t=$LAUNCH_HMS '{ s = substr($0, length($0) - 9, 6); if (s >= t) print }' | tail -1
+}
+state=""; last=""; gone=0; silent=0; frozen=0; pullfail=0; crashed=""
 msize=-1; mchanged=$SECONDS
 for i in $(seq 1 $CAP); do
   sleep 10
-  pull result.log; pull result.json; pull memory.tsv
+  okp=0
+  pull result.log && okp=1; pull result.json && okp=1; pull memory.tsv && okp=1
+  # three polls in a row with no file coming back: a crash leaves a second process behind that the pulls trip on
+  # (round 8, pid 5575) — look for this run's crash report before calling it a freeze
+  if (( okp )); then pullfail=0; else pullfail=$((pullfail + 1)); fi
+  if (( pullfail == 3 )); then
+    crashed=$(new_crash)
+    if [ -n "$crashed" ]; then
+      say "the pulls failed 3 times in a row and the phone lists a crash report of this run: $crashed"
+      break
+    fi
+    say "the pulls failed 3 times in a row (no crash report of this run listed yet): still polling"
+  fi
   if [ -f $OUT/result.log ]; then
     cur=$(tail -1 $OUT/result.log)
     [ "$cur" != "$last" ] && { echo "  ${cur[1,260]}"; last=$cur; }
@@ -223,17 +284,26 @@ for i in $(seq 1 $CAP); do
     fi
   fi
 done
-say "state: ${state:-no result.json} after $((i * 10)) s$( (( frozen )) && echo ' (frozen, terminated)')"
+say "state: ${state:-no result.json} after $((i * 10)) s$( (( frozen )) && echo ' (frozen, terminated)')$( [ -n "$crashed" ] && echo " (crash report $crashed)")"
+# nothing of this run outlives the window: a finished gate idles on its result screen, the cap can stop the poll while a
+# load still specializes, a crash can leave a second process behind
+pid=$(app_pid)
+if [ -n "$pid" ]; then
+  say "the app's process (pid $pid) is still there after the poll ($state): terminating it"
+  xcrun devicectl device process terminate --device $UDID --pid $pid >> $OUT/run.out 2>&1 && say "terminated pid $pid"
+  if [[ $state != done && $state != failed ]]; then sleep 5; pull result.log; pull result.json; pull memory.tsv; fi
+fi
 if [[ $state != done ]]; then
-  # crash reports: the listing, then today's files that name the app or a jetsam event
+  # crash reports: the listing, then today's files that name the app or a jetsam event (by their path in the listing:
+  # a retired report lives under Retired/)
   CL=$(xcrun devicectl device info files --device $UDID --domain-type systemCrashLogs 2>&1)
   echo "$CL" > $OUT/crashlogs_listing.txt
-  names=(${(f)"$(echo "$CL" | grep -oE "[A-Za-z0-9._+-]*(D1Gate|JetsamEvent)[A-Za-z0-9._+-]*$(date +%Y-%m-%d)[A-Za-z0-9._+-]*" | sort -u)"})
+  names=(${(f)"$(echo "$CL" | awk '{ print $1 }' | grep -E "(D1Gate|JetsamEvent)[A-Za-z0-9._+-]*$(date +%Y-%m-%d)" | sort -u)"})
   if (( ${#names} )); then
     mkdir -p $OUT/crash
     for n in $names; do
-      xcrun devicectl device copy from --device $UDID --domain-type systemCrashLogs --source "$n" --destination "$OUT/crash/$n" \
-        >> $OUT/crash/copy.log 2>&1 && say "crash log: $OUT/crash/$n" || say "crash log $n: copy failed (see crash/copy.log)"
+      xcrun devicectl device copy from --device $UDID --domain-type systemCrashLogs --source "$n" --destination "$OUT/crash/${n:t}" \
+        >> $OUT/crash/copy.log 2>&1 && say "crash log: $OUT/crash/${n:t}" || say "crash log $n: copy failed (see crash/copy.log)"
     done
   else
     say "no crash log of today names D1Gate or a jetsam event (listing: crashlogs_listing.txt)"

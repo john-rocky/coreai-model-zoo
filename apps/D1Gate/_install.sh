@@ -4,7 +4,11 @@
 # staged MD5SUMS; a file that is missing or differs is pushed again on its own (up to 3 rounds). `devicectl device copy
 # to` can exit 0 with a file cut short, hence the pull. Copied from apps/KevGate/_install.sh (zoo d1-3b 4955a23).
 #   ./_install.sh <udid>                   normally from ./_gate.sh, which holds the phone
+#   D1_APP=<path to D1Gate.app>            install this build instead of _work/app_path.txt's (the last one built)
 #   D1_SKIP_APP=1 ./_install.sh <udid>     assets only (the app is already installed)
+#   D1_SKIP_PUSH=1 D1_SKIP_VERIFY=1 ./_install.sh <udid>
+#                                          the app only: no push and no pull-back (the assets stayed on the phone; the
+#                                          app's assets / md5 stages check them there)
 #   D1_SKIP_PUSH=1 ./_install.sh <udid>    no whole-directory push (the assets are already there): the md5 check below
 #                                          still pulls everything back and re-pushes what differs
 #   D1_STAGE_DIR=<dir> D1_PUSH_ONLY=<rel>,<rel> D1_SKIP_APP=1 ./_install.sh <udid>
@@ -34,7 +38,24 @@ if [[ ",$D1_ALLOWED_DEVICES," != *",$UDID,"* ]]; then
   say "refusing device $UDID: not in D1_ALLOWED_DEVICES ($D1_ALLOWED_DEVICES)"; exit 2
 fi
 HOLD=${D1_HOLD_FILE:-$HOME/code/coreai/ondevice/.device_hold}
-if ! { [ -f $HOLD ] && head -1 $HOLD | grep -q "^d1-3b device gate"; }; then
+# this lane's hold: the gate's text line, or the JSON a keeper of this lane writes (other lanes' queue tools respect only the
+# JSON form): "script" = D1_HOLD_SCRIPT and a live "pid"
+hold_is_ours() {
+  [ -f $HOLD ] || return 1
+  head -1 $HOLD | grep -q "^d1-3b device gate" && return 0
+  [ -n "${D1_HOLD_SCRIPT:-}" ] || return 1
+  /usr/bin/python3 -c 'import json, os, sys
+try:
+    h = json.load(open(sys.argv[1])); p = h.get("pid")
+    if h.get("script") != sys.argv[2] or not isinstance(p, int):
+        sys.exit(1)
+    os.kill(p, 0)
+except PermissionError:
+    sys.exit(0)
+except Exception:
+    sys.exit(1)' $HOLD "$D1_HOLD_SCRIPT" 2>/dev/null
+}
+if ! hold_is_ours; then
   say "the phone is not held by this lane ($HOLD: $(head -c 200 $HOLD 2>/dev/null || echo absent)); go through ./_gate.sh"; exit 2
 fi
 # a real devicectl process on this phone only (a session whose prompt quotes these words must not count; other phones do
@@ -99,8 +120,9 @@ fi
 
 # 1. the app: success = an installationURL line (a failed install leaves the previous app in place)
 if [ "${D1_SKIP_APP:-0}" != 1 ]; then
-  APP=$(cat $W/app_path.txt 2>/dev/null)
+  APP=${D1_APP:-$(cat $W/app_path.txt 2>/dev/null)}
   [ -d "$APP" ] || { say "no built app: run ./_build.sh"; exit 1; }
+  say "app: $APP ($(codesign -d --entitlements - "$APP" 2>/dev/null | grep -cE 'increased-memory') increased-memory-limit keys)"
   ok=0
   for attempt in 1 2 3; do
     OUT=$(xcrun devicectl device install app --device $UDID "$APP" 2>&1); echo "$OUT" >> $LOG
@@ -118,6 +140,13 @@ if [ "${D1_SKIP_PUSH:-0}" != 1 ]; then
   say "push returned after $((SECONDS - t0)) s"
 else
   say "no whole-directory push (D1_SKIP_PUSH=1): checking what is on the phone against $S/MD5SUMS"
+fi
+
+if [ "${D1_SKIP_VERIFY:-0}" = 1 ]; then
+  # the assets were checked by an earlier pull and stayed on the phone: the app's assets / md5 stages read every byte
+  # there against MD5SUMS instead of a 4.6 GB pull
+  say "no pull-back check (D1_SKIP_VERIFY=1): the app's assets and md5 stages check the files on the phone"
+  exit 0
 fi
 
 # 3. pull back, compare with MD5SUMS; re-push what is missing or differs, one file at a time

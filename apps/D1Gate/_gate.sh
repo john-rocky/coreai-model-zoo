@@ -43,7 +43,26 @@ if [[ ",$D1_ALLOWED_DEVICES," != *",$UDID,"* ]]; then
 fi
 
 holdline() { print -r -- "$MARK since $(date '+%Y-%m-%d %H:%M:%S %Z'), session ${D1_SESSION:-$USER@$(hostname -s)}"; }
+# this lane's hold: the gate's text line, or the JSON a keeper of this lane writes (other lanes' queue tools respect only the
+# JSON form): "script" = D1_HOLD_SCRIPT and a live "pid"
+hold_is_ours() {
+  [ -f $HOLD ] || return 1
+  head -1 $HOLD | grep -q "^d1-3b device gate" && return 0
+  [ -n "${D1_HOLD_SCRIPT:-}" ] || return 1
+  /usr/bin/python3 -c 'import json, os, sys
+try:
+    h = json.load(open(sys.argv[1])); p = h.get("pid")
+    if h.get("script") != sys.argv[2] or not isinstance(p, int):
+        sys.exit(1)
+    os.kill(p, 0)
+except PermissionError:
+    sys.exit(0)
+except Exception:
+    sys.exit(1)' $HOLD "$D1_HOLD_SCRIPT" 2>/dev/null
+}
+# a slot under a kept hold (D1_HOLD_KEPT=1) accepts this lane's JSON hold too; the take and the release are the text line's
 ours() { [ -f $HOLD ] && head -1 $HOLD | grep -q "^$MARK"; }
+ours_kept() { hold_is_ours; }
 take() { ( setopt noclobber; holdline > $HOLD ) 2>/dev/null; }
 # the keeper pid of a JSON hold (empty for the text form)
 json_pid() { /usr/bin/python3 -c 'import json,sys
@@ -91,7 +110,7 @@ PY
 
 if [ "${D1_HOLD_KEPT:-0}" = 1 ]; then
   # a slot under a hold the keeper (D1_KEEP_UNTIL) keeps: run inside it, never take or release it
-  ours || { hsay "D1_HOLD_KEPT=1 but the hold is not this lane's ($(head -c 200 $HOLD 2>/dev/null || echo absent)): stopping"; exit 2; }
+  ours_kept || { hsay "D1_HOLD_KEPT=1 but the hold is not this lane's ($(head -c 200 $HOLD 2>/dev/null || echo absent)): stopping"; exit 2; }
   HELD_AT=$SECONDS
   hsay "slot under the kept hold: $(head -1 $HOLD) (window ${FRAME} s from now)"
 elif ours; then

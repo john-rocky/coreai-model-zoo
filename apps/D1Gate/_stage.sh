@@ -8,6 +8,10 @@
 #                                    aot/d1_3b_decode_int8mlp_pf16.h19p.aimodelc + MD5SUMS_AOT (pushed with
 #                                    D1_STAGE_DIR=… D1_PUSH_ONLY=… ./_install.sh; checked on the phone by the md5 stage
 #                                    with D1_MD5SUMS=MD5SUMS_AOT)
+#   ./_stage.sh --aot <x.aimodelc>... [--file <src> <aot/rel>]...
+#                                    the same with these iPhone AOT assets under aot/ by their own names (e.g. the
+#                                    decoder without efr, the tower's AOT for load_tower_aot) and any small file at
+#                                    aot/<rel> (a Mac reference the app compares with); MD5SUMS_AOT lists every file
 # Layout (GateRunner.swift / Fixtures.swift read it):
 #   decoder/    <- $L/exports/bundles/d1_3b_decode_int8mlp_pf16/{metadata.json, <name>.aimodel/, tokenizer/, head/, LICENSE}
 #   tower/      <- $L/exports/vision/d1_3b_vision_fp16w32/{metadata.json, <name>.aimodel/, host/, LICENSE}
@@ -32,13 +36,29 @@ TNAME=d1_3b_vision_fp16w32
 need() { [ -e "$1" ] || { echo "missing: $1"; exit 1; } }
 
 if [ "${1:-}" = "--aot" ]; then
-  SRC=$L/exports/bundles_aotc_ios/$NAME.h19p.aimodelc
-  need $SRC/main.hash
-  SA=$W/device_stage_aot/D1Assets
-  [[ $SA == */_work/device_stage_aot/D1Assets ]] || { echo "refusing to clear $SA"; exit 1; }
+  shift
+  (( $# )) || set -- $L/exports/bundles_aotc_ios/$NAME.h19p.aimodelc
+  # D1_AOT_STAGE: another stage directory (_work/device_stage_aot<suffix>/D1Assets) to keep two AOT stages apart
+  SA=${D1_AOT_STAGE:-$W/device_stage_aot/D1Assets}
+  [[ $SA == */_work/device_stage_aot*/D1Assets ]] || { echo "refusing to clear $SA"; exit 1; }
   rm -rf $SA
   mkdir -p $SA/aot
-  cp -cR $SRC $SA/aot/$NAME.h19p.aimodelc
+  while (( $# )); do
+    case $1 in
+      --file)
+        (( $# >= 3 )) || { echo "--file <src> <aot/rel>"; exit 1; }
+        need $2
+        [[ $3 == aot/* && $3 != *..* ]] || { echo "--file: the destination $3 is not under aot/"; exit 1; }
+        mkdir -p $SA/${3:h}
+        cp -c $2 $SA/$3
+        shift 3 ;;
+      *)
+        [[ $1 == *.h1[0-9]p.*aimodelc || $1 == *.h1[0-9]p.aimodelc ]] || { echo "$1: not an iPhone (.h1Np.) AOT asset"; exit 1; }
+        need $1/main.hash
+        cp -cR $1 $SA/aot/${1:t}
+        shift ;;
+    esac
+  done
   (cd $SA && find aot -type f | LC_ALL=C sort | while read -r f; do nice -n 19 md5 -r "$f"; done > MD5SUMS_AOT)
   echo "staged $SA: $(grep -c . $SA/MD5SUMS_AOT) files, $(du -sh $SA | cut -f1)"
   cat $SA/MD5SUMS_AOT

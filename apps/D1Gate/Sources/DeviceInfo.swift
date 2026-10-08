@@ -154,6 +154,65 @@ enum DeviceInfo {
                 "dirs_total": perDir.count]
     }
 
+    /// statfs's free blocks for an unprivileged writer on the volume holding `url`, in GB (-1 when unknown): recorded beside
+    /// volumeAvailableCapacityForImportantUsage, which holds still within a launch on the iPhone (Kev round 8).
+    static func statfsFreeGB(_ url: URL) -> Double {
+        var s = statfs()
+        guard statfs(url.path, &s) == 0 else { return -1 }
+        return Double(s.f_bavail) * Double(s.f_bsize) / 1e9
+    }
+
+    /// Bytes under the app's Library/Caches (the Core AI cache inside) and tmp (MPSGraph's scratch) on the iPhone; on a
+    /// Mac only this app's Core AI cache directory (the user's Caches and tmp are every process's).
+    static func containerWrittenBytes() -> Int {
+        #if os(iOS)
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        return tree(caches).bytes + tree(URL(fileURLWithPath: NSTemporaryDirectory())).bytes
+        #else
+        return tree(coreAICacheDir()).bytes
+        #endif
+    }
+
+    /// Whether this build carries the entitlement `key`: in the executable's code signature (the LC_CODE_SIGNATURE blob
+    /// only: the key's text elsewhere in the binary does not count) and in the embedded provisioning profile.
+    static func entitlement(_ key: String) -> [String: Any] {
+        let needle = Data(key.utf8)
+        var r: [String: Any] = ["key": key]
+        if let exe = Bundle.main.executableURL, let d = try? Data(contentsOf: exe, options: .alwaysMapped) {
+            if let sig = codeSignatureRange(d) {
+                r["signature"] = d.range(of: needle, options: [], in: sig) != nil
+                r["signature_bytes"] = sig.count
+            } else {
+                r["signature"] = "no LC_CODE_SIGNATURE found"
+            }
+        }
+        if let p = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"), let d = try? Data(contentsOf: p) {
+            r["profile"] = d.range(of: needle) != nil
+        } else {
+            r["profile"] = "no embedded.mobileprovision"
+        }
+        return r
+    }
+
+    /// The code signature's byte range of a thin 64-bit Mach-O (LC_CODE_SIGNATURE: dataoff, datasize), nil otherwise.
+    static func codeSignatureRange(_ d: Data) -> Range<Data.Index>? {
+        guard d.count > 32 else { return nil }
+        func u32(_ o: Int) -> UInt32 { d.withUnsafeBytes { $0.loadUnaligned(fromByteOffset: o, as: UInt32.self) } }
+        guard u32(0) == 0xfeedfacf else { return nil }
+        let n = Int(u32(16))
+        var off = 32
+        for _ in 0..<n {
+            guard off + 16 <= d.count else { return nil }
+            let cmd = u32(off), size = Int(u32(off + 4))
+            if cmd == 0x1d {
+                let o = Int(u32(off + 8)), s = Int(u32(off + 12))
+                return o + s <= d.count ? (d.startIndex + o)..<(d.startIndex + o + s) : nil
+            }
+            off += max(size, 8)
+        }
+        return nil
+    }
+
     /// Free space for important data on the volume holding `url`, in GB (-1 when unknown).
     static func freeGB(_ url: URL) -> Double {
         let v = try? url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])

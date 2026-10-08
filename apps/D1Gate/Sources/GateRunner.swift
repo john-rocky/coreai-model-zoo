@@ -57,8 +57,24 @@
 //   e2e_aot      on the decider in use: the fixture's first D1_AOT_LIMIT (60) text records, scored as e2e and against
 //                p_ref_jit.json (p bits, hidden sha256)
 //   bench_aot    bench.json `bench_aot` on the decider in use
-//   delete       D1_DELETE (comma-separated): paths under the assets directory, or cache:<hex> = the Core AI cache
-//                entries of this app whose directory name starts with that hash (the phone has no delete verb)
+//   load_tower_aot  the tower's AOT asset alone (D1_TOWER_AOT, default aot/d1_3b_vision_fp16w32.h19p.aimodelc,
+//                SpecializationOptions.default) under the sampler with the cache sized around it; D1_TOWER_RECORD's
+//                crops through it twice (bit-equal re-run) and through the tower's `.aimodel` (its JIT), per crop the
+//                output's sha256 against the Mac's (mac_ref.json) and max |d| / cosine against the JIT's and the Mac's
+//                values (D1_TOWER_REF, default aot/tower_ref/<record>.f32, when staged); the outputs go to
+//                <out>/tower_out_<record>_<aot|jit>.f32
+//   probe_noefr  on the decider in use (the decoder AOT without --expect-frequent-reshapes: one specialization per new
+//                position length): D1_PROBE_RECORD (card_refund) D1_PROBE_PASSES (2) times, direct; every call's ms
+//                with its position length and whether it was new, storage and memory around each pass, p bits and
+//                hidden sha256 against the first pass, the oracle and the Mac
+//   delete       D1_DELETE (comma-separated): paths under the assets directory, cache:<hex> = the Core AI cache
+//                entries of this app whose directory name starts with that hash (the phone has no delete verb), or
+//                tmp:<name> = a directory under the app's tmp (iPhone only: MPSGraph's scratch)
+//
+// The disk guard (iPhone): the volume's free-space reading holds still within a launch (Kev round 8), so the gate keeps
+// the launch's reading and subtracts what the container has written since (Library/Caches with the Core AI cache, tmp
+// with MPSGraph's scratch); statfs's reading beside it. When the smaller falls below D1_MIN_FREE_GB + D1_DISK_MARGIN_GB
+// (8) the loops stop as at the deadline (checked at most every 10 s) and result.json carries `disk_stop`.
 //
 // A stage writes its start into result.json before it runs. A launch that finds result.json still "running" records the
 // stage the previous launch died in (a crash or a jetsam kill) and skips that stage if it is planned again
@@ -70,8 +86,11 @@
 // optional except D1_ASSETS on the Mac: D1_RUN_ID, D1_STAGES, D1_ASSETS, D1_OUT, D1_DECODER, D1_TOWER, D1_TOWER_ASSET,
 // D1_AOT, D1_LIMIT, D1_IDS, D1_IMAGE_LIMIT, D1_IMAGE_IDS, D1_SHARED (multi | none), D1_SKIP_DONE, D1_DEADLINE_S,
 // D1_RESERVE_S, D1_WARM, D1_WAIT_NOMINAL, D1_BENCH_REST, D1_BENCH_RUNS, D1_BENCH_ITEMS, D1_AOT_LIMIT, D1_MIN_FREE_GB,
-// D1_DELETE, D1_MD5SUMS, D1_ORACLE (another oracle_slim: the Mac's red control), D1_RECORD_PAUSE, D1_RETRY_DIED,
-// D1_EXIT_WHEN_DONE (Mac, default 1). Every D1_* variable is echoed into result.json (config.env).
+// D1_DISK_MARGIN_GB, D1_DELETE, D1_MD5SUMS (comma-separated lists: MD5SUMS = the files "assets" left), D1_ORACLE
+// (another oracle_slim: the Mac's red control), D1_RECORD_PAUSE, D1_RETRY_DIED, D1_TOWER_AOT, D1_TOWER_RECORD,
+// D1_TOWER_REF, D1_PROBE_RECORD, D1_PROBE_PASSES, D1_EXIT_WHEN_DONE (Mac, default 1). Every D1_* variable is echoed into
+// result.json (config.env). The launch line records os_proc_available_memory and whether the build carries
+// com.apple.developer.kernel.increased-memory-limit (in its code signature and in its embedded profile).
 
 import CoreAI
 import D1
@@ -80,7 +99,7 @@ import Foundation
 struct GateConfig: Sendable {
     static let defaultStages = ["assets", "load_jit", "warm", "red", "e2e_images", "e2e_fixture", "reset"]
     static let knownStages = ["assets", "md5", "load_jit", "load_aot", "warm", "red", "e2e_images", "e2e_fixture", "reset",
-                              "bench", "e2e_aot", "bench_aot", "delete"]
+                              "bench", "e2e_aot", "bench_aot", "delete", "load_tower_aot", "probe_noefr"]
     /// stages that still run after the deadline (short, or the cleanup)
     static let afterDeadline: Set<String> = ["reset", "md5", "delete"]
 
@@ -94,6 +113,16 @@ struct GateConfig: Sendable {
     /// "jit" (the tower bundle's .aimodel, specialized here) or "aot" (the h16c asset beside the tower bundle: the Mac)
     let towerAsset: String
     let aotPath: String
+    /// load_tower_aot: the tower's AOT asset (the iPhone's h19p; the Mac's h16c on a Mac run), the record whose crops go
+    /// through it, the Mac's output values of those crops (nil = aot/tower_ref/<record>.f32 when it exists)
+    let towerAOTPath: String
+    let towerRecord: String
+    let towerRefPath: String?
+    /// probe_noefr's record and passes
+    let probeRecord: String
+    let probePasses: Int
+    /// the loops stop when the free space left falls below D1_MIN_FREE_GB + this (the disk guard, iPhone)
+    let diskMarginGB: Double
     let limit: Int
     let ids: [String]
     let imageLimit: Int
@@ -149,6 +178,12 @@ struct GateConfig: Sendable {
             towerPath: env["D1_TOWER"] ?? "tower",
             towerAsset: env["D1_TOWER_ASSET"] == "aot" ? "aot" : "jit",
             aotPath: env["D1_AOT"] ?? "aot/d1_3b_decode_int8mlp_pf16.h19p.aimodelc",
+            towerAOTPath: env["D1_TOWER_AOT"] ?? "aot/d1_3b_vision_fp16w32.h19p.aimodelc",
+            towerRecord: env["D1_TOWER_RECORD"] ?? "img01_shapes_384x384",
+            towerRefPath: env["D1_TOWER_REF"],
+            probeRecord: env["D1_PROBE_RECORD"] ?? "card_refund",
+            probePasses: max(1, Int(env["D1_PROBE_PASSES"] ?? "") ?? 2),
+            diskMarginGB: max(0, Double(env["D1_DISK_MARGIN_GB"] ?? "") ?? 8),
             limit: max(0, Int(env["D1_LIMIT"] ?? "") ?? Int.max),
             ids: list("D1_IDS"),
             imageLimit: max(0, Int(env["D1_IMAGE_LIMIT"] ?? "") ?? Int.max),
@@ -176,7 +211,9 @@ struct GateConfig: Sendable {
 
     var json: [String: Any] {
         ["assets": assets?.path ?? "(unset)", "out": out.path, "stages": stages, "decoder": decoderPath, "tower": towerPath,
-         "tower_asset": towerAsset, "aot": aotPath, "limit": limit == Int.max ? -1 : limit, "ids": ids,
+         "tower_asset": towerAsset, "aot": aotPath, "tower_aot": towerAOTPath, "tower_record": towerRecord,
+         "tower_ref": towerRefPath ?? "(aot/tower_ref/<record>.f32 when present)", "probe_record": probeRecord,
+         "probe_passes": probePasses, "disk_margin_gb": diskMarginGB, "limit": limit == Int.max ? -1 : limit, "ids": ids,
          "image_limit": imageLimit == Int.max ? -1 : imageLimit, "image_ids": imageIDs, "shared": shared,
          "skip_done": skipDone, "deadline_s": deadline ?? -1, "reserve_s": reserve, "warm_record": warmRecord,
          "wait_nominal_s": waitNominalSeconds, "bench_rest_s": benchRest, "bench_runs": benchRuns ?? -1,
@@ -214,6 +251,14 @@ actor GateRunner {
     private var diedStage: String?
     /// Stages the deadline cut short or skipped.
     private var deadlineCut: [String] = []
+    /// The disk guard: the launch's free space, what the container held at the launch, the reason once it tripped.
+    private var launchFreeGB = -1.0
+    private var launchWrittenBytes = 0
+    private var diskStopped: String?
+    private var lastDiskCheck: ContinuousClock.Instant?
+    /// Position lengths the decider in use has run in probe_noefr (an efr-less AOT specializes each new one once).
+    private var lengthsSeen = Set<Int>()
+    static let increasedMemoryLimit = "com.apple.developer.kernel.increased-memory-limit"
 
     init(config: GateConfig, emit: @escaping @Sendable (String) -> Void, setStage: @escaping @Sendable (String) -> Void) {
         self.config = config
@@ -239,10 +284,39 @@ actor GateRunner {
         #endif
     }
 
-    /// True once the launch is within D1_RESERVE_S of D1_DEADLINE_S.
+    /// True once the launch is within D1_RESERVE_S of D1_DEADLINE_S, or once the disk guard tripped.
     private func pastDeadline() -> Bool {
+        if diskStopped != nil { return true }
+        if lastDiskCheck == nil || seconds(since: lastDiskCheck!) >= 10 {
+            lastDiskCheck = .now
+            if let why = diskCheck() {
+                diskStopped = why
+                report["disk_stop"] = why
+                line("DISK STOP: \(why)")
+                return true
+            }
+        }
         guard let d = config.deadline else { return false }
         return elapsed() >= d - config.reserve
+    }
+
+    /// The free space left: the launch's reading minus what the app's container has written since (Caches with the Core
+    /// AI cache, tmp with MPSGraph's scratch), and statfs's reading beside it; a reason when the smaller one is below
+    /// D1_MIN_FREE_GB + D1_DISK_MARGIN_GB. nil on a Mac.
+    private func diskCheck() -> String? {
+        #if os(iOS)
+        guard launchFreeGB >= 0 else { return nil }
+        let written = DeviceInfo.containerWrittenBytes() - launchWrittenBytes
+        let est = launchFreeGB - Double(written) / 1e9
+        let st = DeviceInfo.statfsFreeGB(config.out)
+        let free = st >= 0 ? min(est, st) : est
+        let floor = config.minFreeGB + config.diskMarginGB
+        guard free < floor else { return nil }
+        return "free space \(f1(free)) GB (launch \(f1(launchFreeGB)) GB - written since \(mb(written)) MB = \(f1(est)) GB; "
+            + "statfs \(f1(st)) GB) < D1_MIN_FREE_GB \(f1(config.minFreeGB)) + D1_DISK_MARGIN_GB \(f1(config.diskMarginGB))"
+        #else
+        return nil
+        #endif
     }
 
     // MARK: - the run
@@ -275,12 +349,19 @@ actor GateRunner {
         device["footprint_mb"] = DeviceInfo.footprintMB()
         device["available_mb"] = DeviceInfo.availableMB()
         device["free_gb"] = DeviceInfo.freeGB(config.out)
+        device["free_gb_statfs"] = DeviceInfo.statfsFreeGB(config.out)
+        let iml = DeviceInfo.entitlement(Self.increasedMemoryLimit)
+        device["entitlement_increased_memory_limit"] = iml
+        launchFreeGB = device["free_gb"] as? Double ?? -1
+        launchWrittenBytes = DeviceInfo.containerWrittenBytes()
+        device["container_bytes_at_launch"] = launchWrittenBytes
         report = ["app": "D1Gate", "run_id": config.runID, "status": "running", "started": Self.now(),
                   "launch_index": launchIndex, "device": device,
                   "model": "d1-3B: decoder d1_3b_decode_int8mlp_pf16 (main S=16, MLP int8 per block of 32, hidden output) "
                       + "+ tower d1_3b_vision_fp16w32 + the option readout on the host (float64), D1 library (D1Decider)",
                   "options": ["decoder_jit": d1Describe(D1Paths.decoderJITOptions), "tower_jit": d1Describe(D1Paths.towerJITOptions),
-                              "aot": d1Describe(SpecializationOptions.default)],
+                              "aot": d1Describe(SpecializationOptions.default),
+                              "tower_aot": d1Describe(SpecializationOptions.default)],
                   "build": ["configuration": Self.buildConfiguration],
                   "bar": ["argmax": "every question whose oracle top-2 margin is above 0.02 (near-ties counted apart)",
                           "max_abs_dp": 0.02, "mean_of_run_mean_abs_dp": 0.002,
@@ -299,6 +380,9 @@ actor GateRunner {
              + "\(f1(DeviceInfo.footprintMB())) MB, available \(f1(DeviceInfo.availableMB())) MB, free "
              + "\(f1(DeviceInfo.freeGB(config.out))) GB, physical memory \(f2(device["physical_memory_gb"] as? Double ?? -1)) GB"
              + (config.deadline.map { ", deadline \(Int($0)) s after the launch" } ?? ""))
+        line("increased-memory-limit: code signature \(iml["signature"] ?? "?"), profile \(iml["profile"] ?? "?") | "
+             + "os_proc_available_memory \(f1(DeviceInfo.availableMB())) MB at launch | free \(f1(launchFreeGB)) GB (statfs "
+             + "\(f1(device["free_gb_statfs"] as? Double ?? -1)) GB), container \(mb(launchWrittenBytes)) MB in Caches + tmp")
         if let p = previous {
             line("previous launch: run \(p["run_id"] ?? "?") ended \(p["status"] ?? "?")"
                  + (diedStage.map { " — it died in stage \($0) (last result.json update \(p["updated"] ?? "?"))" } ?? ""))
@@ -314,6 +398,11 @@ actor GateRunner {
         if config.stages.contains("load_aot"), config.aotPath.range(of: #"\.h[0-9]+p\."#, options: .regularExpression) != nil {
             line("FATAL refusing an iPhone AOT bundle on macOS: \(config.aotPath)")
             return finish(ok: false, fatal: "iPhone AOT bundle on macOS: \(config.aotPath)")
+        }
+        if config.stages.contains("load_tower_aot"),
+           config.towerAOTPath.range(of: #"\.h[0-9]+p\."#, options: .regularExpression) != nil {
+            line("FATAL refusing an iPhone AOT bundle on macOS: \(config.towerAOTPath)")
+            return finish(ok: false, fatal: "iPhone AOT bundle on macOS: \(config.towerAOTPath)")
         }
         #endif
         do {
@@ -337,8 +426,9 @@ actor GateRunner {
                 line("\(stage): SKIPPED — the previous launch died in this stage (D1_RETRY_DIED=1 runs it again)")
                 result = ["skipped": true, "reason": "the previous launch died in this stage", "pass": false]
             } else if pastDeadline() && !GateConfig.afterDeadline.contains(stage) {
-                line("\(stage): SKIPPED — past the deadline (\(f1(elapsed())) s of \(f1(config.deadline ?? -1)) s)")
-                result = ["skipped": true, "reason": "deadline", "deadline_skipped": true]
+                line("\(stage): SKIPPED — " + (diskStopped.map { "the disk guard (\($0))" }
+                     ?? "past the deadline (\(f1(elapsed())) s of \(f1(config.deadline ?? -1)) s)"))
+                result = ["skipped": true, "reason": diskStopped == nil ? "deadline" : "disk", "deadline_skipped": true]
                 deadlineCut.append(stage)
             } else {
                 // the stage's start goes into result.json before it runs: a launch that dies here leaves it behind
@@ -348,6 +438,8 @@ actor GateRunner {
                 case "md5": result = stageMD5()
                 case "load_jit": result = await stageLoad(kind: "jit", key: stage)
                 case "load_aot": result = await stageLoad(kind: "aot", key: stage)
+                case "load_tower_aot": result = await stageLoadTowerAOT()
+                case "probe_noefr": result = await stageProbeNoEFR()
                 case "warm": result = await stageWarm()
                 case "red": result = await stageRed()
                 case "e2e_images": result = await stageE2E(key: stage, records: selected(set: "image"))
@@ -507,17 +599,19 @@ actor GateRunner {
     func stageMD5() -> [String: Any] {
         let c0 = ContinuousClock.now
         var files: [(rel: String, sum: String)] = []
-        if config.md5Sums != "MD5SUMS" {
-            // another list (e.g. the AOT asset's): every file in it
-            guard let text = try? String(contentsOf: assets.appendingPathComponent(config.md5Sums), encoding: .utf8) else {
-                line("md5: no \(config.md5Sums) in \(assets.path)")
-                return ["error": "no \(config.md5Sums)", "pass": false]
+        let lists = config.md5Sums.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        for list in lists where list != "MD5SUMS" {
+            // another list (e.g. the AOT assets'): every file in it
+            guard let text = try? String(contentsOf: assets.appendingPathComponent(list), encoding: .utf8) else {
+                line("md5: no \(list) in \(assets.path)")
+                return ["error": "no \(list)", "pass": false]
             }
-            files = text.split(separator: "\n").compactMap { row in
+            files += text.split(separator: "\n").compactMap { row -> (rel: String, sum: String)? in
                 let p = row.split(separator: " ", maxSplits: 1)
                 return p.count == 2 ? (p[1].trimmingCharacters(in: .whitespaces), String(p[0])) : nil
             }
-        } else {
+        }
+        if lists.contains("MD5SUMS") {
             if !assetsChecked {
                 if let text = try? String(contentsOf: assets.appendingPathComponent("MD5SUMS"), encoding: .utf8) {
                     deferredMD5 = text.split(separator: "\n").compactMap { row in
@@ -529,7 +623,7 @@ actor GateRunner {
                     }
                 }
             }
-            files = deferredMD5
+            files += deferredMD5
         }
         var mismatched: [String] = []
         var bytes = 0
@@ -566,6 +660,7 @@ actor GateRunner {
         d1 = nil
         graphKind = nil
         graphAsset = nil
+        lengthsSeen = []
         try? await Task.sleep(for: .seconds(2))
         j["dropped_decider"] = had ?? "none"
         j["footprint_mb_after_drop"] = DeviceInfo.footprintMB()
@@ -613,6 +708,11 @@ actor GateRunner {
         j["asset_bytes"] = dt.bytes
         j["asset_files"] = dt.files
         j["asset_main_hash"] = hashHex(decAsset) ?? "?"
+        let pkg = Self.aotPackage(decAsset)
+        if let pkg {
+            j["asset_package"] = pkg
+            j["asset_efr"] = pkg["efr"] ?? NSNull()
+        }
         j["options"] = d1Describe(decOptions)
         j["tower_bundle"] = tower.path
         j["tower_asset"] = towerModel.path
@@ -631,7 +731,8 @@ actor GateRunner {
         j["battery_start"] = ["level": b0.level, "state": b0.state, "power": DeviceInfo.powerSource(b0.state)]
         j["thermal_start"] = DeviceInfo.thermal()
         line("\(key): decoder \(decAsset.lastPathComponent) (\(mb(dt.bytes)) MB, \(dt.files) files, main.hash "
-             + "\((hashHex(decAsset) ?? "?").prefix(12))…), \(d1Describe(decOptions)); tower \(towerModel.lastPathComponent) "
+             + "\((hashHex(decAsset) ?? "?").prefix(12))…\(pkg.map { ", efr \($0["efr"] ?? "?")" } ?? "")), "
+             + "\(d1Describe(decOptions)); tower \(towerModel.lastPathComponent) "
              + "(\(mb(tt.bytes)) MB), \(d1Describe(towerOptions)); Core AI cache \(mb(cache0.bytes)) MB in \(cache0.files) files; "
              + "footprint \(f1(DeviceInfo.footprintMB())) MB, available \(f1(DeviceInfo.availableMB())) MB; free \(f1(free)) GB")
         for (what, u) in [("decoder", decAsset), ("tower", towerModel)] where !FileManager.default.fileExists(atPath: u.path) {
@@ -936,11 +1037,20 @@ actor GateRunner {
         var baseRuns: [[String: Any]] = []
         var arms: [[String: Any]] = []
         var allRed = true
+        var cut = false
         let c0 = ContinuousClock.now
         do {
             for arm in fx.red {
                 var items: [[String: Any]] = []
                 for rq in arm.requests {
+                    // a deadline or the disk guard stops the arms between requests (an efr-less AOT specializes every new
+                    // row length: one arm can take minutes and gigabytes)
+                    if pastDeadline() {
+                        cut = true
+                        line("red: \(diskStopped == nil ? "deadline" : "disk guard") — stopping before \(arm.id) \(rq.name) at "
+                             + "\(f1(elapsed())) s")
+                        break
+                    }
                     if base[rq.base] == nil {
                         guard let b = fx.byID[rq.base] else { throw GateError.fixture("red \(arm.id): no base record \(rq.base)") }
                         let tb = try await d1.trace(request: D1Request(json: b.json), mode: .direct)
@@ -975,6 +1085,7 @@ actor GateRunner {
                         items.append(item)
                     }
                 }
+                if cut && items.isEmpty { break }
                 let movedFar = items.filter { ($0["argmax_moved"] as? Bool ?? false) && !($0["near_tie"] as? Bool ?? true) }.count
                 let mdp = items.compactMap { $0["max_abs_dp_vs_base"] as? Double }.max() ?? 0
                 let means = items.compactMap { $0["mean_abs_dp_vs_base"] as? Double }
@@ -989,6 +1100,7 @@ actor GateRunner {
                 line("red \(arm.id) (\(arm.kind)): \(items.count) rows, max|dp| vs base \(f6(mdp)), mean \(f6(meanRun)), argmax "
                      + "moved (non-near-tie) \(movedFar) -> \(red ? "RED" : "not red")"
                      + (dd.map { " | graph dp - oracle dp max \(f6($0))" } ?? ""))
+                if cut { break }
             }
         } catch {
             line("red: ERROR \(error)")
@@ -996,7 +1108,8 @@ actor GateRunner {
         }
         let red = arms.filter { $0["red"] as? Bool == true }.count
         line("red: \(red)/\(arms.count) arms red in \(f1(seconds(since: c0))) s")
-        return ["arms": arms, "base_runs": baseRuns, "red_arms": red, "arm_count": arms.count, "seconds": seconds(since: c0),
+        return ["arms": arms, "base_runs": baseRuns, "red_arms": red, "arm_count": arms.count, "arms_planned": fx.red.count,
+                "deadline_stop": cut, "seconds": seconds(since: c0),
                 "rule": "red = the perturbed rows against their base rows fail FACTS §7: (a) an argmax moves on a question "
                     + "whose oracle top-2 margin is above 0.02, or (b) max |dp| > 0.02, or (c) the mean over the arm's rows "
                     + "of the row's mean |dp| > 0.002", "pass": allRed && !arms.isEmpty]
@@ -1032,7 +1145,8 @@ actor GateRunner {
         for (i, rec) in recs.enumerated() {
             if pastDeadline() {
                 deadlineStop = true
-                line("\(key): deadline — stopping before record \(i + 1)/\(recs.count) (\(rec.id)) at \(f1(elapsed())) s")
+                line("\(key): \(diskStopped == nil ? "deadline" : "disk guard") — stopping before record \(i + 1)/\(recs.count) "
+                     + "(\(rec.id)) at \(f1(elapsed())) s")
                 break
             }
             if config.skipDone, let o = fx.oracle[rec.id], !o.questions.isEmpty,
@@ -1339,6 +1453,38 @@ actor GateRunner {
         var ok = true
         let free0 = DeviceInfo.freeGB(assets)
         for p in config.deletePaths {
+            if p.hasPrefix("tmp:") {
+                // a directory under the app's tmp (MPSGraph's scratch); on a Mac tmp is every process's: refused
+                let rel = String(p.dropFirst(4))
+                #if os(iOS)
+                guard !rel.isEmpty, !rel.hasPrefix("/"), !rel.contains("..") else {
+                    done.append(["path": p, "error": "want tmp:<a name under the app's tmp>"])
+                    ok = false
+                    continue
+                }
+                let u = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(rel)
+                let t = DeviceInfo.tree(u)
+                var rec: [String: Any] = ["path": u.path, "bytes": t.bytes, "files": t.files]
+                if fm.fileExists(atPath: u.path) {
+                    do {
+                        try fm.removeItem(at: u)
+                        rec["deleted"] = true
+                    } catch {
+                        rec["error"] = "\(error)"
+                        ok = false
+                    }
+                } else {
+                    rec["deleted"] = false
+                    rec["absent"] = true
+                }
+                done.append(rec)
+                line("delete \(p): \(mb(t.bytes)) MB in \(t.files) files, deleted \(rec["deleted"] as? Bool ?? false)")
+                #else
+                done.append(["path": p, "error": "tmp: is refused on a Mac (its tmp is every process's)"])
+                ok = false
+                #endif
+                continue
+            }
             if p.hasPrefix("cache:") {
                 let hex = String(p.dropFirst(6)).lowercased()
                 guard hex.count >= 8, hex.allSatisfy(\.isHexDigit) else {
@@ -1390,6 +1536,316 @@ actor GateRunner {
         line("delete: free \(f1(free0)) -> \(f1(free1)) GB")
         return ["deleted": done, "free_gb_before": free0, "free_gb_after": free1, "storage": DeviceInfo.storageSnapshot(),
                 "pass": ok && !config.deletePaths.isEmpty]
+    }
+
+    // MARK: - the tower's AOT
+
+    /// The files of an AOT asset's MPSGraph package (<main>-<arch>-delegates/MPSGraph/mpsExecutable.mpsgraphpackage), name
+    /// -> bytes, and what coreai-build put in it: a dynamic graph with --expect-frequent-reshapes keeps the original
+    /// beside a specialized model (efr), without it only the original (specialized at the load, once per new input shape
+    /// for a dynamic graph); a static graph gets a specialized model only. nil for a `.aimodel`.
+    static func aotPackage(_ asset: URL) -> [String: Any]? {
+        guard asset.pathExtension == "aimodelc" else { return nil }
+        let fm = FileManager.default
+        guard let dirs = try? fm.contentsOfDirectory(atPath: asset.path) else { return nil }
+        var files: [String: Int] = [:]
+        for d in dirs where d.hasSuffix("-delegates") {
+            let pkg = asset.appendingPathComponent(d).appendingPathComponent("MPSGraph/mpsExecutable.mpsgraphpackage")
+            for n in (try? fm.contentsOfDirectory(atPath: pkg.path)) ?? [] {
+                files["\(d)/\(n)"] = (try? pkg.appendingPathComponent(n).resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? -1
+            }
+        }
+        let names = files.keys.map { ($0 as NSString).lastPathComponent }
+        let original = names.contains { $0.hasPrefix("original_model") }
+        let specialized = names.contains { $0.hasPrefix("specialized_model") }
+        let kind = original && specialized ? "original + specialized (efr)"
+            : original ? "original only (no efr: specialized on the device)" : specialized ? "specialized only (static)" : "?"
+        return ["files": files, "efr": original && specialized, "original": original, "specialized": specialized, "kind": kind]
+    }
+
+    /// float32 little-endian, the arrays one after the other.
+    static func writeFloats(_ xs: [[Float]], to url: URL) throws {
+        var d = Data()
+        for x in xs { x.withUnsafeBytes { d.append(contentsOf: $0) } }
+        try d.write(to: url)
+    }
+
+    static func readFloats(_ url: URL) -> [Float]? {
+        guard let d = try? Data(contentsOf: url), d.count % 4 == 0, !d.isEmpty else { return nil }
+        return d.withUnsafeBytes { Array($0.bindMemory(to: Float.self)) }
+    }
+
+    /// max |a - b|, the cosine (float64 sums) and the number of values whose bits differ, over two equal-length arrays.
+    static func compareFloats(_ a: [Float], _ b: [Float]) -> [String: Any] {
+        guard a.count == b.count, !a.isEmpty else { return ["error": "lengths \(a.count) and \(b.count)"] }
+        var maxd = 0.0, dot = 0.0, na = 0.0, nb = 0.0, diff = 0
+        for i in 0..<a.count {
+            let x = Double(a[i]), y = Double(b[i])
+            maxd = max(maxd, abs(x - y))
+            dot += x * y
+            na += x * x
+            nb += y * y
+            if a[i].bitPattern != b[i].bitPattern { diff += 1 }
+        }
+        return ["max_abs": maxd, "cos": dot / (na.squareRoot() * nb.squareRoot()), "values": a.count, "bit_different": diff]
+    }
+
+    static func brief(_ v: Any?) -> String {
+        guard let m = v as? [String: Any] else { return v.map { "\($0)" } ?? "-" }
+        if let e = m["error"] { return "error \(e)" }
+        return "max|d| \(String(format: "%.3g", m["max_abs"] as? Double ?? .nan)), cos "
+            + "\(String(format: "%.10f", m["cos"] as? Double ?? .nan)), bit-different \(m["bit_different"] ?? "?")"
+    }
+
+    /// mac_ref.json's tower_outputs_sha256 of a picture record (the Mac's run of the same crops).
+    static func macTowerSHA(_ url: URL, record: String) -> [String]? {
+        guard let d = try? Data(contentsOf: url), let doc = try? JSONParser.parse(d),
+              let a = doc["records"]?[record]?["tower_outputs_sha256"]?.array else { return nil }
+        let s = a.compactMap(\.string)
+        return s.count == a.count ? s : nil
+    }
+
+    /// load_tower_aot: the tower's AOT asset (D1_TOWER_AOT, SpecializationOptions.default) loaded alone under the 100 ms
+    /// sampler with the Core AI cache sized around it; D1_TOWER_RECORD's crops through it twice, then through the tower's
+    /// `.aimodel` (D1Paths.towerJITOptions: its cache entry when warm). Per crop: the output's sha256 against the Mac's,
+    /// max |d| and cosine against the JIT's and the Mac's values (D1_TOWER_REF; default aot/tower_ref/<record>.f32).
+    func stageLoadTowerAOT() async -> [String: Any] {
+        let key = "load_tower_aot"
+        var j: [String: Any] = ["kind": "tower_aot"]
+        await dropDecider(&j)
+        let tower = towerURL
+        let asset = assetURL(config.towerAOTPath)
+        let at = DeviceInfo.tree(asset)
+        j["tower_bundle"] = tower.path
+        j["asset"] = asset.path
+        j["asset_bytes"] = at.bytes
+        j["asset_files"] = at.files
+        j["asset_main_hash"] = hashHex(asset) ?? "?"
+        j["asset_package"] = Self.aotPackage(asset) ?? [:]
+        j["options"] = d1Describe(SpecializationOptions.default)
+        j["record"] = config.towerRecord
+        guard FileManager.default.fileExists(atPath: asset.path) else {
+            line("\(key): ERROR no tower AOT asset at \(asset.path)")
+            j["error"] = "no tower AOT asset at \(asset.path)"
+            j["pass"] = false
+            return j
+        }
+        guard let fx = fixtures, let rec = fx.byID[config.towerRecord], !rec.images.isEmpty else {
+            line("\(key): ERROR no picture record \(config.towerRecord)")
+            j["error"] = "no picture record \(config.towerRecord)"
+            j["pass"] = false
+            return j
+        }
+        var storage: [String: Any] = [:]
+        let cache0 = cacheSnapshot("before", &storage)
+        j["cache_bytes_before"] = cache0.bytes
+        j["footprint_mb_before"] = DeviceInfo.footprintMB()
+        j["available_mb_before"] = DeviceInfo.availableMB()
+        j["thermal_start"] = DeviceInfo.thermal()
+        line("\(key): tower \(asset.lastPathComponent) (\(mb(at.bytes)) MB, \(at.files) files, main.hash "
+             + "\((hashHex(asset) ?? "?").prefix(12))…), \(d1Describe(SpecializationOptions.default)); Core AI cache "
+             + "\(mb(cache0.bytes)) MB; footprint \(f1(DeviceInfo.footprintMB())) MB, available \(f1(DeviceInfo.availableMB())) MB")
+        j["step"] = "load"
+        j["storage"] = storage
+        writePartial(key, j)
+        let (res, mem, wall) = await sampled("\(key) load") {
+            try await D1Tower(bundle: tower, asset: asset, options: SpecializationOptions.default)
+        }
+        try? await Task.sleep(for: .seconds(1))
+        let cache1 = cacheSnapshot("after_load", &storage)
+        j["storage"] = storage
+        let aotTower: D1Tower
+        switch res {
+        case .success(let t):
+            aotTower = t
+            j["load"] = ["wall_s": wall, "library_load_s": t.loadSeconds, "memory": memoryBrief(mem),
+                         "cache_bytes_added": cache1.bytes - cache0.bytes, "cache_files_added": cache1.files - cache0.files,
+                         "descriptor": JSONWriter.compact(t.descriptor), "options": d1Describe(t.options)]
+            line("\(key) load: wall \(f2(wall)) s (AIModel + main \(f2(t.loadSeconds)) s) | peak footprint "
+                 + "\(f1(mem["peak_footprint_mb"] as? Double ?? -1)) MB, least available \(f1(mem["min_available_mb"] as? Double ?? -1)) MB "
+                 + "| Core AI cache +\(mb(cache1.bytes - cache0.bytes)) MB")
+        case .failure(let error):
+            line("\(key): ERROR load: \(error)")
+            j["load"] = ["wall_s": wall, "memory": memoryBrief(mem)]
+            j["error"] = "load: \(error)"
+            j["error_detail"] = Self.errorRecord(error)
+            j["pass"] = false
+            return j
+        }
+        do {
+            j["step"] = "crops"
+            writePartial(key, j)
+            let crops = try D1TowerInputs.pictures(files: rec.images.map { fixturesDir.appendingPathComponent($0) },
+                                                   table: aotTower.positionTable).pictures.flatMap(\.crops)
+            func encodeAll(_ t: D1Tower) async throws -> (outs: [[Float]], ms: [Double]) {
+                var outs: [[Float]] = [], ms: [Double] = []
+                for c in crops {
+                    let c0 = ContinuousClock.now
+                    outs.append(try await t.encode(c))
+                    ms.append(seconds(since: c0) * 1e3)
+                }
+                return (outs, ms)
+            }
+            let a1 = try await encodeAll(aotTower)
+            let a2 = try await encodeAll(aotTower)
+            let rerunEqual = a1.outs.count == a2.outs.count
+                && zip(a1.outs, a2.outs).allSatisfy { $0.0.map(\.bitPattern) == $0.1.map(\.bitPattern) }
+            let finite = a1.outs.allSatisfy { $0.allSatisfy(\.isFinite) }
+            let allZero = a1.outs.contains { $0.allSatisfy { $0 == 0 } }
+            let shas = a1.outs.map { sha256Hex(of: $0) }
+            try? Self.writeFloats(a1.outs, to: config.out.appendingPathComponent("tower_out_\(rec.id)_aot.f32"))
+            var cmp: [String: Any] = [:]
+            if let m = Self.macTowerSHA(fixturesDir.appendingPathComponent("mac_ref.json"), record: rec.id) {
+                cmp["mac_sha256_equal"] = zip(shas, m).filter { $0.0 == $0.1 }.count
+                cmp["mac_sha256_crops"] = m.count
+            }
+            let refURL = assetURL(config.towerRefPath ?? "aot/tower_ref/\(rec.id).f32")
+            if let ref = Self.readFloats(refURL) {
+                cmp["mac_values"] = Self.compareFloats(a1.outs.flatMap { $0 }, ref)
+                cmp["mac_values_file"] = refURL.path
+            } else {
+                cmp["mac_values"] = "absent (\(refURL.lastPathComponent))"
+            }
+            j["step"] = "jit"
+            writePartial(key, j)
+            let cj0 = cacheSnapshot("before_jit", &storage)
+            let (jres, jmem, jwall) = await sampled("\(key) jit") {
+                try await D1Tower(bundle: tower, asset: try D1Tower.modelAsset(bundle: tower), options: D1Paths.towerJITOptions)
+            }
+            let cj1 = cacheSnapshot("after_jit", &storage)
+            j["storage"] = storage
+            switch jres {
+            case .success(let tj):
+                let jo = try await encodeAll(tj)
+                try? Self.writeFloats(jo.outs, to: config.out.appendingPathComponent("tower_out_\(rec.id)_jit.f32"))
+                let bitEq = zip(a1.outs, jo.outs).filter { $0.0.map(\.bitPattern) == $0.1.map(\.bitPattern) }.count
+                cmp["jit"] = ["load_wall_s": jwall, "load_s": tj.loadSeconds, "memory": memoryBrief(jmem),
+                              "cache_bytes_added": cj1.bytes - cj0.bytes, "crop_ms": jo.ms, "bit_equal_crops": bitEq,
+                              "vs_aot": Self.compareFloats(jo.outs.flatMap { $0 }, a1.outs.flatMap { $0 }),
+                              "sha256": jo.outs.map { sha256Hex(of: $0) }]
+            case .failure(let error):
+                cmp["jit"] = ["error": "\(error)", "load_wall_s": jwall]
+            }
+            j["crops"] = crops.count
+            j["crop_ms"] = ["first_run": a1.ms, "second_run": a2.ms]
+            j["outputs_sha256"] = shas
+            j["rerun_bit_equal"] = rerunEqual
+            j["finite"] = finite
+            j["all_zero_crop"] = allZero
+            j["compare"] = cmp
+            j["step"] = "done"
+            j["thermal_end"] = DeviceInfo.thermal()
+            j["pass"] = rerunEqual && finite && !allZero
+            let jit = cmp["jit"] as? [String: Any]
+            line("\(key): \(rec.id) \(crops.count) crops, ms \(a1.ms.map { f1($0) }.joined(separator: " ")) then "
+                 + "\(a2.ms.map { f1($0) }.joined(separator: " ")) | re-run bit-equal \(rerunEqual), finite \(finite) | Mac sha256 "
+                 + "\(cmp["mac_sha256_equal"] ?? "-")/\(cmp["mac_sha256_crops"] ?? "-") | Mac values \(Self.brief(cmp["mac_values"])) "
+                 + "| JIT bit-equal \(jit?["bit_equal_crops"] ?? "-")/\(crops.count), JIT vs AOT \(Self.brief(jit?["vs_aot"]))")
+        } catch {
+            line("\(key): ERROR \(error)")
+            j["error"] = "\(error)"
+            j["error_detail"] = Self.errorRecord(error)
+            j["pass"] = false
+        }
+        return j
+    }
+
+    // MARK: - the efr-less AOT
+
+    /// probe_noefr: on the decider in use (meant for the decoder AOT without --expect-frequent-reshapes, which
+    /// specializes once per new position length), one record (D1_PROBE_RECORD) D1_PROBE_PASSES times, direct, each pass
+    /// under the memory sampler with the container's storage sized around it: every call's ms with its position length (a
+    /// row's call c binds (c + 1) S positions) and whether the decider had run that length in this stage before (a new
+    /// length's call = the phone's specialization), the rows' p bits and hidden sha256 against the first pass, the oracle
+    /// and the Mac.
+    func stageProbeNoEFR() async -> [String: Any] {
+        let key = "probe_noefr"
+        guard let d1, let fx = fixtures else { return noDecider(key) }
+        guard let rec = fx.byID[config.probeRecord] else {
+            line("\(key): ERROR no record \(config.probeRecord)")
+            return ["error": "no record \(config.probeRecord)", "pass": false]
+        }
+        let S = d1.graph?.metadata.chunk ?? 16
+        var j: [String: Any] = ["kind": graphKind ?? "", "asset": graphAsset ?? "", "record": rec.id, "chunk": S,
+                                "passes_planned": config.probePasses, "stages_before": stageOrder,
+                                "asset_package": graphAsset.flatMap { Self.aotPackage(URL(fileURLWithPath: $0)) } ?? [:]]
+        var passes: [[String: Any]] = []
+        var first: (bits: [String], hidden: [String])? = nil
+        var ok = true, stopped = false
+        line("\(key): \(rec.id) \(config.probePasses) times, direct, on the \(graphKind ?? "?") decider "
+             + "\((graphAsset ?? "").split(separator: "/").last ?? "")")
+        for p in 1...config.probePasses {
+            if p > 1 && pastDeadline() {
+                stopped = true
+                line("\(key): stopping before pass \(p) at \(f1(elapsed())) s (\(diskStopped ?? "deadline"))")
+                break
+            }
+            var storage: [String: Any] = [:]
+            let s0 = DeviceInfo.containerWrittenBytes()
+            let c0 = cacheSnapshot("before", &storage)
+            let (res, mem, wall) = await sampled("\(key) pass \(p)") { try await self.decideRecord(rec, d1, fx, shared: false) }
+            let c1 = cacheSnapshot("after", &storage)
+            let s1 = DeviceInfo.containerWrittenBytes()
+            var pj: [String: Any] = ["pass": p, "wall_s": wall, "memory": memoryBrief(mem),
+                                     "coreai_cache_bytes_added": c1.bytes - c0.bytes, "container_bytes_written": s1 - s0,
+                                     "storage": storage, "thermal": DeviceInfo.thermal(), "available_mb_after": DeviceInfo.availableMB()]
+            switch res {
+            case .success(let r):
+                let t = r.json["direct"] as? [String: Any] ?? [:]
+                let callMs = t["call_ms"] as? [Double] ?? []
+                let rowsTokens = t["rows_tokens"] as? [Int] ?? []
+                var calls: [[String: Any]] = []
+                var idx = 0
+                for (k, n) in rowsTokens.enumerated() {
+                    for c in 0..<((n + S - 1) / S) {
+                        let len = (c + 1) * S
+                        let isNew = !lengthsSeen.contains(len)
+                        lengthsSeen.insert(len)
+                        calls.append(["row": k, "call": c, "position_length": len, "ms": idx < callMs.count ? callMs[idx] : -1,
+                                      "new_length": isNew])
+                        idx += 1
+                    }
+                }
+                let bits = r.scores.map { $0.pBits.joined(separator: ",") }
+                let hidden = r.scores.map(\.hiddenSHA)
+                if first == nil { first = (bits, hidden) }
+                let newCalls = calls.filter { $0["new_length"] as? Bool == true }
+                let newMs = newCalls.compactMap { $0["ms"] as? Double }
+                let oldMs = calls.filter { $0["new_length"] as? Bool != true }.compactMap { $0["ms"] as? Double }
+                let pEq = bits == first!.bits, hEq = hidden == first!.hidden
+                pj["calls"] = calls
+                pj["calls_match_trace"] = idx == callMs.count
+                pj["new_lengths"] = newCalls.compactMap { $0["position_length"] as? Int }
+                pj["new_length_ms"] = newMs
+                pj["seen_length_ms_median"] = median(oldMs)
+                pj["latency_ms"] = t["latency_ms"] ?? -1
+                pj["rows"] = r.json["rows"] ?? NSNull()
+                pj["summary"] = Fixtures.summarize(r.scores)
+                pj["p_bit_equal_pass1"] = pEq
+                pj["hidden_sha256_equal_pass1"] = hEq
+                ok = ok && pEq && hEq && idx == callMs.count && r.scores.allSatisfy { $0.finite && $0.idsEqualOracle }
+                line("\(key) pass \(p): \(calls.count) calls in \(f1(wall)) s | new lengths \(newCalls.compactMap { $0["position_length"] as? Int }) "
+                     + "at \(newMs.map { f1($0) }.joined(separator: " ")) ms, lengths run before: median \(f1(median(oldMs))) ms | "
+                     + "p = pass 1 \(pEq), hidden = pass 1 \(hEq) | max|dp| \(f6(r.scores.map(\.maxAbsDp).max() ?? .nan)), argmax "
+                     + "\(r.scores.filter(\.argmaxEqual).count)/\(r.scores.count), Mac p bits \(r.scores.filter { $0.macPBitEqual == true }.count) "
+                     + "| peak footprint \(f1(mem["peak_footprint_mb"] as? Double ?? -1)) MB, least available "
+                     + "\(f1(mem["min_available_mb"] as? Double ?? -1)) MB | container +\(mb(s1 - s0)) MB (Core AI cache "
+                     + "+\(mb(c1.bytes - c0.bytes)) MB)")
+            case .failure(let error):
+                pj["error"] = "\(error)"
+                pj["error_detail"] = Self.errorRecord(error)
+                ok = false
+                line("\(key) pass \(p): ERROR \(error)")
+            }
+            passes.append(pj)
+            j["passes"] = passes
+            writePartial(key, j)
+            if pj["error"] != nil { break }
+        }
+        j["passes"] = passes
+        j["deadline_stop"] = stopped
+        j["pass"] = ok && !passes.isEmpty && (passes.count == config.probePasses || stopped)
+        return j
     }
 
     // MARK: - p references across launches
