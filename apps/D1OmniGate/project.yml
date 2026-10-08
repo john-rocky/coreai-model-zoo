@@ -1,0 +1,52 @@
+# D1OmniGate — device gate of the d1-omni-600M Core AI port (conversion/d1_omni) on the Swift host apps/D1Omni. Copied
+# from apps/KevGate (this worktree) and made d1-omni's. The app is a thin shell: the decision path is the library's
+# (D1Omni: the publisher's prompt rows, the decision graph of the row's bucket, the vision and audio graphs on the media
+# the host decodes here, the readout), taken by path from ../D1Omni. One target for iOS and macOS, so the phone and the
+# Mac run the same gate code. Build: ./_build.sh (iOS) or ./_build.sh --mac (xcodegen generate + xcodebuild Release).
+# Assets are sideloaded, not bundled. No entitlements: the bundle id is new, and the team's only profile that lists the
+# iPhone 18 Pro and fits a new id is the wildcard one, which cannot carry
+# com.apple.developer.kernel.increased-memory-limit (KevGate README "Signing"); the gate runs at the default memory limit
+# and records it.
+name: D1OmniGate
+options:
+  bundleIdPrefix: com.daisukemajima
+  createIntermediateGroups: true
+packages:
+  D1Omni:
+    path: ../D1Omni
+schemes:
+  D1OmniGate:
+    build:
+      targets:
+        D1OmniGate: all
+    run:
+      config: Release
+targets:
+  D1OmniGate:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    deploymentTarget:
+      iOS: "27.0"
+      macOS: "27.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: D1Omni
+        product: D1Omni
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.d1omnigate
+        DEVELOPMENT_TEAM: MFN25KNUGJ
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: D1OmniGate
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        # macOS: the gate reads the stage directory and writes its results where D1_ASSETS / D1_OUT point.
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: NO
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"

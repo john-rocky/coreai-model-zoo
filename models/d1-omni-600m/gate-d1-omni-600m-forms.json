@@ -1,0 +1,1478 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "forms",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "Every form measured on the way to the ship form, on the Mac (M4 Max, macOS 27.0 26A428): precision (fp32 reference, wfp16 = fp16 weights with fp32 compute, fp16 = fp16 weights and compute, int8 = every decision linear int8 per block of 32 in an fp16 frame) x compute unit (GPU, Neural Engine) x bucket. Each gated form keeps its gate (recomputed from its rows) and, where it was timed, its round-7 score (the mean of two windows' medians; timing-mac has the samples). The CPU torch gates of fp16 / wfp16 are the eager references; the export manifests keep the CPU export gate of each bundle. Forms that fail the bar are kept with their numbers. status: every recomputation equals its record's summary and the ship form's gates (fp16 decision L256 / L4096, vision and audio end to end) pass; a form whose own status is FAIL is a measured form, not a failure of this transcript.",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-fp16-10s/provenance/export-manifest.json",
+   "bytes": 5769,
+   "sha256": "509833a2a003573bb2cf86c0a08f119a44336df83dbfaf8afa6510ee6f845f72"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-fp16-20s/provenance/export-manifest.json",
+   "bytes": 5721,
+   "sha256": "831fec8e94f3a770b3cbb3da88e2a96562b8abc091900358ec8efd7457014928"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-fp16-30s/provenance/export-manifest.json",
+   "bytes": 5760,
+   "sha256": "16a7b8152db27ef8554f0bd85a0a1abf1da68db57a99f48d93130c5306c4d869"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-fp16-5s/provenance/export-manifest.json",
+   "bytes": 5757,
+   "sha256": "9ea029058da3588c138d49a5df32e1f4db822c28ae49d011496274a423767024"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-fp32-10s/provenance/export-manifest.json",
+   "bytes": 5709,
+   "sha256": "4cd7027dca89dd43a479871f2c9bdad78be7371aa4f2da98da13c019697ffcba"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-wfp16-10s/provenance/export-manifest.json",
+   "bytes": 5779,
+   "sha256": "000e6da6840fad5c372cfcd54f21dd7af31aa69c28c25a3baa76ed9647b58655"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-wfp16-20s/provenance/export-manifest.json",
+   "bytes": 5726,
+   "sha256": "7408382b0ae42699a47672091864955f3bf478ed781277ec0f90d901fd1f8987"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-wfp16-30s/provenance/export-manifest.json",
+   "bytes": 5763,
+   "sha256": "f39dd8eb41fdf74bb667c1e0ddf21c861c6d894e49206d00704917e9d8489f9d"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/audio-wfp16-5s/provenance/export-manifest.json",
+   "bytes": 5757,
+   "sha256": "9deb570dd31370920446db57a4158dadc3e8a5e1af8c22ae952edd21ee7bc49c"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp16-L1024/provenance/export-manifest.json",
+   "bytes": 7979,
+   "sha256": "0cbac0d6df9df6978de5b6d6abcaa86aae3b4e8fe4419344e5eeff4b271e28f9"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp16-L128/provenance/export-manifest.json",
+   "bytes": 8433,
+   "sha256": "9ba4fbe8dc14cf8d2f68494ca47364b9e6d208db4f8b07f2d8c655cb728d9742"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp16-L2048/provenance/export-manifest.json",
+   "bytes": 8336,
+   "sha256": "81e88d5c9505b667b852e9e48d162d6c0ba12240b3a59d4b4863a7474612af18"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp16-L256/provenance/export-manifest.json",
+   "bytes": 5902,
+   "sha256": "784be06df257ebc5cd859704cd51c2f1d2889e3cd68f19286aae09d58117eb2c"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp16-L4096/provenance/export-manifest.json",
+   "bytes": 8483,
+   "sha256": "c728d5862a2b80c41311f91a2f6ed2ff26e1ea87777d0461341d1809316a4e52"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp16-L512/provenance/export-manifest.json",
+   "bytes": 8332,
+   "sha256": "fce5df1ee809e173db83e0d418a416c60d242f8cf19be6965c524cd1668c0d01"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp16-L64/provenance/export-manifest.json",
+   "bytes": 7839,
+   "sha256": "875cc2b01b64d943ab8a169c16403e597228f30ddfd9ccbdcbccb1c06748ea22"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/fp32-L256/provenance/export-manifest.json",
+   "bytes": 5753,
+   "sha256": "48f24f8d356e74d5911ffe20584139e6399839c1819ddcca87b5fdee7795609f"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/int8-L256/provenance/export-manifest.json",
+   "bytes": 31640,
+   "sha256": "c50dcc3ef6e759f1929720cd22cd42a914982769b16792d31d77693824185879"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/vision-fp16/provenance/export-manifest.json",
+   "bytes": 5459,
+   "sha256": "9e6e268a830ceab532461cce434839bf49c7b1a3aab7549a9696200ae6fb2c36"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/vision-fp32/provenance/export-manifest.json",
+   "bytes": 5390,
+   "sha256": "d5e8d3f50596885d00e48f028678107c27e13b154b4278f8b515a60570ee4139"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/vision-wfp16/provenance/export-manifest.json",
+   "bytes": 5460,
+   "sha256": "a97eff52df0ed202eb6f3a1239380b480c4ce98b99310929341787b131613541"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/wfp16-L1024/provenance/export-manifest.json",
+   "bytes": 7840,
+   "sha256": "b62467a451e9abe7df4e29304843766ad8ba2e9aed00cc88f4f0ef5e6ee1301e"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/wfp16-L2048/provenance/export-manifest.json",
+   "bytes": 8206,
+   "sha256": "919aa199cba8c70359063e6104585205b4f6c4518e4e129215cd2d635f301531"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/wfp16-L256/provenance/export-manifest.json",
+   "bytes": 5811,
+   "sha256": "6332ce9502298f64d6ff22dce18858d6d6cb5c38e0ec0a6f7424f0fbffc6603e"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/wfp16-L4096/provenance/export-manifest.json",
+   "bytes": 8506,
+   "sha256": "9a9f5024088d0dd0fa4caf07f7993dd9f0cd8a09436f5fd51c87485803560a83"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos/wfp16-L512/provenance/export-manifest.json",
+   "bytes": 8201,
+   "sha256": "b4116dacee92c7286eba0a84ca02ee82fbf3af14a6ee7236a0dd5a8668e1f84d"
+  },
+  {
+   "file": "results/absmax.json",
+   "bytes": 174065,
+   "sha256": "3fc2ab85766aec719fce8d4a63a5b64a8c3d3181eb00fc0e5bc977c14b565119"
+  },
+  {
+   "file": "results/ane_probe_audio_fp16_10s.json",
+   "bytes": 9346,
+   "sha256": "c4929052e603fa2cf329331e944d6365af95ae0bdea8eb642355c75a1cb444ad"
+  },
+  {
+   "file": "results/ane_probe_vision_fp16.json",
+   "bytes": 7417,
+   "sha256": "686b8c3b9c7d668c267663c4d811da405a691438cef150731da214b551058139"
+  },
+  {
+   "file": "results/aot_fp16_L256_ane.json",
+   "bytes": 33759,
+   "sha256": "bc8bfc0d9d4688dbc4391c09f936328ce16899d947e59e62ce02e3a7e77aad4d"
+  },
+  {
+   "file": "results/aot_wfp16_L256_ane.json",
+   "bytes": 13239,
+   "sha256": "4a0704916c3132e9567856aa25e1f5731f4ea8c7234a62b7c2518871292bc14d"
+  },
+  {
+   "file": "results/audio_e2e_fp16.json",
+   "bytes": 122773,
+   "sha256": "d75e780d585905a80984ffaac4d42c14d00704045767f00776fb1a4d63a8c5cc"
+  },
+  {
+   "file": "results/audio_e2e_fp16.run2.json",
+   "bytes": 69269,
+   "sha256": "fd7ecf6753aa9eba85e0624f9c9f20d14d22dede3fd81ecb5ff7459bd28e2b51"
+  },
+  {
+   "file": "results/audio_e2e_fp16.run3.json",
+   "bytes": 69178,
+   "sha256": "c32f269229858d63f65d4815e7bc797133a57ed8bf38a8849f4931396f935492"
+  },
+  {
+   "file": "results/audio_e2e_fp16.run4.json",
+   "bytes": 122779,
+   "sha256": "6c4689e509f6089f37150bfb4019cc6f4d8eeb4692a0317f9982707f7090e1b9"
+  },
+  {
+   "file": "results/audio_e2e_fp32.json",
+   "bytes": 69092,
+   "sha256": "47f2fe1b205b75158eba1ba88c369034ee47fe2eb0370e655996dc9fd77efcb5"
+  },
+  {
+   "file": "results/audio_e2e_fp32.run2.json",
+   "bytes": 69147,
+   "sha256": "50509433606aa7cd834007b84d6e324691a3d9e1a1431b63db94982a2e8c6416"
+  },
+  {
+   "file": "results/audio_e2e_wfp16.json",
+   "bytes": 122780,
+   "sha256": "57359f3b44b256ae4ea419dcf5cdbab5a5c283ff8c78704710489a9bdb95b540"
+  },
+  {
+   "file": "results/audio_e2e_wfp16.run2.json",
+   "bytes": 122785,
+   "sha256": "e9f1392a7235dff5051633de34300c07023ef52b673d2d574965d20f8873069b"
+  },
+  {
+   "file": "results/runtime_fp16_L1024_gpu.json",
+   "bytes": 33346,
+   "sha256": "80119a5cf5bf8523f32728427204dda60257862d89a423c127b4d8b462e000b9"
+  },
+  {
+   "file": "results/runtime_fp16_L2048_gpu.json",
+   "bytes": 31360,
+   "sha256": "3c41bd918158579268fa14a0ace7ba037450fc42e8feb488ffc97559d5209bdc"
+  },
+  {
+   "file": "results/runtime_fp16_L256_gpu.json",
+   "bytes": 305752,
+   "sha256": "cd452880c4d63c0ce2a9c940f2b236ca11aeb9cde32989f412836fa942d42df8"
+  },
+  {
+   "file": "results/runtime_fp16_L256_neural_engine.json",
+   "bytes": 311367,
+   "sha256": "88eeec4f521d81130c685c7a1c1a1db83b3d06dcce76900cc6d4b9466e24dce3"
+  },
+  {
+   "file": "results/runtime_fp16_L4096_gpu.json",
+   "bytes": 24275,
+   "sha256": "009c5f9dbb93e487299ade681fe8f18afc0d42cbccba14a5287f4b7a97f37cf0"
+  },
+  {
+   "file": "results/runtime_fp16_L512_gpu.json",
+   "bytes": 49644,
+   "sha256": "f40413617bc7184298788499a9de1e0a78798d2b9b4821369a0d180c04d4ba1c"
+  },
+  {
+   "file": "results/runtime_fp32_L256_gpu.json",
+   "bytes": 301690,
+   "sha256": "5473f567c475b5f613eded07c1be19fd02e7e2df9615307cc511d57a4a3bc540"
+  },
+  {
+   "file": "results/runtime_int8_L256_gpu.json",
+   "bytes": 323192,
+   "sha256": "f1408141ce44fda17c245101fcfcae2b14c9f3ea51b5c88dca4a949f231af40b"
+  },
+  {
+   "file": "results/runtime_wfp16_L1024_gpu.json",
+   "bytes": 34557,
+   "sha256": "dc09c9aed2b9874f56f5759f5c12281938b8bf6e5f25b9a2c71b58167b49f791"
+  },
+  {
+   "file": "results/runtime_wfp16_L2048_gpu.json",
+   "bytes": 43161,
+   "sha256": "256d9eb21b6820d43c19c510621ef3184885f9f2cd27891c37efb65ba557bef8"
+  },
+  {
+   "file": "results/runtime_wfp16_L256_gpu.json",
+   "bytes": 301285,
+   "sha256": "75c326d019e326f4c5970714e8dab78ee44ce137a6aafa0c421a57bd3dba8910"
+  },
+  {
+   "file": "results/runtime_wfp16_L256_neural_engine.json",
+   "bytes": 307341,
+   "sha256": "917fa8af5e2723e6dffcc8bf757560017df49e2a947f23e8001687c680b1670c"
+  },
+  {
+   "file": "results/runtime_wfp16_L4096_gpu.json",
+   "bytes": 37600,
+   "sha256": "c7d8bdc6762bf7d9c83788f81861168b6b6151b05e6337ece4e5e07b854c1fb3"
+  },
+  {
+   "file": "results/runtime_wfp16_L512_gpu.json",
+   "bytes": 49184,
+   "sha256": "a9aa3c05b80d779dff3eb61cd3c6c81d86fb58ba1d1a77500d04f8e6734e35ef"
+  },
+  {
+   "file": "results/timing/ranking.json",
+   "bytes": 110611,
+   "sha256": "46cb7425e573bb27fc92d270ac17f9dd2f2592a1beb0ba0526731957010828be"
+  },
+  {
+   "file": "results/vision_e2e_fp16.json",
+   "bytes": 93780,
+   "sha256": "eff4f43cb6505373f3c094e40223dc728a38bb79922b44452906b7450f742723"
+  },
+  {
+   "file": "results/vision_e2e_fp16.run2.json",
+   "bytes": 93865,
+   "sha256": "45fcc7a1fea0927f4e0cd6121da0ebcfc9859465ff5f07945179f588a3f7175f"
+  },
+  {
+   "file": "results/vision_e2e_fp16.run3.json",
+   "bytes": 93893,
+   "sha256": "f387386fc69abdd6c63f4d9a80baffeb0fa71fff824ab80fa9c7d2c050455ea6"
+  },
+  {
+   "file": "results/vision_e2e_fp16.run4.json",
+   "bytes": 93840,
+   "sha256": "2311feb3105bc3f9f20b7bf280197bfa1b9b2ea71e1a3413abfe102ee32e8967"
+  },
+  {
+   "file": "results/vision_e2e_fp32.json",
+   "bytes": 93854,
+   "sha256": "3e4ee6a8382d88d27620a0b14109f6fa98dea1721f152e7decec7f9bb60a869a"
+  },
+  {
+   "file": "results/vision_e2e_fp32.run2.json",
+   "bytes": 93857,
+   "sha256": "27d5b4049bb975aa579197836f215fe54e589b22bd68d836705cac986c4b3049"
+  },
+  {
+   "file": "results/vision_e2e_wfp16.json",
+   "bytes": 93834,
+   "sha256": "4ae3e55360eae391107381eaaa885ed9003c740c0028e724227202ec2d96a72c"
+  },
+  {
+   "file": "results/vision_e2e_wfp16.run2.json",
+   "bytes": 93840,
+   "sha256": "8642c674be0643a9c9a80bdfb08416af1c64b47c9da8b0d0dc9ebc86e32d09ae"
+  }
+ ],
+ "bar": {
+  "name": "FACTS §7 (the ship bar)",
+  "argmax": "equal to the oracle's on every row whose oracle top-2 margin is above 0.02 (near ties reported apart)",
+  "max_abs_dp": 0.02,
+  "mean_row_max_abs_dp": 0.002,
+  "oracle": "the publisher's model, AutoModel.from_pretrained(trust_remote_code=True), CPU, fp32: text rows after the config.json temperature, image and audio rows the raw softmax"
+ },
+ "status": "PASS",
+ "runtime_gates": {
+  "results/runtime_int8_L256_gpu.json": {
+   "source": "results/runtime_int8_L256_gpu.json",
+   "status": "FAIL",
+   "kind": "gpu int8 L256",
+   "rows": 436,
+   "argmax_equal": 429,
+   "non_near_tie": {
+    "rows": 424,
+    "argmax_equal": 420
+   },
+   "max_abs_dp": 0.09736904501914978,
+   "mean_row_max_abs_dp": 0.010168839807576676,
+   "max_abs_dlogit": 0.8048170804977417,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 761964946,
+    "resources_bin_bytes": 761554008,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_fp16_L256_gpu.json": {
+   "source": "results/runtime_fp16_L256_gpu.json",
+   "status": "PASS",
+   "kind": "gpu fp16 L256",
+   "rows": 436,
+   "argmax_equal": 436,
+   "non_near_tie": {
+    "rows": 424,
+    "argmax_equal": 424
+   },
+   "max_abs_dp": 0.006703674793243408,
+   "mean_row_max_abs_dp": 0.000982329264718269,
+   "max_abs_dlogit": 0.06113624572753906,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 761954600,
+    "resources_bin_bytes": 761554008,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_fp32_L256_gpu.json": {
+   "source": "results/runtime_fp32_L256_gpu.json",
+   "status": "PASS",
+   "kind": "gpu fp32 L256",
+   "rows": 436,
+   "argmax_equal": 436,
+   "non_near_tie": {
+    "rows": 424,
+    "argmax_equal": 424
+   },
+   "max_abs_dp": 1.0907649993896484e-05,
+   "mean_row_max_abs_dp": 1.395803195952519e-06,
+   "max_abs_dlogit": 0.00010442733764648438,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 1523403176,
+    "resources_bin_bytes": 1523057800,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_wfp16_L256_neural_engine.json": {
+   "source": "results/runtime_wfp16_L256_neural_engine.json",
+   "status": "FAIL",
+   "kind": "neural_engine wfp16 L256",
+   "rows": 436,
+   "argmax_equal": 418,
+   "non_near_tie": {
+    "rows": 424,
+    "argmax_equal": 406
+   },
+   "max_abs_dp": 0.7310272544564214,
+   "mean_row_max_abs_dp": 0.03351867627156726,
+   "max_abs_dlogit": 13.789222955703735,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 13.782833337783813,
+   "compiled": {
+    "bytes": 762376847,
+    "resources_bin_bytes": 761789532,
+    "ane_regions": 1
+   }
+  },
+  "results/runtime_wfp16_L256_gpu.json": {
+   "source": "results/runtime_wfp16_L256_gpu.json",
+   "status": "PASS",
+   "kind": "gpu wfp16 L256",
+   "rows": 436,
+   "argmax_equal": 436,
+   "non_near_tie": {
+    "rows": 424,
+    "argmax_equal": 424
+   },
+   "max_abs_dp": 0.001986384391784668,
+   "mean_row_max_abs_dp": 0.00031348755913630723,
+   "max_abs_dlogit": 0.029266834259033203,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 762222808,
+    "resources_bin_bytes": 761785432,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_fp16_L512_gpu.json": {
+   "source": "results/runtime_fp16_L512_gpu.json",
+   "status": "PASS",
+   "kind": "gpu fp16 L512",
+   "rows": 49,
+   "argmax_equal": 49,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.00436711311340332,
+   "mean_row_max_abs_dp": 0.0009499247958325325,
+   "max_abs_dlogit": 0.048277854919433594,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 762020263,
+    "resources_bin_bytes": 761619544,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_wfp16_L512_gpu.json": {
+   "source": "results/runtime_wfp16_L512_gpu.json",
+   "status": "PASS",
+   "kind": "gpu wfp16 L512",
+   "rows": 49,
+   "argmax_equal": 49,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.0020588040351867676,
+   "mean_row_max_abs_dp": 0.0003425496579995747,
+   "max_abs_dlogit": 0.017058491706848145,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 762353623,
+    "resources_bin_bytes": 761916504,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_fp16_L256_neural_engine.json": {
+   "source": "results/runtime_fp16_L256_neural_engine.json",
+   "status": "FAIL",
+   "kind": "neural_engine fp16 L256",
+   "rows": 436,
+   "argmax_equal": 409,
+   "non_near_tie": {
+    "rows": 424,
+    "argmax_equal": 401
+   },
+   "max_abs_dp": 0.9499124884605408,
+   "mean_row_max_abs_dp": 0.042760027794156066,
+   "max_abs_dlogit": 11.185545444488525,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 763349492,
+    "resources_bin_bytes": 761558108,
+    "ane_regions": 52
+   }
+  },
+  "results/runtime_fp16_L1024_gpu.json": {
+   "source": "results/runtime_fp16_L1024_gpu.json",
+   "status": "PASS",
+   "kind": "gpu fp16 L1024",
+   "rows": 30,
+   "argmax_equal": 30,
+   "non_near_tie": {
+    "rows": 29,
+    "argmax_equal": 29
+   },
+   "max_abs_dp": 0.007126212120056152,
+   "mean_row_max_abs_dp": 0.0010184056126187593,
+   "max_abs_dlogit": 0.046489715576171875,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 762151368,
+    "resources_bin_bytes": 761750616,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_wfp16_L1024_gpu.json": {
+   "source": "results/runtime_wfp16_L1024_gpu.json",
+   "status": "PASS",
+   "kind": "gpu wfp16 L1024",
+   "rows": 30,
+   "argmax_equal": 30,
+   "non_near_tie": {
+    "rows": 29,
+    "argmax_equal": 29
+   },
+   "max_abs_dp": 0.0020524263381958008,
+   "mean_row_max_abs_dp": 0.0003083391674105466,
+   "max_abs_dlogit": 0.01707315444946289,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 762615396,
+    "resources_bin_bytes": 762178648,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_fp16_L2048_gpu.json": {
+   "source": "results/runtime_fp16_L2048_gpu.json",
+   "status": "PASS",
+   "kind": "gpu fp16 L2048",
+   "rows": 26,
+   "argmax_equal": 26,
+   "non_near_tie": {
+    "rows": 25,
+    "argmax_equal": 25
+   },
+   "max_abs_dp": 0.007126212120056152,
+   "mean_row_max_abs_dp": 0.0009886306451545141,
+   "max_abs_dlogit": 0.046489715576171875,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 762413497,
+    "resources_bin_bytes": 762012760,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_wfp16_L2048_gpu.json": {
+   "source": "results/runtime_wfp16_L2048_gpu.json",
+   "status": "PASS",
+   "kind": "gpu wfp16 L2048",
+   "rows": 41,
+   "argmax_equal": 41,
+   "non_near_tie": {
+    "rows": 40,
+    "argmax_equal": 40
+   },
+   "max_abs_dp": 0.0020630359649658203,
+   "mean_row_max_abs_dp": 0.0003153919948179065,
+   "max_abs_dlogit": 0.017081260681152344,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 763139949,
+    "resources_bin_bytes": 762702936,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_fp16_L4096_gpu.json": {
+   "source": "results/runtime_fp16_L4096_gpu.json",
+   "status": "PASS",
+   "kind": "gpu fp16 L4096",
+   "rows": 20,
+   "argmax_equal": 20,
+   "non_near_tie": {
+    "rows": 20,
+    "argmax_equal": 20
+   },
+   "max_abs_dp": 0.0037687867879867554,
+   "mean_row_max_abs_dp": 0.0006353344696904628,
+   "max_abs_dlogit": 0.04526805877685547,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 763023262,
+    "resources_bin_bytes": 762537048,
+    "ane_regions": 0
+   }
+  },
+  "results/runtime_wfp16_L4096_gpu.json": {
+   "source": "results/runtime_wfp16_L4096_gpu.json",
+   "status": "PASS",
+   "kind": "gpu wfp16 L4096",
+   "rows": 34,
+   "argmax_equal": 34,
+   "non_near_tie": {
+    "rows": 33,
+    "argmax_equal": 33
+   },
+   "max_abs_dp": 0.0020546913146972656,
+   "mean_row_max_abs_dp": 0.00031360457719261726,
+   "max_abs_dlogit": 0.017061710357666016,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "repeat_drift_max": 0.0,
+   "compiled": {
+    "bytes": 764295696,
+    "resources_bin_bytes": 763751512,
+    "ane_regions": 0
+   }
+  },
+  "results/vision_e2e_fp16.run4.json": {
+   "source": "results/vision_e2e_fp16.run4.json",
+   "status": "PASS",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.006227403879165649,
+   "mean_row_max_abs_dp": 0.0011123106542974572,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/vision_e2e_fp32.run2.json": {
+   "source": "results/vision_e2e_fp32.run2.json",
+   "status": "PASS",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.00514531135559082,
+   "mean_row_max_abs_dp": 0.0007408706335626368,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/vision_e2e_wfp16.run2.json": {
+   "source": "results/vision_e2e_wfp16.run2.json",
+   "status": "PASS",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.005106210708618164,
+   "mean_row_max_abs_dp": 0.0009624885752222543,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/vision_e2e_fp16.json": {
+   "source": "results/vision_e2e_fp16.json",
+   "status": "PASS",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.006829619407653809,
+   "mean_row_max_abs_dp": 0.0009052882412697232,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/vision_e2e_fp32.json": {
+   "source": "results/vision_e2e_fp32.json",
+   "status": "PASS",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.0020503997802734375,
+   "mean_row_max_abs_dp": 0.0002489328226073192,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/vision_e2e_wfp16.json": {
+   "source": "results/vision_e2e_wfp16.json",
+   "status": "PASS",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.002779632806777954,
+   "mean_row_max_abs_dp": 0.0004754379638130934,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/vision_e2e_fp16.run3.json": {
+   "source": "results/vision_e2e_fp16.run3.json",
+   "status": "FAIL",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 45,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 45
+   },
+   "max_abs_dp": 0.014400899410247803,
+   "mean_row_max_abs_dp": 0.003056951986532953,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/vision_e2e_fp16.run2.json": {
+   "source": "results/vision_e2e_fp16.run2.json",
+   "status": "FAIL",
+   "kind": "end to end, vision_bundle_prefix",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.01447761058807373,
+   "mean_row_max_abs_dp": 0.0030977209027051467,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_fp16.run4.json": {
+   "source": "results/audio_e2e_fp16.run4.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.00552445650100708,
+   "mean_row_max_abs_dp": 0.0008123737698833397,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_fp32.run2.json": {
+   "source": "results/audio_e2e_fp32.run2.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 24,
+   "argmax_equal": 24,
+   "non_near_tie": {
+    "rows": 24,
+    "argmax_equal": 24
+   },
+   "max_abs_dp": 0.004375636577606201,
+   "mean_row_max_abs_dp": 0.0007392195922951336,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_wfp16.run2.json": {
+   "source": "results/audio_e2e_wfp16.run2.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.004017353057861328,
+   "mean_row_max_abs_dp": 0.0007918280868145065,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_fp16.json": {
+   "source": "results/audio_e2e_fp16.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.0036922097206115723,
+   "mean_row_max_abs_dp": 0.00043718928278078397,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_fp32.json": {
+   "source": "results/audio_e2e_fp32.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 24,
+   "argmax_equal": 24,
+   "non_near_tie": {
+    "rows": 24,
+    "argmax_equal": 24
+   },
+   "max_abs_dp": 0.0008125901222229004,
+   "mean_row_max_abs_dp": 0.00010930357348115649,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_wfp16.json": {
+   "source": "results/audio_e2e_wfp16.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 46,
+   "argmax_equal": 46,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "max_abs_dp": 0.003884434700012207,
+   "mean_row_max_abs_dp": 0.0004073589748456826,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_fp16.run3.json": {
+   "source": "results/audio_e2e_fp16.run3.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 24,
+   "argmax_equal": 24,
+   "non_near_tie": {
+    "rows": 24,
+    "argmax_equal": 24
+   },
+   "max_abs_dp": 0.0041200220584869385,
+   "mean_row_max_abs_dp": 0.0006961274324718639,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  },
+  "results/audio_e2e_fp16.run2.json": {
+   "source": "results/audio_e2e_fp16.run2.json",
+   "status": "PASS",
+   "kind": "end to end, audio_bundle_prefix_torch_mel",
+   "rows": 24,
+   "argmax_equal": 24,
+   "non_near_tie": {
+    "rows": 24,
+    "argmax_equal": 24
+   },
+   "max_abs_dp": 0.0025833845138549805,
+   "mean_row_max_abs_dp": 0.00047746849531904445,
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   }
+  }
+ },
+ "timed": {
+  "dec-int8-L256-gpu": {
+   "W1": {
+    "score_ms": 16.700770996976644,
+    "parity_json": "results/runtime_int8_L256_gpu.json",
+    "ship_candidate": false
+   },
+   "W2": {
+    "score_ms": 49.76372927194461,
+    "parity_json": "results/runtime_int8_L256_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-fp16-L256-gpu": {
+   "W1": {
+    "score_ms": 16.810510540381074,
+    "parity_json": "results/runtime_fp16_L256_gpu.json",
+    "ship_candidate": true
+   },
+   "W2": {
+    "score_ms": 49.70216678339057,
+    "parity_json": "results/runtime_fp16_L256_gpu.json",
+    "ship_candidate": true
+   }
+  },
+  "dec-fp32-L256-gpu": {
+   "W1": {
+    "score_ms": 17.630083224503323,
+    "parity_json": "results/runtime_fp32_L256_gpu.json",
+    "ship_candidate": false
+   },
+   "W2": {
+    "score_ms": 52.64766651089303,
+    "parity_json": "results/runtime_fp32_L256_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-wfp16-L256-ane": {
+   "W1": {
+    "score_ms": 23.453312751371413,
+    "parity_json": "results/runtime_wfp16_L256_neural_engine.json",
+    "ship_candidate": false
+   },
+   "W2": {
+    "score_ms": 69.98243750422262,
+    "parity_json": "results/runtime_wfp16_L256_neural_engine.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-wfp16-L256-gpu": {
+   "W1": {
+    "score_ms": 23.673708230489865,
+    "parity_json": "results/runtime_wfp16_L256_gpu.json",
+    "ship_candidate": false
+   },
+   "W2": {
+    "score_ms": 64.63797899778001,
+    "parity_json": "results/runtime_wfp16_L256_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-fp16-L512-gpu": {
+   "W1": {
+    "score_ms": 28.663083270657808,
+    "parity_json": "results/runtime_fp16_L512_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-wfp16-L512-gpu": {
+   "W1": {
+    "score_ms": 36.91386469290592,
+    "parity_json": "results/runtime_wfp16_L512_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-fp16-L256-ane": {
+   "W1": {
+    "score_ms": 41.7677502555307,
+    "parity_json": "results/runtime_fp16_L256_neural_engine.json",
+    "ship_candidate": false
+   },
+   "W2": {
+    "score_ms": 132.74714545696042,
+    "parity_json": "results/runtime_fp16_L256_neural_engine.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-fp16-L1024-gpu": {
+   "W1": {
+    "score_ms": 55.147979233879596,
+    "parity_json": "results/runtime_fp16_L1024_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-wfp16-L1024-gpu": {
+   "W1": {
+    "score_ms": 66.20467724860646,
+    "parity_json": "results/runtime_wfp16_L1024_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-fp16-L2048-gpu": {
+   "W1": {
+    "score_ms": 112.43442702107131,
+    "parity_json": "results/runtime_fp16_L2048_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-wfp16-L2048-gpu": {
+   "W1": {
+    "score_ms": 132.02370828366838,
+    "parity_json": "results/runtime_wfp16_L2048_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "dec-fp16-L4096-gpu": {
+   "W1": {
+    "score_ms": 299.92851050337777,
+    "parity_json": "results/runtime_fp16_L4096_gpu.json",
+    "ship_candidate": false
+   },
+   "W3": {
+    "score_ms": 299.20097897411324,
+    "parity_json": "results/runtime_fp16_L4096_gpu.json",
+    "ship_candidate": true
+   }
+  },
+  "dec-wfp16-L4096-gpu": {
+   "W1": {
+    "score_ms": 358.7308437854517,
+    "parity_json": "results/runtime_wfp16_L4096_gpu.json",
+    "ship_candidate": false
+   },
+   "W3": {
+    "score_ms": 358.1828544847667,
+    "parity_json": "results/runtime_wfp16_L4096_gpu.json",
+    "ship_candidate": false
+   }
+  },
+  "vis-fp16-gpu+dec-fp16-L256-gpu": {
+   "W4": {
+    "score_ms": 38.30727099557407,
+    "parity_json": "results/vision_e2e_fp16.run4.json",
+    "ship_candidate": true
+   }
+  },
+  "vis-fp32-gpu+dec-fp16-L256-gpu": {
+   "W4": {
+    "score_ms": 38.342208543326706,
+    "parity_json": "results/vision_e2e_fp32.run2.json",
+    "ship_candidate": true
+   }
+  },
+  "vis-wfp16-gpu+dec-fp16-L256-gpu": {
+   "W4": {
+    "score_ms": 40.49384398967959,
+    "parity_json": "results/vision_e2e_wfp16.run2.json",
+    "ship_candidate": false
+   }
+  },
+  "vis-fp16-gpu+dec-wfp16-L256-gpu": {
+   "W4": {
+    "score_ms": 43.30629200558178,
+    "parity_json": "results/vision_e2e_fp16.json",
+    "ship_candidate": false
+   }
+  },
+  "vis-fp32-gpu+dec-wfp16-L256-gpu": {
+   "W4": {
+    "score_ms": 43.380531220464036,
+    "parity_json": "results/vision_e2e_fp32.json",
+    "ship_candidate": false
+   }
+  },
+  "vis-wfp16-gpu+dec-wfp16-L256-gpu": {
+   "W4": {
+    "score_ms": 45.54561447002925,
+    "parity_json": "results/vision_e2e_wfp16.json",
+    "ship_candidate": false
+   }
+  },
+  "vis-fp16-ane+dec-fp16-L256-gpu": {
+   "W4": {
+    "score_ms": 98.11908323899843,
+    "parity_json": "results/vision_e2e_fp16.run3.json",
+    "ship_candidate": false
+   }
+  },
+  "vis-fp16-ane+dec-wfp16-L256-gpu": {
+   "W4": {
+    "score_ms": 102.12412528926507,
+    "parity_json": "results/vision_e2e_fp16.run2.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-10s-gpu+dec-fp16-L256-gpu": {
+   "W5": {
+    "score_ms": 24.964541458757594,
+    "parity_json": "results/audio_e2e_fp16.run4.json",
+    "ship_candidate": true
+   }
+  },
+  "aud-fp32-10s-gpu+dec-fp16-L256-gpu": {
+   "W5": {
+    "score_ms": 25.09295826894231,
+    "parity_json": "results/audio_e2e_fp32.run2.json",
+    "ship_candidate": true
+   }
+  },
+  "aud-wfp16-10s-gpu+dec-fp16-L256-gpu": {
+   "W5": {
+    "score_ms": 28.90463572111912,
+    "parity_json": "results/audio_e2e_wfp16.run2.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-10s-gpu+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 30.02857300452888,
+    "parity_json": "results/audio_e2e_fp16.json",
+    "ship_candidate": false
+   },
+   "W5s": {
+    "score_ms": 29.958312516100705,
+    "parity_json": "results/audio_e2e_fp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp32-10s-gpu+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 30.129833554383367,
+    "parity_json": "results/audio_e2e_fp32.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-20s-gpu+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 33.28379147569649,
+    "parity_json": "results/audio_e2e_fp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-wfp16-10s-gpu+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 33.933239756152034,
+    "parity_json": "results/audio_e2e_wfp16.json",
+    "ship_candidate": false
+   },
+   "W5s": {
+    "score_ms": 33.897426998009905,
+    "parity_json": "results/audio_e2e_wfp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-30s-gpu+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 36.92602101364173,
+    "parity_json": "results/audio_e2e_fp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-wfp16-20s-gpu+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 41.507364745484665,
+    "parity_json": "results/audio_e2e_wfp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-10s-ane+dec-fp16-L256-gpu": {
+   "W5": {
+    "score_ms": 44.44684399641119,
+    "parity_json": "results/audio_e2e_fp16.run3.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-wfp16-30s-gpu+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 48.63014578586444,
+    "parity_json": "results/audio_e2e_wfp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-10s-ane+dec-wfp16-L256-gpu": {
+   "W5": {
+    "score_ms": 49.142301781103015,
+    "parity_json": "results/audio_e2e_fp16.run2.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-5s-gpu+dec-wfp16-L256-gpu": {
+   "W5s": {
+    "score_ms": 28.924603975610808,
+    "parity_json": "results/audio_e2e_fp16.json",
+    "ship_candidate": true
+   }
+  },
+  "aud-wfp16-5s-gpu+dec-wfp16-L256-gpu": {
+   "W5s": {
+    "score_ms": 30.84155247779563,
+    "parity_json": "results/audio_e2e_wfp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-fp16-30s-gpu+dec-fp16-L512-gpu": {
+   "W5L": {
+    "score_ms": 43.87153100105934,
+    "parity_json": "results/audio_e2e_fp16.run4.json",
+    "ship_candidate": true
+   }
+  },
+  "aud-fp16-30s-gpu+dec-wfp16-L512-gpu": {
+   "W5L": {
+    "score_ms": 52.185094042215496,
+    "parity_json": "results/audio_e2e_fp16.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-wfp16-30s-gpu+dec-fp16-L512-gpu": {
+   "W5L": {
+    "score_ms": 55.61712526832707,
+    "parity_json": "results/audio_e2e_wfp16.run2.json",
+    "ship_candidate": false
+   }
+  },
+  "aud-wfp16-30s-gpu+dec-wfp16-L512-gpu": {
+   "W5L": {
+    "score_ms": 63.93678128370084,
+    "parity_json": "results/audio_e2e_wfp16.json",
+    "ship_candidate": false
+   }
+  }
+ },
+ "export_bundles": {
+  "audio-fp16-10s": {
+   "status": "MEASURED",
+   "bytes": 225316174,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-fp16-20s": {
+   "status": "MEASURED",
+   "bytes": 225572188,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-fp16-30s": {
+   "status": "MEASURED",
+   "bytes": 225828193,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-fp16-5s": {
+   "status": "MEASURED",
+   "bytes": 225187123,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-fp32-10s": {
+   "status": "PASS",
+   "bytes": 449661094,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-wfp16-10s": {
+   "status": "MEASURED",
+   "bytes": 226375540,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-wfp16-20s": {
+   "status": "MEASURED",
+   "bytes": 226887540,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-wfp16-30s": {
+   "status": "MEASURED",
+   "bytes": 227399542,
+   "ops": null,
+   "measure_only": false
+  },
+  "audio-wfp16-5s": {
+   "status": "MEASURED",
+   "bytes": 226117475,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp16-L1024": {
+   "status": "FAIL",
+   "bytes": 762046397,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp16-L128": {
+   "status": "PASS",
+   "bytes": 761817203,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp16-L2048": {
+   "status": "FAIL",
+   "bytes": 762308740,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp16-L256": {
+   "status": "PASS",
+   "bytes": 761849972,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp16-L4096": {
+   "status": "PASS",
+   "bytes": 762879057,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp16-L512": {
+   "status": "PASS",
+   "bytes": 761915494,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp16-L64": {
+   "status": "PASS",
+   "bytes": 761800702,
+   "ops": null,
+   "measure_only": false
+  },
+  "fp32-L256": {
+   "status": "PASS",
+   "bytes": 1523328898,
+   "ops": null,
+   "measure_only": false
+  },
+  "int8-L256": {
+   "status": "FAIL",
+   "bytes": 468960581,
+   "ops": null,
+   "measure_only": false
+  },
+  "vision-fp16": {
+   "status": "MEASURED",
+   "bytes": 188291698,
+   "ops": null,
+   "measure_only": false
+  },
+  "vision-fp32": {
+   "status": "PASS",
+   "bytes": 376281817,
+   "ops": null,
+   "measure_only": false
+  },
+  "vision-wfp16": {
+   "status": "MEASURED",
+   "bytes": 188477299,
+   "ops": null,
+   "measure_only": false
+  },
+  "wfp16-L1024": {
+   "status": "PASS",
+   "bytes": 762469259,
+   "ops": null,
+   "measure_only": false
+  },
+  "wfp16-L2048": {
+   "status": "PASS",
+   "bytes": 762993741,
+   "ops": null,
+   "measure_only": false
+  },
+  "wfp16-L256": {
+   "status": "PASS",
+   "bytes": 762076218,
+   "ops": null,
+   "measure_only": false
+  },
+  "wfp16-L4096": {
+   "status": "PASS",
+   "bytes": 764087671,
+   "ops": null,
+   "measure_only": false
+  },
+  "wfp16-L512": {
+   "status": "PASS",
+   "bytes": 762207305,
+   "ops": null,
+   "measure_only": false
+  }
+ },
+ "torch_cpu_eager": {
+  "fp16": {
+   "rows": 60,
+   "argmax_equal": 57,
+   "argmax_equal_non_near_tie": 47,
+   "near_ties": 13,
+   "max_abs_dp": 0.008232295513153076,
+   "mean_of_row_max_abs_dp": 0.0015718621830728807,
+   "max_abs_dlogit": 0.048442840576171875
+  },
+  "wfp16": {
+   "rows": 60,
+   "argmax_equal": 60,
+   "argmax_equal_non_near_tie": 47,
+   "near_ties": 13,
+   "max_abs_dp": 0.0020567774772644043,
+   "mean_of_row_max_abs_dp": 0.00039866594441567336,
+   "max_abs_dlogit": 0.018347740173339844
+  }
+ },
+ "neural_engine_compiles": {
+  "vision_fp16": {
+   "regions": 40,
+   "parity": "FAIL",
+   "by_decision": {
+    "decision_wfp16_on_gpu": "FAIL",
+    "decision_fp16_on_gpu": "FAIL"
+   }
+  },
+  "audio_fp16_10s": {
+   "regions": 64,
+   "parity": "PASS",
+   "by_decision": {
+    "decision_wfp16_on_gpu": "PASS",
+    "decision_fp16_on_gpu": "PASS"
+   }
+  },
+  "decision_fp16_L256": {
+   "regions": 52,
+   "ir_bytes": 1287141
+  },
+  "decision_wfp16_L256": {
+   "regions": 1,
+   "ir_bytes": 5746
+  }
+ },
+ "ship_form": "fp16 for all three graphs, decision buckets 64 / 128 / 256 / 512 / 1024 / 2048 / 4096 on the GPU (the supervisor's decision, 2026-10-08, from the speed ladder: the fastest form that passes)",
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}

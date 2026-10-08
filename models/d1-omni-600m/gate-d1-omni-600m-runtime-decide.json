@@ -1,0 +1,518 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "runtime-decide",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "The shipped decision graph (fp16, debug locations stripped, AOT h16c) on the Mac GPU through the Python Core AI runtime (coreai-core 1.0.0b2, SpecializationOptions preferring the GPU), against the oracle: per bucket every fixture row whose bucket it is (native), shorter rows padded into it (pad) and media rows with the oracle's prefix (prefix); 3 calls per row (repeat drift); a wrong-pairing control that must fail; the same rows on the unstripped bundle (round 3-4, round 12).",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "results/ship_runtime_compare.json",
+   "bytes": 18921,
+   "sha256": "a4c9aa6508af9656511f8b3260b6d544f13fab91d6e5f846498049218e6b4cd0"
+  },
+  {
+   "file": "results/ship_runtime_decide_fp16_L1024_gpu.json",
+   "bytes": 32653,
+   "sha256": "b07d0b88ec68d08357d1ef1d6d41b331d5a6de0a7bd40ba377f44ab14732979a"
+  },
+  {
+   "file": "results/ship_runtime_decide_fp16_L128_gpu.json",
+   "bytes": 221632,
+   "sha256": "3b547b57474b720bdce4b01428076859850376290d940e492f0242f82859ae4e"
+  },
+  {
+   "file": "results/ship_runtime_decide_fp16_L2048_gpu.json",
+   "bytes": 29236,
+   "sha256": "03de8c9a6255b56cc1991c03b38f4745a55e93465c3ce8141d8c46fbd37b42b1"
+  },
+  {
+   "file": "results/ship_runtime_decide_fp16_L256_gpu.json",
+   "bytes": 321461,
+   "sha256": "683a27f5c2054dd6f46b735f7d864bb9fe146b471c9a9dabdf5a9a5e98e52380"
+  },
+  {
+   "file": "results/ship_runtime_decide_fp16_L4096_gpu.json",
+   "bytes": 24125,
+   "sha256": "615a0cac24c2fda4fc769ab2c785940058e37f6ad75f3ea3fe743ce477e44d5e"
+  },
+  {
+   "file": "results/ship_runtime_decide_fp16_L512_gpu.json",
+   "bytes": 47785,
+   "sha256": "9f010c85fc9f2d4ad3572651a72f089eab0e3e850e2dd78064558f9139a4ea34"
+  },
+  {
+   "file": "results/ship_runtime_decide_fp16_L64_gpu.json",
+   "bytes": 56014,
+   "sha256": "2db254b1f9b2db4079f746f8c9e225932567c2e90c124fd7e0f216c27552e5b6"
+  },
+  {
+   "file": "results/small_runtime_compare.json",
+   "bytes": 3496,
+   "sha256": "f579457dcb3b13fec29957b02515122d2946cdbefde617eaa337de18e91c1303"
+  }
+ ],
+ "bar": {
+  "name": "FACTS §7 (the ship bar)",
+  "argmax": "equal to the oracle's on every row whose oracle top-2 margin is above 0.02 (near ties reported apart)",
+  "max_abs_dp": 0.02,
+  "mean_row_max_abs_dp": 0.002,
+  "oracle": "the publisher's model, AutoModel.from_pretrained(trust_remote_code=True), CPU, fp32: text rows after the config.json temperature, image and audio rows the raw softmax"
+ },
+ "status": "PASS",
+ "device": "Apple M4 Max, macOS 27.0 (26A428), coreai-build 3600.83.1 (--architecture h16c)",
+ "buckets": {
+  "64": {
+   "source": "results/ship_runtime_decide_fp16_L64_gpu.json",
+   "status": "PASS",
+   "rows": 64,
+   "rows_by_set": {
+    "native": 64
+   },
+   "argmax_equal": 64,
+   "non_near_tie": {
+    "rows": 64,
+    "argmax_equal": 64
+   },
+   "near_tie": {
+    "rows": 0,
+    "argmax_equal": 0
+   },
+   "max_abs_dp": 0.005848944187164307,
+   "mean_row_max_abs_dp": 0.0009462214551376746,
+   "max_abs_dlogit": 0.050078392028808594,
+   "ship_bar": {
+    "verdict": {
+     "argmax_non_near_tie": true,
+     "max_abs_dp": true,
+     "mean_row_max_abs_dp": true,
+     "finite": true
+    },
+    "status": "PASS"
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 64,
+    "rows_over_dp_bar": 61
+   },
+   "repeat_drift": {
+    "repeats_per_row": 3,
+    "max_abs_scores": 0.0,
+    "rows_nonzero": 0
+   },
+   "compiled": {
+    "aimodelc": "d1_omni_decide_fp16_L64.h16c.aimodelc",
+    "architecture": "h16c",
+    "bytes": 761747071,
+    "resources_bin_bytes": 761504856,
+    "main_hash": "5c0252eb058f35cd7f2ff0e85034d410a451a3a14ee31e40ef837d9da95bda0b",
+    "ane_regions": 0
+   },
+   "specialization_options": "SpecializationOptions Allowed: [CPU, GPU, Neural Engine] Preferred: GPU Debug: False",
+   "load_s": 0.17764437501318753,
+   "first_call_s": 0.0424994999775663,
+   "stripped_vs_unstripped": {
+    "source": "results/small_runtime_compare.json",
+    "status": "SAME",
+    "rows_compared": 64,
+    "logits_and_p_equal": 64,
+    "max_abs_dlogit": 0.0
+   }
+  },
+  "128": {
+   "source": "results/ship_runtime_decide_fp16_L128_gpu.json",
+   "status": "PASS",
+   "rows": 298,
+   "rows_by_set": {
+    "native": 278,
+    "pad": 20
+   },
+   "argmax_equal": 298,
+   "non_near_tie": {
+    "rows": 290,
+    "argmax_equal": 290
+   },
+   "near_tie": {
+    "rows": 8,
+    "argmax_equal": 8
+   },
+   "max_abs_dp": 0.011694788932800293,
+   "mean_row_max_abs_dp": 0.0010895870298115167,
+   "max_abs_dlogit": 0.0593111515045166,
+   "ship_bar": {
+    "verdict": {
+     "argmax_non_near_tie": true,
+     "max_abs_dp": true,
+     "mean_row_max_abs_dp": true,
+     "finite": true
+    },
+    "status": "PASS"
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 298,
+    "rows_over_dp_bar": 271
+   },
+   "repeat_drift": {
+    "repeats_per_row": 3,
+    "max_abs_scores": 0.0,
+    "rows_nonzero": 0
+   },
+   "compiled": {
+    "aimodelc": "d1_omni_decide_fp16_L128.h16c.aimodelc",
+    "architecture": "h16c",
+    "bytes": 761763730,
+    "resources_bin_bytes": 761521240,
+    "main_hash": "d28c54ff1f390f6dc3be54491bd13e5ad82b1be56ede5309950d0f85ce475ac3",
+    "ane_regions": 0
+   },
+   "specialization_options": "SpecializationOptions Allowed: [CPU, GPU, Neural Engine] Preferred: GPU Debug: False",
+   "load_s": 0.17823008296545595,
+   "first_call_s": 0.04155520792119205,
+   "stripped_vs_unstripped": {
+    "source": "results/small_runtime_compare.json",
+    "status": "SAME",
+    "rows_compared": 298,
+    "logits_and_p_equal": 298,
+    "max_abs_dlogit": 0.0
+   }
+  },
+  "256": {
+   "source": "results/ship_runtime_decide_fp16_L256_gpu.json",
+   "status": "PASS",
+   "rows": 436,
+   "rows_by_set": {
+    "native": 436
+   },
+   "argmax_equal": 436,
+   "non_near_tie": {
+    "rows": 424,
+    "argmax_equal": 424
+   },
+   "near_tie": {
+    "rows": 12,
+    "argmax_equal": 12
+   },
+   "max_abs_dp": 0.006703674793243408,
+   "mean_row_max_abs_dp": 0.000982329264718269,
+   "max_abs_dlogit": 0.06113624572753906,
+   "ship_bar": {
+    "verdict": {
+     "argmax_non_near_tie": true,
+     "max_abs_dp": true,
+     "mean_row_max_abs_dp": true,
+     "finite": true
+    },
+    "status": "PASS"
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 432,
+    "rows_over_dp_bar": 393
+   },
+   "repeat_drift": {
+    "repeats_per_row": 3,
+    "max_abs_scores": 0.0,
+    "rows_nonzero": 0
+   },
+   "compiled": {
+    "aimodelc": "d1_omni_decide_fp16_L256.h16c.aimodelc",
+    "architecture": "h16c",
+    "bytes": 761796335,
+    "resources_bin_bytes": 761554008,
+    "main_hash": "b075f032d760cd9ebddd2e68c41b2fe60be9d965cc1420501530a582a37fc33e",
+    "ane_regions": 0
+   },
+   "specialization_options": "SpecializationOptions Allowed: [CPU, GPU, Neural Engine] Preferred: GPU Debug: False",
+   "load_s": 0.17694525001570582,
+   "first_call_s": 0.11408720794133842,
+   "stripped_vs_unstripped": {
+    "source": "results/ship_runtime_compare.json",
+    "status": "SAME",
+    "rows_compared": 436,
+    "logits_and_p_equal": 436,
+    "max_abs_dlogit": 0.0
+   }
+  },
+  "512": {
+   "source": "results/ship_runtime_decide_fp16_L512_gpu.json",
+   "status": "PASS",
+   "rows": 49,
+   "rows_by_set": {
+    "native": 19,
+    "pad": 20,
+    "prefix": 10
+   },
+   "argmax_equal": 49,
+   "non_near_tie": {
+    "rows": 46,
+    "argmax_equal": 46
+   },
+   "near_tie": {
+    "rows": 3,
+    "argmax_equal": 3
+   },
+   "max_abs_dp": 0.00436711311340332,
+   "mean_row_max_abs_dp": 0.0009499247958325325,
+   "max_abs_dlogit": 0.048277854919433594,
+   "ship_bar": {
+    "verdict": {
+     "argmax_non_near_tie": true,
+     "max_abs_dp": true,
+     "mean_row_max_abs_dp": true,
+     "finite": true
+    },
+    "status": "PASS"
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 42,
+    "rows_over_dp_bar": 38
+   },
+   "repeat_drift": {
+    "repeats_per_row": 3,
+    "max_abs_scores": 0.0,
+    "rows_nonzero": 0
+   },
+   "compiled": {
+    "aimodelc": "d1_omni_decide_fp16_L512.h16c.aimodelc",
+    "architecture": "h16c",
+    "bytes": 761861998,
+    "resources_bin_bytes": 761619544,
+    "main_hash": "43e7197f37bc9f7cee33c8d20017dcaff4f3264d2cbb732eec00808d6b16d991",
+    "ane_regions": 0
+   },
+   "specialization_options": "SpecializationOptions Allowed: [CPU, GPU, Neural Engine] Preferred: GPU Debug: False",
+   "load_s": 0.17398249998223037,
+   "first_call_s": 0.06346820900216699,
+   "stripped_vs_unstripped": {
+    "source": "results/ship_runtime_compare.json",
+    "status": "SAME",
+    "rows_compared": 49,
+    "logits_and_p_equal": 49,
+    "max_abs_dlogit": 0.0
+   }
+  },
+  "1024": {
+   "source": "results/ship_runtime_decide_fp16_L1024_gpu.json",
+   "status": "PASS",
+   "rows": 30,
+   "rows_by_set": {
+    "pad": 20,
+    "prefix": 10
+   },
+   "argmax_equal": 30,
+   "non_near_tie": {
+    "rows": 29,
+    "argmax_equal": 29
+   },
+   "near_tie": {
+    "rows": 1,
+    "argmax_equal": 1
+   },
+   "max_abs_dp": 0.007126212120056152,
+   "mean_row_max_abs_dp": 0.0010184056126187593,
+   "max_abs_dlogit": 0.046489715576171875,
+   "ship_bar": {
+    "verdict": {
+     "argmax_non_near_tie": true,
+     "max_abs_dp": true,
+     "mean_row_max_abs_dp": true,
+     "finite": true
+    },
+    "status": "PASS"
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 26,
+    "rows_over_dp_bar": 24
+   },
+   "repeat_drift": {
+    "repeats_per_row": 3,
+    "max_abs_scores": 0.0,
+    "rows_nonzero": 0
+   },
+   "compiled": {
+    "aimodelc": "d1_omni_decide_fp16_L1024.h16c.aimodelc",
+    "architecture": "h16c",
+    "bytes": 761993103,
+    "resources_bin_bytes": 761750616,
+    "main_hash": "507914e2ec5b70aec620fd5d01860fedfa42d3baceb0c90ebb71242374477f9e",
+    "ane_regions": 0
+   },
+   "specialization_options": "SpecializationOptions Allowed: [CPU, GPU, Neural Engine] Preferred: GPU Debug: False",
+   "load_s": 0.17956641700584441,
+   "first_call_s": 0.07893091603182256,
+   "stripped_vs_unstripped": {
+    "source": "results/ship_runtime_compare.json",
+    "status": "SAME",
+    "rows_compared": 30,
+    "logits_and_p_equal": 30,
+    "max_abs_dlogit": 0.0
+   }
+  },
+  "2048": {
+   "source": "results/ship_runtime_decide_fp16_L2048_gpu.json",
+   "status": "PASS",
+   "rows": 26,
+   "rows_by_set": {
+    "native": 11,
+    "pad": 5,
+    "prefix": 10
+   },
+   "argmax_equal": 26,
+   "non_near_tie": {
+    "rows": 25,
+    "argmax_equal": 25
+   },
+   "near_tie": {
+    "rows": 1,
+    "argmax_equal": 1
+   },
+   "max_abs_dp": 0.007126212120056152,
+   "mean_row_max_abs_dp": 0.0009886306451545141,
+   "max_abs_dlogit": 0.046489715576171875,
+   "ship_bar": {
+    "verdict": {
+     "argmax_non_near_tie": true,
+     "max_abs_dp": true,
+     "mean_row_max_abs_dp": true,
+     "finite": true
+    },
+    "status": "PASS"
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 19,
+    "rows_over_dp_bar": 17
+   },
+   "repeat_drift": {
+    "repeats_per_row": 3,
+    "max_abs_scores": 0.0,
+    "rows_nonzero": 0
+   },
+   "compiled": {
+    "aimodelc": "d1_omni_decide_fp16_L2048.h16c.aimodelc",
+    "architecture": "h16c",
+    "bytes": 762255232,
+    "resources_bin_bytes": 762012760,
+    "main_hash": "dc950eadfe335ee20d804fd51947c5f5797a972a06cdccc8b13e4d4dd41f1087",
+    "ane_regions": 0
+   },
+   "specialization_options": "SpecializationOptions Allowed: [CPU, GPU, Neural Engine] Preferred: GPU Debug: False",
+   "load_s": 0.17643683298956603,
+   "first_call_s": 0.141876042005606,
+   "stripped_vs_unstripped": {
+    "source": "results/ship_runtime_compare.json",
+    "status": "SAME",
+    "rows_compared": 26,
+    "logits_and_p_equal": 26,
+    "max_abs_dlogit": 0.0
+   }
+  },
+  "4096": {
+   "source": "results/ship_runtime_decide_fp16_L4096_gpu.json",
+   "status": "PASS",
+   "rows": 20,
+   "rows_by_set": {
+    "native": 4,
+    "pad": 5,
+    "prefix": 11
+   },
+   "argmax_equal": 20,
+   "non_near_tie": {
+    "rows": 20,
+    "argmax_equal": 20
+   },
+   "near_tie": {
+    "rows": 0,
+    "argmax_equal": 0
+   },
+   "max_abs_dp": 0.0037687867879867554,
+   "mean_row_max_abs_dp": 0.0006353344696904628,
+   "max_abs_dlogit": 0.04526805877685547,
+   "ship_bar": {
+    "verdict": {
+     "argmax_non_near_tie": true,
+     "max_abs_dp": true,
+     "mean_row_max_abs_dp": true,
+     "finite": true
+    },
+    "status": "PASS"
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "wrong_pairing_control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 16,
+    "rows_over_dp_bar": 14
+   },
+   "repeat_drift": {
+    "repeats_per_row": 5,
+    "max_abs_scores": 0.0,
+    "rows_nonzero": 0
+   },
+   "compiled": {
+    "aimodelc": "d1_omni_decide_fp16_L4096.h16c.aimodelc",
+    "architecture": "h16c",
+    "bytes": 762828849,
+    "resources_bin_bytes": 762537048,
+    "main_hash": "320b89d649e522d22c2980fb6f9c581f8c74b210e0b99d3c1a33de16eae8e055",
+    "ane_regions": 0
+   },
+   "specialization_options": "SpecializationOptions Allowed: [CPU, GPU, Neural Engine] Preferred: GPU Debug: False",
+   "load_s": 0.20159216702450067,
+   "first_call_s": 0.3254747500177473,
+   "stripped_vs_unstripped": {
+    "source": "results/ship_runtime_compare.json",
+    "status": "SAME",
+    "rows_compared": 20,
+    "logits_and_p_equal": 20,
+    "max_abs_dlogit": 0.0
+   }
+  }
+ },
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}

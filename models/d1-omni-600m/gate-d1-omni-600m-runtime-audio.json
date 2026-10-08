@@ -1,0 +1,519 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "runtime-audio",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "The audio graph (fp16, stripped, AOT h16c, clip buckets 5 / 10 / 20 / 30 s) on the Mac GPU: its prefix per clip, and the audio rows end to end through the fp16 decision graph.",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "results/ship_runtime_audio_e2e_fp16.json",
+   "bytes": 122849,
+   "sha256": "78c36ed582ef647e93d84059a400135445830bb92971e3ca8941c3701144113c"
+  },
+  {
+   "file": "results/ship_runtime_audio_fp16_10s_gpu.json",
+   "bytes": 8573,
+   "sha256": "3094394c0b290acf7c8e7626492e71b13c1203a5278d6acdc38492b3a2783130"
+  },
+  {
+   "file": "results/ship_runtime_audio_fp16_20s_gpu.json",
+   "bytes": 5626,
+   "sha256": "4fba1dc718b63871c85388a9e74108f6e6305ed8533e964606818301ff1d45c3"
+  },
+  {
+   "file": "results/ship_runtime_audio_fp16_30s_gpu.json",
+   "bytes": 7836,
+   "sha256": "507921d5bcad29753e3e040f0b6b45c1b6e8e87872edb089aa1b83ed7b829793"
+  },
+  {
+   "file": "results/ship_runtime_audio_fp16_5s_gpu.json",
+   "bytes": 7804,
+   "sha256": "26b5848817a80a0dceaf0308f1284cff73366470dadfa031aa355e1d71b72af0"
+  },
+  {
+   "file": "results/ship_runtime_compare.json",
+   "bytes": 18921,
+   "sha256": "a4c9aa6508af9656511f8b3260b6d544f13fab91d6e5f846498049218e6b4cd0"
+  },
+  {
+   "file": "results/small_runtime_audio_e2e_fp16.json",
+   "bytes": 125605,
+   "sha256": "f19c1f02777a2b46dd5b62be34acc64eafb760fd35ab0f7e6b8f86eef81818d2"
+  }
+ ],
+ "bar": {
+  "name": "FACTS §7 (the ship bar)",
+  "argmax": "equal to the oracle's on every row whose oracle top-2 margin is above 0.02 (near ties reported apart)",
+  "max_abs_dp": 0.02,
+  "mean_row_max_abs_dp": 0.002,
+  "oracle": "the publisher's model, AutoModel.from_pretrained(trust_remote_code=True), CPU, fp32: text rows after the config.json temperature, image and audio rows the raw softmax"
+ },
+ "status": "PASS",
+ "prefix": {
+  "5s": {
+   "source": "results/ship_runtime_audio_fp16_5s_gpu.json",
+   "status": "PASS",
+   "clips": 6,
+   "min_cos": 0.9999989044592714,
+   "min_row_cos": 0.999984395625956,
+   "max_abs": 0.012531161308288574,
+   "drift_max": 0.0,
+   "recomputed_equal": true
+  },
+  "10s": {
+   "source": "results/ship_runtime_audio_fp16_10s_gpu.json",
+   "status": "PASS",
+   "clips": 7,
+   "min_cos": 0.9999833836497362,
+   "min_row_cos": 0.999781465769193,
+   "max_abs": 0.09990859031677246,
+   "drift_max": 0.0,
+   "recomputed_equal": true
+  },
+  "20s": {
+   "source": "results/ship_runtime_audio_fp16_20s_gpu.json",
+   "status": "PASS",
+   "clips": 3,
+   "min_cos": 0.9999935783386759,
+   "min_row_cos": 0.9999549209057499,
+   "max_abs": 0.052649736404418945,
+   "drift_max": 0.0,
+   "recomputed_equal": true
+  },
+  "30s": {
+   "source": "results/ship_runtime_audio_fp16_30s_gpu.json",
+   "status": "PASS",
+   "clips": 6,
+   "min_cos": 0.9999787190353003,
+   "min_row_cos": 0.999214748509375,
+   "max_abs": 0.23656010627746582,
+   "drift_max": 0.0,
+   "recomputed_equal": true
+  }
+ },
+ "end_to_end_round10_buckets": {
+  "source": "results/ship_runtime_audio_e2e_fp16.json",
+  "status": "PASS",
+  "rows": 46,
+  "arms": {
+   "audio_bundle_prefix_numpy_mel": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.0032091140747070312,
+    "mean_row_max_abs_dp": 0.0007656688837177289,
+    "max_abs_dlogit": 0.04858827590942383,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "256": {
+      "rows": 30,
+      "argmax_equal": 30,
+      "max_abs_dp": 0.0032091140747070312,
+      "mean_row_max_abs_dp": 0.0006301748100365027
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 16,
+      "max_abs_dp": 0.002990424633026123,
+      "mean_row_max_abs_dp": 0.0010197202718700282
+     }
+    }
+   },
+   "audio_bundle_prefix_torch_mel": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.00552445650100708,
+    "mean_row_max_abs_dp": 0.0008123737698833397,
+    "max_abs_dlogit": 0.075927734375,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "256": {
+      "rows": 30,
+      "argmax_equal": 30,
+      "max_abs_dp": 0.00552445650100708,
+      "mean_row_max_abs_dp": 0.0009300968811051765
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 16,
+      "max_abs_dp": 0.0018208026885986328,
+      "mean_row_max_abs_dp": 0.0005916429363423958
+     }
+    }
+   },
+   "reference_prefix": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.004489302635192871,
+    "mean_row_max_abs_dp": 0.0006102870867597749,
+    "max_abs_dlogit": 0.043633460998535156,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "256": {
+      "rows": 30,
+      "argmax_equal": 30,
+      "max_abs_dp": 0.004489302635192871,
+      "mean_row_max_abs_dp": 0.0007182796068567162
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 16,
+      "max_abs_dp": 0.0016679167747497559,
+      "mean_row_max_abs_dp": 0.00040780111157801
+     }
+    }
+   },
+   "control_next_clip_prefix": {
+    "rows": 46,
+    "argmax_equal": 30,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 30
+    },
+    "max_abs_dp": 0.9849788444116712,
+    "mean_row_max_abs_dp": 0.29479570483683754,
+    "max_abs_dlogit": 11.8072829246521,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": false,
+      "max_abs_dp": false,
+      "mean_row_max_abs_dp": false,
+      "finite": true
+     },
+     "status": "FAIL"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "256": {
+      "rows": 30,
+      "argmax_equal": 17,
+      "max_abs_dp": 0.9849788444116712,
+      "mean_row_max_abs_dp": 0.33674843330445203
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 13,
+      "max_abs_dp": 0.8659082651138306,
+      "mean_row_max_abs_dp": 0.2161343389600603
+     }
+    }
+   }
+  },
+  "control_must_fail": "FAIL",
+  "wrong_pairing_oracle_swap": {
+   "status": "FAIL",
+   "must_be": "FAIL",
+   "caught": true,
+   "rows_over_dp_bar": 35
+  },
+  "repeat_drift_max": 0.0,
+  "decision_graphs": {
+   "256": {
+    "aimodelc": "d1_omni_decide_fp16_L256.h16c.aimodelc",
+    "main_hash": "b075f032d760cd9ebddd2e68c41b2fe60be9d965cc1420501530a582a37fc33e"
+   },
+   "512": {
+    "aimodelc": "d1_omni_decide_fp16_L512.h16c.aimodelc",
+    "main_hash": "43e7197f37bc9f7cee33c8d20017dcaff4f3264d2cbb732eec00808d6b16d991"
+   }
+  },
+  "verdict": "PASS",
+  "what": "46 audio rows routed by the round-10 buckets (256 / 512): the audio graph's prefix (mel from the NumPy host = the Swift host's specification, and from the publisher's torch front end) -> the decision graph fp16, against the oracle (raw softmax); control = the next clip's prefix"
+ },
+ "end_to_end_all_buckets": {
+  "source": "results/small_runtime_audio_e2e_fp16.json",
+  "status": "PASS",
+  "rows": 46,
+  "arms": {
+   "audio_bundle_prefix_numpy_mel": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.0036495327949523926,
+    "mean_row_max_abs_dp": 0.0008476851017487364,
+    "max_abs_dlogit": 0.04858827590942383,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "64": {
+      "rows": 4,
+      "argmax_equal": 4,
+      "max_abs_dp": 0.0036495327949523926,
+      "mean_row_max_abs_dp": 0.0021442770957946777
+     },
+     "128": {
+      "rows": 5,
+      "argmax_equal": 5,
+      "max_abs_dp": 0.0016321539878845215,
+      "mean_row_max_abs_dp": 0.0005346596240997315
+     },
+     "256": {
+      "rows": 21,
+      "argmax_equal": 21,
+      "max_abs_dp": 0.0031104087829589844,
+      "mean_row_max_abs_dp": 0.0005441706584211456
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 16,
+      "max_abs_dp": 0.002990424633026123,
+      "mean_row_max_abs_dp": 0.0010197202718700282
+     }
+    }
+   },
+   "audio_bundle_prefix_torch_mel": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.00552445650100708,
+    "mean_row_max_abs_dp": 0.0006674982482195446,
+    "max_abs_dlogit": 0.075927734375,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "64": {
+      "rows": 4,
+      "argmax_equal": 4,
+      "max_abs_dp": 0.002070128917694092,
+      "mean_row_max_abs_dp": 0.000876888632774353
+     },
+     "128": {
+      "rows": 5,
+      "argmax_equal": 5,
+      "max_abs_dp": 0.001691281795501709,
+      "mean_row_max_abs_dp": 0.0006741155393910958
+     },
+     "256": {
+      "rows": 21,
+      "argmax_equal": 21,
+      "max_abs_dp": 0.00552445650100708,
+      "mean_row_max_abs_dp": 0.0006838333432651346
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 16,
+      "max_abs_dp": 0.0018208026885986328,
+      "mean_row_max_abs_dp": 0.0005916429363423958
+     }
+    }
+   },
+   "reference_prefix": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.004489302635192871,
+    "mean_row_max_abs_dp": 0.0005964580866376585,
+    "max_abs_dlogit": 0.043633460998535156,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "64": {
+      "rows": 4,
+      "argmax_equal": 4,
+      "max_abs_dp": 0.002644866704940796,
+      "mean_row_max_abs_dp": 0.0013058781623840332
+     },
+     "128": {
+      "rows": 5,
+      "argmax_equal": 5,
+      "max_abs_dp": 0.0024715662002563477,
+      "mean_row_max_abs_dp": 0.0006434910581447184
+     },
+     "256": {
+      "rows": 21,
+      "argmax_equal": 21,
+      "max_abs_dp": 0.004489302635192871,
+      "mean_row_max_abs_dp": 0.0005938707742773529
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 16,
+      "max_abs_dp": 0.0016679167747497559,
+      "mean_row_max_abs_dp": 0.00040780111157801
+     }
+    }
+   },
+   "control_next_clip_prefix": {
+    "rows": 46,
+    "argmax_equal": 30,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 30
+    },
+    "max_abs_dp": 0.9849788444116712,
+    "mean_row_max_abs_dp": 0.2947031127287539,
+    "max_abs_dlogit": 11.8072829246521,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": false,
+      "max_abs_dp": false,
+      "mean_row_max_abs_dp": false,
+      "finite": true
+     },
+     "status": "FAIL"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "64": {
+      "rows": 4,
+      "argmax_equal": 1,
+      "max_abs_dp": 0.6380652189254761,
+      "mean_row_max_abs_dp": 0.4276542501931999
+     },
+     "128": {
+      "rows": 5,
+      "argmax_equal": 3,
+      "max_abs_dp": 0.8667013049125671,
+      "mean_row_max_abs_dp": 0.4035881721259784
+     },
+     "256": {
+      "rows": 21,
+      "argmax_equal": 13,
+      "max_abs_dp": 0.9849788444116712,
+      "mean_row_max_abs_dp": 0.30331599527423914
+     },
+     "512": {
+      "rows": 16,
+      "argmax_equal": 13,
+      "max_abs_dp": 0.8659082651138306,
+      "mean_row_max_abs_dp": 0.2161343389600603
+     }
+    }
+   }
+  },
+  "control_must_fail": "FAIL",
+  "wrong_pairing_oracle_swap": {
+   "status": "FAIL",
+   "must_be": "FAIL",
+   "caught": true,
+   "rows_over_dp_bar": 35
+  },
+  "repeat_drift_max": 0.0,
+  "decision_graphs": {
+   "64": {
+    "aimodelc": "d1_omni_decide_fp16_L64.h16c.aimodelc",
+    "main_hash": "5c0252eb058f35cd7f2ff0e85034d410a451a3a14ee31e40ef837d9da95bda0b"
+   },
+   "128": {
+    "aimodelc": "d1_omni_decide_fp16_L128.h16c.aimodelc",
+    "main_hash": "d28c54ff1f390f6dc3be54491bd13e5ad82b1be56ede5309950d0f85ce475ac3"
+   },
+   "256": {
+    "aimodelc": "d1_omni_decide_fp16_L256.h16c.aimodelc",
+    "main_hash": "b075f032d760cd9ebddd2e68c41b2fe60be9d965cc1420501530a582a37fc33e"
+   },
+   "512": {
+    "aimodelc": "d1_omni_decide_fp16_L512.h16c.aimodelc",
+    "main_hash": "43e7197f37bc9f7cee33c8d20017dcaff4f3264d2cbb732eec00808d6b16d991"
+   }
+  },
+  "verdict": "PASS",
+  "what": "the same 46 rows routed by host.ALL_BUCKETS (the shipped set): 9 rows of 128 positions or fewer go to L64 / L128"
+ },
+ "stripped_vs_unstripped": {
+  "audio-fp16-5s": "SAME",
+  "audio-fp16-10s": "SAME",
+  "audio-fp16-20s": "SAME",
+  "audio-fp16-30s": "SAME",
+  "audio-e2e": "SAME"
+ },
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}
