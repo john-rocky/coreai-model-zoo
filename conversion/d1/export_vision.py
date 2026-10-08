@@ -36,7 +36,10 @@ static, and a fixed-shape graph compiled with it has crashed before). The record
 names the entry the Python runtime makes under ~/Library/Caches/coreai-cache/<build>/python/ when it loads it.
 
 `--toy` runs the same path on the toy snapshot (`lfm2_vl_tower.py write-toy`, laid out like the checkpoint, BF16,
-random weights; `vision_toy_oracle.py` is its transformers oracle). Without `--toy` it needs model.safetensors.
+random weights; `vision_oracle.py --toy` is its transformers oracle). Without `--toy` it needs model.safetensors
+(`vision_oracle.py` is the model's oracle). The record also says how many checkpoint values fp16 storage does not hold
+exactly (`fp16_storage`: BF16 values outside fp16's normal range) and the compiled asset's file sizes
+(`aot.files`, `aot.resources_bin_bytes`: what an fp16w32 asset really stores).
 
     cd conversion/d1
     export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer PY=<coreai-models venv>/bin/python
@@ -236,6 +239,27 @@ def eager_check(model, typed, dtype: str) -> dict:
             "finite": bool(torch.isfinite(got).all())}
 
 
+def fp16_storage(model) -> dict:
+    """How many of the (fp32, BF16-valued) weights fp16 storage changes: overflow to inf, flush to zero, or a rounded
+    subnormal. 0 changed = fp16 storage holds every checkpoint value exactly (fp16w32 computes with the fp32 weights)."""
+    import torch
+
+    n = changed = to_inf = to_zero = 0
+    worst = 0.0
+    for _, p in model.named_parameters():
+        w = p.detach().float()
+        h = w.half().float()
+        diff = h != w
+        n += w.numel()
+        changed += int(diff.sum())
+        to_inf += int(torch.isinf(h).logical_and(torch.isfinite(w)).sum())
+        to_zero += int((h == 0).logical_and(w != 0).sum())
+        if diff.any():
+            worst = max(worst, float((h - w).abs()[diff].max()))
+    return {"values": n, "changed": changed, "overflow_to_inf": to_inf, "flushed_to_zero": to_zero,
+            "max_abs_change": worst, "absmax": float(max(p.detach().abs().max() for _, p in model.named_parameters()))}
+
+
 def export(args, out_dir: Path, name: str) -> dict:
     import torch
     from toy_graph_check import count_ops
@@ -248,6 +272,7 @@ def export(args, out_dir: Path, name: str) -> dict:
     disk = {"before_load": ed.disk_free()}
     t0 = time.monotonic()
     base, toy = load_model(args)
+    storage = fp16_storage(base)
     model = T.typed(base, args.dtype)
     fp32_params = sorted(n for n, p in model.named_parameters() if p.dtype == torch.float32)
     fp16_params = sorted(n for n, p in model.named_parameters() if p.dtype == torch.float16)
@@ -279,8 +304,14 @@ def export(args, out_dir: Path, name: str) -> dict:
     lic = ed.copy_verbatim(ed.snapshot(), out_dir, {"LICENSE": ed.LICENSE_SHA256})
     disk["after_save"] = ed.disk_free()
     mlirb = aimodel / "main.mlirb"
+    rep = base.load_report
     rec = {"bundle": str(out_dir), "name": name, "aimodel": str(aimodel), "toy": toy, "dtype": args.dtype,
-           "attention": args.attention, "load_report": base.load_report,
+           "attention": args.attention, "load_report": rep,
+           "load_summary": {"checkpoint_keys": rep["checkpoint_keys_under_prefixes"], "expected_keys": rep["expected_keys"],
+                            "unread": len(rep["unmapped_checkpoint_keys"]) + len(rep["unexpected_keys"]),
+                            "missing": len(rep["missing_module_tensors"]), "shape_mismatches": len(rep["shape_mismatches"]),
+                            "layout_differs": len(rep["layout_differs"]), "host_position_table": rep["host_position_table"]},
+           "fp16_storage": storage,
            "spec": {"input_names": list(spec["input_names"]), "output_names": list(spec["output_names"]),
                     "reference_inputs": {k: [list(v.shape), str(v.dtype).replace("torch.", "")]
                                          for k, v in spec["reference_inputs"].items()}, "dynamic": "none"},
@@ -298,7 +329,8 @@ def export(args, out_dir: Path, name: str) -> dict:
                           "shape": list(base.host_position_table.shape)},
            "metadata_sha256": ed.sha256_file(out_dir / "metadata.json"), "license_sha256": lic["LICENSE"], "disk": disk}
     print(f"bundle ready: {out_dir} ({rec['du_aimodel']}, main.mlirb {rec['main_mlirb']['bytes']:,} B, eager "
-          f"{args.dtype} vs fp32 max|d| {eager['max_abs_vs_fp32_eager']:.2e}, total {rec['seconds']['total']:.1f}s)",
+          f"{args.dtype} vs fp32 max|d| {eager['max_abs_vs_fp32_eager']:.2e}, total {rec['seconds']['total']:.1f}s; "
+          f"load {rec['load_summary']}; fp16 storage changes {storage['changed']} of {storage['values']:,} values)",
           flush=True)
     return rec
 
@@ -327,6 +359,8 @@ def aot_compile(aimodel: Path, out_dir: Path) -> tuple[Path, float, dict]:
         return target, secs, info
     mh = target / "main.hash"
     info["main_hash_hex"] = mh.read_bytes().hex() if mh.exists() else None
+    info["files"] = {str(p.relative_to(target)): p.stat().st_size for p in sorted(target.rglob("*")) if p.is_file()}
+    info["resources_bin_bytes"] = sum(v for k, v in info["files"].items() if k.endswith("resources.bin"))
     info["runtime_cache_entry"] = str(ed.coreai_cache_dir() / info["main_hash_hex"]) if info["main_hash_hex"] else None
     stats = target / "stats.json"
     info["stats"] = json.loads(stats.read_text()) if stats.exists() else None
@@ -380,7 +414,8 @@ def main() -> None:
             sys.exit(f"coreai-build failed (exit {info['returncode']}) after {secs:.1f} s; record {args.record}")
         record["aot"].update({"du_aimodelc": ed.du(aimodelc), "digest": ed.tree_digest(aimodelc)})
         print(f"asset: {aimodelc} (compile {secs:.1f} s, {record['aot']['du_aimodelc']}, "
-              f"{record['aot']['digest']['bytes']:,} B, main.hash {info.get('main_hash_hex')})", flush=True)
+              f"{record['aot']['digest']['bytes']:,} B, resources.bin {info['resources_bin_bytes']:,} B, "
+              f"main.hash {info.get('main_hash_hex')})", flush=True)
     record["finished"] = ed.now()
     save_record()
     if args.record:

@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
 """Tower gate: the exact vision tower's AOT asset on the Mac GPU against transformers' image path, crop by crop.
 
-For every crop of the oracle (`vision_toy_oracle.py` on the toy: the 12 fixture pictures and the 6 random ones, 64
-crops; the model's oracle has the same layout), the graph — the AOT h16c `.aimodelc` under
+For every crop of the oracle (`vision_oracle.py`: transformers 5.19's `get_image_features` on d1-3B's checkpoint, or
+with `--toy` on the toy snapshot; the 12 fixture pictures and the 6 random ones, 64 crops), the graph — the AOT h16c
+`.aimodelc` under
 `SpecializationOptions.default()`, never the JIT — gets the crop's four host inputs from the oracle's npz (patches,
 pos_table, key_bias, unshuffle_idx: `vision_host.tower_inputs`; the float ones cast to the bundle's input dtype), and
 the first h w / 4 rows of its image_embeds are compared with the oracle's: the cosine over the crop and the lowest row
 cosine (float64), max |d|.
 
 Bar, fixed before any result (written at the top of the transcript before the first GPU process):
-  fp32     every crop cos >= 0.99999 and max |d| <= 1e-4; a second process reproduces every output bit for bit
-  fp16w32  every crop cos >= 0.9999 and every row cos >= 0.999
-  fp16     recorded only (judged on the model)
+  the model (round 5b)
+    fp32     every crop cos >= 0.99999 and every row cos >= 0.9999; a second process reproduces every output bit for bit
+    fp16w32  the same
+    fp16     recorded; it stays a candidate only when every row cos >= 0.999 (`fp16_candidate`)
+  the toy (round 3b)
+    fp32     every crop cos >= 0.99999 and max |d| <= 1e-4; a second process reproduces every output bit for bit
+    fp16w32  every crop cos >= 0.9999 and every row cos >= 0.999
+    fp16     recorded only
+The model's oracle is tied to the bundle before any GPU process: the oracle's position table (sha256 of its fp32
+bytes) = the bundle's host/position_embedding.safetensors, and the oracle's checkpoint sha256 = the bundle's source
+weights.
 Negative controls, each run on the same asset and judged against that asset's bar (fp16: the fp16w32 bar, recorded):
   no_mask     key_bias all zero: the padded patches become keys. A crop with no padding (1024 patches: a tile, a
               full single crop) cannot move and is listed as immune.
@@ -27,7 +36,8 @@ sessions: the per-call ms are contended reference values for the transcript only
     cd conversion/d1
     PY=<coreai-models venv>/bin/python
     ~/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 -- $PY gate_tower.py run \\
-        $ZOO_WORK_ROOT/_d1_3b/exports/toy_vision/d1_toy_vision_fp32 --transcript $ZOO_WORK_ROOT/_d1_3b/results/<json>
+        $ZOO_WORK_ROOT/_d1_3b/exports/vision/d1_3b_vision_fp16w32 --transcript $ZOO_WORK_ROOT/_d1_3b/results/<json>
+    (the toy: exports/toy_vision/d1_toy_vision_fp32; the oracle follows the bundle: oracle/images/ or oracle_toy_vision/)
 """
 from __future__ import annotations
 
@@ -52,10 +62,15 @@ sys.path.insert(0, str(HERE))
 from _paths import work_path  # noqa: E402
 
 LANE = work_path("_d1_3b")
-ORACLE = LANE / "oracle_toy_vision" / "oracle.json"
-BARS = {"fp32": {"cos": 0.99999, "max_abs": 1e-4, "rerun": "bit-equal"},
-        "fp16w32": {"cos": 0.9999, "min_row": 0.999},
+ORACLE = LANE / "oracle" / "images" / "oracle.json"
+TOY_ORACLE = LANE / "oracle_toy_vision" / "oracle.json"
+BARS = {"fp32": {"cos": 0.99999, "min_row": 0.9999, "rerun": "bit-equal"},
+        "fp16w32": {"cos": 0.99999, "min_row": 0.9999, "rerun": "bit-equal"},
         "fp16": None}
+TOY_BARS = {"fp32": {"cos": 0.99999, "max_abs": 1e-4, "rerun": "bit-equal"},
+            "fp16w32": {"cos": 0.9999, "min_row": 0.999},
+            "fp16": None}
+FP16_CANDIDATE_MIN_ROW = 0.999          # the model's fp16 tower: every row cos at least this, else not a candidate
 CONTROL_BAR = {"fp32": "fp32", "fp16w32": "fp16w32", "fp16": "fp16w32"}
 CONTROLS = ("no_mask", "transposed")
 MAX_CALLS = 240
@@ -232,11 +247,31 @@ def gate(args) -> int:
     out = Path(args.transcript)
     if out.exists():
         raise SystemExit(f"{out} exists: transcripts are never overwritten")
-    oracle_path = Path(args.oracle).resolve()
+    toy = bool(meta.get("toy"))
+    oracle_path = Path(args.oracle or (TOY_ORACLE if toy else ORACLE)).resolve()
+    if oracle_path.is_dir():
+        oracle_path = oracle_path / "oracle.json"
     oracle = json.loads(oracle_path.read_text())
-    if meta.get("toy") and oracle["snapshot"]["model_safetensors_sha256"] != meta["toy"]["snapshot_sha256"]["model.safetensors"]:
-        raise SystemExit("the oracle was made on another toy snapshot than the bundle's")
-    bar, cbar = BARS[dtype], BARS[CONTROL_BAR[dtype]]
+    link = {}
+    if toy:
+        if oracle["snapshot"]["model_safetensors_sha256"] != meta["toy"]["snapshot_sha256"]["model.safetensors"]:
+            raise SystemExit("the oracle was made on another toy snapshot than the bundle's")
+    else:
+        from safetensors.numpy import load_file
+
+        if oracle.get("schema") != "d1-vision-oracle/1":
+            raise SystemExit(f"{oracle_path}: schema {oracle.get('schema')!r} is not the model's oracle")
+        table = np.ascontiguousarray(load_file(str(bundle / "host" / "position_embedding.safetensors"))["position_embedding"])
+        link = {"bundle_table_sha256": hashlib.sha256(table.tobytes()).hexdigest(),
+                "oracle_table_sha256": oracle["position_table"]["sha256"],
+                "bundle_weights_sha256": meta["source"]["weights"]["sha256"],
+                "oracle_checkpoint_sha256": oracle["snapshot"]["model_safetensors_sha256"]}
+        link["table_equal"] = link["bundle_table_sha256"] == link["oracle_table_sha256"] and table.dtype == np.float32
+        link["checkpoint_equal"] = link["bundle_weights_sha256"] == link["oracle_checkpoint_sha256"]
+        if not (link["table_equal"] and link["checkpoint_equal"]):
+            raise SystemExit(f"the oracle is not tied to this bundle: {link}")
+    bars = TOY_BARS if toy else BARS
+    bar, cbar = bars[dtype], bars[CONTROL_BAR[dtype]]
     crops = [(p["id"], c) for p in oracle["pictures"] for c in p["crops"]]
     work = LANE / ("gate_tower_toy" if meta.get("toy") else "gate_tower") / (args.tag or name)
     work.mkdir(parents=True, exist_ok=True)
@@ -247,6 +282,7 @@ def gate(args) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"schema": "d1-vision-tower-gate/1", "status": "running", "started": now(), "bar": bar,
                                "control_bar": cbar, "controls": CONTROLS, "asset": name,
+                               "fp16_candidate_min_row": FP16_CANDIDATE_MIN_ROW if (dtype == "fp16" and not toy) else None,
                                "oracle": {"path": str(oracle_path), "sha256": sha256_file(oracle_path)},
                                "crops": len(crops)}, indent=1) + "\n")
     # which control calls can move an output (the rest are immune)
@@ -333,8 +369,13 @@ def gate(args) -> int:
     checks = {"controls_red": all(v["all_red"] for v in ctl_sum.values()), "finite": summary["finite_all"]}
     if bar:
         checks["all_crops_pass"] = summary["n_pass"] == len(rows)
-    if dtype == "fp32":
+    if bar and bar.get("rerun") == "bit-equal":
         checks["rerun_bit_equal"] = all(r["rerun_bit_equal"] for r in rows)
+    if dtype == "fp16" and not toy:
+        summary["fp16_candidate"] = {"rule": f"every row cos >= {FP16_CANDIDATE_MIN_ROW}",
+                                     "min_row": summary["min_row"]["value"],
+                                     "rows_below": sum(1 for r in rows if r["min_row"] < FP16_CANDIDATE_MIN_ROW),
+                                     "candidate": summary["min_row"]["value"] >= FP16_CANDIDATE_MIN_ROW}
     result = ("PASS" if all(checks.values()) else "FAIL") if bar else ("RECORDED" if checks["finite"] else "FAIL")
     timing = {"contended": True, "load_seconds": [p["load_seconds"] for _, p in procs],
               "first_call_ms": [p["calls"][0]["ms"] for _, p in procs],
@@ -349,7 +390,7 @@ def gate(args) -> int:
               "gate": "the exact tower's AOT asset on the Mac GPU, every oracle crop, against transformers 5.19's "
                       "get_image_features rows", "bar": bar, "control_bar": cbar, "result": result, "checks": checks,
               "asset": asset, "oracle": {"path": str(oracle_path), "sha256": sha256_file(oracle_path),
-                                         "schema": oracle.get("schema"), "n_crops": oracle.get("n_crops")},
+                                         "schema": oracle.get("schema"), "n_crops": oracle.get("n_crops"), "link": link},
               "script": {"path": "conversion/d1/gate_tower.py", "sha256": sha256_file(Path(__file__).resolve())},
               "environment": env, "gpu_lock": {"start": lock_start, "end": lock_end},
               "processes": [{"phase": ph, "pid": p["pid"], "calls": len(p["calls"]), "load_seconds": p["load_seconds"],
@@ -364,6 +405,8 @@ def gate(args) -> int:
         print(f"  control {ctl}: {v['crops']} crops, immune {v['immune']}, all red {v['all_red']}, max cos {v['max_cos']}")
     for k, v in checks.items():
         print(f"  {k}: {'ok' if v else 'FAIL'}")
+    if "fp16_candidate" in summary:
+        print(f"  fp16 candidate ({summary['fp16_candidate']['rule']}): {summary['fp16_candidate']['candidate']}")
     print(f"  ms/crop (contended) median {timing['ms_per_crop_base']['median']:.2f}")
     return 0 if result in ("PASS", "RECORDED") else 1
 
@@ -374,7 +417,7 @@ def main() -> int:
     r = sub.add_parser("run", help="the gate: workers on the GPU, then the comparison with the oracle")
     r.add_argument("bundle")
     r.add_argument("--transcript", required=True)
-    r.add_argument("--oracle", default=str(ORACLE))
+    r.add_argument("--oracle", help="oracle.json or its directory (default: oracle/images/, the toy's oracle_toy_vision/)")
     r.add_argument("--aimodelc", help="the compiled asset (default <bundles>_aotc/<name>.h16c.aimodelc)")
     r.add_argument("--tag", help="worker directory name (default: the bundle name)")
     w = sub.add_parser("worker")

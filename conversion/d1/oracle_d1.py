@@ -28,8 +28,26 @@ fp32 (the card: bf16 changes answers):
 A question the provider refuses (no `instructions`: `own_email_03` / `next_step`) is recorded with the error; the
 record's other questions still run their rows, and its API path is the error the provider raises.
 
+`--images` (round 5b): the picture records of `fixtures/image_records.json`, each picture opened with
+`PIL.Image.open(path)` (a URL is not fetched: the record is listed as skipped), through the provider's image path:
+  (a) the API path: engine.run([(state, questions, images)]) — `_request`: one question = the whole prompt in one plain
+      pass (`_image_inputs(prefix + suffix)` -> `_one_pass(**inputs, logits_to_keep=1)`), several = one Tree (trunk =
+      the processor's ids of the prefix with the pictures, `model.answer(trunk, packed, lengths, **vision)` =
+      `get_image_features(**vision)` scattered into the `<image>` slots); its probabilities and input_tokens
+  (b) the row form, per question: `_request`'s one-question branch line for line (cap_pixels, prefix_text with
+      `_image_markup`, suffix_text, `_image_inputs`, `_one_pass`, log-softmax, readout, answer): the processor's ids,
+      the pixel inputs' shapes, the hook-point assert of (d), the image features (a forward hook on the projector)
+  (c) per record, max |dp| between (a) and (b) (one question: bit-equal; several: the Tree against the plain passes)
+  (d) `--hidden`: per question the final norm's hidden states [T, 2048] fp32, the slot's row, the ids and the image
+      features [n_image_tokens, 2048] fp32 (npz under <out-dir>/images_hidden/)
+  (e) record 0 again after the loop: bit-equal (rows and the API path)
+  -> <out-dir>/records_oracle_images.json and `--summary` (per path, near-ties, gold on our subset, Tree vs plain,
+     seconds per record).
+
     HF_HUB_OFFLINE=1 python oracle_d1.py --threads 1                        # round 2: the model on the CPU, fp32
     HF_HUB_OFFLINE=1 python oracle_d1.py --threads 1 --hidden tv4_000,card_refund,long_34k
+    HF_HUB_OFFLINE=1 python oracle_d1.py --images --threads 1 --hidden img01_shapes_384x384,img06_grid_1024x768,\\
+        img12_small_300x300 --summary $ZOO_WORK_ROOT/_d1_3b/results/<json>                   # round 5b: the pictures
 
 `--dry-run` (round 1) loads no model: the provider's API path runs on a stand-in backbone that records the ids it is
 handed and returns seeded random fp32 logits over the 128,000 ids, so SystemOne.run / _request / _logz_ids / _plan,
@@ -60,6 +78,8 @@ import host  # noqa: E402
 from _paths import hf_snapshot, work_path  # noqa: E402
 
 LANE = work_path("_d1_3b")
+IMAGE_FIXTURES = LANE / "fixtures" / "image_records.json"
+IMAGE_ID = 124907                    # <image>
 MODEL = {"hf_id": "LiquidAI/d1-3B", "revision": "da1fe36a861f24690f27f622dca1d8688503d113"}
 PROVIDER_SRC = LANE / "src"          # K/src/d1 = the six .py files of the snapshot, verbatim (+ __init__.py)
 VOCAB = 128000
@@ -438,6 +458,248 @@ def run_model(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- round 5b: the pictures
+class ProjectorHook:
+    """Forward hook on the multimodal projector: each crop's image features [h w / 4, d] since the last take(), in
+    call order (get_image_features projects the crops one by one, in crop order)."""
+
+    def __init__(self, module):
+        self.rows = []
+        self.handle = module.register_forward_hook(self._hook)
+
+    def _hook(self, _m, _inp, output):
+        self.rows.append(output.detach().reshape(-1, output.shape[-1]).float().clone())
+
+    def take(self) -> list:
+        out, self.rows = self.rows, []
+        return out
+
+
+def provider_image_record(eng, model, r: dict, images: list, norm_hook, proj_hook, keep: bool) -> tuple[dict, dict]:
+    """A picture record through the provider's code: per question the row form (`_request`'s one-question branch line
+    for line), then the API path engine.run([(state, questions, images)]). -> (entry, the --hidden arrays)."""
+    import torch
+
+    prompt, api = provider(eng)
+    runner = sys.modules[type(eng).__module__]
+    tok = eng.tokenizer
+    state, qdict = r["request"]["state"], r["request"]["questions"]
+    out: dict = {"id": r["id"], "source": r["source"], "images": r["images"], "questions": [], "refused": []}
+    qs = []
+    for name, qd in qdict.items():
+        try:
+            qs.append((name, prompt.as_question(qd)))
+        except Exception as e:  # noqa: BLE001 — the provider's own refusal
+            out["refused"].append({"name": name, "error": f"{type(e).__name__}: {e}"})
+            qs.append((name, None))
+    pics = [runner.cap_pixels(im) for im in images]
+    out["pictures"] = [{"size": list(im.size), "mode": im.mode, "capped": list(p.size)} for im, p in zip(images, pics)]
+    prefix = prompt.prefix_text(tok, state, eng.bos, eng.state_style, eng.system, eng._image_markup(len(pics)))
+    arrays: dict = {}
+    feats_first = None
+    E = model.lm_head.weight.detach()
+    for k, (name, q) in enumerate(qs):
+        if q is None:
+            continue
+        suffix = prompt.suffix_text(tok, q, eng.lead, eng.option_style)
+        inputs = eng._image_inputs(prefix + suffix, pics)
+        row = [int(x) for x in inputs["input_ids"][0].tolist()]
+        proj_hook.take()
+        t0 = time.perf_counter()
+        logits = eng._one_pass(**inputs, logits_to_keep=1).logits[0, -1].float()
+        logz = logits - torch.logsumexp(logits, dim=-1)
+        secs = time.perf_counter() - t0
+        h = norm_hook.out                                    # [T, d] of this pass
+        assert h is not None and h.shape[0] == len(row), "the hook did not see this row"
+        raw = model.lm_head(h[-1][None, None, :]).float()[0, -1]
+        assert torch.equal(raw - torch.logsumexp(raw, dim=-1), logz), "lm_head(hook hidden) != the pass's log-softmax"
+        feats = torch.cat(proj_hook.take()).numpy().astype(np.float32)
+        slots = [i for i, t in enumerate(row) if t == IMAGE_ID]
+        if feats.shape[0] != len(slots):
+            raise SystemExit(f"{r['id']}/{name}: {feats.shape[0]} image features for {len(slots)} <image> slots")
+        if feats_first is None:
+            feats_first = feats
+        groups = prompt.readout_ids(tok, q)
+        codes = ([c for c, _ in prompt.aliases(tok, list(q.criteria.keys()))]
+                 if isinstance(q, prompt.Choice) else None)
+        probs = prompt.readout(tok, q, logz)
+        keys = _keys(api, prompt, q)
+        order = sorted(range(len(probs)), key=lambda i: -probs[i])
+        margin = probs[order[0]] - probs[order[1]] if len(probs) > 1 else 1.0
+        gold = host.gold_key({"type": q.type}, (r.get("gold") or {}).get(name))
+        argmax = keys[max(range(len(probs)), key=probs.__getitem__)]
+        entry = {
+            "name": name, "type": q.type, "text": prefix + suffix, "row_ids": row, "row_len": len(row),
+            "slot": len(row) - 1, "codes": codes, "groups": groups, "keys": keys,
+            "group_logz": {str(i): float(logz[i]) for g in groups for i in g},
+            "probs": probs, "argmax": argmax, "top2_margin": margin, "near_tie": margin <= NEAR_TIE,
+            "gold": gold, "correct": None if gold is None else argmax == gold, "answer": api.answer(q, probs),
+            "seconds": round(secs, 4), "n_image_tokens": len(slots), "image_positions": [slots[0], slots[-1]],
+            "pixel_values_shape": list(inputs["pixel_values"].shape),
+            "spatial_shapes": [list(map(int, x)) for x in inputs["spatial_shapes"].tolist()],
+            "image_features_sha256": hashlib.sha256(feats.tobytes()).hexdigest(),
+            "image_features_absmax": float(np.abs(feats).max()),
+            "image_features_equal_first_question": bool(np.array_equal(feats, feats_first))}
+        if keep:
+            ids = host.group_ids(groups)
+            hn = h.float().numpy()
+            z64 = host.option_logits(hn[-1], E[ids].float().numpy(), ids)
+            with torch.no_grad():
+                z32 = model.lm_head(h[-1][None, None, :]).float()[0, -1]
+            entry["host_gather_max_abs_dlogit"] = max(abs(z64[i] - float(z32[i])) for i in ids)
+            assert entry["host_gather_max_abs_dlogit"] <= 1e-3, entry["host_gather_max_abs_dlogit"]
+            arrays[f"q{k}_hidden"] = hn.astype(np.float32)
+            arrays[f"q{k}_ids"] = np.asarray(row, np.int32)
+            arrays[f"q{k}_slot_hidden"] = hn[-1].astype(np.float32)
+            if "image_features" not in arrays:
+                arrays["image_features"] = feats
+        out["questions"].append(entry)
+    if out["refused"]:
+        try:
+            eng.run([(state, [prompt.as_question(qd) for qd in qdict.values()], images)])
+            out["api"] = {"error": None}
+        except Exception as e:  # noqa: BLE001
+            out["api"] = {"error": f"{type(e).__name__}: {e}"}
+        return out, arrays
+    t0 = time.perf_counter()
+    [(probs_api, read)] = eng.run([(state, [q for _, q in qs], images)])
+    secs = time.perf_counter() - t0
+    resp = {"answers": {n: api.answer(q, p) for (n, q), p in zip(qs, probs_api)},
+            "usage": {"input_tokens": read, "output_tokens": 0}}
+    dp = max(abs(a - b) for p, e in zip(probs_api, out["questions"]) for a, b in zip(p, e["probs"]))
+    api_rec = {"path": "tree" if len(qs) > 1 else "plain", "probs": probs_api, "input_tokens": read, "response": resp,
+               "max_abs_dp_vs_rows": dp,
+               "bit_equal_rows": all(list(p) == list(e["probs"]) for p, e in zip(probs_api, out["questions"])),
+               "seconds": round(secs, 4)}
+    if len(qs) > 1:   # the Tree's trunk and branches as `_request` makes them
+        trunk = [int(x) for x in eng._image_inputs(prefix, pics)["input_ids"][0].tolist()]
+        branches = [tok.encode(prompt.suffix_text(tok, q, eng.lead, eng.option_style), add_special_tokens=False)
+                    for _, q in qs]
+        api_rec.update({"trunk_len": len(trunk), "branch_lens": [len(b) for b in branches],
+                        "trunk_plus_branch_equals_row": [trunk + list(b) == e["row_ids"]
+                                                         for b, e in zip(branches, out["questions"])],
+                        "input_tokens_equal_trunk_plus_branches": read == len(trunk) + sum(map(len, branches))})
+    else:
+        api_rec["input_tokens_equal_row"] = read == out["questions"][0]["row_len"]
+    out["api"] = api_rec
+    return out, arrays
+
+
+def run_images(args) -> int:
+    import torch
+    from PIL import Image
+
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+    fx = Path(args.fixtures)
+    records = json.loads(fx.read_text())["records"]
+    if args.records:
+        want = set(args.records.split(","))
+        records = [r for r in records if r["id"] in want]
+    hidden_ids = set(args.hidden.split(",")) if args.hidden else set()
+    out_dir = Path(args.out_dir)
+    hidden_dir = out_dir / "images_hidden"
+    oracle_path = out_dir / "records_oracle_images.json"
+    summary_path = Path(args.summary) if args.summary else Path(args.results_dir) / "oracle_images_summary.json"
+    for p in (oracle_path, summary_path):
+        if p.exists():
+            raise SystemExit(f"{p} exists: the oracle is never overwritten")
+    hidden_dir.mkdir(parents=True, exist_ok=True)
+    model, engine, info = load_model(args.loader, args.threads)
+    norm_hook = FinalNormHook(model.model.language_model.embedding_norm)
+    proj_hook = ProjectorHook(model.model.multi_modal_projector)
+    entries, skipped, hidden_index, first = [], [], {}, None
+    t_all = time.perf_counter()
+    for r in records:
+        if any("://" in x for x in r["images"]):
+            skipped.append({"id": r["id"], "images": r["images"],
+                            "why": "a URL, not fetched: material that needs attribution is not used, even to measure"})
+            continue
+        paths = [fx.parent / x for x in r["images"]]
+        images = [Image.open(p) for p in paths]
+        t0 = time.perf_counter()
+        with torch.inference_mode():
+            e, arrays = provider_image_record(engine, model, r, images, norm_hook, proj_hook, r["id"] in hidden_ids)
+        e["seconds_record"] = round(time.perf_counter() - t0, 2)
+        e["image_files"] = [{"path": str(p), "sha256": sha256_file(p)} for p in paths]
+        if arrays:
+            tmp = hidden_dir / f"{r['id']}.tmp.npz"
+            np.savez(tmp, **arrays)
+            os.replace(tmp, hidden_dir / f"{r['id']}.npz")
+            hidden_index[r["id"]] = {k: list(v.shape) for k, v in arrays.items() if k.endswith("hidden") or k == "image_features"}
+        if first is None:
+            first = (r, paths, e)
+        entries.append(e)
+        print(f"{r['id']}: rows {[q['row_len'] for q in e['questions']]} images {[q['n_image_tokens'] for q in e['questions']]}"
+              f" api={e['api'].get('path')} dp={e['api'].get('max_abs_dp_vs_rows')} {e['seconds_record']} s", flush=True)
+    loop_s = time.perf_counter() - t_all
+    r0, paths0, e0 = first
+    with torch.inference_mode():   # (e) record 0 again
+        again, _ = provider_image_record(engine, model, r0, [Image.open(p) for p in paths0], norm_hook, proj_hook, False)
+    det = (all(a["group_logz"] == b["group_logz"] for a, b in zip(again["questions"], e0["questions"]))
+           and again["api"]["probs"] == e0["api"]["probs"])
+    assert det, "record 0 re-run differs"
+    header = {"schema": "d1-oracle-images/1", "model": {**MODEL, **info}, "fixtures": {"path": str(fx), "sha256": sha256_file(fx)},
+              "images_opened": "PIL.Image.open(path) (the provider's cap_pixels converts to RGB); a URL is not fetched",
+              "versions": {"python": platform.python_version(), "torch": torch.__version__,
+                           **{m: __import__(m).__version__ for m in ("transformers", "tokenizers", "numpy", "PIL")}},
+              "platform": platform.platform(), "loop_seconds": round(loop_s, 1),
+              "determinism": {"record": r0["id"], "rows_group_logz_and_api_probs_bit_equal": det},
+              "hidden_records": {"dir": str(hidden_dir), "shapes": hidden_index}, "skipped": skipped,
+              "checks": ("per question: lm_head(final-norm hook row at the slot) - logsumexp == the plain pass's log-softmax "
+                         "(torch.equal); the projector hook's features = one row per <image> slot; --hidden rows: host "
+                         "float64 gather within 1e-3 of the fp32 logits")}
+    doc = {**header, "records": entries}
+    write_atomic(oracle_path, (json.dumps(doc) + "\n").encode())
+    summ = summarize_images(entries)
+    summ.update({"oracle": str(oracle_path), "oracle_sha256": sha256_file(oracle_path), "skipped": skipped,
+                 "determinism": header["determinism"], "load_seconds": info["load_seconds"], "loop_seconds": header["loop_seconds"],
+                 "threads": info["torch_threads"], "load_report": info["load_report"], "provider_code": info["provider_code"]})
+    write_atomic(summary_path, (json.dumps(summ, indent=1) + "\n").encode())
+    print(json.dumps({k: v for k, v in summ.items() if k not in ("load_report", "provider_code", "by_record")}, indent=1))
+    return 0
+
+
+def summarize_images(entries: list[dict]) -> dict:
+    qs = [(e, q) for e in entries for q in e["questions"]]
+    by_path: dict = {}
+    for e in entries:
+        p = e["api"].get("path")
+        g = by_path.setdefault(p, {"records": 0, "questions": 0})
+        g["records"] += 1
+        g["questions"] += len(e["questions"])
+    gold = [q for _, q in qs if q["gold"] is not None]
+    tree = {e["id"]: e["api"]["max_abs_dp_vs_rows"] for e in entries if e["api"].get("path") == "tree"}
+    secs = [e["seconds_record"] for e in entries]
+    return {"records": len(entries), "questions": len(qs), "by_path": by_path,
+            "types": {t: sum(1 for _, q in qs if q["type"] == t) for t in ("choice", "noul", "score")},
+            "near_ties": {"threshold_top2": NEAR_TIE, "n": sum(q["near_tie"] for _, q in qs),
+                          "ids": [f"{e['id']}/{q['name']}" for e, q in qs if q["near_tie"]],
+                          "smallest_top2": min(q["top2_margin"] for _, q in qs)},
+            "gold_agreement_our_subset": f"{sum(bool(q['correct']) for q in gold)}/{len(gold)}",
+            "gold_note": "gold on our own drawn pictures only, not the provider's benchmark numbers",
+            "tree_vs_plain_max_abs_dp": max(tree.values()) if tree else None, "tree_vs_plain_by_record": tree,
+            "plain_api_bit_equal_single_question": sum(1 for e in entries if e["api"].get("path") == "plain"
+                                                       and e["api"]["bit_equal_rows"]),
+            "plain_records_single_question": sum(1 for e in entries if e["api"].get("path") == "plain"),
+            "trunk_plus_branch_equals_row": sum(all(e["api"]["trunk_plus_branch_equals_row"]) for e in entries
+                                                if e["api"].get("path") == "tree"),
+            "image_features_equal_across_questions": all(q["image_features_equal_first_question"] for _, q in qs),
+            "row_len": {"min": min(q["row_len"] for _, q in qs), "max": max(q["row_len"] for _, q in qs)},
+            "n_image_tokens": {e["id"]: e["questions"][0]["n_image_tokens"] for e in entries},
+            "seconds_per_record": {"p50": round(pct(secs, 0.5), 2), "max": round(max(secs), 2), "total": round(sum(secs), 1),
+                                   "what": "every question's plain pass + the API pass (+ the --hidden copies)"},
+            "seconds_per_plain_pass": {"p50": round(pct([q["seconds"] for _, q in qs], 0.5), 2),
+                                       "max": round(max(q["seconds"] for _, q in qs), 2)},
+            "by_record": [{"id": e["id"], "path": e["api"].get("path"), "questions": len(e["questions"]),
+                           "input_tokens": e["api"].get("input_tokens"), "row_len": [q["row_len"] for q in e["questions"]],
+                           "n_image_tokens": e["questions"][0]["n_image_tokens"],
+                           "argmax": {q["name"]: q["argmax"] for q in e["questions"]},
+                           "gold": {q["name"]: q["gold"] for q in e["questions"]},
+                           "top2": {q["name"]: q["top2_margin"] for q in e["questions"]},
+                           "max_abs_dp_tree_vs_plain": e["api"]["max_abs_dp_vs_rows"] if e["api"].get("path") == "tree" else None,
+                           "seconds": e["seconds_record"]} for e in entries]}
+
+
 def pct(v, q):
     v = sorted(v)
     return v[min(len(v) - 1, int(round(q * (len(v) - 1))))]
@@ -498,7 +760,14 @@ def main() -> int:
     ap.add_argument("--loader", choices=["auto", "package"], default="auto",
                     help="auto = AutoModel + trust_remote_code (the card); package = K/src/d1's verbatim copies")
     ap.add_argument("--dry-run", action="store_true", help="no model: the stand-in backbone (round 1; test_host.py)")
+    ap.add_argument("--images", action="store_true",
+                    help="the picture records (default fixtures/image_records.json) through the provider's image path")
+    ap.add_argument("--summary", help="--images: the summary JSON (default <results-dir>/oracle_images_summary.json)")
     args = ap.parse_args()
+    if args.images:
+        if args.fixtures == str(LANE / "fixtures" / "records.json"):
+            args.fixtures = str(IMAGE_FIXTURES)
+        return run_images(args)
     if args.dry_run:
         from transformers import AutoTokenizer
 
