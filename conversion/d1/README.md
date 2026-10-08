@@ -24,6 +24,7 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 | `export_option_rows.py` | the option table (round 3 with the weights): the tied embedding rows of every readout candidate id, bf16 to fp32, read one row at a time and checked by a second reader; `--check` holds every fixture readout id against the table and the host's refusals against their controls |
 | `readout_gate.py` | the gate (round 3 against the oracle): the AOT graph on the Mac GPU (`SpecializationOptions.default()`), the slot's hidden row through the host's readout, against the oracle; at most 40 rows a process and a re-run of its first row; the red arms of `--arms` (default round 4's set) with an oracle pre-check on that set's own oracle; `red`, `merge`, `red-records` |
 | `parity_decoder_torch.py` | the decoder module in fp32 torch driven as the graph runs (round 3 against the oracle): P1 every row through the host's readout, P2 the chunk order against one forward, P3 the chunk widths, P4 the red arms; `toy` runs all four on the toy |
+| `compute_unit_probe.py` | the speed ladder's compute-unit and AOT-flag facts (round 6a): `ane` compiles the decoder and the tower with the Neural Engine preferred, counts the Neural Engine regions, loads them with that preference and runs a fixed subset against the GPU assets' records and the oracle (plus the GPU assets loaded the same way); `noefr` compiles the decoder without `--expect-frequent-reshapes` and times each call of a row whose position length grows, twice in a process and in two processes; the transcript opens with the rules |
 | `int8_bisect_torch.py` | which layers carry int8lin's error: P1's fp32 instrument with each of the 134 int8lin linears holding its checkpoint weight or the exporter's own int8 weight (read back through the finalized module's dequantization), on the int8lin gate's worst rows; the selection rule written to a file before any result (`rule`, `dump`, `run`, `plan`, `merge`) |
 | `timing.py` | decision latency for the card's columns (round 3 on the model's bundle), inside a measurement window its caller holds; `--dry-run` prints the plan without a bundle |
 | `vision_host.py` | the image path's host specification (NumPy + Pillow): the provider's `cap_pixels`, the processor's crop plan (one crop or tiles + a thumbnail), torch's uint8 bicubic resize, patches and mask, the image token run and the extension ids, the position-table resize, the unshuffle index, the tower's four inputs per crop |
@@ -260,6 +261,58 @@ chose it cannot test it, and it needs a held-out set.
 The option table covers every readout id the host's rules can produce for noul, score and ASCII-letter or positional
 choice questions, up to the alias pool's limit; a request that would read an id outside it (a one-letter native label
 in another script) is refused whole by the host (`host.py` section 3, `decision.option_table` in the metadata).
+
+### Chunk widths and the compute-unit probes (round 6a)
+
+The forms a speed ladder compares are made and gated here; their speed is measured in a timing window, not by these
+commands. A chunk width is the bundle's static S (`--prefill-chunk`, the name's `_pf<S>`): a row runs as ⌈T / S⌉ calls
+and the last call is padded, so a wider S makes fewer calls and pads more. The gate reads S from the bundle's
+`metadata.json`; `--compare-with` the same mode's S = 16 transcript shows what the width alone moves (the fp16 graph
+rounds in another order at another width; in fp32 torch the widths are bit-equal, `parity_decoder_torch.py p3`).
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+for S in 32 64; do
+  $PY export_decoder.py fp16 --prefill-chunk $S --aot --record $K/results/<fp16 S record>.json
+  $PY export_decoder.py int8mlp --prefill-chunk $S --aot --record $K/results/<int8mlp S record>.json
+  $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_fp16_pf$S --red \
+      --compare-with $K/results/<gate fp16 S=16>.json --transcript $K/results/<gate fp16 S>.json
+  $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8mlp_pf$S --red \
+      --compare-with $K/results/<gate int8mlp S=16>.json --transcript $K/results/<gate int8mlp S>.json
+done
+$PY compute_unit_probe.py ane --transcript $K/results/<ane probe>.json
+$PY compute_unit_probe.py noefr --transcript $K/results/<noefr probe>.json
+# the efr-less asset again, the Neural Engine preferred at load; a static tower that computes in fp16 (a diagnostic)
+$PY compute_unit_probe.py noefr --options neural_engine --asset $K/exports/probe_noefr/d1_3b_decode_fp16_pf16.h16c.aimodelc \
+    --processes 1 --tag _ane --transcript $K/results/<noefr ane probe>.json
+$PY compute_unit_probe.py ane --graphs tower --tower $K/exports/vision/d1_3b_vision_fp16 \
+    --tower-gate $K/results/<gate tower fp16>.json --no-control --tag _fp16diag --transcript $K/results/<diag>.json
+```
+
+Each S compiles to its own `main.hash` (the function's type holds S), but check the runtime cache entry before a gate
+all the same (above). `compute_unit_probe.py ane` compiles the decoder (`--expect-frequent-reshapes`, as it ships) and
+the tower (without it, as it ships) with `--preferred-compute neural-engine` (the flag's values are `gpu`,
+`neural-engine` and `none`) into `$K/exports/probe_ane/`, counts the compiled asset's Neural Engine regions (the unique
+`*_ANE_region_<n>` names in its tree), loads it with
+`SpecializationOptions.from_preferred_compute_unit_kind(ComputeUnitKind.neural_engine())` (`neural_engine` is a method:
+call it) and runs a fixed subset of rows and crops against the GPU asset's own record, bit for bit, and against the
+oracle. `noefr` compiles the decoder without `--expect-frequent-reshapes` into `$K/exports/probe_noefr/` and times the
+calls of one row whose position length grows by S each call, twice in a process and in two processes. A probe asset
+shares its source `.aimodel` with a shipped asset; the script renames a same-named runtime cache entry aside before it
+loads the probe asset, renames the probe's own entry `<hash>__probe_r6a_<label>` after the run and puts the aside entry
+back; remove the probe entries by name when you are done. Inside an entry the runtime keeps one directory per set of
+specialization options (`default()` and a neural-engine preference get two), so loading a shipped asset with other
+options adds a second copy to its entry; remove that directory by name too. The runtime's `Profiler` is not used: with
+callbacks, `load_function(.., profiler=)` stops the process (SIGTRAP), and without them it records nothing.
+
+Where the Neural Engine shows up: an AOT compile of the dynamic decoder makes no Neural Engine region whatever the
+preference (its compiled graph holds no ANE message), while the static tower's compile tries it and leaves the
+validation messages in its `*.mpsgraph`. An asset compiled without `--expect-frequent-reshapes` is specialized by the
+runtime at each new position length, and that specialization does try the Neural Engine (with `default()` too): it
+writes a region's IR and compiler options under `$TMPDIR/com.apple.MetalPerformanceShadersGraph/mpsgraph-<pid>-*`,
+calls the Neural Engine compiler, prints its failure on stderr and runs the GPU. The probe reads both and lists the
+worker's scratch; that scratch stays after the process exits (one region IR per new length, each about as large as
+the MLP and conv-mixer linears' fp16 weights), so remove your own `mpsgraph-<pid>-*` directories by name after a probe.
 
 ## 3. Vision
 
