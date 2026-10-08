@@ -3,7 +3,8 @@
 
 Every oracle question is one row (`row_ids`, positions 0..T-1), fed to the bundle's one static-S function `main` (the
 AOT h16c `.aimodelc`, `SpecializationOptions.default()`, never the JIT) from fresh zero states in S-token calls: call c
-gets ids[cS : cS + S] with position_ids 0..cS+S-1 and image_embeds zero, the last call padded with <|pad|> (124893)
+gets ids[cS : cS + S] with position_ids 0..cS+S-1 (a static-form bundle, metadata `language.contract.static`:
+cS..cS+S-1, the states at their static shapes) and image_embeds zero, the last call padded with <|pad|> (124893)
 and the padded positions' rows discarded (`parity_decoder_torch.py`'s order). Everything the gate needs comes from the
 bundle: S, max_context_length and the input / output / state contract (metadata.json `language`), the option rows
 (`head/option_rows.safetensors`), the tokenizer for the red arms (`tokenizer/`). The slot's hidden row (the row's last
@@ -210,6 +211,8 @@ def worker(spec_path: Path) -> int:
     spec = json.loads(spec_path.read_text())
     S, max_ctx, H, pad = int(spec["S"]), int(spec["max_ctx"]), int(spec["hidden"]), int(spec["pad_id"])
     keep_full = set(spec.get("keep_full", []))
+    static = bool(spec["contract"].get("static"))     # lfm2_d1_static.py: position_ids = the call's own S positions
+    limit = max_ctx if static else max_ctx - 1
 
     def nd(a):
         return rt.NDArray(np.ascontiguousarray(a))
@@ -244,8 +247,8 @@ def worker(spec_path: Path) -> int:
             ids = np.asarray(run["ids"], np.int32)
             T = len(ids)
             n = -(-T // S)
-            if n * S > max_ctx - 1:
-                raise SystemExit(f"{run['id']}:{run['k']}: {n * S} padded positions > {max_ctx - 1}")
+            if n * S > limit:
+                raise SystemExit(f"{run['id']}:{run['k']}: {n * S} padded positions > {limit}")
             x = np.full(n * S, pad, np.int32)
             x[:T] = ids
             t_run = time.perf_counter()
@@ -255,7 +258,8 @@ def worker(spec_path: Path) -> int:
             for c in range(n):
                 t1 = time.perf_counter()
                 res = await maybe(fn(inputs={"input_ids": nd(x[c * S:(c + 1) * S].reshape(1, S)),
-                                             "position_ids": nd(np.arange((c + 1) * S, dtype=np.int32)[None]),
+                                             "position_ids": nd(np.arange(c * S if static else 0, (c + 1) * S,
+                                                                          dtype=np.int32)[None]),
                                              "image_embeds": img}, state=state))
                 h = np.asarray(res["hidden"].numpy())
                 if h.shape != (1, S, H) or h.dtype != np.float16:

@@ -19,6 +19,7 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 | `test_host.py` | `host.py` against the provider's code (through `oracle_d1.dry_run`) and transformers' tokenizer on every fixture question with two tokenizers; the tokenizer contract, the readout's equivalence on random full-vocabulary logits, a request table, negative controls, the fixture's lengths |
 | `oracle_d1.py` | the provider's code unchanged (`AutoModel` + `trust_remote_code`, fp32, CPU): the API path and the row form per question, Tree against row, the final-norm hook and its proof, determinism; `--dry-run` runs the same code on a stand-in backbone (no weights); --images runs the picture records through the provider's image path: the API path (one question = the whole prompt in one plain pass, several = the Tree), each question's plain pass, the image features and the final-norm rows of the --hidden records |
 | `lfm2_d1_decoder.py` | the decoder module: `Lfm2VlPipelinedForCausalLM` with an Identity head, hidden `[1, S, 2048]` out, `image_embeds [N_IMAGE_TOKENS, 2048]` in (the image-row contract in its header), the static-S export spec; run as a script it checks the module against the checkpoint's config and safetensors header with no weights |
+| `lfm2_d1_static.py` | the decoder's static form (round 9b): the same network with `position_ids [1, S]` (the call's own positions) and the KV caches at a static C slots, the attention mask built in the graph from the positions, the new keys and values written in place (`slice`) or by shifting the cache (`roll`); no dynamic dimension, so an AOT compile without `--expect-frequent-reshapes` specializes it once (`export_decoder.py --static`) |
 | `toy_graph_check.py` | the decoder class at a toy config through export, `optimize`, `save_asset` and the Python runtime on the CPU, against its eager forward; the extension-id image rows |
 | `export_decoder.py` | the bundle (round 3 with the weights): fp16 / int8lin / int8mix / int8mlp / int8conv / int4lin at block 32 or 16 (`--quant-block`), one static-S function `main`, the quantized set asserted equal to the mode's; `metadata.json` (`decision-backbone`, the contract, `decision` with the option table, `vision`, `compression`), `tokenizer/` and `LICENSE` verbatim, `head/` the option rows; `--aot` compiles for the Mac GPU (h16c); `--toy` runs the same path on a toy config with random weights |
 | `export_option_rows.py` | the option table (round 3 with the weights): the tied embedding rows of every readout candidate id, bf16 to fp32, read one row at a time and checked by a second reader; `--check` holds every fixture readout id against the table and the host's refusals against their controls |
@@ -319,6 +320,64 @@ writes a region's IR and compiler options under `$TMPDIR/com.apple.MetalPerforma
 calls the Neural Engine compiler, prints its failure on stderr and runs the GPU. The probe reads both and lists the
 worker's scratch; that scratch stays after the process exits (one region IR per new length, each about as large as
 the MLP and conv-mixer linears' fp16 weights), so remove your own `mpsgraph-<pid>-*` directories by name after a probe.
+
+### The static form (round 9b)
+
+The form above keeps two dynamic dimensions (the position input's length and the KV sequence axis). Without
+`--expect-frequent-reshapes` the runtime specializes it again at every new position length; with it, the AOT asset
+carries an fp16 copy of every linear. `lfm2_d1_static.py` removes both: `position_ids [1, S]` holds the call's own S
+positions (call c of a row: cS .. cS+S-1), the KV caches are `[8, 1, 8, C, 64]` with C = `--max-ctx` (4,096), and
+every full-attention layer attends all C slots through the coreai SDPA composite with a bool mask it builds from the
+positions (a slot is visible when the position it holds is at or before the query's). Nothing else changes: the same
+weights, the conv mixer and its state, the image rows, the hidden output. A row fits when ⌈T / S⌉ · S ≤ C.
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+# fp32 torch: the static form against the dynamic form on the same weights (P2's rows, both writes)
+$PY parity_decoder_torch.py p2s --threads 1 --kv-write slice,roll --context 4096 --out $K/results/<p2s>.json
+# the bundle, its Mac AOT (no --expect-frequent-reshapes) and the iPhone 18 Pro AOT (h19p; never loaded on a Mac)
+$PY export_decoder.py int8mlp --static --prefill-chunk 16 --aot --ios-aot --record $K/results/<record>.json
+# the first loads of the asset: does a new position still pay a specialization? (two processes)
+$PY compute_unit_probe.py static --decoder $K/exports/bundles/d1_3b_decode_int8mlp_pf16_static \
+    --transcript $K/results/<probe>.json
+$PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8mlp_pf16_static --red \
+    --compare-with $K/results/<the dynamic int8mlp S=16 gate>.json --transcript $K/results/<gate>.json
+```
+
+The hosts read the form from `metadata.json` (`language.contract.static`): `decide.py`, `readout_gate.py` and
+`compute_unit_probe.py` send each call its own positions and allocate the states at their static shapes; a bundle of
+the dynamic form runs exactly as before. The Swift host in `apps/D1` reads the dynamic form only.
+
+`--kv-write` chooses how the new keys and values enter the cache. `slice` (the default) writes them in place at slots
+p .. p+S-1 with `mutable_slice_update`, its begin index taken from `position_ids` at run time — the form zoo
+`knowledge/coreai-beta-mpsgraph-kvwrite-bug.md` records as trapping at the first execute on a Mac GPU (a minimal export
+of the macOS path). Here it runs, on the toy and on the model (AOT h16c, the Python runtime, macOS 27.0 26A428). `roll`
+shifts every layer's cache left by S and appends the new S (slot j holds position p+S-C+j), writing each cache back
+whole once per call, with no index taken from the data; it costs a read and a write of the whole cache per call
+(67.1 MB at C = 4,096) and is kept as the fallback. In fp32 torch both writes give the dynamic form's hidden rows bit
+for bit on P2's rows (106, 61 and 3,470 tokens).
+
+Every call attends C keys. The bare `softmax(q kᵀ) v` chain compiled for the GPU is wrong from 4,032 keys on
+(`knowledge/clef-flash-port.md`), so the static form uses the SDPA composite, which the dynamic decoder already ran
+past 4,032 keys correctly; on the toy at C = 4,096 the GPU's rows hold cosine 0.9999994 to fp32 at every position of a
+4,060-token row, positions 4,032 on included. On the model, a 4,050-token row (long_34k's event log extended with its
+own first events) holds cosine 0.99996 at every position against the dynamic form of the same weights, 0.9999965 from
+position 4,032 on; so C stays 4,096 (a smaller C, 3,968 = 62 × 64, was the fallback). The fixture gate attends 4,096
+keys in every call too.
+
+The compiled asset carries no dynamic dimension, so the runtime never specializes it again: the `static` probe loads
+it in two processes and runs rows whose calls reach new positions: a process's first call takes a few hundred
+milliseconds and every later call, a new position's first included, tens of milliseconds on a shared GPU (the dynamic
+form compiled without `--expect-frequent-reshapes` paid seconds at every new position length, `noefr` above); the
+runtime makes one cache entry for it and does not try the Neural Engine at run time.
+
+The compiled asset is specialized once, at compile time: its MPSGraph package holds `specialized_model_0` and
+`resources.bin`, no `original_model_0`. Its size is the fp16 decoder's, not the `.aimodel`'s: int8mlp's static AOT is
+5,562,787,390 B (h16c) / 5,562,788,615 B (h19p) against a 3,704,648,671 B `.aimodel`, because the compile folds the int8
+weights' dequantization into fp16 constants (its `stats.json` still counts the int8 elements; measure
+`resources.bin`) — fp16's static AOT at S = 64 is 5,562,784,605 B. The dynamic form's efr asset is 8,742,888,771 B (the
+int8 weights plus an fp16 copy). The width does not change the bytes (int8mlp at S = 64: 5,562,787,469 B), and each
+width and write compiles to its own `main.hash`.
 
 ## 3. Vision
 

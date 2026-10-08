@@ -12,8 +12,9 @@ host step; `apps/D1` is the Swift copy and `gate_swift.py` compares the two):
       with <image> -> V + k (vision_host.extension_ids)
     host.graph_context_check: every row's padded end <= max_context_length - 1
     graph (the bundle's AOT `.aimodelc`, function `main`, SpecializationOptions.default(); never the JIT):
-        direct   every row from fresh zero states in ceil(T / S) calls of S ids (call c: position_ids 0..p+cS+S-1),
-                 the last padded with <|pad|>; the padded positions' rows dropped -> hidden [T, d] fp16
+        direct   every row from fresh zero states in ceil(T / S) calls of S ids (call c: position_ids 0..p+cS+S-1;
+                 a static-form bundle, metadata `language.contract.static`: p+cS..p+cS+S-1), the last padded with
+                 <|pad|>; the padded positions' rows dropped -> hidden [T, d] fp16
         shared   (--shared) the state's first k = floor(Ls / S) * S row tokens once from zero states, the three states
                  read back once and every question's remaining tokens run from a fresh copy of them at positions k..:
                  the direct run's calls on a static-S graph, so its hidden rows bit for bit
@@ -200,6 +201,7 @@ class D1:
         self.S = int(lang["prefill_chunk"])
         self.max_ctx = int(lang["max_context_length"])
         self.contract = lang["contract"]
+        self.static = bool(self.contract.get("static"))   # lfm2_d1_static.py: position_ids = the call's S positions
         self.d = int(self.contract["outputs"]["hidden"][0][2])
         self.N = int(self.contract["inputs"]["image_embeds"][0][0])
         self.V = int(lang["vocab_size"])
@@ -272,10 +274,14 @@ class D1:
         return self.rt.NDArray(a)
 
     # graph calls ------------------------------------------------------------------
+    def positions(self, p: int) -> np.ndarray:
+        """position_ids [1, ..] of a call after p earlier ids: 0..p+S-1 (dynamic form), p..p+S-1 (static form)."""
+        return np.arange(p if self.static else 0, p + self.S, dtype=np.int32)[None]
+
     async def call(self, x: np.ndarray, p: int, state: dict, img) -> np.ndarray:
-        """One call: S ids after p earlier ids (position_ids 0..p+S-1) -> hidden [S, d] fp16."""
+        """One call: S ids after p earlier ids (position_ids 0..p+S-1; static form p..p+S-1) -> hidden [S, d] fp16."""
         res = await maybe(self.fn(inputs={"input_ids": self.rt.NDArray(np.ascontiguousarray(x.reshape(1, self.S))),
-                                          "position_ids": self.rt.NDArray(np.arange(p + self.S, dtype=np.int32)[None]),
+                                          "position_ids": self.rt.NDArray(self.positions(p)),
                                           "image_embeds": img}, state=state))
         h = np.asarray(res["hidden"].numpy())
         if h.shape != (1, self.S, self.d) or h.dtype != np.float16:
@@ -327,7 +333,7 @@ class D1:
                          "read_groups": g})
         host.option_table_check([{**r, "groups": r["read_groups"]} for r in rows], list(self.table))
         for r in rows:
-            host.graph_context_check(r["row_len"], self.S, self.max_ctx)
+            host.graph_context_check(r["row_len"], self.S, self.max_ctx, self.static)
         trunk = (vh.extension_ids(vh.prompt_ids(self.tok, img_prefix, plans)) if n_img
                  else host.token_ids(self.tok, img_prefix))
         stable = self.stable_prefix(img_prefix, trunk)

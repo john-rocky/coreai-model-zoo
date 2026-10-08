@@ -52,6 +52,16 @@ The bundle is `<out-dir>/bundles/<name>/`, `<name>` = `d1_3b_decode_<mode>[_n<N>
 `.aimodelc` with `SpecializationOptions.default()`, never the JIT). The record gives the compiled asset's main.hash,
 which names the entry the Python runtime makes under ~/Library/Caches/coreai-cache/<build>/python/ when it loads it.
 
+`--static` exports the static form instead (`lfm2_d1_static.Lfm2D1StaticDecoder`, contract in that file's header):
+position_ids [1, S] = the call's S new positions, keyCache / valueCache [8, 1, 8, C, 64] with C = `--max-ctx`
+(4,096 by default), the attention mask built in the graph from position_ids, no dynamic dimension anywhere;
+`--kv-write slice|roll` says how the new keys and values enter the cache. The name gets `_static` (`_static_c<C>` when C
+is not 4,096; `_kv<w>` when the write is not the default), metadata.json `language.contract` says `static: true` with
+the context, the write and the row limit (ceil(T / S) * S <= C), and `--aot` compiles it without
+--expect-frequent-reshapes (one specialization, at compile time). `--ios-aot` compiles the same `.aimodel` for the
+iPhone 18 Pro (`--platform iOS --architecture h19p --preferred-compute gpu`, no efr) into
+`<out-dir>/bundles_aotc_ios/<name>.h19p.aimodelc` (never loaded on the Mac).
+
 `--toy` runs the same path with no checkpoint: toy_graph_check.py's toy config (hidden 64, layers conv / attention /
 conv, vocabulary 256, 8 image slots unless `--n-image-tokens` says otherwise: N adds no weight) and seeded random weights
 (`--toy-seed`, 0 = round 1's toy, checked bit for bit), name `d1_toy_decode_<mode>[_n<N>]_pf<S>`, bundles under
@@ -66,6 +76,7 @@ LICENSE and the metadata writer are the real ones, and metadata.json carries a `
     $PY export_decoder.py fp16 --prefill-chunk 16 --aot --record <json>     # round 3: needs model.safetensors
     $PY export_decoder.py int8lin --aot --record <json>
     $PY export_decoder.py int8mlp --quant-block 16 --aot --record <json>   # round 5c
+    $PY export_decoder.py int8mlp --static --prefill-chunk 16 --aot --ios-aot --record <json>   # round 9b
 """
 from __future__ import annotations
 
@@ -104,6 +115,10 @@ SPECIAL = {"bos": ("<|startoftext|>", 124894), "im_start": ("<|im_start|>", 1248
 NAME_PREFIX, TOY_PREFIX = "d1_3b_decode", "d1_toy_decode"
 AOT_FLAGS = ["--platform", "macOS", "--preferred-compute", "gpu", "--architecture", "h16c",
              "--expect-frequent-reshapes"]
+AOT_FLAGS_STATIC = ["--platform", "macOS", "--preferred-compute", "gpu", "--architecture", "h16c"]
+AOT_FLAGS_IOS_STATIC = ["--platform", "iOS", "--preferred-compute", "gpu", "--architecture", "h19p"]
+STATIC_CONTEXT = 4096
+KV_WRITE_DEFAULT = "slice"
 DISK = "/System/Volumes/Data"
 MODES = ("fp16", "int8lin", "int8mix", "int4lin", "int8mlp", "int8conv")
 MLP_LEAVES = ("feed_forward.gate_proj", "feed_forward.up_proj", "feed_forward.down_proj")
@@ -320,8 +335,25 @@ def quantize(model, spec: dict, mode: str, block: int, fp16_layers: list[int]) -
 
 
 # --------------------------------------------------------------------------- metadata
-def contract_block(cfg, S: int, n_img: int) -> dict:
+def contract_block(cfg, S: int, n_img: int, static: dict | None = None) -> dict:
     hd, H = cfg.head_dim, cfg.hidden_size
+    if static:
+        C = static["context"]
+        return {"function": "main", "static": True,
+                "inputs": {"input_ids": [[1, S], "int32"], "position_ids": [[1, S], "int32"],
+                           "image_embeds": [[n_img, H], "float16"]},
+                "outputs": {"hidden": [[1, S, H], "float16"]},
+                "states": {"keyCache": [[cfg.num_full_layers, 1, cfg.num_key_value_heads, C, hd], "float16"],
+                           "valueCache": [[cfg.num_full_layers, 1, cfg.num_key_value_heads, C, hd], "float16"],
+                           "convState": [[cfg.num_conv_layers, 1, H, cfg.conv_state_width], "float16"]},
+                "dynamic": "none",
+                "position_ids": f"the call's S new positions p .. p+{S - 1} (a row's call c: {S}c .. {S}c+{S - 1})",
+                "context": C, "kv_write": static["kv_write"],
+                "kv_write_text": static["kv_write_text"],
+                "attention_mask": "built in the graph from position_ids (no input): a cache slot is visible to a query "
+                                  "when the absolute position it holds is at or before the query's",
+                "row_limit": f"ceil(T / S) * S <= {C} (the last call's positions within the {C} cache slots)",
+                "module": "conversion/d1/lfm2_d1_static.py"}
     return {"function": "main",
             "inputs": {"input_ids": [[1, S], "int32"], "position_ids": [[1, -1], "int32"],
                        "image_embeds": [[n_img, H], "float16"]},
@@ -333,8 +365,16 @@ def contract_block(cfg, S: int, n_img: int) -> dict:
                        "2048..max_context_length (a host allocates it at max_context_length)"}
 
 
-def readout_text(S: int, max_ctx: int) -> str:
+def readout_text(S: int, max_ctx: int, static: bool = False) -> str:
     pad = SPECIAL["pad"]
+    if static:
+        return (f"one row per question, fresh zero states per row; a row of T ids runs as ceil(T / {S}) calls of 'main' "
+                f"(static S = {S}, every shape static): call c gets ids[{S}c : {S}c + {S}] with position_ids "
+                f"{S}c..{S}c+{S - 1} (the call's own positions only), image_embeds zero for a text row; the last call is "
+                f"padded with {pad[0]} ({pad[1]}) and the hidden rows of the padded positions are discarded (causal: they "
+                f"cannot reach a real position). The hidden row of the row's last real token (the answer slot, T - 1) "
+                f"is the final-norm hidden the readout reads. A row fits when ceil(T / {S}) * {S} <= {max_ctx} (the KV "
+                f"cache's {max_ctx} slots).")
     return (f"one row per question, fresh zero states per row; a row of T ids runs as ceil(T / {S}) calls of 'main' "
             f"(static S = {S}): call c gets ids[{S}c : {S}c + {S}] with position_ids 0..{S}c+{S - 1}, image_embeds zero "
             f"for a text row; the last call is padded with {pad[0]} ({pad[1]}) and the hidden rows of the padded "
@@ -366,14 +406,14 @@ def option_table_block(table: dict, capacity: dict) -> dict:
                                    "readout ids are all in the table)"}
 
 
-def decision_block(S: int, max_ctx: int, hidden: int, table: dict, capacity: dict) -> dict:
+def decision_block(S: int, max_ctx: int, hidden: int, table: dict, capacity: dict, static: bool = False) -> dict:
     """How a host turns a System One request into the graph's rows and the rows' hidden into the response — host.py's
     contract (sections 1-7), written out for a host that reads only the bundle."""
     sp = {k: {"token": t, "id": i} for k, (t, i) in SPECIAL.items()}
     return {
         "output": f"hidden [1, {S}, {hidden}] per call: the final-norm hidden state at every position (no vocabulary "
                   "head in the graph)",
-        "readout": readout_text(S, max_ctx),
+        "readout": readout_text(S, max_ctx, static),
         "spec": "conversion/d1/host.py (its docstring is the contract; test_host.py gates it against the provider's code "
                 f"at {MODEL['hf_id']}@{MODEL['revision']}: prompt.py, api.py, runner.py)",
         "request": {
@@ -510,10 +550,13 @@ def write_metadata(out_dir: Path, name: str, cfg, args, quant: dict | None, tabl
     from _bundle import write_bundle_metadata
 
     S, n_img = args.prefill_chunk, args.n_image_tokens
-    language_extra = {"prefill_chunk": S, "static_inputs": ["image_embeds"], "image_tokens_max": n_img,
+    static = static_info(args)
+    language_extra = {"prefill_chunk": S,
+                      "static_inputs": (list(INPUT_ORDER) if static else ["image_embeds"]),
+                      "image_tokens_max": n_img,
                       "output": f"hidden [1, {S}, {cfg.hidden_size}] fp16, every position",
-                      "contract": contract_block(cfg, S, n_img)}
-    extra = {"decision": decision_block(S, args.max_ctx, cfg.hidden_size, table, capacity),
+                      "contract": contract_block(cfg, S, n_img, static)}
+    extra = {"decision": decision_block(S, args.max_ctx, cfg.hidden_size, table, capacity, bool(static)),
              "vision": vision_block(cfg, n_img)}
     if quant:
         extra["compression"] = compression_block(quant)
@@ -541,6 +584,23 @@ def write_metadata(out_dir: Path, name: str, cfg, args, quant: dict | None, tabl
 
 
 # --------------------------------------------------------------------------- export
+INPUT_ORDER = ("input_ids", "position_ids", "image_embeds")
+KV_WRITE_TEXT = {
+    "slice": "each full-attention layer writes the call's S new keys / values in place at slots p .. p+S-1 "
+             "(slot j = position j; the write index is position_ids[0, 0])",
+    "roll": "each full-attention layer's cache is shifted left by S slots and the call's S new keys / values appended "
+            "(slot j = position p+S-C+j, slots of negative positions masked), the eight layers written back as one "
+            "whole-state write per state at the end of the call",
+}
+
+
+def static_info(args) -> dict | None:
+    """The static form's settings (None for the dynamic form): the context C (= --max-ctx) and the KV write."""
+    if not getattr(args, "static", False):
+        return None
+    return {"context": args.max_ctx, "kv_write": args.kv_write, "kv_write_text": KV_WRITE_TEXT[args.kv_write]}
+
+
 def default_n_image_tokens(toy: bool) -> int:
     """The image_embeds rows when --n-image-tokens is not given: the contract's N, or the toy's 8."""
     if toy:
@@ -560,7 +620,11 @@ def bundle_name(args) -> str:
         suffix += f"_b{args.quant_block}"
     if args.n_image_tokens != default_n_image_tokens(args.toy):
         suffix += f"_n{args.n_image_tokens}"
-    return f"{TOY_PREFIX if args.toy else NAME_PREFIX}_{args.mode}{suffix}_pf{args.prefill_chunk}"
+    tail = ""
+    if args.static:
+        tail = "_static" + (f"_c{args.max_ctx}" if args.max_ctx != STATIC_CONTEXT else "") + (
+            f"_kv{args.kv_write}" if args.kv_write != KV_WRITE_DEFAULT else "")
+    return f"{TOY_PREFIX if args.toy else NAME_PREFIX}_{args.mode}{suffix}_pf{args.prefill_chunk}{tail}"
 
 
 def load_real(args) -> tuple[object, dict]:
@@ -587,6 +651,9 @@ def load_real(args) -> tuple[object, dict]:
     if (rep["unread_checkpoint_keys_under_prefix"] or rep["module_tensors_not_in_checkpoint"] or rep["meta_params"]
             or rep["module_has_lm_head_weight"] or bad_cfg):
         raise SystemExit(f"load mismatch: {json.dumps(rep)} config {bad_cfg}")
+    if args.static:
+        from lfm2_d1_static import make_static
+        model = make_static(model, args.max_ctx, args.kv_write)
     return model, {"load_report": rep, "weights": weights, "text_config": cfg_rec}
 
 
@@ -610,6 +677,9 @@ def export(args, out_dir: Path, name: str) -> dict:
         load = {"toy": True, **toy_round1_check(base, args.toy_seed),
                 "parameters": int(sum(p.numel() for p in base.parameters()))}
         model = typed_module(base, dtype)
+        if args.static:
+            from lfm2_d1_static import make_static
+            model = make_static(model, args.max_ctx, args.kv_write)
         cfg = model.config
         toy = {"what": "a toy: toy_graph_check.py's config with seeded random weights through the export path; NOT the "
                        "model. The gate's toy oracle folds every real id into the toy vocabulary (id % vocab_size): "
@@ -632,7 +702,10 @@ def export(args, out_dir: Path, name: str) -> dict:
         cfg = model.config
     if args.n_image_tokens != model.n_image_tokens:
         raise SystemExit(f"n_image_tokens {args.n_image_tokens} != the module's {model.n_image_tokens}")
-    spec = model.build_export_spec(dtype, args.max_ctx, trace_kv_len=TRACE_KV_CACHE_SEQ_LEN, query_len=S)
+    if args.static:
+        spec = model.build_static_export_spec(dtype, query_len=S)
+    else:
+        spec = model.build_export_spec(dtype, args.max_ctx, trace_kv_len=TRACE_KV_CACHE_SEQ_LEN, query_len=S)
     t_loaded = time.monotonic()
     disk["after_load"] = disk_free()
 
@@ -647,7 +720,10 @@ def export(args, out_dir: Path, name: str) -> dict:
     from export_qwen38vl_pipelined import _install_externalize_dim_retry
 
     _install_externalize_dim_retry()
-    print(f"exporting the hidden-output decoder (one function 'main', static S={S}, {args.mode}) ...", flush=True)
+    form = (f"the static form: position_ids [1, {S}], KV [.., {args.max_ctx}, ..], kv_write {args.kv_write}"
+            if args.static else "position_ids and the KV axis dynamic")
+    print(f"exporting the hidden-output decoder (one function 'main', static S={S}, {args.mode}; {form}) ...",
+          flush=True)
     prog = export_to_coreai(model, spec["reference_inputs"], dynamic_shapes=spec["dynamic_shapes"],
                             input_names=spec["input_names"], output_names=spec["output_names"],
                             state_names=spec["state_names"], externalize_modules=specs)
@@ -677,7 +753,8 @@ def export(args, out_dir: Path, name: str) -> dict:
     mlirb = aimodel / "main.mlirb"
     main_hash = aimodel / "main.hash"
     rec = {"bundle": str(out_dir), "name": name, "aimodel": str(aimodel), "toy": bool(args.toy), "load": load,
-           "trace_kv_len": TRACE_KV_CACHE_SEQ_LEN, "max_ctx": args.max_ctx, "functions": ["main"], "query_len": S,
+           "trace_kv_len": None if args.static else TRACE_KV_CACHE_SEQ_LEN, "max_ctx": args.max_ctx,
+           "static": static_info(args), "functions": ["main"], "query_len": S,
            "n_image_tokens": args.n_image_tokens, "spec": {
                "input_names": list(spec["input_names"]), "output_names": list(spec["output_names"]),
                "state_names": list(spec["state_names"]),
@@ -701,8 +778,9 @@ def export(args, out_dir: Path, name: str) -> dict:
     return rec
 
 
-def aot_compile(aimodel: Path, out_dir: Path) -> tuple[Path, float, dict]:
-    target = out_dir / f"{aimodel.stem}.h16c.aimodelc"
+def aot_compile(aimodel: Path, out_dir: Path, flags: list[str] = AOT_FLAGS) -> tuple[Path, float, dict]:
+    arch = flags[flags.index("--architecture") + 1]
+    target = out_dir / f"{aimodel.stem}.{arch}.aimodelc"
     if not os.environ.get("DEVELOPER_DIR"):
         sys.exit("set DEVELOPER_DIR to the Xcode 27 RC (its Metal toolchain carries coreai-build)")
     cb = subprocess.run(["xcrun", "-f", "coreai-build"], capture_output=True, text=True)
@@ -712,7 +790,7 @@ def aot_compile(aimodel: Path, out_dir: Path) -> tuple[Path, float, dict]:
         sys.exit(f"{target} exists: an AOT compile never overwrites an asset (remove it first, on purpose)")
     out_dir.mkdir(parents=True, exist_ok=True)
     disk = {"before": disk_free()}
-    cmd = [cb.stdout.strip(), "compile", str(aimodel), "--output", str(out_dir), *AOT_FLAGS]
+    cmd = [cb.stdout.strip(), "compile", str(aimodel), "--output", str(out_dir), *flags]
     print(" ".join(cmd), flush=True)
     t0 = time.monotonic()
     proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -728,6 +806,10 @@ def aot_compile(aimodel: Path, out_dir: Path) -> tuple[Path, float, dict]:
     info["runtime_cache_entry"] = (str(coreai_cache_dir() / info["main_hash_hex"]) if info["main_hash_hex"] else None)
     stats = target / "stats.json"
     info["stats"] = json.loads(stats.read_text()) if stats.exists() else None
+    # what the package holds: the MPSGraph files (an efr asset has original_model_0 + specialized_model_1, an asset
+    # specialized at compile time specialized_model_0 only) and resources.bin, the bytes the weights take
+    info["package"] = {str(p.relative_to(target)): p.stat().st_size for p in sorted(target.rglob("*"))
+                       if p.is_file() and (p.suffix in (".mpsgraph", ".bin", ".fb") or p.name == "manifest.plist")}
     return target, secs, info
 
 
@@ -751,9 +833,20 @@ def main() -> None:
                     help="toy_graph_check.py's toy config and seeded random weights through the same path (no checkpoint)")
     ap.add_argument("--toy-seed", type=int, default=0, help="--toy: the weights' seed (0 = round 1's toy)")
     ap.add_argument("--skip-export", action="store_true", help="reuse the saved .aimodel (with --aot)")
-    ap.add_argument("--aot", action="store_true", help="compile the .aimodel for the Mac GPU (h16c, efr)")
+    ap.add_argument("--aot", action="store_true",
+                    help="compile the .aimodel for the Mac GPU (h16c; efr for the dynamic form, none for --static)")
+    ap.add_argument("--static", action="store_true",
+                    help="the static form (lfm2_d1_static.py): position_ids [1, S], KV at --max-ctx slots, no dynamic "
+                         "dimension; name _static")
+    ap.add_argument("--kv-write", default=KV_WRITE_DEFAULT, choices=["slice", "roll"],
+                    help="--static: how the new keys / values enter the cache (lfm2_d1_static.py header)")
+    ap.add_argument("--ios-aot", action="store_true",
+                    help="--static: also compile for the iPhone 18 Pro (iOS, h19p, GPU, no efr) into "
+                         "<out-dir>/bundles_aotc_ios/ (never loaded on the Mac)")
     ap.add_argument("--record", help="write the export / AOT record JSON here (never overwritten)")
     args = ap.parse_args()
+    if (args.kv_write != KV_WRITE_DEFAULT or args.ios_aot) and not args.static:
+        ap.error("--kv-write and --ios-aot apply to --static only")
     if (args.mode == "int8mix") != bool(args.fp16_layers):
         ap.error("--fp16-layers is required by int8mix and applies to it only")
     if args.quant_block != 32 and args.mode == "fp16":
@@ -775,6 +868,8 @@ def main() -> None:
                     "fp16_layers": args.fp16_layers, "quant_block": args.quant_block, "argv": sys.argv[1:],
                     "pid": os.getpid(), "started": now(), "script_sha256": sha256_file(Path(__file__).resolve()),
                     "module_sha256": sha256_file(HERE / "lfm2_d1_decoder.py"),
+                    "static": static_info(args),
+                    "static_module_sha256": sha256_file(HERE / "lfm2_d1_static.py") if args.static else None,
                     "option_rows_sha256": sha256_file(HERE / "export_option_rows.py")}
 
     def save_record() -> None:
@@ -785,17 +880,25 @@ def main() -> None:
     if not args.skip_export:
         record["export"] = export(args, out_dir, name)
         save_record()
+    compiles = []
     if args.aot:
-        aimodelc, secs, info = aot_compile(out_dir / f"{name}.aimodel", aot_dir)
-        record["aot"] = {"aimodelc": str(aimodelc), "flags": AOT_FLAGS, "seconds": secs, **info}
+        compiles.append(("aot", aot_dir, AOT_FLAGS_STATIC if args.static else AOT_FLAGS))
+    if args.ios_aot:
+        compiles.append(("ios_aot", Path(args.out_dir) / f"{sub}_aotc_ios", AOT_FLAGS_IOS_STATIC))
+    for key, where, flags in compiles:
+        aimodelc, secs, info = aot_compile(out_dir / f"{name}.aimodel", where, flags)
+        record[key] = {"aimodelc": str(aimodelc), "flags": flags, "seconds": secs, **info}
         if info.get("failed"):
             record["finished"] = now()
             save_record()
             print("\n".join(info["stderr_tail"]), file=sys.stderr)
             sys.exit(f"coreai-build failed (exit {info['returncode']}) after {secs:.1f} s; record {args.record}")
-        record["aot"].update({"du_aimodelc": du(aimodelc), "digest": tree_digest(aimodelc)})
-        print(f"asset: {aimodelc} (compile {secs:.1f} s, {record['aot']['du_aimodelc']}, "
-              f"{record['aot']['digest']['bytes']:,} B, main.hash {info.get('main_hash_hex')})", flush=True)
+        record[key].update({"du_aimodelc": du(aimodelc), "digest": tree_digest(aimodelc)})
+        if key == "ios_aot":
+            record[key]["runtime_cache_entry"] = None   # an iOS asset is never loaded on the Mac
+        save_record()
+        print(f"asset: {aimodelc} (compile {secs:.1f} s, {record[key]['du_aimodelc']}, "
+              f"{record[key]['digest']['bytes']:,} B, main.hash {info.get('main_hash_hex')})", flush=True)
     record["finished"] = now()
     save_record()
     if args.record:

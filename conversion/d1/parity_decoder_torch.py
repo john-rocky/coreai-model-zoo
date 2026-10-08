@@ -15,6 +15,10 @@ probabilities (`oracle/records_oracle.json` from oracle_d1.py: the provider's co
   p2   P2_ROWS: the S-chunk order against one forward over the whole row (the module's forward with every id in one
        call -> forward_stateful_embeds, positions 0..T-1, zero states): max |d| and the lowest cosine over every
        position. Bar: max |d| <= 1e-4 (the toy: <= 1e-5).
+  p2s  round 9b: P2_ROWS through the static form (lfm2_d1_static.py, `--kv-write slice,roll`, `--context C`: call c
+       with position_ids cS..cS+S-1, the KV axis at C, the mask built from the positions) against the dynamic form,
+       both in S = 16 calls from zero states on the same weights: max |d|, the lowest position cosine, bit equality,
+       both p against the oracle -> `--out`. Bar: max |d| <= 1e-4.
   p3   `--widths 16,32,64` on P3_ROWS: each width's hidden rows against S = 16's (max |d|) and its p against the
        oracle (recorded, not a bar).
   p4   `--red`: the five arms of `fixtures/red_arms.json` on fp32 torch, every perturbed row against its base row
@@ -203,6 +207,35 @@ class Runner:
                 outs.append(h[0])
         hid = torch.cat(outs)[:T].numpy().astype(np.float32)
         return hid, {"T": T, "S": S, "chunks": n, "padded": n * S, "seconds": time.monotonic() - t0}
+
+    def chunked_static(self, ids: list[int], S: int, context: int, kv_write: str) -> tuple[np.ndarray, dict]:
+        """One row through the static form (lfm2_d1_static.py, the same weights: the module's class switched for the
+        run and back) from zero states at `context` KV slots, call c with position_ids cS..cS+S-1 -> hidden [T, H]."""
+        from lfm2_d1_decoder import Lfm2D1Decoder
+        from lfm2_d1_static import make_static
+
+        torch = self.torch
+        T = len(ids)
+        n = -(-T // S)
+        if n * S > context:
+            raise ValueError(f"a row of {T} ids runs {n * S} padded positions, over the context {context}")
+        x = torch.full((n * S,), self.pad_id, dtype=torch.int32)
+        x[:T] = torch.tensor(ids, dtype=torch.int32)
+        st = self.states(context)
+        outs = []
+        t0 = time.monotonic()
+        m = make_static(self.model, context, kv_write)
+        try:
+            with torch.inference_mode():
+                for c in range(n):
+                    h = m(x[c * S:(c + 1) * S].reshape(1, S), torch.arange(c * S, (c + 1) * S, dtype=torch.int32)[None],
+                          self.img, st["k_cache"], st["v_cache"], st["conv_state"])
+                    outs.append(h[0])
+        finally:
+            self.model.__class__ = Lfm2D1Decoder
+        hid = torch.cat(outs)[:T].numpy().astype(np.float32)
+        return hid, {"T": T, "S": S, "chunks": n, "padded": n * S, "context": context, "kv_write": kv_write,
+                     "seconds": time.monotonic() - t0}
 
     def oneshot(self, ids: list[int]) -> tuple[np.ndarray, dict]:
         """The whole row in one call from zero states (forward -> forward_stateful_embeds) -> hidden [T, H] fp32."""
@@ -477,6 +510,32 @@ def stage_p3(runner: Runner, recs: dict, widths=WIDTHS, rows=P3_ROWS) -> list[di
     return out
 
 
+def stage_p2s(runner: Runner, recs: dict, kv_writes, context: int, S: int = CHUNK, rows=P2_ROWS) -> list[dict]:
+    """Round 9b's fp32 control: each row through the static form (each kv_write) against the dynamic form, both in
+    S-token calls from zero states: max |d|, the lowest position cosine, bit equality; the readout's p of both against
+    the oracle."""
+    out = []
+    for rid, name in rows:
+        k, q = question_of(recs[rid], name)
+        a, ia = runner.chunked(q["row_ids"], S)
+        pa = score_probs(runner.readout(a[q["slot"]], q["groups"]), q)
+        for kv in kv_writes:
+            b, ib = runner.chunked_static(q["row_ids"], S, context, kv)
+            c = compare_hidden(b, a)
+            pb = score_probs(runner.readout(b[q["slot"]], q["groups"]), q)
+            out.append({"id": rid, "q": k, "name": q["name"], "T": ia["T"], "S": S, "chunks": ia["chunks"],
+                        "context": context, "kv_write": kv, "max_abs_diff": c["max_abs_diff"],
+                        "rel_max_abs_diff": c["rel_max_abs_diff"], "min_pos_cos": c["min_pos_cos"],
+                        "bit_equal": bool(np.array_equal(a, b)), "finite": c["finite"],
+                        "dynamic_vs_oracle_max_abs_dp": pa["max_abs_dp"], "static_vs_oracle_max_abs_dp": pb["max_abs_dp"],
+                        "static_vs_dynamic_max_abs_dp": float(np.abs(np.asarray(pb["probs"]) - np.asarray(pa["probs"])).max()),
+                        "argmax_equal_oracle": [pa["argmax_equal"], pb["argmax_equal"]],
+                        "seconds": [ia["seconds"], ib["seconds"]]})
+            print(f"[p2s] {rid}:{q['name']} T={ia['T']} static ({kv}, C={context}) vs dynamic max|d| "
+                  f"{c['max_abs_diff']:.3e} cos {c['min_pos_cos']:.12f} bit {out[-1]['bit_equal']}", flush=True)
+    return out
+
+
 def stage_p4(runner: Runner, recs: dict, red: dict, S: int = CHUNK) -> dict:
     base = {}
     for rid, k in red["base_rows"]:
@@ -640,6 +699,19 @@ def cmd_stage(args) -> int:
             f.write(json.dumps({"kind": "end", "finished": now()}) + "\n")
     elif args.stage == "p2":
         (PARITY / "p2.json").write_text(json.dumps({**meta, "rows": stage_p2(runner, recs)}, indent=1) + "\n")
+    elif args.stage == "p2s":
+        kvs = [x for x in args.kv_write.split(",") if x]
+        rows = stage_p2s(runner, recs, kvs, args.context)
+        worst = max(x["max_abs_diff"] for x in rows)
+        rec = {**meta, "schema": "d1-decoder-torch-parity-static/1",
+               "what": "round 9b: the static form (lfm2_d1_static.py) against the dynamic form, fp32 CPU, S-token calls "
+                       "from zero states, the same weights",
+               "bar": {"max_abs_diff": BAR["p2_max_abs_diff"]}, "static_module_sha256": sha256_file(HERE / "lfm2_d1_static.py"),
+               "kv_writes": kvs, "context": args.context, "rows": rows, "max_abs_diff": worst,
+               "result": "PASS" if worst <= BAR["p2_max_abs_diff"] and all(x["finite"] for x in rows) else "FAIL",
+               "finished": now()}
+        Path(args.out).write_text(json.dumps(rec, indent=1) + "\n")
+        print(f"P2s {rec['result']}: max|d| {worst:.3e} -> {args.out}")
     elif args.stage == "p3":
         (PARITY / "p3.json").write_text(json.dumps({**meta, "widths": args.widths,
                                                    "rows": stage_p3(runner, recs, tuple(args.widths))}, indent=1) + "\n")
@@ -680,7 +752,9 @@ def cmd_merge(args) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("stage", choices=["p1", "p2", "p3", "p4", "merge", "toy"])
+    ap.add_argument("stage", choices=["p1", "p2", "p2s", "p3", "p4", "merge", "toy"])
+    ap.add_argument("--kv-write", default="slice", help="p2s: the static form's KV writes to run (comma list of slice, roll)")
+    ap.add_argument("--context", type=int, default=4096, help="p2s: the static form's KV slots C")
     ap.add_argument("--threads", type=int, default=1)
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--shards", type=int, default=1)
@@ -702,6 +776,11 @@ def main() -> int:
         if Path(args.out).exists():
             raise SystemExit(f"{args.out} exists: records are never overwritten")
         return cmd_merge(args)
+    if args.stage == "p2s":
+        if not args.out:
+            raise SystemExit("p2s writes to --out")
+        if Path(args.out).exists():
+            raise SystemExit(f"{args.out} exists: records are never overwritten")
     return cmd_stage(args)
 
 

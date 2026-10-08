@@ -118,7 +118,22 @@ RULES = {
                     "sha256 against the efr asset's record of the row, the readout's p against the oracle; the "
                     "runtime cache entry's size and the MPSGraph scratch's before and after each process",
     },
+    "static": {
+        "asset": "the static form's AOT (export_decoder.py --static --aot: h16c, --preferred-compute gpu, no "
+                 "--expect-frequent-reshapes), loaded with SpecializationOptions.default(); nothing is compiled here",
+        "rows": "tv4x_emotion_00's question (57 ids, 4 calls at S=16) and the first 32 calls of long_34k's first "
+                "question (the row cut at 32 x S ids), from fresh zero states, position_ids = each call's own S positions",
+        "processes": "two, one after the other; in each, lap 1 then lap 2 over both rows",
+        "compared": "each call's wall: a position's first call in the process (lap 1) against its second (lap 2) and "
+                    "the process's first call; each row's hidden sha256 lap 1 vs lap 2 and process 1 vs 2; the "
+                    "readout's p against the oracle for the uncut row; the runtime cache entry named by the asset's "
+                    "main.hash and every entry made, before and after each process; the MPSGraph scratch",
+        "words": "no re-specialization = no call of lap 1 after the process's first call takes seconds (a new "
+                 "position's first call within the same order of magnitude as its lap 2 call) in both processes, "
+                 "and one cache entry",
+    },
 }
+STATIC_ROWS = (("tv4x_emotion_00", 0, None), ("long_34k", 0, 32))   # (record, question, the calls kept; None = all)
 
 
 def sha256_file(path: Path) -> str:
@@ -427,6 +442,7 @@ async def decoder_rows(rt, fn, desc, spec, out, store, fail, check_contract) -> 
 
     img_shape, img_dt = spec["contract"]["inputs"]["image_embeds"]
     img = nd(np.zeros(img_shape, np.dtype(img_dt)))
+    static = bool(spec["contract"].get("static"))   # lfm2_d1_static.py: position_ids = the call's own S positions
     seen_lengths: set[int] = set()
     for lap in spec["laps"]:
         for j, run in enumerate(lap["rows"]):
@@ -440,11 +456,12 @@ async def decoder_rows(rt, fn, desc, spec, out, store, fail, check_contract) -> 
             hid = np.zeros((n * S, H), np.float16)
             t_run = time.perf_counter()
             for c in range(n):
-                L = (c + 1) * S
+                L = (c + 1) * S      # the positions seen after this call (the dynamic form's position_ids length)
                 t1 = time.perf_counter()
                 try:
                     res = await maybe(fn(inputs={"input_ids": nd(x[c * S:(c + 1) * S].reshape(1, S)),
-                                                 "position_ids": nd(np.arange(L, dtype=np.int32)[None]),
+                                                 "position_ids": nd(np.arange(c * S if static else 0, L,
+                                                                              dtype=np.int32)[None]),
                                                  "image_embeds": img}, state=state))
                     h = np.asarray(res["hidden"].numpy())
                 except Exception as e:  # noqa: BLE001
@@ -453,7 +470,8 @@ async def decoder_rows(rt, fn, desc, spec, out, store, fail, check_contract) -> 
                 ms = (time.perf_counter() - t1) * 1e3
                 hid[c * S:(c + 1) * S] = h[0]
                 out["calls"].append({"lap": lap["label"], "row": f"{run['id']}:{run['k']}", "call": c,
-                                     "position_length": L, "new_length_in_process": L not in seen_lengths, "ms": ms})
+                                     "position_length": L, "first_position": c * S,
+                                     "new_length_in_process": L not in seen_lengths, "ms": ms})
                 seen_lengths.add(L)
             hid = hid[:T].copy()
             key = f"{lap['label']}__{j:02d}"
@@ -909,9 +927,129 @@ def noefr_cmd(args) -> int:
     return 0
 
 
+def static_cmd(args) -> int:
+    """The static form's AOT (no efr): does a new position's first call still pay a specialization? (RULES["static"])"""
+    from parity_decoder_torch import load_oracle, score_probs
+    from readout_gate import ORACLE, Bundle, readout_probs
+
+    out = Path(args.transcript)
+    if out.exists():
+        raise SystemExit(f"{out} exists: transcripts are never overwritten")
+    dec = Bundle(args.decoder)
+    if not dec.contract.get("static"):
+        raise SystemExit(f"{dec.name} is not a static-form bundle (metadata language.contract.static)")
+    oracle_path = Path(args.oracle or ORACLE)
+    _, recs = load_oracle(oracle_path)
+    rows = []
+    for rid, k, keep in STATIC_ROWS:
+        q = recs[rid]["questions"][k]
+        ids = q["row_ids"] if keep is None else q["row_ids"][:keep * dec.S]
+        rows.append({"id": rid, "k": k, "ids": ids, "slot": q["slot"] if keep is None else len(ids) - 1,
+                     "cut_to_calls": keep, "tokens_of_the_row": len(q["row_ids"])})
+    asset = dec.aimodelc
+    work = Path(args.work)
+    doc = {"schema": "d1-compute-unit-probe/1", "probe": "static", "status": "running", "started": now(),
+           "rules": RULES["static"], "decoder": {"bundle": str(dec.dir), "asset": str(asset), "contract": dec.contract},
+           "rows": [{k: v for k, v in r.items() if k != "ids"} | {"tokens": len(r["ids"]),
+                                                                  "calls": -(-len(r["ids"]) // dec.S)} for r in rows],
+           "oracle": {"path": str(oracle_path), "sha256": sha256_file(oracle_path)}, "work": str(work),
+           "tag": args.tag, "note": args.note, "gpu": "shared with other sessions: every ms is a contended reference "
+                                                    "value, never the ladder's"}
+    open_transcript(out, doc)
+    doc["environment"] = env_record()
+    doc["asset_tree"] = {k: v for k, v in asset_tree(asset).items() if k != "graph_strings"}
+    doc["lock_start"] = lock_state()
+    t0 = time.monotonic()
+    table = dec.table()
+    base = {"graph": "decoder", "S": dec.S, "max_ctx": dec.max_ctx, "hidden": dec.hidden, "pad_id": dec.pad_id,
+            "contract": dec.contract, "aimodelc": str(asset), "options": "default",
+            "laps": [{"label": "lap1", "rows": rows}, {"label": "lap2", "rows": rows}]}
+    procs = []
+    with EntryGuard(asset, f"static{args.tag}", own=True) as eg:
+        for n in range(1, args.processes + 1):
+            before = {"entry_kib": du_kib(eg.entry), "scratch_kib": du_kib(scratch_dir()), "free_bytes": free_bytes(),
+                      "entries": entries()}
+            rec = run_worker({**base, "out": str(work / f"static{args.tag}_process{n}")}, args.run_limit)
+            after = {"entry_kib": du_kib(eg.entry), "scratch_kib": du_kib(scratch_dir()), "free_bytes": free_bytes(),
+                     "entries": entries()}
+            p = {"process": n, "before": {k: v for k, v in before.items() if k != "entries"},
+                 "after": {k: v for k, v in after.items() if k != "entries"},
+                 "new_entries": sorted(set(after["entries"]) - set(before["entries"])),
+                 "run": {k: v for k, v in rec.items() if k not in ("rows", "calls")}}
+            calls = rec.get("calls", [])
+            if calls and not rec.get("error"):
+                lap = {(c["lap"], c["row"], c["call"]): c for c in calls}
+                pairs = [{"row": c["row"], "call": c["call"], "first_position": c["first_position"],
+                          "lap1_ms": round(c["ms"], 3), "lap2_ms": round(lap[("lap2", c["row"], c["call"])]["ms"], 3)}
+                         for c in calls if c["lap"] == "lap1" and ("lap2", c["row"], c["call"]) in lap]
+                l1 = np.asarray([x["lap1_ms"] for x in pairs][1:])
+                l2 = np.asarray([x["lap2_ms"] for x in pairs])
+                p["calls"] = pairs
+                p["first_call_of_process_ms"] = round(calls[0]["ms"], 3)
+                p["lap1_after_first"] = {"median_ms": float(np.median(l1)), "max_ms": float(l1.max())} if l1.size else None
+                p["lap2"] = {"median_ms": float(np.median(l2)), "max_ms": float(l2.max())} if l2.size else None
+                p["lap1_over_lap2_max"] = float(max(x["lap1_ms"] / x["lap2_ms"] for x in pairs[1:])) if len(pairs) > 1 else None
+                shas = {}
+                for r in rec.get("rows", []):
+                    shas.setdefault(f"{r['id']}:{r['k']}", {})[r["lap"]] = r["hidden_sha256"]
+                p["hidden_sha256"] = shas
+                p["lap_hidden_bit_equal"] = all(len(set(v.values())) == 1 for v in shas.values())
+                z = np.load(rec["npz"])
+                scored = []
+                for r in rec.get("rows", []):
+                    src = next(x for x in rows if (x["id"], x["k"]) == (r["id"], r["k"]))
+                    if src["cut_to_calls"] is not None:
+                        continue
+                    q = recs[r["id"]]["questions"][r["k"]]
+                    s = score_probs(readout_probs(z[f"{r['key']}__slot"], q["groups"], table), q)
+                    scored.append({"lap": r["lap"], "row": f"{r['id']}:{r['k']}",
+                                   **{k: s[k] for k in ("argmax_equal", "max_abs_dp", "near_tie")}})
+                p["parity"] = scored
+            procs.append(p)
+            doc["processes"] = procs
+            open_transcript(out, doc)
+            if rec.get("error"):
+                break
+    doc["entry"] = eg.rec
+    ok = [p for p in procs if "calls" in p]
+    doc["summary"] = {
+        "processes_run": len(ok), "processes_asked": args.processes,
+        "first_call_of_process_ms": [p["first_call_of_process_ms"] for p in ok],
+        "lap1_after_first_max_ms": [p["lap1_after_first"]["max_ms"] if p["lap1_after_first"] else None for p in ok],
+        "lap2_median_ms": [p["lap2"]["median_ms"] if p["lap2"] else None for p in ok],
+        "lap1_over_lap2_max": [p["lap1_over_lap2_max"] for p in ok],
+        "lap_hidden_bit_equal": [p["lap_hidden_bit_equal"] for p in ok],
+        "hidden_equal_across_processes": (len(ok) > 1 and all(p["hidden_sha256"] == ok[0]["hidden_sha256"]
+                                                                for p in ok[1:])),
+        "new_entries": [p["new_entries"] for p in procs],
+        "entry_kib_after": [p["after"]["entry_kib"] for p in procs],
+        "load_seconds": [p["run"].get("load_seconds") for p in procs],
+        "errors": [p["run"].get("error") for p in procs if p["run"].get("error")],
+        "parity": [x for p in ok for x in p.get("parity", [])],
+        "anec_compile_failed": [p["run"].get("ane_messages", {}).get("anec_compile_failed") for p in procs],
+        "scratch_kib": [(p["run"].get("mpsgraph_scratch") or {}).get("kib") for p in procs]}
+    doc["lock_end"] = lock_state()
+    doc["seconds"] = time.monotonic() - t0
+    doc["status"] = "done"
+    doc["script"] = {"path": "conversion/d1/compute_unit_probe.py", "sha256": sha256_file(Path(__file__).resolve())}
+    doc["generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    open_transcript(out, doc)
+    print(json.dumps(doc["summary"], indent=1))
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
+    st = sub.add_parser("static", help="the static form's AOT (no efr): the call walls of new positions, two processes")
+    st.add_argument("--decoder", required=True, help="the static-form bundle (its AOT under <bundles>_aotc/)")
+    st.add_argument("--oracle", help="records_oracle.json (default readout_gate.ORACLE)")
+    st.add_argument("--processes", type=int, default=2)
+    st.add_argument("--tag", default="")
+    st.add_argument("--note")
+    st.add_argument("--transcript", required=True)
+    st.add_argument("--work", default=str(LANE / "readout" / "r9b_probe_static"))
+    st.add_argument("--run-limit", type=float, default=RUN_LIMIT_S)
     a = sub.add_parser("ane", help="the decoder and the tower compiled with the Neural Engine preferred, loaded with it")
     a.add_argument("--tower", default=str(TOWER))
     a.add_argument("--tower-gate", default=str(TOWER_GATE))
@@ -940,6 +1078,8 @@ def main() -> int:
     args = ap.parse_args()
     if args.cmd == "worker":
         return worker(Path(args.spec))
+    if args.cmd == "static":
+        return static_cmd(args)
     return ane_cmd(args) if args.cmd == "ane" else noefr_cmd(args)
 
 

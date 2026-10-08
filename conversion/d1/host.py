@@ -97,6 +97,9 @@ written out, and `test_host.py` gates it against that code and transformers' tok
      a row of T ids runs as ceil(T / S) calls of S ids from zero states, call c with position_ids 0 .. cS + S - 1;
      the last call is padded with <|pad|> (124893) and its padded rows dropped; the row limit is
      ceil(T / S) * S <= max_ctx - 1 (the position axis' upper bound: T <= 4080 at S = 16, max_ctx 4096).
+     The static form (`lfm2_d1_static.py`, metadata `language.contract.static`): call c gets position_ids
+     cS .. cS + S - 1 (its own S positions only), the states have no dynamic axis, and the row limit is
+     ceil(T / S) * S <= max_ctx (the KV cache's slots).
 """
 from __future__ import annotations
 
@@ -474,11 +477,13 @@ def padded_len(T: int, S: int) -> int:
     return chunk_calls(T, S) * S
 
 
-def graph_context_check(T: int, S: int = 16, max_ctx: int = 4096) -> None:
-    """A row of T ids fits the static-S graph: its padded end <= max_ctx - 1 (the position axis' upper bound)."""
-    if padded_len(T, S) > max_ctx - 1:
+def graph_context_check(T: int, S: int = 16, max_ctx: int = 4096, static: bool = False) -> None:
+    """A row of T ids fits the static-S graph: its padded end <= max_ctx - 1 (the dynamic form's position axis upper
+    bound), or <= max_ctx for the static form (`lfm2_d1_static.py`: the KV cache's max_ctx slots)."""
+    limit = max_ctx if static else max_ctx - 1
+    if padded_len(T, S) > limit:
         raise ValueError(f"a row of {T} tokens runs {padded_len(T, S)} padded positions, over the graph's "
-                         f"{max_ctx - 1} (rows of at most {(max_ctx - 1) // S * S} tokens at S = {S})")
+                         f"{limit} (rows of at most {limit // S * S} tokens at S = {S})")
 
 
 def plan_calls(ids: list[int], S: int, pad_id: int = PAD_ID) -> list[tuple[list[int], int]]:
