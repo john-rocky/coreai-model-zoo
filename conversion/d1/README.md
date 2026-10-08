@@ -465,6 +465,29 @@ extension ids kept) must fail it, and its `hf_rows` arm runs the decoder on tran
 end-to-end error between the tower and the decoder. The card's example picture is a URL and is not fetched (its record
 is skipped by the oracle and the gate).
 
+### The shipped bundles: the debug locations stripped (round 11)
+
+coreai-torch writes every op's Python source location into `main.mlirb`, the export machine's absolute paths included
+(14 in the fp16 decoder, 19 in the int8mlp decoder, 11 in the tower). `strip_bundle.py` copies a bundle to a new name
+and re-saves its `.aimodel` after `strip_debug_info`, then writes the strip into `metadata.json` (`strip`: both
+`main.mlirb` sha256 and the tool's versions); `--aot` compiles the copy where the gates look for it
+(`<bundles_ship>_aotc/`). The released bundles are these copies; run the gates again on them:
+
+```bash
+S=$K/exports/bundles_ship
+for b in bundles/d1_3b_decode_fp16_pf64 bundles/d1_3b_decode_int8mlp_pf64 vision/d1_3b_vision_fp16w32; do
+  $PY strip_bundle.py $K/exports/$b $S/$(basename $b)_s --aot
+done
+$PY readout_gate.py run $S/d1_3b_decode_fp16_pf64_s --red --compare-with <the export's fixture gate>.json \
+    --transcript $K/results/<stripped fixture gate>.json
+$PY gate_tower.py run $S/d1_3b_vision_fp16w32_s --transcript $K/results/<stripped tower gate>.json --tag <tag>
+```
+
+With `--compare-with` the gate prints the largest |Δp| and hidden difference against the export's rows. On the Mac the
+stripped bundles gave the export's rows bit for bit in every gate (round 11: the fixture with the red arms, the
+held-out set, the pictures, the tower gate; `../../models/d1-3b/gate-d1-3b-strip.json`). Keep one program object when
+stripping: `AIModelAsset.program` builds a new object on every access.
+
 ## 4. The hosts: `decide.py` and the Swift host
 
 `decide.py` is the whole read-out in Python on the AOT assets (the Mac GPU, `SpecializationOptions.default()`): the

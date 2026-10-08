@@ -121,10 +121,19 @@ the broken assets are healthy except the debug locations, and those can simply b
 ```python
 from coreai_torch.debugging.debug_info import strip_debug_info
 from coreai.authoring import AIModelAsset
-asset = AIModelAsset.load(path)          # <-- fails on beta 2+ with b2 wheels, see below
-strip_debug_info(asset.program)
-asset.program.save_asset(out_path)
+import coreai.runtime as rt
+program = AIModelAsset.load(path).program   # <-- fails on beta 2+ with b2 wheels for 0.4.0 assets, see below
+strip_debug_info(program)                   # keep this one object: .program builds a new one on every access
+program.save_asset(out_path, rt.AIModelAssetMetadata())
 ```
+
+**Correction 2026-10-09 — keep one program object.** `AIModelAsset.program` builds a new `AIProgram` on every
+access (coreai-core 1.0.0b2, coreai-torch 0.4.1). The earlier form of this snippet, `strip_debug_info(asset.program)`
+and then `asset.program.save_asset(out_path)`, strips one object and saves another: on the d1-3B vision tower the saved
+`main.mlirb` was byte-identical to the source (853,162,237 B, sha256 `e24933d8…c80c98cf`, 11 absolute source paths
+left). Holding one object strips it: 852,915,980 B, sha256 `358b7de0…59591161`, no path left. The checked-in
+`conversion/recovery/strip_b1.py` already holds one object; [`conversion/d1/strip_bundle.py`](../conversion/d1/strip_bundle.py)
+is the same step for a b2-era bundle.
 
 Verified here on 40 zoo bundles: weights byte-identical, minutes per model, stripped assets
 load clean on beta 3.

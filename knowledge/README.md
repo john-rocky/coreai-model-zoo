@@ -194,6 +194,18 @@ For the long-form version of the same material, read
   3.12's `sum()` and Python's `str()`; the shared prefix is exact on a static graph; Swift's JIT of the `.aimodel`
   equals the AOT asset at both sizes; Kev-0.8B on the iPhone 18 Pro at the default memory limit, and Kev-4B's iPhone AOT asset crashing at
   load; four of ten invented fixture names found in use on the web.
+- [`d1-port.md`](d1-port.md) — **an option-token decision model with pictures on Core AI**
+  (LiquidAI/d1-3B): the vocabulary head replaced by the tied embedding rows of 2,134 option ids on the host (the
+  provider's log-sum-exp cancels in a softmax over the options); the processor's resize is torch's uint8 bicubic
+  kernel, not Pillow's; the vision tower's fp16 math misses a row and fp16w32 ships, while a toy hid fp16w32's real size;
+  int8 on the MLP linears alone passes (every MLP and conv projection fails, int4 is a cliff); an AOT cache entry is
+  named by the kind of linear and S, not the bit width; dynamic positions without `--expect-frequent-reshapes`
+  re-specialize per position length (on the phone a call right after it can be wrong), a static form specializes once
+  but costs more per call; three Neural Engine walls; on the iPhone 18 Pro neither decoder form loads without the
+  increased-memory-limit entitlement, and the phone's JIT beats the Mac-compiled AOT asset per call; on the Mac an int8
+  `.aimodel`'s JIT is slower than its AOT asset and gives other bits while the fp16 one matches it bit for bit, so the
+  two platforms ship different decoders; the export writes local paths into `main.mlirb`, and the stripped copy (one
+  program object, or nothing is stripped) gives the same rows.
 - [`openthai-systemone-port.md`](openthai-systemone-port.md) — **a slot-head decision model on Core AI**
   (iapp/OpenThai-SystemOne): the LM head replaced by a 256-way head read at a control token —
   `model.*` weights, a resized embedding, `vocab_size` 256 as the logits width; temperatures from the

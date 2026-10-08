@@ -1,0 +1,167 @@
+# Recipe for d1-3B — the configuration that produced the staged bundles.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# A decision needs one decoder bundle; a picture adds the tower bundle. Two decoders ship, one per platform: the Mac runs
+# the fp16 decoder (`d1-3b`), the iPhone the int8mlp decoder (`d1-3b-int8mlp`, the MLP linears int8). Both are this port's
+# authoring (conversion/d1/lfm2_d1_decoder.py: the overlay's LFM2.5-VL text decoder, Lfm2VlPipelinedForCausalLM, with an
+# identity head: the final-norm hidden state at every position of a static 64-token call, the image rows as a static
+# input, the positions and the KV sequence axis dynamic) and carry the same contract. The exporter writes the option table
+# (head/option_rows: the tied embedding rows of every readout candidate id) beside the graph; the host reads it. The tower
+# is conversion/d1/lfm2_vl_tower.py (SigLIP2 + projector with the crop's grid as inputs, one call per crop).
+# Each bundle ships as the export copied to a new name with the export's debug locations stripped (step 2,
+# conversion/d1/strip_bundle.py: coreai-torch writes every op's source location, local paths included, into
+# main.mlirb; the stripped graph's ops and weights are the same). conversion/d1/README.md lists the fixtures, the oracle
+# and the gates in order.
+
+["d1-3b"]
+steps = [
+  { script = "d1/export_decoder.py", args = ["fp16", "--prefill-chunk", "64", "--aot"] },
+  { script = "d1/strip_bundle.py", args = ["../../_d1_3b/exports/bundles/d1_3b_decode_fp16_pf64", "../../_d1_3b/exports/bundles_ship/d1_3b_decode_fp16_pf64_s", "--aot"], bundle = "gpu-pipelined/d1_3b_decode_fp16_pf64_s" },
+]
+card = "README.md"
+hf_repo = "mlboydaisuke/d1-3B-CoreAI"
+source_hf_id = "LiquidAI/d1-3B"
+source_revision = "da1fe36a861f24690f27f622dca1d8688503d113"
+bundle = "gpu-pipelined/d1_3b_decode_fp16_pf64_s"
+status = "verified"
+overlay = true
+runtime_patches = []
+needs = [
+  "The source snapshot at da1fe36a861f24690f27f622dca1d8688503d113 in the Hugging Face cache, model.safetensors included",
+  "(6,247,065,504 B, sha256 50e03317847caf6df9a9aee27ed40f20554a86a21e60d1d47ba41a422b546c0c = its LFS oid), fetched with",
+  "HF_HUB_DISABLE_XET=1 and read with HF_HUB_OFFLINE=1.",
+  "The overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0, transformers 4.57.6) and,",
+  "for --aot, Xcode 27.0 RC as DEVELOPER_DIR.",
+]
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes"
+notes = [
+  "The Mac's decoder. The arguments are the logged run's (2026-10-08 16:27-16:28 JST, macOS 27.0 26A428, M4 Max), which",
+  "also passed --record <work>/_d1_3b/results/r6a_export_fp16_pf64.json (a log; it does not change the bundle). Export",
+  "42.0 s; --aot adds bundles_aotc/<name>.h16c.aimodelc (10,600,779,479 B, AOT 24.2 s), which the Python gates load and",
+  "which is not shipped: the Swift host specializes the .aimodel where it runs. Output:",
+  "$ZOO_WORK_ROOT/_d1_3b/exports/bundles/<name>/ (.aimodel, metadata.json, tokenizer/, head/option_rows.{json,safetensors},",
+  "LICENSE).",
+  "fp16 weights; the four attention projections of every full-attention layer fp32 (the overlay's rule for an fp16 export).",
+  "One function, main, at a static 64 tokens; inputs input_ids [1, 64] int32, position_ids [1, seq] int32 and",
+  "image_embeds [2816, 2048] fp16, states keyCache / valueCache [8, 1, 8, ctx, 64] fp16 and convState [22, 1, 2048, 2]",
+  "fp16, output hidden [1, 64, 2048] fp16 at every position, no vocabulary head; metadata.json kind decision-backbone,",
+  "language.prefill_chunk 64, max_context_length 4096; the option table 2,134 rows.",
+  "As exported: main.mlirb 5,562,548,035 B, sha256 d4ed7ae09f048ef7597310b03e1ab88934d9ce5cd4c9df3376e521b5a2b174bb;",
+  "metadata.json sha256 0fb3d5b208dcc02df38448eb9429b6f4245742aed7ec11a24d0f2148dea32ecb (14 absolute source paths in main.mlirb).",
+  "Shipped (step 2, 2026-10-09 07:58 JST, 4.1 s; its --aot 26.2 s, 10,600,292,772 B): main.mlirb 5,562,302,268 B, sha256",
+  "e54d5d411537782bdcca6ae48610aa0455ad252b360d9dd7ac95ce50f4ecbc5c (no path); metadata.json (name, assets.main and the strip",
+  "record added) sha256 f9e4ad705923641c0536a851b78f1d4f0b51f81305c9e563b58c20b0e313029a. The stripped bundle's gates equal",
+  "the export's bit for bit (fixture and red arms 406/406 rows, pictures 24/24 rows and 40/40 tower crops), and its .aimodel",
+  "specialized by Swift gives its AOT asset's rows bit for bit on every timed question (window 2026-10-09 08:04-08:08).",
+  "Gates vs the provider's fp32 readout (bar: argmax on every question with an oracle top-2 margin above 0.02, max |dp|",
+  "0.02, mean of run means 0.002): fixture 393 questions 392/392 + near-tie 1/1, max 0.0039, mean 0.00018; pictures",
+  "24/24, max 0.00049 (tower fp16w32); red arms 5/5. Transcripts: gate-d1-3b-forms.json; the Mac's JIT of this .aimodel",
+  "against its AOT asset: gate-d1-3b-timing-mac.json.",
+]
+notes_reexport = [
+  "The staged bundle was exported with export_decoder.py sha256 16218c7f43fe02a1622122240e3342f8b7381e21edc7d8d83e7a5561283bfcf1",
+  "and lfm2_d1_decoder.py bacdc9f3db17cc336ba25899a403a1e99075dd3ccd52b1a99166c8e8aa29cf89 (round 6a); export_decoder.py is",
+  "now 55bd6f10189d2e615d5f2d60b57af42ea346d309e6f1ebed6174ade964a21636 (round 9b's --static, round 10b), lfm2_d1_decoder.py",
+  "unchanged. On 2026-10-09 today's scripts re-exported the tower and the int8mlp decoder, without --aot",
+  "(<work>/_d1_3b/results/r11_reexport.json). main.mlirb does not reproduce byte for byte: every export names its weight",
+  "resources resource_<random 64-bit number> (440 in the tower, 340 in the int8mlp decoder) and a few ops with a random",
+  "suffix, and those names sit in the bytecode's string table at its end; the tower's two re-exports differ from each other",
+  "too. The rest matched: the leading 99.9933 % (tower) / 99.9987 % (int8mlp) of main.mlirb's bytes, every weight included;",
+  "every other string of the differing span (the last 46-56 KB: op and attribute names); metadata.json but its",
+  "compilation.date; the tokenizer files and LICENSE; the option table's tensors (its safetensors header key order and",
+  "option_rows.json's time differ). This fp16 decoder was not re-exported (disk); it takes the int8mlp decoder's path",
+  "without the quantization. Check a rebuild with the gates (readout_gate.py, decide.py), not with sha256.",
+]
+
+["d1-3b-int8mlp"]
+steps = [
+  { script = "d1/export_decoder.py", args = ["int8mlp", "--prefill-chunk", "64", "--aot"] },
+  { script = "d1/strip_bundle.py", args = ["../../_d1_3b/exports/bundles/d1_3b_decode_int8mlp_pf64", "../../_d1_3b/exports/bundles_ship/d1_3b_decode_int8mlp_pf64_s", "--aot"], bundle = "gpu-pipelined/d1_3b_decode_int8mlp_pf64_s" },
+]
+card = "README.md"
+hf_repo = "mlboydaisuke/d1-3B-CoreAI"
+source_hf_id = "LiquidAI/d1-3B"
+source_revision = "da1fe36a861f24690f27f622dca1d8688503d113"
+bundle = "gpu-pipelined/d1_3b_decode_int8mlp_pf64_s"
+status = "verified"
+overlay = true
+runtime_patches = []
+needs = [
+  "As for d1-3b.",
+]
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes"
+notes = [
+  "The iPhone's decoder. The arguments are the logged run's (2026-10-08 16:37-16:40 JST, macOS 27.0 26A428, M4 Max), which",
+  "also passed --record <work>/_d1_3b/results/r6a_export_int8mlp_pf64.json (a log). Export 53.9 s; --aot adds",
+  "bundles_aotc/<name>.h16c.aimodelc (8,742,889,020 B: the int8 weights plus an fp16 copy of every linear, AOT 130.6 s), which",
+  "the Python gates load and which is not shipped. The phone specializes the .aimodel itself (the app needs the",
+  "com.apple.developer.kernel.increased-memory-limit entitlement).",
+  "int8mlp = every MLP linear (90) int8 per block of 32, symmetric_with_clipping, weights only; the conv-mixer projections,",
+  "the embedding table, the conv1d and the norms fp16; the four attention projections of every full-attention layer fp32.",
+  "The contract is d1-3b's (the same metadata.json but its compression block and name).",
+  "As exported: main.mlirb 3,704,646,757 B, sha256 2ab109907108870b8e7e191162d98bff7107b0ff338e3ead4854f490d4a6850b;",
+  "metadata.json sha256 864a2e13289fe5c6f012930fce4a6220db839d4eb23641d8d32023416f318e74 (19 absolute source paths).",
+  "Shipped (step 2, 2026-10-09 08:12 JST; its --aot 104.8 s, 8,742,371,578 B): main.mlirb 3,704,370,745 B, sha256",
+  "1836fba840ea88a3cec691be25a7af25585232fdb11b22e0b11cb2748079473f (no path); metadata.json sha256",
+  "71d8739f0b645741fd116cde002f388827d69633f2881cb63dc74dc66051e32b. On the Mac its gates equal the export's bit for bit",
+  "(fixture and red arms 406/406 rows, held out 120/120). The iPhone numbers below were measured on the export; the",
+  "stripped bundle has not run on the phone yet.",
+  "Gates vs the provider's fp32 readout: the Mac's AOT asset, fixture 393 questions 392/392 + near-tie 1/1, max 0.0197, mean",
+  "0.00126; held out 120 questions 118/118 + 2/2, max 0.0140, mean 0.00101; pictures 24/24, max 0.0024; red arms 5/5;",
+  "iPhone 18 Pro (the .aimodel specialized on the phone) 416/416 + 1/1, max 0.0186. Transcripts: gate-d1-3b-readout.json,",
+  "-heldout.json, -images.json, -iphone.json; every measured form: gate-d1-3b-forms.json.",
+]
+notes_reexport = [
+  "As for d1-3b: export_decoder.py 16218c7f... at export (round 6a), 55bd6f10... now. Re-exported on 2026-10-09 with",
+  "today's scripts: main.mlirb 3,704,646,770 B against 3,704,646,757, the leading 3,704,598,353 B (99.9987 %, every weight)",
+  "identical; the rest of the difference is 340 random resource names, 4 random op-name suffixes and one run of '=' / ';' /",
+  "digits in the string table;",
+  "metadata.json identical but its compilation.date (<work>/_d1_3b/results/r11_reexport.json). Check a rebuild with the",
+  "gates, not with sha256.",
+]
+
+["d1-3b-tower"]
+steps = [
+  { script = "d1/export_vision.py", args = ["--dtype", "fp16w32", "--aot"] },
+  { script = "d1/strip_bundle.py", args = ["../../_d1_3b/exports/vision/d1_3b_vision_fp16w32", "../../_d1_3b/exports/bundles_ship/d1_3b_vision_fp16w32_s", "--aot"], bundle = "gpu-pipelined/d1_3b_vision_fp16w32_s" },
+]
+card = "README.md"
+hf_repo = "mlboydaisuke/d1-3B-CoreAI"
+source_hf_id = "LiquidAI/d1-3B"
+source_revision = "da1fe36a861f24690f27f622dca1d8688503d113"
+bundle = "gpu-pipelined/d1_3b_vision_fp16w32_s"
+status = "verified"
+overlay = true
+runtime_patches = []
+needs = [
+  "The source snapshot as for d1-3b (the tower's 441 tensors come from the same model.safetensors).",
+  "The overlay venv and, for --aot, Xcode 27.0 RC as DEVELOPER_DIR.",
+]
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "The arguments are the logged run's (2026-10-08 11:32 JST, macOS 27.0 26A428, M4 Max), which also passed --record",
+  "<work>/_d1_3b/results/r5b_export_vision_fp16w32.json (a log). Export 14.9 s; --aot adds",
+  "vision_aotc/<name>.h16c.aimodelc (resources.bin 852,790,576 B), not shipped. Output:",
+  "$ZOO_WORK_ROOT/_d1_3b/exports/vision/<name>/ (.aimodel, metadata.json, host/position_embedding.safetensors, LICENSE).",
+  "fp16w32 = the weights stored fp16 and read through a cast, the math fp32 (the fp16-math tower missed the tower bar:",
+  "lowest row cosine 0.9807). One function, every shape static: patches [1024, 768], pos_table [1024, 1152], key_bias",
+  "[1024], unshuffle_idx [256, 4] int32 -> image_embeds [256, 2048]; the host resizes the position table per crop. Both",
+  "decoders read its rows.",
+  "As exported: main.mlirb 853,162,237 B, sha256 e24933d812b1b69168eb4b3d3aeccde42847e868e36487cb59c5667fc80c98cf;",
+  "metadata.json sha256 8835829c02f850622009c5715917bd875012bb12c16fe60122a315256b8f29ed (11 absolute source paths).",
+  "Shipped (step 2, 2026-10-09 07:59 JST): main.mlirb 852,915,980 B, sha256",
+  "358b7de01a7f29ced8790cd99cfc5c277e2e56b77547f00279e3925859591161 (no path). Its tower gate equals the export's (64/64",
+  "crops), and its crops in the picture records are the export's bit for bit.",
+  "Gate (AOT h16c on the Mac GPU) vs transformers 5.19's get_image_features in fp32 on 64 crops: every row's cosine",
+  "0.99999998 or more, max |d| 6.9e-5 (gate-d1-3b-images.json, tower_gate). export_vision.py and lfm2_vl_tower.py are",
+  "unchanged since that export (sha256 99778636416d95b4b3cc4fc24b80f275934455ebe6c38bc9be950ea59e295bb1 and",
+  "13c8ffbcdd51e71a466319dc1b59a8b4e9e839a2d9ae98f424a788fe3a8e44f2).",
+]
+notes_reexport = [
+  "Re-exported twice on 2026-10-09 with these unchanged scripts: main.mlirb 853,162,239 and 853,162,251 B against",
+  "853,162,237, each sharing the leading 853,105,041 B (99.9933 %, every weight) with the staged export; the rest of the",
+  "difference is 440 random resource names, one random op-name suffix and one run of '=' / ';' / digits in the string table;",
+  "metadata.json, LICENSE and host/position_embedding.safetensors identical (<work>/_d1_3b/results/r11_reexport.json).",
+  "Check a rebuild with the gates, not with sha256.",
+]
