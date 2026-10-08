@@ -52,6 +52,8 @@ public final class D1Decoder: @unchecked Sendable {
     public let options: SpecializationOptions
     /// zeroing the image buffer and the three states at load
     public let allocationSeconds: Double
+    /// `main` calls since the load (a gate reads it around a request the host refuses: no call)
+    public private(set) var callCount = 0
 
     private let main: InferenceFunction
     private let idsDescriptor: NDArrayDescriptor
@@ -311,6 +313,7 @@ public final class D1Decoder: @unchecked Sendable {
         states.insert(&b.convState, for: "convState")
         var outputs = InferenceFunction.MutableViews()
         outputs.insert(&b.hidden, for: "hidden")
+        callCount += 1
         _ = try await main.run(inputs: inputs, states: consume states, outputViews: consume outputs)
         let rows = ND.read(b.hidden, as: Float16.self)
         guard rows.count == chunk * hidden else {

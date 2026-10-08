@@ -2,7 +2,8 @@
 //
 //   let d1 = try await D1Decider(bundle: bundleDir)
 //   let rows = try d1.rows(requestJSON: data)          // request checks -> rows -> option table -> graph limit
-//   let response = try await d1.decide(requestJSON: data)
+//   try await d1.loadGraph(tower: towerBundleDir)      // the decoder's AOT asset (and the tower's, for pictures)
+//   let response = try await d1.decide(requestJSON: data, images: [pictureURL])
 //
 //   request ──D1Request (host.py's checks)──> D1Text (prefix / suffix) ──D1Tokenizer──> one row per question,
 //           aliases, readout groups, keys; the Tree's trunk / branches and input_tokens
@@ -116,13 +117,17 @@ public final class D1Decider: @unchecked Sendable {
         return rows
     }
 
-    /// The response for one request (its JSON text); without a loaded graph, the rows and then `graphNotWired`.
-    public func decide(requestJSON data: Data, shared: Bool = false) async throws -> JSONValue {
+    /// The response for one request (its JSON text) and its pictures (files, in the order the request names them: the
+    /// k-th file is the k-th `<image>` of the prompt); without a loaded graph, the rows and then `graphNotWired`. A
+    /// request the host refuses throws `D1Error.request` / `.graphLimit` with host.py's text, before any graph call.
+    public func decide(requestJSON data: Data, images: [URL] = [], shared: Bool = false) async throws -> JSONValue {
         guard graph != nil else {
             _ = try rows(requestJSON: data)
             throw D1Error.graphNotWired
         }
-        return try await trace(request: try D1Request(data: data), mode: shared ? .shared : .direct).response
+        let request = try D1Request(data: data)
+        let pictures = images.isEmpty ? nil : try self.pictures(files: images)
+        return try await trace(request: request, mode: shared ? .shared : .direct, pictures: pictures).response
     }
 
     /// The readout and the response from the slots' hidden rows (one per question, `hidden` wide, in request order).
@@ -150,7 +155,11 @@ public final class D1Decider: @unchecked Sendable {
 //   Ls       the state's stable tokens (decide.py `stable_prefix`): the prefix's ids minus the ids of its last pre-token,
 //            the one piece a question's text can change (":\n" then "\n..." is the one token ":\n\n"); 0 when a row does
 //            not start with them. shared / prepared run k = floor(Ls / S) * S of them once.
-//   images   every crop's four inputs (D1TowerInputs) through the tower, crops and pictures in order -> image rows fp16
+//   pictures each file (D1Pixels: decode, cap_pixels, plan, crops) -> every crop's four inputs (D1TowerInputs, the tower
+//            bundle's position table); the pixel work comes first, as decide.py does it, then the plan's checks in
+//            decide.py's order (the option table, every row's padded length, the image tokens against N with the
+//            metadata's `vision.limits.refusal_text`): a refused request makes no graph call, the tower's included
+//   images   every crop's four inputs through the tower, crops and pictures in order -> image rows fp16
 
 /// The decoder's side of a bundle's metadata.json: the graph's contract and what the host feeds it.
 public struct D1GraphMetadata: Sendable {
@@ -169,6 +178,10 @@ public struct D1GraphMetadata: Sendable {
     /// a toy bundle (metadata `toy`, rounds 2a / 3b): every real id folded id % vocab, an extension id 128,000 + k ->
     /// vocab + k, the readout groups folded the same way unless they are given
     public let toyFold: Int?
+    /// the refusal of a request whose pictures need more than N image rows: metadata `vision.limits.refusal_text` with
+    /// `<n>` for the request's image tokens ("images: <n> image tokens over the graph's N image rows"); a bundle without
+    /// a vision block (the toys) gets the same text
+    public let imageRefusal: String
 
     public init(bundle: URL, special: [String: Int]) throws {
         let url = bundle.appendingPathComponent("metadata.json")
@@ -200,11 +213,25 @@ public struct D1GraphMetadata: Sendable {
             toyFold = nil
             padID = pad
         }
+        let n = contract.imageRows
+        if let vision = j["vision"] {
+            guard let text = vision["limits"]?["refusal_text"]?.string, text.components(separatedBy: "<n>").count == 2,
+                  text.replacingOccurrences(of: "<n>", with: "\(n + 1)")
+                  == D1Tokenizer.imageRowsRefusal(tokens: n + 1, imageRows: n),
+                  vision["n_image_tokens"]?.intValue == n
+            else {
+                throw D1Error.contract("\(url.lastPathComponent) vision: n_image_tokens \(vision["n_image_tokens"]?.intValue.map(String.init) ?? "absent"), "
+                    + "limits.refusal_text \(vision["limits"]?["refusal_text"]?.string ?? "absent") is not the host's for N = \(n)")
+            }
+            imageRefusal = text
+        } else {
+            imageRefusal = D1Tokenizer.imageRowsRefusal(tokens: nil, imageRows: n)
+        }
         self.contract = contract
         chunk = s
         maxContext = ctx
         hidden = contract.hidden
-        imageRows = contract.imageRows
+        imageRows = n
         vocab = v
     }
 }
@@ -351,6 +378,15 @@ extension D1Decider {
         return graph
     }
 
+    /// A request's picture files (text order) -> every crop's four inputs, made here with the loaded tower bundle's
+    /// position table (`D1TowerInputs.pictures(files:table:)`).
+    public func pictures(files: [URL]) throws -> D1TowerInputs {
+        guard let tower = try requireGraph().tower else {
+            throw D1Error.contract("a request with pictures needs a tower (loadGraph(tower:))")
+        }
+        return try D1TowerInputs.pictures(files: files, table: tower.positionTable)
+    }
+
     /// Real ids -> the graph's (a toy folds them: id % V, an extension id 128,000 + k -> V + k).
     public func graphIDs(_ ids: [Int]) throws -> [Int] {
         guard let v = try requireGraph().metadata.toyFold else { return ids }
@@ -393,9 +429,7 @@ extension D1Decider {
         }, table: table.idSet)
         for r in rows { try D1Tokenizer.graphContextCheck(length: r.ids.count, chunk: gm.chunk, maxContext: gm.maxContext) }
         let imageTokens = D1Vision.imageTokenCount(plans)
-        guard imageTokens <= gm.imageRows else {
-            throw D1Error.request("images: \(imageTokens) image tokens over the graph's \(gm.imageRows) image rows")
-        }
+        try D1Tokenizer.imageRowsCheck(tokens: imageTokens, imageRows: gm.imageRows, refusal: gm.imageRefusal)
         let trunk = plans.isEmpty ? tokenizer.encode(prefix)
             : D1Vision.extensionIDs(try D1Vision.promptIDs(tokenizer, text: prefix, plans: plans))
         var stable = stablePrefix(prefix, trunk)

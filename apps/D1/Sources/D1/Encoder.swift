@@ -32,6 +32,9 @@
 //             branch = encode(suffix) apart (input_tokens = len(trunk) + Σ len(branch)); `shared` = `_logz_ids`' common
 //             prefix of the rows (each row keeping its last id)
 //   table     a request any of whose readout ids is outside the option table (head/option_rows) is refused whole
+//   limits    so is a request with a row past the graph's positions (`host.graph_context_check`: ceil(T / S) * S <=
+//             max_context_length - 1, 4,080 ids at S = 16) or with pictures over its N image rows (decide.py `image_nd`,
+//             the text metadata.json `vision.limits.refusal_text` gives), in that order, before any graph call
 
 import Foundation
 import Hub
@@ -342,6 +345,17 @@ public final class D1Tokenizer: @unchecked Sendable {
             throw D1Error.graphLimit("a row of \(length) tokens runs \(padded) padded positions, over the graph's "
                 + "\(maxContext - 1) (rows of at most \((maxContext - 1) / chunk * chunk) tokens at S = \(chunk))")
         }
+    }
+
+    /// The pictures' image tokens fit the graph's N image rows (decide.py `image_nd`, metadata `vision.limits`), else
+    /// the request is refused whole with `refusal` (the metadata's text, `<n>` = the tokens).
+    public static func imageRowsCheck(tokens: Int, imageRows: Int, refusal: String) throws {
+        if tokens > imageRows { throw D1Error.request(refusal.replacingOccurrences(of: "<n>", with: String(tokens))) }
+    }
+
+    /// decide.py `image_nd`'s refusal text for `tokens` image tokens (nil: the template, `<n>` in their place).
+    public static func imageRowsRefusal(tokens: Int?, imageRows: Int) -> String {
+        "images: \(tokens.map(String.init) ?? "<n>") image tokens over the graph's \(imageRows) image rows"
     }
 }
 

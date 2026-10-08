@@ -12,9 +12,11 @@
 // first h w / 4 rows, crops in order (per picture its tiles row-major, then the thumbnail), pictures in text order,
 // cast to float16 (round to nearest even, NumPy's astype) -> the decoder's image_embeds rows 0 ..< n.
 //
-// This round the four inputs of a crop come from files (`D1TowerInputs`: what vision_host.tower_inputs wrote, raw
-// little-endian float32 / int32); the pixel path in Swift (decode, cap_pixels, the torch uint8 bicubic resize, patches,
-// the position-table resize, the unshuffle index) is ImagePixels.swift's.
+// A crop's four inputs come from the picture file (`D1TowerInputs.pictures(files:table:)`: ImagePixels.swift's decode,
+// cap_pixels, crops, the torch uint8 bicubic resize, patches, the position table of the tower bundle's
+// `host/position_embedding.safetensors` resized per crop, the unshuffle index = vision_host.tower_inputs, the order
+// decide.py and readout_gate_vision.py run) or, to split an error between the pixels and the graphs, from raw files
+// (`D1TowerInputs.read`: what vision_host.tower_inputs wrote, little-endian float32 / int32).
 
 import CoreAI
 import Foundation
@@ -50,14 +52,21 @@ public final class D1Tower: @unchecked Sendable {
     /// d (image_embeds [256, d]: the decoder's hidden width)
     public let width: Int
     public let maxTokens: Int
+    /// the bundle's `host/position_embedding.safetensors` [256, d_v] (metadata.json `host_files`), resized per crop
+    public let positionTable: D1Pixels.PositionTable
     public let loadSeconds: Double
     public let descriptor: JSONValue
     public let options: SpecializationOptions
+    /// crops encoded since the load (a gate reads it around a request the host refuses: no call)
+    public private(set) var callCount = 0
     private let function: InferenceFunction
     private let inputDescriptors: [String: NDArrayDescriptor]
 
+    public static let positionTableFile = "host/position_embedding.safetensors"
+
     /// `bundle` = a tower bundle directory; `asset` = its `.aimodelc` (AOT) or `.aimodel` (JIT), nil = the AOT asset
-    /// beside it (`<bundles>_aotc/<name>.h16c.aimodelc`).
+    /// beside it (`<bundles>_aotc/<name>.h16c.aimodelc`). The contract's input shapes are checked against the host's
+    /// (patches [1024, 768], pos_table [1024, d_v] with d_v the position table's width, key_bias [1024]).
     public init(bundle: URL, asset: URL? = nil, options: SpecializationOptions? = nil) async throws {
         let meta = try JSONParser.parse(Data(contentsOf: bundle.appendingPathComponent("metadata.json")))
         guard meta["kind"]?.string == "vision-tower", let name = meta["name"]?.string, let g = meta["graph"],
@@ -67,6 +76,15 @@ public final class D1Tower: @unchecked Sendable {
         guard Set(contract.inputs.keys) == Set(Self.inputNames), let out = contract.outputs["image_embeds"], out.shape.count == 2,
               contract.inputs["unshuffle_idx"] == D1TensorSpec(shape: [out.shape[0], 4], dtype: "int32")
         else { throw D1Error.contract("\(name): the graph is not patches / pos_table / key_bias / unshuffle_idx -> image_embeds") }
+        let table = try D1Pixels.PositionTable.load(url: bundle.appendingPathComponent(Self.positionTableFile))
+        let p = D1Pixels.maxPatches
+        guard out.shape[0] == D1Pixels.maxTokens, contract.inputs["patches"]?.shape == [p, D1Pixels.patchDim],
+              contract.inputs["pos_table"]?.shape == [p, table.dim], contract.inputs["key_bias"]?.shape == [p]
+        else {
+            throw D1Error.contract("\(name): inputs \(contract.inputs.sorted { $0.key < $1.key }.map { "\($0.key) \($0.value)" }) "
+                + "-> image_embeds \(out) are not the host's (patches [\(p), \(D1Pixels.patchDim)], pos_table [\(p), "
+                + "\(table.dim)] = \(Self.positionTableFile), key_bias [\(p)], \(D1Pixels.maxTokens) rows)")
+        }
         let url = asset ?? D1Paths.aot(bundle: bundle, name: name)
         let opts = options ?? (url.pathExtension == "aimodelc" ? .default : D1Paths.towerJITOptions)
         let t0 = ContinuousClock.now
@@ -82,6 +100,7 @@ public final class D1Tower: @unchecked Sendable {
         self.contract = contract
         width = out.shape[1]
         maxTokens = out.shape[0]
+        positionTable = table
         descriptor = D1Contract.describe(fd)
         self.options = opts
         function = fn
@@ -110,6 +129,7 @@ public final class D1Tower: @unchecked Sendable {
             throw D1Error.contract("tower input unshuffle_idx: \(c.unshuffle.count) values for \(ud.shape)")
         }
         inputs["unshuffle_idx"] = ND.make(c.unshuffle, ud)
+        callCount += 1
         var outputs = try await function.run(inputs: inputs)
         guard let array = outputs.remove("image_embeds")?.ndArray else {
             throw D1Error.contract("tower: no image_embeds in the outputs")
@@ -140,7 +160,8 @@ public final class D1Tower: @unchecked Sendable {
     }
 }
 
-/// The four tower inputs of every crop of a request's pictures, read from files (`--tower-inputs <dir>`):
+/// The four tower inputs of every crop of a request's pictures, in text order: made from the picture files here
+/// (`pictures(files:table:)`, ImagePixels.swift) or read from raw files (`read`, `--tower-inputs <dir>`):
 /// `<dir>/manifest.json` = {"pictures": [{"id", "size": [w, h] (as the picture arrives), "crops": [{"crop", "kind",
 /// "grid": [h, w], "n_tokens", "patches", "pos_table", "key_bias", "unshuffle_idx"}]}]} with each input a raw
 /// little-endian file (float32; unshuffle_idx int32) beside it. The plan Swift makes from the picture's size
@@ -148,6 +169,7 @@ public final class D1Tower: @unchecked Sendable {
 public struct D1TowerInputs: Sendable {
     public struct Picture: Sendable {
         public let id: String
+        /// the picture as it arrives (after its EXIF orientation, before cap_pixels)
         public let width: Int
         public let height: Int
         public let plan: D1Vision.Plan
@@ -155,6 +177,30 @@ public struct D1TowerInputs: Sendable {
     }
 
     public let pictures: [Picture]
+
+    /// Picture files, in text order -> every crop's four inputs (vision_host.py §1–8 through `D1Pixels`: decode with
+    /// the EXIF orientation, cap_pixels, the plan, each crop resized and cut, patches / key_bias / unshuffle_idx, the
+    /// position table resized to the crop's grid once per distinct grid). A picture's id is its file name without the
+    /// extension.
+    public static func pictures(files: [URL], table: D1Pixels.PositionTable) throws -> D1TowerInputs {
+        var out: [Picture] = []
+        for url in files {
+            let pic = try D1Pixels.picture(url: url)
+            let w = pic.decoded.rgb.width, h = pic.decoded.rgb.height
+            let check = D1Vision.plan(pictureWidth: w, pictureHeight: h)
+            guard check.crops == pic.plan.crops else {
+                throw D1Error.contract("\(url.lastPathComponent): the plan of the capped pixels differs from the plan of \(w) x \(h)")
+            }
+            let inputs = try D1Pixels.towerInputs(pic, table: table)
+            let crops = zip(pic.plan.crops, inputs).map { c, t in
+                D1Tower.CropInputs(patches: t.patches, posTable: t.posTable, keyBias: t.keyBias, unshuffle: t.unshuffleIndex,
+                                   grid: (t.gridHeight, t.gridWidth), tokens: c.tokens)
+            }
+            out.append(Picture(id: url.deletingPathExtension().lastPathComponent, width: w, height: h, plan: pic.plan,
+                               crops: crops))
+        }
+        return D1TowerInputs(pictures: out)
+    }
 
     public static func read(_ dir: URL, ids: [String]? = nil) throws -> D1TowerInputs {
         let m = try JSONParser.parse(Data(contentsOf: dir.appendingPathComponent("manifest.json")))

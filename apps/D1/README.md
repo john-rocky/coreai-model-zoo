@@ -8,21 +8,24 @@ the Mac CLI. `conversion/d1/host.py` (the text, the ids, the readout, the respon
 checks the copy against them and against HF `tokenizers` on the checkpoint's `tokenizer.json`, exactly: the same text,
 the same ids, the same readout bits, the same response bytes.
 
-The text side and the graph side are here. `D1Decider.loadGraph` loads the decoder bundle's graph (and a tower bundle
-for pictures) and checks both against their `metadata.json`; `decide` then runs request → rows → graph → readout →
-response, the order of `conversion/d1/decide.py`, the Python reference it copies. A decider loaded without a graph
-builds the rows and stops with `D1Error.graphNotWired`; `D1Decider.response(requestJSON:slotHidden:)` runs the readout
-and the answers from slot hidden rows the caller supplies. A picture's pixels (decode, the processor's resize, patches,
-the position table) are not computed here yet: `D1Vision` plans the crops and the image-token run from the picture's
-size, and the four tower inputs of each crop are read from files (`D1TowerInputs`, what `vision_host.tower_inputs`
-writes).
+The text side, the pictures and the graph side are here. `D1Decider.loadGraph` loads the decoder bundle's graph (and a
+tower bundle for pictures) and checks both against their `metadata.json`; `decide` then runs request → rows →
+pictures → graph → readout → response, the order of `conversion/d1/decide.py`, the Python reference it copies. A
+picture is a file: `D1Pixels` decodes it and cuts its crops as the processor does (`vision_host.py`'s pixels), the tower
+bundle's position table is resized per crop, the tower turns each crop into image rows and the decoder reads them
+through the prompt's extension ids. A decider loaded without a graph builds the rows and stops with
+`D1Error.graphNotWired`; `D1Decider.response(requestJSON:slotHidden:)` runs the readout and the answers from slot hidden
+rows the caller supplies; `D1TowerInputs.read` takes a crop's four tower inputs from raw files instead of the picture
+(what `vision_host.tower_inputs` writes), which splits an error between the pixels and the graphs.
 
 ```swift
 import D1
 
 let d1 = try await D1Decider(bundle: bundleDir)              // metadata.json, tokenizer/, head/option_rows checked
-try await d1.loadGraph(asset: .aot)                           // the decoder (.aimodelc; .jit = the bundle's .aimodel)
+try await d1.loadGraph(asset: .aot, tower: towerBundleDir)    // the decoder (.aimodelc; .jit = the bundle's .aimodel)
+                                                              // and the tower for pictures (its own metadata.json)
 let body = try await d1.decide(requestJSON: requestData)      // the System One response
+let seen = try await d1.decide(requestJSON: requestData, images: [pictureURL])   // with a picture: <image> k = file k
 print(PythonFormat.dumps(body, indent: 2, asciiOnly: false))
 
 let rows = try d1.rows(requestJSON: requestData)              // the text side alone: one row per question
@@ -37,12 +40,12 @@ let later = try await d1.decide(prepared: kept, questionsJSON: questionsData)   
 | `JSONValue.swift` | the request as written: members in order, number literals kept (`1250` and `1250.0` render differently), `json.loads`' duplicate-key, NaN / Infinity and 4,300-digit int rules (from apps/Kev, itself from apps/ClefFlash) |
 | `PythonFormat.swift` | `json.dumps(state, ensure_ascii=False, indent=2)` (the state block) and `json.dumps` with its defaults, `repr` / `str` / `round(x, n)` of a float, `str.strip`, `str.isalpha`, `repr(str)` (the option-table refusal's text) |
 | `Request.swift` | host.py §1–2: `validate_question` / `validate_request` (the same accept / refuse decisions and texts), `state_block`, `prefix_text`, `question_block`, `suffix_text`, `option_codes`, the keys |
-| `Encoder.swift` | host.py §3–4: the ids of `tokenizers`' `encode(text, add_special_tokens=False)`, `aliases` with the fallback pool, `readout_groups`, `build_question` (row, slot), `build_request` (one question = its row; several = the Tree, trunk and branches encoded apart), `shared_prefix`, `option_table_check`, `graph_context_check` |
+| `Encoder.swift` | host.py §3–4: the ids of `tokenizers`' `encode(text, add_special_tokens=False)`, `aliases` with the fallback pool, `readout_groups`, `build_question` (row, slot), `build_request` (one question = its row; several = the Tree, trunk and branches encoded apart), `shared_prefix`, `option_table_check`, `graph_context_check`, and decide.py's `image_nd` refusal (pictures over the graph's image rows) |
 | `Vision.swift` | vision_host.py §1, 2, 5, 6: `cap_size`, `smart_size`, `is_too_large`, the 26 target ratios and the tie-break, `plan`, `image_tokens`, `prompt_ids` (the text cut at each `<image>`), `extension_ids` (the k-th `<image>` → 128,000 + k) |
 | `Readout.swift` | host.py §5–6: z = h · E[id] in float64, the group max, the softmax with Python 3.12's `sum()`, `answer`, `response`; the option table |
-| `D1Decider.swift` | the glue in host.py's order; the bundle's `metadata.json` and `head/option_rows.{json,safetensors}` read and checked at load; the graph's side of decide.py (`D1.build` / `decide` / `prepare` / `decide_prepared`): the rows in the graph's ids, the readout groups, the state's stable tokens Ls, direct / shared / prepared, the trace |
+| `D1Decider.swift` | the glue in host.py's order; the bundle's `metadata.json` and `head/option_rows.{json,safetensors}` read and checked at load; the graph's side of decide.py (`D1.build` / `decide` / `prepare` / `decide_prepared`): the request's pictures from their files, the rows in the graph's ids, the readout groups, the state's stable tokens Ls, the refusals in decide.py's order, direct / shared / prepared, the trace |
 | `Decoder.swift` | the decoder graph on the low-level runtime (apps/Kev's `KevDecoder`, itself apps/ClefFlash's): `AIModel` + `loadFunction("main")`, the descriptor checked against `metadata.json` `language.contract`, the three states allocated once at `max_context_length` and zeroed per row, the image rows written once per request and bound to every call, S-id calls with `position_ids` 0 ..< p + S, the pad, the shared prefix and the prepared state |
-| `Tower.swift` | the vision tower bundle (apps/ClefFlash's `VisionTower`): its contract from the tower's `metadata.json` `graph`, one call per crop, the float inputs cast to an fp16 tower's type, each crop's first h w / 4 rows cast to float16 into the image rows; `D1TowerInputs` reads a crop's four inputs from raw files |
+| `Tower.swift` | the vision tower bundle (apps/ClefFlash's `VisionTower`): its contract from the tower's `metadata.json` `graph` and its position table `host/position_embedding.safetensors`, one call per crop, the float inputs cast to an fp16 tower's type, each crop's first h w / 4 rows cast to float16 into the image rows; `D1TowerInputs` makes every crop's four inputs from the picture files (`D1Pixels`, the position table resized per grid) or reads them from raw files |
 | `ImagePixels.swift` | vision_host.py §1, 3, 4, 7, 8 (`D1Pixels`): a picture file → ImageIO decode with the EXIF orientation applied and alpha dropped → `cap_pixels` (Pillow's BICUBIC resampler, from apps/ClefFlash) → each crop resized with torch's uint8 bicubic antialias kernel (int16 fixed-point weights, per-axis precision, horizontal then vertical) → `(x - 127.5) / 127.5` → patches, pad and mask → the position table resized with fused multiply-adds → the unshuffle index: the tower's four inputs, bit-equal to the Python specification on every fixture crop |
 | `Sources/d1-pixels-test` | the pixel path's test CLI: pictures in, the four inputs per crop out as raw files for `conversion/d1/gate_swift_pixels.py` (`--stages` writes each stage; `--resize float|pillow` and `--positions unfused` are the negative controls) |
 | `D1BLAS` (C) | the readout's products through the BLAS calls NumPy makes for `E @ h` (Accelerate's new interface, ILP64; operands on page-aligned copies) |
@@ -84,6 +87,16 @@ count, and the three steps can then go.
   as many as `decision.option_table.n`, rows `[n, hidden]` fp32.
 - A request whose readout ids are not all in the option table is refused whole, before any graph call, with host.py's
   text (`questions.<name>: the token id <N> of label '<label>' is not in the option table`).
+- The decoder bundle's `vision` block: `n_image_tokens` = the contract's N (`image_embeds [N, d]`) and
+  `limits.refusal_text` = the host's refusal for N (`images: <n> image tokens over the graph's N image rows`, decide.py's
+  `image_nd` text); a bundle without a vision block (the gates' toys) gets the same text.
+- A tower bundle: `metadata.json` `kind` = `vision-tower`, its `graph` = the loaded function's descriptor, and the inputs
+  the host makes: `patches [1024, 768]`, `pos_table [1024, d_v]` with d_v the width of `host/position_embedding.safetensors`
+  (`[256, d_v]` float32), `key_bias [1024]`, `unshuffle_idx [256, 4]`, 256 output rows as wide as the decoder's hidden.
+- A request is refused whole, before any decoder or tower call, in decide.py's order: the option table, then any row whose
+  padded length is past the graph's positions (`host.graph_context_check`'s text), then pictures that need more image
+  rows than N (the metadata's text with their image tokens for `<n>`). The pixels come first, as in decide.py: a file
+  ImageIO cannot open, or a crop past 1,024 patches, is refused before those checks.
 
 ## Arithmetic
 
@@ -106,6 +119,9 @@ it; S, `max_context_length`, d, N and the pad id come from the same file. A diff
   every row. A row of T ids runs as ceil(T / S) calls; call c gets ids cS ..< cS + S with `position_ids` 0 ..< cS + S,
   the last call padded with `<|pad|>`, and the padded positions' rows are dropped. The readout reads the row's last
   position.
+- **The pictures.** The request's files, in the order its `<image>` markers come: each decoded with its EXIF orientation,
+  capped, planned and cut into crops (`D1Pixels`, `ImagePixels.swift`), every crop's four tower inputs made with the tower
+  bundle's position table resized to the crop's grid, one tower call per crop.
 - **The image rows.** One `image_embeds` buffer per decoder: a request with pictures writes every crop's first h w / 4
   tower rows (crops in order, pictures in text order, cast to float16) at its top and zero after; a text request leaves
   it zero and nothing is rewritten. The k-th `<image>` of a row is sent as 128,000 + k and reads row k.
@@ -147,22 +163,29 @@ $D1 answers-test --in cases.json --out out.json
 $D1 bundle-check --bundle <bundle> --out out.json
 
 # the graph (the Mac GPU)
-$D1 decide --bundle <bundle> [--asset aot|jit] [--tower <tower bundle> --tower-inputs <dir>] --request req.json \
-    [--shared] [--groups groups.json] --out resp.json [--trace trace.json] [--reps N] [--warm]
-$D1 fixture --bundle <bundle> --records records.json [--groups groups.json] --arms direct,shared [--asset aot|jit] \
-    [--tower <tower bundle> --tower-inputs <dir> [--zero-image-control]] [--dump-hidden <dir>] --out pass.json
+$D1 decide --bundle <bundle> [--asset aot|jit] [--tower <tower bundle> [--tower-asset aot|jit] \
+    [--images <dir> | --tower-inputs <dir>]] --request req.json [--shared] [--groups groups.json] --out resp.json \
+    [--trace trace.json] [--reps N] [--warm]
+$D1 fixture --bundle <bundle> (--records records.json | --image-records image_records.json [--images <dir>]) \
+    [--groups groups.json] --arms direct,shared [--asset aot|jit] [--tower <tower bundle> [--tower-asset aot|jit] \
+    [--tower-inputs <dir>] [--zero-image-control] [--dump-tower <dir>]] [--dump-hidden <dir>] --out pass.json
 $D1 prepare-test --bundle <bundle> --records records.json [--groups groups.json] --out out.json
 
 # the gates (the lane's venv: tokenizers, NumPy, safetensors; the graph sections after conversion/d1/decide.py's records)
 cd conversion/d1 && python gate_swift.py all        # -> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json
-~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph   # -> results/r3c_swift_graph.json
+~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph   # -> results/r3c_swift_graph.json (the toys)
+python gate_swift.py real                           # -> results/r6b_swift_real.json (the model's bundles)
 ```
 
-`decide` answers one request (`images` in the request names pictures by file; their crops' inputs come from the
-`--tower-inputs` directory's `manifest.json`) and writes the response as `json.dumps(response, indent=2,
-ensure_ascii=False)`; `fixture` answers every record from its raw request, direct and shared, a refused request with
-its text and each of its questions alone, and re-runs the first record at the end; `prepare-test` checks prepare +
-decide(prepared) against shared. `_time_mac.sh` is the timing window's driver (apps/Kev's, not run in round 3c).
+`decide` answers one request and writes the response as `json.dumps(response, indent=2, ensure_ascii=False)`; the
+request's `images` are picture files, relative to `--images` (by default the request file's directory), decoded and cut
+here, or, with `--tower-inputs`, the names of the manifest's pictures whose crops' inputs it reads. `fixture` answers
+every record from its raw request, direct and shared, a refused request with its text (and a text request's questions
+each alone), and re-runs the first record at the end; an image record's `images` are files relative to `--images` (by
+default the records file's directory), and a URL is not fetched (the record is listed as skipped). `--dump-tower` writes
+every crop's tower output before the cast to the image rows; a refused record carries the decoder and tower calls made
+before its refusal. `prepare-test` checks prepare + decide(prepared) against shared. `_time_mac.sh` is the timing
+window's driver (apps/Kev's, not run in round 3c).
 
 `rows` validates each question alone (as `test_host.py` does) and then the whole request with the option table;
 `--plain` adds swift-transformers' own ids of every row. `readout-test` reads an option table as a bundle holds it and

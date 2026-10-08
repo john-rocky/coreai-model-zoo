@@ -44,13 +44,35 @@ records first: decide.py check on the fp16 and int8lin toys, decide.py e2e --eag
   int8      score and jit on the int8lin toy
   graph     every graph section -> results/r3c_swift_graph.json; graph-inputs writes the CLI's inputs only
 
+Round 6b, the model's own assets (the fp16 decoder d1_3b_decode_fp16_pf16, the fp16w32 tower d1_3b_vision_fp16w32; the
+Swift passes and the Python records come first, on the GPU: lane scripts r6b_swift_aot.sh / r6b_swift_jit.sh and
+r6b_py_check.sh / r6b_py_images.sh; these sections only read them):
+  real-graph     every text record, AOT: G1 ids / slot / readout groups = render_ids.json and the provider's oracle, G2 every
+                 row's hidden sha256 = round 4's readout gate and decide.py check, G3 p bits = both and the response bytes
+                 = decide.py check (361 records, the refusal's text), G4 shared = direct (hidden bits) and = decide.py's
+                 shared, prepared = shared (`d1 prepare-test`), G5 the reset re-run, G6 finite; FACTS §7's bar on the Swift
+                 p against the provider's fp32 oracle directly
+  real-e2e       every picture record from its PNG (ImagePixels -> tower -> decoder), AOT: the crops' four inputs = the
+                 vision_host inputs of the HF tower oracle (sha256), every crop's tower output = round 5b's tower gate and
+                 e2e gate, the image rows = the e2e gate's, every row's ids / hidden sha256 / p bits = the e2e gate and
+                 decide.py run, the response bytes = decide.py run, shared = direct, the zero-image control (hidden = the
+                 e2e gate's zero arm, its p red against the oracle), the bar against the oracle's row form and API path
+  real-controls  requests the host refuses (pictures over N, a row over the positions, both): the error text = decide.py
+                 run's response bytes and = metadata.json's `vision.limits.refusal_text` / host.graph_context_check's,
+                 no decoder or tower call before the refusal; `d1 decide` on img06 = round 5b's decide.py responses
+  real-jit       the subset (each source's first 5 text records, img01 / img06 / img12) with the decoder's and the tower's
+                 .aimodel specialized by Swift against the AOT passes: hidden bits (max |d| and p where they differ), the
+                 specialization's seconds and the runtime cache's growth (r6b_swift_jit.sh's record)
+  real           every real section -> results/r6b_swift_real.json
+
     cd conversion/d1
     source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift.py all
     ~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph
+    source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift.py real
     (the binary: swift build -c release --package-path apps/D1 --scratch-path $ZOO_WORK_ROOT/_d1_3b/swift/.build)
 
--> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json, r3c_swift_graph.json; the CLI's inputs and outputs under
-_d1_3b/swift/r3a/, swift/r3c/.
+-> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json, r3c_swift_graph.json, r6b_swift_real.json; the CLI's inputs and
+outputs under _d1_3b/swift/r3a/, swift/r3c/, swift/r6b/.
 """
 from __future__ import annotations
 
@@ -1246,6 +1268,453 @@ def graph_main(names: list[str], out_path: Path | None) -> int:
     return 0 if rec["pass"] else 1
 
 
+# --------------------------------------------------------------------------- round 6b: the real bundles
+# The Swift host on the model's own assets against the Python runtime's records of the same AOT assets and the
+# provider's fp32 oracle. The Swift passes (swift/r6b/*.json) and the Python records (decide.py check / run) are made
+# first by the lane's scripts on the GPU; the sections below only read them.
+REAL = SWIFT / "r6b"
+REAL_TRANSCRIPT = RESULTS / "r6b_swift_real.json"
+REAL_DECODER = EXPORTS / "bundles" / "d1_3b_decode_fp16_pf16"
+REAL_TOWER = EXPORTS / "vision" / "d1_3b_vision_fp16w32"
+R4_GATE = RESULTS / "r4_readout_fp16_pf16.json"
+R6B_PY_CHECK = RESULTS / "r6b_py_check_fp16.json"
+ORACLE_TEXT = LANE / "oracle" / "records_oracle.json"
+ORACLE_IMAGES = LANE / "oracle" / "records_oracle_images.json"
+TOWER_ORACLE = LANE / "oracle" / "images" / "oracle.json"
+R5B_E2E = RESULTS / "r5b_e2e_fp16w32.json"
+R5B_TOWER_GATE = LANE / "gate_tower" / "d1_3b_vision_fp16w32" / "main_00.json"
+R5B_DECIDE = LANE / "decide" / "r5b"
+PY_IMAGES = REAL / "py_decide" / "images"
+FACTS_BAR = {"max_abs_dp": 0.02, "mean_of_run_mean_abs_dp": 0.002, "near_tie_top2_margin": 0.02,
+             "argmax": "every question whose oracle top-2 margin is above 0.02 (near-ties listed apart)",
+             "max_abs_dp_applies_to": "every option of every question, near-ties included",
+             "mean": "mean over questions of the question's mean |dp| over its options"}
+TOWER_INPUTS = ("patches", "pos_table", "key_bias", "unshuffle_idx")
+
+
+def sha256_array(a: np.ndarray) -> str:
+    return hashlib.sha256(np.ascontiguousarray(a).tobytes()).hexdigest()
+
+
+def ids_sha256(ids: list[int]) -> str:
+    """The Swift trace's `row_ids_sha256`: sha256 of json.dumps(ids) (PythonFormat.dumps' defaults)."""
+    return hashlib.sha256(json.dumps([int(i) for i in ids]).encode()).hexdigest()
+
+
+def p_bits(ps: list[float]) -> list[str]:
+    return [format(bits(float(x)), "x") for x in ps]
+
+
+def bar_vs_oracle(pairs: list[tuple[str, list[float], list[float]]]) -> dict:
+    """FACTS §7 on (question, p, oracle p): (a) argmax equal on every question whose oracle top-2 margin is above 0.02,
+    (b) max |dp| <= 0.02 over every option, (c) the mean over questions of the question's mean |dp| <= 0.002."""
+    rows = []
+    for q, p, po in pairs:
+        a, b = np.asarray(p, np.float64), np.asarray(po, np.float64)
+        srt = np.sort(b)[::-1]
+        margin = float(srt[0] - srt[1]) if b.size > 1 else 1.0
+        d = np.abs(a - b)
+        rows.append({"q": q, "argmax_equal": int(a.argmax()) == int(b.argmax()), "margin": margin,
+                     "near_tie": margin <= FACTS_BAR["near_tie_top2_margin"], "max_abs_dp": float(d.max()),
+                     "mean_abs_dp": float(d.mean())})
+    far = [r for r in rows if not r["near_tie"]]
+    worst = max(rows, key=lambda r: r["max_abs_dp"])
+    out = {"questions": len(rows), "argmax_equal": sum(r["argmax_equal"] for r in rows),
+           "questions_non_near_tie": len(far), "argmax_equal_non_near_tie": sum(r["argmax_equal"] for r in far),
+           "near_ties": [{k: r[k] for k in ("q", "margin", "argmax_equal", "max_abs_dp")} for r in rows if r["near_tie"]],
+           "max_abs_dp": worst["max_abs_dp"], "worst": worst["q"],
+           "mean_of_run_mean_abs_dp": float(np.mean([r["mean_abs_dp"] for r in rows]))}
+    out["a_argmax_non_near_tie"] = out["argmax_equal_non_near_tie"] == out["questions_non_near_tie"]
+    out["b_max_abs_dp"] = out["max_abs_dp"] <= FACTS_BAR["max_abs_dp"]
+    out["c_mean_of_run_mean_abs_dp"] = out["mean_of_run_mean_abs_dp"] <= FACTS_BAR["mean_of_run_mean_abs_dp"]
+    out["pass"] = out["a_argmax_non_near_tie"] and out["b_max_abs_dp"] and out["c_mean_of_run_mean_abs_dp"]
+    return out
+
+
+def real_pass(name: str) -> dict:
+    path = REAL / f"{name}.json"
+    if not path.exists():
+        raise SystemExit(f"{path} is missing: run the lane's scripts/r6b_swift_*.sh first")
+    return json.loads(path.read_text())
+
+
+def run_info(p: dict) -> dict:
+    """The pass's binary, asset and load, as the gate cites them."""
+    g = p["graph"]
+    return {"binary_sha256": p["environment"].get("binary_sha256"), "asset": g["asset"], "asset_path": g["asset_path"],
+            "options": g["options"], "tower": (g.get("tower") or {}).get("asset_path"),
+            "tower_options": (g.get("tower") or {}).get("options"),
+            "load_s": {k: g[k] for k in ("text_load_s", "graph_load_s", "decoder_model_s", "decoder_function_s",
+                                         "state_allocation_s")} | {"tower": (g.get("tower") or {}).get("load_s")},
+            "runs_wall_s": p.get("runs_wall_s"),
+            "coreai_cache": {"before_load": g["coreai_cache_before_load"], "after_load": g["coreai_cache_after_load"],
+                             "end": p.get("coreai_cache_end")}}
+
+
+def section_real_graph() -> dict:
+    p = real_pass("pass_fp16_aot")
+    pt = real_pass("prepare_fp16_aot")
+    sw = swift_rows(p)
+    rid = {r["id"]: r for r in json.loads(RENDER_IDS.read_text())["records"]}
+    orc = {r["id"]: r for r in json.loads(ORACLE_TEXT.read_text())["records"]}
+    oq = {(r["id"], q["name"]): q for r in orc.values() for q in r["questions"]}
+    gate_doc = json.loads(R4_GATE.read_text())
+    gate = {(r["id"], r["name"]): r for r in gate_doc["runs"] if r.get("variant", "base") == "base"}
+    py_doc = json.loads(R6B_PY_CHECK.read_text())
+    py = {r["id"]: r for r in py_doc["records"]}
+    py_rows = {(r["id"], row["name"]): row for r in py.values() for row in r.get("rows", r.get("sub", []))}
+    if p["graph"]["asset_path"] != gate_doc["bundle"]["aimodelc"]["path"]:
+        raise SystemExit(f"the Swift pass ran {p['graph']['asset_path']}, round 4's gate {gate_doc['bundle']['aimodelc']['path']}")
+    g1 = g1_oracle = g2 = g2_py = g3 = g3_py = fin = 0
+    bad: dict[str, list] = {"G1": [], "G2": [], "G3": []}
+    pairs, n_rows = [], 0
+    for r in rid.values():
+        for q in r["questions"]:
+            n_rows += 1
+            key = (r["id"], q["name"])
+            s = sw.get(key)
+            if s is None:
+                bad["G1"].append(f"{r['id']}/{q['name']}: missing")
+                continue
+            o = oq[key]
+            ok1 = (s["row_ids_sha256"] == ids_sha256(q["row_ids"]) and s["graph_ids_sha256"] == s["row_ids_sha256"]
+                   and s["slot"] == q["slot"] == len(q["row_ids"]) - 1 and s["read_groups"] == q["groups"])
+            ok1o = s["row_ids_sha256"] == ids_sha256(o["row_ids"]) and s["slot"] == o["slot"] and s["read_groups"] == o["groups"]
+            g1 += ok1
+            g1_oracle += ok1o
+            if not (ok1 and ok1o) and len(bad["G1"]) < 6:
+                bad["G1"].append(f"{r['id']}/{q['name']}")
+            pr = py_rows.get(key)
+            ok2 = s["hidden_sha256"] == gate[key]["hidden_sha256"]
+            ok2p = pr is not None and s["hidden_sha256"] == pr["hidden_sha256"]
+            g2 += ok2
+            g2_py += ok2p
+            if not (ok2 and ok2p) and len(bad["G2"]) < 6:
+                bad["G2"].append(f"{r['id']}/{q['name']}")
+            ok3 = s["p_bits"] == p_bits(gate[key]["probs"])
+            ok3p = pr is not None and s["p_bits"] == pr["p_bits"]
+            g3 += ok3
+            g3_py += ok3p
+            if not (ok3 and ok3p) and len(bad["G3"]) < 6:
+                bad["G3"].append(f"{r['id']}/{q['name']}")
+            fin += bool(s["finite"]) and not s["all_zero"]
+            pairs.append((f"{r['id']}/{q['name']}", s["p"], o["probs"]))
+    rec_ok, rec_bad = 0, []
+    for r in p["records"]:
+        y = py[r["id"]]
+        if r["accepted"]:
+            o = orc[r["id"]]
+            ok = (y["accepted"] and r["response_indent2"] == y["response_indent2"] and r["answers_dumps"] == y["answers_dumps"]
+                  and r["input_tokens"] == y["input_tokens"] == o["api"]["input_tokens"] and r["state_tokens"] == y["state_tokens"])
+        else:
+            ok = not y["accepted"] and r["error"] == y["error"]
+        rec_ok += ok
+        if not ok and len(rec_bad) < 6:
+            rec_bad.append(r["id"])
+    refused = [{"id": r["id"], "swift": r["error"], "python": py[r["id"]].get("error"),
+                "graph_calls_before_refusal": r.get("graph_calls_before_refusal"),
+                "provider_refused": orc[r["id"]].get("refused")} for r in p["records"] if not r["accepted"]]
+    multi = [r for r in p["records"] if r["accepted"] and len(r["rows"]) > 1]
+    acc = [r for r in p["records"] if "shared" in r]
+    sh_multi = sum(all(r["shared"]["hidden_bit_equal_direct"]) for r in multi)
+    sh_all = sum(all(r["shared"]["hidden_bit_equal_direct"]) for r in acc)
+    sh_resp = sum(r["shared"]["response_indent2_equal_direct"] for r in acc)
+    sh_py = sum(r["shared"]["hidden_sha256"] == py[r["id"]]["shared"]["hidden_sha256"]
+                and r["shared"]["p_bits"] == py[r["id"]]["shared"]["p_bits"] and r["shared"]["k"] == py[r["id"]]["shared"]["k"]
+                for r in acc)
+    prep = [r for r in pt["records"] if "refused" not in r]
+    prep_rec = {"records": len(prep), "refused": [r for r in pt["records"] if "refused" in r],
+                "hidden_bit_equal_shared": sum(all(r["hidden_bit_equal_shared"]) for r in prep),
+                "p_bit_equal_shared": sum(all(r["p_bit_equal_shared"]) for r in prep),
+                "single_question_hidden_bit_equal_shared": sum(all(r["single_hidden_bit_equal_shared"]) for r in prep),
+                "response_equal_shared": sum(r["response_indent2_equal_shared"] for r in prep),
+                "rows_run_whole": sum(r["prepared"]["rows_run_whole"] for r in prep),
+                "k_prepared_equal_k_shared": sum(r["k_shared"] == r["k_prepared"] for r in prep),
+                "swift_prepared_hidden_equal_python_shared": sum(r["hidden_sha256"] == py[r["id"]]["shared"]["hidden_sha256"]
+                                                                 for r in prep),
+                "python_prepared": {k: v for k, v in py_doc["summary"].items() if k.startswith("prepared")},
+                "binary_sha256": pt["environment"].get("binary_sha256")}
+    prep_ok = (len(prep) == 14 and prep_rec["hidden_bit_equal_shared"] == prep_rec["p_bit_equal_shared"]
+               == prep_rec["single_question_hidden_bit_equal_shared"] == prep_rec["response_equal_shared"]
+               == prep_rec["k_prepared_equal_k_shared"] == prep_rec["swift_prepared_hidden_equal_python_shared"] == 14
+               and prep_rec["rows_run_whole"] == 0)
+    bar = bar_vs_oracle(pairs)
+    bar["r4_gate_summary"] = {k: gate_doc["summary"][k] for k in ("max_abs_dp", "mean_of_run_mean_abs_dp", "argmax_equal",
+                                                                  "near_tie_questions")}
+    py_gate = py_doc.get("gate") or {}
+    rec = {"pass_file": str(REAL / "pass_fp16_aot.json"), "prepare_file": str(REAL / "prepare_fp16_aot.json"),
+           "run": run_info(p), "decoder": str(REAL_DECODER), "r4_gate": str(R4_GATE), "python_check": str(R6B_PY_CHECK),
+           "oracle": {"path": str(ORACLE_TEXT), "sha256": sha256_file(ORACLE_TEXT)},
+           "python_check_vs_r4_gate": {k: py_gate.get(k) for k in ("rows", "hidden_sha256_equal", "p_bit_equal")},
+           "G1_ids_slot_groups": {"n": n_rows, "equal_render_ids": g1, "equal_oracle": g1_oracle, "first_differences": bad["G1"]},
+           "G2_hidden_sha256": {"n": n_rows, "equal_r4_gate": g2, "equal_python_check": g2_py, "first_differences": bad["G2"]},
+           "G3_p_bits": {"n": n_rows, "equal_r4_gate": g3, "equal_python_check": g3_py, "first_differences": bad["G3"]},
+           "G3_records_response_bytes_equal_python": {"n": len(p["records"]), "equal": rec_ok, "first_differences": rec_bad,
+                                                      "refused": refused},
+           "G4_shared": {"multi_question_records": len(multi), "multi_hidden_bit_equal_direct": sh_multi,
+                         "accepted_records": len(acc), "hidden_bit_equal_direct": sh_all, "response_equal_direct": sh_resp,
+                         "hidden_p_k_equal_python_shared": sh_py,
+                         "calls_direct_multi": sum(r["direct"]["calls"] for r in multi),
+                         "calls_shared_multi": sum(r["shared"]["times"]["calls"] for r in multi)},
+           "G4_prepared": prep_rec, "G5_reset": p["reset_check"], "G6_finite_rows": {"n": n_rows, "finite_not_zero": fin},
+           "bar_vs_oracle": bar, "contended_ms": contended_ms(p)}
+    rec["pass"] = (g1 == g1_oracle == g2 == g2_py == g3 == g3_py == fin == n_rows == 393 and rec_ok == len(p["records"]) == 361
+                   and all(x["graph_calls_before_refusal"] == {"decoder": 0, "tower": 0} for x in refused)
+                   and sh_multi == len(multi) == 14 and sh_all == sh_resp == sh_py == len(acc) == 360 and prep_ok
+                   and p["reset_check"]["bit_equal"] and bar["pass"])
+    return rec
+
+
+def tower_gate_outputs() -> tuple[dict, dict]:
+    """Round 5b's tower gate: (picture/crop -> output sha256, picture/crop -> (npz path, key)) of its base calls."""
+    g = json.loads(R5B_TOWER_GATE.read_text())
+    npz = R5B_TOWER_GATE.with_suffix(".npz")
+    base = [c for c in g["calls"] if c["variant"] == "base"]
+    return {c["key"]: c["sha256"] for c in base}, {c["key"]: (npz, f"{c['index']:03d}") for c in base}
+
+
+def section_real_e2e() -> dict:
+    import export_option_rows as eor
+
+    p = real_pass("pass_images_aot")
+    e2e = json.loads(R5B_E2E.read_text())
+    runs = {(r["record"], r["name"]): r for r in e2e["runs"] if r["arm"] == "e2e"}
+    zero_runs = {(r["record"], r["name"]): r for r in e2e["runs"] if r["arm"] == "zero"}
+    orc = {r["id"]: r for r in json.loads(ORACLE_IMAGES.read_text())["records"]}
+    tor = {pp["id"]: pp for pp in json.loads(TOWER_ORACLE.read_text())["pictures"]}
+    tg_sha, tg_npz = tower_gate_outputs()
+    e2e_tower = {(t["record"], t["crop"]): t["out_sha256"] for t in e2e["tower_rows"]}
+    embeds = {}
+    for proc in e2e["processes"]:
+        with np.load(proc["npz"]) as z:
+            for k in z.files:
+                if k.startswith("embeds__") and k.endswith("__e2e"):
+                    embeds[k.split("__")[1]] = sha256_array(z[k])
+    table = eor.read_table(REAL_DECODER)
+    rows_n = ok_ids = ok_hid = ok_hid_py = ok_p = ok_p_py = fin = 0
+    rec_resp = rec_tok = crops_n = in_ok = out_gate = out_e2e = out_py = rows_img_ok = sh_ok = sh_tower = zero_hid = 0
+    bad: list[str] = []
+    tower_diff: list[dict] = []
+    pairs_row, pairs_api, pairs_zero = [], [], []
+    for r in p["records"]:
+        rid_ = r["id"]
+        o = orc[rid_]
+        oqs = {q["name"]: (k, q) for k, q in enumerate(o["questions"])}
+        py_resp = (PY_IMAGES / f"{rid_}.direct.response.json").read_text()
+        py_tr = json.loads((PY_IMAGES / f"{rid_}.direct.trace.json").read_text())
+        py_rows = {x["name"]: x for x in py_tr["rows"]}
+        rec_resp += r["accepted"] and r["response_indent2"] == py_resp
+        rec_tok += r["accepted"] and r["input_tokens"] == o["api"]["input_tokens"] == py_tr["input_tokens"]
+        for s in r["rows"]:
+            rows_n += 1
+            k, q = oqs[s["name"]]
+            key = (rid_, s["name"])
+            ext = vh.extension_ids(q["row_ids"])
+            a = s["row_ids_sha256"] == ids_sha256(ext) and s["slot"] == len(ext) - 1 and s["read_groups"] == q["groups"]
+            ok_ids += a
+            ok_hid += s["hidden_sha256"] == runs[key]["hidden_sha256"]
+            ok_hid_py += s["hidden_sha256"] == py_rows[s["name"]]["hidden_sha256"]
+            ok_p += s["p_bits"] == p_bits(runs[key]["row"]["probs"])
+            ok_p_py += s["p_bits"] == py_rows[s["name"]]["p_bits"]
+            fin += bool(s["finite"]) and not s["all_zero"]
+            if not (a and s["hidden_sha256"] == runs[key]["hidden_sha256"] == py_rows[s["name"]]["hidden_sha256"]
+                    and s["p_bits"] == py_rows[s["name"]]["p_bits"]) and len(bad) < 6:
+                bad.append(f"{rid_}/{s['name']}")
+            pairs_row.append((f"{rid_}/{s['name']}", s["p"], q["probs"]))
+            pairs_api.append((f"{rid_}/{s['name']}", s["p"], o["api"]["probs"][k]))
+            # the zero-image control: its hidden rows against the e2e gate's zero arm, its p from the Swift slot row
+            zi = [x["name"] for x in r["rows"]].index(s["name"])
+            zero_hid += r["zero_images"]["hidden_sha256"][zi] == zero_runs[key]["hidden_sha256"]
+            hz = np.fromfile(REAL / "hidden_images_aot" / f"{rid_}__{zi}__zero.f16", np.float16).reshape(s["T"], -1)
+            gids = host.group_ids(s["read_groups"])
+            pz = host.readout(hz[s["slot"]].astype(np.float32), eor.rows_for(table, gids), gids, s["read_groups"])
+            pairs_zero.append((f"{rid_}/{s['name']}", pz, q["probs"]))
+        names = [c["crop"] for c in tor[rid_]["crops"]]
+        for c, sha in zip(r["crops"], r["tower_outputs_sha256"]):
+            crops_n += 1
+            cname = names[c["crop"]]
+            with np.load(tor[rid_]["crops"][c["crop"]]["npz"]) as z:
+                in_ok += all(c["inputs_sha256"][k] == sha256_array(z[k]) for k in TOWER_INPUTS)
+            gkey = f"{rid_}/{cname}"
+            out_gate += sha == tg_sha[gkey]
+            out_e2e += sha == e2e_tower[(rid_, cname)]
+            out_py += sha == py_tr["crops"][c["crop"]]["output_sha256"]
+            if sha != tg_sha[gkey]:
+                mine = np.fromfile(REAL / "tower_images_aot" / f"{rid_}__{c['crop']:02d}.f32", np.float32).reshape(256, -1)
+                npz, nk = tg_npz[gkey]
+                with np.load(npz) as z:
+                    ref = z[nk]
+                tower_diff.append({"crop": gkey, "max_abs": float(np.abs(mine - ref).max())})
+        rows_img_ok += r["image_rows_sha256"] == embeds[rid_]
+        sh_ok += all(r["shared"]["hidden_bit_equal_direct"]) and r["shared"]["response_indent2_equal_direct"]
+        sh_tower += r["shared"]["tower_outputs_bit_equal_direct"]
+    n_rec = len(p["records"])
+    bar_row, bar_api, bar_zero = bar_vs_oracle(pairs_row), bar_vs_oracle(pairs_api), bar_vs_oracle(pairs_zero)
+    rec = {"pass_file": str(REAL / "pass_images_aot.json"), "run": run_info(p), "decoder": str(REAL_DECODER),
+           "tower_bundle": str(REAL_TOWER), "e2e_gate": str(R5B_E2E), "tower_gate": str(R5B_TOWER_GATE),
+           "python_runs": str(PY_IMAGES), "skipped": p["skipped"],
+           "oracle": {"path": str(ORACLE_IMAGES), "sha256": sha256_file(ORACLE_IMAGES)},
+           "records": n_rec, "rows": rows_n,
+           "ids_slot_groups_equal_oracle": ok_ids, "hidden_sha256_equal_e2e_gate": ok_hid,
+           "hidden_sha256_equal_python_run": ok_hid_py, "p_bits_equal_e2e_gate": ok_p, "p_bits_equal_python_run": ok_p_py,
+           "finite_rows": fin, "first_differences": bad,
+           "response_bytes_equal_python_run": rec_resp, "input_tokens_equal_oracle_and_python": rec_tok,
+           "tower": {"crops": crops_n, "inputs_sha256_equal_vision_host": in_ok, "output_sha256_equal_tower_gate": out_gate,
+                     "output_sha256_equal_e2e_gate": out_e2e, "output_sha256_equal_python_run": out_py,
+                     "where_unequal_max_abs": tower_diff},
+           "image_rows_sha256_equal_e2e_gate": rows_img_ok,
+           "shared": {"records": n_rec, "hidden_and_response_equal_direct": sh_ok, "tower_outputs_bit_equal_direct": sh_tower},
+           "zero_control": {"hidden_sha256_equal_e2e_gate_zero_arm": zero_hid, "bar_vs_oracle_row": bar_zero,
+                            "red": not bar_zero["pass"]},
+           "reset": p["reset_check"], "bar_vs_oracle_row": bar_row, "bar_vs_oracle_api": bar_api,
+           "e2e_gate_summary": {k: e2e["summary"][k] for k in ("e2e_row", "e2e_api")}}
+    rec["pass"] = (n_rec == 12 and rows_n == 24 and ok_ids == ok_hid == ok_hid_py == ok_p == ok_p_py == fin == rows_n
+                   and rec_resp == rec_tok == n_rec and crops_n == 40 and in_ok == out_gate == out_e2e == out_py == crops_n
+                   and rows_img_ok == sh_ok == sh_tower == n_rec and zero_hid == rows_n and rec["zero_control"]["red"]
+                   and p["reset_check"]["bit_equal"] and bar_row["pass"] and bar_api["pass"])
+    return rec
+
+
+def section_real_controls() -> dict:
+    """Requests the host refuses: the Swift error = decide.py run's response bytes, the text metadata.json and host.py
+    give, and no decoder or tower call before the refusal; `d1 decide` on img06 = round 5b's decide.py responses."""
+    p = real_pass("pass_controls_aot")
+    meta = json.loads((REAL_DECODER / "metadata.json").read_text())
+    template = meta["vision"]["limits"]["refusal_text"]
+    S, ctx = int(meta["language"]["prefill_chunk"]), int(meta["language"]["max_context_length"])
+    tok_ = host.load_tokenizer(REAL_DECODER / "tokenizer" / "tokenizer.json")
+    ctl = {r["id"]: r for r in json.loads((REAL / "inputs" / "controls.json").read_text())["records"]}
+    rows = []
+    for r in p["records"]:
+        c = ctl[r["id"]]
+        py_resp = (PY_IMAGES / f"{r['id']}.direct.response.json").read_text()
+        plans = [vh.plan(*vh.cap_pixels(vh.to_rgb(LANE / "fixtures" / x)).shape[:2]) for x in c["images"]]
+        req = host.validate_request(c["request"])
+        b = host.build_question(tok_, req["state"], *req["questions"][0])
+        T = len(vh.prompt_ids(tok_, vh.image_prefix_text(req["state"], len(plans)) + b["suffix"], plans))
+        n = vh.n_image_tokens(plans)
+        try:
+            host.graph_context_check(T, S, ctx)
+            want = template.replace("<n>", str(n)) if n > int(meta["vision"]["n_image_tokens"]) else None
+        except ValueError as e:
+            want = str(e)
+        rows.append({"id": r["id"], "row_tokens": T, "image_tokens": n, "swift_error": r.get("error"),
+                     "expected_text": want, "error_equal_expected": r.get("error") == want,
+                     "response_bytes_equal_python_run": r.get("response_indent2") == py_resp,
+                     "graph_calls_before_refusal": r.get("graph_calls_before_refusal")})
+    swift_template = p["graph"]["image_refusal"]
+    dec = {}
+    e2e = json.loads(R5B_E2E.read_text())
+    img06 = {r["name"]: r["hidden_sha256"] for r in e2e["runs"] if r["arm"] == "e2e" and r["record"] == "img06_grid_1024x768"}
+    for m in ("direct", "shared"):
+        resp = (REAL / f"decide_img06_{m}.response.json").read_text()
+        tr = json.loads((REAL / f"decide_img06_{m}.trace.json").read_text())
+        dec[m] = {"response_bytes_equal_r5b_decide": resp == (R5B_DECIDE / f"img06_{m}.response.json").read_text(),
+                  "hidden_sha256_equal_e2e_gate": all(x["hidden_sha256"] == img06[x["name"]] for x in tr["trace"]["rows"]),
+                  "shared_k": tr["trace"]["times"]["shared_k"], "calls": tr["trace"]["times"]["calls"],
+                  "binary_sha256": tr["environment"].get("binary_sha256")}
+    rec = {"pass_file": str(REAL / "pass_controls_aot.json"), "metadata_refusal_text": template,
+           "swift_image_refusal": swift_template, "controls": rows, "decide_img06": dec}
+    rec["pass"] = (swift_template == template and len(rows) == 3
+                   and all(x["error_equal_expected"] and x["response_bytes_equal_python_run"]
+                           and x["graph_calls_before_refusal"] == {"decoder": 0, "tower": 0} for x in rows)
+                   and all(v["response_bytes_equal_r5b_decide"] and v["hidden_sha256_equal_e2e_gate"] for v in dec.values()))
+    return rec
+
+
+def jit_vs_aot(jit: dict, aot: dict, dumps: tuple[str, str]) -> dict:
+    """The JIT pass's rows against the AOT pass's on the same records: hidden sha256; where they differ, max |d| of the
+    hidden rows (the dumps) and of p, and whether the argmax moved."""
+    a, j = swift_rows(aot), swift_rows(jit)
+    eq = peq = 0
+    unequal = []
+    dmax = pmax = 0.0
+    moved = 0
+    for key, x in j.items():
+        y = a[key]
+        peq += x["p_bits"] == y["p_bits"]
+        pmax = max(pmax, max(abs(u - v) for u, v in zip(x["p"], y["p"])))
+        moved += int(np.argmax(x["p"])) != int(np.argmax(y["p"]))
+        if x["hidden_sha256"] == y["hidden_sha256"]:
+            eq += 1
+            continue
+        rec_id, name = key
+        ra = next(r for r in aot["records"] if r["id"] == rec_id)
+        k = f"{rec_id}__{[w['name'] for w in ra['rows']].index(name)}" if ra["accepted"] else f"{rec_id}__{name}"
+        hx = np.fromfile(REAL / dumps[0] / f"{k}.f16", np.float16).astype(np.float32)
+        hy = np.fromfile(REAL / dumps[1] / f"{k}.f16", np.float16).astype(np.float32)
+        d = float(np.max(np.abs(hx - hy)))
+        dmax = max(dmax, d)
+        if len(unequal) < 8:
+            unequal.append({"row": f"{rec_id}/{name}", "hidden_max_abs_diff": d})
+    resp = sum(r["response_indent2"] == next(q for q in aot["records"] if q["id"] == r["id"])["response_indent2"]
+               for r in jit["records"])
+    return {"rows": len(j), "hidden_sha256_equal_aot": eq, "p_bit_equal_aot": peq, "p_max_abs_diff": pmax,
+            "argmax_moved": moved, "hidden_max_abs_diff_where_unequal": dmax, "first_unequal": unequal,
+            "records": len(jit["records"]), "responses_equal_aot": resp, "reset": jit["reset_check"]}
+
+
+def section_real_jit() -> dict:
+    jt, ji = real_pass("pass_jit_text"), real_pass("pass_jit_images")
+    text = jit_vs_aot(jt, real_pass("pass_fp16_aot"), ("hidden_fp16_jit", "hidden_fp16_aot"))
+    images = jit_vs_aot(ji, real_pass("pass_images_aot"), ("hidden_images_jit", "hidden_images_aot"))
+    aot_img = {r["id"]: r for r in real_pass("pass_images_aot")["records"]}
+    images["tower_outputs_sha256_equal_aot"] = sum(r["tower_outputs_sha256"] == aot_img[r["id"]]["tower_outputs_sha256"]
+                                                   for r in ji["records"])
+    snaps = [json.loads(x) for x in (REAL / "jit_cache.jsonl").read_text().splitlines() if x.strip()]
+    names = next(s for s in snaps if s["label"] == "names")
+    at = {s["label"]: s for s in snaps if "d1_cache_kib" in s}
+    gib = 1024 ** 2
+    cache = {"snapshots": snaps,
+             "decoder_jit_entry_gib": (at["after_text"]["d1_cache_kib"] - at["before_text"]["d1_cache_kib"]) / gib,
+             "tower_jit_entry_gib": (at["after_images"]["d1_cache_kib"] - at["after_text"]["d1_cache_kib"]) / gib,
+             "free_gib": {k: v["free_kib"] / gib for k, v in at.items()},
+             "stopped": [s for s in snaps if s["label"].startswith("stopped")],
+             "jit_entries_removed": not any(names[k] in at["after_removal"]["entries"].split()
+                                            for k in ("decoder_jit_entry", "tower_jit_entry")),
+             "aot_entries_kept": all(x in at["after_removal"]["entries"].split() for x in (
+                 (REAL_DECODER.parent.parent / "bundles_aotc" / "d1_3b_decode_fp16_pf16.h16c.aimodelc" / "main.hash")
+                 .read_bytes().hex(),
+                 (REAL_TOWER.parent.parent / "vision_aotc" / "d1_3b_vision_fp16w32.h16c.aimodelc" / "main.hash")
+                 .read_bytes().hex()))}
+    rec = {"text": text | {"run": run_info(jt)}, "images": images | {"run": run_info(ji)},
+           "specialization_s": {"decoder": jt["graph"]["decoder_model_s"], "tower": (ji["graph"].get("tower") or {}).get("load_s"),
+                                "decoder_again_in_the_images_pass": ji["graph"]["decoder_model_s"]},
+           "cache": cache}
+    rec["pass"] = (text["hidden_sha256_equal_aot"] == text["rows"] > 0 and images["hidden_sha256_equal_aot"] == images["rows"] > 0
+                   and images["tower_outputs_sha256_equal_aot"] == images["records"] and not cache["stopped"]
+                   and cache["jit_entries_removed"] and cache["aot_entries_kept"])
+    return rec
+
+
+REAL_SECTIONS = {"real-graph": section_real_graph, "real-e2e": section_real_e2e, "real-controls": section_real_controls,
+                 "real-jit": section_real_jit}
+
+
+def real_main(names: list[str], out_path: Path | None) -> int:
+    rec: dict = {"schema": "d1-swift-real/1", "generated_at": now(),
+                 "gate": "apps/D1 on the model's assets (decoder d1_3b_decode_fp16_pf16, tower d1_3b_vision_fp16w32; AOT, "
+                         "and the .aimodel specialized by Swift on a subset) vs the Python runtime's records of the same "
+                         "assets (round 4's readout gate, decide.py check / run, round 5b's e2e and tower gates): exact "
+                         "(ids, hidden sha256, p bits, tower outputs, response bytes); FACTS §7's bar on the Swift p against "
+                         "the provider's fp32 oracle",
+                 "bar": FACTS_BAR, "env": {"python": sys.version.split()[0], "numpy": np.__version__},
+                 "package": package_record(), "sections": {}}
+    for name in names:
+        t0 = time.time()
+        print(f"[{name}]", flush=True)
+        r = REAL_SECTIONS[name]()
+        r["seconds"] = round(time.time() - t0, 1)
+        rec["sections"][name.removeprefix("real-")] = r
+        print(f"[{name}] {'PASS' if r['pass'] else 'FAIL'} ({r['seconds']} s)", flush=True)
+        write_json(REAL / f"section_{name.removeprefix('real-')}.json", r)
+    rec["pass"] = all(r["pass"] for r in rec["sections"].values())
+    if out_path is not None:
+        out_path.write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n")
+        print(f"{'PASS' if rec['pass'] else 'FAIL'} -> {out_path}")
+    return 0 if rec["pass"] else 1
+
+
 # --------------------------------------------------------------------------- package / main
 def package_record() -> dict:
     files = sorted(p for p in PKG.rglob("*") if p.is_file() and ".build" not in p.parts and ".swiftpm" not in p.parts)
@@ -1266,12 +1735,16 @@ SECTIONS = {"render": section_render, "ids": section_ids, "image": section_image
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("cmd", choices=[*SECTIONS, "all", *GRAPH_SECTIONS, "graph", "graph-inputs"])
-    ap.add_argument("--out", help="the transcript (all: default results/r3a_swift_text.json; graph: results/r3c_swift_graph.json)")
+    ap.add_argument("cmd", choices=[*SECTIONS, "all", *GRAPH_SECTIONS, "graph", "graph-inputs", *REAL_SECTIONS, "real"])
+    ap.add_argument("--out", help="the transcript (all: default results/r3a_swift_text.json; graph: results/r3c_swift_graph.json; "
+                                  "real: results/r6b_swift_real.json)")
     args = ap.parse_args()
     if args.cmd == "graph-inputs":
         print(json.dumps(graph_inputs()))
         return 0
+    if args.cmd == "real" or args.cmd in REAL_SECTIONS:
+        names = list(REAL_SECTIONS) if args.cmd == "real" else [args.cmd]
+        return real_main(names, (Path(args.out) if args.out else REAL_TRANSCRIPT) if args.cmd == "real" else None)
     if args.cmd == "graph" or args.cmd in GRAPH_SECTIONS:
         names = list(GRAPH_SECTIONS) if args.cmd == "graph" else [args.cmd]
         return graph_main(names, (Path(args.out) if args.out else GRAPH_TRANSCRIPT) if args.cmd == "graph" else None)

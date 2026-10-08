@@ -21,17 +21,26 @@
 //       D1Decider's load contract on a bundle (metadata, tokenizer, head/option_rows), then `decide` (graph not wired)
 //
 // Round 3c: the graph (Decoder.swift, Tower.swift; the decoder asset --asset aot = <bundles>_aotc/<name>.h16c.aimodelc,
-// jit = the bundle's .aimodel specialized here; a tower bundle with --tower, a crop's four inputs from --tower-inputs).
-//   d1 decide --bundle <dir> [--asset aot|jit] [--tower <dir> --tower-inputs <dir>] --request req.json [--shared]
-//          [--groups groups.json] --out resp.json [--trace trace.json] [--reps N] [--warm]
-//       one request {state, questions[, images: [paths]]} -> the response (json.dumps indent 2); the trace: per row the
-//       ids, the slot, the hidden rows' sha256, the logits and p (bits), each call's ms; --reps N decides it N more times
-//   d1 fixture --bundle <dir> --records records.json [--groups groups.json] --arms direct[,shared] [--asset aot|jit]
-//          [--tower <dir> --tower-inputs <dir> [--zero-image-control]] [--dump-hidden <dir>] [--warm] --out pass.json
+// jit = the bundle's .aimodel specialized here; a tower bundle with --tower and its asset with --tower-asset aot|jit).
+// A request's pictures are files (round 6b: decoded and cut here, ImagePixels.swift, with the tower bundle's position
+// table) or, to split an error between the pixels and the graphs, their crops' four inputs read from --tower-inputs.
+//   d1 decide --bundle <dir> [--asset aot|jit] [--tower <dir> [--tower-asset aot|jit] [--images <dir> | --tower-inputs
+//          <dir>]] --request req.json [--shared] [--groups groups.json] --out resp.json [--trace trace.json] [--reps N]
+//          [--warm]
+//       one request {state, questions[, images: [paths]]} -> the response (json.dumps indent 2); the pictures' paths are
+//       relative to --images (default: the request file's directory); with --tower-inputs they name the manifest's
+//       pictures by file stem. The trace: per row the ids, the slot, the hidden rows' sha256, the logits and p (bits),
+//       each call's ms, per crop the tower's inputs and output (sha256); --reps N decides it N more times
+//   d1 fixture --bundle <dir> (--records records.json | --image-records image_records.json [--images <dir>])
+//          [--groups groups.json] --arms direct[,shared] [--asset aot|jit] [--tower <dir> [--tower-asset aot|jit]
+//          [--tower-inputs <dir>] [--zero-image-control] [--dump-tower <dir>]] [--dump-hidden <dir>] [--warm] --out pass.json
 //       every record from its raw request: direct (and shared) rows, hidden sha256, p bits, the response's bytes; a refused
-//       request's text and each of its questions alone; the first record again at the end (the state reset). A record
-//       may name pictures of the --tower-inputs manifest ("pictures": [ids]); --zero-image-control runs those again with
-//       the image rows left zero. groups.json = {record id: {question: groups}} (a toy's readout groups)
+//       request's text and each of its questions alone; the first record again at the end (the state reset). An image
+//       record ({id, request, images: [paths relative to --images, default the file's directory]}) runs its pictures
+//       from their files; a URL is not fetched (the record is listed as skipped). A record may instead name pictures of
+//       the --tower-inputs manifest ("pictures": [ids]); --zero-image-control runs those again with the image rows left
+//       zero; --dump-tower writes every crop's tower output (float32, before the cast to the image rows).
+//       groups.json = {record id: {question: groups}} (a toy's readout groups)
 //   d1 prepare-test --bundle <dir> --records records.json [--groups groups.json] [--asset aot|jit] --out out.json
 //       every accepted request of 2+ questions: shared, then prepare(state) + decide(prepared) with all its questions and
 //       with each alone: hidden rows, p and the response against shared's
@@ -448,8 +457,8 @@ func cacheListing() -> JSONValue {
     }))])
 }
 
-func assetKind(_ args: Args) throws -> D1Graph.Asset {
-    guard let a = D1Graph.Asset(rawValue: args.one("--asset") ?? "aot") else { throw CLIError.usage("--asset aot|jit") }
+func assetKind(_ args: Args, _ flag: String = "--asset") throws -> D1Graph.Asset {
+    guard let a = D1Graph.Asset(rawValue: args.one(flag) ?? "aot") else { throw CLIError.usage("\(flag) aot|jit") }
     return a
 }
 
@@ -460,7 +469,7 @@ func loadGraphDecider(_ args: Args) async throws -> (D1Decider, D1Graph, JSONVal
     let d1 = try await D1Decider(bundle: url(try args.need("--bundle")))
     let tText = seconds(since: t0)
     let g = try await d1.loadGraph(asset: try assetKind(args), tower: args.one("--tower").map(url),
-                                   warmUp: args.flags.contains("--warm"))
+                                   towerAsset: try assetKind(args, "--tower-asset"), warmUp: args.flags.contains("--warm"))
     let m = g.metadata
     let info: JSONValue = .obj([
         ("bundle", .string(d1.bundle.path)), ("name", .string(d1.metadata.name)), ("asset", .string(g.asset.rawValue)),
@@ -471,8 +480,14 @@ func loadGraphDecider(_ args: Args) async throws -> (D1Decider, D1Graph, JSONVal
         ("functions", .strings(g.decoder.functionNames)), ("descriptor", g.decoder.descriptor),
         ("chunk", .int(m.chunk)), ("max_context", .int(m.maxContext)), ("hidden", .int(m.hidden)), ("image_rows", .int(m.imageRows)),
         ("vocab", .int(m.vocab)), ("pad_id", .int(m.padID)), ("toy_fold", m.toyFold.map { .int($0) } ?? .null),
+        ("image_refusal", .string(m.imageRefusal)),
         ("tower", g.tower.map { t in .obj([("bundle", .string(t.bundle.path)), ("asset_path", .string(t.url.path)),
                                            ("options", .string(d1Describe(t.options))), ("load_s", .double(t.loadSeconds)),
+                                           ("position_table", .obj([
+                                               ("file", .string(t.bundle.appendingPathComponent(D1Tower.positionTableFile).path)),
+                                               ("sha256", .optional(try? sha256(Data(contentsOf: t.bundle.appendingPathComponent(
+                                                   D1Tower.positionTableFile))))),
+                                               ("dim", .int(t.positionTable.dim))])),
                                            ("descriptor", t.descriptor)]) } ?? .null),
         ("coreai_cache_before_load", cacheBefore), ("coreai_cache_after_load", cacheListing()),
     ])
@@ -515,20 +530,64 @@ func writeHidden(_ h: [Float16], to u: URL) throws {
     try h.withUnsafeBytes { Data($0) }.write(to: u)
 }
 
-/// A request object without its `images` member, and the pictures it names (the files' stems = the manifest's ids).
+/// A request object without its `images` member, and the pictures it names (as written: paths or URLs).
 func splitImages(_ j: JSONValue) -> (request: JSONValue, pictures: [String]?) {
     guard let m = j.members, let imgs = m.first(where: { $0.key == "images" })?.value.array else { return (j, nil) }
-    let ids = imgs.compactMap(\.string).map { (($0 as NSString).lastPathComponent as NSString).deletingPathExtension }
-    return (.object(m.filter { $0.key != "images" }), ids)
+    return (.object(m.filter { $0.key != "images" }), imgs.compactMap(\.string))
+}
+
+/// A picture as a request names it -> the manifest's id (the file's stem).
+func pictureID(_ p: String) -> String { ((p as NSString).lastPathComponent as NSString).deletingPathExtension }
+
+func isURLPicture(_ p: String) -> Bool { p.contains("://") }
+
+/// A picture's path, relative to `base` unless absolute.
+func pictureFile(_ p: String, base: URL) -> URL {
+    p.hasPrefix("/") || p.hasPrefix("~") ? url(p) : base.appendingPathComponent(p).standardizedFileURL
+}
+
+/// sha256 of an array's little-endian bytes (NumPy's `tobytes()` of the same dtype).
+func sha256<T>(_ values: [T]) -> String { values.withUnsafeBytes { sha256(Data($0)) } }
+
+/// Per crop: its picture, kind, grid, tokens and its four inputs' sha256 (vision_host.tower_inputs' arrays).
+func cropsJSON(_ p: D1TowerInputs) -> JSONValue {
+    var out: [JSONValue] = []
+    for (pi, pic) in p.pictures.enumerated() {
+        for (c, (pc, ci)) in zip(pic.plan.crops, pic.crops).enumerated() {
+            out.append(.obj([("picture", .int(pi)), ("picture_id", .string(pic.id)), ("crop", .int(c)),
+                             ("kind", .string(pc.kind.rawValue)), ("grid", .ints([ci.grid.h, ci.grid.w])),
+                             ("n_tokens", .int(ci.tokens)),
+                             ("inputs_sha256", .obj([("patches", .string(sha256(ci.patches))),
+                                                     ("pos_table", .string(sha256(ci.posTable))),
+                                                     ("key_bias", .string(sha256(ci.keyBias))),
+                                                     ("unshuffle_idx", .string(sha256(ci.unshuffle)))]))]))
+        }
+    }
+    return .array(out)
+}
+
+/// The image rows a trace bound (each crop's first n_tokens rows of its tower output, cast to float16), as the
+/// decoder's buffer holds them: sha256 of the fp16 bytes.
+func imageRowsSHA256(_ t: D1Trace, _ p: D1TowerInputs, width: Int) -> String {
+    var rows: [Float16] = []
+    for (o, c) in zip(t.towerOutputs, p.pictures.flatMap(\.crops)) { rows += o[0..<(c.tokens * width)].map { Float16($0) } }
+    return D1Decoder.sha256(rows)
+}
+
+/// The request's pictures: files (decoded and cut here) or the --tower-inputs manifest's crops (by file stem).
+func requestPictures(_ d1: D1Decider, _ names: [String]?, base: URL, args: Args) throws -> D1TowerInputs? {
+    guard let names else { return nil }
+    if let dir = args.one("--tower-inputs") { return try D1TowerInputs.read(url(dir), ids: names.map(pictureID)) }
+    if let u = names.first(where: isURLPicture) { throw CLIError.failed("picture \(u): a URL is not fetched") }
+    return try d1.pictures(files: names.map { pictureFile($0, base: base) })
 }
 
 func decideCommand(_ args: Args) async throws {
     let (d1, g, info) = try await loadGraphDecider(args)
-    let (reqJSON, picIDs) = splitImages(try readJSON(url(try args.need("--request"))))
-    let pictures = try picIDs.map { ids -> D1TowerInputs in
-        guard let dir = args.one("--tower-inputs") else { throw CLIError.usage("a request with images needs --tower-inputs") }
-        return try D1TowerInputs.read(url(dir), ids: ids)
-    }
+    let requestURL = url(try args.need("--request"))
+    let (reqJSON, picNames) = splitImages(try readJSON(requestURL))
+    let pictures = try requestPictures(d1, picNames, base: args.one("--images").map(url) ?? requestURL.deletingLastPathComponent(),
+                                       args: args)
     let groups = try args.one("--groups").map { groupsMap(try readJSON(url($0))) } ?? nil
     let mode: D1Decider.Mode = args.flags.contains("--shared") ? .shared : .direct
     var body: JSONValue
@@ -538,9 +597,14 @@ func decideCommand(_ args: Args) async throws {
         let request = try D1Request(json: reqJSON)
         let t = try await d1.trace(request: request, mode: mode, groups: groups, pictures: pictures)
         body = t.response
-        trace = .obj([("rows", traceRowsJSON(t, d: g.metadata.hidden)), ("times", traceTimesJSON(t)),
-                      ("input_tokens", .int(t.plan.inputTokens)), ("state_tokens", .int(t.plan.stateTokens)),
-                      ("image_rows", .int(t.imageRows))])
+        var tr: [(String, JSONValue)] = [("rows", traceRowsJSON(t, d: g.metadata.hidden)), ("times", traceTimesJSON(t)),
+                                         ("input_tokens", .int(t.plan.inputTokens)), ("state_tokens", .int(t.plan.stateTokens)),
+                                         ("image_rows", .int(t.imageRows))]
+        if let pictures, !t.towerOutputs.isEmpty {
+            tr += [("crops", cropsJSON(pictures)), ("tower_outputs_sha256", .strings(t.towerOutputs.map { sha256($0) })),
+                   ("image_rows_sha256", .string(imageRowsSHA256(t, pictures, width: g.metadata.hidden)))]
+        }
+        trace = .obj(tr)
         for _ in 0..<(Int(args.one("--reps") ?? "0") ?? 0) {
             reps.append(traceTimesJSON(try await d1.trace(request: request, mode: mode, groups: groups, pictures: pictures)))
         }
@@ -558,19 +622,37 @@ func decideCommand(_ args: Args) async throws {
     log(PythonFormat.dumps(body, asciiOnly: false))
 }
 
+/// Where a fixture record's pictures come from: the record's `images` files (under `imagesBase`) or the --tower-inputs
+/// manifest's crops (the record's `pictures` ids).
+struct PictureSource {
+    var towerInputs: URL?
+    var imagesBase: URL?
+    /// --dump-tower: every crop's tower output (float32 [256 * d]) as <dir>/<record>__<crop>.f32
+    var dumpTower: URL?
+}
+
 /// One fixture record: direct (and shared) on the request; a refused request's text and its questions alone.
-func fixtureRecord(_ d1: D1Decider, _ rec: JSONValue, groups: [String: [[Int]]]?, towerInputs: URL?, arms: Set<String>,
+func fixtureRecord(_ d1: D1Decider, _ rec: JSONValue, groups: [String: [[Int]]]?, source: PictureSource, arms: Set<String>,
                    zeroControl: Bool, dump: URL?) async throws -> (json: JSONValue, hidden: [[Float16]])
 {
     let id = rec["id"]?.string ?? ""
     let reqJSON = rec["request"] ?? .null
-    let d = try d1.requireGraph().metadata.hidden
+    let g = try d1.requireGraph()
+    let d = g.metadata.hidden
+    let calls0 = (decoder: g.decoder.callCount, tower: g.tower?.callCount ?? 0)
     var j: [(String, JSONValue)] = [("id", .string(id))]
     var pictures: D1TowerInputs? = nil
     if let ids = rec["pictures"]?.array?.compactMap(\.string) {
-        guard let dir = towerInputs else { throw CLIError.usage("record \(id) names pictures: --tower-inputs") }
+        guard let dir = source.towerInputs else { throw CLIError.usage("record \(id) names pictures: --tower-inputs") }
         pictures = try D1TowerInputs.read(dir, ids: ids)
+        j.append(("pictures_from", .string("tower-inputs")))
+    } else if let names = rec["images"]?.array?.compactMap(\.string), !names.isEmpty {
+        guard let base = source.imagesBase else { throw CLIError.usage("record \(id) names images: --images") }
+        let t0 = ContinuousClock.now
+        pictures = try d1.pictures(files: names.map { pictureFile($0, base: base) })
+        j += [("pictures_from", .string("files")), ("images", .strings(names)), ("pixels_s", .double(seconds(since: t0)))]
     }
+    if let pictures { j.append(("crops", cropsJSON(pictures))) }
     do {
         let request = try D1Request(json: reqJSON)
         let t = try await d1.trace(request: request, mode: .direct, groups: groups, pictures: pictures)
@@ -578,24 +660,33 @@ func fixtureRecord(_ d1: D1Decider, _ rec: JSONValue, groups: [String: [[Int]]]?
               ("state_tokens", .int(t.plan.stateTokens)), ("trunk_len", .int(t.plan.trunkLength)), ("image_rows", .int(t.imageRows)),
               ("response_indent2", .string(PythonFormat.dumps(t.response, indent: 2, asciiOnly: false))),
               ("answers_dumps", .string(PythonFormat.dumps(t.response["answers"]!))), ("direct", traceTimesJSON(t))]
-        if !t.towerOutputs.isEmpty {
-            j.append(("tower_outputs_sha256", .strings(t.towerOutputs.map { o in
-                o.withUnsafeBytes { sha256(Data($0)) }
-            })))
+        if let pictures, !t.towerOutputs.isEmpty {
+            j += [("tower_outputs_sha256", .strings(t.towerOutputs.map { sha256($0) })),
+                  ("image_rows_sha256", .string(imageRowsSHA256(t, pictures, width: d)))]
+            if let dt = source.dumpTower {
+                for (k, o) in t.towerOutputs.enumerated() {
+                    try o.withUnsafeBytes { Data($0) }.write(to: dt.appendingPathComponent("\(id)__\(String(format: "%02d", k)).f32"))
+                }
+            }
         }
         if let dump {
             for (k, h) in t.hidden.enumerated() { try writeHidden(h, to: dump.appendingPathComponent("\(id)__\(k).f16")) }
         }
         if arms.contains("shared") {
             let s = try await d1.trace(request: request, mode: .shared, groups: groups, pictures: pictures)
-            j.append(("shared", .obj([
+            var sh: [(String, JSONValue)] = [
                 ("k", .int(s.sharedK)), ("times", traceTimesJSON(s)),
                 ("hidden_bit_equal_direct", .array(zip(s.hidden, t.hidden).map { .bool(bitsEqual($0.0, $0.1)) })),
                 ("hidden_sha256", .strings(s.hidden.map(D1Decoder.sha256))),
                 ("p_bits", .array(s.probabilities.map { .array($0.map(hex)) })),
                 ("response_indent2_equal_direct", .bool(PythonFormat.dumps(s.response, indent: 2, asciiOnly: false)
                     == PythonFormat.dumps(t.response, indent: 2, asciiOnly: false))),
-            ])))
+            ]
+            if !s.towerOutputs.isEmpty {
+                sh.append(("tower_outputs_bit_equal_direct", .bool(s.towerOutputs.count == t.towerOutputs.count
+                    && zip(s.towerOutputs, t.towerOutputs).allSatisfy { $0.0.map(\.bitPattern) == $0.1.map(\.bitPattern) })))
+            }
+            j.append(("shared", .obj(sh)))
         }
         if zeroControl, pictures != nil {
             let z = try await d1.trace(request: request, mode: .direct, groups: groups, pictures: pictures, zeroImages: true)
@@ -610,10 +701,14 @@ func fixtureRecord(_ d1: D1Decider, _ rec: JSONValue, groups: [String: [[Int]]]?
         case .request, .graphLimit, .json: break
         default: throw e
         }
-        j += [("accepted", .bool(false)), ("error", .string(e.message))]
+        j += [("accepted", .bool(false)), ("error", .string(e.message)),
+              ("response_indent2", .string(PythonFormat.dumps(.obj([("error", .string(e.message))]), indent: 2, asciiOnly: false))),
+              ("graph_calls_before_refusal", .obj([("decoder", .int(g.decoder.callCount - calls0.decoder)),
+                                                   ("tower", .int((g.tower?.callCount ?? 0) - calls0.tower))]))]
         var sub: [JSONValue] = []
         var hidden: [[Float16]] = []
-        for m in reqJSON["questions"]?.members ?? [] {
+        // a refused text request's questions alone (the readout gate's rows); a refused request with pictures stops here
+        for m in pictures == nil ? reqJSON["questions"]?.members ?? [] : [] {
             guard (try? D1Request.validateQuestion(name: m.key, m.value)) != nil else { continue }
             let one = try D1Request(json: .obj([("state", reqJSON["state"] ?? .null), ("questions", .object([m]))]))
             let t = try await d1.trace(request: one, mode: .direct, groups: groups)
@@ -629,11 +724,27 @@ func fixtureRecord(_ d1: D1Decider, _ rec: JSONValue, groups: [String: [[Int]]]?
 
 func fixtureCommand(_ args: Args) async throws {
     let arms = Set((args.one("--arms") ?? "direct").split(separator: ",").map(String.init))
-    let records = try readJSON(url(try args.need("--records")))["records"]?.array ?? []
-    guard !records.isEmpty else { throw CLIError.failed("no records") }
+    var records = try args.one("--records").map { try readJSON(url($0))["records"]?.array ?? [] } ?? []
+    var skipped: [JSONValue] = []
+    var source = PictureSource(towerInputs: args.one("--tower-inputs").map(url), imagesBase: nil, dumpTower: nil)
+    if let ir = args.one("--image-records") {
+        source.imagesBase = args.one("--images").map(url) ?? url(ir).deletingLastPathComponent()
+        for r in try readJSON(url(ir))["records"]?.array ?? [] {
+            let names = r["images"]?.array?.compactMap(\.string) ?? []
+            if let u = names.first(where: isURLPicture) {   // a URL picture is not fetched (the oracle skipped it too)
+                skipped.append(.obj([("id", .optional(r["id"]?.string)), ("images", .strings(names)),
+                                     ("why", .string("picture \(u): a URL is not fetched"))]))
+                continue
+            }
+            records.append(r)
+        }
+    }
+    guard !records.isEmpty else { throw CLIError.failed("no records (--records and / or --image-records)") }
     let groupsAll = try args.one("--groups").map { try readJSON(url($0)) }
     let dump = args.one("--dump-hidden").map(url)
     if let dump { try FileManager.default.createDirectory(at: dump, withIntermediateDirectories: true) }
+    source.dumpTower = args.one("--dump-tower").map(url)
+    if let dt = source.dumpTower { try FileManager.default.createDirectory(at: dt, withIntermediateDirectories: true) }
     let (d1, _, info) = try await loadGraphDecider(args)
     var out: [JSONValue] = []
     var first: [[Float16]] = []
@@ -643,7 +754,9 @@ func fixtureCommand(_ args: Args) async throws {
         let id = rec["id"]?.string ?? ""
         let again = i == records.count
         let t0 = ContinuousClock.now
-        let (j, h) = try await fixtureRecord(d1, rec, groups: groupsMap(groupsAll?[id]), towerInputs: args.one("--tower-inputs").map(url),
+        var src = source
+        if again { src.dumpTower = nil }
+        let (j, h) = try await fixtureRecord(d1, rec, groups: groupsMap(groupsAll?[id]), source: src,
                                              arms: again ? ["direct"] : arms, zeroControl: !again && args.flags.contains("--zero-image-control"),
                                              dump: again ? nil : dump)
         if again {
@@ -661,7 +774,9 @@ func fixtureCommand(_ args: Args) async throws {
         out.append(jj)
         if i % 40 == 0 { log("  \(i + 1)/\(records.count) \(id)") }
     }
-    let doc: JSONValue = .obj([("schema", .string("d1-swift-fixture/1")), ("records_json", .string(try args.need("--records"))),
+    let doc: JSONValue = .obj([("schema", .string("d1-swift-fixture/1")), ("records_json", .optional(args.one("--records"))),
+                               ("image_records_json", .optional(args.one("--image-records"))),
+                               ("images_base", .optional(source.imagesBase?.path)), ("skipped", .array(skipped)),
                                ("arms", .strings(arms.sorted())), ("graph", info), ("reset_check", resetCheck),
                                ("records", .array(out)), ("runs_wall_s", .double(seconds(since: tAll))),
                                ("coreai_cache_end", cacheListing()), ("environment", environment())])
