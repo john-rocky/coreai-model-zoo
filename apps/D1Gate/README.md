@@ -20,6 +20,8 @@ What it loads (staged by `_stage.sh`):
 |---|---|
 | `decoder/` | the bundle `d1_3b_decode_int8mlp_pf16`: `metadata.json`, `d1_3b_decode_int8mlp_pf16.aimodel` (`main`, S = 16, the MLP linears int8 per block of 32, final-norm hidden output), `tokenizer/`, `head/option_rows.{json,safetensors}` |
 | `decoder_pf32/`, `decoder_pf64/` | the same decoder exported at S = 32 / 64 (`d1_3b_decode_int8mlp_pf32` / `_pf64`), pushed apart (`_stage.sh --decoder`, `MD5SUMS_PF32` / `MD5SUMS_PF64`); `D1_DECODER` names the directory the gate loads (default `decoder`), the chunk width comes from its `metadata.json` |
+| `decoder_pf64_static/` | the decoder's static form at S = 64 (`d1_3b_decode_int8mlp_pf64_static`, [`conversion/d1`](../../conversion/d1) "The static form": `position_ids [1, 64]` = the call's own positions, the KV caches at 4,096 slots, the mask built in the graph), pushed apart (`_stage.sh --decoder <bundle> --into decoder_pf64_static`, `MD5SUMS_PF64_STATIC`, `fixtures/mac_ref_pf64_static.json` / `bench_pf64_static.json`); the library reads the form from `metadata.json` (`language.contract.static`) |
+| `aot/d1_3b_decode_int8mlp_pf64_static.h19p.aimodelc` | the static form's iPhone 18 Pro AOT (`coreai-build compile --platform iOS --architecture h19p --preferred-compute gpu`, no `--expect-frequent-reshapes`: specialized once, at compile time), pushed apart (`_stage.sh --aot`, `MD5SUMS_AOT`), loaded with `D1_AOT` and the bundle directory `D1_DECODER=decoder_pf64_static` |
 | `tower/` | the bundle `d1_3b_vision_fp16w32`: `metadata.json`, `d1_3b_vision_fp16w32.aimodel` (static, fp16 weights, fp32 compute), `host/position_embedding.safetensors` |
 | `aot/d1_3b_decode_int8mlp_pf16.h19p.aimodelc` | the iPhone 18 Pro's AOT of the decoder (`coreai-build compile --platform iOS --architecture h19p --preferred-compute gpu --expect-frequent-reshapes`), pushed apart (`_stage.sh --aot`, `MD5SUMS_AOT`) |
 | `fixtures/` | `requests.json` (373 records), `images/` (the 12 PNG files), `oracle_slim.json` (the provider's fp32 oracle per question: row ids, readout groups, keys, probabilities of the question's own row and of the API path, argmax, top-2 margin), `mac_ref.json` (the Mac's read-out of the same decoder asset, AOT h16c: hidden sha256 and p bits per question — round 5c's readout gate for the text, round 8's `decide.py run` for the pictures), `red_arms.json`, `bench.json`; for another decoder directory `mac_ref_pf<S>.json` (the Mac's read-out of that bundle: round 6a's readout gate for the text, `decide.py run` for the pictures) and `bench_pf<S>.json` (the same items, with the calls each makes at that S), chosen with `D1_MAC_REF` / `D1_BENCH` |
@@ -89,7 +91,8 @@ iPhone 18 Pro (iOS 27.2) the key moved `os_proc_available_memory` at launch from
    stages the decoder at another chunk width apart, in `_work/device_stage_pf<S>/D1Assets/`: the bundle, the Mac's
    read-out of that bundle as `fixtures/mac_ref_pf<S>.json` (every question of `oracle_slim.json` must be in it),
    `fixtures/bench_pf<S>.json` (the main stage's `bench.json` items with `calls_expected` at that S) and `MD5SUMS_PF<S>`.
-   `D1_LANE` (default `~/code/coreai/_d1_3b`) is the port's working directory.
+   A bundle of the static form goes `--into decoder_pf<S>_static` (its files end in `pf<S>_static`; the calls per item
+   are the dynamic form's at the same S). `D1_LANE` (default `~/code/coreai/_d1_3b`) is the port's working directory.
 3. The Mac: `./_run_mac.sh` runs the macOS build on the stage directory with the Mac's h16c assets (`D1_AOT`, the tower's
    beside its bundle), 20 text records and 3 picture records, only while no measurement window is open — it never takes
    the lock, and a window that opens while it runs stops the app until it closes; `./_run_mac.sh --red` runs the text
@@ -180,3 +183,22 @@ bench), round 9a's five bench items unchanged:
 The int8mlp decoder's worst row is the same question at every chunk width and on both machines but the Mac's S = 16
 (0.0180 to 0.0223): the margin to the bar is thin. The phone's S = 32 sits 0.0039 above the Mac's S = 32 on that row (another
 GPU; the cause is not isolated).
+
+## Runs (2026-10-09): the static form on the phone
+
+The same phone and entitled build family, now on the library that reads the static contract from `metadata.json`: the
+int8mlp decoder's static form at S = 64 (`decoder_pf64_static/`) in two arms, one gate launch each:
+
+- `r10c1c-023331`: its AOT h19p, compiled on the Mac without `--expect-frequent-reshapes` (5.56 GB, specialized at compile
+  time), loads in 15.3 s (Core AI cache +5,563 MB). The first call after the load takes 1.84 s; no later call takes more than
+  169 ms over 2,122 calls, so the phone does not specialize it again at a new position (the dynamic form's AOT without efr
+  did). Every question but one passes the bar: `semif_33d6e5da58f0fee2490d:answer` lands at max |dp| 0.0208 (the dynamic
+  S = 64 JIT on this phone 0.0186, the Mac's static S = 64 0.0190), the next 0.0146; red arms 5/5, reset bit-equal, shared =
+  direct. The gate failing, no bench ran.
+- `r10c2c-024102`: the static `.aimodel` specialized on the phone (GPU preferred with frequent reshapes) loads in 31.7 s
+  (Core AI cache +3,705 MB), its first call 0.2 s, and returns the AOT arm's rows bit for bit (417 of 417 p bits and hidden
+  sha256), the one row over the bar included. No bench.
+
+In the gate loops (thermal serious; a relative cost, not the bench protocol) a call took 150.6 ms on the AOT and 118.3 ms
+on the JIT, against 87.8 ms for the dynamic S = 64 JIT in round 10a's gate. `r10c2d-024653` deleted the static form's assets
+and cache entries from the phone, and S = 32's.

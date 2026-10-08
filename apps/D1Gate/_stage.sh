@@ -23,7 +23,9 @@
 #                                    MD5SUMS_PF<S> D1_SKIP_APP=1 ./_install.sh (sizes from the phone's listing), read by
 #                                    the app with D1_DECODER=decoder_pf<S> D1_MAC_REF=mac_ref_pf<S>.json
 #                                    D1_BENCH=bench_pf<S>.json, its bytes checked on the phone by the md5 stage
-#                                    (D1_MD5SUMS=MD5SUMS,MD5SUMS_PF<S>)
+#                                    (D1_MD5SUMS=MD5SUMS,MD5SUMS_PF<S>). A bundle of the static form
+#                                    (metadata language.contract.static) goes --into decoder_pf<S>_static (the files
+#                                    then end in pf<S>_static: mac_ref_pf<S>_static.json, MD5SUMS_PF<S>_STATIC, ...)
 # Layout (GateRunner.swift / Fixtures.swift read it):
 #   decoder/    <- $L/exports/bundles/d1_3b_decode_int8mlp_pf16/{metadata.json, <name>.aimodel/, tokenizer/, head/, LICENSE}
 #   tower/      <- $L/exports/vision/d1_3b_vision_fp16w32/{metadata.json, <name>.aimodel/, host/, LICENSE}
@@ -115,7 +117,9 @@ L, B, MT, MI, M, SD = (Path(x) for x in sys.argv[1:7])
 SUF = sys.argv[7]
 meta = json.load(open(B / "metadata.json"))
 S = meta["language"]["prefill_chunk"]
-assert SUF == f"pf{S}", (SUF, S)
+static = bool(meta["language"]["contract"].get("static"))
+# the static form's bundle stages apart from the dynamic one of the same S: decoder_pf<S>_static
+assert SUF == f"pf{S}" + ("_static" if static else ""), (SUF, S, static)
 
 def sha(p):
     h = hashlib.sha256()
@@ -165,7 +169,7 @@ for rid, v in oracle.items():
     want = {q["name"] for q in v["questions"]}
     assert have == want, (rid, sorted(want - have), sorted(have - want))
 ref_name = f"mac_ref_{SUF}.json"
-json.dump({"schema": "d1-gate-mac-ref/1", "chunk": S,
+json.dump({"schema": "d1-gate-mac-ref/1", "chunk": S, "static": static,
            "sources": {"mac_text": {"path": str(MT), "sha256": sha(MT)}, "mac_images": {"path": str(MI), "sha256": sha(MI)}},
            "assets": {"text": g.get("bundle"), "pictures": mi.get("assets")}, "records": mac},
           open(SD / "fixtures" / ref_name, "w"))
@@ -178,6 +182,8 @@ for it in bench["bench"] + bench["bench_aot"]:
     assert it["name"] in calls, it["name"]
     it["calls_expected"] = calls[it["name"]]
 bench["chunk"] = S
+bench["static"] = static
+# the static form's calls are the dynamic form's at the same S (round 10b's plan of both forms)
 bench["source"] += f"; the same items at S = {S} (calls_expected from results/r7_timing_plan.json, sha256 {sha(L / 'results/r7_timing_plan.json')[:16]})"
 json.dump(bench, open(SD / "fixtures" / f"bench_{SUF}.json", "w"), indent=1)
 nrows = sum(len(v["rows"]) for v in mac.values())
