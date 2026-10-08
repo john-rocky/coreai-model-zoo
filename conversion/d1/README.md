@@ -84,8 +84,20 @@ Run from `conversion/d1`. `K=$ZOO_WORK_ROOT/_d1_3b`; everything the scripts writ
 $K/venv-oracle/bin/python make_fixtures.py     # -> $K/fixtures/records.json, red_arms.json, LICENSE-SemIf-MIT.txt
 $K/venv-oracle/bin/python test_host.py         # -> $K/results/test_host.json, tokenizer_check.json, render_ids.json,
                                                #    fixture_lengths.json
-HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --threads 1 --hidden tv4_000,card_refund,long_34k   # (round 2)
+HF_HUB_DISABLE_XET=1 hf download LiquidAI/d1-3B model.safetensors \
+    --revision da1fe36a861f24690f27f622dca1d8688503d113   # the checkpoint; check its sha256 against the LFS oid
+HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --threads 1 \
+    --hidden tv4_000,card_refund,long_34k,own_long_log_10,semif_a3f18f3a63d45345942b,tv4x_qnli_00,tv4s_00
+                                               # -> $K/oracle/records_oracle.json, oracle/hidden/<id>.npz,
+                                               #    $K/results/oracle_summary.json
 ```
+
+One thread: on the CPU the oracle's rows come out bit-equal at one and four threads and not at twelve (a long row's
+hidden rows move), and one thread is the fastest of the three. `oracle_d1.py` runs the provider's code as the card
+loads it (`AutoModel` + `trust_remote_code`, the remote-code copy under `~/.cache/huggingface/modules`), so the question
+objects come from that copy's `prompt` (`provider(engine)`); `oracle_summary.json` carries the load report
+(transformers' missing / unexpected keys, and every language tensor of the checkpoint bit-equal to the loaded
+parameter), and the oracle's header (`model.provider_code`) the remote-code files' sha256 against the snapshot's.
 
 `make_fixtures.py` reads the Kev fixture from the lane's copy (`$K/fixtures/src/requests.json`, sha256 checked) and the
 checkpoint's tokenizer to size the two long states. The fixture keeps the Kev records' gold keys (`"true"` / `"false"` for
@@ -135,20 +147,30 @@ $PY timing.py run --dry-run
 ### Export and the gate on the model (needs `model.safetensors`)
 
 ```bash
+export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
+$PY export_option_rows.py --write $K/exports/head --check --out $K/results/<option rows check>.json
 $PY export_decoder.py fp16 --prefill-chunk 16 --aot --record $K/results/<fp16 record>.json
-$PY export_decoder.py int8lin --prefill-chunk 16 --aot --record $K/results/<int8lin record>.json
 $PY readout_gate.py red-records                    # -> $K/fixtures/red_arms_records.json, the arms for the oracle
-HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --fixtures $K/fixtures/red_arms_records.json \
+HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --threads 1 --fixtures $K/fixtures/red_arms_records.json \
     --out-dir $K/oracle/red --results-dir $K/oracle/red
-for k in 0 1 2; do $PY parity_decoder_torch.py p1 --shard $k --shards 3 --threads 1 & done; wait
-$PY parity_decoder_torch.py p2; $PY parity_decoder_torch.py p3; $PY parity_decoder_torch.py p4
-$PY parity_decoder_torch.py merge
+for k in 0 1 2; do $PY parity_decoder_torch.py p1 --oracle <oracle> --hidden-npz $K/oracle/hidden \
+    --shard $k --shards 3 --threads 1 & done; wait
+$PY parity_decoder_torch.py p2 --threads 1; $PY parity_decoder_torch.py p3 --threads 1
+$PY parity_decoder_torch.py p4 --threads 1
+$PY parity_decoder_torch.py merge --oracle <oracle> --out $K/results/<parity>.json
 $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_fp16_pf16 --red --transcript $K/results/<gate fp16>.json
+$PY decide.py check --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 --gate $K/results/<gate fp16>.json \
+    --records <the multi-question records> --out $K/results/<check>.json --shared-out $K/results/<shared vs direct>.json
+$PY export_decoder.py int8lin --prefill-chunk 16 --aot --record $K/results/<int8lin record>.json
 $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8lin_pf16 --red \
     --compare-with $K/results/<gate fp16>.json --transcript $K/results/<gate int8lin>.json
 <window holder> $PY timing.py run --bundle $K/exports/bundles/d1_3b_decode_fp16_pf16 \
     --gate-transcript $K/results/<gate fp16>.json --tag <tag>
 ```
+
+`parity_decoder_torch.py p1` runs every row of the oracle document it is given (`--oracle`, default
+`$K/oracle/records_oracle.json`): a subset is the same layout with fewer records (per source the first records, plus
+the records whose hidden rows the oracle kept, for the position cosine). P2, P3 and P4 read the whole oracle.
 
 The gate's bar is fixed in `readout_gate.py` and written at the top of each transcript before the first GPU process:
 argmax against the oracle on every question that is not a near-tie, max |dp| and the mean of the rows' mean |dp| over

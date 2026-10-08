@@ -21,7 +21,9 @@ fp32 (the card: bf16 changes answers):
       h . E[id] over the tied rows lands within 1e-3 of the fp32 logits (recorded)
   (e) record 0 again after the loop: bit-equal log-probabilities
   (f) results/oracle_summary.json: per source, row lengths, near-ties (top-2 <= 0.02), gold agreement on our fixture
-      subset (not the provider's benchmark numbers), seconds
+      subset (not the provider's benchmark numbers), Tree against row per record, seconds, and the load report
+      (`load_report`: transformers' missing / unexpected keys, and every language tensor of the checkpoint equal to
+      the loaded parameter)
 
 A question the provider refuses (no `instructions`: `own_email_03` / `next_step`) is recorded with the error; the
 record's other questions still run their rows, and its API path is the error the provider raises.
@@ -69,8 +71,18 @@ def snapshot() -> Path:
     return Path(hf_snapshot(MODEL["hf_id"], revision=MODEL["revision"]))
 
 
-def provider():
-    """The provider's modules from K/src/d1 (the package needs no model to import prompt / api)."""
+PROVIDER_FILES = ("api.py", "hybrid.py", "lfm2_vl.py", "modeling_d1.py", "prompt.py", "runner.py")
+
+
+def provider(eng=None):
+    """The provider's prompt / api modules. With an engine: its own package's (`--loader auto` runs the remote-code copy
+    under ~/.cache/huggingface/modules, whose `render` accepts only its own question classes); without one, K/src/d1's
+    (the package needs no model to import prompt / api)."""
+    if eng is not None:
+        import importlib
+
+        pkg = type(eng).__module__.rsplit(".", 1)[0]
+        return importlib.import_module(f"{pkg}.prompt"), importlib.import_module(f"{pkg}.api")
     if str(PROVIDER_SRC) not in sys.path:
         sys.path.insert(0, str(PROVIDER_SRC))
     import d1.api as api
@@ -176,7 +188,7 @@ def provider_record(eng, r: dict, logz_fn) -> dict:
     """A fixture record through the provider's code: per question the row (render -> encode -> logz_fn -> readout ->
     answer), and the API path (engine.run) with its probabilities and input_tokens. `logz_fn(row_ids)` returns the
     row's log-probabilities over the vocabulary (the model, or the stand-in through `_logz_ids`)."""
-    prompt, api = provider()
+    prompt, api = provider(eng)
     tok = eng.tokenizer
     state, qdict = r["request"]["state"], r["request"]["questions"]
     out: dict = {"id": r["id"], "source": r["source"], "questions": [], "refused": []}
@@ -261,6 +273,57 @@ class FinalNormHook:
         self.out = output[0].detach().clone()
 
 
+def _key_part(k: str) -> str:
+    return ("language" if "language_model." in k else "vision" if "vision" in k else
+            "projector" if "projector" in k else "other")
+
+
+def load_report(model, loading_info: dict, snap: Path) -> dict:
+    """What transformers reports for the load (missing / unexpected / mismatched keys, by part), and every
+    `model.language_model.*` tensor of the checkpoint against the loaded parameter of that name: bf16 widened to fp32
+    is exact, so each must be torch.equal."""
+    import torch
+    from safetensors import safe_open
+
+    def parts(keys) -> dict:
+        out: dict = {}
+        for k in keys:
+            out.setdefault(_key_part(k), []).append(k)
+        return {p: sorted(v) for p, v in sorted(out.items())}
+
+    missing = sorted(loading_info.get("missing_keys") or [])
+    unexpected = sorted(loading_info.get("unexpected_keys") or [])
+    mismatched = sorted([str(x) for x in loading_info.get("mismatched_keys") or []])
+    params = dict(model.named_parameters())
+    ck = snap / "model.safetensors"
+    lang, absent, differ = [], [], []
+    with safe_open(str(ck), framework="pt", device="cpu") as f:
+        keys = list(f.keys())  # noqa: SIM118
+        for k in keys:
+            if not k.startswith("model.language_model."):
+                continue
+            lang.append(k)
+            p = params.get(k)
+            if p is None:
+                absent.append(k)
+                continue
+            t = f.get_tensor(k)
+            if not (p.dtype == torch.float32 and tuple(p.shape) == tuple(t.shape) and torch.equal(p.detach(), t.float())):
+                differ.append(k)
+    counts: dict = {}
+    for k in keys:
+        counts[_key_part(k)] = counts.get(_key_part(k), 0) + 1
+    return {"transformers": {"missing_keys": parts(missing), "unexpected_keys": parts(unexpected),
+                             "mismatched_keys": mismatched, "error_msgs": [str(e) for e in loading_info.get("error_msgs") or []],
+                             "n_missing": len(missing), "n_unexpected": len(unexpected), "n_mismatched": len(mismatched)},
+            "checkpoint": {"file": str(ck), "keys": len(keys), "keys_by_part": dict(sorted(counts.items()))},
+            "language_keys": len(lang), "language_keys_missing_in_model": absent,
+            "language_keys_not_bit_equal": differ,
+            "language_bit_equal": not absent and not differ,
+            "check": "every model.language_model.* checkpoint tensor (bf16) widened to fp32 == the loaded parameter "
+                     "of the same name (torch.equal)"}
+
+
 def load_model(loader: str, threads: int):
     import torch
 
@@ -272,18 +335,25 @@ def load_model(loader: str, threads: int):
         if str(PROVIDER_SRC) not in sys.path:
             sys.path.insert(0, str(PROVIDER_SRC))
         from d1.modeling_d1 import D1Model
-        model = D1Model.from_pretrained(str(snap), dtype=torch.float32)
+        model, linfo = D1Model.from_pretrained(str(snap), dtype=torch.float32, output_loading_info=True)
     else:                       # the card's way (copies the remote code under ~/.cache/huggingface/modules)
         from transformers import AutoModel
-        model = AutoModel.from_pretrained(str(snap), trust_remote_code=True, dtype=torch.float32)
+        model, linfo = AutoModel.from_pretrained(str(snap), trust_remote_code=True, dtype=torch.float32,
+                                                 output_loading_info=True)
     model.eval()
+    load_s = time.perf_counter() - t0
     engine = model.engine
     info = {"loader": loader, "class": f"{type(model).__module__}.{type(model).__qualname__}",
             "engine": f"{type(engine).__module__}.{type(engine).__qualname__}", "dtype": str(next(model.parameters()).dtype),
             "device": str(engine.device), "bos": engine.bos, "lead": engine.lead, "state_style": engine.state_style,
             "system": engine.system, "option_style": engine.option_style, "torch_threads": torch.get_num_threads(),
-            "load_seconds": round(time.perf_counter() - t0, 1),
-            "tied": bool(model.lm_head.weight.data_ptr() == model.get_input_embeddings().weight.data_ptr())}
+            "load_seconds": round(load_s, 1),
+            "tied": bool(model.lm_head.weight.data_ptr() == model.get_input_embeddings().weight.data_ptr()),
+            "load_report": load_report(model, linfo, snap)}
+    pkg_dir = Path(sys.modules[type(engine).__module__].__file__).parent
+    code = {f: sha256_file(pkg_dir / f) for f in PROVIDER_FILES}
+    info["provider_code"] = {"package": type(engine).__module__.rsplit(".", 1)[0], "dir": str(pkg_dir), "sha256": code,
+                             "equal_to_snapshot": all(code[f] == sha256_file(snap / f) for f in PROVIDER_FILES)}
     return model, engine, info
 
 
@@ -362,7 +432,7 @@ def run_model(args) -> int:
         summ = summarize(entries)
         summ.update({"oracle_sha256": sha256_file(out_dir / "records_oracle.json"), "determinism": header["determinism"],
                      "load_seconds": info["load_seconds"], "loop_seconds": header["loop_seconds"],
-                     "threads": info["torch_threads"]})
+                     "threads": info["torch_threads"], "load_report": info["load_report"]})
         write_atomic(res_dir / "oracle_summary.json", (json.dumps(summ, indent=1) + "\n").encode())
         print(json.dumps({k: v for k, v in summ.items() if k != "by_source"}, indent=1))
     return 0
@@ -396,14 +466,25 @@ def summarize(entries: list[dict]) -> dict:
     rows = [q["row_len"] for e in entries for q in e["questions"]]
     secs = [q["seconds"] for e in entries for q in e["questions"]]
     tree = [e["api"]["max_abs_dp_vs_rows"] for e in entries if e["api"].get("path") == "tree"]
+    by_rec = {e["id"]: e["api"]["max_abs_dp_vs_rows"] for e in entries if e["api"].get("path") == "tree"}
+    rec_secs = [sum(q["seconds"] for q in e["questions"]) + float(e["api"].get("seconds") or 0.0) for e in entries]
+    near = [f"{e['id']}/{q['name']}" for e in entries for q in e["questions"] if q["near_tie"]]
     return {"records": len(entries), "questions": len(rows), "by_source": by,
             "row_len": {"min": min(rows), "p50": pct(rows, 0.5), "p99": pct(rows, 0.99), "max": max(rows)},
-            "near_ties": {"threshold_top2": NEAR_TIE,
-                          "ids": [f"{e['id']}/{q['name']}" for e in entries for q in e["questions"] if q["near_tie"]]},
+            "near_ties": {"threshold_top2": NEAR_TIE, "n": len(near), "ids": near},
             "tree_vs_row_max_abs_dp": max(tree) if tree else None, "tree_records": len(tree),
+            "tree_vs_row_by_record": by_rec,
+            "tree_vs_row_distribution": ({"min": min(tree), "p50": pct(tree, 0.5), "p90": pct(tree, 0.9), "max": max(tree)}
+                                         if tree else None),
+            "row_api_bit_equal_single_question": sum(1 for e in entries if e["api"].get("path") == "row"
+                                                     and e["api"]["max_abs_dp_vs_rows"] == 0.0),
+            "row_api_records_single_question": sum(1 for e in entries if e["api"].get("path") == "row"),
             "refused": [f"{e['id']}/{x['name']}: {x['error']}" for e in entries for x in e["refused"]],
             "gold_note": "gold agreement on our fixture subset only, not the provider's benchmark numbers",
-            "seconds_per_row": {"p50": round(pct(secs, 0.5), 3), "max": round(max(secs), 3), "total": round(sum(secs), 1)}}
+            "seconds_per_row": {"p50": round(pct(secs, 0.5), 3), "max": round(max(secs), 3), "total": round(sum(secs), 1)},
+            "seconds_per_record": {"what": "the record's row-form passes plus its API pass",
+                                   "p50": round(pct(rec_secs, 0.5), 3), "max": round(max(rec_secs), 3),
+                                   "total": round(sum(rec_secs), 1)}}
 
 
 def main() -> int:
