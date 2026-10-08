@@ -19,11 +19,15 @@ projections keep fp32 weights on the fp16 export (the overlay loader's `fp32_att
                          conv1d and every RMSNorm (by type). export_lfm2_decode_pipelined.py's recipe.
     int8mix --fp16-layers I,J,..
                          int8lin with every linear of decoder layers I, J, .. left fp16 (name `.._int8mix_l<I>-<J>_..`)
-    int4lin [--quant-block 32|16]
-                         int8lin's set at int4 (block 16: name `.._int4lin_b16_..`)
+    int8mlp              int8lin on the MLP linears only: the conv-mixer projections left fp16 (by name)
+    int8conv             int8lin on the conv-mixer projections only: the MLP linears left fp16 (by name; a map of the
+                         error by kind, not a candidate)
+    int4lin              int8lin's set at int4
+    --quant-block 32|16  the per-block size of any quantized mode (16: one fp16 scale per 16 weights, the name gets
+                         `_b16`: `.._int8lin_b16_..`, `.._int8mlp_b16_..`, `.._int4lin_b16_..`)
 
-After a quantized mode the int8 / int4 Linear names must equal the intended set exactly (and nothing but Linear is
-quantized), or the export stops. There is no lm_head in this graph; `.*lm_head$` stays in the name exclusions as in
+After a quantized mode the int8 / int4 Linear names must equal the mode's intended set exactly (and nothing but Linear
+is quantized), or the export stops. There is no lm_head in this graph; `.*lm_head$` stays in the name exclusions as in
 the recipe and matches nothing.
 
 The bundle is `<out-dir>/bundles/<name>/`, `<name>` = `d1_3b_decode_<mode>[_n<N>]_pf<S>` (`_n<N>` when
@@ -61,6 +65,7 @@ LICENSE and the metadata writer are the real ones, and metadata.json carries a `
         $PY export_decoder.py fp16 --toy --prefill-chunk 16 --aot --record $ZOO_WORK_ROOT/_d1_3b/results/<json>
     $PY export_decoder.py fp16 --prefill-chunk 16 --aot --record <json>     # round 3: needs model.safetensors
     $PY export_decoder.py int8lin --aot --record <json>
+    $PY export_decoder.py int8mlp --quant-block 16 --aot --record <json>   # round 5c
 """
 from __future__ import annotations
 
@@ -100,9 +105,17 @@ NAME_PREFIX, TOY_PREFIX = "d1_3b_decode", "d1_toy_decode"
 AOT_FLAGS = ["--platform", "macOS", "--preferred-compute", "gpu", "--architecture", "h16c",
              "--expect-frequent-reshapes"]
 DISK = "/System/Volumes/Data"
-MODES = ("fp16", "int8lin", "int8mix", "int4lin")
-QUANT_LEAVES = ("feed_forward.gate_proj", "feed_forward.up_proj", "feed_forward.down_proj", "conv.in_proj",
-                "conv.out_proj")
+MODES = ("fp16", "int8lin", "int8mix", "int4lin", "int8mlp", "int8conv")
+MLP_LEAVES = ("feed_forward.gate_proj", "feed_forward.up_proj", "feed_forward.down_proj")
+CONV_LEAVES = ("conv.in_proj", "conv.out_proj")
+QUANT_LEAVES = MLP_LEAVES + CONV_LEAVES
+MODE_KINDS = {"int8lin": ("mlp", "conv"), "int8mix": ("mlp", "conv"), "int4lin": ("mlp", "conv"), "int8mlp": ("mlp",),
+              "int8conv": ("conv",)}
+KIND_LEAVES = {"mlp": MLP_LEAVES, "conv": CONV_LEAVES}
+KIND_TEXT = {"mlp": "every MLP linear (feed_forward.gate_proj / up_proj / down_proj)",
+             "conv": "every conv-mixer projection (conv.in_proj / out_proj)"}
+KIND_PLURAL = {"mlp": "MLP linears (feed_forward.gate_proj / up_proj / down_proj)",
+               "conv": "conv-mixer projections (conv.in_proj / out_proj)"}
 ATTN_PROJ = r".*self_attn\.(q_proj|k_proj|v_proj|out_proj)$"
 
 
@@ -207,11 +220,21 @@ def toy_table_ids(vocab: int) -> tuple[list[int], dict]:
 
 
 # --------------------------------------------------------------------------- the recipe
-def linear_quant_config(dtype: str = "int8", block: int = 32, fp16_layers: list[int] | None = None) -> dict:
+def mode_leaves(mode: str) -> tuple[str, ...]:
+    """The linear leaves a quantized mode quantizes (int8lin's five, or one kind's)."""
+    return tuple(leaf for k in MODE_KINDS[mode] for leaf in KIND_LEAVES[k])
+
+
+def linear_quant_config(dtype: str = "int8", block: int = 32, fp16_layers: list[int] | None = None,
+                        leaves: tuple[str, ...] = QUANT_LEAVES) -> dict:
     """Weight-only linear per-block (export_lfm2_decode_pipelined.linear_quant_config's recipe): the attention
     projections excluded by name (fp32 weights, the GPU delegate's precision-critical path), lm_head by name (none in
-    this graph), SDPA / RMSNorm / Embedding / Conv1d by type; `fp16_layers` keeps every linear of those layers fp16."""
+    this graph), SDPA / RMSNorm / Embedding / Conv1d by type; `fp16_layers` keeps every linear of those layers fp16;
+    a leaf of QUANT_LEAVES outside `leaves` is excluded by name in every layer (int8mlp / int8conv)."""
     names: dict = {r".*lm_head$": None, ATTN_PROJ: None}
+    for leaf in QUANT_LEAVES:
+        if leaf not in leaves:
+            names[r".*\." + leaf.replace(".", r"\.") + "$"] = None
     for i in sorted(set(fp16_layers or [])):
         names[rf"model\.layers\.{i}\..*"] = None
     return {
@@ -237,8 +260,9 @@ def linear_quant_config(dtype: str = "int8", block: int = 32, fp16_layers: list[
     }
 
 
-def intended_quantized(model, fp16_layers: list[int]) -> list[str]:
-    """The Linear names the recipe quantizes: QUANT_LEAVES of every decoder layer outside fp16_layers."""
+def intended_quantized(model, fp16_layers: list[int], leaves: tuple[str, ...] = QUANT_LEAVES) -> list[str]:
+    """The Linear names the recipe quantizes: `leaves` (QUANT_LEAVES or one kind's) of every decoder layer outside
+    fp16_layers."""
     import torch
 
     keep = set(fp16_layers)
@@ -247,7 +271,7 @@ def intended_quantized(model, fp16_layers: list[int]) -> list[str]:
         if not isinstance(m, torch.nn.Linear) or not n.startswith("model.layers."):
             continue
         layer, leaf = int(n.split(".")[2]), ".".join(n.split(".")[3:])
-        if leaf in QUANT_LEAVES and layer not in keep:
+        if leaf in leaves and layer not in keep:
             out.append(n)
     return sorted(out)
 
@@ -259,12 +283,14 @@ def quantize(model, spec: dict, mode: str, block: int, fp16_layers: list[int]) -
     from coreai_models.export.compression import quantize_pytorch_model
 
     dtype = "int4" if mode == "int4lin" else "int8"
-    want = intended_quantized(model, fp16_layers)
-    cfg_q = linear_quant_config(dtype, block, fp16_layers)
+    leaves = mode_leaves(mode)
+    want = intended_quantized(model, fp16_layers, leaves)
+    cfg_q = linear_quant_config(dtype, block, fp16_layers, leaves)
     cfg_rec = json.loads(json.dumps(cfg_q))   # the quantizer rewrites the dict it is given: keep a copy
     t0 = time.monotonic()
-    print(f"quantizing ({dtype} per-block-{block} symmetric_with_clipping on {len(want)} linears; attention projections "
-          f"fp32, embedding / conv1d / norms fp16; fp16 layers {sorted(set(fp16_layers))}) ...", flush=True)
+    print(f"quantizing ({dtype} per-block-{block} symmetric_with_clipping on {len(want)} linears ({'+'.join(MODE_KINDS[mode])}); "
+          f"attention projections fp32, embedding / conv1d / norms fp16; fp16 layers {sorted(set(fp16_layers))}) ...",
+          flush=True)
     model = quantize_pytorch_model(model, tuple(spec["reference_inputs"].values()), spec["dynamic_shapes"], cfg_q)
     lin = [(n, m) for n, m in model.named_modules() if isinstance(m, torch.nn.Linear)]
     got = sorted(n for n, m in lin if P.is_parametrized(m, "weight"))
@@ -282,7 +308,8 @@ def quantize(model, spec: dict, mode: str, block: int, fp16_layers: list[int]) -
 
     fp16_lin = sorted(n for n, m in lin if not P.is_parametrized(m, "weight") and n not in {a for a, _ in attn})
     return model, {
-        "mode": mode, "dtype": dtype, "block": block, "linear": cfg_rec["global_config"]["op_state_spec"]["weight"],
+        "mode": mode, "dtype": dtype, "block": block, "kinds": list(MODE_KINDS[mode]), "leaves": list(leaves),
+        "linear": cfg_rec["global_config"]["op_state_spec"]["weight"],
         "excluded_names": sorted(cfg_rec["module_name_configs"]),
         "excluded_types": sorted(k for k, v in cfg_rec["module_type_configs"].items() if v is None),
         "fp16_layers": sorted(set(fp16_layers)), "quantized_linear_modules": len(got),
@@ -447,13 +474,15 @@ def vision_block(cfg, n_img: int) -> dict:
 
 
 def compression_block(quant: dict) -> dict:
+    kinds = quant.get("kinds") or ["mlp", "conv"]
+    left = [KIND_PLURAL[k] for k in ("mlp", "conv") if k not in kinds]
     return {"scheme": quant["mode"],
             "linear": f"{quant['dtype']} per-block-{quant['block']} symmetric_with_clipping (weight only)",
-            "quantized": "every MLP linear (feed_forward.gate_proj / up_proj / down_proj) and conv-mixer projection "
-                         "(conv.in_proj / out_proj)" + (f" outside layers {quant['fp16_layers']}" if quant["fp16_layers"]
-                                                       else ""),
-            "excluded": "fp32: the four attention projections of every full-attention layer; fp16: the embedding "
-                        "table (the tied table of head/option_rows), the conv1d, every RMSNorm, SDPA",
+            "quantized": " and ".join(KIND_TEXT[k] for k in kinds)
+                         + (f" outside layers {quant['fp16_layers']}" if quant["fp16_layers"] else ""),
+            "excluded": "fp32: the four attention projections of every full-attention layer; fp16: "
+                        + "".join(f"the {x}, " for x in left)
+                        + "the embedding table (the tied table of head/option_rows), the conv1d, every RMSNorm, SDPA",
             "excluded_names": quant["excluded_names"], "excluded_types": quant["excluded_types"],
             "quantized_linear_modules": quant["quantized_linear_modules"], "fp16_layers": quant["fp16_layers"],
             "fp16_linear_modules": quant["fp16_linear_modules"],
@@ -527,8 +556,8 @@ def bundle_name(args) -> str:
     suffix = ""
     if args.mode == "int8mix":
         suffix = "_l" + "-".join(str(i) for i in sorted(set(args.fp16_layers)))
-    if args.mode == "int4lin" and args.quant_block != 32:
-        suffix = f"_b{args.quant_block}"
+    if args.mode != "fp16" and args.quant_block != 32:
+        suffix += f"_b{args.quant_block}"
     if args.n_image_tokens != default_n_image_tokens(args.toy):
         suffix += f"_n{args.n_image_tokens}"
     return f"{TOY_PREFIX if args.toy else NAME_PREFIX}_{args.mode}{suffix}_pf{args.prefill_chunk}"
@@ -609,8 +638,7 @@ def export(args, out_dir: Path, name: str) -> dict:
 
     quant = None
     if args.mode != "fp16":
-        block = args.quant_block if args.mode == "int4lin" else 32
-        model, quant = quantize(model, spec, args.mode, block, args.fp16_layers or [])
+        model, quant = quantize(model, spec, args.mode, args.quant_block, args.fp16_layers or [])
         print(f"quantized in {quant['seconds']:.1f}s: {quant['quantized_linear_modules']} {quant['dtype']} linears "
               f"({quant['quantized_params']:,} params), {len(quant['fp16_linear_modules'])} fp16 linears", flush=True)
     t_quantized = time.monotonic()
@@ -708,7 +736,8 @@ def main() -> None:
     ap.add_argument("mode", nargs="?", default="fp16", choices=list(MODES))
     ap.add_argument("--fp16-layers", type=lambda s: [int(x) for x in s.split(",") if x != ""],
                     help="int8mix only: comma list of decoder layer indices whose linears stay fp16")
-    ap.add_argument("--quant-block", type=int, default=32, choices=[16, 32], help="int4lin only: the per-block size")
+    ap.add_argument("--quant-block", type=int, default=32, choices=[16, 32],
+                    help="the per-block size of a quantized mode (16 adds _b16 to the name)")
     ap.add_argument("--prefill-chunk", type=int, default=16, help="static S of the one function 'main' (name _pf<S>)")
     ap.add_argument("--max-ctx", type=int, default=4096)
     ap.add_argument("--n-image-tokens", type=int, default=None,
@@ -727,8 +756,8 @@ def main() -> None:
     args = ap.parse_args()
     if (args.mode == "int8mix") != bool(args.fp16_layers):
         ap.error("--fp16-layers is required by int8mix and applies to it only")
-    if args.quant_block != 32 and args.mode != "int4lin":
-        ap.error("--quant-block applies to int4lin only (the int8 modes are block 32)")
+    if args.quant_block != 32 and args.mode == "fp16":
+        ap.error("--quant-block applies to the quantized modes only")
     if args.prefill_chunk < 2:
         ap.error("--prefill-chunk must be >= 2 (this graph has no S=1 function)")
     if args.n_image_tokens is None:

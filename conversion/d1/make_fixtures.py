@@ -26,10 +26,22 @@ probabilities as [yes, no], so `host.gold_key` maps "true" -> "yes" and "false" 
   the checkpoint's tokenizer on `host.state_block(state)` and held within 5 % of the target.
 
     python make_fixtures.py        # -> $ZOO_WORK_ROOT/_d1_3b/fixtures/{records.json, red_arms.json, LICENSE-SemIf-MIT.txt}
+    python make_fixtures.py --heldout          # -> $ZOO_WORK_ROOT/_d1_3b/fixtures/heldout.json (round 5c)
 
 red_arms.json defines the pairs the round-2+ gates run (definitions only): Kev's word arm on tv4_000 ("correctly" ->
 "incorrectly"), a grammatical "not" in one qnli and one paws noul, and two state swaps (tv4_000 <-> tv4_001, the
 first <-> the third SemIf record, which ask the same claim of opposite evidence).
+
+`--heldout` (round 5c) writes fixtures/heldout.json only: the Core AI Kev lane's held-out set
+(`$ZOO_WORK_ROOT/_kev/fixtures/heldout.json`, sha256 8ec7ca4a…, 130 records: transfer-v4 development mmlu records
+61-100 as `tv4h_*`, records 21-30 of each other source as `tv4xh_<source>_*`, score records 21-40 as `tv4sh_*`) in
+d1's record form, ids kept: the 10 `tv4xh_tweet_offensive_*` left out (as in records.json), the request's `model` key
+dropped (d1's `system_one(state, questions)` takes none), Kev's token counts dropped, the source `tv4h` / `tv4xh` /
+`tv4sh`, Kev's provenance kept with the file's sha256 and the row's `_meta.id`. 120 records. It is checked against
+records.json: no id or transfer-v4 line in common (asserted); a record whose request renders to a records.json row
+(tv4h_28 = tv4_002: Kev's `permuted` mmlu row with the option order unchanged) and the records with records.json's
+state, question and labels in another option order (Kev's other `permuted` rows) are listed in the summary, not
+dropped. The held-out set verifies a choice made on records.json; it never makes one.
 """
 from __future__ import annotations
 
@@ -85,6 +97,16 @@ PUBLICATION = ("measurement use only for sciq (CC BY-NC 3.0) and for emotion / q
                "of these restrictions (the card's text is LiquidAI's README, LFM Open License v1.0).")
 LONG_TARGETS = {"long_15k": 1500, "long_34k": 3400}
 LONG_TOLERANCE = 0.05
+KEV_HELDOUT = {
+    "local_copy": str(work_path("_kev", "fixtures", "heldout.json")),
+    "original": "the Core AI Kev lane's held-out set ($ZOO_WORK_ROOT/_kev/fixtures/heldout.json, conversion/kev/"
+                "make_fixtures.py --heldout)",
+    "sha256": "8ec7ca4aa0e5be3a5261f03302d7e9df6cc78fae5ae368ca9db50b7b4921c6df",
+    "records": 130,
+    "model_key": "kev-0.8b",
+}
+HELDOUT_SOURCES = {"tv4h_": "tv4h", "tv4xh_": "tv4xh", "tv4sh_": "tv4sh"}
+HELDOUT_COUNTS = {"tv4h": 40, "tv4xh": 60, "tv4sh": 20}
 
 
 # --------------------------------------------------------------------------- helpers
@@ -125,6 +147,148 @@ def kev_records() -> tuple[list[dict], dict, list[dict]]:
     assert not any(r["provenance"].get("_meta", {}).get("source") == "tweet_offensive" for r in keep)
     by_id = {r["id"]: r for r in recs}
     return keep, by_id, dropped
+
+
+# --------------------------------------------------------------------------- the held-out set (round 5c)
+TV4_FILE = "evals/v4/transfer-v4/development.jsonl"
+
+
+def request_key(req: dict) -> str:
+    """A request as the host renders it: the state, then the questions and their options in request order."""
+    return json.dumps({"state": req["state"], "questions": req["questions"]}, ensure_ascii=False)
+
+
+def text_key(req: dict) -> str:
+    """A request with its questions and every option map in sorted order: equal for two requests that differ only in
+    the order of their options (the rows differ: the prompt lists the options in request order)."""
+    qs = {n: ({**q, "criteria": dict(sorted(q["criteria"].items()))} if isinstance(q.get("criteria"), dict) else q)
+          for n, q in sorted(req["questions"].items())}
+    return json.dumps({"state": req["state"], "questions": qs}, ensure_ascii=False, sort_keys=True)
+
+
+def heldout_records(fixture: list[dict]) -> tuple[list[dict], list[dict], dict]:
+    """Kev's held-out set in d1's record form (the module docstring) -> (records, the left-out records, the checks
+    against records.json)."""
+    path = Path(KEV_HELDOUT["local_copy"])
+    raw = path.read_bytes()
+    if sha256_bytes(raw) != KEV_HELDOUT["sha256"]:
+        raise SystemExit(f"{path}: sha256 differs from the pinned {KEV_HELDOUT['sha256'][:12]}")
+    recs = json.loads(raw)["records"]
+    assert len(recs) == KEV_HELDOUT["records"], len(recs)
+    keep, dropped = [], []
+    for r in recs:
+        if r["id"].startswith("tv4xh_tweet_offensive_"):
+            assert r["provenance"]["_meta"]["source"] == "tweet_offensive", r["id"]
+            dropped.append(r)
+            continue
+        assert r["provenance"]["_meta"]["source"] != "tweet_offensive", r["id"]
+        req = dict(r["request"])
+        if req.pop("model", None) != KEV_HELDOUT["model_key"]:
+            raise SystemExit(f"{r['id']}: the request's model key is not {KEV_HELDOUT['model_key']!r}")
+        assert list(req) == ["state", "questions"], (r["id"], list(req))
+        src = next(v for p, v in HELDOUT_SOURCES.items() if r["id"].startswith(p))
+        prov = {**r["provenance"], "kev_heldout": {"file": "_kev/fixtures/heldout.json", "sha256": KEV_HELDOUT["sha256"],
+                                                   "kev_source": r["source"], "meta_id": r["provenance"]["_meta"]["id"]}}
+        keep.append(record(r["id"], src, req["state"], req["questions"], r["gold"], r["note"], prov))
+    assert len(dropped) == 10, len(dropped)
+    counts = Counter(r["source"] for r in keep)
+    assert counts == Counter(HELDOUT_COUNTS), counts
+
+    clash = sorted({r["id"] for r in keep} & {r["id"] for r in fixture})
+    assert not clash, f"ids in records.json too: {clash}"
+
+    def lines(rs: list[dict]) -> set:
+        return {r["provenance"]["line"] for r in rs if r["provenance"].get("file") == TV4_FILE}
+    common = sorted(lines(keep) & lines(fixture))
+    assert not common, f"transfer-v4 lines in records.json too: {common}"
+    fx_req = {request_key(r["request"]): r["id"] for r in fixture}
+    same = [{"heldout": r["id"], "records_json": fx_req[request_key(r["request"])],
+             "meta_id": r["provenance"]["_meta"]["id"]} for r in keep if request_key(r["request"]) in fx_req]
+    fx_text: dict[str, list[str]] = {}
+    for r in fixture:
+        fx_text.setdefault(text_key(r["request"]), []).append(r["id"])
+    order_only = [{"heldout": r["id"], "records_json": fx_text[text_key(r["request"])],
+                   "meta_id": r["provenance"]["_meta"]["id"]} for r in keep
+                  if text_key(r["request"]) in fx_text and request_key(r["request"]) not in fx_req]
+    within: dict[str, list[str]] = {}
+    for r in keep:
+        within.setdefault(request_key(r["request"]), []).append(r["id"])
+    checks = {"ids_in_records_json": clash, "transfer_v4_lines_in_records_json": common,
+              "transfer_v4_lines": len(lines(keep)),
+              "requests_rendered_identically_in_records_json": same,
+              "requests_rendered_identically_note": "another transfer-v4 line whose request renders to the same row as a "
+                                                    "records.json record (a `permuted` mmlu row whose option order came "
+                                                    "out unchanged): not unseen; kept (the set is Kev's), listed so a "
+                                                    "verdict can be read without it",
+              "option_order_only_vs_records_json": order_only,
+              "option_order_only_note": "the same state, question and label -> text map as a records.json record, the "
+                                        "options in another order (Kev's permuted mmlu rows): another row, kept",
+              "identical_requests_within": [v for v in within.values() if len(v) > 1]}
+    return keep, dropped, checks
+
+
+def heldout_main(out: Path) -> int:
+    """fixtures/heldout.json (never overwritten); records.json and red_arms.json are not touched."""
+    from datetime import datetime, timezone
+
+    path = out / "heldout.json"
+    if path.exists():
+        raise SystemExit(f"{path} exists: never overwritten")
+    fx_path = out / "records.json"
+    fx_raw = fx_path.read_bytes()
+    records, dropped, checks = heldout_records(json.loads(fx_raw)["records"])
+    refused = []
+    for r in records:
+        for qid, q in r["request"]["questions"].items():
+            try:
+                host.validate_question(qid, q)
+            except ValueError as e:
+                refused.append({"record": r["id"], "question": qid, "host": str(e)})
+            g = (r["gold"] or {}).get(qid)
+            if g is not None:
+                keys = (["true", "false"] if q.get("type") == "noul" else list(q["criteria"]) if q.get("type", "choice") == "choice"
+                        else [str(i) for i in range(len(q["criteria"]))])
+                assert g in keys, (r["id"], qid, g)
+    kev = json.loads(Path(KEV_HELDOUT["local_copy"]).read_text())
+    doc = {
+        "schema": "d1-fixtures/1",
+        "role": ("held-out (round 5c): verifies a choice made on records.json (an int8 mode, a layer set); never used to "
+                 "choose anything"),
+        "model": MODEL,
+        "record_format": ("{id, source, request: {state, questions: {qid: {type, instructions, criteria}}}, gold: {qid: key or "
+                          "null}, note, provenance}; request = the arguments of d1's model.system_one(state, questions)"),
+        "gold_keys": ("the Kev fixture's: choice = criteria name, noul = 'true' / 'false', score = level index as a string; "
+                      "d1's noul probabilities are [yes, no]: host.gold_key maps 'true' -> 'yes', 'false' -> 'no'"),
+        "records": records,
+        "summary": {**summarize(records, refused), "checks_against_records_json": checks},
+        "sources": {
+            "kev_heldout": {**{k: v for k, v in KEV_HELDOUT.items() if k != "local_copy"},
+                            "path": KEV_HELDOUT["local_copy"],
+                            "kev_file": {k: kev[k] for k in ("schema", "role", "model", "checkpoint")},
+                            "transfer_v4": kev["sources"]["transfer_v4"],
+                            "copied": len(records), "ids": "Kev's, unchanged",
+                            "changed": "request.model ('kev-0.8b') dropped; Kev's token counts (`tokens`) dropped; source "
+                                       "= tv4h / tv4xh / tv4sh by the id's prefix (Kev's in provenance.kev_heldout)",
+                            "excluded": {f"{p}*": v for p, v in EXCLUDED_PREFIXES.items()},
+                            "excluded_ids": [r["id"] for r in dropped]},
+            "records_json": {"path": str(fx_path), "sha256": sha256_bytes(fx_raw)},
+            "publication": PUBLICATION + " The held-out text stays local: publish ids, hashes and numbers only.",
+        },
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    data = (json.dumps(doc, ensure_ascii=False, indent=1) + "\n").encode()
+    write_atomic(path, data)
+    s = doc["summary"]
+    print(f"{path}: {s['records']} records, {s['questions']} questions ({s['questions_answerable']} answerable), "
+          f"sha256 {sha256_bytes(data)}")
+    for src, v in s["by_source"].items():
+        print(f"  {src}: {v['records']} records, {v['questions']} questions, {v['types']}, options {v['options']}")
+    print("  refused:", refused)
+    print("  rendered identically in records.json:",
+          [(x["heldout"], x["records_json"]) for x in checks["requests_rendered_identically_in_records_json"]])
+    print("  option order only vs records.json:", [(x["heldout"], x["records_json"]) for x in checks["option_order_only_vs_records_json"]])
+    print("  identical requests within:", checks["identical_requests_within"])
+    return 0
 
 
 # --------------------------------------------------------------------------- card records
@@ -371,8 +535,12 @@ def summarize(records: list[dict], refused: list[dict]) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out-dir", default=str(LANE / "fixtures"))
+    ap.add_argument("--heldout", action="store_true",
+                    help="write <out-dir>/heldout.json only (Kev's held-out set in d1's form; records.json is read)")
     args = ap.parse_args()
     out = Path(args.out_dir)
+    if args.heldout:
+        return heldout_main(out)
     out.mkdir(parents=True, exist_ok=True)
     snap = Path(hf_snapshot(MODEL["hf_id"], revision=MODEL["revision"]))
     readme = (snap / "README.md").read_text()

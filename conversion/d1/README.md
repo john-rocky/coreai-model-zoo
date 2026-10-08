@@ -14,13 +14,13 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 
 | file | what it does |
 |---|---|
-| `make_fixtures.py` | the fixture: the Kev fixture's records as they are (its tweet_offensive records and its red arm left out), the model card's example requests, two long JSON states written for the port; `red_arms.json` (a word arm, two grammatical "not" arms, two state swaps) |
+| `make_fixtures.py` | the fixture: the Kev fixture's records as they are (its tweet_offensive records and its red arm left out), the model card's example requests, two long JSON states written for the port; `red_arms.json` (a word arm, two grammatical "not" arms, two state swaps); `--heldout`: the Core AI Kev lane's held-out set in d1's form (`heldout.json`, its tweet_offensive records left out), checked against `records.json` |
 | `host.py` | the host specification (`tokenizers`, NumPy, json): the request checks, the prompt text, option codes and readout groups, the row and the Tree split, the readout arithmetic, the answers and the response, the graph's static-S rows |
 | `test_host.py` | `host.py` against the provider's code (through `oracle_d1.dry_run`) and transformers' tokenizer on every fixture question with two tokenizers; the tokenizer contract, the readout's equivalence on random full-vocabulary logits, a request table, negative controls, the fixture's lengths |
 | `oracle_d1.py` | the provider's code unchanged (`AutoModel` + `trust_remote_code`, fp32, CPU): the API path and the row form per question, Tree against row, the final-norm hook and its proof, determinism; `--dry-run` runs the same code on a stand-in backbone (no weights); --images runs the picture records through the provider's image path: the API path (one question = the whole prompt in one plain pass, several = the Tree), each question's plain pass, the image features and the final-norm rows of the --hidden records |
 | `lfm2_d1_decoder.py` | the decoder module: `Lfm2VlPipelinedForCausalLM` with an Identity head, hidden `[1, S, 2048]` out, `image_embeds [N_IMAGE_TOKENS, 2048]` in (the image-row contract in its header), the static-S export spec; run as a script it checks the module against the checkpoint's config and safetensors header with no weights |
 | `toy_graph_check.py` | the decoder class at a toy config through export, `optimize`, `save_asset` and the Python runtime on the CPU, against its eager forward; the extension-id image rows |
-| `export_decoder.py` | the bundle (round 3 with the weights): fp16 / int8lin / int8mix / int4lin, one static-S function `main`, the quantized set asserted equal to the recipe's; `metadata.json` (`decision-backbone`, the contract, `decision` with the option table, `vision`, `compression`), `tokenizer/` and `LICENSE` verbatim, `head/` the option rows; `--aot` compiles for the Mac GPU (h16c); `--toy` runs the same path on a toy config with random weights |
+| `export_decoder.py` | the bundle (round 3 with the weights): fp16 / int8lin / int8mix / int8mlp / int8conv / int4lin at block 32 or 16 (`--quant-block`), one static-S function `main`, the quantized set asserted equal to the mode's; `metadata.json` (`decision-backbone`, the contract, `decision` with the option table, `vision`, `compression`), `tokenizer/` and `LICENSE` verbatim, `head/` the option rows; `--aot` compiles for the Mac GPU (h16c); `--toy` runs the same path on a toy config with random weights |
 | `export_option_rows.py` | the option table (round 3 with the weights): the tied embedding rows of every readout candidate id, bf16 to fp32, read one row at a time and checked by a second reader; `--check` holds every fixture readout id against the table and the host's refusals against their controls |
 | `readout_gate.py` | the gate (round 3 against the oracle): the AOT graph on the Mac GPU (`SpecializationOptions.default()`), the slot's hidden row through the host's readout, against the oracle; at most 40 rows a process and a re-run of its first row; the red arms of `--arms` (default round 4's set) with an oracle pre-check on that set's own oracle; `red`, `merge`, `red-records` |
 | `parity_decoder_torch.py` | the decoder module in fp32 torch driven as the graph runs (round 3 against the oracle): P1 every row through the host's readout, P2 the chunk order against one forward, P3 the chunk widths, P4 the red arms; `toy` runs all four on the toy |
@@ -111,6 +111,25 @@ emotion, qnli and paws records are for measurement only: their text does not go 
 The oracle asserts, per question, that the model's own `lm_head` applied to the final-norm hook's row at the answer slot,
 minus its log-sum-exp, equals the row form's log-probabilities bit for bit; with `--hidden` it also keeps the rows and
 checks the host's float64 gather against the fp32 logits. Record 0 runs again at the end and must be bit-equal.
+
+The held-out set (round 5c) checks a choice made on `records.json` (an int8 mode, a layer set) on records nothing was
+chosen on:
+
+```bash
+$PY make_fixtures.py --heldout                 # -> $K/fixtures/heldout.json (never overwritten)
+HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --threads 1 --fixtures $K/fixtures/heldout.json \
+    --out-dir $K/oracle/heldout --results-dir $K/oracle/heldout
+```
+
+`--heldout` reads the Core AI Kev lane's held-out file (`$ZOO_WORK_ROOT/_kev/fixtures/heldout.json`, sha256 pinned in
+the script: transfer-v4 development records past the fixture's slices) and writes only `heldout.json`: its
+tweet_offensive records left out as in `records.json`, the request's `model` key dropped, ids and gold kept, Kev's
+provenance kept with that file's sha256 and each row's `_meta.id`. It asserts that no id and no transfer-v4 line is
+shared with `records.json`, and lists in `summary.checks_against_records_json` the records whose request still renders
+to a `records.json` row (a `permuted` mmlu row whose option order came out unchanged) and those that only reorder a
+fixture record's options; a verdict on the held-out set can be read with and without the first kind. Give the oracle
+its own `--results-dir`: the default is the fixture oracle's summary. The held-out text stays local, as the fixture's
+measurement-only sources do.
 
 ## 2. The decoder: module, export and gate
 
@@ -205,15 +224,30 @@ $PY int8_bisect_torch.py merge --out $K/results/<bisect>.json
 $PY export_decoder.py int8mix --fp16-layers <the chosen layers> --prefill-chunk 16 --aot --record $K/results/<record>.json
 $PY readout_gate.py run $K/exports/bundles/d1_3b_decode_int8mix_l<..>_pf16 --red \
     --compare-with $K/results/<gate fp16>.json --transcript $K/results/<gate int8mix>.json
+# round 5c: the block size and the kind of linear
+$PY export_decoder.py int8lin --quant-block 16 --prefill-chunk 16 --aot --record $K/results/<record>.json  # .._int8lin_b16_..
+$PY export_decoder.py int8mlp --prefill-chunk 16 --aot --record $K/results/<record>.json   # the conv-mixer projections fp16
+$PY export_decoder.py int8conv --prefill-chunk 16 --aot --record $K/results/<record>.json  # the MLP linears fp16: a map
+$PY export_decoder.py int8mlp --quant-block 16 --prefill-chunk 16 --aot --record $K/results/<record>.json
+# a mode that passes the fixture gate, on the held-out set (§1; no red arms: their base rows are fixture records)
+$PY readout_gate.py run $K/exports/bundles/d1_3b_decode_fp16_pf16 --oracle $K/oracle/heldout/records_oracle.json \
+    --tag heldout_fp16_pf16 --transcript $K/results/<gate fp16 held-out>.json
+$PY readout_gate.py run $K/exports/bundles/<the mode's bundle> --oracle $K/oracle/heldout/records_oracle.json \
+    --tag heldout_<mode> --compare-with $K/results/<gate fp16 held-out>.json --transcript $K/results/<gate held-out>.json
 ```
 
 The quantizer prints two warnings and only these: `Tensor size 1 along axis 1 is not divisible by block size 32.
-Skipping quantization.` (22 times, int8 and int4) and `dynamic_shapes is only supported in graph mode and will be
-ignored.` (coreai-opt's eager mode, which the weight-only recipe uses, does not read input shapes); any other warning,
-or a quantized set other than the recipe's, stops the export.
+Skipping quantization.` (22 times, int8 and int4, and with `block size 16` at block 16) and `dynamic_shapes is only
+supported in graph mode and will be ignored.` (coreai-opt's eager mode, which the weight-only recipe uses, does not read
+input shapes); any other warning, or a quantized set other than the mode's, stops the export.
+
+The held-out gate reads the held-out oracle (`--oracle`) and keeps its shards apart (`--tag`); the bar is the gate's
+own. Which modes go to it and which one is the candidate is written down before the first int8 gate of a round, and
+nothing is chosen on held-out numbers.
 
 The AOT asset's `main-h16c.mlirb` holds the function's type and the source files' paths and sha256, not the weights:
-int8lin and int4lin compile to the same `main.hash`, and the Python runtime names its cache entry by it
+the `main.hash` follows which linears are quantized, not the bit width or the block size (int8lin at block 32 and 16
+and int4lin share one name, int8mlp at block 32 and 16 another), and the Python runtime names its cache entry by it
 (`~/Library/Caches/coreai-cache/<OS build>/python/<main.hash>/`). Loading the second mode's asset while the first
 mode's entry is there can run the first mode's graph. Before gating (or timing) another mode of the same graph,
 move the entry aside, and after the run check that the entry's `manifest.plist` has the asset's own sha256.
