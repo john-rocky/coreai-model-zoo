@@ -281,5 +281,5 @@ own records name invented people and companies that were never screened, so only
 | pictures, int8mlp S = 64 + tower fp16w32, Mac | 24/24, max \|Δp\| 0.0024 | `gate-d1-3b-images.json` |
 | the stripped bundles against the exports, Mac | every gate row bit for bit | `gate-d1-3b-strip.json` |
 | iPhone 18 Pro, the phone's JIT (int8mlp as exported) | 416/416 + 1/1, max \|Δp\| 0.0186 | `gate-d1-3b-iphone.json` |
-| one question, Mac (fp16 JIT, stripped) / iPhone | 34.3 / 48.0 ms | `gate-d1-3b-timing-mac.json`, `gate-d1-3b-iphone.json` |
-| 3,470-token state, Mac / iPhone | 1,888.0 / 2,794.4 ms | the same |
+| one question, Mac (fp16 JIT, stripped) / iPhone (int8mlp JIT, stripped; run r12c-085445) | 34.3 / 48.3 ms | `gate-d1-3b-timing-mac.json`, `gate-d1-3b-iphone.json` |
+| 3,470-token state, Mac / iPhone | 1,888.0 / 2,795.9 ms | the same |
