@@ -1,5 +1,7 @@
 # Granite-Embedding-97M-Multilingual-R2 — Core AI
 
+Sample app: [CoreAISearchiOS](https://github.com/john-rocky/coreai-samples/tree/main/CoreAISearchiOS) downloads `ios/fp32-s128` from [`mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI`](https://huggingface.co/mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI) and searches your own notes by meaning, 16.5 ms per query on an iPhone 18 Pro (iOS 27.2, 2026-10-09).
+
 IBM's 97M-parameter **multilingual text embedder** — a ModernBERT encoder, 384-d CLS-pooled
 unit vectors, Japanese and English among its languages — as a static `.aimodel` for macOS 27 and
 iOS 27 (every iPhone generation specializes it on its first load), with an ahead-of-time compiled
