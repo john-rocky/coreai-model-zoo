@@ -1,5 +1,7 @@
 # FLUX.2 klein 4B — Core AI
 
+> **Note (2026-10-10):** the HF export (2026-07-20) loads only with the apple/coreai-models diffusion pipeline of that time; on current main (97a14be and later) it stops with "unsupported metadata_version". A re-export with the current exporter is planned. Until then, the coreai-samples app CoreAIImageGenMac (https://github.com/john-rocky/coreai-samples/tree/main/CoreAIImageGenMac) pins dushandz/FLUX.2-klein-4B-CoreAI, a community export made with the current recipe.
+
 [Black Forest Labs' **FLUX.2 [klein] 4B**](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B)
 converted to **Core AI** for on-device image generation on Apple Silicon (macOS 27+),
 running on Apple's official diffusion runtime in
