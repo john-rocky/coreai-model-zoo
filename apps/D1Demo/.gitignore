@@ -1,0 +1,3 @@
+_work/
+*.xcodeproj
+__pycache__/

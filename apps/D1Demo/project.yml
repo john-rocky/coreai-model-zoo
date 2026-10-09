@@ -1,0 +1,53 @@
+# D1Demo — d1-3B's demo app (iPhone; a Mac build for checking the run against the Python reference). The decision path
+# is the Swift host apps/D1 (D1Decider), linked by path and unchanged; this target is the screens, the samples and the
+# autoplay. Build: ./_build.sh (iOS, with D1Demo.entitlements: com.apple.developer.kernel.increased-memory-limit, which
+# the iPhone's decoder needs to specialize) or ./_build.sh --mac (xcodegen generate + xcodebuild Release). The model
+# and the samples are sideloaded, not bundled (_stage.sh, _install.sh).
+name: D1Demo
+options:
+  bundleIdPrefix: com.daisukemajima
+  createIntermediateGroups: true
+packages:
+  D1:
+    path: ../D1
+schemes:
+  D1Demo:
+    build:
+      targets:
+        D1Demo: all
+    run:
+      config: Release
+targets:
+  D1Demo:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    deploymentTarget:
+      iOS: "27.0"
+      macOS: "27.0"
+    sources:
+      - path: Sources
+    dependencies:
+      - package: D1
+        product: D1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daisukemajima.d1demo
+        DEVELOPMENT_TEAM: MFN25KNUGJ
+        CODE_SIGN_STYLE: Automatic
+        # iOS only: the iPhone's decoder does not specialize under the default memory limit (apps/D1Gate README)
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": D1Demo.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIStatusBarHidden: YES
+        INFOPLIST_KEY_UIRequiresFullScreen: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_CFBundleDisplayName: d1 inbox
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        # macOS: the check run reads the lane's bundles and writes where -out points
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: NO
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
