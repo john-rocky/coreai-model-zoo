@@ -364,6 +364,8 @@ xcrun coreai-build compile d1_3b_decode_fp16_pf64_s.aimodel --output aot --prefe
 
 ## Use it
 
+In [CoreAIKit](https://github.com/john-rocky/coreai-kit/blob/main/docs/SYSTEM_ONE.md#pictures-and-text-one-row-per-question-d1-3b) the model is catalog id `d1-3b` (`KitD1Decider`; `systemone serve --model d1-3b` takes `images`); the kit downloads the platform's decoder and, for a request with a picture, the tower. [`apps/D1Demo`](../../apps/D1Demo/) is the iPhone demo app (the support-inbox clip).
+
 Swift, with the [`D1`](../../apps/D1/) package (macOS 27 / iOS 27; the system CoreAI framework, Accelerate and
 swift-transformers' tokenizer), on a download of the repository:
 
