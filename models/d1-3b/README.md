@@ -29,7 +29,7 @@ MLP linears are int8 per block of 32 (3.70 GB). Both keep the attention projecti
 specialization nor its ahead-of-time asset loads.
 
 **Why two decoders.** On the phone, the int8mlp decoder at 64 tokens a call passes the bar and decides one question in
-48.0 ms; each other form tried there is slower, misses the bar or does not load (Forms measured). On the Mac, the same
+48.3 ms; each other form tried there is slower, misses the bar or does not load (Forms measured). On the Mac, the same
 `.aimodel` specializes to a graph up to 25.7 % slower than its AOT asset, with other bits. The fp16 `.aimodel`
 specializes to its AOT asset's rows bit for bit, at most 0.7 % slower, and keeps more room under the bar (fixture max
 |Δp| 0.0039 against 0.0197).
@@ -218,13 +218,15 @@ Transcript: [`gate-d1-3b-timing-mac.json`](gate-d1-3b-timing-mac.json).
 Through [`apps/D1Gate`](../../apps/D1Gate/), a headless gate app on the Swift host, Release, with
 `com.apple.developer.kernel.increased-memory-limit` (6,432 MB available at launch; 3,530 MB without the entitlement).
 The phone was on USB power, the battery at 80 % and charging; every bench item started at thermal state nominal. Every
-p the app wrote was re-scored on the Mac from its bit patterns. These runs used the int8mlp bundle as exported, before its
-debug locations were stripped (Bundle, below); the stripped bundle has not run on the phone yet.
+p the app wrote was re-scored on the Mac from its bit patterns. These runs used the released bundles,
+`d1_3b_decode_int8mlp_pf64_s` and `d1_3b_vision_fp16w32_s` (Bundle, below). An earlier run on this phone used the
+bundles as exported, before their debug locations were stripped. Both runs gave the same p and the same hidden row
+on all 417 questions, the same red-arm rows and the same tower output on all 40 crops, bit for bit.
 
 - **Load.** The `.aimodel` specialized on the phone (GPU preferred, `expectFrequentReshapes`), the tower's `.aimodel`
-  the same way: 28.1 s cold, 20.8 s of it in `AIModel(contentsOf:)`, with +4,779 MB of runtime cache and a peak
-  footprint of 270 MB during the load. With the cache warm a load took 3.6 s.
-- **Gate** (run `r10a1c-012336`):
+  the same way: 31.8 s cold, 27.0 s of it in `AIModel(contentsOf:)`, with +4,779 MB of runtime cache and a peak
+  footprint of 265 MB during the load. With the cache warm a load took 3.7 s.
+- **Gate** (run `r12c-085445`):
 
 | set | questions | argmax (margin > 0.02) | near-ties agreeing | max \|Δp\| | mean of row means | bar |
 |---|---:|---:|---:|---:|---:|---|
@@ -233,20 +235,21 @@ debug locations were stripped (Bundle, below); the stripped bundle has not run o
 
   The red arms are red (5/5), the shared prefix equals the direct run on all 23 multi-question records, and the re-run
   of the opening record is bit-equal. No hidden row equals the Mac's (a different GPU): their p differ by at most
-  0.0037, with every argmax equal (417/417). The run's footprint peaked at 547 MB.
+  0.0037, with every argmax equal (417/417). The run's footprint peaked at 568 MB.
 - **Bench** (60 s of rest before each item, one warm-up, then 5 decisions; the 3,470-token state with 30 s of rest
   before each decision):
 
 | request | ms | 5 runs |
 |---|---:|---|
-| one question | 48.0 | 47.3–50.3 |
-| three questions on that state, shared / each row from zero | 146.7 / 145.2 | 142.7–150.2 / 143.0–150.9 |
-| one question on a 3,470-token state | 2,794.4 | 2,781.6–2,802.4 |
-| one question on a 384 × 384 picture (the tower's crop: 418.7) | 570.0 | 568.5–575.6 |
+| one question | 48.3 | 47.4–51.9 |
+| three questions on that state, shared / each row from zero | 147.1 / 144.8 | 142.9–150.3 / 142.7–150.5 |
+| one question on a 3,470-token state | 2,795.9 | 2,791.1–2,806.0 |
+| one question on a 384 × 384 picture (the tower's crop: 416.9) | 569.3 | 567.4–572.3 |
 
 Without the entitlement neither decoder form loads on this phone: the on-device specialization dies with
 `std::bad_alloc` while it folds a weight transpose, and the ahead-of-time asset (8.74 GB) with a `SIGSEGV` in the
-delegate compile, both within two seconds. Transcript: [`gate-d1-3b-iphone.json`](gate-d1-3b-iphone.json).
+delegate compile, both within two seconds. Transcripts: [`gate-d1-3b-iphone.json`](gate-d1-3b-iphone.json), and for
+the run before the strip [`gate-d1-3b-iphone-r10a.json`](gate-d1-3b-iphone-r10a.json).
 
 ## Forms measured
 
@@ -282,7 +285,7 @@ iPhone 18 Pro (D1Gate, with the entitlement):
 |---|---:|---:|---|
 | int8mlp, S = 16, the phone's JIT | 125.5 | 0.0180 | 3 calls of 40.2 ms; thermal fair |
 | int8mlp, S = 32, the phone's JIT | — | 0.0223 | one question over the bar: not timed |
-| **int8mlp, S = 64, the phone's JIT (this release)** | **48.0** | **0.0186** | |
+| **int8mlp, S = 64, the phone's JIT (this release)** | **48.3** | **0.0186** | [`gate-d1-3b-iphone.json`](gate-d1-3b-iphone.json); as exported, before the strip: 48.0 |
 | int8mlp, S = 16, AOT h19p with `--expect-frequent-reshapes` (8.74 GB) | — | 0.0075 (20 questions) | 55.9 ms a call against the JIT's 40.5 |
 | int8mlp, S = 16, AOT h19p without it (3.70 GB) | — | — | no-go: a call right after a new position length is specialized can return a wrong row, then `SIGTRAP` |
 | int8mlp, static form, S = 64: AOT h19p and JIT | — | 0.0208 | one question over the bar; the two give the same rows bit for bit |
@@ -469,8 +472,8 @@ From the [provider's card](https://huggingface.co/LiquidAI/d1-3B): it is not a c
 port adds:
 
 - A row holds at most 4,032 tokens, while the provider's card gives a context length of 32,768.
-- Loading an `.aimodel` with a cold runtime cache specializes it: 10.2 s for the Mac's decoder, 28.1 s for the iPhone's
-  on the phone. With the cache warm a load takes 0.7 s on the Mac and 3.6 s on the phone.
+- Loading an `.aimodel` with a cold runtime cache specializes it: 10.2 s for the Mac's decoder, 31.8 s for the iPhone's
+  on the phone. With the cache warm a load takes 0.7 s on the Mac and 3.7 s on the phone.
 - Measured on one iPhone 18 Pro with iOS 27.2 beta (24B5099f) and one M4 Max; other iPhones and Macs were not measured.
 - The oracle is the provider's code in fp32 on the CPU; a bf16 run of the provider's code was not compared, and no
   form here runs on the CPU alone.

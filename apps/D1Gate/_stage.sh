@@ -26,6 +26,20 @@
 #                                    (D1_MD5SUMS=MD5SUMS,MD5SUMS_PF<S>). A bundle of the static form
 #                                    (metadata language.contract.static) goes --into decoder_pf<S>_static (the files
 #                                    then end in pf<S>_static: mac_ref_pf<S>_static.json, MD5SUMS_PF<S>_STATIC, ...)
+#   ./_stage.sh --stripped <bundle> --like decoder_pf<S> [--tower <tower bundle>]
+#                                    a bundle re-saved with its debug locations stripped (conversion/d1/strip_bundle.py:
+#                                    the `strip` record in metadata.json), staged apart beside the bundle it was stripped
+#                                    from: _work/device_stage_pf<S>_s/D1Assets/ with decoder_pf<S>_s/ (the bundle),
+#                                    tower_s/ (--tower: the tower stripped the same way), the decoder_pf<S> stage's
+#                                    fixtures/mac_ref_pf<S>.json and fixtures/bench_pf<S>.json unchanged (the same ops and
+#                                    weights: the Mac's read-out of the unstripped bundle stays the reference) and
+#                                    MD5SUMS_PF<S>_S (every file of the three). The strip record must name the bundle
+#                                    staged as decoder_pf<S> and the sha256 of its main.mlirb (the tower's: tower/'s), and
+#                                    every other file and field must equal that bundle's. Pushed with D1_PUSH_ONLY=
+#                                    decoder_pf<S>_s,tower_s,fixtures/mac_ref_pf<S>.json,fixtures/bench_pf<S>.json,
+#                                    MD5SUMS_PF<S>_S, read with D1_DECODER=decoder_pf<S>_s D1_TOWER=tower_s
+#                                    D1_MAC_REF=mac_ref_pf<S>.json D1_BENCH=bench_pf<S>.json D1_MD5SUMS=MD5SUMS,
+#                                    MD5SUMS_PF<S>_S
 # Layout (GateRunner.swift / Fixtures.swift read it):
 #   decoder/    <- $L/exports/bundles/d1_3b_decode_int8mlp_pf16/{metadata.json, <name>.aimodel/, tokenizer/, head/, LICENSE}
 #   tower/      <- $L/exports/vision/d1_3b_vision_fp16w32/{metadata.json, <name>.aimodel/, host/, LICENSE}
@@ -76,6 +90,100 @@ if [ "${1:-}" = "--aot" ]; then
   (cd $SA && find aot -type f | LC_ALL=C sort | while read -r f; do nice -n 19 md5 -r "$f"; done > MD5SUMS_AOT)
   echo "staged $SA: $(grep -c . $SA/MD5SUMS_AOT) files, $(du -sh $SA | cut -f1)"
   cat $SA/MD5SUMS_AOT
+  exit 0
+fi
+
+if [ "${1:-}" = "--stripped" ]; then
+  B=${2:-} LIKE="" TB=""
+  shift; (( $# )) && shift
+  while (( $# >= 2 )); do
+    case $1 in
+      --like) LIKE=$2 ;;
+      --tower) TB=$2 ;;
+      *) echo "unknown argument $1"; exit 1 ;;
+    esac
+    shift 2
+  done
+  (( $# == 0 )) || { echo "a lone argument: $1"; exit 1; }
+  [ -n "$B" ] && [ -n "$LIKE" ] || { echo "--stripped <bundle> --like decoder_pf<S> [--tower <tower bundle>]"; exit 1; }
+  [[ $LIKE =~ '^decoder_pf[0-9]+$' ]] || { echo "--like $LIKE: want decoder_pf<S>"; exit 1; }
+  SUF=${LIKE#decoder_}
+  LS=$W/device_stage_$SUF/D1Assets
+  M=$W/device_stage/D1Assets
+  INTO=${LIKE}_s
+  SD=$W/device_stage_${SUF}_s/D1Assets
+  [[ $SD == */_work/device_stage_pf[0-9]*_s/D1Assets ]] || { echo "refusing to clear $SD"; exit 1; }
+  BN=${B:t}
+  for f in metadata.json tokenizer/tokenizer.json tokenizer/tokenizer_config.json head/option_rows.json \
+    head/option_rows.safetensors $BN.aimodel/main.mlirb $BN.aimodel/main.hash; do need $B/$f; done
+  for f in $LIKE/metadata.json fixtures/mac_ref_$SUF.json fixtures/bench_$SUF.json MD5SUMS_${(U)SUF}; do need $LS/$f; done
+  if [ -n "$TB" ]; then
+    TBN=${TB:t}
+    for f in metadata.json host/position_embedding.safetensors $TBN.aimodel/main.mlirb $TBN.aimodel/main.hash; do need $TB/$f; done
+    need $M/tower/metadata.json
+  fi
+  junk=$(find $B ${TB:+$TB} \( -name '.*' -o -name '*.incomplete' -o -name '*.lock' -o -name '*.aria2' \) -print -quit)
+  [ -z "$junk" ] || { echo "$junk: a hidden or partial file (a copy still running?)"; exit 1; }
+  # the strip record against the bundles staged before (decoder_pf<S>/, tower/): the source's main.mlirb by size and
+  # sha256, this bundle's main.mlirb and main.hash, every other file and every other metadata field equal
+  /usr/bin/python3 - $B $LS/$LIKE "${TB:-}" $M/tower <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+
+def sha(p):
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 24), b""):
+            h.update(b)
+    return h.hexdigest()
+
+def check(b: Path, like: Path, what: str) -> str:
+    m, lm = json.load(open(b / "metadata.json")), json.load(open(like / "metadata.json"))
+    st = m.get("strip")
+    assert st, f"{what}: {b}/metadata.json has no strip record"
+    assert st["from_bundle"] == lm["name"], f"{what}: stripped from {st['from_bundle']}, the staged bundle is {lm['name']}"
+    src = like / lm["assets"]["main"] / "main.mlirb"
+    out = b / m["assets"]["main"] / "main.mlirb"
+    assert (src.stat().st_size, sha(src)) == (st["from_main_mlirb"]["bytes"], st["from_main_mlirb"]["sha256"]), \
+        f"{what}: the strip record's source is not {src}"
+    assert (out.stat().st_size, sha(out)) == (st["main_mlirb"]["bytes"], st["main_mlirb"]["sha256"]), \
+        f"{what}: {out} is not the strip record's output"
+    assert (out.parent / "main.hash").read_bytes().hex() == st["main_mlirb"]["sha256"], f"{what}: main.hash is not main.mlirb's sha256"
+    rest = lambda d: {k: v for k, v in d.items() if k not in ("name", "assets", "strip")}
+    assert rest(m) == rest(lm), f"{what}: metadata.json differs from {lm['name']}'s beyond name / assets / strip"
+    # every file outside the .aimodel directory and metadata.json, by sha256
+    mine ={str(p.relative_to(b)) for p in b.rglob("*") if p.is_file() and not str(p.relative_to(b)).startswith(m["assets"]["main"])}
+    theirs = {str(p.relative_to(like)) for p in like.rglob("*") if p.is_file() and not str(p.relative_to(like)).startswith(lm["assets"]["main"])}
+    assert mine == theirs, f"{what}: files {sorted(mine ^ theirs)} are in one bundle only"
+    differ = [r for r in sorted(mine - {"metadata.json"}) if sha(b / r) != sha(like / r)]
+    assert not differ, f"{what}: {differ} differ from {lm['name']}'s"
+    return (f"{what} {m['name']}: stripped from the staged {lm['name']} (main.mlirb {st['from_main_mlirb']['bytes']} B "
+            f"{st['from_main_mlirb']['sha256'][:12]}… -> {st['main_mlirb']['bytes']} B {st['main_mlirb']['sha256'][:12]}…), "
+            f"{len(mine) - 1} other files equal")
+
+print(check(Path(sys.argv[1]), Path(sys.argv[2]), "decoder"))
+if sys.argv[3]:
+    print(check(Path(sys.argv[3]), Path(sys.argv[4]), "tower"))
+PY
+  rm -rf $SD
+  mkdir -p $SD/$INTO $SD/fixtures
+  for e in metadata.json $BN.aimodel tokenizer head LICENSE; do [ -e $B/$e ] && cp -cR $B/$e $SD/$INTO/$e; done
+  if [ -n "$TB" ]; then
+    mkdir -p $SD/tower_s
+    for e in metadata.json $TBN.aimodel host LICENSE; do [ -e $TB/$e ] && cp -cR $TB/$e $SD/tower_s/$e; done
+  fi
+  cp -c $LS/fixtures/mac_ref_$SUF.json $LS/fixtures/bench_$SUF.json $SD/fixtures/
+  LST=MD5SUMS_${(U)SUF}_S
+  (cd $SD && find $INTO ${TB:+tower_s} fixtures -type f | LC_ALL=C sort | while read -r f; do nice -n 19 md5 -r "$f"; done > $LST)
+  # the two fixture files are the ones the decoder_pf<S> stage put on the phone
+  for f in fixtures/mac_ref_$SUF.json fixtures/bench_$SUF.json; do
+    [ "$(grep " $f\$" $SD/$LST)" = "$(grep " $f\$" $LS/MD5SUMS_${(U)SUF})" ] || { echo "$f: md5 differs from the $LIKE stage's"; exit 1; }
+  done
+  echo "staged $SD: $(grep -c . $SD/$LST) files in $LST, $(du -sh $SD | cut -f1) (push: D1_PUSH_ONLY=$INTO${TB:+,tower_s},fixtures/mac_ref_$SUF.json,fixtures/bench_$SUF.json,$LST)"
+  for d in $INTO ${TB:+tower_s} fixtures; do
+    printf "  %-16s %10.1f MB  %4d files\n" $d $(( $(find $SD/$d -type f -exec stat -f %z {} + | paste -sd+ - | bc) / 1e6 )) \
+      $(find $SD/$d -type f | wc -l)
+  done
   exit 0
 fi
 
