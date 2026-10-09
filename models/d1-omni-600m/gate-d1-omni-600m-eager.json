@@ -1,0 +1,252 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "eager",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "The re-authored modules in fp32 torch on the CPU against the publisher's code before any export (rounds 1-6): the decision graph, its L4096 key blocks, the vision and audio towers and the mel front end, the host's rows and resize in NumPy, and the activation range against fp16.",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "results/absmax.json",
+   "bytes": 174065,
+   "sha256": "3fc2ab85766aec719fce8d4a63a5b64a8c3d3181eb00fc0e5bc977c14b565119"
+  },
+  {
+   "file": "results/audio_eager.json",
+   "bytes": 74193,
+   "sha256": "e958e5003a33a971d9f8a9ebc98a551ff1729f3c47e119740d8a5e597e1493bf"
+  },
+  {
+   "file": "results/audio_mel.json",
+   "bytes": 20803,
+   "sha256": "a12c4e02994c5d566e95a65c7b07907a5ac30453cb31e8e3485f0de479ccedac"
+  },
+  {
+   "file": "results/block_softmax_check.v2.json",
+   "bytes": 46500,
+   "sha256": "0c9f43ae9c4bfb047fe2ef06167cfa31e645a789a4569edefe0141d12ecc7a2f"
+  },
+  {
+   "file": "results/eager_check.json",
+   "bytes": 214430,
+   "sha256": "90a9c38dbeeb7f427a51bb400b2d6e234a234004bea27401fbd58e5df2e0d721"
+  },
+  {
+   "file": "results/encode_rows.v3.json",
+   "bytes": 465588,
+   "sha256": "874dfbab1b3aea6c9a5e44de52f82b8e74bda8a06599e21ac781d3bd8e23eb0b"
+  },
+  {
+   "file": "results/resize_numpy_gate.json",
+   "bytes": 42122,
+   "sha256": "1f06e5494535169832545b10eafe97a83543f64b1add6955ba238500fbbe7a3d"
+  },
+  {
+   "file": "results/vision_eager.run2.json",
+   "bytes": 73430,
+   "sha256": "8224c0afba3c0c9bb4ecc13e0a1e5cff6230d5b3c5748d5a6132c19d418f1c98"
+  }
+ ],
+ "status": "PASS",
+ "decision_graph": {
+  "what": "d1_omni_model.py (the decision graph's module: bidirectional LFM2 trunk + decision head, an explicit mask and key-padding input, fp32) on the CPU against the oracle, every fixture row of round 2 (text rows and the media rows with the oracle's own prefix), at each row's bucket",
+  "rows": 470,
+  "argmax_equal": 470,
+  "near_tie": {
+   "rows": 13,
+   "argmax_equal": 13
+  },
+  "max_abs_dp": 1.4454126358032227e-05,
+  "max_abs_dlogit": 8.58306884765625e-05,
+  "bar": {
+   "name": "round 2's eager bar (fp32 against fp32)",
+   "argmax": "every row, near ties included",
+   "max_abs_dp": 2e-05,
+   "max_abs_dlogit": 0.001,
+   "basis": "2 x the fp32 oracle's own max |dp| against the publisher's code run in float64 (eager_check.json bar_basis), the supervisor's ruling of 2026-10-08 round 2"
+  },
+  "verdict": {
+   "argmax": true,
+   "max_abs_dp": true,
+   "max_abs_dlogit": true
+  },
+  "status": "PASS",
+  "recomputed_vs_file": {
+   "equal": true,
+   "different": {}
+  },
+  "bar_basis": {
+   "rule": "max |dp| <= 2 x the fp32 reference's max |dp| against the publisher's code in float64",
+   "ref_vs_pub64_max_abs_dp": 9.302171096958745e-06,
+   "mine_vs_pub64_max_abs_dp": 7.897718024424405e-06,
+   "mine64_vs_pub64_max_abs_dp": 2.114485346538242e-06,
+   "twice_ref_vs_pub64": 1.860434219391749e-05,
+   "pure_float64_same_rope_length_max_abs_dlogit": 1.1901590823981678e-13,
+   "publisher_padded_to_bucket_max_abs_dp": 9.713121706333983e-06,
+   "publisher_batch_partners_max_abs_dp": 4.9173831939697266e-06
+  },
+  "pad_content": {
+   "bit_identical": true,
+   "what": "pad ids and pad / non-prefix prefix_embeds replaced (5 forms on 20 rows): real-position scores bit-identical"
+  },
+  "bucket_change": {
+   "marker_max_abs_d": 3.337860107421875e-05,
+   "bit_identical_rows": 6,
+   "what": "the same rows at two bucket lengths (256 <-> 512, 2048 <-> 4096)"
+  },
+  "gqa_repeat_vs_broadcast": {
+   "rows": 10,
+   "real_scores_bit_identical_rows": 10,
+   "marker_max_abs_d": 0.0
+  },
+  "red_arms": {
+   "what": "mutations of the graph's masks on the media rows: each must move the marker logits above 1e-3 on every row",
+   "arms": {
+    "keep_right_ones": {
+     "max_abs_dp": 0.008449912071228027,
+     "max_abs_dlogit": 0.7366142272949219,
+     "min_abs_dlogit": 0.04222071170806885,
+     "rows_over_logit_bar": 5
+    },
+    "no_media_text_mask": {
+     "max_abs_dp": 0.08776628971099854,
+     "max_abs_dlogit": 1.5867891311645508,
+     "min_abs_dlogit": 0.45183753967285156,
+     "rows_over_logit_bar": 5
+    },
+    "no_head_key_mask": {
+     "max_abs_dp": 0.015151143074035645,
+     "max_abs_dlogit": 0.8556613922119141,
+     "min_abs_dlogit": 0.10811001062393188,
+     "rows_over_logit_bar": 5
+    }
+   },
+   "caught_every_row": {
+    "keep_right_ones": true,
+    "no_media_text_mask": true,
+    "no_head_key_mask": true
+   }
+  }
+ },
+ "decision_graph_L4096_blocks": {
+  "what": "L4096 attention in two blocks of 2,048 keys (d1_omni_model.KEY_BLOCK) against the plain softmax: float64 = the same function; fp32 against the oracle on the rows of 2,048 / 4,096 positions",
+  "status": "PASS",
+  "bar": {
+   "same_function": "float64: blocked vs plain marker logits max |d| <= 1e-12 (toy, full64)",
+   "blocked_vs_reference": "fp32: round 2's eager bar",
+   "blocked_vs_plain_fp32": "recorded, not a bar"
+  },
+  "float64_max_abs_d_markers": 6.661338147750939e-14,
+  "toy_float64_max_abs_d_scores": 4.218847493575595e-15,
+  "blocked_vs_reference": {
+   "rows": 21,
+   "argmax_equal": 21,
+   "max_abs_dp": 4.827976226806641e-06,
+   "max_abs_dlogit": 3.147125244140625e-05,
+   "status": "PASS"
+  },
+  "rows_by_bucket": {
+   "256": 5,
+   "512": 1,
+   "2048": 11,
+   "4096": 4
+  }
+ },
+ "vision_tower": {
+  "what": "d1_omni_vision.py (SigLIP2 NaFlex tower + projector, one crop -> 256 rows, fp32) on the CPU against the publisher's vision code, 16 images / 62 crops",
+  "status": "PASS",
+  "bars": {
+   "prefix": {
+    "cos": 0.999999
+   },
+   "float64_max_abs": 1e-06,
+   "pos_numpy_max_abs": 1e-05,
+   "launch_prefix_max_abs_recorded": 0.001,
+   "why_max_abs_is_recorded": "the fp32 rounding floor of this tower is above it: the publisher's own fp32 prefix vs its float64 run (fp32_floor_publisher_max_abs)",
+   "bit_equal": "rows, pixel_values, patch masks, position tables (publisher call and hooked), unshuffle order"
+  },
+  "prefix_min_cos": 0.9999999999213962,
+  "prefix_min_cos_file": 0.9999999999213962,
+  "recomputed_equal": true,
+  "images": 16,
+  "crops": 62,
+  "rows_equal_reference": "46/46",
+  "pixel_values_bit_equal": "62/62",
+  "pos_numpy_bit_equal": "62/62",
+  "prefix_max_abs": 0.020050048828125,
+  "float64_mine_vs_publisher_max_abs": 2.6709301437222166e-10,
+  "fp32_floor_publisher_max_abs": 0.11734617186669993,
+  "unshuffle_bit_equal": "16/16",
+  "red_arm_caught": "16/16"
+ },
+ "audio_tower": {
+  "what": "d1_omni_audio.py (subsampling + 17 FastConformer layers + adapter + residual, clip buckets 5 / 10 / 20 / 30 s, fp32) on the CPU against the publisher's audio code, 22 clips",
+  "status": "PASS",
+  "bars": {
+   "prefix": {
+    "cos": 0.999999
+   },
+   "float64_max_abs": 1e-06,
+   "pad_invariance_max_abs": 1e-05,
+   "red_arms": "cos < 0.999999 (red masks: on the clips with pad steps in their bucket)"
+  },
+  "prefix_min_cos": 0.9999999999997452,
+  "prefix_min_cos_file": 0.9999999999997452,
+  "recomputed_equal": true,
+  "clips": 22,
+  "rows_equal_reference": "46/46",
+  "host_lengths_equal": "22/22",
+  "prefix_max_abs": 1.811981201171875e-05,
+  "float64_mine_vs_publisher_max_abs": 3.0926035066158875e-09,
+  "fp32_floor_publisher_max_abs": 0.00010176461829702887,
+  "mel": {
+   "what": "mel_host.py: mel_torch = the publisher's front end bit for bit; mel_numpy (the Swift host's specification, float64) = mel_torch run in float64",
+   "status": "PASS",
+   "bars": {
+    "torch": "bit for bit",
+    "numpy_launch_max_abs": 0.0001,
+    "numpy_same_function_max_abs": 1e-06,
+    "why_same_function": "mel_numpy in float64 against mel_torch run in float64: the steps are the publisher's; the rest of (b) is the fp32 rounding of the publisher's own mel"
+   },
+   "same_function_max_abs": 4.547473508864641e-13,
+   "same_function_max_abs_file": 4.547473508864641e-13,
+   "recomputed_equal": true,
+   "clips": 22,
+   "torch_bit_equal_publisher": "22/22",
+   "frames_equal": "22/22",
+   "numpy_clips_le_1e-4": "14/22",
+   "fp32_floor_max_abs": 0.16011811757323358
+  }
+ },
+ "host_numpy": {
+  "rows": {
+   "what": "host.py request_rows (the publisher's prompt.py copied, the tokenizer without the post-processor) against the publisher's prompt.encode and system_one_batch, fixture v3",
+   "encode_rows_equal": "623/623",
+   "dispatch": {
+    "requests": 453,
+    "answers": 623,
+    "answers_equal": 623,
+    "usage_equal": 453
+   }
+  },
+  "resize": {
+   "what": "host.resize_uint8_antialias_numpy (torchvision's float32 antialias kernel, round half to even) against torchvision 0.24 on this Mac, every crop of 16 images",
+   "status": "PASS",
+   "crops": 62,
+   "bit_equal": 62,
+   "file_bit_equal": 62,
+   "recomputed_equal": true
+  }
+ },
+ "activation_range": {
+  "what": "the largest activation of the fp32 module over every round-2 row against fp16's largest value",
+  "max_abs": 2068.955078125,
+  "point": "trunk.L14.resid_mid [real]",
+  "fp16_max": 65504.0,
+  "headroom": 31.6604264116567,
+  "rows": 470
+ },
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}

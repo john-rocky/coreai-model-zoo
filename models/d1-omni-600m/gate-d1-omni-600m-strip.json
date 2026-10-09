@@ -1,0 +1,415 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "strip",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "Every shipped bundle with its MLIR debug locations removed (coreai-torch strip_debug_info, strip_ship.py): the op count and `coreai-build inspect` summary before and after, the bytes and main.hash before and after, the byte scan for the exporting machine's paths; the compiles of the stripped bundles (h16c for the Mac, h19p for the iPhone 18 Pro, never loaded on a Mac); the scan of the Hugging Face staging (every file, text and binary). The gates on the stripped bundles equal the unstripped ones (runtime-decide / -vision / -audio: stripped_vs_unstripped).",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "bundles/d1-omni-600m/macos-ship-small/manifest.json",
+   "bytes": 1796,
+   "sha256": "d24f1ac6375ace8cbc480830c32d3de7a6568cac254bff35f3d4adfe5442304d"
+  },
+  {
+   "file": "bundles/d1-omni-600m/macos-ship/manifest.json",
+   "bytes": 6585,
+   "sha256": "6b775e5ad9cbdc67fea7e584160b01e324d0255ac8af8082ddcb8e6402cef8e8"
+  },
+  {
+   "file": "compiled/ship-h16c/manifest.json",
+   "bytes": 7831,
+   "sha256": "0fdae57d79beb7e0c253984e8164c388350a5fe80cd50365a267b5adebd742d2"
+  },
+  {
+   "file": "compiled/ship-h16c/manifest.small.json",
+   "bytes": 1838,
+   "sha256": "f2888496c1fcaba834f1f1094f6ea3c667a7b4be6529a626ae9dc840a6628dc7"
+  },
+  {
+   "file": "compiled/ship-h19p/manifest.json",
+   "bytes": 7861,
+   "sha256": "ec512dbd0634ded9cda8639edfc78621e80c22bb62d1a62ce32eb40e416c2d90"
+  },
+  {
+   "file": "compiled/ship-h19p/manifest.small.json",
+   "bytes": 1867,
+   "sha256": "0fe0191c3092b1fad2ae99cb1fb252f5611eb89f0473d28e702b825a5ab85feb"
+  },
+  {
+   "file": "logs/r13_staging_grep.txt",
+   "bytes": 1409,
+   "sha256": "d73aeab2a2dc03363f72998a63e16f6004b29aca1b1c2246f31574f3f6251c01"
+  }
+ ],
+ "status": "PASS",
+ "bundles": {
+  "fp16-L256": {
+   "status": "PASS",
+   "bundle": "d1_omni_decide_fp16_L256.aimodel",
+   "bytes_before": 761849972,
+   "bytes_after": 761680330,
+   "main_hash_before": "516472b0c1419fcc599f6d503633a6545f68105d63fb8c0b8005b9a9b6c207a9",
+   "main_hash_after": "eb4b4f9dd21f8454b49d7433b31e18b2a00c39215f5049c7137ff53306ee943b",
+   "ops": 1315,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "fp16-L512": {
+   "status": "PASS",
+   "bundle": "d1_omni_decide_fp16_L512.aimodel",
+   "bytes_before": 761915494,
+   "bytes_after": 761745868,
+   "main_hash_before": "8981804c244aaf24896e5f671b9e8a1c182179c307e11f4e4c994f84a6684865",
+   "main_hash_after": "4f73c0b4742272e6e8c57a0368ca14521ae7845b3e5d469e697aa5e4027e48b7",
+   "ops": 1315,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "fp16-L1024": {
+   "status": "PASS",
+   "bundle": "d1_omni_decide_fp16_L1024.aimodel",
+   "bytes_before": 762046397,
+   "bytes_after": 761876787,
+   "main_hash_before": "7a8261a5be48f0a0bede335932abefddb30bef65c886103a8ff4eedfe904efe6",
+   "main_hash_after": "92bf9613ca22138709d741196796fcde9302f01b66cfade2e5c9b6237ef35c73",
+   "ops": 1315,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "fp16-L2048": {
+   "status": "PASS",
+   "bundle": "d1_omni_decide_fp16_L2048.aimodel",
+   "bytes_before": 762308740,
+   "bytes_after": 762139098,
+   "main_hash_before": "c305c254900797ab118c1856bd0ededaa9ed30ad1bd959730adf5a97372f5b8f",
+   "main_hash_after": "51b6cbe1b3c13267c544d7f596bdc265e7214b68d6386a03dd1f31c45d1a4ee5",
+   "ops": 1315,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "fp16-L4096": {
+   "status": "PASS",
+   "bundle": "d1_omni_decide_fp16_L4096.aimodel",
+   "bytes_before": 762879057,
+   "bytes_after": 762676555,
+   "main_hash_before": "e0c17040e141f13c2adf19a8a6e558516b0a1de4448686f45c5c30c3858ff674",
+   "main_hash_after": "4c38676fe90011b05fc79e6c5cca04fe2eb0f9b72c92e71aec64e1d3ffa664a5",
+   "ops": 1513,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "vision-fp16": {
+   "status": "PASS",
+   "bundle": "d1_omni_vision_fp16.aimodel",
+   "bytes_before": 188291698,
+   "bytes_after": 188218374,
+   "main_hash_before": "c24572d8489eaebae7f76dbd872340aa25c7213c0e083fa50a1ca231bb580f17",
+   "main_hash_after": "d65cf00787bab8bd5ee390cc8820ab600ba44cfe5a72ee43574a0ffd3d3d148c",
+   "ops": 758,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "audio-fp16-5s": {
+   "status": "PASS",
+   "bundle": "d1_omni_audio_fp16_5s.aimodel",
+   "bytes_before": 225187123,
+   "bytes_after": 224920212,
+   "main_hash_before": "238b5a91f445f572a466edef824205e97454718bed652f4fbeff3cacdcbf10f0",
+   "main_hash_after": "b3240c83a181d87adda6fa97fe52661ab1fa6d82b6c62b651d5481cfe5138685",
+   "ops": 2560,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "audio-fp16-10s": {
+   "status": "PASS",
+   "bundle": "d1_omni_audio_fp16_10s.aimodel",
+   "bytes_before": 225316174,
+   "bytes_after": 225049263,
+   "main_hash_before": "ce8f4932e41aeebfd0d9e017edb9f226f1297c9d2dca66d754a27267046427c6",
+   "main_hash_after": "0efcce362b71f05bb90eb11eb22b087521e990135f2bfdd2efd72a6b213eaa01",
+   "ops": 2560,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "audio-fp16-20s": {
+   "status": "PASS",
+   "bundle": "d1_omni_audio_fp16_20s.aimodel",
+   "bytes_before": 225572188,
+   "bytes_after": 225305277,
+   "main_hash_before": "98027fd3d1e9eddce27392116d69dbca65879dda31c518561f10291a11653f2a",
+   "main_hash_after": "9de9ec76dc8c6abb22688ce7e842cb056cee0ca15ffe6cb3a66ecdfe0dab515e",
+   "ops": 2560,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "audio-fp16-30s": {
+   "status": "PASS",
+   "bundle": "d1_omni_audio_fp16_30s.aimodel",
+   "bytes_before": 225828193,
+   "bytes_after": 225561282,
+   "main_hash_before": "eddadb379996ef12412922048b97133f0dd54df4dcbc99cc786fa0e5581d06cc",
+   "main_hash_after": "6bb3911322160cd29ec93e72c5d78e7c9ab07b3a1073552fe2fda053bee61c65",
+   "ops": 2560,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "fp16-L64": {
+   "status": "PASS",
+   "bundle": "d1_omni_decide_fp16_L64.aimodel",
+   "bytes_before": 761800702,
+   "bytes_after": 761631060,
+   "main_hash_before": "4a7153dd1ad6ed16856fbad2d2800e1dc06d8b9f81abddb70687782b9ac46653",
+   "main_hash_after": "e9e43ae73782c138dc785bc7fb14d484319926e95c19d08506b3c83bec357f74",
+   "ops": 1315,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  },
+  "fp16-L128": {
+   "status": "PASS",
+   "bundle": "d1_omni_decide_fp16_L128.aimodel",
+   "bytes_before": 761817203,
+   "bytes_after": 761647561,
+   "main_hash_before": "079077d7a00b299810c31144a595828c06cbc0d6cd54bfccc1a7fc25859397cf",
+   "main_hash_after": "aa6af50cfa06c729f4a618ec0cb6d7a85515ed7f32159e81e5e49991417bf79f",
+   "ops": 1315,
+   "ops_equal": true,
+   "inspect_equal": true,
+   "local_paths_before": 6,
+   "local_paths_after": 0
+  }
+ },
+ "aot": {
+  "ship-h16c": {
+   "fp16-L256": {
+    "bytes": 761796335,
+    "resources_bin_bytes": 761554008,
+    "main_hash": "b075f032d760cd9ebddd2e68c41b2fe60be9d965cc1420501530a582a37fc33e",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L512": {
+    "bytes": 761861998,
+    "resources_bin_bytes": 761619544,
+    "main_hash": "43e7197f37bc9f7cee33c8d20017dcaff4f3264d2cbb732eec00808d6b16d991",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L1024": {
+    "bytes": 761993103,
+    "resources_bin_bytes": 761750616,
+    "main_hash": "507914e2ec5b70aec620fd5d01860fedfa42d3baceb0c90ebb71242374477f9e",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L2048": {
+    "bytes": 762255232,
+    "resources_bin_bytes": 762012760,
+    "main_hash": "dc950eadfe335ee20d804fd51947c5f5797a972a06cdccc8b13e4d4dd41f1087",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L4096": {
+    "bytes": 762828849,
+    "resources_bin_bytes": 762537048,
+    "main_hash": "320b89d649e522d22c2980fb6f9c581f8c74b210e0b99d3c1a33de16eae8e055",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "vision-fp16": {
+    "bytes": 188303987,
+    "resources_bin_bytes": 188154104,
+    "main_hash": "b0ba6e0a311bfca6372959352f7bacfbb2af408321768e8c92459e6d58c0ee9a",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-5s": {
+    "bytes": 225264693,
+    "resources_bin_bytes": 224698944,
+    "main_hash": "ff6c797e679716539e3d3d981a64abcd74cff19e8ac712342916a28d711f24d4",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-10s": {
+    "bytes": 225393562,
+    "resources_bin_bytes": 224827968,
+    "main_hash": "c8b2e44ed6f2522e4ca7289bb51814fe7d00f01650c1e7f4b74a5a51f6120a4d",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-20s": {
+    "bytes": 225649636,
+    "resources_bin_bytes": 225083968,
+    "main_hash": "7e353c87e43730085013458bb66bc76bed0ebc7bbbe5b40fb1d86635cfdc4f24",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-30s": {
+    "bytes": 225905670,
+    "resources_bin_bytes": 225339968,
+    "main_hash": "88511427752a2619a6511f3b8538b0aad95ccd8566e6443455cc076ceac13ade",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L64": {
+    "bytes": 761747071,
+    "resources_bin_bytes": 761504856,
+    "main_hash": "5c0252eb058f35cd7f2ff0e85034d410a451a3a14ee31e40ef837d9da95bda0b",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L128": {
+    "bytes": 761763730,
+    "resources_bin_bytes": 761521240,
+    "main_hash": "d28c54ff1f390f6dc3be54491bd13e5ad82b1be56ede5309950d0f85ce475ac3",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   }
+  },
+  "ship-h19p": {
+   "fp16-L256": {
+    "bytes": 761796331,
+    "resources_bin_bytes": 761554008,
+    "main_hash": "7ba3b11ff7d253b1f97ecca8c177d18f953b9e844ff9eabda6b28454b71de937",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L512": {
+    "bytes": 761861994,
+    "resources_bin_bytes": 761619544,
+    "main_hash": "1d54cd013075829da188bc5be1ed7ee1f3f071371aa391f2bc61738c9f37558e",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L1024": {
+    "bytes": 761993099,
+    "resources_bin_bytes": 761750616,
+    "main_hash": "c21863c40b02ef7c0e3e7d87297016864d209ab306bc16bc551c7841202b1cd7",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L2048": {
+    "bytes": 762255228,
+    "resources_bin_bytes": 762012760,
+    "main_hash": "117d089252f05d23fdcdbaebcead8da2fc4bf1f69da18f6f873ee000c487332d",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L4096": {
+    "bytes": 762828845,
+    "resources_bin_bytes": 762537048,
+    "main_hash": "e5328e3f39e0a2af94e4dba8f75f30af6d75a30b8bbc0666735df91df3702ad9",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "vision-fp16": {
+    "bytes": 188303983,
+    "resources_bin_bytes": 188154104,
+    "main_hash": "fc3e1278f91c97cdf9419aa154b5041e7f6fb82525d245c4135aab972d83bef1",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-5s": {
+    "bytes": 225226318,
+    "resources_bin_bytes": 224698944,
+    "main_hash": "09a5141b87f4abc2be1169bbda2528ad492cfb9681ad9bc8761d237c9ad7839c",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-10s": {
+    "bytes": 225355344,
+    "resources_bin_bytes": 224827968,
+    "main_hash": "0a66cbd973f93c56bcc086df520399d97a05c0857d8aab73c3e58e59209a12ae",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-20s": {
+    "bytes": 225611159,
+    "resources_bin_bytes": 225083968,
+    "main_hash": "0039312e4d292a6c00f18480a8dc90c66743762546123ffa842f166e1d382e5c",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "audio-fp16-30s": {
+    "bytes": 225867256,
+    "resources_bin_bytes": 225339968,
+    "main_hash": "1354d0680107fc4b551fe93c35ab5806dc6c882bbe5c32f3f295f1b6d1e798ab",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L64": {
+    "bytes": 761747067,
+    "resources_bin_bytes": 761504856,
+    "main_hash": "eff8f9efff9098fbaebd4ec088d08430f9b5b1b040d1d82a2c0edce25fe7b88f",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   },
+   "fp16-L128": {
+    "bytes": 761763726,
+    "resources_bin_bytes": 761521240,
+    "main_hash": "fe544a478d29e743b5e615a18b4d4f98925ba89905dda872efe0e341fe68fd26",
+    "ane_regions": 0,
+    "status": "COMPILED",
+    "files_with_local_paths": 0
+   }
+  }
+ },
+ "staging_scan": {
+  "file": "logs/r13_staging_grep.txt",
+  "lines": [
+   "grep -rIl <users-folder prefix> (text files): 0 files",
+   "grep -rl -a <users-folder prefix> (every file, binary included): 0 files",
+   "grep -rl -a <home dir> (every file): 0 files",
+   "grep -rl -a <user name> (every file): 0 files",
+   "strings | grep <users-folder prefix> over every .mlirb / .mpsgraph / .bin (binary graphs): 0 lines"
+  ]
+ },
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}

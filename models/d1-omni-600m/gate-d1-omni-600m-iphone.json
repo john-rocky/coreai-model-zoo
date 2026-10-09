@@ -1,0 +1,1035 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "iphone",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "The shipped fp16 graphs on the iPhone 18 Pro through the Swift host (apps/D1Omni) in the gate app apps/D1OmniGate (round 11, 2026-10-08): parity on a subset of the fixture with each .aimodel specialized on the phone (JIT) and with the h19p compiles (AOT), one decision's ms, the loads, the L4096 compile's memory limit and the Neural Engine attempts. The per-row values are in the sources; the numbers here are recomputed from them and checked against each file's own summary.",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "device/fixtures/subset.json",
+   "bytes": 287285,
+   "sha256": "2c6dc7b2ba6c880f602b538201107668f636b33b2d8583f34d9e0f6d4ca26326"
+  },
+  {
+   "file": "device/hold.log",
+   "bytes": 2035,
+   "sha256": "36b5da91fef7bdad2b1eceb9a3224f27cb64e1dd78a6aaa32496ece91eafe623"
+  },
+  {
+   "file": "device/install_20261008-210148.json",
+   "bytes": 415,
+   "sha256": "1de4215ebc8bb5f7e9a107e83f1d973965c85c76a4ff0c8a0613c295229073ae"
+  },
+  {
+   "file": "device/runs/r11-210603/crash/JetsamEvent-2026-10-08-210652.ips",
+   "bytes": 222999,
+   "sha256": "6de866ff695f20f37ed1cd29af2705e204c6f166a049e88d79b60d5e0b75d228"
+  },
+  {
+   "file": "device/runs/r11-210603/memory.tsv",
+   "bytes": 29487,
+   "sha256": "b6627bb5e2f1247abfd3a64ffe08e96d2e9fe159b9d1beed5dd79e586c61a854"
+  },
+  {
+   "file": "device/runs/r11-210603/result.json",
+   "bytes": 354293,
+   "sha256": "487b32fda2c03460d4e8c1cf69280cc4c2f3d9480a202df72ea91a631f9e82bf"
+  },
+  {
+   "file": "device/runs/r11-210811/result.json",
+   "bytes": 31806,
+   "sha256": "7e6db0fbfc8e712523461cb429400115c45144d40d448c2b81b93c87f7dc8818"
+  },
+  {
+   "file": "device/runs/r11b-211352/result.json",
+   "bytes": 143843,
+   "sha256": "6cfd10c41aad3ffc3314fa8a173bfdf38fd7ca047cbb2a9342f7b0c6cdbad6dc"
+  },
+  {
+   "file": "results/iphone_ane.json",
+   "bytes": 205563,
+   "sha256": "1125b696e32216985ce49b80dafc6069ff92b59d4f61cce1e6838c46fadb5035"
+  },
+  {
+   "file": "results/iphone_bench.json",
+   "bytes": 228158,
+   "sha256": "08564a10d56e11a617862893e874ddb8d8a1b1fad7c684cac1e19cc9780eedf9"
+  },
+  {
+   "file": "results/iphone_parity_aot.json",
+   "bytes": 156430,
+   "sha256": "3077a08618da9bd666f292bfef442dff520e56d4488775c0d2d15155167057bb"
+  },
+  {
+   "file": "results/iphone_parity_jit.json",
+   "bytes": 161137,
+   "sha256": "ce5b145cd791ad3849b8c3c97589c53ebc5fd13f95f547bbf0e16cbfe8112d7b"
+  }
+ ],
+ "bar": {
+  "name": "FACTS §7 (the ship bar)",
+  "argmax": "equal to the oracle's on every row whose oracle top-2 margin is above 0.02 (near ties reported apart)",
+  "max_abs_dp": 0.02,
+  "mean_row_max_abs_dp": 0.002,
+  "oracle": "the publisher's model, AutoModel.from_pretrained(trust_remote_code=True), CPU, fp32: text rows after the config.json temperature, image and audio rows the raw softmax"
+ },
+ "status": "PASS",
+ "device": {
+  "machine": "iPhone19,2",
+  "hw_model": "V63AP",
+  "os": "iOS 27.2.0",
+  "os_build": "24B5099f",
+  "coreai_architecture": "h19p",
+  "physical_memory_gb": 11.28448486328125,
+  "battery_level": 0.800000011920929,
+  "battery_state": "charging",
+  "power_source": "USB power",
+  "low_power_mode": false,
+  "available_mb": 3529.423224,
+  "free_gb": 121.786491235,
+  "thermal": "nominal"
+ },
+ "app": {
+  "host": "apps/D1Omni built for iOS 27 inside the gate app apps/D1OmniGate",
+  "launches": [
+   {
+    "run_id": "r11-210603",
+    "status": "running",
+    "started": "2026-10-08T12:06:03Z",
+    "finished": null,
+    "build": "Release",
+    "stages": [
+     "assets",
+     "parity_jit",
+     "parity_aot",
+     "bench",
+     "long"
+    ]
+   },
+   {
+    "run_id": "r11-210811",
+    "status": "done",
+    "started": "2026-10-08T12:08:12Z",
+    "finished": "2026-10-08T12:08:23Z",
+    "build": "Release",
+    "stages": [
+     "long",
+     "ane",
+     "md5"
+    ]
+   },
+   {
+    "run_id": "r11b-211352",
+    "status": "done",
+    "started": "2026-10-08T12:13:53Z",
+    "finished": "2026-10-08T12:15:13Z",
+    "build": "Release",
+    "stages": [
+     "bench",
+     "ane"
+    ]
+   }
+  ],
+  "note": "the first launch was killed (jetsam) at the first call of the L4096 compile, so its result file stays 'running'; the second launch ran the stages left, the third the W3 bench and the Neural Engine runs"
+ },
+ "subset": {
+  "records": 48,
+  "records_not_published": 5,
+  "rows": 78,
+  "rows_l64": 18,
+  "what": "48 records of the fixture (text, image and audio); the rows of the records the HF repository does not publish are counted, not named"
+ },
+ "conditions": {
+  "thermal": {
+   "bench_decisions": [
+    "nominal"
+   ],
+   "parity_rows": [
+    "nominal"
+   ],
+   "neural_engine": [
+    "nominal"
+   ]
+  },
+  "series_max_s": 17.699115417,
+  "timed_per_form": [
+   20
+  ],
+  "warmup_per_form": [
+   3
+  ],
+  "power": [
+   "charging at 0.80"
+  ]
+ },
+ "parity": {
+  "jit": {
+   "what": "the shipping fp16 graphs on the iPhone through the Swift host (apps/D1Omni) in the gate app apps/D1OmniGate: each .aimodel specialized on the phone (JIT)",
+   "rows": {
+    "rows": 78,
+    "rows_by_mode": {
+     "text": 60,
+     "image": 9,
+     "audio": 9
+    },
+    "rows_by_bucket": {
+     "256": 71,
+     "2048": 3,
+     "4096": 4
+    },
+    "non_near_tie": 77,
+    "argmax_equal_non_near_tie": 77,
+    "near_tie": 1,
+    "argmax_equal_near_tie": 1,
+    "max_abs_dp": 0.005926892161369324,
+    "mean_row_max_abs_dp": 0.0009040274919333896,
+    "ids_markers_bucket_ok": 78,
+    "finite": 78,
+    "mac": {
+     "logits_bit_equal": 0,
+     "probs_bit_equal": 0,
+     "max_abs_dp": 0.004047870635986328,
+     "max_abs_dlogit": 0.047385573387145996
+    },
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true,
+      "ids_markers_bucket": true
+     },
+     "status": "PASS"
+    }
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "rows_l64": {
+    "rows": 18,
+    "rows_by_mode": {
+     "text": 18,
+     "image": 0,
+     "audio": 0
+    },
+    "rows_by_bucket": {
+     "64": 18
+    },
+    "non_near_tie": 18,
+    "argmax_equal_non_near_tie": 18,
+    "near_tie": 0,
+    "argmax_equal_near_tie": 0,
+    "max_abs_dp": 0.0014893114566802979,
+    "mean_row_max_abs_dp": 0.0004247804819088843,
+    "ids_markers_bucket_ok": 18,
+    "finite": 18,
+    "mac": {
+     "logits_bit_equal": 0,
+     "probs_bit_equal": 0,
+     "max_abs_dp": 0.002916872501373291,
+     "max_abs_dlogit": 0.029160022735595703
+    },
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true,
+      "ids_markers_bucket": true
+     },
+     "status": "PASS"
+    }
+   },
+   "recomputed_vs_file_l64": {
+    "equal": true,
+    "different": {}
+   },
+   "control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 71,
+    "rows_over_dp_bar": 66
+   },
+   "l4096": {
+    "rows": 4,
+    "pass": true,
+    "control_caught": true
+   }
+  },
+  "aot": {
+   "what": "the shipping fp16 graphs on the iPhone through the Swift host (apps/D1Omni) in the gate app apps/D1OmniGate: the h19p AOT .aimodelc of each graph",
+   "rows": {
+    "rows": 74,
+    "rows_by_mode": {
+     "text": 56,
+     "image": 9,
+     "audio": 9
+    },
+    "rows_by_bucket": {
+     "256": 71,
+     "2048": 3
+    },
+    "non_near_tie": 73,
+    "argmax_equal_non_near_tie": 73,
+    "near_tie": 1,
+    "argmax_equal_near_tie": 1,
+    "max_abs_dp": 0.005926892161369324,
+    "mean_row_max_abs_dp": 0.0009244782597746151,
+    "ids_markers_bucket_ok": 74,
+    "finite": 74,
+    "mac": {
+     "logits_bit_equal": 0,
+     "probs_bit_equal": 0,
+     "max_abs_dp": 0.004047870635986328,
+     "max_abs_dlogit": 0.047385573387145996
+    },
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true,
+      "ids_markers_bucket": true
+     },
+     "status": "PASS"
+    }
+   },
+   "recomputed_vs_file": {
+    "equal": true,
+    "different": {}
+   },
+   "rows_l64": {
+    "rows": 18,
+    "rows_by_mode": {
+     "text": 18,
+     "image": 0,
+     "audio": 0
+    },
+    "rows_by_bucket": {
+     "64": 18
+    },
+    "non_near_tie": 18,
+    "argmax_equal_non_near_tie": 18,
+    "near_tie": 0,
+    "argmax_equal_near_tie": 0,
+    "max_abs_dp": 0.0014893114566802979,
+    "mean_row_max_abs_dp": 0.0004247804819088843,
+    "ids_markers_bucket_ok": 18,
+    "finite": 18,
+    "mac": {
+     "logits_bit_equal": 0,
+     "probs_bit_equal": 0,
+     "max_abs_dp": 0.002916872501373291,
+     "max_abs_dlogit": 0.029160022735595703
+    },
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true,
+      "ids_markers_bucket": true
+     },
+     "status": "PASS"
+    }
+   },
+   "recomputed_vs_file_l64": {
+    "equal": true,
+    "different": {}
+   },
+   "control": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 71,
+    "rows_over_dp_bar": 66
+   }
+  },
+  "aot_vs_jit": {
+   "rows": 92,
+   "logits_and_p_bit_equal": 92
+  }
+ },
+ "host_arrays_equal_mac": {
+  "rgb": 3,
+  "images": 3,
+  "crop_u8": 9,
+  "crops": 9,
+  "vision_inputs": 36,
+  "vision_inputs_total": 36,
+  "samples": 3,
+  "mel": 3,
+  "masks": 12,
+  "clips": 3
+ },
+ "graph_outputs_equal_mac": {
+  "vision_output": 0,
+  "crops": 9,
+  "audio_output": 0,
+  "clips": 3,
+  "prefix": 0,
+  "prefixes": 6
+ },
+ "load_s": {
+  "jit": {
+   "cold": {
+    "loads": 6,
+    "min_s": 0.403318375,
+    "max_s": 1.794040167
+   },
+   "warm": {
+    "loads": 10,
+    "min_s": 0.025765625,
+    "max_s": 0.836356125
+   }
+  },
+  "aot": {
+   "cold": {
+    "loads": 6,
+    "min_s": 0.291464167,
+    "max_s": 1.654004542
+   },
+   "warm": {
+    "loads": 9,
+    "min_s": 0.030870834000000003,
+    "max_s": 0.771841541
+   }
+  }
+ },
+ "bench": {
+  "rules": {
+   "max_series_s": 18,
+   "rest_s": 10,
+   "serious_cap_s": 300,
+   "serious_rest_s": 60,
+   "timed": 20,
+   "wait_nominal_cap_s": 60,
+   "warmup_first": 3,
+   "warmup_later": 1
+  },
+  "what": "one decision's ms on the iPhone (the Mac's `d1omni time` definition), forms alternating per round in one process (W3: one form after the other), series of at most 18 s with 10 s rests",
+  "workloads": {
+   "W1": {
+    "what": "one question, short state",
+    "record": "card_text",
+    "mode": "text",
+    "positions": [
+     47
+    ],
+    "prefix_rows": 0,
+    "buckets": [
+     64,
+     256
+    ],
+    "interleaved": true,
+    "forms": {
+     "aot-L64": {
+      "n": 20,
+      "median_ms": 10.698917000000002,
+      "p10_ms": 10.663516900000001,
+      "p90_ms": 10.7465872,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 10.695625000000001,
+       "inputs_ms": 0.000604,
+       "media_ms": 0,
+       "readout_ms": 0.0009584999999999999
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "aot-L256": {
+      "n": 20,
+      "median_ms": 20.1459165,
+      "p10_ms": 20.0926131,
+      "p90_ms": 20.2137247,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 20.1436255,
+       "inputs_ms": 0.00075,
+       "media_ms": 0,
+       "readout_ms": 0.001229
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "jit-L64": {
+      "n": 20,
+      "median_ms": 10.7926875,
+      "p10_ms": 10.7400911,
+      "p90_ms": 10.879737200000001,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 10.7876455,
+       "inputs_ms": 0.0017920000000000002,
+       "media_ms": 8.3e-05,
+       "readout_ms": 0.0027080000000000003
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "jit-L256": {
+      "n": 20,
+      "median_ms": 20.1200415,
+      "p10_ms": 20.037667000000003,
+      "p90_ms": 20.171133,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 20.114062500000003,
+       "inputs_ms": 0.001042,
+       "media_ms": 4.2000000000000004e-05,
+       "readout_ms": 0.0029165
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     }
+    },
+    "output_check": {
+     "first_calls_bit_equal_across_blocks": null,
+     "forms_bit_equal_every_round": true,
+     "max_abs_dp_vs_oracle": 1.0892399586737156e-05,
+     "status": "PASS"
+    },
+    "series_s": [
+     1.452587375
+    ],
+    "thermal_every_decision": [
+     "nominal"
+    ],
+    "battery": {
+     "states": [
+      "charging"
+     ],
+     "levels": [
+      0.800000011920929,
+      0.800000011920929
+     ]
+    }
+   },
+   "W2": {
+    "what": "three questions in one pass (3 calls)",
+    "record": "card_text",
+    "mode": "text",
+    "positions": [
+     47,
+     56,
+     51
+    ],
+    "prefix_rows": 0,
+    "buckets": [
+     64,
+     256
+    ],
+    "interleaved": true,
+    "forms": {
+     "aot-L64": {
+      "n": 20,
+      "median_ms": 32.071583000000004,
+      "p10_ms": 31.9657705,
+      "p90_ms": 32.2148039,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 32.06687600000001,
+       "inputs_ms": 0.0017490000000000001,
+       "media_ms": 4.1500000000000006e-05,
+       "readout_ms": 0.0025199999999999997
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "aot-L256": {
+      "n": 20,
+      "median_ms": 60.638167,
+      "p10_ms": 60.5581125,
+      "p90_ms": 60.80492530000001,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 60.63131250000001,
+       "inputs_ms": 0.0024795,
+       "media_ms": 0,
+       "readout_ms": 0.003438
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "jit-L64": {
+      "n": 20,
+      "median_ms": 32.5157085,
+      "p10_ms": 32.4145712,
+      "p90_ms": 32.6631036,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 32.499437,
+       "inputs_ms": 0.005771,
+       "media_ms": 8.3e-05,
+       "readout_ms": 0.0082285
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "jit-L256": {
+      "n": 20,
+      "median_ms": 60.59527100000001,
+      "p10_ms": 60.4582666,
+      "p90_ms": 60.6876827,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 60.5772925,
+       "inputs_ms": 0.0062705,
+       "media_ms": 8.3e-05,
+       "readout_ms": 0.0082915
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     }
+    },
+    "output_check": {
+     "first_calls_bit_equal_across_blocks": null,
+     "forms_bit_equal_every_round": true,
+     "max_abs_dp_vs_oracle": 0.0021919608116149902,
+     "status": "PASS"
+    },
+    "series_s": [
+     4.2937945840000005
+    ],
+    "thermal_every_decision": [
+     "nominal"
+    ],
+    "battery": {
+     "states": [
+      "charging"
+     ],
+     "levels": [
+      0.800000011920929,
+      0.800000011920929
+     ]
+    }
+   },
+   "W4": {
+    "what": "one question about a 384 px image (1 crop)",
+    "record": "img_01",
+    "mode": "image",
+    "positions": [
+     183
+    ],
+    "prefix_rows": 144,
+    "buckets": [
+     256
+    ],
+    "interleaved": true,
+    "forms": {
+     "aot-L256": {
+      "n": 20,
+      "median_ms": 57.723374500000006,
+      "p10_ms": 57.63162020000001,
+      "p90_ms": 57.84307950000001,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 20.4036255,
+       "inputs_ms": 0.0012295000000000001,
+       "media_ms": 37.3192085,
+       "readout_ms": 0.001083
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "jit-L256": {
+      "n": 20,
+      "median_ms": 57.670979,
+      "p10_ms": 57.5535464,
+      "p90_ms": 58.493470800000004,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 20.390812500000003,
+       "inputs_ms": 0.0011665,
+       "media_ms": 37.2704995,
+       "readout_ms": 0.0023335
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     }
+    },
+    "output_check": {
+     "first_calls_bit_equal_across_blocks": null,
+     "forms_bit_equal_every_round": true,
+     "max_abs_dp_vs_oracle": 2.384185791015625e-06,
+     "status": "PASS"
+    },
+    "series_s": [
+     2.686083958
+    ],
+    "thermal_every_decision": [
+     "nominal"
+    ],
+    "battery": {
+     "states": [
+      "charging"
+     ],
+     "levels": [
+      0.800000011920929,
+      0.800000011920929
+     ]
+    }
+   },
+   "W5": {
+    "what": "one question about 10 s of audio",
+    "record": "aud_01",
+    "mode": "audio",
+    "positions": [
+     184
+    ],
+    "prefix_rows": 121,
+    "buckets": [
+     256
+    ],
+    "interleaved": true,
+    "forms": {
+     "aot-L256": {
+      "n": 20,
+      "median_ms": 27.3023545,
+      "p10_ms": 27.216779100000004,
+      "p90_ms": 27.361933300000004,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 20.402854500000004,
+       "inputs_ms": 0.0013330000000000002,
+       "media_ms": 6.876625000000001,
+       "readout_ms": 0.0012915000000000001
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     },
+     "jit-L256": {
+      "n": 20,
+      "median_ms": 27.023354500000003,
+      "p10_ms": 26.8951833,
+      "p90_ms": 27.141388100000004,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 20.339812000000002,
+       "inputs_ms": 0.001208,
+       "media_ms": 6.6672285,
+       "readout_ms": 0.002875
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     }
+    },
+    "output_check": {
+     "first_calls_bit_equal_across_blocks": null,
+     "forms_bit_equal_every_round": true,
+     "max_abs_dp_vs_oracle": 0.00028842687606811523,
+     "status": "PASS"
+    },
+    "series_s": [
+     1.281188458
+    ],
+    "thermal_every_decision": [
+     "nominal"
+    ],
+    "battery": {
+     "states": [
+      "charging"
+     ],
+     "levels": [
+      0.800000011920929,
+      0.800000011920929
+     ]
+    }
+   },
+   "W3": {
+    "what": "one question over a 3.4k-token state",
+    "record": "long_3400",
+    "mode": "text",
+    "positions": [
+     3454
+    ],
+    "prefix_rows": 0,
+    "buckets": [
+     4096
+    ],
+    "interleaved": false,
+    "forms": {
+     "jit-L4096": {
+      "n": 20,
+      "median_ms": 758.2270210000001,
+      "p10_ms": 757.0431959000001,
+      "p90_ms": 792.8437703000001,
+      "warmup": 3,
+      "parts_median_ms": {
+       "graph_ms": 758.1814380000001,
+       "inputs_ms": 0.035771000000000004,
+       "media_ms": 0.000209,
+       "readout_ms": 0.009271000000000001
+      },
+      "thermal_of_timed": {
+       "nominal": 20
+      },
+      "recomputed_vs_file": true
+     }
+    },
+    "output_check": {
+     "first_calls_bit_equal_across_blocks": null,
+     "forms_bit_equal_every_round": true,
+     "max_abs_dp_vs_oracle": 9.861588478088379e-05,
+     "status": "PASS"
+    },
+    "series_s": [
+     17.699115417
+    ],
+    "thermal_every_decision": [
+     "nominal"
+    ],
+    "battery": {
+     "states": [
+      "charging"
+     ],
+     "levels": [
+      0.800000011920929,
+      0.800000011920929
+     ]
+    }
+   }
+  }
+ },
+ "l4096_h19p": {
+  "what": "the h19p compile of decide-fp16-L4096: it loaded, and its first call was killed (jetsam); the rest of the phone's runs went on in a second launch. Not shipped (the HF repository's ios-h19p/ leaves it out; a phone runs the .aimodel, which passed above)",
+  "load_wall_s": 1.160665458,
+  "last_samples": {
+   "before": {
+    "t_app_s": "48.69",
+    "label": "long_parity_aot L4096",
+    "footprint_mb": "1535.4",
+    "available_mb": "2004.6"
+   },
+   "last": {
+    "t_app_s": "48.79",
+    "label": "long_parity_aot L4096",
+    "footprint_mb": "3306.1",
+    "available_mb": "233.9"
+   }
+  },
+  "jetsam": {
+   "largest_process": "D1OmniGate",
+   "reason": "per-process-limit",
+   "rpages": 221218,
+   "page_size": 16384,
+   "os": "iPhone OS 27.2 (24B5099f)"
+  },
+  "jit_l4096_peak_footprint_mb": 2777.680408
+ },
+ "neural_engine": {
+  "what": "not shipped: the h19p compiles made with --preferred-compute neural-engine (audio 10 s, decision L256) and the .aimodel loaded with the Neural Engine preferred; placement not confirmed (no ANE region entry in the app's cache)",
+  "options": "preferred neuralEngine, allowed [\"cpu\", \"gpu\", \"neuralEngine\"], expectFrequentReshapes false",
+  "h19p_neural_engine_compiles": {
+   "audio": "failedToSpecialize",
+   "decision": "failedToSpecialize",
+   "error_type": "CoreAIDelegates.AIModelError.failedToSpecialize"
+  },
+  "aimodel_neural_engine_preferred": {
+   "audio": {
+    "load_wall_s": 4.344210125,
+    "ane_region_entries": 0,
+    "rows": {
+     "rows": 9,
+     "rows_by_mode": {
+      "text": 0,
+      "image": 0,
+      "audio": 9
+     },
+     "rows_by_bucket": {
+      "256": 9
+     },
+     "non_near_tie": 9,
+     "argmax_equal_non_near_tie": 9,
+     "near_tie": 0,
+     "argmax_equal_near_tie": 0,
+     "max_abs_dp": 0.006357312202453613,
+     "mean_row_max_abs_dp": 0.000974848108651511,
+     "ids_markers_bucket_ok": 9,
+     "finite": 9,
+     "mac": {
+      "logits_bit_equal": 0,
+      "probs_bit_equal": 0,
+      "max_abs_dp": 0.004124000668525696,
+      "max_abs_dlogit": 0.05159103870391846
+     },
+     "ship_bar": {
+      "verdict": {
+       "argmax_non_near_tie": true,
+       "max_abs_dp": true,
+       "mean_row_max_abs_dp": true,
+       "finite": true,
+       "ids_markers_bucket": true
+      },
+      "status": "PASS"
+     }
+    },
+    "vs_gpu_jit": {
+     "rows": 9,
+     "max_abs_dp": 0.000550687313079834,
+     "source": "results/iphone_parity_jit.json rows (launch 1, the GPU JIT)"
+    },
+    "W5_ms": {
+     "ane-audio": {
+      "n": 20,
+      "median_ms": 59.97577100000001,
+      "p10_ms": 52.043691300000006,
+      "p90_ms": 61.28609970000001,
+      "parts_median_ms": {
+       "graph_ms": 20.5029375,
+       "inputs_ms": 0.0019375,
+       "media_ms": 39.494,
+       "readout_ms": 0.0030210000000000002
+      }
+     },
+     "gpu-jit": {
+      "n": 20,
+      "median_ms": 27.191833000000003,
+      "p10_ms": 27.026229100000002,
+      "p90_ms": 27.275470300000002,
+      "parts_median_ms": {
+       "graph_ms": 20.4328335,
+       "inputs_ms": 0.0014375,
+       "media_ms": 6.7560625000000005,
+       "readout_ms": 0.0026245
+      }
+     }
+    }
+   },
+   "decision_l256": {
+    "load_wall_s": 11.6286695,
+    "ane_region_entries": 0,
+    "rows": {
+     "rows": 56,
+     "rows_by_mode": {
+      "text": 56,
+      "image": 0,
+      "audio": 0
+     },
+     "rows_by_bucket": {
+      "256": 56
+     },
+     "non_near_tie": 55,
+     "argmax_equal_non_near_tie": 33,
+     "near_tie": 1,
+     "argmax_equal_near_tie": 1,
+     "max_abs_dp": 0.9988131173249712,
+     "mean_row_max_abs_dp": 0.2642146446741143,
+     "ids_markers_bucket_ok": 56,
+     "finite": 56,
+     "mac": {
+      "logits_bit_equal": 0,
+      "probs_bit_equal": 0,
+      "max_abs_dp": 0.9988135036237509,
+      "max_abs_dlogit": 22.011192321777344
+     },
+     "ship_bar": {
+      "verdict": {
+       "argmax_non_near_tie": false,
+       "max_abs_dp": false,
+       "mean_row_max_abs_dp": false,
+       "finite": true,
+       "ids_markers_bucket": true
+      },
+      "status": "FAIL"
+     }
+    },
+    "vs_gpu_jit": {
+     "rows": 56,
+     "max_abs_dp": 0.9988131963182241,
+     "source": "results/iphone_parity_jit.json rows (launch 1, the GPU JIT)"
+    },
+    "drift_marker_logits_max": 0.020994186401367188,
+    "ms": {
+     "W1": {
+      "ane-decision": {
+       "n": 20,
+       "median_ms": 155.912104,
+       "p10_ms": 49.896495800000004,
+       "p90_ms": 181.02324580000004
+      },
+      "gpu-jit": {
+       "n": 20,
+       "median_ms": 23.8509165,
+       "p10_ms": 20.980583000000003,
+       "p90_ms": 33.758558300000004
+      }
+     },
+     "W2": {
+      "ane-decision": {
+       "n": 20,
+       "median_ms": 593.7131665,
+       "p10_ms": 454.97545390000005,
+       "p90_ms": 643.6671167
+      },
+      "gpu-jit": {
+       "n": 20,
+       "median_ms": 73.4427915,
+       "p10_ms": 68.20596250000001,
+       "p90_ms": 80.2799875
+      }
+     }
+    }
+   }
+  },
+  "note": "each pair (Neural Engine preferred / GPU) ran alternating in one series; the GPU values of these series are higher than the bench's (W1 GPU 23.85 ms here, 20.12 ms in the bench at L256)"
+ },
+ "hold": {
+  "taken": [
+   "2026-10-08 21:01:48",
+   "2026-10-08 21:13:51"
+  ],
+  "released": [
+   {
+    "at": "2026-10-08 21:08:33",
+    "held_s": 405
+   },
+   {
+    "at": "2026-10-08 21:15:17",
+    "held_s": 86
+   }
+  ],
+  "held_s_total": 491,
+  "timezone": "JST"
+ },
+ "transfer": {
+  "staged_files": 215,
+  "staged_bytes": 8047720825,
+  "push_s": 254,
+  "push_mb_per_s": 31.68394025590551,
+  "check": "sizes",
+  "repushed_files": 0,
+  "bad_after_checks": 0
+ },
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}

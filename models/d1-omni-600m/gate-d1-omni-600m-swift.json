@@ -1,0 +1,316 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "swift",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "The Swift host (apps/D1Omni: library D1Omni, CLI d1omni; Release; the system CoreAI framework, GPU preferred) on the Mac against the Python host and runtime and the oracle.",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "results/ship_swift_l1024_probe.json",
+   "bytes": 6851,
+   "sha256": "6f07065a7fe1b1a7c62bfca46d7c150996cefec1969b7686ffa304f51289e477"
+  },
+  {
+   "file": "results/ship_swift_media_audio.json",
+   "bytes": 51819,
+   "sha256": "76981eb67dd45ca09859ae1dd3956ae7cc2a2d424258f21e1631ef9b511f9d18"
+  },
+  {
+   "file": "results/ship_swift_media_image.json",
+   "bytes": 43539,
+   "sha256": "d242626ef688eb1d359b4c4005fa1226f8b4d2820963be15652f38c09fe97b7a"
+  },
+  {
+   "file": "results/ship_swift_parity.json",
+   "bytes": 6186,
+   "sha256": "2bd8243a73d5f477b5d7faf1e84a575c83222e4b99c04a18ec4585754398b38d"
+  },
+  {
+   "file": "results/ship_swift_parity_aot.json",
+   "bytes": 245900,
+   "sha256": "89315744e964b7c3427d7416fd35a851e4b4a31e2ceaa9d7f7568bf9db852425"
+  },
+  {
+   "file": "results/ship_swift_parity_jit.json",
+   "bytes": 246663,
+   "sha256": "c28c77228337c66a69924b9713603ab4b5211dae3a1b4d6e2be973f5d1b41c0a"
+  },
+  {
+   "file": "results/small_swift_parity_aot.json",
+   "bytes": 183335,
+   "sha256": "831effd34f097f2a81a424dd4ba38668f15024856e81b4f3bf896aa1729699f3"
+  },
+  {
+   "file": "results/small_swift_parity_jit.json",
+   "bytes": 183676,
+   "sha256": "7d3221c3967dc8b6a4a3a0a867e9cee008271840e06d1077b92bb946c34b63f4"
+  },
+  {
+   "file": "results/swift_media_ask.json",
+   "bytes": 7009,
+   "sha256": "2b95ee97e9502d9af3ecf2052e0cd82e172a99b84524cdc8aa4d4b5f0a38a189"
+  },
+  {
+   "file": "results/swift_parity_L64_128.json",
+   "bytes": 13884,
+   "sha256": "03206f162faff787efd84bea5a88c1e302a940aa5e172cbc605c14fe9930ad42"
+  },
+  {
+   "file": "results/swift_rows_gate.json",
+   "bytes": 7071,
+   "sha256": "9196f636b340a8eaa483d647e944ff8068b7a265b30744b2672fcd83fa008f57"
+  }
+ ],
+ "bar": {
+  "name": "FACTS §7 (the ship bar)",
+  "argmax": "equal to the oracle's on every row whose oracle top-2 margin is above 0.02 (near ties reported apart)",
+  "max_abs_dp": 0.02,
+  "mean_row_max_abs_dp": 0.002,
+  "oracle": "the publisher's model, AutoModel.from_pretrained(trust_remote_code=True), CPU, fp32: text rows after the config.json temperature, image and audio rows the raw softmax"
+ },
+ "status": "PASS",
+ "device": "Apple M4 Max, macOS 27.0 (26A428), Xcode 27.0 RC, Apple Swift 6.4, swift-transformers 1.3.3",
+ "token_rows": {
+  "what": "d1omni rows (Swift: swift-transformers' tokenizer, the prompt rules of host.py, unicodeScalars) against the Python host on every row of fixtures v1 / v2 / v3: ids, markers, masks, qtype",
+  "acceptance": {
+   "rows": 479,
+   "status_v1": "PASS",
+   "status_all": "PASS"
+  },
+  "versions": {
+   "v1": {
+    "rows": 479,
+    "python_rows": 479,
+    "ids_sha256_equal": "479/479"
+   },
+   "v2": {
+    "rows": 551,
+    "python_rows": 551,
+    "ids_sha256_equal": "551/551"
+   },
+   "v3": {
+    "rows": 623,
+    "python_rows": 623,
+    "ids_sha256_equal": "623/623"
+   }
+  },
+  "control": {
+   "what": "card_text/refund: 'Is the customer asking for a refund?' -> 'Is the customer asking for a return?' in a copy of fixtures v1, Swift rows against encode_rows v1",
+   "rows_flagged": [
+    "card_text/text/refund"
+   ],
+   "status": "FAIL (as it must, on that row only)"
+  }
+ },
+ "text": {
+  "what": "the 470 text-path rows of the round-2 fixture (459 text + 11 media rows with the oracle's prefix) through the stripped decision graphs (buckets 256-4096): AOT h16c and the .aimodel specialized by the Swift runtime, against the Python runtime on the same AOT (bit for bit) and the oracle",
+  "per_kind": {
+   "aot": {
+    "text_rows": 470,
+    "python_bit_equal": 470,
+    "file_python_bit_equal_rows": 470,
+    "recomputed_equal": true,
+    "drift_max": 0.0,
+    "by_bucket": {
+     "256": 436,
+     "512": 19,
+     "1024": 0,
+     "2048": 11,
+     "4096": 4
+    }
+   },
+   "jit": {
+    "text_rows": 470,
+    "python_bit_equal": 470,
+    "file_python_bit_equal_rows": 470,
+    "recomputed_equal": true,
+    "drift_max": 0.0,
+    "by_bucket": {
+     "256": 436,
+     "512": 19,
+     "1024": 0,
+     "2048": 11,
+     "4096": 4
+    }
+   }
+  },
+  "facts_bar": {
+   "aot": "PASS",
+   "jit": "PASS"
+  },
+  "argmax_equal": 470,
+  "max_abs_dp": 0.006703674793243408,
+  "mean_row_max_abs_dp": 0.0009796771402761806,
+  "wrong_pairing_control": "FAIL",
+  "jit_vs_aot": {
+   "rows": 470,
+   "bit_equal": 470,
+   "max_abs_dlogit": 0.0,
+   "max_abs_dp": 0.0,
+   "first_different": []
+  }
+ },
+ "media": {
+  "image": {
+   "source": "results/ship_swift_media_image.json",
+   "status": "PASS",
+   "rows": 46,
+   "argmax_equal": 46,
+   "max_abs_dp": 0.006227403879165649,
+   "mean_row_max_abs_dp": 0.0011123106542974572,
+   "rows_bit_equal_python": "46/46",
+   "control_next_item_prefix": {
+    "rows": 46,
+    "argmax_equal": 31,
+    "max_abs_dp": 0.9998168623278616,
+    "mean_row_max_abs_dp": 0.3228745365577988,
+    "status": "FAIL",
+    "must_be": "FAIL"
+   },
+   "wrong_pairing_oracle_swap": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 46,
+    "unpaired_rows": [],
+    "rows_over_dp_bar": 43,
+    "argmax_mismatch_non_near_tie": 26,
+    "max_abs_dp": 0.9977676006965339,
+    "mean_row_max_abs_dp": 0.5566859822058793,
+    "verdict": {
+     "argmax_non_near_tie": false,
+     "max_abs_dp": false,
+     "mean_row_max_abs_dp": false,
+     "finite": true
+    }
+   },
+   "jit_vs_aot": {
+    "media_outputs_equal": "16/16",
+    "rows_bit_equal": "46/46",
+    "status": "PASS"
+   },
+   "decode": {
+    "images": 16,
+    "rgb_bit_equal": "16/16",
+    "rule": "ImageIO's decoded bytes (CGImage data provider), no EXIF rotation, no colour matching, alpha dropped"
+   },
+   "graph_inputs": {},
+   "prefix": {
+    "bit_equal_images": "16/16",
+    "max_abs": 0.0,
+    "max_abs_on_bit_equal_rgb": 0.0,
+    "arm_b_python_inputs_through_swift_graph": "62/62 crops bit-equal",
+    "drift_max": 0.0
+   }
+  },
+  "audio": {
+   "source": "results/ship_swift_media_audio.json",
+   "status": "PASS",
+   "rows": 46,
+   "argmax_equal": 46,
+   "max_abs_dp": 0.0032091140747070312,
+   "mean_row_max_abs_dp": 0.0007656688837177289,
+   "rows_bit_equal_python": "46/46",
+   "control_next_item_prefix": {
+    "rows": 46,
+    "argmax_equal": 30,
+    "max_abs_dp": 0.9850644962862134,
+    "mean_row_max_abs_dp": 0.2948130090845557,
+    "status": "FAIL",
+    "must_be": "FAIL"
+   },
+   "wrong_pairing_oracle_swap": {
+    "status": "FAIL",
+    "must_be": "FAIL",
+    "caught": true,
+    "paired_rows": 45,
+    "unpaired_rows": [],
+    "rows_over_dp_bar": 35,
+    "argmax_mismatch_non_near_tie": 12,
+    "max_abs_dp": 0.9884130852296948,
+    "mean_row_max_abs_dp": 0.27020228004081825,
+    "verdict": {
+     "argmax_non_near_tie": false,
+     "max_abs_dp": false,
+     "mean_row_max_abs_dp": false,
+     "finite": true
+    }
+   },
+   "jit_vs_aot": {
+    "media_outputs_equal": "16/16",
+    "rows_bit_equal": "46/46",
+    "status": "PASS"
+   },
+   "prefix": {
+    "bit_equal_numpy_mel_prefix": "16/16",
+    "max_abs_vs_numpy_mel_prefix": 0.0,
+    "max_abs_vs_torch_mel_prefix": 0.018456220626831055,
+    "arm_b_python_inputs_through_swift_graph": "16/16 clips bit-equal",
+    "drift_max": 0.0
+   },
+   "samples": {
+    "clips": 16,
+    "bit_equal": "16/16"
+   },
+   "mel": {
+    "rule": "float64 (mel_numpy) cast to float32; the FFT is vDSP's (NumPy: pocketfft), every other step NumPy's arithmetic in NumPy's order (libm log / cos, Accelerate dgemm, pairwise sums)"
+   },
+   "masks": {
+    "mask_f": "16/16",
+    "mask_f2": "16/16",
+    "mask_f4": "16/16",
+    "mask_t": "16/16"
+   }
+  }
+ },
+ "small_buckets": {
+  "what": "the 342 text rows whose bucket under host.ALL_BUCKETS is 64 or 128, through the stripped L64 / L128 graphs: AOT and the .aimodel, against the Python runtime (bit for bit) and the oracle. The 9 audio rows of 128 positions or fewer were not run through the Swift host at L64 / L128",
+  "status": "PASS",
+  "per_kind": {
+   "aot": {
+    "rows": 342,
+    "python_bit_equal": 342,
+    "by_bucket": {
+     "64": 64,
+     "128": 278
+    }
+   },
+   "jit": {
+    "rows": 342,
+    "python_bit_equal": 342,
+    "by_bucket": {
+     "64": 64,
+     "128": 278
+    }
+   }
+  },
+  "argmax_equal": 342,
+  "max_abs_dp": 0.011694788932800293,
+  "mean_row_max_abs_dp": 0.00105917183051314,
+  "wrong_pairing_control": "FAIL",
+  "jit_vs_aot": {
+   "rows": 342,
+   "bit_equal": 342,
+   "max_abs_dlogit": 0.0,
+   "max_abs_dp": 0.0,
+   "first_different": []
+  }
+ },
+ "l1024_probe": {
+  "what": "no fixture row has 513-1024 positions: one request (a public long record's state cut to its first 34 lines, 3 rows of 961-1009 positions) through `d1omni ask` against the Python runtime's response",
+  "status": "PASS",
+  "response_equal_python_bytes": {
+   "aot": true,
+   "jit_cold": true,
+   "jit_warm": true
+  }
+ },
+ "ask": {
+  "status": "PASS",
+  "what": "README's `d1omni ask --image / --audio` and three failure paths (a WAV as an image, a FLAC as audio, a missing file: exit 1 and a message)"
+ },
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}

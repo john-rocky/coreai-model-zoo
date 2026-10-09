@@ -18,8 +18,8 @@ configuration; a single bundle answers that question by itself.
 | published repos | 294 |
 | Core AI repos | 101 |
 | Core AI bundles inside them | 411 |
-| Core AI repos with a `models/<family>/` card | 93 |
-| repos covered by a recipe | 93 |
+| Core AI repos with a `models/<family>/` card | 94 |
+| repos covered by a recipe | 94 |
 | Core AI repos with 0 downloads in the last 30 days | 3 |
 
 ## All repos, by 30-day downloads
@@ -306,7 +306,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/LFM2-1.2B-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2-1.2B-ExecuTorch) | 1 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLOE-S-CoreML](https://huggingface.co/mlboydaisuke/YOLOE-S-CoreML) | 1 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/coreml-zoo](https://huggingface.co/mlboydaisuke/coreml-zoo) | 0 | 1 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/d1-omni-600M-CoreAI](https://huggingface.co/mlboydaisuke/d1-omni-600M-CoreAI) | 0 | 0 | coreai | port | 35 | — | — | — | — | — |
+| [mlboydaisuke/d1-omni-600M-CoreAI](https://huggingface.co/mlboydaisuke/d1-omni-600M-CoreAI) | 0 | 0 | coreai | port | 35 | — | — | [d1-omni-600m](d1-omni-600m/README.md) | `d1-omni-600m` | — |
 | [mlboydaisuke/embeddinggemma-300m-coreml](https://huggingface.co/mlboydaisuke/embeddinggemma-300m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/functiongemma-270m-coreml](https://huggingface.co/mlboydaisuke/functiongemma-270m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/gemma-3-270m-it-NPU-LiteRT](https://huggingface.co/mlboydaisuke/gemma-3-270m-it-NPU-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
@@ -361,7 +361,7 @@ Published and downloadable, undocumented here. Each is either a card to write
 or a repo to unpublish. (Bench exports of Apple's own recipes are listed
 separately below — those answer to Apple's repo, not to a zoo card.)
 
-- [mlboydaisuke/d1-omni-600M-CoreAI](https://huggingface.co/mlboydaisuke/d1-omni-600M-CoreAI) — 0 DL/30d, 35 bundle(s), updated 2026-10-08
+- (none)
 
 Bench exports of Apple's own recipes, no card expected (7): `sam3-CoreAI-official`, `gemma-3-4b-it-CoreAI-official`, `qwen3-8b-CoreAI-official`, `gpt-oss-20b-CoreAI-official`, `mistral-7b-v0.3-CoreAI-official`, `gemma-3-12b-it-CoreAI-official`, `clip-vit-base-patch32-CoreAI-official`
 
@@ -375,7 +375,7 @@ published configuration. **Do not guess their `args`.**
 
 ### 3. Recipes recorded, shipped configuration unknown
 
-8 of the 128 recipes carry `status = "unverified"`:
+8 of the 129 recipes carry `status = "unverified"`:
 the script is known, the arguments that produced the published bundle are not,
 and nothing in the repo records them. `zoo_convert.py` refuses to run these
 without `--force`. Each needs one answer from the owner.

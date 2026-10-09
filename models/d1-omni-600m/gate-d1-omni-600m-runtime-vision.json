@@ -1,0 +1,216 @@
+{
+ "schema": "d1-omni-gate-transcript/1",
+ "transcript": "runtime-vision",
+ "model": {
+  "hf_id": "LiquidAI/d1-omni-600M",
+  "revision": "414f8d6438174f5b2133a9c21a478fc42625e308"
+ },
+ "what": "The vision graph (fp16, stripped, AOT h16c) on the Mac GPU: its prefix per crop, and the image rows end to end through the fp16 decision graph.",
+ "lane": "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)",
+ "sources": [
+  {
+   "file": "results/ship_runtime_compare.json",
+   "bytes": 18921,
+   "sha256": "a4c9aa6508af9656511f8b3260b6d544f13fab91d6e5f846498049218e6b4cd0"
+  },
+  {
+   "file": "results/ship_runtime_vision_e2e_fp16.json",
+   "bytes": 93903,
+   "sha256": "5e6c97685dc68dc123b35cda38a46e4bbb69f0b7c452e29f16f899cfd3150256"
+  },
+  {
+   "file": "results/ship_runtime_vision_fp16_gpu.json",
+   "bytes": 9511,
+   "sha256": "fbff47526b593d2ff84368f896819024e62bdb3a1b30a04af38d72b5ed4205a0"
+  }
+ ],
+ "bar": {
+  "name": "FACTS §7 (the ship bar)",
+  "argmax": "equal to the oracle's on every row whose oracle top-2 margin is above 0.02 (near ties reported apart)",
+  "max_abs_dp": 0.02,
+  "mean_row_max_abs_dp": 0.002,
+  "oracle": "the publisher's model, AutoModel.from_pretrained(trust_remote_code=True), CPU, fp32: text rows after the config.json temperature, image and audio rows the raw softmax"
+ },
+ "status": "PASS",
+ "prefix": {
+  "source": "results/ship_runtime_vision_fp16_gpu.json",
+  "status": "PASS",
+  "images": 16,
+  "crops": 62,
+  "min_cos": 0.9999740808535205,
+  "min_row_cos": 0.9979570550488077,
+  "max_abs": 10.716331481933594,
+  "drift_max": 0.0,
+  "host_pixels_equal_reference": 16,
+  "what": "the vision graph (fp16, stripped, AOT h16c) on the Mac GPU against the publisher's fp32 vision prefix, every crop of 16 images (3 public, 13 measurement-only), 3 calls each",
+  "recomputed_equal": true
+ },
+ "end_to_end": {
+  "source": "results/ship_runtime_vision_e2e_fp16.json",
+  "status": "PASS",
+  "rows": 46,
+  "arms": {
+   "vision_bundle_prefix": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.006227403879165649,
+    "mean_row_max_abs_dp": 0.0011123106542974572,
+    "max_abs_dlogit": 0.03194713592529297,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "256": {
+      "rows": 18,
+      "argmax_equal": 18,
+      "max_abs_dp": 0.006227403879165649,
+      "mean_row_max_abs_dp": 0.001370048585389188
+     },
+     "512": {
+      "rows": 1,
+      "argmax_equal": 1,
+      "max_abs_dp": 0.005338519811630249,
+      "mean_row_max_abs_dp": 0.005338519811630249
+     },
+     "2048": {
+      "rows": 27,
+      "argmax_equal": 27,
+      "max_abs_dp": 0.0027608871459960938,
+      "mean_row_max_abs_dp": 0.0007839591018165703
+     }
+    }
+   },
+   "reference_prefix": {
+    "rows": 46,
+    "argmax_equal": 46,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 46
+    },
+    "max_abs_dp": 0.00495484471321106,
+    "mean_row_max_abs_dp": 0.0006603613327973048,
+    "max_abs_dlogit": 0.022943496704101562,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": true,
+      "max_abs_dp": true,
+      "mean_row_max_abs_dp": true,
+      "finite": true
+     },
+     "status": "PASS"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "256": {
+      "rows": 18,
+      "argmax_equal": 18,
+      "max_abs_dp": 0.00495484471321106,
+      "mean_row_max_abs_dp": 0.0008460943191310991
+     },
+     "512": {
+      "rows": 1,
+      "argmax_equal": 1,
+      "max_abs_dp": 0.001340031623840332,
+      "mean_row_max_abs_dp": 0.001340031623840332
+     },
+     "2048": {
+      "rows": 27,
+      "argmax_equal": 27,
+      "max_abs_dp": 0.0026326775550842285,
+      "mean_row_max_abs_dp": 0.0005113663681657743
+     }
+    }
+   },
+   "control_other_image_prefix": {
+    "rows": 46,
+    "argmax_equal": 31,
+    "non_near_tie": {
+     "rows": 46,
+     "argmax_equal": 31
+    },
+    "max_abs_dp": 0.9998168623278616,
+    "mean_row_max_abs_dp": 0.3228745365577988,
+    "max_abs_dlogit": 18.35795783996582,
+    "ship_bar": {
+     "verdict": {
+      "argmax_non_near_tie": false,
+      "max_abs_dp": false,
+      "mean_row_max_abs_dp": false,
+      "finite": true
+     },
+     "status": "FAIL"
+    },
+    "recomputed_vs_file": {
+     "equal": true,
+     "different": {}
+    },
+    "by_bucket": {
+     "256": {
+      "rows": 18,
+      "argmax_equal": 9,
+      "max_abs_dp": 0.9998168623278616,
+      "mean_row_max_abs_dp": 0.44262610522936385
+     },
+     "512": {
+      "rows": 1,
+      "argmax_equal": 0,
+      "max_abs_dp": 0.4184872731566429,
+      "mean_row_max_abs_dp": 0.4184872731566429
+     },
+     "2048": {
+      "rows": 27,
+      "argmax_equal": 22,
+      "max_abs_dp": 0.9499957405496389,
+      "mean_row_max_abs_dp": 0.23949894497679822
+     }
+    }
+   }
+  },
+  "control_must_fail": "FAIL",
+  "wrong_pairing_oracle_swap": {
+   "status": "FAIL",
+   "must_be": "FAIL",
+   "caught": true,
+   "rows_over_dp_bar": 43
+  },
+  "repeat_drift_max": 0.0,
+  "decision_graphs": {
+   "256": {
+    "aimodelc": "d1_omni_decide_fp16_L256.h16c.aimodelc",
+    "main_hash": "b075f032d760cd9ebddd2e68c41b2fe60be9d965cc1420501530a582a37fc33e"
+   },
+   "512": {
+    "aimodelc": "d1_omni_decide_fp16_L512.h16c.aimodelc",
+    "main_hash": "43e7197f37bc9f7cee33c8d20017dcaff4f3264d2cbb732eec00808d6b16d991"
+   },
+   "2048": {
+    "aimodelc": "d1_omni_decide_fp16_L2048.h16c.aimodelc",
+    "main_hash": "dc950eadfe335ee20d804fd51947c5f5797a972a06cdccc8b13e4d4dd41f1087"
+   }
+  },
+  "verdict": "PASS",
+  "what": "46 image rows: the vision graph's prefix -> the decision graph fp16 (buckets 256 / 512 / 2048) on the Mac GPU, against the oracle (raw softmax, no temperature); arms: the shipped prefix, the publisher's prefix in the same decision graph (reference), another image's prefix (control, must fail)"
+ },
+ "stripped_vs_unstripped": {
+  "vision-fp16": "SAME",
+  "vision-e2e": "SAME"
+ },
+ "written_by": "conversion/d1_omni/zoo_transcripts.py"
+}

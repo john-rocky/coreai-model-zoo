@@ -468,6 +468,69 @@
    "repos": []
   },
   {
+   "family": "d1-omni-600m",
+   "card": "models/d1-omni-600m/README.md",
+   "recipes": [
+    {
+     "name": "d1-omni-600m",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/d1-omni-600M-CoreAI",
+     "bundle": null,
+     "steps": 58,
+     "run": "python3 conversion/zoo_convert.py run d1-omni-600m",
+     "gate_transcript": null,
+     "open_questions": []
+    }
+   ],
+   "repos": [
+    {
+     "id": "mlboydaisuke/d1-omni-600M-CoreAI",
+     "downloads_30d": 0,
+     "bundles": [
+      "ios-h19p/audio-fp16-10s",
+      "ios-h19p/audio-fp16-20s",
+      "ios-h19p/audio-fp16-30s",
+      "ios-h19p/audio-fp16-5s",
+      "ios-h19p/decide-fp16-L1024",
+      "ios-h19p/decide-fp16-L128",
+      "ios-h19p/decide-fp16-L2048",
+      "ios-h19p/decide-fp16-L256",
+      "ios-h19p/decide-fp16-L512",
+      "ios-h19p/decide-fp16-L64",
+      "ios-h19p/vision-fp16",
+      "ios/audio-fp16-10s",
+      "ios/audio-fp16-20s",
+      "ios/audio-fp16-30s",
+      "ios/audio-fp16-5s",
+      "ios/decide-fp16-L1024",
+      "ios/decide-fp16-L128",
+      "ios/decide-fp16-L2048",
+      "ios/decide-fp16-L256",
+      "ios/decide-fp16-L4096",
+      "ios/decide-fp16-L512",
+      "ios/decide-fp16-L64",
+      "ios/vision-fp16",
+      "macos/audio-fp16-10s",
+      "macos/audio-fp16-20s",
+      "macos/audio-fp16-30s",
+      "macos/audio-fp16-5s",
+      "macos/decide-fp16-L1024",
+      "macos/decide-fp16-L128",
+      "macos/decide-fp16-L2048",
+      "macos/decide-fp16-L256",
+      "macos/decide-fp16-L4096",
+      "macos/decide-fp16-L512",
+      "macos/decide-fp16-L64",
+      "macos/vision-fp16"
+     ],
+     "tier1": {},
+     "smoke": []
+    }
+   ]
+  },
+  {
    "family": "decider-0.8b",
    "card": "models/decider-0.8b/README.md",
    "recipes": [

@@ -224,6 +224,16 @@ For the long-form version of the same material, read
   (the publisher's own SDPA-vs-eager distance is 2.9e-4 at the final norm, so laya's 2e-4 does not carry over)
   and the residual traced to the final LayerNorm of a different torch build; fp16 storage is not free on an
   F32 checkpoint (|Δp| 0.023); the Neural Engine does not take the fp32 graph.
+- [`d1-omni-port.md`](d1-omni-port.md) — **an encoder decision model with an image and an audio tower on Core AI**
+  (LiquidAI/d1-omni-600M): three graphs (the decision graph at seven static lengths from 64 to 4,096, SigLIP2
+  vision per crop, FastConformer audio per clip bucket) with the masks as float inputs and the media prefix
+  written by the host; the publisher's fp32 floor sets a 2e-5 module bar; L = 4,096 attends in two blocks of 2,048
+  keys; fp16 passes at every length while int8 fails and compiles to fp16-sized weights, and the Neural Engine
+  misses the bar; torchvision's uint8 resize, the position-table resize and the mel copied in NumPy and Swift bit
+  for bit, with a libjpeg-turbo-exact baseline JPEG decoder (ImageIO is up to 3 levels off); the MLIR debug
+  locations carry the exporting machine's path until `strip_debug_info`; Swift's JIT of the `.aimodel` equals the
+  AOT asset; swift-transformers' tokenizer takes 0.4 s on a 3.4k-token state; a question costs 7.35 ms at L64 and
+  16.2 ms at L256 on the M4 Max GPU, so the host picks the smallest bucket that holds the row.
 - [`apus-decision-v1-4b-port.md`](apus-decision-v1-4b-port.md) — **a letter-readout decision model as an HF-id swap**
   (apus-ailab/APUS-OpenJev-v1-4B): the unchanged Qwen3.5-4B exporter; the author's `openjet_runtime` as the fp32
   oracle (transformers 5.16.1 pinned); the `Shared state:` + JSON task turn under the chat template read at

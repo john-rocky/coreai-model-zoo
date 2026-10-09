@@ -1,0 +1,136 @@
+# Recipe for d1-omni-600m — the configuration that produced each staged bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# LiquidAI/d1-omni-600M re-authored from model.safetensors at 414f8d6438174f5b2133a9c21a478fc42625e308 as three plain
+# PyTorch graphs (conversion/d1_omni/d1_omni_model.py, d1_omni_vision.py, d1_omni_audio.py), exported in fp16, their
+# debug locations stripped, compiled ahead of time, and gated against the publisher's own model in fp32 on the CPU.
+# conversion/d1_omni/README.md lists every stage in this order, with the gate of each.
+
+["d1-omni-600m"]
+card = "README.md"
+hf_repo = "mlboydaisuke/d1-omni-600M-CoreAI"
+source_hf_id = "LiquidAI/d1-omni-600M"
+source_revision = "414f8d6438174f5b2133a9c21a478fc42625e308"
+status = "verified"
+steps = [
+  # the decision graph at seven static lengths, the vision graph (one crop), the audio graph at four clip lengths;
+  # each export gates its torch program against the oracle rows of its bucket before it converts
+  { script = "d1_omni/export_decide.py", args = ["--precision", "fp16", "--seq-len", "64"] },
+  { script = "d1_omni/export_decide.py", args = ["--precision", "fp16", "--seq-len", "128"] },
+  { script = "d1_omni/export_decide.py", args = ["--precision", "fp16", "--seq-len", "256"] },
+  { script = "d1_omni/export_decide.py", args = ["--precision", "fp16", "--seq-len", "512"] },
+  { script = "d1_omni/export_decide.py", args = ["--precision", "fp16", "--seq-len", "1024"] },
+  { script = "d1_omni/export_decide.py", args = ["--precision", "fp16", "--seq-len", "2048"] },
+  { script = "d1_omni/export_decide.py", args = ["--precision", "fp16", "--seq-len", "4096"] },
+  { script = "d1_omni/export_vision.py", args = ["--precision", "fp16"] },
+  { script = "d1_omni/export_audio.py", args = ["--precision", "fp16", "--sec", "5"] },
+  { script = "d1_omni/export_audio.py", args = ["--precision", "fp16", "--sec", "10"] },
+  { script = "d1_omni/export_audio.py", args = ["--precision", "fp16", "--sec", "20"] },
+  { script = "d1_omni/export_audio.py", args = ["--precision", "fp16", "--sec", "30"] },
+  # the published bundles: the debug locations removed (coreai-torch strip_debug_info), the operations unchanged
+  { script = "d1_omni/strip_ship.py", args = ["--only", "fp16-L64"], bundle = "macos/decide-fp16-L64/d1_omni_decide_fp16_L64.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "fp16-L128"], bundle = "macos/decide-fp16-L128/d1_omni_decide_fp16_L128.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "fp16-L256"], bundle = "macos/decide-fp16-L256/d1_omni_decide_fp16_L256.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "fp16-L512"], bundle = "macos/decide-fp16-L512/d1_omni_decide_fp16_L512.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "fp16-L1024"], bundle = "macos/decide-fp16-L1024/d1_omni_decide_fp16_L1024.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "fp16-L2048"], bundle = "macos/decide-fp16-L2048/d1_omni_decide_fp16_L2048.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "fp16-L4096"], bundle = "macos/decide-fp16-L4096/d1_omni_decide_fp16_L4096.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "vision-fp16"], bundle = "macos/vision-fp16/d1_omni_vision_fp16.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "audio-fp16-5s"], bundle = "macos/audio-fp16-5s/d1_omni_audio_fp16_5s.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "audio-fp16-10s"], bundle = "macos/audio-fp16-10s/d1_omni_audio_fp16_10s.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "audio-fp16-20s"], bundle = "macos/audio-fp16-20s/d1_omni_audio_fp16_20s.aimodel" },
+  { script = "d1_omni/strip_ship.py", args = ["--only", "audio-fp16-30s"], bundle = "macos/audio-fp16-30s/d1_omni_audio_fp16_30s.aimodel" },
+  # ahead-of-time compiles: h16c for this Mac (the Python gates load it), h19p for the iPhone 18 Pro (never on a Mac)
+  { script = "d1_omni/aot_ship.py", args = ["--target", "h16c"] },
+  { script = "d1_omni/aot_ship.py", args = ["--target", "h16c", "--only", "fp16-L64", "fp16-L128"] },
+  { script = "d1_omni/aot_ship.py", args = ["--target", "h19p"], bundle = "ios-h19p/<name>/<stem>.h19p.aimodelc (L256 to L2048, vision, audio; the L4096 compile is made but not published: on the iPhone 18 Pro its first call exceeds the per-process memory limit, gate-d1-omni-600m-iphone.json)" },
+  { script = "d1_omni/aot_ship.py", args = ["--target", "h19p", "--only", "fp16-L64", "fp16-L128"], bundle = "ios-h19p/decide-fp16-L{64,128}/<stem>.h19p.aimodelc" },
+  # the Mac GPU gates (the ship bar against the oracle; each writes results/ship_runtime_* or small_runtime_*)
+  { script = "d1_omni/runtime_check.py", args = ["../../_d1_omni/compiled/ship-h16c/fp16-L64", "--compute", "gpu", "--repeats", "3", "--out", "../../_d1_omni/results/ship_runtime_decide_fp16_L64_gpu.json"] },
+  { script = "d1_omni/runtime_check.py", args = ["../../_d1_omni/compiled/ship-h16c/fp16-L128", "--compute", "gpu", "--repeats", "3", "--out", "../../_d1_omni/results/ship_runtime_decide_fp16_L128_gpu.json"] },
+  { script = "d1_omni/runtime_check.py", args = ["../../_d1_omni/compiled/ship-h16c/fp16-L256", "--compute", "gpu", "--repeats", "3", "--out", "../../_d1_omni/results/ship_runtime_decide_fp16_L256_gpu.json"] },
+  { script = "d1_omni/runtime_check.py", args = ["../../_d1_omni/compiled/ship-h16c/fp16-L512", "--compute", "gpu", "--repeats", "3", "--out", "../../_d1_omni/results/ship_runtime_decide_fp16_L512_gpu.json"] },
+  { script = "d1_omni/runtime_check.py", args = ["../../_d1_omni/compiled/ship-h16c/fp16-L1024", "--compute", "gpu", "--repeats", "3", "--out", "../../_d1_omni/results/ship_runtime_decide_fp16_L1024_gpu.json"] },
+  { script = "d1_omni/runtime_check.py", args = ["../../_d1_omni/compiled/ship-h16c/fp16-L2048", "--compute", "gpu", "--repeats", "3", "--out", "../../_d1_omni/results/ship_runtime_decide_fp16_L2048_gpu.json"] },
+  { script = "d1_omni/runtime_check.py", args = ["../../_d1_omni/compiled/ship-h16c/fp16-L4096", "--compute", "gpu", "--repeats", "5", "--out", "../../_d1_omni/results/ship_runtime_decide_fp16_L4096_gpu.json"] },
+  { script = "d1_omni/vision_check.py", args = ["--stage", "runtime", "--compute", "gpu", "--vision", "../../_d1_omni/compiled/ship-h16c/vision-fp16", "--decide", "256=../../_d1_omni/compiled/ship-h16c/fp16-L256", "--decide", "512=../../_d1_omni/compiled/ship-h16c/fp16-L512", "--decide", "2048=../../_d1_omni/compiled/ship-h16c/fp16-L2048", "--results-prefix", "ship_runtime_"] },
+  { script = "d1_omni/audio_check.py", args = ["--stage", "runtime", "--compute", "gpu", "--audio", "5=../../_d1_omni/compiled/ship-h16c/audio-fp16-5s", "--audio", "10=../../_d1_omni/compiled/ship-h16c/audio-fp16-10s", "--audio", "20=../../_d1_omni/compiled/ship-h16c/audio-fp16-20s", "--audio", "30=../../_d1_omni/compiled/ship-h16c/audio-fp16-30s", "--decide", "256=../../_d1_omni/compiled/ship-h16c/fp16-L256", "--decide", "512=../../_d1_omni/compiled/ship-h16c/fp16-L512", "--results-prefix", "ship_runtime_"] },
+  { script = "d1_omni/audio_check.py", args = ["--stage", "runtime", "--compute", "gpu", "--audio", "5=../../_d1_omni/compiled/ship-h16c/audio-fp16-5s", "--audio", "10=../../_d1_omni/compiled/ship-h16c/audio-fp16-10s", "--audio", "20=../../_d1_omni/compiled/ship-h16c/audio-fp16-20s", "--audio", "30=../../_d1_omni/compiled/ship-h16c/audio-fp16-30s", "--decide", "64=../../_d1_omni/compiled/ship-h16c/fp16-L64", "--decide", "128=../../_d1_omni/compiled/ship-h16c/fp16-L128", "--decide", "256=../../_d1_omni/compiled/ship-h16c/fp16-L256", "--decide", "512=../../_d1_omni/compiled/ship-h16c/fp16-L512", "--buckets", "64,128,256,512,1024,2048,4096", "--results-prefix", "small_runtime_"] },
+  { script = "d1_omni/compare_ship.py" },
+  { script = "d1_omni/compare_ship.py", args = ["--small"] },
+  # the Swift host (apps/D1Omni) on the same graphs: bit-equal to the Python runtime, AOT and the .aimodel
+  { command = ["swift", "build", "-c", "release", "--package-path", "../apps/D1Omni", "--scratch-path", "../../_d1_omni/swift/.build"] },
+  { script = "d1_omni/gate_swift.py", args = ["--ship", "pyref"] },
+  { script = "d1_omni/host_dump_media.py", args = ["--ship"] },
+  { command = ["../../_d1_omni/swift/.build/out/Products/Release/d1omni", "parity", "--bundle-dir", "../../_d1_omni/bundles/d1-omni-600m/macos-ship", "--fixtures", "../../_d1_omni/fixtures/records.v1.json", "--reference", "../../_d1_omni/results/ship_swift_ref/swift_ref.json", "--out", "../../_d1_omni/results/ship_swift_parity_aot.json", "--asset", "aot", "--aot-root", "../../_d1_omni/compiled/ship-h16c", "--repeats", "2"] },
+  { command = ["../../_d1_omni/swift/.build/out/Products/Release/d1omni", "parity", "--bundle-dir", "../../_d1_omni/bundles/d1-omni-600m/macos-ship", "--fixtures", "../../_d1_omni/fixtures/records.v1.json", "--reference", "../../_d1_omni/results/ship_swift_ref/swift_ref.json", "--out", "../../_d1_omni/results/ship_swift_parity_jit.json", "--asset", "jit", "--repeats", "2"] },
+  { command = ["../../_d1_omni/swift/.build/out/Products/Release/d1omni", "parity-media", "--bundle-dir", "../../_d1_omni/bundles/d1-omni-600m/macos-ship", "--fixtures", "../../_d1_omni/fixtures/records.json", "--media-reference", "../../_d1_omni/results/ship_swift_ref_media", "--media-root", "../../_d1_omni", "--out", "../../_d1_omni/results/ship_swift_media_parity_aot.json", "--asset", "aot", "--aot-root", "../../_d1_omni/compiled/ship-h16c", "--repeats", "2"] },
+  { command = ["../../_d1_omni/swift/.build/out/Products/Release/d1omni", "parity-media", "--bundle-dir", "../../_d1_omni/bundles/d1-omni-600m/macos-ship", "--fixtures", "../../_d1_omni/fixtures/records.json", "--media-reference", "../../_d1_omni/results/ship_swift_ref_media", "--media-root", "../../_d1_omni", "--out", "../../_d1_omni/results/ship_swift_media_parity_jit.json", "--asset", "jit", "--repeats", "2"] },
+  { script = "d1_omni/gate_swift.py", args = ["--ship", "parity"] },
+  { script = "d1_omni/gate_swift.py", args = ["--ship", "media"] },
+  { script = "d1_omni/gate_swift.py", args = ["ship-summary"] },
+  { script = "d1_omni/gate_swift.py", args = ["--small", "pyref"] },
+  { command = ["../../_d1_omni/swift/.build/out/Products/Release/d1omni", "parity", "--bundle-dir", "../../_d1_omni/bundles/d1-omni-600m/macos-ship-small", "--fixtures", "../../_d1_omni/fixtures/records.v1.json", "--reference", "../../_d1_omni/results/small_swift_ref/swift_ref.json", "--out", "../../_d1_omni/results/small_swift_parity_aot.json", "--asset", "aot", "--aot-root", "../../_d1_omni/compiled/ship-h16c", "--repeats", "2"] },
+  { command = ["../../_d1_omni/swift/.build/out/Products/Release/d1omni", "parity", "--bundle-dir", "../../_d1_omni/bundles/d1-omni-600m/macos-ship-small", "--fixtures", "../../_d1_omni/fixtures/records.v1.json", "--reference", "../../_d1_omni/results/small_swift_ref/swift_ref.json", "--out", "../../_d1_omni/results/small_swift_parity_jit.json", "--asset", "jit", "--repeats", "2"] },
+  { script = "d1_omni/gate_swift.py", args = ["--small", "parity"] },
+  # the Hugging Face folder (uploads nothing; --final: README.md = the card, no ios-h19p/decide-fp16-L4096) and this
+  # directory's fixture and transcripts (the iPhone transcript reads the device round's records, apps/D1OmniGate)
+  { script = "d1_omni/stage_hf.py", args = ["--ship", "--final"] },
+  { script = "d1_omni/zoo_fixtures.py" },
+  { script = "d1_omni/zoo_transcripts.py" },
+  { script = "d1_omni/zoo_transcripts.py", args = ["--check"] },
+]
+needs = [
+  "The checkpoint in the Hugging Face cache, read offline by every step: `HF_HUB_DISABLE_XET=1 hf download",
+  "LiquidAI/d1-omni-600M --revision 414f8d6438174f5b2133a9c21a478fc42625e308`, then HF_HUB_OFFLINE=1 (with",
+  "huggingface_hub 1.33 a 40-hex revision resolves offline only after one online snapshot_download has written its",
+  "tree listing). The exporters check model.safetensors' sha256 (0713bb05...) before they read it.",
+  "Stage 0 first, in its own environment (venv-d1: Python 3.12.11, torch 2.9.0, torchvision 0.24.0, transformers",
+  "5.19.0, tokenizers 0.23.2, numpy 2.5.3, safetensors 0.8.0, huggingface_hub 1.33.0, pillow 12.3.0, soundfile",
+  "0.14.0; the checkpoint's own code needs transformers >= 5.15, which the zoo venv does not have):",
+  "d1_omni/make_fixtures.py (the fixture, fixtures/records.json v3, sha256 18b4ddff...), d1_omni/reference_d1_omni.py",
+  "three times (every record -> ref/records_ref.json; `--only <the image records> --out ref/records_ref_images.json`;",
+  "`--only 'aud_0[4-9]' 'aud_1[0-5]' --out ref/records_ref_audio.json`), d1_omni/encode_rows.py --out",
+  "results/encode_rows.v3.json, d1_omni/media_lengths.py, d1_omni/eager_check.py, d1_omni/block_softmax_check.py,",
+  "d1_omni/absmax_scan.py, d1_omni/vision_check.py --stage eager, d1_omni/audio_check.py --stage mel / --stage eager.",
+  "The steps above read the oracle files and the fixture media from <work>/_d1_omni (conversion/_paths.py: the",
+  "repository's parent unless ZOO_WORK_ROOT is set; zoo_convert.py runs in conversion/, so ../../_d1_omni is that",
+  "lane).",
+  "The fixture's public records and media are reference/ of the Hugging Face repository and",
+  "fixtures-d1-omni-600m.json here. Its measurement-only records are not redistributed (a photo and a speech clip",
+  "whose licences require attribution, the transfer-v4 sources other than MMLU, and records withheld by the name",
+  "screen); a rebuild from the published material gates the public rows only.",
+  "The export, strip and gate steps run in the zoo venv (coreai-core 1.0.0b2, coreai-torch 0.4.1 with",
+  "coreai_torch.debugging.debug_info.strip_debug_info, torch 2.9.0, numpy 2.3.5; no transformers: the graphs are",
+  "plain torch and read model.safetensors themselves). PYTHONDONTWRITEBYTECODE=1 keeps conversion/ free of .pyc.",
+  "Xcode 27.0 RC as DEVELOPER_DIR (/Applications/Xcode-27.0.0-RC.app/Contents/Developer) for coreai-build (resolved",
+  "with `xcrun -f coreai-build`, 3600.83.1 here) and for the Swift build (the stable Xcode has no CoreAI.framework).",
+  "Every step writes a new file or folder and refuses to replace one: run it on a fresh lane directory.",
+]
+aot = "xcrun coreai-build compile <stem>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c (Mac); --platform iOS --min-deployment-version 27.0 --preferred-compute gpu --architecture h19p (iPhone 18 Pro). No --expect-frequent-reshapes: every graph is static."
+notes = [
+  "Graphs (fp16 weights and compute; the exceptions in each metadata.json): decision `main` at L = 64 / 128 / 256 /",
+  "512 / 1024 / 2048 / 4096 (input_ids int32 [1, L], prefix_embeds [1, L, 1024], pad_mask / prefix_mask / keep_right",
+  "[1, L], qtype_onehot [1, 3] -> scores [1, L]; L4096 computes attention in two blocks of 2,048 keys); vision",
+  "`main` (one crop: pixel_values / pos_embed [1, 1024, 768], patch_mask [1, 1024], unshuffle_index int32 [256, 4] ->",
+  "prefix [1, 256, 1024]); audio `main` per clip bucket of 5 / 10 / 20 / 30 s (mel [1, 128, F] and four time masks ->",
+  "prefix [1, T, 1024]). The host (conversion/d1_omni/host.py; apps/D1Omni in Swift) builds the rows, the media",
+  "inputs and the mel, picks the smallest bucket that holds the row, reads scores at the markers and applies the",
+  "publisher's temperatures and softmax.",
+  "Published bundle bytes (stripped .aimodel / h19p .aimodelc): decision 761,631,060 to 762,676,555 / 761,747,067 to",
+  "762,255,228 (L64 to L2048: ios-h19p/ has no L4096); vision 188,218,374 / 188,303,983; audio 224,920,212 to",
+  "225,561,282 / 225,226,318 to 225,867,256 (<work>/_d1_omni/hf_staging/d1-omni-600M-CoreAI/metadata.json `staged`).",
+  "ios/ holds the same .aimodel files as macos/; each phone specializes them at load.",
+  "Gates against the publisher's model in fp32 on the CPU (FACTS §7: argmax on every row whose oracle top-2 margin is",
+  "above 0.02, max |dp| 0.02, mean of the rows' max |dp| 0.002): gate-d1-omni-600m-runtime-decide.json (L64 ... L4096),",
+  "-runtime-vision.json, -runtime-audio.json, -swift.json, -strip.json; the torch module before any export:",
+  "-eager.json; every form measured (fp32, wfp16, fp16, int8, the Neural Engine): -forms.json; time per decision on the",
+  "Mac: -timing-mac.json; the iPhone 18 Pro (apps/D1OmniGate, the .aimodel and the h19p compiles): -iphone.json.",
+  "zoo_transcripts.py --check rebuilds them and records the result in <work>/_d1_omni/results/zoo_fixtures_check.json.",
+  "Not a step: the L1024 probe (no fixture row has 513-1024 positions; one request through the Swift host against the",
+  "Python runtime, a lane script), the timing windows (timing_run.py window under quiet_hold.py, gate_swift.py window",
+  "/ media-window; their records are in -timing-mac.json) and the device round (apps/D1OmniGate: _fixtures.py, _stage.sh,",
+  "_gate.sh on a connected iPhone 18 Pro; its records are in -iphone.json).",
+]
+open_questions = []
