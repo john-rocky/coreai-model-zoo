@@ -15,7 +15,7 @@ configuration; a single bundle answers that question by itself.
 
 | metric | count |
 | --- | --- |
-| published repos | 293 |
+| published repos | 294 |
 | Core AI repos | 101 |
 | Core AI bundles inside them | 411 |
 | Core AI repos with a `models/<family>/` card | 94 |
@@ -316,6 +316,7 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/lfm2.5-350m-coreml](https://huggingface.co/mlboydaisuke/lfm2.5-350m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/magenta-arbitrary-style-transfer-litert](https://huggingface.co/mlboydaisuke/magenta-arbitrary-style-transfer-litert) | 0 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Mordant-3B-Think-LiteRT](https://huggingface.co/mlboydaisuke/Mordant-3B-Think-LiteRT) | 0 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-0.6B-wo4-float-repro-LiteRT](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-wo4-float-repro-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI](https://huggingface.co/mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [system-one-scorer-4b](system-one-scorer-4b/README.md) | `system-one-scorer-4b`, `system-one-scorer-4b-fp16` | — |
 | [mlboydaisuke/Tashkeel-350M-v2-LiteRT](https://huggingface.co/mlboydaisuke/Tashkeel-350M-v2-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [ukint-vs/Nanbeige4.2-3B-CoreAI](https://huggingface.co/ukint-vs/Nanbeige4.2-3B-CoreAI) | 0 | 1 | coreai | port | 1 | **1 DIFF** | 1 deferred | [nanbeige4.2-3b](nanbeige4.2-3b/README.md) | `nanbeige4.2-3b` | `nanbeige4.2-3b` |
@@ -374,7 +375,7 @@ published configuration. **Do not guess their `args`.**
 
 ### 3. Recipes recorded, shipped configuration unknown
 
-8 of the 126 recipes carry `status = "unverified"`:
+8 of the 129 recipes carry `status = "unverified"`:
 the script is known, the arguments that produced the published bundle are not,
 and nothing in the repo records them. `zoo_convert.py` refuses to run these
 without `--force`. Each needs one answer from the owner.

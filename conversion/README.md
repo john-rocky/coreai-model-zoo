@@ -135,6 +135,20 @@ Apple's repo; each recipe names the script it runs.
   (the Python host, hidden rows bit-equal to the gate's) → `gate_swift.py` (the Swift CLI; JIT = AOT) →
   [`apps/KevGate`](../apps/KevGate/) (Kev-0.8B on the iPhone 18 Pro). Order and flags: [`kev/README.md`](kev/README.md).
   Cards: [`../models/kev-0.8b/README.md`](../models/kev-0.8b/README.md), [`../models/kev-4b/README.md`](../models/kev-4b/README.md).
+- **d1-3B (option-token decision model with pictures, Liquid AI; in [`d1/`](d1/)): `d1/export_decoder.py fp16
+  --prefill-chunk 64 --aot` (the Mac's decoder) and `int8mlp` (the iPhone's), tower `d1/export_vision.py --dtype fp16w32
+  --aot`, then `d1/strip_bundle.py` on each (the shipped `_s` bundles: the export's debug locations, local paths
+  included, stripped)** — the overlay's LFM2.5-VL text decoder
+  without a vocabulary head (`lfm2_d1_decoder.py`: the final-norm hidden state at every position of a static 64-token
+  call, the image rows as a static input), the tied embedding rows of 2,134 option ids as the host's readout table
+  (`export_option_rows.py`), and the SigLIP2 tower with the crop's grid as inputs (`lfm2_vl_tower.py`). Every gate
+  compares with the provider's own fp32 code: `oracle_d1.py` (361 records, 393 questions; 120 held out; 12 pictures,
+  24 questions) → `test_host.py` / `test_vision_host.py` (ids and pixels) → `parity_decoder_torch.py` (fp32 torch, max
+  |Δp| 2.4e-6) → `gate_tower.py` → `readout_gate.py` (AOT h16c: fixture 0.0039 fp16 / 0.0197 int8mlp, held out
+  0.0140; int8lin fails at 0.0227) → `int8_bisect_torch.py` → `decide.py` (pictures 0.00049 / 0.0024) →
+  `gate_swift.py` / `gate_swift_pixels.py` (the Swift CLI, bit for bit) → [`apps/D1Gate`](../apps/D1Gate/) (the iPhone
+  18 Pro, increased-memory-limit). The stripped bundles give the same gate rows bit for bit on the Mac. Order and
+  flags: [`d1/README.md`](d1/README.md). Card: [`../models/d1-3b/README.md`](../models/d1-3b/README.md).
 - **OpenThai-SystemOne (System One decision model with a 256-way slot head, iApp;
   [`export_openthai_systemone_decode_pipelined.py`](export_openthai_systemone_decode_pipelined.py) + [`slot/`](slot/)):
   `export_openthai_systemone_decode_pipelined.py int8lin`** — the Qwen3.5 S=1 decode graph with

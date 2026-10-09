@@ -425,6 +425,49 @@
    ]
   },
   {
+   "family": "d1-3b",
+   "card": "models/d1-3b/README.md",
+   "recipes": [
+    {
+     "name": "d1-3b",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/d1-3B-CoreAI",
+     "bundle": "gpu-pipelined/d1_3b_decode_fp16_pf64_s",
+     "steps": 2,
+     "run": "python3 conversion/zoo_convert.py run d1-3b",
+     "gate_transcript": null,
+     "open_questions": []
+    },
+    {
+     "name": "d1-3b-int8mlp",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/d1-3B-CoreAI",
+     "bundle": "gpu-pipelined/d1_3b_decode_int8mlp_pf64_s",
+     "steps": 2,
+     "run": "python3 conversion/zoo_convert.py run d1-3b-int8mlp",
+     "gate_transcript": null,
+     "open_questions": []
+    },
+    {
+     "name": "d1-3b-tower",
+     "status": "verified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/d1-3B-CoreAI",
+     "bundle": "gpu-pipelined/d1_3b_vision_fp16w32_s",
+     "steps": 2,
+     "run": "python3 conversion/zoo_convert.py run d1-3b-tower",
+     "gate_transcript": null,
+     "open_questions": []
+    }
+   ],
+   "repos": []
+  },
+  {
    "family": "d1-omni-600m",
    "card": "models/d1-omni-600m/README.md",
    "recipes": [
