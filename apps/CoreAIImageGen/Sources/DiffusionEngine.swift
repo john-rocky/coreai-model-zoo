@@ -1,23 +1,27 @@
-// DiffusionEngine — downloads / loads a Core AI diffusion bundle and generates
-// images using Apple's official CoreAIDiffusionPipeline runtime. The pipeline type
-// (FLUX.2 / SD3 / SD) is auto-detected from metadata.json, mirroring the zoo's
-// `diffusion-runner` reference tool, so any `coreai.diffusion.export` bundle drops in.
+// DiffusionEngine — downloads / loads a Core AI diffusion bundle and generates images.
 //
-// The hosted catalog is macOS-only: FLUX.2 klein 4B's peak footprint exceeds the iOS
-// per-process memory limit (measured ~0.4 GB over on a 12 GB iPhone 17 Pro — the text
-// encoder is not released before the transformer runs). The iOS app still loads smaller
-// diffusion bundles (e.g. Stable Diffusion) via "Local…".
+// FLUX.2 runs on Apple's stock CoreAIDiffusionPipeline: `FlowTransformerPipeline` from
+// apple/coreai-models at the commit project.yml pins. It reads whatever bundle that pipeline reads
+// (FLUX.2 and Sana Sprint, picked from metadata.json), so such a `coreai.diffusion.export` folder drops
+// in via "Local…". GLM-Image and Z-Image-Turbo run bespoke host loops on the Core AI runtime
+// (GlmImagePipeline below, ZImagePipeline.swift).
 //
-// Model delivery uses the shared AppShared/ModelDownloader (range-chunked parallel
-// download with cross-launch resume and atomic bundle placement) for the `.aimodel`
-// directory bundles + the tokenizer, plus a couple of direct GETs for the handful of
-// tiny root files (metadata.json, vae_bn_*.npy) that the HF tree API can't enumerate.
+// The hosted catalog is macOS-only: FLUX.2 klein 4B's peak footprint exceeds the iOS per-process
+// memory limit (the int4 export traced ~0.4 GB over on a 12 GB iPhone 17 Pro, 2026-06-15 — the text
+// encoder is not released before the transformer runs). The iOS app loads bundles via "Local…".
+//
+// Model delivery: a FLUX.2 folder comes down with swift-transformers' HubApi, one file at a time,
+// pinned to the Hub revision in the catalog, so the app gets exactly the files it was measured with.
+// GLM-Image and Z-Image use the shared AppShared/ModelDownloader (range-chunked parallel download
+// with cross-launch resume and atomic bundle placement) for the `.aimodel` directory bundles + the
+// tokenizer, plus a couple of direct GETs for the tiny root files the HF tree API can't enumerate.
 
 import CoreAI
 import CoreAIDiffusionPipeline
 import CoreAIShared
 import CoreGraphics
 import Foundation
+import Hub
 import ImageIO
 import Tokenizers
 import UniformTypeIdentifiers
@@ -30,8 +34,123 @@ import UIKit
 final class CancellationToken: @unchecked Sendable {
     private let lock = NSLock()
     private var flag = false
+    private var steps = 0
     var isCancelled: Bool { lock.withLock { flag } }
     func cancel() { lock.withLock { flag = true } }
+    /// Denoising steps finished so far (written by the FLUX.2 progress callback).
+    var stepsDone: Int { lock.withLock { steps } }
+    func stepFinished(_ step: Int) { lock.withLock { steps = step } }
+}
+
+/// One FLUX.2 folder of a Hugging Face repo, pinned to a revision: the files this app reads from
+/// it, with each file's size at that revision. HubApi fetches them one at a time, so an interrupted
+/// download keeps the files that finished and the next try fetches only the rest. The folder counts
+/// as on disk only when every size matches, so the runtime never opens a partial bundle.
+struct FluxFolder: Hashable, Sendable {
+    struct File: Hashable, Sendable {
+        let path: String
+        let bytes: Int64
+    }
+
+    let repo: String
+    let revision: String
+    let folder: String
+    let files: [File]
+
+    var totalBytes: Int64 { files.reduce(0) { $0 + $1.bytes } }
+
+    /// The folder the pipeline opens: <base>/models/<repo>/<folder>.
+    func root(base: URL) -> URL {
+        HubApi(downloadBase: base).localRepoLocation(HubApi.Repo(id: repo)).appending(path: folder)
+    }
+
+    func isOnDisk(base: URL) -> Bool { files.allSatisfy { size(of: $0.path, base: base) == $0.bytes } }
+
+    func bytesOnDisk(base: URL) -> Int64 {
+        files.reduce(0) { $0 + min(size(of: $1.path, base: base) ?? 0, $1.bytes) }
+    }
+
+    private func size(of path: String, base: URL) -> Int64? {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: root(base: base).appending(path: path).path)
+        return (attributes?[.size] as? NSNumber)?.int64Value
+    }
+
+    /// Downloads the files that are not on disk yet. `progress` gets the bytes done so far.
+    func download(base: URL, progress: @escaping @Sendable (Int64) -> Void) async throws {
+        // cache: nil = one copy of each file, under `base` (no second copy in the Hub cache).
+        // useOfflineMode: false = no network gives the network's own error, not a missing-file one.
+        let hub = HubApi(downloadBase: base, cache: nil, useOfflineMode: false)
+        var done: Int64 = 0
+        for file in files {
+            if size(of: file.path, base: base) != file.bytes {
+                let before = done
+                try await hub.snapshot(from: HubApi.Repo(id: repo), revision: revision,
+                                       matching: ["\(folder)/\(file.path)"]) { @Sendable fraction in
+                    progress(before + Int64(fraction.fractionCompleted * Double(file.bytes)))
+                }
+                try Task.checkCancellation()
+                guard size(of: file.path, base: base) == file.bytes else {
+                    throw NSError(domain: "DiffusionEngine", code: 1, userInfo: [
+                        NSLocalizedDescriptionKey: "\(file.path) did not download completely."])
+                }
+            }
+            done += file.bytes
+            progress(done)
+        }
+    }
+}
+
+extension FluxFolder {
+    static let repo = "mlboydaisuke/FLUX.2-klein-4B-CoreAI"
+    /// The Hub commit that holds the 2026-10-10 folders, exported with the apple/coreai-models
+    /// commit project.yml pins.
+    static let revision = "039db98cbf1247680ea5e76048f87b3ce061e6d6"
+
+    /// The tokenizer and the small root files, the same bytes in both folders.
+    private static let shared: [File] = [
+        File(path: "tokenizer/chat_template.jinja", bytes: 4_168),
+        File(path: "tokenizer/config.json", bytes: 375),
+        File(path: "tokenizer/tokenizer.json", bytes: 11_422_650),
+        File(path: "tokenizer/tokenizer_config.json", bytes: 375),
+        File(path: "vae_bn_mean.npy", bytes: 640),
+        File(path: "vae_bn_var.npy", bytes: 640),
+    ]
+
+    /// int8 per-block 32 (text encoder + transformer): text-to-image and Edit. The transformer
+    /// carries the image-to-image entrypoints, and the VAE encoder turns the reference into tokens.
+    /// The folder's half-size VAEs (512 and tiled decoding) are left out: this app decodes at 1024.
+    static let int8 = FluxFolder(
+        repo: repo, revision: revision, folder: "macos-int8",
+        files: [File(path: "metadata.json", bytes: 1_549)] + shared + [
+            File(path: "VAEDecoder.aimodel/main.hash", bytes: 32),
+            File(path: "VAEDecoder.aimodel/metadata.json", bytes: 395),
+            File(path: "VAEDecoder.aimodel/main.mlirb", bytes: 99_294_687),
+            File(path: "VAEEncoder.aimodel/main.hash", bytes: 32),
+            File(path: "VAEEncoder.aimodel/metadata.json", bytes: 395),
+            File(path: "VAEEncoder.aimodel/main.mlirb", bytes: 68_896_263),
+            File(path: "TextEncoder.aimodel/main.hash", bytes: 32),
+            File(path: "TextEncoder.aimodel/metadata.json", bytes: 396),
+            File(path: "TextEncoder.aimodel/main.mlirb", bytes: 3_309_658_432),
+            File(path: "Transformer.aimodel/main.hash", bytes: 32),
+            File(path: "Transformer.aimodel/metadata.json", bytes: 396),
+            File(path: "Transformer.aimodel/main.mlirb", bytes: 4_119_647_410),
+        ])
+
+    /// fp16: text-to-image only — the folder has no image-to-image transformer, so its VAE encoder
+    /// is left out too (with it, the pipeline would load it for nothing).
+    static let fp16 = FluxFolder(
+        repo: repo, revision: revision, folder: "macos-fp16",
+        files: [File(path: "metadata.json", bytes: 974)] + shared + [
+            File(path: "VAEDecoder.aimodel/main.hash", bytes: 32),
+            File(path: "VAEDecoder.aimodel/metadata.json", bytes: 395),
+            File(path: "VAEDecoder.aimodel/main.mlirb", bytes: 99_294_680),
+            File(path: "TextEncoder.aimodel/main.hash", bytes: 32),
+            File(path: "TextEncoder.aimodel/metadata.json", bytes: 396),
+            File(path: "TextEncoder.aimodel/main.mlirb", bytes: 6_228_947_553),
+            File(path: "Transformer.aimodel/main.hash", bytes: 32),
+            File(path: "Transformer.aimodel/metadata.json", bytes: 396),
+            File(path: "Transformer.aimodel/main.mlirb", bytes: 7_751_312_967),
+        ])
 }
 
 @MainActor
@@ -39,17 +158,18 @@ final class DiffusionEngine: ObservableObject {
 
     /// A Core AI-converted diffusion bundle published on the Hugging Face Hub.
     struct ModelOption: Identifiable, Hashable {
-        // Several options share a repo (GLM 512/1024, Z-Image 512/1024 differ only in what the
-        // host feeds one graph), so the repo cannot identify a row — ForEach needs unique ids.
+        // Several options share a repo (FLUX int8/fp16, GLM 512/1024, Z-Image 512/1024), so the repo
+        // cannot identify a row — ForEach needs unique ids.
         var id: String { title }
+        /// Short name, also the value of `-model` in hands-off runs.
+        let key: String
         let repoId: String           // "org/name" on the Hub
         let bundleDirName: String    // local folder name under Documents/
         let title: String
         let defaultSteps: Int
         let defaultGuidance: Float
-        // The Hub repo also hosts in-context edit transformers, fetched on demand (not in the
-        // base download) so text-to-image users don't pay for the ~4 GB edit weights up front.
-        var hasEditAssets: Bool = false
+        // FLUX.2: one folder of the Hub repo at a pinned revision, run by the stock pipeline.
+        var flux: FluxFolder? = nil
         // GLM-Image (AR+diffusion hybrid) uses the bespoke GlmImagePipeline, not the high-level
         // diffusion pipeline. Its bundle is a folder of AR/DiT/VAE .aimodelc + tokenizer + ehs.f32.
         // One Hub repo hosts both resolutions (the AR is shared); glmSize picks the DiT/VAE pair.
@@ -62,27 +182,39 @@ final class DiffusionEngine: ObservableObject {
     }
 
     // Hosted catalog — macOS only. FLUX.2 klein 4B overruns the iOS memory limit, so the
-    // iOS app ships with an empty catalog and loads smaller bundles via "Local…".
+    // iOS app ships with an empty catalog and loads bundles via "Local…".
     static let catalog: [ModelOption] = {
         #if os(macOS)
         return [
+            // FLUX.2 klein 4B (Black Forest Labs, Apache-2.0): two folders of one Hub repo. int8 is
+            // the default and also runs Edit; fp16 is text-to-image only.
             ModelOption(
-                repoId: "mlboydaisuke/FLUX.2-klein-4B-CoreAI",
-                bundleDirName: "FLUX.2-klein-4B",
-                title: "FLUX.2 klein 4B",
+                key: "int8",
+                repoId: FluxFolder.repo,
+                bundleDirName: "FLUX.2-klein-4B-CoreAI",
+                title: "FLUX.2 klein 4B int8 (7.6 GB · text-to-image, Edit)",
                 defaultSteps: 4, defaultGuidance: 1.0,
-                hasEditAssets: true),
+                flux: .int8),
+            ModelOption(
+                key: "fp16",
+                repoId: FluxFolder.repo,
+                bundleDirName: "FLUX.2-klein-4B-CoreAI",
+                title: "FLUX.2 klein 4B fp16 (14.1 GB · text-to-image)",
+                defaultSteps: 4, defaultGuidance: 1.0,
+                flux: .fp16),
             // GLM-Image (zai-org, MIT) — AR + flow-matching diffusion hybrid. 1024 is native
             // quality; 512 is a faster variant (same weights, smaller static graph). Both live in
             // ONE Hub repo (the 9.6 GB AR is shared); "Download & Load" loads a bundle already
             // present under Documents/ or fetches it from the Hub otherwise.
             ModelOption(
+                key: "glm1024",
                 repoId: "mlboydaisuke/GLM-Image-CoreAI",
                 bundleDirName: "GLM-Image-1024",
                 title: "GLM-Image 1024 (AR+diffusion)",
                 defaultSteps: 20, defaultGuidance: 1.5,
                 isGLM: true, glmSize: 1024),
             ModelOption(
+                key: "glm512",
                 repoId: "mlboydaisuke/GLM-Image-CoreAI",
                 bundleDirName: "GLM-Image-512",
                 title: "GLM-Image 512 (AR+diffusion)",
@@ -92,12 +224,14 @@ final class DiffusionEngine: ObservableObject {
             // the image-token and caption axes are dynamic — so 512 and 1024 share weights and
             // differ only in what the host feeds them.
             ModelOption(
+                key: "zimage512",
                 repoId: "mlboydaisuke/Z-Image-Turbo-CoreAI",
                 bundleDirName: "Z-Image-Turbo",
                 title: "Z-Image-Turbo 512",
                 defaultSteps: 8, defaultGuidance: 1.0,
                 isZImage: true, zSide: 512),
             ModelOption(
+                key: "zimage1024",
                 repoId: "mlboydaisuke/Z-Image-Turbo-CoreAI",
                 bundleDirName: "Z-Image-Turbo",
                 title: "Z-Image-Turbo 1024",
@@ -145,6 +279,7 @@ final class DiffusionEngine: ObservableObject {
         case loading
         case ready
         case generating(step: Int, total: Int)
+        case stopping
         case error(String)
 
         var label: String {
@@ -154,16 +289,23 @@ final class DiffusionEngine: ObservableObject {
             case .loading: return "Loading model…"
             case .ready: return "Ready"
             case .generating(let s, let t): return "Generating… step \(s)/\(t)"
+            case .stopping: return "Stopping after this step…"
             case .error(let m): return "Error: \(m)"
             }
         }
 
         var isBusy: Bool {
             switch self {
-            case .downloading, .loading, .generating: return true
+            case .downloading, .loading, .generating, .stopping: return true
             default: return false
             }
         }
+    }
+
+    /// Bytes of a FLUX.2 folder download (HubApi), for the progress bar.
+    struct HubProgress: Equatable {
+        var done: Int64
+        var total: Int64
     }
 
     @Published var status: Status = .idle
@@ -174,22 +316,16 @@ final class DiffusionEngine: ObservableObject {
     @Published var loadSeconds: Double?
     @Published var generateSeconds: Double?
     @Published var imageSize: String = ""
-    /// True once a pipeline with a VAE encoder is loaded — FLUX.2 bundles ship one, so
-    /// the loaded model can run image-to-image (the UI reveals its mode switch on this).
-    @Published var supportsImg2Img: Bool = false
-    /// Native square side the loaded model generates at (e.g. 1024). Used to letterbox an
-    /// image-to-image source into the square the runtime expects, then crop the result back.
-    private var modelSide: Int = 1024
-    /// Directory the loaded bundle was read from — used to locate the edit-sequence transformer.
-    private var modelDir: URL?
-    /// True when the loaded FLUX.2 bundle also ships an edit-sequence transformer (in-context edit).
+    /// A sentence about the last Generate that did not give an image (e.g. after Stop).
+    @Published var notice: String?
+    /// Set while a FLUX.2 folder downloads; GLM / Z-Image report through `downloader`.
+    @Published var hubDownload: HubProgress?
+    /// True when the loaded FLUX.2 bundle can run Edit: it has a VAE encoder and a traced
+    /// image-to-image graph (macos-int8 does; macos-fp16 does not).
     @Published var supportsEdit: Bool = false
-    /// True when the bundle also ships the two-reference edit transformer (combine two images).
-    @Published var supports2refEdit: Bool = false
-    /// True when the loaded hosted model can fetch its edit transformers on demand (not yet local).
-    @Published var canDownloadEditAssets: Bool = false
-    private var loadedRepoId: String?
-    private var loadedHasEditAssets = false
+    /// Native square side the loaded model generates at (e.g. 1024). Used to letterbox an Edit
+    /// reference into the square the runtime expects, then crop the result back.
+    private var modelSide: Int = 1024
 
     /// GLM-Image (AR+diffusion hybrid) runs a bespoke low-level pipeline (GlmImagePipeline) instead
     /// of the high-level CoreAIDiffusionPipeline auto-detect path. Set when such a bundle is loaded.
@@ -202,52 +338,24 @@ final class DiffusionEngine: ObservableObject {
     /// Shared range-chunked downloader (atomic placement + cross-launch resume).
     let downloader = ModelDownloader()
 
-    private var pipeline: (any DiffusionPipeline)?
-    private var descriptor: PipelineDescriptor?
+    private var pipeline: FlowTransformerPipeline?
     private var work: Task<Void, Never>?
     private var cancelToken = CancellationToken()
 
     var canGenerate: Bool { if case .ready = status { return true }; return false }
 
-    // Platform target: iOS runs the lighter 512 / half-VAE components; macOS runs
-    // the full 1024 components. The HF bundle is universal — we fetch only the subset
-    // this platform needs. The transformer / VAE bundles are resolved by NAME at load
-    // (Transformer / Transformer_512 …), so downloading only the half set is enough.
+    // macOS runs the full 1024 components and keeps every model loaded between images; iOS runs
+    // the 512 / half components and loads each stage on demand, releasing it after, to keep the
+    // peak footprint down.
     #if os(iOS)
     private static let fluxMode: DecodeResolution = .half
-    private static let decodeResolution: DecodeResolution = .half
-    private static let directoryItems: [ModelDownloader.Item] = [
-        .init(remote: "Transformer_512.aimodel", local: "Transformer_512.aimodel"),
-        .init(remote: "TextEncoder.aimodel", local: "TextEncoder.aimodel"),
-        .init(remote: "VAEDecoder_half.aimodel", local: "VAEDecoder_half.aimodel"),
-        .init(remote: "VAEEncoder_half.aimodel", local: "VAEEncoder_half.aimodel"),
-        .init(remote: "tokenizer", local: "tokenizer"),
-    ]
-    // Edit transformers — fetched on demand (not part of the base download).
-    private static let editDirectoryItems: [ModelDownloader.Item] = [
-        .init(remote: "Transformer_edit_512.aimodel", local: "Transformer_edit_512.aimodel"),
-        .init(remote: "Transformer_edit_2ref_512.aimodel", local: "Transformer_edit_2ref_512.aimodel"),
-    ]
+    private static let lazyModelLoading = true
     #else
     private static let fluxMode: DecodeResolution = .auto
-    private static let decodeResolution: DecodeResolution = .full
-    private static let directoryItems: [ModelDownloader.Item] = [
-        .init(remote: "Transformer.aimodel", local: "Transformer.aimodel"),
-        .init(remote: "TextEncoder.aimodel", local: "TextEncoder.aimodel"),
-        .init(remote: "VAEDecoder.aimodel", local: "VAEDecoder.aimodel"),
-        .init(remote: "VAEEncoder.aimodel", local: "VAEEncoder.aimodel"),
-        .init(remote: "tokenizer", local: "tokenizer"),
-    ]
-    // Edit transformers — fetched on demand (not part of the base download).
-    private static let editDirectoryItems: [ModelDownloader.Item] = [
-        .init(remote: "Transformer_edit.aimodel", local: "Transformer_edit.aimodel"),
-        .init(remote: "Transformer_edit_2ref.aimodel", local: "Transformer_edit_2ref.aimodel"),
-    ]
+    private static let lazyModelLoading = false
     #endif
-
-    // Tiny root-level files the pipeline needs alongside the bundles. The HF tree API
-    // only enumerates directories, so these are fetched with a plain resolve GET.
-    private static let rootFiles = ["metadata.json", "vae_bn_mean.npy", "vae_bn_var.npy"]
+    /// Edit attends to the reference at the output's own token grid (64×64 tokens at 1024).
+    private static let referenceGrid: ReferenceGrid = .full
 
     // MARK: - Loading
 
@@ -255,10 +363,8 @@ final class DiffusionEngine: ObservableObject {
     /// run, resumable across launches) and load it.
     func loadFromHub(_ option: ModelOption) {
         work?.cancel()
-        image = nil; exportURL = nil; loadSeconds = nil; generateSeconds = nil
+        image = nil; exportURL = nil; loadSeconds = nil; generateSeconds = nil; notice = nil
         modelTitle = option.title
-        loadedRepoId = option.repoId
-        loadedHasEditAssets = option.hasEditAssets
         // Not `.downloading` yet — a bundle already staged under Documents/ never hits the Hub,
         // and flashing a download bar at it is a lie. `.loading` is busy, so the button is
         // disabled either way; the fetch below promotes the status if it actually runs.
@@ -269,22 +375,32 @@ final class DiffusionEngine: ObservableObject {
         Self.setIdleTimerDisabled(true)
 
         // The fine-grained download progress (fraction / byte detail) is read straight off
-        // `downloader` by the view (it's an ObservableObject); this Task only sequences the
-        // phases and surfaces a terminal error.
+        // `downloader` / `hubDownload` by the view; this Task only sequences the phases and
+        // surfaces a terminal error.
         work = Task {
             defer { Self.setIdleTimerDisabled(false) }
             do {
                 self.zSide = option.zSide
                 let dest = try Self.bundleDestination(for: option)
+                if let flux = option.flux {
+                    if !flux.isOnDisk(base: dest) {
+                        self.hubDownload = HubProgress(done: flux.bytesOnDisk(base: dest), total: flux.totalBytes)
+                        self.status = .downloading
+                        try await flux.download(base: dest) { bytes in
+                            Task { @MainActor in self.showHubDownload(bytes) }
+                        }
+                        self.hubDownload = nil
+                    }
+                    try await self.loadPipeline(at: flux.root(base: dest))
+                    return
+                }
                 let items: [ModelDownloader.Item]
                 if option.isGLM { items = Self.glmItems(size: option.glmSize) }
-                else if option.isZImage { items = Self.zimageItems(side: option.zSide) }
-                else { items = Self.directoryItems }
-                let roots = option.isGLM ? Self.glmRootFiles
-                          : (option.isZImage ? Self.zimageRootFiles : Self.rootFiles)
+                else { items = Self.zimageItems(side: option.zSide) }
+                let roots = option.isGLM ? Self.glmRootFiles : Self.zimageRootFiles
                 // Load a bundle already present under Documents/ without re-downloading; otherwise
                 // fetch it from the Hub. (GLM: the folder is "complete" once the AR bundle + ehs.f32
-                // are present; FLUX always goes through the downloader, which no-ops cached files.)
+                // are present.)
                 let alreadyLocal = (option.isGLM && Self.glmBundleComplete(at: dest))
                     || (option.isZImage && Self.zimageBundleComplete(at: dest))
                 if !alreadyLocal {
@@ -300,21 +416,24 @@ final class DiffusionEngine: ObservableObject {
             } catch is CancellationError {
                 // user cancelled or started another action — cancel() owns the resulting state
             } catch {
-                self.status = .error("\(error)")
+                self.hubDownload = nil
+                // A cancelled HubApi transfer surfaces as a URL error; cancel() owns that state too.
+                if !Task.isCancelled { self.status = .error(error.localizedDescription) }
             }
         }
+        holdActivity("Downloading and loading \(option.title)")
     }
 
     /// Preselect a model whose bundle is already on disk, so opening the app and hitting
     /// "Download & Load" cannot kick off a multi-GB transfer for a model the user never chose.
-    /// Falls back to the first entry. (Only GLM and Z-Image can be checked — FLUX has no
-    /// completeness predicate and always round-trips through the downloader's cache.)
+    /// Falls back to the first entry. (FLUX checks every file's size; GLM and Z-Image their key files.)
     static var defaultSelection: ModelOption? {
         let docs = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask,
                                                 appropriateFor: nil, create: false)
         return catalog.first(where: { opt in
             guard let dir = docs?.appendingPathComponent(opt.bundleDirName, isDirectory: true)
             else { return false }
+            if let flux = opt.flux { return flux.isOnDisk(base: dir) }
             return (opt.isGLM && glmBundleComplete(at: dir))
                 || (opt.isZImage && zimageBundleComplete(at: dir))
         }) ?? catalog.first
@@ -341,36 +460,26 @@ final class DiffusionEngine: ObservableObject {
     /// Load a bundle already exported to a local folder.
     func loadLocal(_ url: URL) {
         work?.cancel()
-        image = nil; exportURL = nil; loadSeconds = nil; generateSeconds = nil
+        image = nil; exportURL = nil; loadSeconds = nil; generateSeconds = nil; notice = nil
         modelTitle = url.lastPathComponent
-        loadedRepoId = nil
-        loadedHasEditAssets = false
         status = .loading
         work = Task {
             do { try await self.loadPipeline(at: url) }
-            catch { self.status = .error("\(error)") }
+            catch is CancellationError {}
+            catch { self.status = .error(error.localizedDescription) }
         }
-    }
-
-    /// Edit-transformer bundle names for this platform (full 1024 vs half 512), by reference count.
-    #if os(iOS)
-    private static let edit1RefName = "Transformer_edit_512.aimodel"
-    private static let edit2RefName = "Transformer_edit_2ref_512.aimodel"
-    #else
-    private static let edit1RefName = "Transformer_edit.aimodel"
-    private static let edit2RefName = "Transformer_edit_2ref.aimodel"
-    #endif
-    private static func editTransformerName(refCount: Int) -> String {
-        refCount >= 2 ? edit2RefName : edit1RefName
+        holdActivity("Loading \(url.lastPathComponent)")
     }
 
     private func loadPipeline(at url: URL) async throws {
         status = .loading
-        supportsImg2Img = false
         supportsEdit = false
-        supports2refEdit = false
-        canDownloadEditAssets = false
-        modelDir = url
+        // Let go of the loaded model first, so two never sit in memory at once.
+        pipeline = nil
+        glm = nil
+        zimage = nil
+        isGLM = false
+        isZImage = false
 
         // GLM-Image bundle (AR+diffusion hybrid) — bespoke low-level pipeline, not the auto-detect path.
         if GlmImagePipeline.looksLikeGLM(url) {
@@ -378,8 +487,6 @@ final class DiffusionEngine: ObservableObject {
             let pipe = GlmImagePipeline(dir: url)
             try await pipe.load()
             self.glm = pipe
-            self.pipeline = nil
-            self.descriptor = nil
             self.isGLM = true
             self.loadSeconds = Self.seconds(since: glmStart)
             self.imageSize = "\(pipe.side)×\(pipe.side)"
@@ -393,46 +500,37 @@ final class DiffusionEngine: ObservableObject {
             let pipe = ZImagePipeline(dir: url)
             try await pipe.load()
             self.zimage = pipe
-            self.glm = nil; self.pipeline = nil; self.descriptor = nil
-            self.isGLM = false; self.isZImage = true
+            self.isZImage = true
             self.loadSeconds = Self.seconds(since: zStart)
             self.imageSize = "\(zSide)×\(zSide)"
             self.modelSide = zSide
             self.status = .ready
             return
         }
-        self.glm = nil
-        self.zimage = nil
-        self.isGLM = false
-        self.isZImage = false
 
-        let start = ContinuousClock.now
-        let desc = try PipelineDescriptor.resolve(at: url, config: .auto)
-
-        let built: any DiffusionPipeline
-        switch desc.type {
-        case .some(.flux2):
-            built = try await Flux2Pipeline(from: url, config: .auto, mode: Self.fluxMode)
-        case .some(.stableDiffusion3):
-            built = try await SD3Pipeline(from: url, config: .auto)
-        default:
-            built = try await StableDiffusionPipeline.load(from: url, config: .auto)
+        // Everything else goes to Apple's FlowTransformerPipeline. The most common wrong pick gets
+        // a sentence of its own instead of the runtime's error.
+        guard FileManager.default.fileExists(atPath: url.appendingPathComponent("metadata.json").path) else {
+            throw Self.err("“\(url.lastPathComponent)” is not a bundle this app can load: it has no metadata.json "
+                + "(FLUX.2, Sana Sprint) and no GLM-Image or Z-Image graphs. Choose the folder that holds "
+                + "metadata.json, tokenizer/ and the .aimodel folders.")
         }
-
-        self.descriptor = desc
+        let start = ContinuousClock.now
+        // Reads metadata.json and the tokenizer and picks the components for the best resolution the
+        // folder has (1024×1024 when Transformer and VAEDecoder are there).
+        let built = try await FlowTransformerPipeline(from: url, mode: Self.fluxMode)
+        if !Self.lazyModelLoading {
+            // Load every model text-to-image runs now. On the first launch Core AI also specializes
+            // each one for this Mac and caches the result; later launches read the cache.
+            try await built.loadResources()
+        }
+        try Task.checkCancellation()
         self.pipeline = built
         self.loadSeconds = Self.seconds(since: start)
         let size = built.defaultImageSize
         self.imageSize = "\(size.width)×\(size.height)"
         self.modelSide = size.width
-        self.supportsImg2Img = built.supportsImageToImage
-        let fm = FileManager.default
-        self.supportsEdit = (desc.type == .flux2)
-            && fm.fileExists(atPath: url.appendingPathComponent(Self.edit1RefName).path)
-        self.supports2refEdit = self.supportsEdit
-            && fm.fileExists(atPath: url.appendingPathComponent(Self.edit2RefName).path)
-        // Hosted FLUX bundles can fetch the edit transformers on demand if not already present.
-        self.canDownloadEditAssets = self.loadedHasEditAssets && !self.supportsEdit
+        self.supportsEdit = built.encoder != nil && built.img2imgRoutes[Self.referenceGrid] != nil
         self.status = .ready
     }
 
@@ -450,7 +548,7 @@ final class DiffusionEngine: ObservableObject {
     /// Fetch the tiny root files with a plain resolve GET (skipping any already present).
     /// `names` are repo paths and may be nested (Z-Image keeps its RoPE tables under `glue/`);
     /// they always land flat at the bundle root, where the pipelines look for them.
-    private static func fetchRootFiles(repoId: String, names: [String] = rootFiles, into dest: URL) async throws {
+    private static func fetchRootFiles(repoId: String, names: [String], into dest: URL) async throws {
         let fm = FileManager.default
         for name in names {
             let target = dest.appendingPathComponent((name as NSString).lastPathComponent)
@@ -466,64 +564,94 @@ final class DiffusionEngine: ObservableObject {
         }
     }
 
+    private func showHubDownload(_ bytes: Int64) {
+        guard var progress = hubDownload, bytes > progress.done else { return }
+        // ~500 updates over a multi-GB download, not one per network packet.
+        let step = max(progress.total / 500, 1)
+        guard bytes / step != progress.done / step || bytes >= progress.total else { return }
+        progress.done = bytes
+        hubDownload = progress
+    }
+
     // MARK: - Generation
 
-    /// Generate an image. Pass `startingImage` (with `strength` in 0…1) to run image-to-image:
-    /// the runtime encodes it through the VAE encoder, blends in noise up to `strength`, and
-    /// denoises from there — higher strength deviates further from the source. `nil` is txt2img.
-    func generate(prompt: String, negativePrompt: String, steps: Int, guidance: Float, seed: UInt32,
-                  startingImage: CGImage? = nil, strength: Float = 1.0) {
-        if isGLM { generateGLM(prompt: prompt, steps: steps, guidance: guidance, seed: seed); return }
+    /// Generate an image from the prompt (text-to-image).
+    func generate(prompt: String, negativePrompt: String, steps: Int, guidance: Float, seed: UInt32) {
+        if isGLM {
+            generateGLM(prompt: prompt, steps: steps, guidance: guidance, seed: seed)
+            holdActivity("Generating an image")
+            return
+        }
         if isZImage {
             generateZImage(prompt: prompt, negativePrompt: negativePrompt,
                            steps: steps, guidance: guidance, seed: seed)
+            holdActivity("Generating an image")
             return
         }
-        guard let pipeline, let desc = descriptor, canGenerate else { return }
-        work?.cancel()
-        savedURL = nil
-        let token = CancellationToken()
-        cancelToken = token
-        status = .generating(step: 0, total: steps)
-
-        let scheduler: SchedulerType =
-            (desc.type == .flux2 || desc.type == .stableDiffusion3)
-            ? .discreteFlow : .dpmSolverMultistep
-
-        // Image-to-image: the model only generates a fixed square. Letterbox the source into
-        // that square (no stretching) and remember its aspect ratio to crop the result back.
-        let sourceSize: (w: Int, h: Int)? = startingImage.map { ($0.width, $0.height) }
-        let squaredSource = startingImage.map { Self.fitToSquare($0, side: modelSide) }
-
+        guard let pipeline, canGenerate else { return }
+        // FLUX.2 klein is guidance-distilled: one pass per step, and the model ignores the guidance
+        // value. Above 1.0 the pipeline adds a second, unconditional pass per step and mixes the
+        // two (classifier-free guidance).
         let config = PipelineConfiguration(
             prompt: prompt,
             negativePrompt: negativePrompt,
             seed: seed,
             stepCount: steps,
             guidanceScale: guidance,
-            schedulerType: scheduler,
-            startingImage: squaredSource,
-            strength: strength,
-            encoderScaleFactor: desc.encoderScaleFactor ?? 0.18215,
-            decoderScaleFactor: desc.decoderScaleFactor ?? 0.18215,
-            decoderShiftFactor: desc.decoderShiftFactor ?? 0.0,
-            decodeResolution: Self.decodeResolution,
-            lazyModelLoading: true
-        )
+            guidanceMode: guidance > 1 ? .manual : .distilled,
+            lazyModelLoading: Self.lazyModelLoading)
+        runFlux(pipeline, config, steps: steps, cropTo: nil)
+    }
 
+    /// FLUX.2 in-context edit on the stock pipeline (reference-token image-to-image): the reference's
+    /// latent tokens are appended after the noise tokens, marked T=10 on the RoPE time axis, and the
+    /// output is denoised from pure noise while attending to them — the instruction edits the picture
+    /// and the subject is kept. The reference is letterboxed into the model's square (no stretching)
+    /// and the result is cropped back to its aspect ratio.
+    func edit(referenceImage: CGImage, instruction: String, steps: Int, guidance: Float, seed: UInt32) {
+        guard let pipeline, supportsEdit, canGenerate else { return }
+        let config = PipelineConfiguration(
+            prompt: instruction,
+            seed: seed,
+            stepCount: steps,
+            guidanceScale: guidance,
+            startingImage: Self.fitToSquare(referenceImage, side: modelSide),
+            referenceGrid: Self.referenceGrid,
+            guidanceMode: guidance > 1 ? .manual : .distilled,
+            lazyModelLoading: Self.lazyModelLoading)
+        runFlux(pipeline, config, steps: steps, cropTo: (w: referenceImage.width, h: referenceImage.height))
+    }
+
+    private func runFlux(_ pipeline: FlowTransformerPipeline, _ config: PipelineConfiguration,
+                         steps: Int, cropTo source: (w: Int, h: Int)?) {
+        work?.cancel()
+        savedURL = nil
+        notice = nil
+        let token = CancellationToken()
+        cancelToken = token
+        status = .generating(step: 0, total: steps)
         work = Task {
             do {
                 let start = ContinuousClock.now
                 let result = try await pipeline.generateImages(configuration: config) { @Sendable progress in
                     let s = progress.step, t = progress.totalSteps
-                    Task { @MainActor in self.status = .generating(step: s, total: t) }
+                    token.stepFinished(s)
+                    Task { @MainActor in
+                        if case .generating = self.status { self.status = .generating(step: s, total: t) }
+                    }
                     return !token.isCancelled
                 }
-                if token.isCancelled { self.status = .ready; return }
+                // Stop: the pipeline finishes the step it is on and still decodes; that unfinished
+                // image is dropped. (A Stop during the decode keeps the finished image.)
+                if token.isCancelled, token.stepsDone < steps {
+                    self.notice = "Stopped after step \(token.stepsDone) of \(steps). The unfinished image was not kept."
+                    self.status = .ready
+                    return
+                }
                 self.generateSeconds = Self.seconds(since: start)
                 var cg = result.images.first
-                // Crop the square result back to the source's aspect ratio (image-to-image only).
-                if let out = cg, let s = sourceSize, s.w != s.h {
+                // Crop the square result back to the reference's aspect ratio (Edit only).
+                if let out = cg, let s = source, s.w != s.h {
                     cg = Self.cropToAspect(out, aspectW: s.w, aspectH: s.h)
                 }
                 self.image = cg
@@ -531,9 +659,10 @@ final class DiffusionEngine: ObservableObject {
                 self.exportURL = Self.writeTempPNG(cg)
                 self.status = .ready
             } catch {
-                self.status = .error("\(error)")
+                self.status = token.isCancelled ? .ready : .error(error.localizedDescription)
             }
         }
+        holdActivity("Generating an image")
     }
 
     /// GLM-Image generation (text→image only). Drives the bespoke AR→DiT→VAE pipeline. The UI's
@@ -601,101 +730,40 @@ final class DiffusionEngine: ObservableObject {
         }
     }
 
-    /// Single-reference convenience.
-    func edit(referenceImage: CGImage, instruction: String, steps: Int, seed: UInt32) {
-        edit(referenceImages: [referenceImage], instruction: instruction, steps: steps, seed: seed)
-    }
-
-    /// FLUX.2 in-context edit: denoise a fresh output while the transformer attends to one or more
-    /// clean reference images, so the instruction edits/combines content while keeping the subjects.
-    /// Requires the matching edit-sequence transformer (Transformer_edit / _2ref) in the bundle.
-    func edit(referenceImages: [CGImage], instruction: String, steps: Int, seed: UInt32) {
-        guard let flux = pipeline as? Flux2Pipeline, let dir = modelDir, canGenerate,
-              !referenceImages.isEmpty else { return }
-        work?.cancel()
-        savedURL = nil
-        let token = CancellationToken()
-        cancelToken = token
-        status = .generating(step: 0, total: steps)
-
-        let editName = Self.editTransformerName(refCount: referenceImages.count)
-        let editURL = dir.appendingPathComponent(editName)
-        work = Task {
-            do {
-                guard FileManager.default.fileExists(atPath: editURL.path) else {
-                    self.status = .error("Edit transformer missing (\(editName)).")
-                    return
-                }
-                let editTransformer = CoreAIDiffusionModelFunction(modelURL: editURL)
-                let start = ContinuousClock.now
-                let result = try await flux.editImages(
-                    referenceImages: referenceImages, instruction: instruction,
-                    editTransformer: editTransformer, stepCount: steps, seed: seed
-                ) { @Sendable progress in
-                    let s = progress.step, t = progress.totalSteps
-                    Task { @MainActor in self.status = .generating(step: s, total: t) }
-                    return !token.isCancelled
-                }
-                if token.isCancelled { self.status = .ready; return }
-                self.generateSeconds = Self.seconds(since: start)
-                let cg = result.images.first
-                self.image = cg
-                if let cg { self.imageSize = "\(cg.width)×\(cg.height)" }
-                self.exportURL = Self.writeTempPNG(cg)
-                self.status = .ready
-            } catch {
-                self.status = .error("\(error)")
-            }
-        }
-    }
-
-    /// Fetch the in-context edit transformers on demand (they're not in the base download, so
-    /// text-to-image users don't pay for the ~4 GB edit weights). Recomputes edit support after.
-    func downloadEditAssets() {
-        guard let repoId = loadedRepoId, let dir = modelDir, !isDownloadingOrLoading else { return }
-        work?.cancel()
-        canDownloadEditAssets = false
-        status = .downloading
-        Self.setIdleTimerDisabled(true)
-        work = Task {
-            defer { Self.setIdleTimerDisabled(false) }
-            do {
-                await downloader.fetch(
-                    repo: "https://huggingface.co/\(repoId)",
-                    items: Self.editDirectoryItems, into: dir)
-                try Task.checkCancellation()
-                if case .failed(let msg) = downloader.phase { throw Self.err(msg) }
-                let fm = FileManager.default
-                self.supportsEdit = fm.fileExists(atPath: dir.appendingPathComponent(Self.edit1RefName).path)
-                self.supports2refEdit = self.supportsEdit
-                    && fm.fileExists(atPath: dir.appendingPathComponent(Self.edit2RefName).path)
-                self.canDownloadEditAssets = self.loadedHasEditAssets && !self.supportsEdit
-                self.status = .ready
-            } catch is CancellationError {
-                self.canDownloadEditAssets = self.loadedHasEditAssets
-                self.status = .ready
-            } catch {
-                self.canDownloadEditAssets = self.loadedHasEditAssets
-                self.status = .error("\(error)")
-            }
-        }
-    }
-
-    /// Cancel the in-flight work. Generation falls back to the loaded model (.ready); a
-    /// cancelled download/load drops to .idle (no model yet).
+    /// Cancel the in-flight work. A FLUX.2 generation finishes the step it is on and then returns
+    /// (.stopping until it does); GLM / Z-Image generation falls back to the loaded model (.ready);
+    /// a cancelled download/load drops to .idle (no model yet).
     func cancel() {
         cancelToken.cancel()
-        work?.cancel()
         Self.setIdleTimerDisabled(false)
         switch status {
-        case .generating: status = .ready
-        case .downloading, .loading: status = .idle
+        case .generating where pipeline != nil:
+            status = .stopping
+        case .generating:
+            work?.cancel()
+            status = .ready
+        case .downloading, .loading:
+            work?.cancel()
+            hubDownload = nil
+            status = .idle
         default: break
         }
     }
 
     var isDownloadingOrLoading: Bool {
         switch status { case .downloading, .loading: return true; default: return false }
+    }
+
+    /// Marks the current work as user-initiated for as long as it runs. Without it macOS App-Naps
+    /// the app once its window is not visible (screen locked or covered): a model download fell to
+    /// ~0.1 MB/s while curl pulled 5–6 MB/s on the same Mac, and inference slows down too.
+    private func holdActivity(_ reason: String) {
+        guard let job = work else { return }
+        Task {
+            let activity = ProcessInfo.processInfo.beginActivity(options: .userInitiated, reason: reason)
+            await job.value
+            ProcessInfo.processInfo.endActivity(activity)
+        }
     }
 
     // MARK: - Saving

@@ -2,7 +2,8 @@
 # Schema and the rules for `status`: ../README.md.
 # Run it with:  python3 ../../conversion/zoo_convert.py run <name>
 
-# The repo root: the 2026-07-20 export (int4). Kept for apps/CoreAIImageGen, which pins the fork runtime.
+# The repo root: the 2026-07-20 export (int4). No app reads it since 2026-10-10 (apps/CoreAIImageGen moved to
+# macos-int8 / macos-fp16); kept in the HF repo for the record.
 ["flux2-klein-4b"]
 card = "README.md"
 hf_repo = "mlboydaisuke/FLUX.2-klein-4B-CoreAI"

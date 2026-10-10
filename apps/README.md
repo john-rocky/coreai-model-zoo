@@ -44,14 +44,14 @@ See [`CoreAIChatMac/README.md`](CoreAIChatMac/README.md).
 
 | App | Model | Image @ 4 steps |
 |---|---|---|
-| [`CoreAIImageGen/`](CoreAIImageGen/) | **FLUX.2 klein 4B** (text→image, **macOS**) — [HF bundle](https://huggingface.co/mlboydaisuke/FLUX.2-klein-4B-CoreAI) | macOS 1024 ≈ 17.4 s |
+| [`CoreAIImageGen/`](CoreAIImageGen/) | **FLUX.2 klein 4B** (text→image, **macOS**) — [HF bundle](https://huggingface.co/mlboydaisuke/FLUX.2-klein-4B-CoreAI) | macOS 1024² 11.6 s int8 / 10.9 s fp16, Edit 24.4 s (M4 Max, 2026-10-10) |
 
 Runs on Apple's stock `CoreAIDiffusionPipeline` — **no model-code port**; any
 `coreai.diffusion.export` bundle (FLUX.2 / SD3 / SD) drops in. It needs **no `coreai-models`
 patch stack** (the diffusion runtime is unmodified), so its build is self-contained — see
 [`CoreAIImageGen/README.md`](CoreAIImageGen/). The hosted FLUX.2 model is macOS-only (4B
-overruns a 12 GB iPhone's memory limit); the iOS build runs smaller bundles (Stable
-Diffusion 0.9B) loaded via **Local…**.
+overruns a 12 GB iPhone's memory limit); the iOS build loads smaller FLUX.2-format bundles via **Local…**
+(apple/coreai-models 97a14be has no Stable Diffusion pipeline).
 
 ### Video generation
 
