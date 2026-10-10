@@ -1,9 +1,10 @@
 # FLUX.2 klein 4B — Core AI
 
 > **2026-10-10 re-export, two folders.** `macos-fp16/` and `macos-int8/` of the HF repo were exported with
-> apple/coreai-models 97a14be and load with its diffusion pipeline. The files at the repo root are the 2026-07-20
-> export: current apple/coreai-models stops on them with "unsupported metadata_version". No app in this repo reads them
-> since 2026-10-10: [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen) moved to the two folders. They stay for the record.
+> apple/coreai-models 97a14be and load with its diffusion pipeline. The 2026-07-20 export that sat at the repo root
+> (int4, plus the in-context edit transformers) was removed from `main` on 2026-10-10: current apple/coreai-models stops
+> on it with "unsupported metadata_version", and no app reads it since [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen)
+> moved to the two folders. It is still there at revision `216f2841`.
 
 [Black Forest Labs' **FLUX.2 [klein] 4B**](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B)
 converted to **Core AI** for image generation on a Mac (macOS 27). It runs on Apple's diffusion pipeline in
@@ -21,7 +22,7 @@ iPhone 17 Pro, over the ~6.1 GB a 12 GB iPhone gives one app ([`apps/CoreAIImage
 | --- | --- | --- | --- | --- |
 | `macos-fp16/` | fp16, one asset per graph | text-to-image | 19 | 14,159,882,995 |
 | `macos-int8/` | int8 per-block 32 on the text encoder and the transformer, fp16 VAEs | text-to-image, image-to-image | 25 | 7,777,120,667 |
-| repo root (2026-07-20) | int4 per-block 32, plus the in-context edit transformers | no app since 2026-10-10 (kept for the record) | 34 | 10,854,216,650 |
+| revision `216f2841` and earlier (2026-07-20; removed from `main` 2026-10-10) | int4 per-block 32, plus the in-context edit transformers | no app | 34 | 10,854,216,650 |
 
 Text-to-image reads 16 files of a folder: 14,090,986,305 bytes from `macos-fp16/`, 7,540,032,209 bytes from
 `macos-int8/`. The VAE encoders and the half-size VAEs are only for image-to-image and tiled decoding.
@@ -136,9 +137,9 @@ The text encoder is the Qwen3 model inside the FLUX.2 klein repo: hidden size 25
 Qwen3-4B. Earlier versions of this card said 8B; that was wrong. The pipeline reads hidden states 9, 18 and 27, so the
 export drops the last 9 layers.
 
-## In-context editing (repo root, 2026-07-20)
+## In-context editing (revision `216f2841`, 2026-07-20)
 
-The repo root also has **`Transformer_edit.aimodel`**, **`Transformer_edit_512.aimodel`** and
+Revision `216f2841` and earlier have **`Transformer_edit.aimodel`**, **`Transformer_edit_512.aimodel`** and
 **`Transformer_edit_2ref.aimodel`** for FLUX.2's in-context editing. You give a reference image and an instruction —
 *"add a red wizard hat, keep everything else the same"* — and only the instructed change is applied while the
 subject, pose, and background are preserved. This is different from strength-based image-to-image (SDEdit), which
