@@ -2,8 +2,8 @@
 
 > **2026-10-10 re-export, two folders.** `macos-fp16/` and `macos-int8/` of the HF repo were exported with
 > apple/coreai-models 97a14be and load with its diffusion pipeline. The files at the repo root are the 2026-07-20
-> export: current apple/coreai-models stops on them with "unsupported metadata_version". They stay for
-> [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen), which pins a fork of that time.
+> export: current apple/coreai-models stops on them with "unsupported metadata_version". No app in this repo reads them
+> since 2026-10-10: [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen) moved to the two folders. They stay for the record.
 
 [Black Forest Labs' **FLUX.2 [klein] 4B**](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B)
 converted to **Core AI** for image generation on a Mac (macOS 27). It runs on Apple's diffusion pipeline in
@@ -21,7 +21,7 @@ iPhone 17 Pro, over the ~6.1 GB a 12 GB iPhone gives one app ([`apps/CoreAIImage
 | --- | --- | --- | --- | --- |
 | `macos-fp16/` | fp16, one asset per graph | text-to-image | 19 | 14,159,882,995 |
 | `macos-int8/` | int8 per-block 32 on the text encoder and the transformer, fp16 VAEs | text-to-image, image-to-image | 25 | 7,777,120,667 |
-| repo root (2026-07-20) | int4 per-block 32, plus the in-context edit transformers | `apps/CoreAIImageGen` only | 34 | 10,854,216,650 |
+| repo root (2026-07-20) | int4 per-block 32, plus the in-context edit transformers | no app since 2026-10-10 (kept for the record) | 34 | 10,854,216,650 |
 
 Text-to-image reads 16 files of a folder: 14,090,986,305 bytes from `macos-fp16/`, 7,540,032,209 bytes from
 `macos-int8/`. The VAE encoders and the half-size VAEs are only for image-to-image and tiled decoding.
@@ -39,8 +39,8 @@ Each folder has a `MANIFEST.json`: the size and SHA-256 of every file, the expor
 - [CoreAIImageGenMac](https://github.com/john-rocky/coreai-samples/tree/main/CoreAIImageGenMac) (coreai-samples) runs
   `macos-fp16/` or `macos-int8/` on unmodified apple/coreai-models 97a14be: pick one, press Download & Load, type a
   prompt, press Generate.
-- [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen) runs the root files on the `john-rocky/coreai-models` fork,
-  including the **Edit** tab below.
+- [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen) runs `macos-int8/` (text-to-image and the **Edit** tab = the stock
+  one-reference image-to-image) or `macos-fp16/` on apple/coreai-models 97a14be, beside GLM-Image and Z-Image-Turbo.
 
 ### Swift
 
@@ -147,8 +147,8 @@ re-renders the whole frame.
 It is the same DiT graph exported at a longer sequence: the output latent (time index `T=0`) concatenated with the
 reference image's latent tokens (`T=10`), so the transformer attends to the reference while denoising the output.
 `Transformer_edit_2ref.aimodel` takes two references (`T=10`, `T=20`). Running them needs a runtime that drives this
-path: [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen) pins the `john-rocky/coreai-models` fork with
-`Flux2Pipeline.editImages` and exposes it as the **Edit** tab. These files are int4 and use the 2026-07-20 layout, so
+path: [`apps/CoreAIImageGen`](../../apps/CoreAIImageGen) ran the `john-rocky/coreai-models` fork (`flux2-in-context-edit`, bc48d3d) with
+`Flux2Pipeline.editImages` until 2026-10-10; its **Edit** tab now runs the stock one-reference image-to-image instead. These files are int4 and use the 2026-07-20 layout, so
 apple/coreai-models 97a14be does not load them. Mechanism:
 [knowledge/flux2-in-context-editing.md](../../knowledge/flux2-in-context-editing.md).
 
