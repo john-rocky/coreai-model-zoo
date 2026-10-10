@@ -2,6 +2,7 @@
 # Schema and the rules for `status`: ../README.md.
 # Run it with:  python3 ../../conversion/zoo_convert.py run <name>
 
+# The repo root: the 2026-07-20 export (int4). Kept for apps/CoreAIImageGen, which pins the fork runtime.
 ["flux2-klein-4b"]
 card = "README.md"
 hf_repo = "mlboydaisuke/FLUX.2-klein-4B-CoreAI"
@@ -18,6 +19,61 @@ notes = [
   "quantization at per_block granularity (block_size=32) over the text encoder and the",
   "transformer. It emitted TextEncoder / Transformer / VAEDecoder / VAEEncoder.",
   "`--platform iOS` produces the device set (see _flux_klein_ios_export.log).",
+  "Loads only with the fork / pre-97a14be runtime: apple/coreai-models 97a14be stops on its metadata.json",
+  "(\"unsupported metadata_version '0.1' (known: 0.2)\"), and its transformer takes rotary_emb_cos / rotary_emb_sin",
+  "where 97a14be passes img_ids / txt_ids. The current exporter's output is the two entries below (2026-10-10).",
+]
+
+# 2026-10-10 re-export with apple/coreai-models 97a14be40bb1c5b95badb08b8532530443d62d26 (2026-10-09), the stock
+# exporter again (coreai-core 1.0.0b3, coreai-torch 0.4.3, coreai-opt 0.3.0, torch 2.9.0, diffusers 0.37.1).
+# Each entry is one folder of the HF repo. The exporter writes exports/FLUX.2-klein-4B/.
+["flux2-klein-4b-fp16"]
+card = "README.md"
+hf_repo = "mlboydaisuke/FLUX.2-klein-4B-CoreAI"
+source_hf_id = "black-forest-labs/FLUX.2-klein-4B"
+source_revision = "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+status = "verified"
+command = ["coreai.diffusion.export", "flux2-klein-4b", "--platform", "macOS",
+           "--compression", "none", "--single-function", "--resolution", "1024",
+           "--output-dir", "../exports/flux2-klein-4b-fp16"]
+bundle = "macos-fp16"
+notes = [
+  "fp16 weights, fp16 compute, one asset per graph. macos-fp16/ is the export folder without",
+  "Transformer_img2img_full.aimodel, so it runs text-to-image only (19 files, 14,159,882,995 bytes).",
+  "Gate against fp32 PyTorch (upstream's export wrappers on Flux2KleinPipeline, MPS), bar 0.999: text encoder",
+  "mean token cos 0.99966-0.99995 over 4 prompts, transformer step-1 output cos 0.999987 (rel-L2 0.0051),",
+  "VAE decoder 65.5 dB; the seed-42 image against the fp32 diffusers image 31.0 dB.",
+  "M4 Max, macOS 27.0 26A428, coreai-samples CoreAIImageGenMac: 10.88 s per 1024x1024 image, 4 steps",
+  "(median of 4 warm runs, 10.86-10.92 s).",
+  "Without --single-function the unquantized transformer is specialized once per entrypoint: 62.0 GB on disk",
+  "and a 243 s first load. Keep --single-function for fp16.",
+]
+
+["flux2-klein-4b-int8"]
+card = "README.md"
+hf_repo = "mlboydaisuke/FLUX.2-klein-4B-CoreAI"
+source_hf_id = "black-forest-labs/FLUX.2-klein-4B"
+source_revision = "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+status = "verified"
+command = ["coreai.diffusion.export", "flux2-klein-4b", "--platform", "macOS", "--compression",
+           '{"execution_mode": "eager", "global_config": {"op_state_spec": {"weight": {"dtype": "int8", "qscheme": "symmetric_with_clipping", "granularity": {"type": "per_block", "block_size": 32}}}, "op_input_spec": null, "op_output_spec": null}, "module_type_configs": {"diffusers.models.normalization.RMSNorm": null, "transformers.models.qwen3.modeling_qwen3.Qwen3RMSNorm": null, "transformers.models.gemma2.modeling_gemma2.Gemma2RMSNorm": null, "transformers.models.umt5.modeling_umt5.UMT5LayerNorm": null}}',
+           "--output-dir", "../exports/flux2-klein-4b-int8"]
+bundle = "macos-int8"
+notes = [
+  "int8 per-block 32 (symmetric_with_clipping, weight-only) on the text encoder and the transformer; the VAEs",
+  "stay fp16. The JSON is the exporter's own 4bit preset with dtype int8: --compression takes a preset name or a",
+  "JSON string, not a path. One multi-function transformer with 8 entrypoints (25 files, 7,777,120,667 bytes).",
+  "Gate against fp32 PyTorch, bar 0.99 (quantized): text encoder mean token cos 0.9928-0.9948 over 4 prompts,",
+  "transformer step-1 output cos 0.99981 (rel-L2 0.019), VAE decoder 65.5 dB; the seed-42 image against the fp32",
+  "diffusers image 23.3 dB.",
+  "M4 Max, macOS 27.0 26A428, coreai-samples CoreAIImageGenMac: 11.60 s per 1024x1024 image, 4 steps",
+  "(median of 4 warm runs, 11.57-11.64 s).",
+  "Each entry exports into its own --output-dir: the exporter skips every asset that already exists in its",
+  "folder (coreai_models/diffusion/pipeline.py:110, 'use --overwrite'), so a second export into the first one's",
+  "folder keeps the first one's weights without an error.",
+  "The registry default for flux2-klein-4b is int4 per-block 32 (the root export's weights). It fails the same",
+  "gate: transformer cos 0.9675, and the quantized text encoder loses the padding positions the transformer reads",
+  "(mean token cos 0.65-0.75); the seed-42 image is 15.9 dB from fp32 and its layout changes.",
 ]
 
 # The three edit transformers are the zoo's own contribution, not Apple's.
@@ -36,3 +92,8 @@ open_questions = [
   "still unrecorded is the invocation: which flag selects the edit transformer, how the 2ref and",
   "512 variants are requested, and whether they were exported in one run or three.",
 ]
+
+# Sources of the numbers above (r3 draft, not part of the zoo file):
+#   ~/code/standup/handoffs/assets/2026-10-10-flux2-klein-reexport/SPEED_LADDER.md rows 14, 15 (and 1, 3)
+#   ~/code/standup/handoffs/assets/2026-10-10-flux2-klein-reexport/r2/numbers.md (Exports, Component gate, Generate)
+#   ~/code/standup/handoffs/assets/2026-10-10-flux2-klein-reexport/r3/logs/stage.json (folder files and bytes)
