@@ -169,3 +169,4 @@ model page carries the same text. Reproduction: [`recipe.toml`](recipe.toml) —
 `flux2-klein-4b-int8` are `verified` (the gate above); the root files' `flux2-klein-4b` records the 2026-07 run, and
 `flux2-klein-4b-edit` is `unverified` (see [`../_INVENTORY.md`](../_INVENTORY.md), "Needs owner input").
 
+Port notes: [`knowledge/flux2-klein-reexport.md`](../../knowledge/flux2-klein-reexport.md).

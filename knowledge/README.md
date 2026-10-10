@@ -407,6 +407,12 @@ For the long-form version of the same material, read
   (9B GLM-4 AR writes visual prior tokens → 7B flow-matching DiT renders).
 - [`flux2-in-context-editing.md`](flux2-in-context-editing.md) — FLUX.2 [klein] **instruction
   editing + multi-reference composition** with no separate editing model and no ControlNet.
+- [`flux2-klein-reexport.md`](flux2-klein-reexport.md) — FLUX.2 klein 4B re-exported with **Apple's stock
+  exporter** (apple/coreai-models 97a14be), 15 forms against a per-component fp32 gate: the registry's
+  int4 default fails it (the quantized text encoder breaks at the padding the transformer reads), fp16
+  `--single-function` ships at 10.88 s per 1024² image on an M4 Max and int8 per-block 32 at 11.60 s;
+  unquantized multi-function specializes 8 weight copies (62 GB), the Neural Engine compile fails with
+  exit 0, AOT is slower and the app cannot open it, tiled decode saves 630 MB only with every model loaded.
 - [`qwenimage21-port.md`](qwenimage21-port.md) — Qwen-Image-2.1 (RGBA-Image-2.1), a 7B
   block-causal DiT with an RGBA VAE: the DiT runs on the GPU only after an
   `--expect-frequent-reshapes` AOT compile, the text encoder's `<|im_start|>` tokens need fp32 compute, and
