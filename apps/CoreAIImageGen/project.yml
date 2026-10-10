@@ -7,12 +7,15 @@ options:
     iOS: "27.0"
 
 packages:
-  # Fork of apple/coreai-models @ 02a8edd + the in-context edit path (Flux2Pipeline.editImages
-  # + the transformer_edit export recipe), on the `flux2-in-context-edit` branch. The stock
-  # apple runtime does text/image-to-image only; this branch adds the Edit tab's runtime.
+  # Stock apple/coreai-models, pinned to the commit the FLUX.2 klein folders on the Hub
+  # (macos-int8/, macos-fp16/) were exported with; its Swift API still changes between commits.
   coreai-models:
-    url: https://github.com/john-rocky/coreai-models
-    revision: bc48d3d07e03ce90a4a05d3264dca4c4c40ac81f
+    url: https://github.com/apple/coreai-models
+    revision: 97a14be40bb1c5b95badb08b8532530443d62d26
+  # Hub = swift-transformers' Hugging Face downloader (the FLUX.2 folders, pinned to a revision).
+  swift-transformers:
+    url: https://github.com/huggingface/swift-transformers
+    from: "1.1.0"
 
 schemes:
   CoreAIImageGen:
@@ -46,6 +49,8 @@ targets:
     dependencies:
       - package: coreai-models
         product: CoreAIDiffusion
+      - package: swift-transformers
+        product: Hub
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.coreai.imagegen.ios
@@ -72,6 +77,8 @@ targets:
     dependencies:
       - package: coreai-models
         product: CoreAIDiffusion
+      - package: swift-transformers
+        product: Hub
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.coreai.imagegenmac

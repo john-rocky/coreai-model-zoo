@@ -88,8 +88,29 @@ introduces the expected minor pixel differences). Mac-first — at 4B the peak f
   AOT reshape.
 - **Edit weights are separate ~2 GB transformers.** Fetch them on demand, not in the base download.
 
+## On the stock runtime (2026-10-10)
+
+apple/coreai-models `97a14be` runs this mechanism itself. Its FLUX.2 image-to-image
+(`FlowTransformerPipeline`, `PipelineConfiguration.startingImage` + `referenceGrid`) VAE-encodes the
+reference to clean latent tokens, appends them after the noise tokens with `T = 10` on RoPE axis 0, starts
+the output from pure noise (`sigmaMax = 1.0`), runs the transformer over the joint sequence and keeps only
+the noise tokens' prediction: the one-reference layout above. The exporter traces it as the
+`img2img_full` / `_half` / `_quarter` entrypoints of the multi-function transformer; `full` is 4096 noise +
+4096 reference tokens = 8192 at 1024, the length `transformer_edit` had. The RoPE comes from position ids
+inside the graph instead of host-computed cos/sin.
+
+- `apps/CoreAIImageGen` runs its Edit tab on it since 2026-10-10: `macos-int8/` of the Hub repo,
+  `referenceGrid: .full`, one reference. `macos-fp16/` has no image-to-image transformer.
+- Multi-reference compose (`transformer_edit_2ref`) has no stock counterpart. It stays on the fork's
+  branch and left the app.
+- Measured on the stock path (2026-10-10, M4 Max, `macos-int8/`, 1024, 4 steps, one reference, full grid):
+  24.39 and 24.31 s per edit in the app, against 11.60 / 11.59 s for text-to-image in the same window
+  (`apps/CoreAIImageGen/README.md`).
+
 ## Where
 
 - Weights + docs: [`mlboydaisuke/FLUX.2-klein-4B-CoreAI`](https://huggingface.co/mlboydaisuke/FLUX.2-klein-4B-CoreAI)
-- Runtime + export recipe: `john-rocky/coreai-models` branch `flux2-in-context-edit`
+- Runtime: apple/coreai-models `97a14be` (`FlowTransformerPipeline` image-to-image) since 2026-10-10; the
+  2026-07 edit-sequence export recipe and the 2-reference path: `john-rocky/coreai-models` branch
+  `flux2-in-context-edit`
 - App: `apps/CoreAIImageGen` (the **Edit** tab)

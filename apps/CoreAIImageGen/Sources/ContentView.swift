@@ -6,29 +6,14 @@ import UniformTypeIdentifiers
 import AppKit
 #endif
 
-/// Generation mode. Text→Image (pure prompt), Image→Image (SDEdit restyle with strength), and
-/// Edit (FLUX.2 in-context edit: attend to a reference image, prompt is the edit instruction).
+/// Generation mode. Text→Image (pure prompt) and Edit (FLUX.2 reference-token image-to-image:
+/// the reference is kept, the prompt is the edit instruction).
 private enum GenMode: String, CaseIterable, Identifiable {
     case textToImage = "Text → Image"
-    case imageToImage = "Image → Image"
     case edit = "Edit"
     var id: String { rawValue }
-    /// True when this mode needs a source/reference image.
-    var usesImage: Bool { self != .textToImage }
-    var actionLabel: String {
-        switch self {
-        case .textToImage: return "Generate"
-        case .imageToImage: return "Transform"
-        case .edit: return "Apply Edit"
-        }
-    }
-    var actionIcon: String {
-        switch self {
-        case .textToImage: return "sparkles"
-        case .imageToImage: return "wand.and.stars"
-        case .edit: return "wand.and.rays"
-        }
-    }
+    var actionLabel: String { self == .edit ? "Apply Edit" : "Generate" }
+    var actionIcon: String { self == .edit ? "wand.and.rays" : "sparkles" }
 }
 
 struct ContentView: View {
@@ -43,24 +28,15 @@ struct ContentView: View {
     @State private var seedText = "42"
     @State private var showingFolderImporter = false
 
-    // Image-to-image. Default 0.85 matches the runtime's own default: a guidance-distilled
-    // 4-step model needs a high strength to actually change the image — below ~0.6 the
-    // denoiser mostly reconstructs the source, which reads as "nothing happened".
+    // Edit: the reference image the instruction edits.
     @State private var mode: GenMode = .textToImage
     @State private var inputImage: CGImage?
-    @State private var strength: Float = 0.85
     @State private var showingImageImporter = false
-    // Edit mode: an optional second reference image (combine / place subject across images).
-    @State private var inputImage2: CGImage?
-    @State private var showingImageImporter2 = false
 
-    /// Modes the loaded model supports: Image→Image needs a VAE encoder, Edit needs the
-    /// edit-sequence transformer. Text→Image is always available.
+    /// Modes the loaded model supports: Edit needs a VAE encoder and a traced image-to-image
+    /// graph (FLUX.2 int8 has both). Text→Image is always available.
     private var availableModes: [GenMode] {
-        var m: [GenMode] = [.textToImage]
-        if engine.supportsImg2Img { m.append(.imageToImage) }
-        if engine.supportsEdit || engine.canDownloadEditAssets { m.append(.edit) }
-        return m
+        engine.supportsEdit ? [.textToImage, .edit] : [.textToImage]
     }
 
     var body: some View {
@@ -81,19 +57,14 @@ struct ContentView: View {
                 if case .success(let url) = result { engine.loadLocal(url) }
             }
             .fileImporter(isPresented: $showingImageImporter, allowedContentTypes: [.image]) { result in
-                if case .success(let url) = result { loadInputImage(from: url, into: 1) }
-            }
-            .fileImporter(isPresented: $showingImageImporter2, allowedContentTypes: [.image]) { result in
-                if case .success(let url) = result { loadInputImage(from: url, into: 2) }
-            }
-            .onChange(of: engine.supportsImg2Img) { _, _ in
-                if !availableModes.contains(mode) { mode = .textToImage }
+                if case .success(let url) = result { loadInputImage(from: url) }
             }
             .onChange(of: engine.supportsEdit) { _, _ in
                 if !availableModes.contains(mode) { mode = .textToImage }
             }
             canvas.frame(minWidth: 460)
         }
+        .task { await runAutoplay() }
         #else
         NavigationStack {
             // GeometryReader gives a CONCRETE content width. A `TextField(axis: .vertical)`
@@ -131,13 +102,7 @@ struct ContentView: View {
                 if case .success(let url) = result { engine.loadLocal(url) }
             }
             .fileImporter(isPresented: $showingImageImporter, allowedContentTypes: [.image]) { result in
-                if case .success(let url) = result { loadInputImage(from: url, into: 1) }
-            }
-            .fileImporter(isPresented: $showingImageImporter2, allowedContentTypes: [.image]) { result in
-                if case .success(let url) = result { loadInputImage(from: url, into: 2) }
-            }
-            .onChange(of: engine.supportsImg2Img) { _, _ in
-                if !availableModes.contains(mode) { mode = .textToImage }
+                if case .success(let url) = result { loadInputImage(from: url) }
             }
             .onChange(of: engine.supportsEdit) { _, _ in
                 if !availableModes.contains(mode) { mode = .textToImage }
@@ -163,11 +128,7 @@ struct ContentView: View {
 
         HStack {
             if let model = selectedModel {
-                Button {
-                    steps = model.defaultSteps
-                    guidance = model.defaultGuidance
-                    engine.loadFromHub(model)
-                } label: {
+                Button { downloadAndLoad(model) } label: {
                     Label("Download & Load", systemImage: "arrow.down.circle")
                 }
                 .disabled(engine.status.isBusy)
@@ -190,8 +151,7 @@ struct ContentView: View {
         statusLine
     }
 
-    // Mode switch + (in image-to-image) the source picker and strength. Shown only when the
-    // loaded model has a VAE encoder — FLUX.2 bundles do; a bare txt2img model would not.
+    // Mode switch + (in Edit) the reference picker. Shown only when the loaded model can edit.
     @ViewBuilder private var modeControls: some View {
         Picker("Mode", selection: $mode) {
             ForEach(availableModes) { Text($0.rawValue).tag($0) }
@@ -199,29 +159,11 @@ struct ContentView: View {
         .pickerStyle(.segmented)
         .disabled(engine.status.isBusy)
 
-        if mode.usesImage {
-            if mode == .edit && !engine.supportsEdit {
-                editDownloadPrompt
-            } else {
-                sourceImageControls
-            }
-        }
+        if mode == .edit { referenceImageControls }
     }
 
-    /// Shown in Edit mode when the edit transformers aren't downloaded yet (hosted model).
-    @ViewBuilder private var editDownloadPrompt: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Button { engine.downloadEditAssets() } label: {
-                Label("Download edit models (~4 GB)", systemImage: "arrow.down.circle")
-            }
-            .disabled(engine.status.isBusy)
-            Text("In-context editing uses separate transformers, fetched on demand.")
-                .font(.caption2).foregroundStyle(.secondary)
-        }
-    }
-
-    @ViewBuilder private var sourceImageControls: some View {
-        // Source preview — full width at its true aspect ratio, tap to (re)choose.
+    @ViewBuilder private var referenceImageControls: some View {
+        // Reference preview — full width at its true aspect ratio, tap to (re)choose.
         Group {
             if let cg = inputImage {
                 Image(decorative: cg, scale: 1)
@@ -237,7 +179,7 @@ struct ContentView: View {
                     .overlay {
                         VStack(spacing: 6) {
                             Image(systemName: "photo.badge.plus").font(.title2)
-                            Text("Choose a source image").font(.caption)
+                            Text("Choose a reference image").font(.caption)
                         }
                         .foregroundStyle(.secondary)
                     }
@@ -253,44 +195,8 @@ struct ContentView: View {
         }
         .disabled(engine.status.isBusy)
 
-        if mode == .imageToImage {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text("Strength")
-                    Spacer()
-                    Text(String(format: "%.2f", strength)).monospacedDigit().foregroundStyle(.secondary)
-                }
-                Slider(value: $strength, in: 0.3...1.0)
-                Text("0.8–0.9 for content edits · 0.5–0.75 for style/texture · lower keeps the source.")
-                    .font(.caption2).foregroundStyle(.secondary)
-            }
-        } else if mode == .edit {
-            if engine.supports2refEdit {
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8).fill(Color(white: 0.12))
-                        if let cg = inputImage2 {
-                            Image(decorative: cg, scale: 1).resizable().aspectRatio(contentMode: .fit)
-                        } else {
-                            Image(systemName: "photo.badge.plus").foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(width: 52, height: 52)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    Button { showingImageImporter2 = true } label: {
-                        Label(inputImage2 == nil ? "Add 2nd reference…" : "Change 2nd", systemImage: "photo.on.rectangle")
-                    }
-                    .disabled(engine.status.isBusy)
-                    if inputImage2 != nil {
-                        Button { inputImage2 = nil } label: { Image(systemName: "xmark.circle.fill") }
-                            .buttonStyle(.borderless).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                }
-            }
-            Text("References are kept; the instruction edits/combines them (e.g. \"add a red hat\", or with a 2nd reference \"put the subject into this scene\").")
-                .font(.caption2).foregroundStyle(.secondary)
-        }
+        Text("The reference is kept; the instruction edits it (e.g. \"add a red hat\", \"make it night\").")
+            .font(.caption2).foregroundStyle(.secondary)
     }
 
     @ViewBuilder private func promptControls(maxWidth: CGFloat?) -> some View {
@@ -329,11 +235,16 @@ struct ContentView: View {
     }
 
     private var statusLine: some View {
-        HStack(spacing: 8) {
-            if engine.status.isBusy { ProgressView().controlSize(.small) }
-            Text(engine.status.label)
-                .font(.caption).foregroundStyle(statusColor).lineLimit(2)
-            Spacer()
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                if engine.status.isBusy { ProgressView().controlSize(.small) }
+                Text(engine.status.label)
+                    .font(.caption).foregroundStyle(statusColor).lineLimit(2)
+                Spacer()
+            }
+            if let notice = engine.notice {
+                Text(notice).font(.caption).foregroundStyle(.secondary).lineLimit(3)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -346,35 +257,51 @@ struct ContentView: View {
 
     private var generateButton: some View {
         Group {
-            if case .generating = engine.status {
+            switch engine.status {
+            case .generating:
                 Button(role: .destructive) { engine.cancel() } label: {
                     Label("Stop", systemImage: "stop.fill").frame(maxWidth: .infinity)
                 }
-            } else {
-                Button {
-                    let seedValue = UInt32(seedText) ?? 42
-                    if mode == .edit, let ref = inputImage {
-                        var refs = [ref]
-                        if engine.supports2refEdit, let ref2 = inputImage2 { refs.append(ref2) }
-                        engine.edit(referenceImages: refs, instruction: prompt, steps: steps, seed: seedValue)
-                    } else {
-                        engine.generate(
-                            prompt: prompt, negativePrompt: negativePrompt,
-                            steps: steps, guidance: guidance, seed: seedValue,
-                            startingImage: mode == .imageToImage ? inputImage : nil,
-                            strength: strength)
-                    }
-                } label: {
+            case .stopping:
+                Button {} label: {
+                    Label("Stopping…", systemImage: "stop.fill").frame(maxWidth: .infinity)
+                }
+                .disabled(true)
+            default:
+                Button { pressGenerate() } label: {
                     Label(mode.actionLabel, systemImage: mode.actionIcon).frame(maxWidth: .infinity)
                 }
-                .disabled(!engine.canGenerate
-                    || (mode != .imageToImage && prompt.trimmingCharacters(in: .whitespaces).isEmpty)
-                    || (mode.usesImage && inputImage == nil)
-                    || (mode == .edit && !engine.supportsEdit))
+                .disabled(!canPressGenerate)
             }
         }
         .controlSize(.large)
         .buttonStyle(.borderedProminent)
+    }
+
+    /// The Download & Load button.
+    private func downloadAndLoad(_ model: DiffusionEngine.ModelOption) {
+        steps = model.defaultSteps
+        guidance = model.defaultGuidance
+        engine.loadFromHub(model)
+    }
+
+    /// Generate / Apply Edit is pressable only with a loaded model, a prompt, and (in Edit) a reference.
+    private var canPressGenerate: Bool {
+        engine.canGenerate
+            && !prompt.trimmingCharacters(in: .whitespaces).isEmpty
+            && (mode != .edit || (inputImage != nil && engine.supportsEdit))
+    }
+
+    /// The Generate / Apply Edit button.
+    private func pressGenerate() {
+        let seedValue = UInt32(seedText) ?? 42
+        if mode == .edit, let ref = inputImage {
+            engine.edit(referenceImage: ref, instruction: prompt, steps: steps, guidance: guidance, seed: seedValue)
+        } else {
+            engine.generate(
+                prompt: prompt, negativePrompt: negativePrompt,
+                steps: steps, guidance: guidance, seed: seedValue)
+        }
     }
 
     // MARK: - Canvas (shared)
@@ -397,10 +324,16 @@ struct ContentView: View {
             } else if case .downloading = engine.status {
                 VStack {
                     Spacer()
-                    DownloadBar(downloader: engine.downloader)
-                        .padding(12)
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                        .padding(20)
+                    Group {
+                        if let hub = engine.hubDownload {
+                            HubDownloadBar(progress: hub)
+                        } else {
+                            DownloadBar(downloader: engine.downloader)
+                        }
+                    }
+                    .padding(12)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    .padding(20)
                 }
             }
         }
@@ -426,14 +359,14 @@ struct ContentView: View {
         }
     }
 
-    /// Decode a user-picked image file into a CGImage for the image-to-image source.
-    /// The runtime resizes it to the model's native size, so any resolution is fine.
-    private func loadInputImage(from url: URL, into slot: Int = 1) {
+    /// Decode a user-picked image file into a CGImage for the Edit reference.
+    /// Any resolution or aspect ratio works: the engine letterboxes it into the model's square.
+    private func loadInputImage(from url: URL) {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         guard let src = CGImageSourceCreateWithURL(url as CFURL, nil),
               let cg = CGImageSourceCreateImageAtIndex(src, 0, nil) else { return }
-        if slot == 2 { inputImage2 = cg } else { inputImage = cg }
+        inputImage = cg
     }
 
     /// Reveal a saved file in Finder (macOS); no-op elsewhere.
@@ -470,13 +403,13 @@ struct ContentView: View {
         switch engine.status {
         case .idle:
             return DiffusionEngine.catalog.isEmpty
-                ? "Tap Local… to load a Core AI diffusion bundle (e.g. Stable Diffusion)."
+                ? "Tap Local… to load a Core AI diffusion bundle (FLUX.2, Sana Sprint, GLM-Image or Z-Image)."
                 : "Pick a model and tap Download & Load to begin."
         case .downloading: return "Downloading the converted bundle from Hugging Face — a few GB, cached after the first run."
         case .loading: return "Loading the model into the Core AI runtime…"
         case .ready: return "Enter a prompt and tap Generate."
         case .error(let m): return m
-        case .generating: return ""
+        case .generating, .stopping: return ""
         }
     }
 
@@ -518,3 +451,115 @@ private struct DownloadBar: View {
         }
     }
 }
+
+/// FLUX.2 folder download progress (HubApi, one file at a time).
+private struct HubDownloadBar: View {
+    let progress: DiffusionEngine.HubProgress
+
+    var body: some View {
+        VStack(spacing: 6) {
+            ProgressView(value: Double(progress.done), total: Double(max(progress.total, 1)))
+            Text("\(Self.bytes(progress.done)) / \(Self.bytes(progress.total))")
+                .font(.caption2).monospacedDigit().foregroundStyle(.secondary)
+        }
+    }
+
+    private static func bytes(_ count: Int64) -> String {
+        ByteCountFormatter.string(fromByteCount: count, countStyle: .file)
+    }
+}
+
+#if os(macOS)
+// MARK: - Hands-off runs (checks, timings, screenshots)
+
+extension ContentView {
+    /// The `-autoplay 1` sequence (launch arguments: Autoplay.swift). It presses the same controls a
+    /// person would, through the same functions; nothing here is a separate code path.
+    fileprivate func runAutoplay() async {
+        guard Autoplay.claim() else { return }
+        var report = RunReport()
+        var outcome = "DONE"
+        do {
+            try await Autoplay.pause()
+            if let path = LaunchOptions.local {
+                Telemetry.line("TAP Local… folder=\(path)")
+                engine.loadLocal(URL(filePath: (path as NSString).expandingTildeInPath))
+            } else {
+                let key = LaunchOptions.model ?? DiffusionEngine.catalog.first?.key ?? ""
+                guard let option = DiffusionEngine.catalog.first(where: { $0.key == key }) else {
+                    throw AutoplayError("-model \(key) is not one of: "
+                        + DiffusionEngine.catalog.map(\.key).joined(separator: ", "))
+                }
+                Telemetry.line("PICK model=\(key)")
+                selectedModel = option
+                try await Autoplay.pause()
+                Telemetry.line("TAP Download & Load")
+                downloadAndLoad(option)
+            }
+            try await Autoplay.until("the download and the load", timeout: 3600) { !engine.status.isBusy }
+            report.loads.append(.init(
+                title: engine.modelTitle, status: engine.status.label, seconds: engine.loadSeconds,
+                image_size: engine.imageSize, edit: engine.supportsEdit))
+            Telemetry.line("LOADED status=\(engine.status.label) seconds=\(engine.loadSeconds ?? -1) size=\(engine.imageSize) edit=\(engine.supportsEdit)")
+            guard engine.canGenerate else {
+                try await Autoplay.pause()
+                return Autoplay.finish(report, outcome: "FAILED")
+            }
+
+            if let path = LaunchOptions.reference {
+                let url = URL(filePath: (path as NSString).expandingTildeInPath)
+                guard let src = CGImageSourceCreateWithURL(url as CFURL, nil),
+                      let cg = CGImageSourceCreateImageAtIndex(src, 0, nil) else {
+                    throw AutoplayError("cannot read the reference image \(path)")
+                }
+                Telemetry.line("TAP Edit, reference=\(path) \(cg.width)x\(cg.height)")
+                mode = .edit
+                inputImage = cg
+                try await Autoplay.pause()
+            }
+            if let text = LaunchOptions.prompt { prompt = text }
+            if let value = LaunchOptions.steps { steps = value }
+            if let value = LaunchOptions.guidance { guidance = value }
+            if let value = LaunchOptions.seed { seedText = value }
+            Telemetry.line("TYPED mode=\(mode.rawValue) prompt=\(prompt) steps=\(steps) guidance=\(guidance) seed=\(seedText)")
+
+            for run in 1...max(LaunchOptions.runs, 1) {
+                try await Autoplay.pause()
+                var record = RunReport.Generation(
+                    mode: mode.rawValue, prompt: prompt, steps: steps, guidance: guidance, seed: seedText,
+                    reference: mode == .edit ? LaunchOptions.reference : nil)
+                guard canPressGenerate else {
+                    record.error = "\(mode.actionLabel) is disabled (prompt, reference or model missing)"
+                    Telemetry.line("NOT PRESSED \(record.error!)")
+                    report.generations.append(record)
+                    continue
+                }
+                Telemetry.line("TAP \(mode.actionLabel) run=\(run)")
+                pressGenerate()
+                if let stopStep = LaunchOptions.stopAfterStep {
+                    try await Autoplay.until("step \(stopStep)", timeout: 900) {
+                        if case .generating(let step, _) = engine.status { return step >= stopStep }
+                        return !engine.status.isBusy
+                    }
+                    Telemetry.line("TAP Stop")
+                    engine.cancel()
+                }
+                try await Autoplay.until("the image", timeout: 1800) { !engine.status.isBusy }
+                record.notice = engine.notice
+                if case .error(let message) = engine.status { record.error = message }
+                if engine.notice == nil, record.error == nil, let image = engine.image {
+                    record.seconds = engine.generateSeconds
+                    Autoplay.record(image, png: engine.exportURL, run: run, into: &record)
+                }
+                Telemetry.line("RESULT run=\(run) seconds=\(record.seconds ?? -1) notice=\(record.notice ?? "-") error=\(record.error ?? "-") png_sha256=\(record.png_sha256 ?? "-")")
+                report.generations.append(record)
+            }
+            try await Autoplay.pause()
+        } catch {
+            Telemetry.line("ERROR \(error)")
+            outcome = "ERROR"
+        }
+        Autoplay.finish(report, outcome: outcome)
+    }
+}
+#endif
