@@ -59,8 +59,8 @@ xcrun coreai-build compile <bundle>.aimodel --output <dir> --platform macOS --ar
 
 The DiT takes 2 min 9 s to compile, the result is 27 GB (≈ 1.9× the bundle), and its delegates are
 MPSGraph only. Load it with `SpecializationOptions.default()`. Every GPU gate of this port ran on
-efr-compiled bundles. Whether the Swift host (`GraphModel(computeUnits: .gpu)`) hits the same
-region is open (Follow-ups).
+efr-compiled bundles. The Swift host runs the `.aimodel` just in time once it loads with the GPU preferred
+and `expectFrequentReshapes = true` (answered 2026-10-11, Follow-ups).
 
 Lesson: a probe that passes does not clear the full-depth graph. Run the full graph on the path the
 app will use before building on it.
@@ -285,7 +285,7 @@ lane). The ship is the bf16 dynamic efr bundle: 0.341 / 1.097 / 4.721 s per forw
 | static image axis (N 4096, text axis dynamic) | −0.50 % at L 40, +0.58 % at L 18 against the dynamic efr, both resolved, both inside 3 % |
 | `--preferred-compute neural-engine` | 0 ANE regions, no error printed; runs on the GPU bit-identical to the gpu compile (max\|Δ\| 0), +0.01 / 0.00 / +0.72 % |
 | plain h16c AOT (no efr) | compiles in 28 s (7.5 s with a static image axis) at half the size, then 192 `ANE I/O op can only do F16 MemRef <-> F32 Tensor cast` warnings and `ANERegion.mm:414 … Code=-19` at the initial call, dynamic and static alike |
-| JIT | `Code=-19` on 2026-09-25 (same graph, base weights); not re-run |
+| JIT | `Code=-19` with `default()` or `preferred gpu` (Python 2026-09-25, Swift 2026-10-11); runs in Swift with `.gpu` + `expectFrequentReshapes = true` — bf16 bytes = the efr AOT, int8 JIT ≠ int8 AOT (48.9 dB; 42.25 dB vs fp32) — coreai-samples CoreAIImageGenMac |
 | text K/V once per image | the 32 text tokens between L 8 and L 40 cost 1.59 % of a forward at 512² and 0.51 % at 1024² |
 | chunking | not applicable: one forward per step |
 
@@ -316,9 +316,7 @@ lane). The ship is the bf16 dynamic efr bundle: 0.341 / 1.097 / 4.721 s per forw
 
 ## Follow-ups
 
-- **Swift host.** Does `GraphModel(computeUnits: .gpu)` run the DiT `.aimodel` just-in-time, or does
-  it hit the same ANE region (then the app ships or builds the efr `.aimodelc`)? Untested, for the
-  base and the Turbo DiT alike. The CoreAIImageGen app has no Qwen-Image-2.1 pipeline yet.
+- **Swift host — answered 2026-10-11 (coreai-samples `CoreAIImageGenMac`).** `AIModel(contentsOf:options:)` on the `.aimodel` with `SpecializationOptions(preferredComputeUnitKind: .gpu)` and `expectFrequentReshapes = true` runs the DiT just in time; the default options or `.gpu` alone abort the process at the first DiT step (`ANERegion.mm:414 … Code=-19`, uncatchable in Swift). bf16 JIT outputs equal the efr `.aimodelc` outputs bit for bit at 256² / 512² / 1024²; the int8 DiT under JIT differs from its AOT compile (48.9 dB) and scores 42.25 dB / corr 0.999924 against the fp32 reference at 256². First JIT load 82.5 s (encoder 34.8, DiT 38.4, VAE ×3 9.1) and a 46.7 GB cache; compiled `aot/<name>/…aimodelc` bundles open with the default options.
 - **iPhone** is out of scope for this port.
 - **CFG.** The pipeline default is no CFG (`true_cfg_scale` 1.0). The graph runs one conditional
   forward per step; a negative-prompt branch has not been gated.

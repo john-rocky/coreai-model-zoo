@@ -62,13 +62,19 @@ and the int8 DiT 20.30 GiB.
 
 **Compile before you run.** On macOS 27.0 (26A428) the Python runtime crashes on this DiT unless it
 is compiled ahead of time with `--expect-frequent-reshapes` (step 2 below). A plain ahead-of-time
-compile fails at the initial call (`ANERegion.mm:414 … Code=-19`); so did a just-in-time compile of
-the same graph with the base weights on 2026-09-25. The compiled copies need their own disk:
+compile fails at the initial call (`ANERegion.mm:414 … Code=-19`), and so does a just-in-time load with
+the default options or with the GPU preferred alone, in Python (2026-09-25, base weights) and in Swift
+(2026-10-11). A Swift host that opens the `.aimodel` with `SpecializationOptions(preferredComputeUnitKind:
+.gpu)` and `expectFrequentReshapes = true` runs it just in time, and its bf16 outputs equal the compiled
+bundle's bit for bit (CoreAIImageGenMac, 2026-10-11). The compiled copies need their own disk:
 26.52 GiB for the bf16 DiT or 20.30 GiB for the int8, and 14.10 GiB for the encoder.
 
 ## Use it
 
-There is no Swift app for this model yet. The Python engine
+The Mac app [CoreAIImageGenMac](https://github.com/john-rocky/coreai-samples/tree/main/CoreAIImageGenMac)
+(coreai-samples) runs this model with the runtime's `AIModel`, compiled just in time: type a prompt, pick
+256 / 512 / 1024, Generate, and Save… writes the RGBA PNG; a 1024² image takes 39.8 s on the M4 Max by the
+app's clock (2026-10-11, first load 82.5 s). The Python engine
 [`conversion/qwenimage21/pipeline_engine.py`](https://github.com/john-rocky/coreai-model-zoo/blob/main/conversion/qwenimage21/pipeline_engine.py)
 runs the whole loop on the three bundles: tokenize, encode, 8 DiT steps, decode, write a PNG.
 `--turbo` selects the 8-step grid.
