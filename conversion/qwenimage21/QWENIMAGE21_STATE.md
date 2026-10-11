@@ -205,3 +205,75 @@ GPU path is **AOT with `--expect-frequent-reshapes`** (same recipe as the 27B
 `ANERegionFormationPass` wall in `~/code/coreai/SPEC38_VERIFY_LEVER_STATE.md`): 2 min 9 s to
 compile, 27 GB (≈1.9× the bundle), delegates = MPSGraph only. Whether the Swift host
 (`GraphModel(computeUnits: .gpu)`) hits the same region is an open question for the app round.
+
+## Qwen-Image-2.1-Turbo (RGBA-Image-2.1-Turbo), 2026-10-11
+
+**Model:** [Qwen/Qwen-Image-2.1-Turbo](https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo) (rev `d65dbc9`,
+32 files, 32.5 GB), the distilled 8-step checkpoint of the same pipeline, same licence (LICENSE sha256
+identical to the base's). Staged as `mlboydaisuke/RGBA-Image-2.1-Turbo-CoreAI` (upload after the
+user's go); card `models/rgba-image-2.1-turbo/`. Supervisor Fable, four Opus rounds (r1 DiT, r2 pipeline
+twin, r2b speed levers, r2c int8 end to end) and a lane-close round. M4 Max, macOS 27.0 26A428,
+coreai-build 3600.83.1, coreai-core 1.0.0b2.
+
+**Read from the files first** (safetensors headers, per-tensor sha256): DiT 297 bf16 tensors with the
+base's keys / shapes / dtypes → re-export only the DiT. Text encoder 750/750 tensors byte-identical →
+the 09-25 encoder bundle is the Turbo encoder. VAE 238/238 tensors = the bf16 round-to-nearest-even of
+the base fp32 → keep the 09-25 fp32 VAE bundles. `tokenizer.json` differs only in offset / decoder
+settings; ids identical on 8 prompts. Sampler = `model_index.json` `sample_sigmas` (8 values), shift
+1.0, no dynamic shifting, no terminal stretch (diffusers main 85c9fa4 reads it from `pipe.config`).
+Base 40-step vs Turbo 8-step on the same noise and embeddings: 21.75 / 23.35 dB at 256² / 512².
+
+### r1 — DiT export and gates
+- `export_dit.py --transformer-dir $T/transformer --name qi21t_dit_full_bf16_dyn_iofp32 --exports-sub
+  qwenimage21_turbo`: 61.7 s wall (convert 34 s), main.mlirb 14,231,004,528 B, peak footprint 15.0 GB.
+  efr AOT h16c: 107.6 s, 26.52 GiB, MPSGraph delegates only.
+- fp32 re-author, teacher-forced: turbo256 8/8 min corr 0.999999999982, max|Δ|/max|ref| 3.22e-5,
+  controls 9/9 red; turbo512 min corr 0.999999999997.
+- Engine efr GPU: 8/8 at 256² / 512² / 1024², min corr 0.999971 / 0.999940 / 0.999977, NaN 0.
+- `bench_dit.py` (L 40, warm ×5, measurement window): 0.341 / 1.097 / 4.721 s per forward; initial
+  call 2.27 / 1.10 / 4.72 s; L 8 at 512² / 1024²: 1.079 / 4.697 s (text-prefix cost 1.59 % / 0.51 %).
+
+### r2 — pipeline twin
+- `qi21_sched.py --turbo`: sigmas, timesteps, 8 Euler steps bit-exact at 256² / 512² / 1024²; base
+  mode 40/40 unchanged. `t == σ` 8/8 on the Turbo grid (the base grid at 256²: σ − 1 ulp at steps 10, 35).
+- Tokenizer (`gate_tokenize_hf.py --snapshot $T`): Lfull 32 / 23 / 47 identical, `drop_idx` 14.
+- `make_host_consts.py --turbo`: gates 1–3 bit-exact (the RoPE files are byte-identical to the
+  published `a9b5c94` `host/`, checked in the lane-close round against the Hub's LFS sha256).
+- Encoder bundle on the Turbo oracle: min token corr 0.999999998629; Turbo DiT downstream corr ≥
+  0.999999999996.
+- VAE: the bundles against a fp32 decode of their own weights 2.995e-5 / 3.184e-5 / 4.221e-5 → PASS
+  (supervisor 16:01: the engine bar, every channel corr ≥ 0.9999 and max|Δ| ≤ 1e-2, applies to this
+  comparison; the 2.3e-5 in the round's launch was the 09-25 measurement, not a bar). Against the
+  Turbo oracle: the bf16 band 7.40e-2 / 1.056e-1 / 1.047e-1 (uint8 56.95 / 58.95 / 58.15 dB).
+- End to end (`pipeline_engine.py --turbo --oracle`): white RGB 43.79 / 42.45 / 42.50 dB, alpha 1/255,
+  final latent corr 0.999961 / 0.999800 / 0.999926; `--encoder oracle` at 256²: 46.57 dB.
+- Free prompts in a measurement window: dragon 512² 32.0 s, dragon 1024² 47.3 s, apple 1024² 47.0 s
+  per image (warm loads); peak footprint 4.80 GB (512²), 17.77–18.16 GB (1024²).
+
+### r2b — speed levers (speed ladder: lint PASS, ship = the bf16 dynamic efr bundle)
+- int8lin (232 Linear weights, per block 32, bf16 scales and compute): quantize 28 s; full 32-layer efr
+  compile **passes** (301.1 s, 20.30 GiB; the 2-layer random-init probe still fails `MPSMemrefAllocFusion`);
+  8/8 at all sizes (min corr 0.999960 / 0.999883 / 0.999965); same-process A/B −0.02 / −0.02 / −0.09 %.
+- Static image axis N 4096: −0.50 % (L 40), +0.58 % (L 18) → the dynamic graph ships.
+- `--preferred-compute neural-engine`: 0 ANE regions; runs on the GPU bit-identical, +0.01 / 0.00 / +0.72 %.
+- Plain h16c AOT: compiles (28.2 s; 7.45 s static), dies at the initial call with `ANERegion.mm:414 …
+  Code=-19`, dynamic and static. JIT: 09-25 no-go, not re-run.
+- `quant_export_dit.py` fixed: `--transformer-dir` was parsed but unused; new `--ref-oracle`.
+  `export_dit.py --img-static` added; `ab_dit.py` (paired same-process A/B) added.
+
+### r2c — int8 end to end
+- `pipeline_engine.py --turbo --oracle … --dit <int8>`: 41.76 / 49.28 / 39.32 dB, alpha 1/255, final
+  corr 0.999944 / 0.999976 / 0.999873; `--encoder oracle` 256² 42.56 dB.
+- Dragon sticker int8 vs bf16: 34.42 / 28.99 dB at 512² / 1024². Controls: the bf16 rerun is
+  byte-identical; bf16 with the embeddings nudged by 1.25e-5 relative moves 29.03 / 32.08 dB. 78–88 % of
+  the pixels with |Δα| > 2 sit within 3 px of the alpha-128 contour.
+- Sizes: bf16 `.aimodel` 14.23 GB / efr 28.46 GB; int8 7.56 GB / efr 21.79 GB. The int8 DiT is staged
+  as an option beside the bf16 one (user's choice at upload).
+
+### Lane close (r3)
+- Staging: six `.aimodel` dirs (bf16 + int8 DiT, the a9b5c94 encoder and VAE ×3; every one a
+  `strip_bundle.py` copy — debug locations stripped, outputs bit-identical to the unstripped bundles, r4),
+  `tokenizer/` (the Turbo `processor/`), `config.json`, `host/`, `LICENSE`, `NOTICE`, `README.md` = the
+  card. 34 files, 39.98 GB (the six bundles 39.97 GB). The two DiT `metadata.json` copies name the source as
+  `Qwen/Qwen-Image-2.1-Turbo@d65dbc9` (the exporters wrote the local `--transformer-dir` path).
+- Open: Swift host (JIT or efr `.aimodelc` from `GraphModel(computeUnits: .gpu)`), as for the base port.

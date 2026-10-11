@@ -24,6 +24,12 @@ Modes:
   --prompt "..." --size 512 --seed N    free prompt; noise0 = ``torch.randn((1,1,64,h,w))`` on a CPU
                           generator seeded N, packed — what the reference pipeline draws for that seed.
 
+``--turbo`` (Qwen-Image-2.1-Turbo @ d65dbc9): bundles from ``exports/qwenimage21_turbo/`` — the Turbo DiT
+``qi21t_dit_full_bf16_dyn_iofp32.h16c.aimodelc`` next to copies of the encoder and VAE bundles above (the Turbo
+text encoder is byte-identical to the base one; the VAE bundles hold the base fp32 weights, of which the Turbo
+``vae/`` is a bf16 copy) — the checkpoint's 8-step grid (``qi21_sched.schedule_fixed``, no ``mu``) and the
+Turbo ``processor/tokenizer.json``. ``--tokenizer-json`` overrides the tokenizer in either mode.
+
 Sensitivity probe: ``--embed-perturb REL --perturb-seed K`` adds ``g * REL * ||pe|| / ||g||`` to the
 prompt_embeds (``g`` ~ N(0, I) from numpy seed K, so the global relative L2 change is exactly REL) —
 the size of the gap between the encoder bundle and the fp32 oracle is ~1.25e-5.
@@ -35,6 +41,8 @@ Run (coreai-models base venv, from conversion/qwenimage21/; timing runs under th
   python pipeline_engine.py --oracle oracle/256
   python3 ~/code/coreai-kit/scripts/with-gpu-lock.py -- ~/code/coreai/coreai-models/.venv/bin/python \\
       pipeline_engine.py --prompt "a red apple on a wooden table" --size 512 --seed 7
+  python pipeline_engine.py --turbo --oracle oracle/turbo256
+  python pipeline_engine.py --turbo --prompt "a red apple on a wooden table" --size 1024 --seed 7 --tag turbo_apple1024
 """
 from __future__ import annotations
 
@@ -54,20 +62,35 @@ import torch
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import exports_dir  # noqa: E402
+from _paths import exports_dir, hf_snapshot  # noqa: E402
 from qi21_host import build_inputs  # noqa: E402
-from qi21_sched import model_t, schedule, step  # noqa: E402
+from qi21_sched import SAMPLE_SIGMAS_TURBO, model_t, schedule, schedule_fixed, step  # noqa: E402
 from qi21_tokenize import QI21Tokenizer  # noqa: E402
 
 ROOT = exports_dir() / "qwenimage21"
 ENCODER = ROOT / "qi21_encoder_dynL_w16a32_ids_iofp32_aot_efr" / "qi21_encoder_dynL_w16a32_ids_iofp32.h16c.aimodelc"
 DIT = ROOT / "qi21_dit_full_bf16_dyn_iofp32_aot_efr" / "qi21_dit_full_bf16_dyn_iofp32.h16c.aimodelc"
+ROOT_TURBO = exports_dir() / "qwenimage21_turbo"
+ENCODER_TURBO = ROOT_TURBO / ENCODER.relative_to(ROOT)
+DIT_TURBO = ROOT_TURBO / "qi21t_dit_full_bf16_dyn_iofp32_aot_efr" / "qi21t_dit_full_bf16_dyn_iofp32.h16c.aimodelc"
+MODEL_TURBO = "Qwen/Qwen-Image-2.1-Turbo"
+REVISION_TURBO = "d65dbc9a7e8f6b5479e33dee6030eaab2a906509"
 ORDER = ("img_tokens", "txt_feats", "timestep", "txt_cos", "txt_sin", "img_cos", "img_sin")
 C = 64
 
 
-def vae_bundle(size: int) -> Path:
-    return ROOT / f"qi21_vae_{size}_fp32_aot_efr" / f"qi21_vae_{size}_fp32.h16c.aimodelc"
+def vae_bundle(size: int, root: Path = ROOT) -> Path:
+    return root / f"qi21_vae_{size}_fp32_aot_efr" / f"qi21_vae_{size}_fp32.h16c.aimodelc"
+
+
+def alpha_stats(a: np.ndarray) -> dict:
+    """uint8 alpha [H,W]: min / mean, and the four corners (pixel, and mean of one 16x16 px latent tile)."""
+    t = 16
+    tiles = [a[:t, :t], a[:t, -t:], a[-t:, :t], a[-t:, -t:]]                    # TL, TR, BL, BR
+    return dict(min=int(a.min()), mean=float(a.mean()), frac_below_128=float((a < 128).mean()),
+                frac_255=float((a == 255).mean()), frac_0=float((a == 0).mean()),
+                corner_px=[int(a[0, 0]), int(a[0, -1]), int(a[-1, 0]), int(a[-1, -1])],
+                corner_tile16_mean=[float(x.mean()) for x in tiles])
 
 
 def corr(a: np.ndarray, b: np.ndarray) -> float:
@@ -112,14 +135,16 @@ async def run(args) -> dict:
     assert size % 32 == 0, size
     H = W = size // 16
     N = H * W
+    vae_path = args.vae or vae_bundle(size, args.vae_root)
     res = dict(mode="oracle" if od else "prompt", size=size, N=N, steps=steps, prompt=prompt,
                seed=int(meta["seed"]) if od else args.seed, encoder=str(args.encoder), dit=str(args.dit),
-               vae=str(args.vae or vae_bundle(size)), loadavg_start=os.getloadavg()[0], sec={})
+               vae=str(vae_path), turbo=bool(args.turbo), loadavg_start=os.getloadavg()[0], sec={})
     sec = res["sec"]
     t_all = time.perf_counter()
 
     # ------------------------------------------------------------------ encoder
-    tok = QI21Tokenizer()
+    tok = QI21Tokenizer(args.tokenizer_json)
+    res["tokenizer_json"] = str(tok.path)
     ids = tok.encode_np(prompt)
     drop = tok.drop_idx
     if od:
@@ -157,21 +182,33 @@ async def run(args) -> dict:
     res["L"] = int(pe.shape[1])
 
     # ---------------------------------------------------------------- sampler
-    sigmas, timesteps, mu = schedule(steps, N)
+    if args.turbo:
+        assert steps == len(SAMPLE_SIGMAS_TURBO), (steps, len(SAMPLE_SIGMAS_TURBO))
+        sigmas, timesteps = schedule_fixed(SAMPLE_SIGMAS_TURBO)
+        mu = None
+        res["sampler"] = "fixed grid (model_index.json sample_sigmas, shift 1.0, no mu)"
+    else:
+        sigmas, timesteps, mu = schedule(steps, N)
+        res["sampler"] = "linspace + exponential shift(mu) + terminal 0.02"
     res["mu"] = mu
+    g = torch.Generator("cpu").manual_seed(res["seed"])          # the reference pipeline's draw for this seed
+    noise = torch.randn((1, 1, C, H, W), generator=g, dtype=torch.float32)
+    x_seed = noise.view(1, C, H * W).transpose(1, 2).contiguous().numpy()
     if od:
         x = np.fromfile(od / "noise0.f32", "<f4").reshape(1, N, C)
         ref_sig = np.fromfile(od / "sigmas.f32", "<f4")
         assert np.array_equal(sigmas, ref_sig), "sampler schedule != oracle sigmas"
+        res["noise0_equals_seed_draw"] = bool(np.array_equal(x, x_seed))   # the --prompt path's noise is the oracle's
+        print(f"[engine] oracle noise0 == torch.randn draw for seed {res['seed']}: {res['noise0_equals_seed_draw']}",
+              flush=True)
     else:
-        g = torch.Generator("cpu").manual_seed(args.seed)
-        noise = torch.randn((1, 1, C, H, W), generator=g, dtype=torch.float32)
-        x = noise.view(1, C, H * W).transpose(1, 2).contiguous().numpy()
+        x = x_seed
     m, dit, sec["dit_load"] = await load(args.dit)
     ins = build_inputs(torch.from_numpy(x), torch.from_numpy(pe), torch.from_numpy(model_t(timesteps, 0)), H, W)
     feed = {k: rt.NDArray(ins[k].contiguous()) for k in ORDER}   # RoPE tables + text: fixed for the whole run
     step_s, rows, nan_total = [], [], 0
-    print(f"[engine] DiT: {steps} steps, N {N} ({H}x{W}), L {pe.shape[1]}, mu {mu:.6f}; load {sec['dit_load']:.1f}s",
+    mu_s = f"mu {mu:.6f}" if mu is not None else "fixed grid"
+    print(f"[engine] DiT: {steps} steps, N {N} ({H}x{W}), L {pe.shape[1]}, {mu_s}; load {sec['dit_load']:.1f}s",
           flush=True)
     for i in range(steps):
         xt = torch.from_numpy(x).contiguous()                    # held until the call returns
@@ -195,15 +232,15 @@ async def run(args) -> dict:
         elif nan:
             print(f"  step {i:2d}: NaN {nan} in the DiT output", flush=True)
     del dit, m, feed
-    sec["dit_40_steps"] = float(sum(step_s))
+    sec[f"dit_{steps}_steps"] = float(sum(step_s))
     sec["dit_first_step"] = step_s[0]
     sec["dit_step_median_warm"] = statistics.median(step_s[1:]) if len(step_s) > 1 else step_s[0]
-    res["steps_rows"], res["dit_nan"] = rows, nan_total
-    print(f"[engine] DiT: {steps} steps {sec['dit_40_steps']:.1f}s (first {step_s[0]:.2f}s, warm median "
+    res["steps_rows"], res["dit_nan"], res["dit_step_s"] = rows, nan_total, step_s
+    print(f"[engine] DiT: {steps} steps {sec[f'dit_{steps}_steps']:.1f}s (first {step_s[0]:.2f}s, warm median "
           f"{sec['dit_step_median_warm']:.3f}s), NaN {nan_total}", flush=True)
 
     # -------------------------------------------------------------------- VAE
-    m, vae, sec["vae_load"] = await load(args.vae or vae_bundle(size))
+    m, vae, sec["vae_load"] = await load(vae_path)
     xt = torch.from_numpy(x).contiguous()
     t0 = time.perf_counter()
     r = await vae({"latents_packed": rt.NDArray(xt)})
@@ -219,11 +256,12 @@ async def run(args) -> dict:
     rgb_white = save_pngs(rgba, stem)
     np.ascontiguousarray(x, "<f4").tofile(f"{stem}_final_latents.f32")
     a = rgba[..., 3]
-    res["alpha"] = dict(min=int(a.min()), mean=float(a.mean()), frac_below_128=float((a < 128).mean()),
-                        frac_255=float((a == 255).mean()))
+    res["alpha"] = alpha_stats(a)
     res["image"] = f"{stem}.png"
     print(f"[engine] VAE: load {sec['vae_load']:.1f}s call {sec['vae_call']:.2f}s -> {stem}.png (+ _rgb.png); "
-          f"alpha min {a.min()} mean {a.mean():.1f} ({100 * res['alpha']['frac_below_128']:.1f}% < 128)", flush=True)
+          f"alpha min {a.min()} mean {a.mean():.1f} ({100 * res['alpha']['frac_below_128']:.1f}% < 128, "
+          f"{100 * res['alpha']['frac_0']:.1f}% = 0); corners px {res['alpha']['corner_px']} 16px-tile mean "
+          f"{[round(v, 2) for v in res['alpha']['corner_tile16_mean']]}", flush=True)
 
     if od:
         from PIL import Image
@@ -257,15 +295,26 @@ def main():
     ap.add_argument("--prompt", default=None)
     ap.add_argument("--size", type=int, default=512)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--steps", type=int, default=40)
-    ap.add_argument("--encoder", default=str(ENCODER), help="encoder bundle, or 'oracle' (the oracle's prompt_embeds)")
-    ap.add_argument("--dit", default=str(DIT))
+    ap.add_argument("--steps", type=int, default=None, help="default 40; --turbo: the grid's 8 (fixed)")
+    ap.add_argument("--turbo", action="store_true", help="Qwen-Image-2.1-Turbo: its DiT, 8-step grid, tokenizer.json")
+    ap.add_argument("--encoder", default=None, help="encoder bundle, or 'oracle' (the oracle's prompt_embeds)")
+    ap.add_argument("--dit", default=None)
     ap.add_argument("--vae", default=None, help="default: qi21_vae_<size>_fp32 AOT efr bundle")
+    ap.add_argument("--tokenizer-json", default=None, help="default: the base snapshot's; --turbo: the Turbo snapshot's")
     ap.add_argument("--embed-perturb", type=float, default=0.0, help="relative L2 perturbation of prompt_embeds")
     ap.add_argument("--perturb-seed", type=int, default=0)
     ap.add_argument("--tag", default=None, help="output stem in _work/samples/ and the json name")
     args = ap.parse_args()
     assert bool(args.oracle) != bool(args.prompt), "pass exactly one of --oracle / --prompt"
+    args.encoder = args.encoder or str(ENCODER_TURBO if args.turbo else ENCODER)
+    args.dit = args.dit or str(DIT_TURBO if args.turbo else DIT)
+    args.vae_root = ROOT_TURBO if args.turbo else ROOT
+    if args.turbo:
+        assert args.steps in (None, len(SAMPLE_SIGMAS_TURBO)), f"--turbo runs the {len(SAMPLE_SIGMAS_TURBO)}-step grid"
+        args.steps = len(SAMPLE_SIGMAS_TURBO)
+        args.tokenizer_json = args.tokenizer_json or str(
+            Path(hf_snapshot(MODEL_TURBO, revision=REVISION_TURBO)) / "processor" / "tokenizer.json")
+    args.steps = args.steps or 40
     if args.tag is None:
         if args.oracle:
             args.tag = f"engine_oracle{Path(args.oracle).name}" + ("_encoracle" if args.encoder == "oracle" else "")

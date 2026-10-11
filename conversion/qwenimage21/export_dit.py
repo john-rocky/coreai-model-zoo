@@ -8,8 +8,10 @@ text ``Dim("ntxt", 8..512)``, image ``Dim("nimg", 64..4096)``. One function, ``m
     txt_cos/txt_sin [1,L,64]  img_cos/img_sin [1,N,64]        ->  vel [1,N,64]   (all fp32)
 
 The host side (RoPE tables, pack/unpack) is ``qi21_host.py``. Bundle:
-``_paths.exports_dir()/qwenimage21/<name>/<name>.aimodel``,
-name = ``qi21_dit_{full|L<n>}_bf16_dyn_iofp32``.
+``_paths.exports_dir()/<exports-sub>/<name>/<name>.aimodel`` (``--exports-sub`` default ``qwenimage21``),
+name = ``qi21_dit_{full|L<n>}_bf16_dyn_iofp32``. Another checkpoint of the same architecture:
+``--transformer-dir <snapshot>/transformer --name <name> --exports-sub <dir>`` (Qwen-Image-2.1-Turbo:
+``qi21t_dit_full_bf16_dyn_iofp32`` under ``qwenimage21_turbo``).
 
 ``--check`` (default for ``--random-init``) loads the saved bundle with
 ``SpecializationOptions.default()`` (or ``--cpu-only``), runs one forward at N=256 / L=40 and
@@ -52,6 +54,20 @@ MIN_FREE_GIB = 30
 
 def free_gib() -> float:
     return shutil.disk_usage("/System/Volumes/Data").free / 2**30
+
+
+def source_clause(transformer_dir: str | None) -> str:
+    """The description's ``Source: <repo id>@<rev7>. `` for the weights, never a local path (``metadata.json`` ships
+    with the bundle): the pinned snapshot by default, the repo id and revision read off an HF cache path
+    (``models--<org>--<name>/snapshots/<rev>/``), nothing for any other directory."""
+    if transformer_dir is None:
+        return f"Source: {MODEL}@{REVISION[:7]}."
+    parts = Path(transformer_dir).expanduser().resolve().parts
+    for i, p in enumerate(parts[:-2]):
+        if p.startswith("models--") and parts[i + 1] == "snapshots":
+            org, _, repo = p[len("models--"):].partition("--")
+            return f"Source: {org}/{repo}@{parts[i + 2][:7]}."
+    return ""
 
 
 def randomize(model, seed):
@@ -157,6 +173,9 @@ def main():
     ap.add_argument("--img-max", type=int, default=4096)
     ap.add_argument("--trace-L", type=int, default=40, help="text length of the tracing inputs")
     ap.add_argument("--trace-hw", type=int, default=16, help="latent side of the tracing inputs (N = hw^2)")
+    ap.add_argument("--img-static", action="store_true",
+                    help="image axis static at the tracing size (N = trace-hw^2: img_tokens / img_cos / img_sin "
+                         "left out of dynamic_shapes); the text axis stays Dim('ntxt')")
     ap.add_argument("--no-optimize", action="store_true")
     ap.add_argument("--check", dest="check", action="store_true", default=None)
     ap.add_argument("--no-check", dest="check", action="store_false")
@@ -172,13 +191,16 @@ def main():
                     help="fp32 = diagnostic probe only (converter-structure check at fp32 precision)")
     ap.add_argument("--name", default=None)
     ap.add_argument("--transformer-dir", default=None, help="default: the pinned HF snapshot's transformer/")
+    ap.add_argument("--exports-sub", default="qwenimage21",
+                    help="bundle goes to _paths.exports_dir()/<exports-sub>/<name>/ (Turbo: qwenimage21_turbo; on the "
+                         "lane Mac exports/qwenimage21 is a symlink into the read-only archive of the 09-25 bundles)")
     args = ap.parse_args()
     check = args.random_init if args.check is None else args.check
 
     tag = "full" if args.layers is None else f"L{args.layers}"
     wdt = torch.bfloat16 if args.dtype == "bf16" else torch.float32
     name = args.name or (f"qi21_dit_{tag}_bf16_dyn_iofp32" if args.dtype == "bf16" else f"qi21_dit_{tag}_fp32_dyn")
-    out_dir = exports_dir() / "qwenimage21" / name
+    out_dir = exports_dir() / args.exports_sub / name
     bundle = out_dir / f"{name}.aimodel"
 
     t_start = time.time()
@@ -216,6 +238,8 @@ def main():
         nimg = Dim("nimg", min=args.img_min, max=args.img_max)
         dyn = {"img_tokens": {1: nimg}, "txt_feats": {1: ntxt}, "timestep": None,
                "txt_cos": {1: ntxt}, "txt_sin": {1: ntxt}, "img_cos": {1: nimg}, "img_sin": {1: nimg}}
+        if args.img_static:                 # Dim(min == max) is refused; an axis left out is static
+            dyn.update(img_tokens={}, img_cos={}, img_sin={})
         t0 = time.time()
         prog = export_to_coreai(model, ref, dynamic_shapes=dyn, input_names=ORDER, output_names=("vel",))
         print(f"[export] converted in {time.time() - t0:.0f}s", flush=True)
@@ -231,8 +255,10 @@ def main():
         meta = rt.AIModelAssetMetadata()
         meta.license = "qwen-research"
         meta.model_description = (f"Qwen-Image-2.1 DiT ({tag}{', random weights' if args.random_init else ''}), "
-                                  f"{args.dtype} weights+compute, fp32 I/O, dynamic text/image axes. "
-                                  f"Source: {MODEL}@{REVISION[:7]}.")
+                                  f"{args.dtype} weights+compute, fp32 I/O, "
+                                  + (f"dynamic text axis, static image axis N={args.trace_hw ** 2}. "
+                                     if args.img_static else "dynamic text/image axes. ") +
+                                  source_clause(args.transformer_dir)).strip()
         t0 = time.time()
         prog.save_asset(bundle, meta)
         size = sum(f.stat().st_size for f in bundle.rglob("*") if f.is_file())

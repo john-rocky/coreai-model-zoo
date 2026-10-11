@@ -1,0 +1,71 @@
+# Recipe for rgba-image-2.1-turbo — the configuration that produced each published bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# The RGBA-Image-2.1 exporters (recipe rgba-image-2.1) pointed at the Qwen/Qwen-Image-2.1-Turbo snapshot
+# (revision d65dbc9). Only the DiT is exported here, as bf16 and as int8 Linear weights. The text encoder
+# and the VAE graphs are RGBA-Image-2.1's (needs, second line). Every published .aimodel is a
+# strip_bundle.py copy of its bundle (notes).
+# conversion/qwenimage21/README.md lists the gates in order.
+
+["rgba-image-2.1-turbo"]
+card = "README.md"
+hf_repo = "mlboydaisuke/RGBA-Image-2.1-Turbo-CoreAI"
+source_hf_id = "Qwen/Qwen-Image-2.1-Turbo"
+status = "verified"
+steps = [
+  { script = "qwenimage21/export_dit.py", args = ["--transformer-dir", "~/.cache/huggingface/hub/models--Qwen--Qwen-Image-2.1-Turbo/snapshots/d65dbc9a7e8f6b5479e33dee6030eaab2a906509/transformer", "--name", "qi21t_dit_full_bf16_dyn_iofp32", "--exports-sub", "qwenimage21_turbo"], bundle = "qi21t_dit_full_bf16_dyn_iofp32.aimodel" },
+  { script = "qwenimage21/quant_export_dit.py", args = ["--transformer-dir", "~/.cache/huggingface/hub/models--Qwen--Qwen-Image-2.1-Turbo/snapshots/d65dbc9a7e8f6b5479e33dee6030eaab2a906509/transformer", "--exports-sub", "qwenimage21_turbo", "--name", "qi21t_dit_full_int8lin_dyn_iofp32", "--aot"], bundle = "qi21t_dit_full_int8lin_dyn_iofp32.aimodel" },
+]
+needs = [
+  "The Qwen/Qwen-Image-2.1-Turbo snapshot at revision d65dbc9a7e8f6b5479e33dee6030eaab2a906509 in the Hugging",
+  "Face cache (32 files, 32.5 GB). zoo_convert.py passes the arguments without a shell: write the `~` of",
+  "--transformer-dir out as your home directory, or pass the path after `--` (the script keeps the last value).",
+  "The text encoder and the three VAE bundles are not exported by this recipe. They are the files of",
+  "mlboydaisuke/RGBA-Image-2.1-CoreAI at revision a9b5c9493571a8c4087dde0f4a191803feb0fd69 (recipe",
+  "rgba-image-2.1), stripped like the DiTs (notes): the Turbo text encoder is byte-identical to the base one",
+  "(750 of 750 tensors), and the Turbo vae/ is the base fp32 VAE rounded to bf16 (238 of 238 tensors), so the",
+  "fp32 graphs are kept.",
+  "Two venvs. Both exporters ran in the coreai-models base venv (Python 3.11.13, torch 2.9.0, coreai-torch",
+  "0.4.1, coreai-core 1.0.0b2, coreai-opt 0.2.1, safetensors 0.7.0). The fp32 Turbo reference",
+  "(capture_oracle.py) and the host constants (make_host_consts.py --turbo) ran in a second venv: Python",
+  "3.11.13, torch 2.9.0, torchvision 0.24.0, transformers 5.17.0, diffusers main 85c9fa4 (0.41.0.dev0),",
+  "safetensors 0.9.0-rc.1, accelerate 1.15.0, numpy 2.4.6, pillow 12.3.0, no coreai packages. The",
+  "checkpoint's 8-step grid (model_index.json sample_sigmas) needs a diffusers main that reads it.",
+]
+aot = "xcrun coreai-build compile <bundle>.aimodel --output <dir> --platform macOS --architecture h16c --preferred-compute gpu --expect-frequent-reshapes"
+notes = [
+  "Published 2026-10-11 as revision c3bd985ce0d1d76fb899d4dc1bfcacf0f153cc1e: all 34 files verified against the staged",
+  "bundles (LFS sha256 + size from the Hub's file metadata; small files by download); zoo_verify.py 6 bundles PASS 5,",
+  "SKIPPED 1 (the encoder bundle name declares no precision), FAIL 0.",
+  "The arguments are the ones the logged runs used (2026-10-11, macOS 27.0 26A428, M4 Max, from",
+  "conversion/qwenimage21/). export_dit.py: all 32 blocks, text axis 8..512, image axis 64..4096; convert 34 s,",
+  "main.mlirb 14,231,004,528 B. quant_export_dit.py: the 232 Linear weights int8, symmetric, per block of 32",
+  "input features, bf16 scales, bf16 compute; main.mlirb 7,560,697,655 B. Its run also had --torch-ref",
+  "--ref-steps 0,4,7 --ref-oracle oracle/turbo256 (a gate; it does not change the bundle). The names invert",
+  "to the flags: qi21t_dit_full_{bf16|int8lin}_dyn_iofp32, qi21t = the Turbo weights.",
+  "The exporters wrote the --transformer-dir path into metadata.json (since 2026-10-11 they write Source:",
+  "<repo id>@<rev7>); the published metadata.json of both DiT bundles says Source: Qwen/Qwen-Image-2.1-Turbo@d65dbc9.",
+  "Every published .aimodel is a strip_bundle.py copy (conversion/qwenimage21/strip_bundle.py <bundle> <out>",
+  "--aot; the DiTs with --metadata-from that metadata.json): coreai-torch's strip_debug_info removes the debug",
+  "locations (the export machine's paths) and leaves the ops and the weights, so main.mlirb and main.hash are new",
+  "(main.mlirb 14,230,567,115 B bf16 DiT, 7,560,188,326 B int8 DiT, 15,137,683,256 B encoder, 1,012,364,804 /",
+  "1,012,366,781 / 1,012,370,701 B VAE) and metadata.json gains a creatorDefinedMetadata.strip record. The",
+  "stripped bundles give the unstripped outputs bit for bit (both DiTs, the encoder, the three VAEs, a 256² image",
+  "end to end with each DiT).",
+  "GPU runs need the AOT compile above: bf16 DiT 107.6 s and 26.52 GiB, int8 DiT 301 s and 20.30 GiB",
+  "(quant_export_dit.py --aot runs it; the bf16 DiT was compiled by hand). On 26A428 a plain h16c AOT compile",
+  "without --expect-frequent-reshapes crashes at the initial call (ANERegion.mm:414 ... Code=-19, this bundle,",
+  "2026-10-11), and JIT crashed the same way on 2026-09-25 (same graph, base weights; not re-run).",
+  "--preferred-compute neural-engine compiles to 0 Neural Engine regions and runs on the GPU.",
+  "M4 Max, bench_dit.py, L 40, warm median of 5: 0.341 / 1.097 / 4.721 s per DiT forward at 256² / 512² /",
+  "1024², 8 steps 2.7 / 8.8 / 37.8 s; the int8 DiT within 0.1 % of that in the same windows. End to end",
+  "against the fp32 Turbo pipeline: 43.79 / 42.45 / 42.50 dB (bf16 DiT), 41.76 / 49.28 / 39.32 dB (int8).",
+  "The Hugging Face repo carries the .aimodel bundles, not the .aimodelc, plus host/ written by",
+  "make_host_consts.py --turbo (RoPE tables byte-identical to RGBA-Image-2.1's, scheduler.json = the",
+  "8-step grid) and host_contract.md.",
+]
+open_questions = [
+  "Swift host: does GraphModel(computeUnits: .gpu) run the DiT .aimodel just-in-time, or does it hit",
+  "the same Neural Engine region as the Python runtime and need the efr .aimodelc? Untested.",
+]

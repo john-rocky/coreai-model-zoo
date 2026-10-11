@@ -15,10 +15,17 @@ The graph's L axis is dynamic, so the host passes exactly ``Lfull`` tokens. ``en
 right-pads with ``<|endoftext|>`` (151643) for a fixed-L graph; attention is causal, so the
 first ``Lfull`` outputs do not depend on the padding.
 
+Which ``tokenizer.json``: the argument, else ``$QI21_TOKENIZER_JSON``, else the pinned base
+snapshot's ``processor/tokenizer.json``. Qwen-Image-2.1-Turbo ships its own (same vocab / merges /
+added tokens; only offset and decoder flags differ) — pass ``--snapshot <Turbo>`` or
+``--tokenizer-json`` (``gate_tokenize_hf.py`` gates it against the Turbo processor).
+
   python qi21_tokenize.py "a red apple on a wooden table, studio lighting"
+  python qi21_tokenize.py --snapshot <Turbo snapshot> "a red apple on a wooden table, studio lighting"
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -27,6 +34,21 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 MODEL = "Qwen/Qwen-Image-2.1"
 REVISION = "790c92633540aa0cb11d9abf19eb46d861714758"
+TOKENIZER_JSON_ENV = "QI21_TOKENIZER_JSON"
+
+
+def tokenizer_json_path(tokenizer_json: str | Path | None = None, snapshot: str | Path | None = None) -> Path:
+    """``tokenizer_json``, else ``<snapshot>/processor/tokenizer.json``, else ``$QI21_TOKENIZER_JSON``, else
+    the pinned base snapshot's ``processor/tokenizer.json``."""
+    if tokenizer_json:
+        return Path(tokenizer_json)
+    if snapshot:
+        return Path(snapshot) / "processor" / "tokenizer.json"
+    if os.environ.get(TOKENIZER_JSON_ENV):
+        return Path(os.environ[TOKENIZER_JSON_ENV])
+    sys.path.insert(0, str(HERE.parent))
+    from _paths import hf_snapshot
+    return Path(hf_snapshot(MODEL, revision=REVISION)) / "processor" / "tokenizer.json"
 
 SYS_PROMPT = "Comprehend and analyze the provided prompt."
 SYS_PART = f"<|im_start|>system\n{SYS_PROMPT}<|im_end|>\n"
@@ -37,11 +59,8 @@ PAD_TOKEN = "<|endoftext|>"
 class QI21Tokenizer:
     def __init__(self, tokenizer_json: str | Path | None = None):
         from tokenizers import Tokenizer
-        if tokenizer_json is None:
-            sys.path.insert(0, str(HERE.parent))
-            from _paths import hf_snapshot
-            tokenizer_json = Path(hf_snapshot(MODEL, revision=REVISION)) / "processor" / "tokenizer.json"
-        self.tok = Tokenizer.from_file(str(tokenizer_json))
+        self.path = tokenizer_json_path(tokenizer_json)
+        self.tok = Tokenizer.from_file(str(self.path))
         self.tok.no_padding()
         self.tok.no_truncation()
         self.sys_ids = self._ids(SYS_PART)
@@ -71,7 +90,14 @@ class QI21Tokenizer:
 
 
 if __name__ == "__main__":
-    t = QI21Tokenizer()
-    for p in sys.argv[1:] or ["a red apple on a wooden table, studio lighting"]:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("prompts", nargs="*")
+    ap.add_argument("--tokenizer-json", default=None)
+    ap.add_argument("--snapshot", default=None, help="use <snapshot>/processor/tokenizer.json")
+    a = ap.parse_args()
+    t = QI21Tokenizer(tokenizer_json_path(a.tokenizer_json, a.snapshot))
+    print(f"tokenizer.json: {t.path}")
+    for p in a.prompts or ["a red apple on a wooden table, studio lighting"]:
         ids = t.encode(p)
         print(f"Lfull {len(ids)}  drop_idx {t.drop_idx}  L {len(ids) - t.drop_idx}  pad {t.pad_id}\n{ids}")
