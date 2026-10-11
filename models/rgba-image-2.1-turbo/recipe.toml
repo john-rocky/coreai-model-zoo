@@ -64,8 +64,10 @@ notes = [
   "The Hugging Face repo carries the .aimodel bundles, not the .aimodelc, plus host/ written by",
   "make_host_consts.py --turbo (RoPE tables byte-identical to RGBA-Image-2.1's, scheduler.json = the",
   "8-step grid) and host_contract.md.",
+  "Swift host (answered 2026-10-11, coreai-samples CoreAIImageGenMac): the .aimodel graphs run just in time when",
+  "opened with SpecializationOptions(preferredComputeUnitKind: .gpu) and expectFrequentReshapes = true; with the",
+  "default options or .gpu alone the DiT aborts at its first step (ANERegion.mm:414 Code=-19). bf16 outputs equal",
+  "the efr .aimodelc bit for bit at 256/512/1024; the int8 DiT compiled just in time differs from its ahead-of-time",
+  "compile (48.9 dB) and scores 42.25 dB / corr 0.999924 against the fp32 reference at 256 (bar 40 dB / 0.9998).",
 ]
-open_questions = [
-  "Swift host: does GraphModel(computeUnits: .gpu) run the DiT .aimodel just-in-time, or does it hit",
-  "the same Neural Engine region as the Python runtime and need the efr .aimodelc? Untested.",
-]
+open_questions = []
