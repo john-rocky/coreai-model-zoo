@@ -27,10 +27,21 @@ engine gate at that size. ``--synthetic 512 --latents <final_latents.f32> --name
 for any saved sampler output (e.g. ``pipeline_engine.py``'s RGBA sticker, whose alpha reaches 0 —
 the oracle images are opaque) -> ``_work/vae_ref_<n>/``.
 
+``--snapshot <dir>`` loads ``<dir>/vae`` instead of the pinned base snapshot's, always as fp32. The
+Qwen-Image-2.1-Turbo ``vae/`` is the bf16 round-to-nearest-even copy of the base fp32 weights, so
+``--synthetic <size> --latents oracle/turbo<size>/final_latents.f32`` once with the Turbo snapshot (the
+oracle's own weights, upcast) and once with the base snapshot (the weights the Core AI VAE bundles were
+exported from) separates the bundle's error from the band that rounding puts between the two
+(``vae_band.py`` scores them). ``--fp64`` decodes the same way in float64 (the weights and latents cast up,
+the latent constants fp32-rounded as in the fp32 path): the reference that says how far each fp32 decode,
+CPU torch or the bundle, sits from the function itself (``vae_out.f64`` next to the fp32 cast).
+
 Run (``.venv-qi21``, from conversion/qwenimage21/):
   python parity_vae_torch.py [--oracle oracle/256 oracle/512]
   python parity_vae_torch.py --synthetic 1024
   python parity_vae_torch.py --synthetic 512 --latents _work/samples/<stem>_final_latents.f32 --name sticker512
+  python parity_vae_torch.py --synthetic 256 --latents oracle/turbo256/final_latents.f32 --snapshot <Turbo> \\
+      --name turbo256_wturbo        # .venv-qi21t (diffusers 85c9fa4)
 """
 from __future__ import annotations
 
@@ -68,7 +79,7 @@ def load(od: Path, name: str, shape) -> torch.Tensor:
     return torch.from_numpy(np.fromfile(od / f"{name}.f32", "<f4").reshape(shape))
 
 
-def synthetic(vae, size: int, latents: str | None = None, name: str | None = None) -> int:
+def synthetic(vae, size: int, latents: str | None = None, name: str | None = None, snapshot: str | None = None) -> int:
     if latents:
         h = w = size // 16
         final = torch.from_numpy(np.fromfile(latents, "<f4").reshape(1, h * w, 64))
@@ -84,7 +95,11 @@ def synthetic(vae, size: int, latents: str | None = None, name: str | None = Non
         final = grid.repeat_interleave(f, dim=1).repeat_interleave(f, dim=2).reshape(1, h * w, 64).contiguous()
         source = (f"oracle/512 final_latents nearest-upsampled x{f} on the token grid; torch fp32 vae.decode "
                   f"(synthetic reference, not an oracle)")
+    wdt = sorted({str(p.dtype) for p in vae.parameters()})
+    fp64 = wdt == ["torch.float64"]
     z = final.transpose(1, 2).reshape(1, 64, 1, h, w)
+    if fp64:                  # the fp32 function evaluated in float64: same inputs, same fp32-rounded constants
+        z = z.double()
     z_dim = vae.config.z_dim
     z = (z * torch.tensor(vae.config.latents_std).view(1, z_dim, 1, 1, 1)
          + torch.tensor(vae.config.latents_mean).view(1, z_dim, 1, 1, 1))
@@ -96,7 +111,10 @@ def synthetic(vae, size: int, latents: str | None = None, name: str | None = Non
     od.mkdir(parents=True, exist_ok=True)
     np.ascontiguousarray(final.numpy(), "<f4").tofile(od / "final_latents.f32")
     np.ascontiguousarray(out.numpy(), "<f4").tofile(od / "vae_out.f32")
-    json.dump(dict(size=size, img_shapes=[[1, h, w]], vae_out_shape=list(out.shape), decode_s=sec, source=source),
+    if fp64:
+        np.ascontiguousarray(out.numpy(), "<f8").tofile(od / "vae_out.f64")
+    json.dump(dict(size=size, img_shapes=[[1, h, w]], vae_out_shape=list(out.shape), decode_s=sec, source=source,
+                   vae_snapshot=str(snapshot) if snapshot else "pinned base snapshot", vae_param_dtypes=wdt),
               open(od / "meta.json", "w"), indent=2)
     print(f"[vae-torch] synthetic {size}: latent {h}x{w}, vae.decode {sec:.1f}s, out {list(out.shape)} "
           f"range {float(out.min()):+.3f}..{float(out.max()):+.3f}, alpha min {float(out[:, 3].min()):+.4f} -> {od}",
@@ -111,13 +129,18 @@ def main():
     ap.add_argument("--synthetic", type=int, default=0, help="write a torch reference for this size (see above)")
     ap.add_argument("--latents", default=None, help="with --synthetic: a saved final_latents [1,N,64] f32 file")
     ap.add_argument("--name", default=None, help="with --synthetic: _work/vae_ref_<name>/ (default: the size)")
+    ap.add_argument("--snapshot", default=None, help="load <snapshot>/vae (fp32) instead of the pinned base snapshot")
+    ap.add_argument("--fp64", action="store_true", help="with --synthetic: decode in float64 (the fp32 floor's "
+                                                        "reference; also writes vae_out.f64)")
     args = ap.parse_args()
+    assert not args.fp64 or args.synthetic, "--fp64 is for --synthetic"
     torch.manual_seed(0)
     t0 = time.time()
-    vae = load_vae()
-    print(f"[vae-torch] loaded fp32 in {time.time() - t0:.1f}s", flush=True)
+    vae = load_vae(args.snapshot, dtype=torch.float64 if args.fp64 else torch.float32)
+    print(f"[vae-torch] loaded {'fp64' if args.fp64 else 'fp32'} in {time.time() - t0:.1f}s from "
+          f"{args.snapshot or 'the pinned base snapshot'}", flush=True)
     if args.synthetic:
-        return synthetic(vae, args.synthetic, args.latents, args.name)
+        return synthetic(vae, args.synthetic, args.latents, args.name, args.snapshot)
     from diffusers.models.autoencoders.autoencoder_kl_qwenimage21 import QwenImage21RMS_norm
 
     min_norm = [float("inf")]

@@ -50,14 +50,16 @@ $PY pipeline_engine.py exports/zimage_dit_512_cap32_full_native_bf16_dyncap_dyni
 
 ## Which image model should I use?
 
-The zoo has three Mac text-to-image models and they are **not** ranked — pick by trade-off
+The zoo's Mac text-to-image models are **not** ranked — pick by trade-off
 (all timings M4 Max, 1024²):
 
 | | params | sampler | time @1024 | precision |
 | --- | --- | --- | --- | --- |
-| **FLUX.2 klein** | 4B | 4 steps, guidance-distilled (no CFG) | **~17 s** | int4 |
+| **FLUX.2 klein** | 4B | 4 steps, guidance-distilled (no CFG) | **~11 s** | fp16 or int8 |
 | **Z-Image-Turbo** | 6B | 8 steps + CFG (16 forwards) | ~70 s | **bf16, near-lossless** |
 | **GLM-Image** | 16B (9B AR + 7B DiT) | AR prior + 20-step DiT | ~208 s | int8 |
+| **RGBA-Image-2.1** | 7B | 40 steps, no CFG | ~190 s | bf16 |
+| **RGBA-Image-2.1-Turbo** | 7B | 8 steps, distilled, no CFG | ~38 s | bf16 or int8 |
 
 FLUX.2 klein is the fast one, and it also does in-context editing. Z-Image trades that speed
 for a non-distilled sampler you can steer with CFG and a port that is **numerically near the

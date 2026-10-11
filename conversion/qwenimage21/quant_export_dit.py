@@ -18,17 +18,24 @@ Bundle: ``_paths.exports_dir()/qwenimage21/qi21_dit_full_int8lin_dyn_iofp32/``; 
 ``xcrun coreai-build compile ... h16c gpu --expect-frequent-reshapes`` -> ``<name>_aot_efr/<name>.h16c.aimodelc``
 (``--no-efr``: the same without the flag -> ``<name>_aot/``).
 
-Round-4 result (2026-09-25, 26A428): the efr compile of this graph FAILS — ``coreai-build`` aborts with
-``MLIR pass manager failed / Pass failed: MPSMemrefAllocFusion`` and ``operand #0 does not dominate this
-use`` located at the first op on a graph input (qi21_dit.py:237 the fp32->bf16 input cast; :239 with
-``--bf16-io``), unchanged with img_in / txt_in.in_layer kept bf16 (``--exclude``) and with
+Round-4 result (2026-09-25, 26A428), on the 2-layer random-weight probe: the efr compile FAILS —
+``coreai-build`` aborts with ``MLIR pass manager failed / Pass failed: MPSMemrefAllocFusion`` and ``operand #0
+does not dominate this use`` located at the first op on a graph input (qi21_dit.py:237 the fp32->bf16 input
+cast; :239 with ``--bf16-io``), unchanged with img_in / txt_in.in_layer kept bf16 (``--exclude``) and with
 ``--preferred-compute none``. The plain AOT (``--no-efr``) compiles (int8 kept, 0.57 GiB for 2 layers)
 and runs (corr 0.999988), printing an ``ANECCompile() FAILED`` fallback at every new shape. The full
-int8lin was not exported (supervisor: the only GPU path of this port is AOT efr).
+int8lin was not exported then.
+
+2026-10-11 (26A428, Qwen-Image-2.1-Turbo weights): the full 32-block int8lin graph efr-compiles (301 s, a
+20.3 GiB ``.aimodelc``) and passes ``engine_parity_dit.py`` 8/8 steps at 256 / 512 / 1024 px (min corr
+0.999960 / 0.999883 / 0.999965) and the ``pipeline_engine.py --turbo`` gate; the 2-layer random probe still
+fails the efr compile with the error above. A probe's compile verdict does not carry over to the full graph.
 
 Run (base venv, from conversion/qwenimage21/):
   python quant_export_dit.py --layers 2 --random-init --aot --check     # probe: reproduces the efr failure
   python quant_export_dit.py --layers 2 --random-init --aot --no-efr --check --check-shapes 40x16x16,40x32x32,8x8x8
+  python quant_export_dit.py --transformer-dir <Turbo snapshot>/transformer --exports-sub qwenimage21_turbo \\
+      --name qi21t_dit_full_int8lin_dyn_iofp32 --aot --torch-ref --ref-steps 0,4,7 --ref-oracle oracle/turbo256
 """
 from __future__ import annotations
 
@@ -39,6 +46,7 @@ import gc
 import json
 import resource
 import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -53,7 +61,7 @@ sys.path.insert(0, str(HERE.parent))
 from _paths import exports_dir, hf_snapshot  # noqa: E402
 import export_dit  # noqa: E402
 import qi21_dit  # noqa: E402
-from export_dit import DEFAULT_CFG, ORDER, example_inputs, randomize, stats  # noqa: E402
+from export_dit import DEFAULT_CFG, ORDER, example_inputs, randomize, source_clause, stats  # noqa: E402
 from export_encoder import free_gib  # noqa: E402
 from qi21_dit import QI21DiT, load_qi21_dit  # noqa: E402
 
@@ -111,11 +119,11 @@ def census(model, linear_names: list[str]) -> dict:
                 unquantized_dtypes=sorted(set(plain.values())))
 
 
-def torch_ref(model, steps: str, axes) -> list[dict]:
-    """int8 weights + fp32 compute (the quantized module upcast), teacher-forced on oracle/256."""
+def torch_ref(model, steps: str, axes, oracle: Path) -> list[dict]:
+    """int8 weights + fp32 compute (the quantized module upcast), teacher-forced on ``oracle``."""
     from qi21_host import build_inputs
     from qi21_oracle import Oracle, parse_steps
-    o = Oracle(HERE / "oracle" / "256")
+    o = Oracle(oracle)
     m32 = copy.deepcopy(model).to(torch.float32).eval()
     assert m32.img_in.weight.dtype == torch.float32
     rows = []
@@ -127,7 +135,7 @@ def torch_ref(model, steps: str, axes) -> list[dict]:
             r = float(np.linalg.norm(v.astype(np.float64) - o.vel(s).numpy().astype(np.float64))
                       / np.linalg.norm(o.vel(s).numpy().astype(np.float64)))
             rows.append(dict(step=s, corr=c, maxd=maxd, rel=r, nan=int(np.isnan(v).sum()), sec=time.time() - t0))
-            print(f"[torch-ref] int8 weights + fp32 compute, oracle/256 step {s:2d}: vel corr {c:.6f}  max|d| "
+            print(f"[torch-ref] int8 weights + fp32 compute, {o.dir.name} step {s:2d}: vel corr {c:.6f}  max|d| "
                   f"{maxd:.3e}  |d|/|ref| {r:.3e}  ({time.time() - t0:.0f}s)", flush=True)
     del m32
     gc.collect()
@@ -197,12 +205,15 @@ def main():
     ap.add_argument("--check-shapes", default="40x16x16")
     ap.add_argument("--torch-ref", action="store_true")
     ap.add_argument("--ref-steps", default="0,20,39")
+    ap.add_argument("--ref-oracle", default=str(HERE / "oracle" / "256"), help="oracle dir for --torch-ref")
     ap.add_argument("--no-export", action="store_true")
     ap.add_argument("--exclude", default="", help="comma list of Linear module names kept bf16 (diagnostic)")
     ap.add_argument("--bf16-io", action="store_true",
                     help="diagnostic probe only: bf16 img_tokens/txt_feats inputs, no fp32->bf16 input cast in the graph")
     ap.add_argument("--name", default=None)
     ap.add_argument("--json", default=None)
+    ap.add_argument("--transformer-dir", default=None, help="default: the pinned HF snapshot's transformer/")
+    ap.add_argument("--exports-sub", default="qwenimage21", help="_paths.exports_dir()/<exports-sub>/ (Turbo: qwenimage21_turbo)")
     args = ap.parse_args()
 
     tag = "full" if args.layers is None else f"L{args.layers}"
@@ -210,10 +221,12 @@ def main():
     assert not args.bf16_io or args.random_init, "--bf16-io is a probe diagnostic (a Swift host cannot fill bf16)"
     io = "bf16io" if args.bf16_io else "iofp32"
     name = args.name or f"qi21_dit_{tag}_int8lin{'_x%d' % len(exclude) if exclude else ''}_dyn_{io}"
-    root = exports_dir() / "qwenimage21"
+    root = exports_dir() / args.exports_sub
     bundle = root / name / f"{name}.aimodel"
     aimodelc = root / (f"{name}_aot" if args.no_efr else f"{name}_aot_efr") / f"{name}.h16c.aimodelc"
     res = dict(name=name, recipe="int8 per_block 32 axis 1 symmetric_with_clipping, weight-only, bf16 compute", sec={})
+    js = Path(args.json or HERE / "_work" / f"quant_export_{name}.json")
+    dump = lambda: json.dump(res, open(js, "w"), indent=2)      # also mid-run: a later stage may abort
     t_start = time.time()
     if args.random_init:
         cfg = dict(DEFAULT_CFG)
@@ -223,7 +236,7 @@ def main():
         randomize(model, args.seed)
         model = model.to(torch.bfloat16).eval()
     else:
-        tdir = Path(hf_snapshot(MODEL, revision=REVISION)) / "transformer"
+        tdir = Path(args.transformer_dir or Path(hf_snapshot(MODEL, revision=REVISION)) / "transformer")
         export_dit.AXES = tuple(json.load(open(tdir / "config.json")).get("axes_dims_rope", export_dit.AXES))
         print(f"[qexport] loading {tdir} (bf16, axes {export_dit.AXES}) ...", flush=True)
         model = load_qi21_dit(tdir, dtype=torch.bfloat16, n_layers=args.layers, io_fp32=True, rope_fp32=True)
@@ -248,8 +261,10 @@ def main():
 
     if args.torch_ref and not args.random_init:
         t0 = time.time()
-        res["torch_ref"] = torch_ref(model, args.ref_steps, export_dit.AXES)
+        res["ref_oracle"] = args.ref_oracle
+        res["torch_ref"] = torch_ref(model, args.ref_steps, export_dit.AXES, Path(args.ref_oracle))
         res["sec"]["torch_ref"] = time.time() - t0
+        dump()
 
     if not args.no_export:
         fg = free_gib()
@@ -277,7 +292,7 @@ def main():
         meta.license = "qwen-research"
         meta.model_description = (f"Qwen-Image-2.1 DiT ({tag}{', random weights' if args.random_init else ''}), "
                                   f"int8 per-block-{args.block} Linear weights (symmetric), bf16 compute, fp32 I/O, "
-                                  f"dynamic text/image axes. Source: {MODEL}@{REVISION[:7]}.")
+                                  "dynamic text/image axes. " + source_clause(args.transformer_dir)).strip()
         t0 = time.time()
         prog.save_asset(bundle, meta)
         res["sec"]["save"] = time.time() - t0
@@ -285,6 +300,7 @@ def main():
         print(f"[qexport] saved {bundle} ({res['aimodel_bytes'] / 2**30:.2f} GiB) in {res['sec']['save']:.0f}s; disk "
               f"free {free_gib():.1f} GiB; peak RSS {resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2**30:.1f} GiB",
               flush=True)
+        dump()
         del prog
         gc.collect()
 
@@ -293,18 +309,21 @@ def main():
         if fg < MIN_FREE_GIB:
             print(f"[aot] STOP: free {fg:.1f} GiB < {MIN_FREE_GIB} GiB", flush=True)
             return 2
-        res["sec"]["aot"] = aot_compile(bundle, aimodelc, efr=not args.no_efr)
-        res["aimodelc_bytes"] = dir_size(aimodelc)
+        try:
+            res["sec"]["aot"] = aot_compile(bundle, aimodelc, efr=not args.no_efr)
+            res["aimodelc_bytes"] = dir_size(aimodelc)
+        except subprocess.CalledProcessError as e:      # keep the torch-ref / export record in the JSON
+            res["aot_failed"] = dict(returncode=e.returncode, cmd=" ".join(map(str, e.cmd)))
+            print(f"[aot] FAILED rc={e.returncode}", flush=True)
 
-    ok = True
-    if args.check:
+    ok = "aot_failed" not in res
+    if args.check and ok:
         shapes = [tuple(int(v) for v in sh.split("x")) for sh in args.check_shapes.split(",")]
         res["check"] = asyncio.run(engine_check(aimodelc, model, shapes, args.seed + 2))
         ok = all(r["ok"] for r in res["check"])
     res["sec"]["total"] = time.time() - t_start
     res["peak_rss_gib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2**30
-    js = Path(args.json or HERE / "_work" / f"quant_export_{name}.json")
-    json.dump(res, open(js, "w"), indent=2)
+    dump()
     print(f"[qexport] total {res['sec']['total']:.0f}s; -> {js}", flush=True)
     return 0 if ok else 1
 

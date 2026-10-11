@@ -14,13 +14,19 @@
 3. ``--dit``: ``hidden[:, drop_idx:]`` -> the fp32 re-authored DiT (real weights) on oracle steps
    (default 0/20/39), teacher-forced, velocity vs the oracle's ``vel_s``. Bar: corr >= 0.999.
    The oracle's own ``prompt_embeds`` go through the same DiT as the reference row.
+   ``--transformer-dir`` picks the DiT weights (default: the pinned base snapshot's transformer/);
+   another checkpoint's oracle needs that checkpoint's DiT (Qwen-Image-2.1-Turbo: its own transformer/,
+   the text encoder is byte-identical to the base one).
 
+``--tokenizer-json`` picks the host tokenizer (default: ``qi21_tokenize``'s, the base snapshot's).
 Engine outputs are saved to ``_work/engine_text/<bundle stem>/hidden_L<L>.f32``.
 
 Run (coreai-models base venv, from conversion/qwenimage21/; the GPU lock, other sessions share it):
   python3 ~/code/coreai-kit/scripts/with-gpu-lock.py -- ~/code/coreai/coreai-models/.venv/bin/python \\
       engine_parity_encoder.py <name>.h16c.aimodelc --dit          # AOT bundle, SpecializationOptions.default()
   ... engine_parity_encoder.py <name>.aimodel --cpu-only           # isolation: the IR on cpu_only()
+  ... engine_parity_encoder.py <name>.h16c.aimodelc --oracle oracle/turbo256 --dit --dit-steps 0,4,7 \\
+      --transformer-dir <Turbo>/transformer --tokenizer-json <Turbo>/processor/tokenizer.json
 """
 from __future__ import annotations
 
@@ -96,6 +102,9 @@ def main():
     ap.add_argument("--pad-L", type=int, default=64, help="right-padded length for the pad-independence check (0 = skip)")
     ap.add_argument("--dit", action="store_true", help="downstream gate through the fp32 DiT (28 GB RAM)")
     ap.add_argument("--dit-steps", default="0,20,39")
+    ap.add_argument("--transformer-dir", default=None, help="downstream DiT weights (default: the pinned base "
+                                                             "snapshot's transformer/)")
+    ap.add_argument("--tokenizer-json", default=None, help="host tokenizer.json (default: the base snapshot's)")
     ap.add_argument("--json", default=None)
     args = ap.parse_args()
     bundle = Path(args.bundle)
@@ -106,7 +115,7 @@ def main():
     meta = json.load(open(od / "meta.json"))
     Lfull, drop = int(meta["Lfull"]), int(meta["drop_idx"])
     ref = np.fromfile(od / "enc_hidden_full.f32", "<f4").reshape(1, Lfull, -1)
-    tok = QI21Tokenizer()
+    tok = QI21Tokenizer(args.tokenizer_json)
     ids = tok.encode_np(meta["prompt"])
     assert ids.tolist() == [np.fromfile(od / "enc_input_ids.i32", "<i4").tolist()], "host ids != oracle ids"
     assert tok.drop_idx == drop, (tok.drop_idx, drop)
@@ -118,7 +127,7 @@ def main():
         feeds[f"L{args.pad_L}pad"] = padded
         feeds[f"L{args.pad_L}alt"] = alt
     print(f"[enc-parity] {bundle.name} ({unit}); oracle {od.name}: prompt {meta['prompt']!r} Lfull {Lfull} "
-          f"drop_idx {drop} (host == oracle ids, host drop_idx == meta)", flush=True)
+          f"drop_idx {drop} (host == oracle ids, host drop_idx == meta); tokenizer.json {tok.path}", flush=True)
 
     outs, secs, t_load = asyncio.run(run_engine(bundle, args.cpu_only, feeds))
     print(f"[enc-parity] load {t_load:.1f}s; " + "  ".join(f"{k}: fwd {v:.2f}s" for k, v in secs.items()), flush=True)
@@ -130,8 +139,8 @@ def main():
     h = outs[f"L{Lfull}"]
     s = per_token(h, ref)
     ok_enc = s["nan"] == 0 and not s["zero"] and min(s["corr"]) >= BAR_TOK_CORR
-    res = dict(bundle=str(bundle), unit=unit, oracle=str(od), Lfull=Lfull, drop_idx=drop, load_s=t_load,
-               fwd_s=secs, vs_oracle=s, ok_enc=ok_enc)
+    res = dict(bundle=str(bundle), unit=unit, oracle=str(od), tokenizer_json=str(tok.path), Lfull=Lfull,
+               drop_idx=drop, load_s=t_load, fwd_s=secs, vs_oracle=s, ok_enc=ok_enc)
     print(f"[enc-parity] engine vs oracle (L={Lfull}): {summary(s)}  {'PASS' if ok_enc else 'FAIL'}", flush=True)
     if s["nan"] == 0:
         print("  tok  id      corr      max|d|     |d|/|ref|", flush=True)
@@ -173,11 +182,12 @@ def main():
         from qi21_host import build_inputs
         from qi21_oracle import Oracle, parse_steps
         o = Oracle(od)
-        tdir = Path(hf_snapshot(MODEL, revision=REVISION)) / "transformer"
+        tdir = Path(args.transformer_dir or Path(hf_snapshot(MODEL, revision=REVISION)) / "transformer")
         axes = tuple(json.load(open(tdir / "config.json")).get("axes_dims_rope", (16, 56, 56)))
         t0 = time.time()
         dit = load_qi21_dit(tdir, dtype=torch.float32)
-        print(f"[enc-parity] DiT fp32 loaded in {time.time() - t0:.0f}s", flush=True)
+        res["dit_transformer_dir"] = str(tdir)
+        print(f"[enc-parity] DiT fp32 loaded in {time.time() - t0:.0f}s from {tdir}", flush=True)
         pe_engine = torch.from_numpy(h[:, drop:].copy())
         rows = []
         with torch.no_grad():

@@ -18,8 +18,16 @@ Gates (all must be bit-exact, max|d| = 0):
      a note when diffusers is not importable);
   3. ``scheduler.json`` reproduces ``qi21_sched.schedule`` (sigmas and timesteps) for 256² / 512² / 1024².
 
+``--turbo`` (Qwen-Image-2.1-Turbo): ``scheduler.json`` carries the checkpoint's fixed grid instead —
+``sample_sigmas`` (8), ``shift`` 1.0, ``use_dynamic_shifting`` false, ``shift_terminal`` null,
+``num_train_timesteps`` 1000, ``steps`` 8 — and gate 3 re-derives the schedule from those json values
+alone and compares it with ``qi21_sched.schedule_fixed`` (and with ``oracle/turbo<size>/sigmas.f32`` and
+``timesteps.f32`` where present) for 256² / 512² / 1024². The grid does not depend on the image size
+(no ``mu``); the three sizes are checked because the host is. The RoPE tables are the same as the base's.
+
 Run (from conversion/qwenimage21/; ``.venv-qi21`` runs gate 2 as well):
   ~/code/coreai/coreai-models/.venv-qi21/bin/python make_host_consts.py --out <staging>/host
+  ~/code/coreai/coreai-models/.venv-qi21t/bin/python make_host_consts.py --turbo --out <staging>/host
 """
 from __future__ import annotations
 
@@ -34,7 +42,8 @@ import torch
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from qi21_host import AXES_DIM, THETA, _axis_table, rope_positions, rope_tables  # noqa: E402
-from qi21_sched import SCHED_CFG, calculate_shift, schedule  # noqa: E402
+from qi21_sched import (SAMPLE_SIGMAS_TURBO, SCHED_CFG, SCHED_CFG_TURBO, calculate_shift, schedule,  # noqa: E402
+                        schedule_fixed)
 
 POS_MIN, POS_MAX = -1024, 8191          # QwenImage21Rope: neg_index -1024..-1, pos_index 0..8191
 STEPS = 40                              # the pipeline default (num_inference_steps)
@@ -121,17 +130,57 @@ def gate_scheduler(cfg: dict) -> bool:
     return ok
 
 
+def scheduler_json_turbo() -> dict:
+    c = SCHED_CFG_TURBO
+    return dict(sample_sigmas=list(SAMPLE_SIGMAS_TURBO), shift=c["shift"],
+                use_dynamic_shifting=c["use_dynamic_shifting"], shift_terminal=c["shift_terminal"],
+                num_train_timesteps=c["num_train_timesteps"], steps=len(SAMPLE_SIGMAS_TURBO))
+
+
+def gate_scheduler_fixed(cfg: dict) -> bool:
+    """Re-derive the fixed-grid schedule from the json text alone; compare with qi21_sched.schedule_fixed and,
+    where an oracle is present, with its recorded sigmas / timesteps."""
+    cfg = json.loads(json.dumps(cfg))                    # exactly what a host parses from scheduler.json
+    assert not cfg["use_dynamic_shifting"], cfg
+    s = np.asarray(cfg["sample_sigmas"], dtype=np.float64).astype(np.float32)
+    shift = cfg["shift"]
+    s = shift * s / (1 + (shift - 1) * s)
+    if cfg["shift_terminal"]:
+        one_minus = 1 - s
+        s = 1 - one_minus / (one_minus[-1] / (1 - cfg["shift_terminal"]))
+    s = s.astype(np.float32)
+    ts = (s * np.float32(cfg["num_train_timesteps"])).astype(np.float32)
+    ref_sig, ref_ts = schedule_fixed(SAMPLE_SIGMAS_TURBO, SCHED_CFG_TURBO)
+    ok = True
+    for size in (256, 512, 1024):
+        n = (size // 16) ** 2
+        same = (len(s) == cfg["steps"] and np.array_equal(s, ref_sig[:-1]) and np.array_equal(ts, ref_ts))
+        od = HERE / "oracle" / f"turbo{size}"
+        if (od / "sigmas.f32").exists():
+            o_sig, o_ts = np.fromfile(od / "sigmas.f32", "<f4"), np.fromfile(od / "timesteps.f32", "<f4")
+            same_o = np.array_equal(s, o_sig[:-1]) and o_sig[-1] == 0 and np.array_equal(ts, o_ts)
+            vs_o = f"; vs {od.name}/sigmas.f32 + timesteps.f32: {'bit-exact' if same_o else 'DIFFERS'}"
+            same = same and same_o
+        else:
+            vs_o = f"; {od.name} not present"
+        ok &= same
+        print(f"[gate 3] {size}²: N {n} (no mu) steps {cfg['steps']} sigma_1 {s[0]:.8f} sigma_{cfg['steps']} "
+              f"{s[-1]:.8f}: {'bit-exact' if same else 'DIFFERS'} vs qi21_sched.schedule_fixed{vs_o}", flush=True)
+    return ok
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True, help="the host/ dir of the staged repo")
+    ap.add_argument("--turbo", action="store_true", help="Qwen-Image-2.1-Turbo: fixed 8-step grid scheduler.json")
     args = ap.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     tables = build_tables()
     ok1 = gate_lookup(tables)
     ok2 = gate_diffusers(tables)
-    cfg = scheduler_json()
-    ok3 = gate_scheduler(cfg)
+    cfg = scheduler_json_turbo() if args.turbo else scheduler_json()
+    ok3 = gate_scheduler_fixed(cfg) if args.turbo else gate_scheduler(cfg)
     if not (ok1 and ok2 is not False and ok3):
         print("[host] FAIL — nothing written", flush=True)
         return 1

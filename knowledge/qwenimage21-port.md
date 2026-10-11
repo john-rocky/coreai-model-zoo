@@ -6,9 +6,11 @@ RGBA output. A Qwen3-VL-8B text encoder (17.5 GB; the vision tower is unused for
 conditions a 7B single-stream DiT (32 blocks, 14.2 GB). A 3D-causal VAE with 64 latent channels
 decodes to four channels, RGBA. The pipeline default is 40 FlowMatch Euler steps without CFG.
 
-Staged as [mlboydaisuke/RGBA-Image-2.1-CoreAI](https://huggingface.co/mlboydaisuke/RGBA-Image-2.1-CoreAI);
-the licence keeps "Qwen" out of the primary name. Card: [`models/rgba-image-2.1/`](../models/rgba-image-2.1/README.md).
-Scripts and the working state: `conversion/qwenimage21/` (`QWENIMAGE21_STATE.md`).
+Published as [mlboydaisuke/RGBA-Image-2.1-CoreAI](https://huggingface.co/mlboydaisuke/RGBA-Image-2.1-CoreAI)
+(revision `a9b5c94`, 2026-09-25); the licence keeps "Qwen" out of the primary name. Card:
+[`models/rgba-image-2.1/`](../models/rgba-image-2.1/README.md). Scripts and the working state:
+`conversion/qwenimage21/` (`QWENIMAGE21_STATE.md`). The distilled checkpoint Qwen-Image-2.1-Turbo
+runs on the same graphs: [§ Qwen-Image-2.1-Turbo](#qwen-image-21-turbo-rgba-image-21-turbo-2026-10-11).
 
 ## Architecture → export mapping (text-to-image, batch 1)
 
@@ -90,7 +92,7 @@ w16a32 costs compute, not bytes. The converter keeps the bf16 constants and cast
 the `.aimodel` is 14.10 GiB and the efr `.aimodelc` is also 14.10 GiB (no fp32 expansion). Per call:
 0.181 / 0.271 s at L = 32 / 128, against 0.062 / 0.149 s for r32. The encoder runs once per image.
 
-### Quantization: no-go on both graphs
+### Quantization (2026-09-25)
 
 - **Encoder int8 (w8a32, per_block 32).** The int8 weights alone break the same tokens on the CPU,
   before any export: apple token 14 corr 0.9946, empty-prompt token 20 0.656. The cancellation
@@ -113,6 +115,11 @@ the `.aimodel` is 14.10 GiB and the efr `.aimodelc` is also 14.10 GiB (no fp32 e
   `ANECCompile() FAILED` fallback per new shape), but the plain AOT of the full bf16 graph already
   died on the ANE region. Not pursued: Z-Image measured weight-only int8 at 2.4–2.7× slower on a
   compute-bound DiT.
+
+  **Corrected 2026-10-11.** The failure above is the 2-layer random-init probe's, and the probe
+  still fails the same way. The full 32-layer graph was not compiled on 09-25. With the Turbo
+  weights it compiles (301 s), passes every gate and runs at the bf16 speed, so the Z-Image figure
+  does not carry to this DiT ([§ Qwen-Image-2.1-Turbo](#qwen-image-21-turbo-rgba-image-21-turbo-2026-10-11)).
 
 Ship = bf16 / fp32 only: DiT bf16 14.23 GB (13.25 GiB), encoder w16a32 14.10 GiB, VAE fp32 0.94 GiB × 3.
 
@@ -213,11 +220,105 @@ The Hugging Face repo carries the tables as files and the whole contract as `hos
 Feed the VAE the sampler's latent unchanged: the graph unpacks and un-normalises. Un-normalising
 again on the host is the bug the Z-Image Swift port hit ([`zimage-port.md`](zimage-port.md)).
 
+## Qwen-Image-2.1-Turbo (RGBA-Image-2.1-Turbo, 2026-10-11)
+
+[`Qwen/Qwen-Image-2.1-Turbo`](https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo) (revision `d65dbc9`,
+32.5 GB, the same Qwen Research License) is a distilled checkpoint of the same pipeline. Staged as
+`mlboydaisuke/RGBA-Image-2.1-Turbo-CoreAI`; card
+[`models/rgba-image-2.1-turbo/`](../models/rgba-image-2.1-turbo/README.md). Same Mac and toolchain as
+above (M4 Max, macOS 27.0 26A428, coreai-build 3600.83.1, coreai-core 1.0.0b2).
+
+**What differs, read from the files** (safetensors headers and per-tensor sha256 against the base
+snapshot):
+
+| piece | Turbo vs base | what the port does |
+| --- | --- | --- |
+| DiT | 297 bf16 tensors, the same keys, shapes and dtypes; other values | `export_dit.py --transformer-dir <Turbo>/transformer --name qi21t_dit_full_bf16_dyn_iofp32 --exports-sub qwenimage21_turbo`: the same graph, 14.23 GB |
+| text encoder | 750 of 750 tensors byte-identical (one file instead of four shards) | no export: the base encoder bundle is the Turbo encoder |
+| VAE | 238 of 238 tensors are the bf16 round-to-nearest-even of the base fp32 ones (none is a truncation) | keeps the base fp32 bundles; the band they leave is below |
+| tokenizer | `tokenizer.json`: only `trim_offsets`, `add_prefix_space` and `use_regex` differ (offsets and decoder); vocabulary, merges and added tokens identical | ids equal the processor's on 8 prompts with either file; `drop_idx` 14 |
+| sampler | `model_index.json` carries `sample_sigmas` (8 values, 1.0 … 0.414568); `scheduler_config.json` has `use_dynamic_shifting` false, `shift` 1.0, `shift_terminal` null | `qi21_sched.schedule_fixed`; `pipeline_engine.py --turbo`; `make_host_consts.py --turbo` |
+
+diffusers main 85c9fa4 reads the grid from `pipe.config` (PR #14950) and passes it to
+`set_timesteps`, ignoring `num_inference_steps`; `μ` is computed and never read. On this grid the
+DiT input `t = timesteps[i] / 1000` equals `σᵢ` bit for bit at all 8 steps. On the base 40-step grid
+it does not (256²: σ − 1 ulp at steps 10 and 35), so a host computes `t` the pipeline's way
+(`qi21_sched.model_t`). Same noise and prompt embeddings, fp32 CPU: the Turbo 8-step final latent
+against the base 40-step one is corr 0.9773 (256²) and 0.9854 (512²), white-composited RGB PSNR
+21.75 / 23.35 dB. The distilled DiT lands on another image, not the base image with fewer steps.
+
+**Gates** (from `conversion/qwenimage21/`, base venv unless marked; `.venv-qi21t` = diffusers main
+85c9fa4, transformers 5.17.0, no coreai packages):
+
+| gate | command | result |
+| --- | --- | --- |
+| oracle (`.venv-qi21t`) | `capture_oracle.py --snapshot <Turbo> --model-id Qwen/Qwen-Image-2.1-Turbo --size {256,512,1024} --steps 8 --tag turbo{256,512,1024}` | 1.99 / 5.65 / 23.60 s per fp32 CPU forward; `sigmas.f32` = `sample_sigmas` + [0] bit-exact |
+| sampler | `qi21_sched.py --turbo --oracle oracle/turbo{256,512,1024} --snapshot <Turbo>` | sigmas, timesteps, 8 Euler steps bit-exact at all three sizes; base mode 40/40 unchanged |
+| tokenizer (`.venv-qi21t`) | `gate_tokenize_hf.py --snapshot <Turbo> --oracle oracle/turbo256` | Lfull 32 / 23 / 47 identical to the Turbo processor, `drop_idx` 14 |
+| host constants (`.venv-qi21t`) | `make_host_consts.py --turbo --out <repo>/host` | tables and the fixed grid bit-exact; the 6 RoPE files byte-identical to RGBA-Image-2.1's `host/` |
+| DiT re-author, fp32 CPU | `parity_dit_oracle.py --transformer-dir <Turbo>/transformer --oracle oracle/turbo256 --steps all --controls 0,4,7` | 8/8 min corr 0.999999999982, max\|Δ\|/max\|ref\| 3.22e-5; 9/9 controls red (512²: 0.999999999997) |
+| DiT bundle, efr, GPU | `engine_parity_dit.py <aimodelc> --oracle oracle/turbo{256,512,1024} --steps all` | 8/8, min corr 0.999971 / 0.999940 / 0.999977, NaN 0 |
+| encoder bundle | `engine_parity_encoder.py <aimodelc> --oracle oracle/turbo256 --dit --dit-steps 0,4,7 --transformer-dir <Turbo>/transformer --tokenizer-json <Turbo>/processor/tokenizer.json` | min token corr 0.999999998629; Turbo DiT downstream corr ≥ 0.999999999996 |
+| VAE bundles | `engine_parity_vae.py`, `parity_vae_torch.py --snapshot <dir> [--fp64]`, `vae_band.py` | against a fp32 decode of their own weights: max\|Δ\| 2.995e-5 / 3.184e-5 / 4.221e-5, channel corr ≥ 0.999999956 |
+| end to end | `pipeline_engine.py --turbo --oracle oracle/turbo{256,512,1024}` (int8: `--dit <int8 aimodelc>`) | white RGB 43.79 / 42.45 / 42.50 dB, alpha 1/255, final corr 0.999961 / 0.999800 / 0.999926; int8 41.76 / 49.28 / 39.32 dB |
+
+At the engine bar (corr 0.999) two of the three DiT controls pass after step 0: text modulated by
+`t` and bidirectional text sit at corr 0.99968–0.99996 at steps 4 and 7. The fp32 gate (9/9 red at
+its bar) and step 0 of the engine gate certify the structure; engine corr at late steps does not.
+
+**The VAE band.** The Turbo oracle decodes with the bf16 copy (oracle = torch fp32 with the Turbo
+file, bit-exact). The fp32 bundles therefore sit max|Δ| 7.40e-2 / 1.056e-1 / 1.047e-1 from it at
+256² / 512² / 1024² (uint8 PSNR 56.95 / 58.95 / 58.15 dB, 10–14 levels on one channel, 1 on alpha),
+7–10× the 1e-2 VAE bar. The bundle is judged against a fp32 decode of the weights it holds, and the
+band is reported beside it. A float64 decode sets the floor: CPU torch fp32 is 2.4e-5–4.8e-5 from
+it and the bundle 1.9e-5–3.6e-5, so a 1e-5-class bar copied from another input can fail the
+reference itself. Alpha is near-constant on an opaque image (0.976–1.000), and its corr falls to
+0.966–0.991 under the band: report alpha in levels.
+
+**Speed levers** (`bench_dit.py` and `ab_dit.py`, measurement window held; the speed ladder of the
+lane). The ship is the bf16 dynamic efr bundle: 0.341 / 1.097 / 4.721 s per forward at 256² /
+512² / 1024² (L 40), 2.7 / 8.8 / 37.8 s for 8 steps.
+
+| lever | result |
+| --- | --- |
+| int8 Linear weights (per block 32, bf16 scales and compute) | the full 32-layer efr compile passes (301 s, `.aimodel` 7.04 GiB, `.aimodelc` 20.30 GiB, 232 `blockwise_shift_scale` ops); 8/8 at all sizes; s/forward −0.02 / −0.02 / −0.09 % against bf16 in the same process. The 2-layer random-init probe still fails with `operand #0 does not dominate this use` / `Pass failed: MPSMemrefAllocFusion`; which property triggers it is not isolated |
+| static image axis (N 4096, text axis dynamic) | −0.50 % at L 40, +0.58 % at L 18 against the dynamic efr, both resolved, both inside 3 % |
+| `--preferred-compute neural-engine` | 0 ANE regions, no error printed; runs on the GPU bit-identical to the gpu compile (max\|Δ\| 0), +0.01 / 0.00 / +0.72 % |
+| plain h16c AOT (no efr) | compiles in 28 s (7.5 s with a static image axis) at half the size, then 192 `ANE I/O op can only do F16 MemRef <-> F32 Tensor cast` warnings and `ANERegion.mm:414 … Code=-19` at the initial call, dynamic and static alike |
+| JIT | `Code=-19` on 2026-09-25 (same graph, base weights); not re-run |
+| text K/V once per image | the 32 text tokens between L 8 and L 40 cost 1.59 % of a forward at 512² and 0.51 % at 1024² |
+| chunking | not applicable: one forward per step |
+
+**Traps of this lane:**
+
+- The 09-25 exports directory was archived read-only. `export_dit.py` and `quant_export_dit.py`
+  take `--exports-sub` so another checkpoint's bundles land elsewhere (`qwenimage21_turbo`).
+- Before 2026-10-11, `quant_export_dit.py` parsed `--transformer-dir` without using it (the full
+  export would have quantized the base weights), and `--torch-ref` read a hard-coded `oracle/256`.
+  Both fixed (`--ref-oracle`).
+- The exporters wrote the `--transformer-dir` path into `metadata.json` verbatim, a local path; since
+  2026-10-11 they write `Source: <repo id>@<rev7>` for a Hugging Face snapshot and no path otherwise.
+  `main.mlirb` carries MLIR source locations (absolute paths of the exporting machine; the 09-25 files
+  too). The published files are `strip_bundle.py` copies (coreai-torch `strip_debug_info`): no path
+  left, and all six bundles give the unstripped outputs bit for bit.
+- The first Python load of a new `.aimodelc` adds a compile-cache entry about its size, even when
+  the run then aborts: 27 GB (bf16 efr), 20 GB (int8 efr), 13 GB (plain AOT). The entry is named
+  by the `.aimodelc`'s `main.hash` (the sha256 of its `main-h16c.mlirb`). Budget disk per load.
+- `/usr/bin/time -l` "maximum resident set size" counts the mapped weight pages (58.3 GB for a
+  1024² run); "peak memory footprint" is the RAM a run needs (17.8–18.2 GB).
+- Comparing two DiT forms on a free prompt needs a nudge control. Moving the prompt embeddings by
+  1.25e-5 relative (the encoder bundle's own gap) moves a sticker by 29.03 dB (512²) and 32.08 dB
+  (1024²); int8 against bf16 is 34.42 / 28.99 dB. On a sticker, 78–88 % of the pixels whose alpha
+  moves by more than 2 levels lie within 3 px of the alpha-128 contour, so alpha max|Δ| (227–255)
+  measures the edge. The bf16 pipeline itself repeats bit for bit across processes.
+- Load and initial-call seconds vary between processes on a shared Mac (DiT load 1.9–43.3 s,
+  encoder 2.5–55.8 s); quote them from a measurement window only.
+
 ## Follow-ups
 
 - **Swift host.** Does `GraphModel(computeUnits: .gpu)` run the DiT `.aimodel` just-in-time, or does
-  it hit the same ANE region (then the app ships or builds the efr `.aimodelc`)? Untested. The
-  CoreAIImageGen app has no Qwen-Image-2.1 pipeline yet.
+  it hit the same ANE region (then the app ships or builds the efr `.aimodelc`)? Untested, for the
+  base and the Turbo DiT alike. The CoreAIImageGen app has no Qwen-Image-2.1 pipeline yet.
 - **iPhone** is out of scope for this port.
 - **CFG.** The pipeline default is no CFG (`true_cfg_scale` 1.0). The graph runs one conditional
   forward per step; a negative-prompt branch has not been gated.

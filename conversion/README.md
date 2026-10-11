@@ -575,6 +575,14 @@ Apple's repo; each recipe names the script it runs.
   crashes on the full DiT in an ANE region. `make_host_consts.py` writes the RoPE tables and the
   scheduler constants a Swift host needs. See [`qwenimage21/README.md`](qwenimage21/README.md) and
   [`../models/rgba-image-2.1/README.md`](../models/rgba-image-2.1/README.md).
+  **RGBA-Image-2.1-Turbo** (the distilled 8-step checkpoint `Qwen/Qwen-Image-2.1-Turbo`) runs on the same
+  scripts: `qwenimage21/export_dit.py --transformer-dir <Turbo>/transformer --name qi21t_dit_full_bf16_dyn_iofp32
+  --exports-sub qwenimage21_turbo`, and `qwenimage21/quant_export_dit.py` with the same `--transformer-dir`
+  and `--exports-sub`, `--name qi21t_dit_full_int8lin_dyn_iofp32` and `--aot` for the int8 DiT (the same speed
+  as bf16). The encoder and VAE bundles are reused: the Turbo text encoder is byte-identical, its VAE a bf16
+  copy of the fp32 one. `--turbo` selects the checkpoint's fixed 8-step grid in `qi21_sched.py`,
+  `make_host_consts.py` and `pipeline_engine.py`.
+  See [`../models/rgba-image-2.1-turbo/README.md`](../models/rgba-image-2.1-turbo/README.md).
 - **GLiNER2.5-Decide (zero-shot text classification, Fastino; [`export_gliner25_decide.py`](export_gliner25_decide.py) and [`gliner25_decide/`](gliner25_decide/)):
   `export_gliner25_decide.py --fixtures <fixture json …> -S 256|512 --mmax 32 --dtype float16 --poison`** — the
   classification path only, re-authored from the safetensors: transformers `DebertaV2Model` (390 encoder tensors,

@@ -27,6 +27,10 @@ this oracle proves.
 Run (qi21 venv, from conversion/qwenimage21/):
   python capture_oracle.py --size 256 --steps 40
   python capture_oracle.py --size 512 --steps 40
+Qwen-Image-2.1-Turbo (8-step grid from model_index.json `sample_sigmas`; needs diffusers >= 85c9fa4 and
+--steps 8, the grid's length):
+  python capture_oracle.py --snapshot <Turbo snapshot dir> --model-id Qwen/Qwen-Image-2.1-Turbo \\
+      --size 256 --steps 8 --tag turbo256
 """
 import argparse
 import json
@@ -63,7 +67,10 @@ def main():
                     help="run the reference with the prefix KV cache off (must match)")
     ap.add_argument("--threads", type=int, default=0)
     ap.add_argument("--snapshot", default=None,
-                    help="pipeline directory override (smoke tests on a tiny random pipeline)")
+                    help="pipeline directory override (smoke tests on a tiny random pipeline, or another "
+                         "checkpoint of the same architecture, e.g. Qwen/Qwen-Image-2.1-Turbo)")
+    ap.add_argument("--model-id", default=MODEL,
+                    help="HF id written to meta.json (the repo --snapshot came from; default %(default)s)")
     args = ap.parse_args()
     if args.threads:
         torch.set_num_threads(args.threads)
@@ -202,7 +209,14 @@ def main():
     sc = pipe.scheduler.config
     mu = calculate_shift(N, sc.get("base_image_seq_len", 256), sc.get("max_image_seq_len", 4096),
                          sc.get("base_shift", 0.5), sc.get("max_shift", 1.15))
-    meta = dict(model=MODEL, snapshot=snap.name, size=args.size, lat=lat, N=N, steps=args.steps,
+    # diffusers >= PR #14950 (85c9fa4): a checkpoint may carry its own sampling grid in model_index.json
+    # (`sample_sigmas`, Qwen-Image-2.1-Turbo: 8 values); the pipeline then ignores num_inference_steps.
+    sample_sigmas = pipe.config.get("sample_sigmas") if hasattr(pipe, "config") else None
+    meta = dict(model=args.model_id, snapshot=snap.name, size=args.size, lat=lat, N=N, steps=args.steps,
+                sample_sigmas=[float(x) for x in sample_sigmas] if sample_sigmas else None,
+                scheduler_config={k: sc.get(k) for k in ("shift", "use_dynamic_shifting", "shift_terminal",
+                                                         "base_shift", "max_shift", "base_image_seq_len",
+                                                         "max_image_seq_len", "time_shift_type")},
                 seed=args.seed, prompt=args.prompt, kv_cache=not args.no_kv_cache,
                 Lfull=Lfull, drop_idx=drop, L=L, img_shapes=[list(x) for x in rec[0]["img_shapes"][0]],
                 mu=float(mu), t=[round(r["t"], 7) for r in rec],
@@ -216,6 +230,7 @@ def main():
     json.dump(meta, open(out / "meta.json", "w"), indent=2)
     print(f"[oracle] meta: {json.dumps({k: v for k, v in meta.items() if k not in ('t', 'sigmas', 'timesteps', 'modes')})}",
           flush=True)
+    print(f"[oracle] sigmas {meta['sigmas']}\n[oracle] timesteps {meta['timesteps']}", flush=True)
     print(f"[oracle] saved to {out}/", flush=True)
 
 

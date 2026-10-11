@@ -30,8 +30,8 @@ tokens, outside this DiT's 64–4096-token axis.
 | `config.json` | the source's `transformer/config.json`, unchanged | |
 | `LICENSE`, `NOTICE` | the Qwen Research License and the change notice | |
 
-No quantized variant ships. The int8 DiT does not compile on the one GPU path that works (next
-paragraph). int8 weights break the text encoder's `<|im_start|>` tokens (Lessons, 2). Compiled, the int8
+No quantized variant ships. On the one GPU path that works (next paragraph), the 2-layer int8 DiT
+probe does not compile; the full int8 graph does (2026-10-11, RGBA-Image-2.1-Turbo). int8 weights break the text encoder's `<|im_start|>` tokens (Lessons, 2). Compiled, the int8
 encoder is also 34.32 GiB; this one is 14.10 GiB.
 
 **Compile before you run.** On macOS 27.0 (26A428) the DiT crashes in the Python runtime when its
@@ -96,13 +96,15 @@ natively, so it fits images that need an alpha channel.
 
 | | params | sampler | time @1024 | precision |
 | --- | --- | --- | --- | --- |
-| **FLUX.2 klein** | 4B | 4 steps, guidance-distilled (no CFG) | ~17 s | int4 |
+| **FLUX.2 klein** | 4B | 4 steps, guidance-distilled (no CFG) | ~11 s | fp16 or int8 |
 | **Z-Image-Turbo** | 6B | 8 steps + CFG (16 forwards) | ~70 s | bf16, near-lossless |
 | **GLM-Image** | 16B (9B AR + 7B DiT) | AR prior + 20-step DiT | ~208 s | int8 |
 | **RGBA-Image-2.1** | 7B | 40 steps, no CFG | ~190 s | bf16 |
+| **RGBA-Image-2.1-Turbo** | 7B | 8 steps, distilled, no CFG | ~38 s | bf16 or int8 |
 
-Times are the ones each card reports, on an M4 Max. For RGBA-Image-2.1 it is 40 DiT steps at the
-warm median of 4.757 s per forward. It leaves out the encoder, the VAE and loading.
+Times are the ones each card reports, on an M4 Max. For the two RGBA-Image models they are the DiT
+steps at the warm median per forward: 40 × 4.757 s and 8 × 4.721 s. They leave out the encoder, the
+VAE and loading.
 
 ## Graph contracts
 
@@ -191,7 +193,8 @@ against the same fp32 reference:
    Engine region inside the 32-block bf16 DiT, and the ANE inference fails (`Code=-19`). It fails
    under JIT and under a plain AOT compile; the 2-layer probe never triggered it. The GPU path that
    runs is AOT with `--expect-frequent-reshapes`: 2 min 9 s to compile, 27 GB, MPSGraph delegates
-   only. The int8 DiT does not compile with that flag (`Pass failed: MPSMemrefAllocFusion`).
+   only. The 2-layer int8 DiT probe does not compile with that flag (`Pass failed: MPSMemrefAllocFusion`);
+   the full int8 graph does (2026-10-11, RGBA-Image-2.1-Turbo).
 2. **The encoder's `<|im_start|>` tokens need fp32 compute, not fp32 storage.** Token 14, the `<|im_start|>`
    that opens the user turn, is the first token the DiT reads. Its residual grows to |h| ≈ 9,100 in
    layers 17–34, and the last two layers cancel it to ≈ 100. bf16 cannot hold that cancellation:
