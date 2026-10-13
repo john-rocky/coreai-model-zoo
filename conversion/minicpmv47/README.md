@@ -28,6 +28,7 @@ in-graph.
 | `gate_vision.py` | G3: one tower form against the oracle's rows on P1–P4 (per-token cos), cold / warm ms — run inside a quiet window |
 | `gate_e2e.py` | G4: image file → tower → decoder → answer on P1–P4, judged like G2 |
 | `timing_decoder.py` | decoder ms per call (one process per bundle, or `--interleave` in one process) and the towers interleaved, with the window record |
+| `strip_stage.py` | run before staging the upload: rebuilds each ship bundle's `.aimodel` with `strip_debug_info` (coreai-torch writes the exporting machine's source paths into `main.mlirb`), checks op counts, `coreai-build inspect` and a byte scan for local paths, and writes `<lane>/stage_hf/gpu-pipelined/<bundle>/` + `<lane>/r6/strip_<bundle>.json` |
 
 ## Environment
 
