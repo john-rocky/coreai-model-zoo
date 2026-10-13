@@ -1,0 +1,427 @@
+{
+ "schema": "minicpmv47-fixtures/1",
+ "what": "the five prompts every MiniCPM-V-4.7-1B gate of this port runs (P0 text, P1-P4 one 448x448 image each) and the fp32 transformers 5.19.0 reference answers they are judged against",
+ "images_in_this_repository": false,
+ "images_note": "the images are not in this repository: conversion/minicpmv47/make_fixtures.py downloads the two NASA photographs from images-assets.nasa.gov and draws the synthetic one, then resizes each to 448x448 (Pillow BICUBIC); the sha256 below pin every file",
+ "licenses": {
+  "saturn_v": "NASA, public domain (NASA media usage guidelines); KSC-69P-372",
+  "earth": "NASA, public domain (NASA media usage guidelines); AS17-148-22727",
+  "synthetic": "drawn by conversion/minicpmv47/make_fixtures.py (Pillow primitives, seed 47, no font file)"
+ },
+ "prompt_images": {
+  "P1": "earth",
+  "P2": "saturn_v",
+  "P3": "synthetic",
+  "P4": "earth"
+ },
+ "source": {
+  "hf_id": "openbmb/MiniCPM-V-4.7-1B",
+  "revision": "984a89aafcd5160164f4f0d04b4be0f4eec03cb8",
+  "model_safetensors_sha256": "8c4921ac83182c85190ad10c3aeb118d51e385d2d98ec13b88b514bbf6cac002"
+ },
+ "oracle": {
+  "class": "MiniCPMV4_7ForConditionalGeneration",
+  "dtype": "torch.float32",
+  "device": "cpu",
+  "threads": 1,
+  "interop_threads": 1,
+  "attn_implementation": "eager",
+  "processor": "MiniCPMV4_7Processor",
+  "image_processor": "MiniCPMV4_6ImageProcessor"
+ },
+ "oracle_versions": {
+  "python": "3.12.13",
+  "torch": "2.14.1",
+  "torchvision": "0.29.1",
+  "transformers": "5.19.0",
+  "tokenizers": "0.23.3",
+  "numpy": "2.5.4",
+  "pillow": "12.3.0",
+  "platform": "macOS-27.0-arm64-arm-64bit"
+ },
+ "constants": {
+  "vocab": 248094,
+  "image_pad": 248056,
+  "image_start": 248078,
+  "image_end": 248079,
+  "stop_ids": [
+   248044,
+   248046
+  ],
+  "p0_new_tokens": 48,
+  "gen_new_tokens": 32
+ },
+ "knife_edge_rule": "a free-run's first divergence passes only where the oracle's softmax top-2 gap there is < 0.1",
+ "prompts": {
+  "P0": {
+   "kind": "text",
+   "system": null,
+   "question": "Write one sentence about the ocean.",
+   "prompt": "<|im_start|>user\nWrite one sentence about the ocean.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "prompt_tokens": 19,
+   "oracle_generated_ids": [
+    760,
+    17415,
+    369,
+    264,
+    12401,
+    11,
+    5214,
+    6105,
+    14120,
+    421,
+    20182,
+    1004,
+    11247,
+    579,
+    9682,
+    321,
+    9931,
+    1674,
+    26706,
+    27657,
+    2199,
+    13,
+    248046,
+    248046,
+    198,
+    248046,
+    198,
+    248046,
+    198,
+    248068,
+    198,
+    77264,
+    11,
+    279,
+    1156,
+    6587,
+    264,
+    3074,
+    11316,
+    883,
+    279,
+    17415,
+    13,
+    6558,
+    728,
+    1683,
+    314,
+    264
+   ],
+   "oracle_generated_text": "The ocean is a vast, living blue giant that shapes our planet's climate and sustains countless marine life.<|im_end|><|im_end|>\n<|im_end|>\n<|im_end|>\n<think>\nHmm, the user wants a single sentence about the ocean. Let me think of a",
+   "stop_tokens_honoured": false,
+   "first_stop_token_index": 22,
+   "oracle_knife_edge_steps": [
+    8,
+    25,
+    37,
+    46
+   ],
+   "oracle_knife_edge_gaps": [
+    0.0552753445956925,
+    0.07774511287748959,
+    0.09575093573520482,
+    0.06459804368431654
+   ]
+  },
+  "P1": {
+   "kind": "image",
+   "image": "earth.448.png",
+   "image_sha256": "bc9564fd3868f113a949a34cd46b44ad1970fd1141672988cf1ac6362e5faa98",
+   "system": null,
+   "question": "What is in this image?",
+   "prompt": "<|im_start|>user\n<|image_pad|>\nWhat is in this image?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "expanded_prompt": "<|im_start|>user\n<image_id>0</image_id><image><|image_pad|>x64</image>\nWhat is in this image?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "processor_kwargs": {
+    "max_slice_nums": 1,
+    "return_tensors": "pt"
+   },
+   "target_sizes": [
+    [
+     32,
+     32
+    ]
+   ],
+   "image_pad_count": 64,
+   "image_start_index": 6,
+   "image_end_index": 71,
+   "rope_shift_start": 73,
+   "rope_shift_amount": 58,
+   "canvas_origin": 6,
+   "prompt_tokens": 88,
+   "oracle_generated_ids": [
+    1919,
+    2099,
+    4774,
+    2972,
+    42373,
+    332,
+    1892,
+    11352,
+    11,
+    264,
+    40630,
+    11,
+    3160,
+    5072,
+    1593,
+    314,
+    279,
+    11247,
+    494,
+    3433,
+    13,
+    271,
+    1536,
+    4275,
+    9155,
+    25,
+    198,
+    12,
+    561,
+    6105,
+    51393,
+    17661
+   ],
+   "oracle_answer": "This image shows **Earth** — specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+   "oracle_knife_edge_steps": [],
+   "oracle_knife_edge_gaps": []
+  },
+  "P2": {
+   "kind": "image",
+   "image": "saturn_v.448.png",
+   "image_sha256": "0033a011db0c12fb7979ffc675cf00e3dd261220066b10e9453da0b1710bd22e",
+   "system": null,
+   "question": "Describe this image in one sentence.",
+   "prompt": "<|im_start|>user\n<|image_pad|>\nDescribe this image in one sentence.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "expanded_prompt": "<|im_start|>user\n<image_id>0</image_id><image><|image_pad|>x64</image>\nDescribe this image in one sentence.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "processor_kwargs": {
+    "max_slice_nums": 1,
+    "return_tensors": "pt"
+   },
+   "target_sizes": [
+    [
+     32,
+     32
+    ]
+   ],
+   "image_pad_count": 64,
+   "image_start_index": 6,
+   "image_end_index": 71,
+   "rope_shift_start": 73,
+   "rope_shift_amount": 58,
+   "canvas_origin": 6,
+   "prompt_tokens": 89,
+   "oracle_generated_ids": [
+    2014,
+    39438,
+    3565,
+    9485,
+    15392,
+    6345,
+    38823,
+    264,
+    47503,
+    629,
+    23542,
+    10932,
+    383,
+    1141,
+    6830,
+    10694,
+    11,
+    22152,
+    539,
+    90743,
+    24080,
+    321,
+    50017,
+    4965,
+    1172,
+    264,
+    71049,
+    12515,
+    13,
+    248046
+   ],
+   "oracle_answer": "An aerial black-and-white photo captures a Saturn V rocket standing on its launch pad, surrounded by barren terrain and runway lines under a cloudy sky.",
+   "oracle_knife_edge_steps": [
+    17,
+    22,
+    23
+   ],
+   "oracle_knife_edge_gaps": [
+    0.09115260550418613,
+    0.05123604269498,
+    0.0034279896818265043
+   ]
+  },
+  "P3": {
+   "kind": "image",
+   "image": "synthetic.448.png",
+   "image_sha256": "8e0eb03708da5fafa507a7fbfbd04b3bec25075cb67239cc804a6e4048e7c25d",
+   "system": null,
+   "question": "What text is written in the image?",
+   "prompt": "<|im_start|>user\n<|image_pad|>\nWhat text is written in the image?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "expanded_prompt": "<|im_start|>user\n<image_id>0</image_id><image><|image_pad|>x64</image>\nWhat text is written in the image?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "processor_kwargs": {
+    "max_slice_nums": 1,
+    "return_tensors": "pt"
+   },
+   "target_sizes": [
+    [
+     32,
+     32
+    ]
+   ],
+   "image_pad_count": 64,
+   "image_start_index": 6,
+   "image_end_index": 71,
+   "rope_shift_start": 73,
+   "rope_shift_amount": 58,
+   "canvas_origin": 6,
+   "prompt_tokens": 90,
+   "oracle_generated_ids": [
+    47824,
+    248046
+   ],
+   "oracle_answer": "EXIT",
+   "oracle_knife_edge_steps": [],
+   "oracle_knife_edge_gaps": []
+  },
+  "P4": {
+   "kind": "image",
+   "image": "earth.448.png",
+   "image_sha256": "bc9564fd3868f113a949a34cd46b44ad1970fd1141672988cf1ac6362e5faa98",
+   "system": "You are a concise assistant.",
+   "question": "What colors do you see?",
+   "prompt": "<|im_start|>system\nYou are a concise assistant.<|im_end|>\n<|im_start|>user\n<|image_pad|>\nWhat colors do you see?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "expanded_prompt": "<|im_start|>system\nYou are a concise assistant.<|im_end|>\n<|im_start|>user\n<image_id>0</image_id><image><|image_pad|>x64</image>\nWhat colors do you see?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+   "processor_kwargs": {
+    "max_slice_nums": 1,
+    "return_tensors": "pt"
+   },
+   "target_sizes": [
+    [
+     32,
+     32
+    ]
+   ],
+   "image_pad_count": 64,
+   "image_start_index": 17,
+   "image_end_index": 82,
+   "rope_shift_start": 84,
+   "rope_shift_amount": 58,
+   "canvas_origin": 17,
+   "prompt_tokens": 99,
+   "oracle_generated_ids": [
+    21765,
+    506,
+    411,
+    8964,
+    2099,
+    11,
+    353,
+    1436,
+    264,
+    8807,
+    7792,
+    314,
+    7736,
+    25,
+    271,
+    12,
+    2972,
+    10025,
+    92217,
+    3554,
+    1199,
+    505,
+    303,
+    279,
+    51393,
+    1892,
+    5365,
+    43285,
+    321,
+    28606,
+    55945,
+    1332
+   ],
+   "oracle_answer": "Looking at this Earth image, I see a rich variety of colors:\n\n- **Blue**: Abundant in the oceans — deep navy and lighter cyan where",
+   "oracle_knife_edge_steps": [
+    30
+   ],
+   "oracle_knife_edge_gaps": [
+    0.060344524426094226
+   ]
+  }
+ },
+ "images": {
+  "synthetic": {
+   "source": "drawn here (Pillow primitives, seed 47; no font file)",
+   "file": "synthetic.png",
+   "sha256": "334dc13626812802e1049ad53be31da85f21e35ad725d9d1c6bc96152a791bb4",
+   "448": {
+    "source_size": [
+     800,
+     600
+    ],
+    "file": "synthetic.448.png",
+    "sha256": "8e0eb03708da5fafa507a7fbfbd04b3bec25075cb67239cc804a6e4048e7c25d"
+   }
+  },
+  "saturn_v": {
+   "source": "NASA / public domain",
+   "search_url": "https://images-api.nasa.gov/search?q=saturn%20v%20rollout&media_type=image",
+   "href": "https://images-assets.nasa.gov/image/KSC-69P-372/KSC-69P-372~medium.jpg",
+   "nasa_id": "KSC-69P-372",
+   "title": "KSC-69P-372",
+   "center": "KSC",
+   "date_created": "1969-05-20T00:00:00Z",
+   "description": "KENNEDY SPACE CENTER, FLA. -  Rollout of Apollo 11 Saturn V space vehicle from the Vehicle Assembly Building's High Bay #1 to Launch Complex 39A.",
+   "file": "saturn_v.orig.jpg",
+   "sha256": "3670c3ecfd4ae1d21ec67054f740fbd8648adf2cb4855c06e24e02642d7ac4f8",
+   "448": {
+    "source_size": [
+     1004,
+     1280
+    ],
+    "file": "saturn_v.448.png",
+    "sha256": "0033a011db0c12fb7979ffc675cf00e3dd261220066b10e9453da0b1710bd22e"
+   }
+  },
+  "earth": {
+   "source": "NASA / public domain",
+   "search_url": "https://images-api.nasa.gov/search?q=as17-148-22727&media_type=image",
+   "href": "https://images-assets.nasa.gov/image/as17-148-22727/as17-148-22727~medium.jpg",
+   "nasa_id": "as17-148-22727",
+   "title": "View of the Earth seen by the Apollo 17 crew traveling toward the moon",
+   "center": "JSC",
+   "date_created": "1972-12-07T00:00:00Z",
+   "description": "AS17-148-22727 (7 Dec. 1972) --- This view of Earth was seen by the Apollo 17 crew as they traveled toward the moon on their NASA lunar landing mission. This outstanding trans-lunar coast photograph extends from the Mediterranean Sea area to the Antarctica south polar ice cap. This is the first time the Apollo trajectory made it possible to photograph the south polar ice cap. Note the heavy cloud cover in the Southern Hemisphere. Almost the entire coastline of Africa is clearly visible. The Arabian Peninsula can be seen at the northeastern edge of Africa. The large island off the coast of Africa is the Malagasy Republic. The Asian mainland is on the horizon toward the northeast. The Apollo 17 crew consisted of astronauts Eugene A. Cernan, mission commander; Ronald E. Evans, command module pilot; and Harrison H. Schmitt, lunar module pilot. While astronauts Cernan and Schmitt descended in the Lunar Module (LM) to explore the moon, astronaut Evans remained with the Command and Service Modules (CSM) in lunar orbit.",
+   "file": "earth.orig.jpg",
+   "sha256": "a68408d781f529434e210cf261c43fb529754659e300bbc9385a71441ecc0a83",
+   "448": {
+    "source_size": [
+     1280,
+     1280
+    ],
+    "file": "earth.448.png",
+    "sha256": "bc9564fd3868f113a949a34cd46b44ad1970fd1141672988cf1ac6362e5faa98"
+   }
+  }
+ },
+ "fixtures_made": {
+  "generated_at": "2026-10-13T06:15:54+00:00",
+  "pillow": "12.3.0",
+  "side": 448,
+  "resample": "PIL BICUBIC"
+ },
+ "staged_from": {
+  "fixtures": "lane oracle/fixtures/fixtures.json",
+  "fixtures_sha256": "378b35a283623fc0abccd8d38d959a136e8ce81840d0f9e41081a82790b44763",
+  "prompts": "lane oracle/oracle.json prompts, oracle/margins.json prompts, r3/gate_decoder_int8hu.json G2"
+ }
+}

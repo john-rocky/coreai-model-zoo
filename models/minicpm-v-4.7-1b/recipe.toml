@@ -1,0 +1,97 @@
+# Recipe for minicpm-v-4.7-1b — the configuration that produced each staged bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# An answer about an image needs the decoder and one tower. The decoder is this port's module
+# (conversion/minicpmv47/minicpmv47_vl_pipelined.py: ids in, the tower rows and rope_shift_start / amount as static
+# inputs, canvas M-RoPE in the graph) on the overlay's Qwen3.5 hybrid; the tower is re-authored from the checkpoint
+# (conversion/minicpmv47/minicpmv47_vision.py, 448x448 baked). conversion/minicpmv47/README.md lists the oracle, the
+# exports, the AOT compiles and the gates in order. Each staged .aimodel is its export with the MLIR debug locations
+# stripped (coreai-torch 0.4.1 strip_debug_info: AIModelAsset.load -> strip_debug_info(program) -> program.save_asset
+# with the source's metadata, the method of conversion/d1_omni/strip_ship.py); the export rebuilds the same ops and
+# weights, and the notes give both sha256.
+
+["minicpm-v-4.7-1b"]
+script = "minicpmv47/export_decoder.py"
+args = ["int8hu"]
+card = "README.md"
+hf_repo = "mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI"
+source_hf_id = "openbmb/MiniCPM-V-4.7-1B"
+source_revision = "984a89aafcd5160164f4f0d04b4be0f4eec03cb8"
+bundle = "gpu-pipelined/minicpmv47_vlm_decode_int8hu"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch", "apps/coreai-pipelined-static-inputs.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+needs = [
+  "The source snapshot at 984a89aafcd5160164f4f0d04b4be0f4eec03cb8 in the Hugging Face cache (the script sets",
+  "HF_HUB_OFFLINE=1 and reads model.safetensors directly; the overlay's transformers 4.57.6 has no minicpmv4_7).",
+  "The overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0) and, for the AOT and the",
+  "gates, Xcode 27.0 RC as DEVELOPER_DIR. The gates read the oracle under $ZOO_WORK_ROOT/_minicpmv47/oracle/, made by",
+  "conversion/minicpmv47/oracle_minicpmv47.py and oracle_margins.py in a transformers 5.19.0 venv.",
+]
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes"
+notes = [
+  "The decoder, S=1 main only. The logged run (2026-10-13 16:30 JST, macOS 27.0 26A428, M4 Max) also passed --record,",
+  "which writes a log and does not change the bundle. Output: $ZOO_EXPORTS/minicpmv47_vlm_decode_int8hu/ = .aimodel +",
+  "metadata.json + tokenizer/ (the snapshot's tokenizer.json, tokenizer_config.json, chat_template.jinja,",
+  "generation_config.json, sha256-checked). int8hu = all 187 linears int8 per block of 32 (186 body linears",
+  "symmetric_with_clipping, the checkpoint's untied lm_head symmetric), weight only; embedding, Conv1d and norms fp16;",
+  "the 18 Gated DeltaNet layers on the loop-free step. Export main.mlirb 1,308,566,922 B, sha256",
+  "3b6ee67657cc1e9c886ec43f8001b12bae0e8c33e04d9d26b78237ad6c07d2ef. Staged (debug locations stripped): .aimodel",
+  "1,308,109,419 B, main.mlirb 1,308,109,065 B, sha256 ae9609fde02dca6a2bd092de6dd4def0922146ab0f5f682520b6f4f663a3d27e;",
+  "op counts 3,326 = the export's, coreai-build inspect equal, AOT h16c resources.bin = the export's.",
+  "Gates vs transformers 5.19.0 fp32 (Mac AOT h16c, Python runtime): G1 P0 teacher-forced 44/44 non-knife-edge (48/48),",
+  "free-run = oracle 23 tokens; G2 P1-P4 4/4 with no divergence; G4 with the int8lin tower 4/4 (also with the fp16",
+  "tower); the stripped pair's G4 re-run gives the same ids. iPhone 18 Pro (iOS 27.2 24B5099f, PipelinedBench, device",
+  "JIT of the .aimodel): nat 23/23 + oracle 32/32 on 4 launches, decode 98.0 tok/s warm (96.0 cold), prefill 105.7",
+  "tok/s at S=1, engine ready 6.4 s cold / 0.2 s warm. Mac Python runtime: 7.44 ms per S=1 call.",
+  "Published 2026-10-13 as revision 51278afd084da67603fb732c87553d89d4ee0680: all 20 files verified against the staged SHA256SUMS (the 4 LFS files by the Hub sha256, the others downloaded and hashed) and by size; README.md and SHA256SUMS byte-identical.",
+]
+
+["minicpm-v-4.7-1b-tower-int8lin"]
+script = "minicpmv47/export_vision.py"
+args = ["int8lin"]
+card = "README.md"
+hf_repo = "mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI"
+source_hf_id = "openbmb/MiniCPM-V-4.7-1B"
+source_revision = "984a89aafcd5160164f4f0d04b4be0f4eec03cb8"
+bundle = "gpu-pipelined/minicpmv47_vision_int8lin"
+status = "verified"
+overlay = true
+runtime_patches = []
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "The recommended tower: pixel_values [1,3,448,448] fp16 -> image_features [64,1024] fp16 (the decoder's",
+  "image_embeds rows, row-major 8x8), every positional term baked (bake_constants(32): int32 pos_ids, window_index,",
+  "merge_index). int8lin = the 170 nn.Linear int8 per block of 16 symmetric_with_clipping (mlp.fc2 takes 4,304",
+  "inputs, which 32 does not divide); LayerNorm, Conv2d and Embedding fp16; fp16 math. The logged run (2026-10-13",
+  "16:33 JST) also passed --record. Export main.mlirb 614,224,287 B, sha256",
+  "94118d314de98445fcc3d28da563d3e4cea873f9c6af46982b8854b2a12b7a95. Staged (debug locations stripped): .aimodel",
+  "613,967,602 B, main.mlirb 613,967,251 B, sha256 40265d0c06d9faa088b57716f4777dc6878dcf64cb586adf78bbd2ff146cdb5d.",
+  "G3 vs the oracle's tower rows, P1-P4: per-token cos mean >= 0.99972, min 0.99411 (bar mean 0.9995, min 0.99).",
+  "Both the Mac AOT and the iPhone's specialization store it as fp16 (resources.bin 1,087,609,504 B, the fp16 tower's",
+  "size), so it encodes at the fp16 tower's speed: 43.81 ms on the M4 Max, 67.8 / 68.5 ms on the iPhone 18 Pro.",
+]
+
+["minicpm-v-4.7-1b-tower-fp16"]
+script = "minicpmv47/export_vision.py"
+args = ["fp16"]
+card = "README.md"
+hf_repo = "mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI"
+source_hf_id = "openbmb/MiniCPM-V-4.7-1B"
+source_revision = "984a89aafcd5160164f4f0d04b4be0f4eec03cb8"
+bundle = "gpu-pipelined/minicpmv47_vision_fp16"
+status = "verified"
+overlay = true
+runtime_patches = []
+aot = "xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "The exact tower, same graph as int8lin with fp16 weights and math. The logged run (2026-10-13 16:33 JST) also",
+  "passed --record. Export main.mlirb 1,087,944,656 B, sha256",
+  "0950ecb567d4753d6db2a25033bd7511b004b51cba98d3e54226b14f2c2b69af. Staged (debug locations stripped): .aimodel",
+  "1,087,749,442 B, main.mlirb 1,087,749,094 B, sha256 0b3ece089d7bd16cb3ecc796945bf9689e8d0d90aed4055e8c1ff13e103cfaf2.",
+  "G3: per-token cos mean >= 0.999997, min 0.999957 (meets the fp16w32 bar: mean 0.9999, min 0.999; the GPU's fp16",
+  "LayerNorm did not overflow on the residual channel whose row sum of squares reaches 2.39e6). G4 with int8hu 4/4.",
+  "Encode 43.85 ms on the M4 Max, 66.5 / 68.6 ms on the iPhone 18 Pro.",
+]

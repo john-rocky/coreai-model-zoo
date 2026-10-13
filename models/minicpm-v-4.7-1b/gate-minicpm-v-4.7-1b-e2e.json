@@ -1,0 +1,467 @@
+{
+ "schema": "minicpmv47-gate-e2e/1",
+ "pair": {
+  "tower": "minicpmv47_vision_int8lin",
+  "decoder": "minicpmv47_vlm_decode_int8hu"
+ },
+ "tower": {
+  "bundle": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_vision_int8lin",
+  "aimodelc": {
+   "path": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_aotc/minicpmv47_vision_int8lin.h16c.aimodelc",
+   "bytes": 1088140022,
+   "tree_sha256": "80a9acb538685993827caa25cdaa154201a01f0c11b77443ca3af57a8260a9d0"
+  },
+  "descriptor": {
+   "inputs": {
+    "pixel_values": [
+     [
+      1,
+      3,
+      448,
+      448
+     ],
+     "float16"
+    ]
+   },
+   "outputs": {
+    "image_features": [
+     [
+      64,
+      1024
+     ],
+     "float16"
+    ]
+   },
+   "states": {}
+  },
+  "input_fed_as": "float16",
+  "load_seconds": 1.5710191249963827
+ },
+ "decoder": {
+  "bundle": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_vlm_decode_int8hu",
+  "aimodelc": {
+   "path": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_aotc/minicpmv47_vlm_decode_int8hu.h16c.aimodelc",
+   "bytes": 2813727608,
+   "tree_sha256": "f4c63c130d887d19ee8f7757db2f349af4af27e1718ee8b96db8a0b7f57901d3"
+  },
+  "load_seconds": {
+   "model": 0.010455499999807216,
+   "main": 2.962423375007347
+  }
+ },
+ "oracle_npz_sha256": "936d4d46c98981dd16fd3ad0ea8559814b1d5748f1d305c950f01bdfd8f413ed",
+ "margins_npz_sha256": "99bfb3ee4e9c7a34e24ced2979c3e3b95abd6ecef4b42a1ceebbcff80a65e49f",
+ "environment": {
+  "versions": {
+   "python": "3.11.13",
+   "numpy": "2.3.5",
+   "coreai-core": "1.0.0b2",
+   "coreai-torch": "0.4.1",
+   "coreai-opt": "0.2.1",
+   "coreai-models": "0.1.0",
+   "torch": "2.9.0",
+   "tokenizers": "0.23.0rc0",
+   "pillow": "12.2.0"
+  },
+  "platform": "macOS-27.0-arm64-arm-64bit",
+  "macos_build": "26A428",
+  "chip": "Apple M4 Max",
+  "pid": 14187,
+  "runtime": "coreai python runtime, AOT h16c GPU .aimodelc, SpecializationOptions.default(), no JIT",
+  "gpu_lock_at_start": "",
+  "quiet_ok_env": "1"
+ },
+ "bar": "P1..P4 4/4: free-run greedy <= 32 with no divergence from the oracle, or the first one at an oracle softmax top-2 gap < 0.1",
+ "prompts": {
+  "P1": {
+   "image": "earth.448.png",
+   "prompt_tokens": 88,
+   "tokenizer_ids_equal_processor_ids": true,
+   "rope_shift_start": 73,
+   "rope_shift_amount": 58,
+   "tower_vs_oracle": {
+    "cos_mean": 0.9998797605995484,
+    "cos_min": 0.9991734633829766,
+    "max_abs_d": 0.03156101703643799
+   },
+   "tower_ms": 112.68720899533946,
+   "first_divergence": null,
+   "exact_prefix": 32,
+   "compared": 32,
+   "verdict": "PASS",
+   "rule": "no divergence over the compared steps",
+   "engine_gen": [
+    1919,
+    2099,
+    4774,
+    2972,
+    42373,
+    332,
+    1892,
+    11352,
+    11,
+    264,
+    40630,
+    11,
+    3160,
+    5072,
+    1593,
+    314,
+    279,
+    11247,
+    494,
+    3433,
+    13,
+    271,
+    1536,
+    4275,
+    9155,
+    25,
+    198,
+    12,
+    561,
+    6105,
+    51393,
+    17661
+   ],
+   "oracle_gen": [
+    1919,
+    2099,
+    4774,
+    2972,
+    42373,
+    332,
+    1892,
+    11352,
+    11,
+    264,
+    40630,
+    11,
+    3160,
+    5072,
+    1593,
+    314,
+    279,
+    11247,
+    494,
+    3433,
+    13,
+    271,
+    1536,
+    4275,
+    9155,
+    25,
+    198,
+    12,
+    561,
+    6105,
+    51393,
+    17661
+   ],
+   "engine_text": "This image shows **Earth** \u2014 specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+   "oracle_text": "This image shows **Earth** \u2014 specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+   "last_position_vs_oracle": {
+    "top5_engine": [
+     1919,
+     760,
+     1061,
+     623,
+     112148
+    ],
+    "top5_oracle": [
+     1919,
+     760,
+     1061,
+     623,
+     112148
+    ],
+    "cos": 0.9995590960597875,
+    "max_abs_d": 0.46847254037857056
+   },
+   "prompt_step_ms_median": 9.81808350479696,
+   "decode_ms_median": 9.958292008377612
+  },
+  "P2": {
+   "image": "saturn_v.448.png",
+   "prompt_tokens": 89,
+   "tokenizer_ids_equal_processor_ids": true,
+   "rope_shift_start": 73,
+   "rope_shift_amount": 58,
+   "tower_vs_oracle": {
+    "cos_mean": 0.9997219438259156,
+    "cos_min": 0.9941141587336737,
+    "max_abs_d": 0.09257102012634277
+   },
+   "tower_ms": 61.71520799398422,
+   "first_divergence": null,
+   "exact_prefix": 30,
+   "compared": 30,
+   "verdict": "PASS",
+   "rule": "no divergence over the compared steps",
+   "engine_gen": [
+    2014,
+    39438,
+    3565,
+    9485,
+    15392,
+    6345,
+    38823,
+    264,
+    47503,
+    629,
+    23542,
+    10932,
+    383,
+    1141,
+    6830,
+    10694,
+    11,
+    22152,
+    539,
+    90743,
+    24080,
+    321,
+    50017,
+    4965,
+    1172,
+    264,
+    71049,
+    12515,
+    13,
+    248046
+   ],
+   "oracle_gen": [
+    2014,
+    39438,
+    3565,
+    9485,
+    15392,
+    6345,
+    38823,
+    264,
+    47503,
+    629,
+    23542,
+    10932,
+    383,
+    1141,
+    6830,
+    10694,
+    11,
+    22152,
+    539,
+    90743,
+    24080,
+    321,
+    50017,
+    4965,
+    1172,
+    264,
+    71049,
+    12515,
+    13,
+    248046
+   ],
+   "engine_text": "An aerial black-and-white photo captures a Saturn V rocket standing on its launch pad, surrounded by barren terrain and runway lines under a cloudy sky.",
+   "oracle_text": "An aerial black-and-white photo captures a Saturn V rocket standing on its launch pad, surrounded by barren terrain and runway lines under a cloudy sky.",
+   "last_position_vs_oracle": {
+    "top5_engine": [
+     2014,
+     1919,
+     32,
+     1473,
+     3702
+    ],
+    "top5_oracle": [
+     2014,
+     1919,
+     32,
+     1473,
+     3702
+    ],
+    "cos": 0.9995748864618167,
+    "max_abs_d": 0.5389652252197266
+   },
+   "prompt_step_ms_median": 9.705791002488695,
+   "decode_ms_median": 10.21237499662675
+  },
+  "P3": {
+   "image": "synthetic.448.png",
+   "prompt_tokens": 90,
+   "tokenizer_ids_equal_processor_ids": true,
+   "rope_shift_start": 73,
+   "rope_shift_amount": 58,
+   "tower_vs_oracle": {
+    "cos_mean": 0.9998683992490842,
+    "cos_min": 0.9992253190685653,
+    "max_abs_d": 0.0415494441986084
+   },
+   "tower_ms": 45.27579199930187,
+   "first_divergence": null,
+   "exact_prefix": 2,
+   "compared": 2,
+   "verdict": "PASS",
+   "rule": "no divergence over the compared steps",
+   "engine_gen": [
+    47824,
+    248046
+   ],
+   "oracle_gen": [
+    47824,
+    248046
+   ],
+   "engine_text": "EXIT",
+   "oracle_text": "EXIT",
+   "last_position_vs_oracle": {
+    "top5_engine": [
+     47824,
+     13259,
+     14893,
+     28862,
+     3152
+    ],
+    "top5_oracle": [
+     47824,
+     13259,
+     14893,
+     28862,
+     3152
+    ],
+    "cos": 0.9997587037309847,
+    "max_abs_d": 0.3359684944152832
+   },
+   "prompt_step_ms_median": 9.629916487028822,
+   "decode_ms_median": 9.592582995537668
+  },
+  "P4": {
+   "image": "earth.448.png",
+   "prompt_tokens": 99,
+   "tokenizer_ids_equal_processor_ids": true,
+   "rope_shift_start": 84,
+   "rope_shift_amount": 58,
+   "tower_vs_oracle": {
+    "cos_mean": 0.9998797605995484,
+    "cos_min": 0.9991734633829766,
+    "max_abs_d": 0.03156101703643799
+   },
+   "tower_ms": 45.16824999882374,
+   "first_divergence": null,
+   "exact_prefix": 32,
+   "compared": 32,
+   "verdict": "PASS",
+   "rule": "no divergence over the compared steps",
+   "engine_gen": [
+    21765,
+    506,
+    411,
+    8964,
+    2099,
+    11,
+    353,
+    1436,
+    264,
+    8807,
+    7792,
+    314,
+    7736,
+    25,
+    271,
+    12,
+    2972,
+    10025,
+    92217,
+    3554,
+    1199,
+    505,
+    303,
+    279,
+    51393,
+    1892,
+    5365,
+    43285,
+    321,
+    28606,
+    55945,
+    1332
+   ],
+   "oracle_gen": [
+    21765,
+    506,
+    411,
+    8964,
+    2099,
+    11,
+    353,
+    1436,
+    264,
+    8807,
+    7792,
+    314,
+    7736,
+    25,
+    271,
+    12,
+    2972,
+    10025,
+    92217,
+    3554,
+    1199,
+    505,
+    303,
+    279,
+    51393,
+    1892,
+    5365,
+    43285,
+    321,
+    28606,
+    55945,
+    1332
+   ],
+   "engine_text": "Looking at this Earth image, I see a rich variety of colors:\n\n- **Blue**: Abundant in the oceans \u2014 deep navy and lighter cyan where",
+   "oracle_text": "Looking at this Earth image, I see a rich variety of colors:\n\n- **Blue**: Abundant in the oceans \u2014 deep navy and lighter cyan where",
+   "last_position_vs_oracle": {
+    "top5_engine": [
+     21765,
+     623,
+     40,
+     760,
+     4350
+    ],
+    "top5_oracle": [
+     21765,
+     623,
+     40,
+     760,
+     4350
+    ],
+    "cos": 0.9996503301870083,
+    "max_abs_d": 0.48993873596191406
+   },
+   "prompt_step_ms_median": 9.72508300037589,
+   "decode_ms_median": 9.665749996202067
+  }
+ },
+ "pass": "4/4",
+ "reset_check": {
+  "tower_bit_equal": true,
+  "answer_equal": true,
+  "last_logits_bit_equal": true,
+  "bit_equal": true
+ },
+ "result": "PASS",
+ "process_prompts": 5,
+ "wall_seconds": 15.241332999998122,
+ "gpu_utilization": {
+  "n": 38,
+  "period_s": 0.25,
+  "max": 86.0,
+  "median": 56.0,
+  "share_ge_50": 0.6052631578947368
+ },
+ "generated_at": "2026-10-13T07:40:37+00:00",
+ "script": {
+  "path": "conversion/minicpmv47/gate_e2e.py",
+  "sha256": "e6e09af832f0114e1097e4540911050155c40c0baeb32aece01c42ba90246caf"
+ }
+}

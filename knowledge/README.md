@@ -399,6 +399,13 @@ For the long-form version of the same material, read
   can prove (S=16) and gate chunked-vs-S=1 token equality; multifunction bundles can assert in MPSGraph's ANE region
   pass under JIT (AOT h16c is the python-driver path); capture the oracle's mRoPE positions with
   a hook instead of re-deriving them.
+- [`minicpm-v-4.7-1b-port.md`](minicpm-v-4.7-1b-port.md) — MiniCPM-V-4.7-1B: 4.6's vision code in front of
+  a Qwen3.5 hybrid with **canvas M-RoPE**, derived in the graph from the ids and two static shifts (decider-2b-vision's
+  contract, the 8×8 grid baked); a last-position logits bar passes 4.6's 1-D positions, so the planes are gated for
+  equality. The head is untied yet 4.9e-4 from the embedding; the tower's LayerNorm inputs overflow fp16 when squared
+  and the GPU's fp16 tower still passes; the Mac AOT and the iPhone both store the int8lin tower as fp16, so int8 buys
+  download, not speed; iPhone 18 Pro device JIT 98.0 tok/s decode; coreai-torch's debug paths in `main.mlirb` and how
+  the strip was re-gated.
 
 ## Image generation & editing (diffusion)
 - [`zimage-port.md`](zimage-port.md) — Z-Image-Turbo, a 6B Single-Stream DiT text-to-image — and why
