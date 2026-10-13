@@ -1,0 +1,173 @@
+{
+ "schema": "minicpmv47-gate-vision/1",
+ "mode": "fp16",
+ "bundle": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_vision_fp16",
+ "aimodelc": {
+  "path": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_aotc/minicpmv47_vision_fp16.h16c.aimodelc",
+  "bytes": 1088131673,
+  "tree_sha256": "1306acc96fdd4a0b410bca02fb847bb729d0f4aa8961fe26060452279830968b"
+ },
+ "metadata_sha256": "63dc962031fd40f939f2cf0af3b9bea990128aca29b606e80d2e5680c9ead3a0",
+ "oracle_npz_sha256": "936d4d46c98981dd16fd3ad0ea8559814b1d5748f1d305c950f01bdfd8f413ed",
+ "environment": {
+  "versions": {
+   "python": "3.11.13",
+   "numpy": "2.3.5",
+   "coreai-core": "1.0.0b2",
+   "coreai-torch": "0.4.1",
+   "coreai-opt": "0.2.1",
+   "coreai-models": "0.1.0",
+   "torch": "2.9.0",
+   "tokenizers": "0.23.0rc0",
+   "pillow": "12.2.0"
+  },
+  "platform": "macOS-27.0-arm64-arm-64bit",
+  "macos_build": "26A428",
+  "chip": "Apple M4 Max",
+  "pid": 11870,
+  "runtime": "coreai python runtime, AOT h16c GPU .aimodelc, SpecializationOptions.default(), no JIT",
+  "gpu_lock_at_start": "mv47-r3-g3-fp16 timing pid 11858 since 2026-10-13T16:39:50+0900",
+  "quiet_ok_env": "1"
+ },
+ "window": {
+  "label": "g3-minicpmv47_vision_fp16",
+  "taken_at": "2026-10-13T16:39:50+09:00",
+  "gpu_lock": "mv47-r3-g3-fp16 timing pid 11858 since 2026-10-13T16:39:50+0900",
+  "loadavg": "{ 14.27 13.16 12.10 }",
+  "swapusage": "vm.swapusage: total = 2048.00M  used = 506.75M  free = 1541.25M  (encrypted)",
+  "driver_pid": 11870
+ },
+ "descriptor": {
+  "inputs": {
+   "pixel_values": [
+    [
+     1,
+     3,
+     448,
+     448
+    ],
+    "float16"
+   ]
+  },
+  "outputs": {
+   "image_features": [
+    [
+     64,
+     1024
+    ],
+    "float16"
+   ]
+  },
+  "states": {}
+ },
+ "input_fed_as": "float16",
+ "host": "host.preprocess: Pillow BICUBIC 448, (x/255 - 0.5)/0.5, CHW [1,3,448,448] float32 -> input dtype",
+ "load_seconds": {
+  "model": 1.4987155419948976,
+  "function": 1.4951006250048522
+ },
+ "prompts": {
+  "P1": {
+   "image": "earth.448.png",
+   "encode_ms": 44.50820900092367,
+   "cos_mean": 0.9999986827911879,
+   "cos_min": 0.9999865677381626,
+   "cos_min_row": 61,
+   "rows_below_0_999": 0,
+   "max_abs_d": 0.006145954132080078,
+   "ref_absmax": 4.0462727546691895,
+   "got_absmax": 4.046875,
+   "finite": true,
+   "equal_to_cold_call": true
+  },
+  "P2": {
+   "image": "saturn_v.448.png",
+   "encode_ms": 44.290290999924764,
+   "cos_mean": 0.9999970548184703,
+   "cos_min": 0.9999568260609905,
+   "cos_min_row": 31,
+   "rows_below_0_999": 0,
+   "max_abs_d": 0.006546497344970703,
+   "ref_absmax": 5.650125980377197,
+   "got_absmax": 5.6484375,
+   "finite": true
+  },
+  "P3": {
+   "image": "synthetic.448.png",
+   "encode_ms": 44.250833001569845,
+   "cos_mean": 0.9999980040057308,
+   "cos_min": 0.9999696939214,
+   "cos_min_row": 31,
+   "rows_below_0_999": 0,
+   "max_abs_d": 0.009276628494262695,
+   "ref_absmax": 3.6347382068634033,
+   "got_absmax": 3.6328125,
+   "finite": true
+  },
+  "P4": {
+   "image": "earth.448.png",
+   "encode_ms": 44.41491700708866,
+   "cos_mean": 0.9999986827911879,
+   "cos_min": 0.9999865677381626,
+   "cos_min_row": 61,
+   "rows_below_0_999": 0,
+   "max_abs_d": 0.006145954132080078,
+   "ref_absmax": 4.0462727546691895,
+   "got_absmax": 4.046875,
+   "finite": true
+  }
+ },
+ "summary": {
+  "cos_mean_min_over_prompts": 0.9999970548184703,
+  "cos_min_over_prompts": 0.9999568260609905,
+  "max_abs_d": 0.009276628494262695,
+  "rows_below_0_999": 0
+ },
+ "bar": {
+  "cos_mean": 0.9999,
+  "cos_min": 0.999,
+  "note": "fp16 is recorded only; 'passes' = meets the fp16w32 bar"
+ },
+ "timing": {
+  "cold_first_call_ms": 86.60591600346379,
+  "warm_ms": [
+   44.39520800951868,
+   44.12487501394935,
+   45.07170899887569,
+   44.789874998969026,
+   44.151916008559056
+  ],
+  "warm_median_ms": 44.39520800951868,
+  "warm_n": 5,
+  "per_prompt_ms": {
+   "P1": 44.50820900092367,
+   "P2": 44.290290999924764,
+   "P3": 44.250833001569845,
+   "P4": 44.41491700708866
+  }
+ },
+ "repro_last_call_bit_equal_first": true,
+ "result": "meets the fp16w32 bar",
+ "wall_seconds": 4.017968125001062,
+ "gpu_utilization": {
+  "n": 9,
+  "period_s": 0.25,
+  "max": 98.0,
+  "median": 0.0,
+  "share_ge_50": 0.2222222222222222
+ },
+ "generated_at": "2026-10-13T07:39:54+00:00",
+ "script": {
+  "path": "conversion/minicpmv47/gate_vision.py",
+  "sha256": "0ad0fee7b3cfad64c0321895605b33fc298c175209651e0b7ee6521fd2b840bc"
+ },
+ "staged_from": {
+  "source": "lane r3/gate_vision_fp16.json ($ZOO_WORK_ROOT/_minicpmv47/r3/)",
+  "source_sha256": "011f2fba2bf192737eab31d7a7b60e8967a0dccc6898b9a28e6c163bc8323883",
+  "removed": [
+   "window.lock_lsof",
+   "window.other_processes_cpu20_or_gpu_suspects"
+  ],
+  "why": "the measurement window's lsof line and the list of other processes on the machine are not part of the gate; every other key is the source's, unchanged"
+ }
+}

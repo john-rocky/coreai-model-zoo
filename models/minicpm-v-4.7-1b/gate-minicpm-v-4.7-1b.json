@@ -1,0 +1,937 @@
+{
+ "schema": "minicpmv47-gate-decoder/1",
+ "bundle": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_vlm_decode_int8hu",
+ "name": "minicpmv47_vlm_decode_int8hu",
+ "aimodelc": {
+  "path": "$ZOO_WORK_ROOT/coreai-models/exports/minicpmv47_aotc/minicpmv47_vlm_decode_int8hu.h16c.aimodelc",
+  "bytes": 2813727608,
+  "tree_sha256": "f4c63c130d887d19ee8f7757db2f349af4af27e1718ee8b96db8a0b7f57901d3"
+ },
+ "metadata_sha256": "506ae2e919bfff23b3bef993a5f7e1b8a1dda8b531619689a16f81e8ce6f3fc2",
+ "oracle_npz_sha256": "936d4d46c98981dd16fd3ad0ea8559814b1d5748f1d305c950f01bdfd8f413ed",
+ "margins_npz_sha256": "99bfb3ee4e9c7a34e24ced2979c3e3b95abd6ecef4b42a1ceebbcff80a65e49f",
+ "environment": {
+  "versions": {
+   "python": "3.11.13",
+   "numpy": "2.3.5",
+   "coreai-core": "1.0.0b2",
+   "coreai-torch": "0.4.1",
+   "coreai-opt": "0.2.1",
+   "coreai-models": "0.1.0",
+   "torch": "2.9.0",
+   "tokenizers": "0.23.0rc0",
+   "pillow": "12.2.0"
+  },
+  "platform": "macOS-27.0-arm64-arm-64bit",
+  "macos_build": "26A428",
+  "chip": "Apple M4 Max",
+  "pid": 2226,
+  "runtime": "coreai python runtime, AOT h16c GPU .aimodelc, SpecializationOptions.default(), no JIT",
+  "gpu_lock_at_start": "",
+  "quiet_ok_env": "1"
+ },
+ "load_seconds": {
+  "model": 0.010924417001660913,
+  "main": 1.7281784579972737
+ },
+ "descriptor": {
+  "inputs": {
+   "input_ids": [
+    [
+     1,
+     1
+    ],
+    "int32"
+   ],
+   "position_ids": [
+    [
+     1,
+     -1
+    ],
+    "int32"
+   ],
+   "image_embeds": [
+    [
+     64,
+     1024
+    ],
+    "float16"
+   ],
+   "rope_shift_start": [
+    [
+     1
+    ],
+    "int32"
+   ],
+   "rope_shift_amount": [
+    [
+     1
+    ],
+    "int32"
+   ]
+  },
+  "outputs": {
+   "logits": [
+    [
+     1,
+     1,
+     248094
+    ],
+    "float16"
+   ]
+  },
+  "states": {
+   "keyCache": [
+    [
+     6,
+     1,
+     2,
+     -1,
+     256
+    ],
+    "float16"
+   ],
+   "valueCache": [
+    [
+     6,
+     1,
+     2,
+     -1,
+     256
+    ],
+    "float16"
+   ],
+   "convState": [
+    [
+     18,
+     1,
+     6144,
+     3
+    ],
+    "float16"
+   ],
+   "recState": [
+    [
+     18,
+     1,
+     16,
+     128,
+     128
+    ],
+    "float16"
+   ]
+  }
+ },
+ "bar": {
+  "G1": "teacher-forced positions 19..66: every non-knife-edge position's argmax = the oracle's; free-run: no divergence, or the first one at an oracle gap < 0.1",
+  "G2": "P1..P4 free-run 4/4 by the same rule",
+  "knife_edge": "oracle softmax top-2 gap < 0.1"
+ },
+ "process_prompts": 10,
+ "G1": {
+  "teacher_forced": {
+   "sequence": 67,
+   "prompt_tokens": 19,
+   "positions": [
+    19,
+    66
+   ],
+   "n": 48,
+   "excluded_knife_edge": [
+    {
+     "p": 26,
+     "engine": 14120,
+     "oracle": 14120,
+     "equal": true,
+     "oracle_gap": 0.0552753445956925,
+     "knife_edge": true
+    },
+    {
+     "p": 43,
+     "engine": 248046,
+     "oracle": 248046,
+     "equal": true,
+     "oracle_gap": 0.07774511287748959,
+     "knife_edge": true
+    },
+    {
+     "p": 55,
+     "engine": 3074,
+     "oracle": 3074,
+     "equal": true,
+     "oracle_gap": 0.09575093573520482,
+     "knife_edge": true
+    },
+    {
+     "p": 64,
+     "engine": 314,
+     "oracle": 314,
+     "equal": true,
+     "oracle_gap": 0.06459804368431654,
+     "knife_edge": true
+    }
+   ],
+   "non_knife_edge": 44,
+   "non_knife_edge_equal": 44,
+   "mismatches": [],
+   "all_positions_equal": 48,
+   "logits_cos_min": 0.9945843377193829,
+   "logits_max_abs_d": 1.7158803939819336,
+   "all_67_positions_argmax_equal_oracle": 66,
+   "all_67_positions_non_knife_mismatch": [],
+   "step_ms_median": 7.588125008624047,
+   "seconds": 0.9369125420053024,
+   "verdict": "PASS"
+  },
+  "free_run": {
+   "engine_gen": [
+    760,
+    17415,
+    369,
+    264,
+    12401,
+    11,
+    5214,
+    6105,
+    14120,
+    421,
+    20182,
+    1004,
+    11247,
+    579,
+    9682,
+    321,
+    9931,
+    1674,
+    26706,
+    27657,
+    2199,
+    13,
+    248046
+   ],
+   "oracle_gen": [
+    760,
+    17415,
+    369,
+    264,
+    12401,
+    11,
+    5214,
+    6105,
+    14120,
+    421,
+    20182,
+    1004,
+    11247,
+    579,
+    9682,
+    321,
+    9931,
+    1674,
+    26706,
+    27657,
+    2199,
+    13,
+    248046,
+    248046,
+    198
+   ],
+   "first_divergence": null,
+   "exact_prefix": 23,
+   "compared": 23,
+   "verdict": "PASS",
+   "rule": "no divergence over the compared steps",
+   "engine_text": "The ocean is a vast, living blue giant that shapes our planet's climate and sustains countless marine life.<|im_end|>",
+   "oracle_text": "The ocean is a vast, living blue giant that shapes our planet's climate and sustains countless marine life.<|im_end|>",
+   "decode_ms_median": 7.371208499534987,
+   "seconds": 0.3318431249936111
+  },
+  "verdict": "PASS"
+ },
+ "G2": {
+  "prompts": {
+   "P1": {
+    "prompt_tokens": 88,
+    "rope_shift_start": 73,
+    "rope_shift_amount": 58,
+    "canvas_origin": 6,
+    "first_divergence": null,
+    "exact_prefix": 32,
+    "compared": 32,
+    "verdict": "PASS",
+    "rule": "no divergence over the compared steps",
+    "engine_gen": [
+     1919,
+     2099,
+     4774,
+     2972,
+     42373,
+     332,
+     1892,
+     11352,
+     11,
+     264,
+     40630,
+     11,
+     3160,
+     5072,
+     1593,
+     314,
+     279,
+     11247,
+     494,
+     3433,
+     13,
+     271,
+     1536,
+     4275,
+     9155,
+     25,
+     198,
+     12,
+     561,
+     6105,
+     51393,
+     17661
+    ],
+    "oracle_gen": [
+     1919,
+     2099,
+     4774,
+     2972,
+     42373,
+     332,
+     1892,
+     11352,
+     11,
+     264,
+     40630,
+     11,
+     3160,
+     5072,
+     1593,
+     314,
+     279,
+     11247,
+     494,
+     3433,
+     13,
+     271,
+     1536,
+     4275,
+     9155,
+     25,
+     198,
+     12,
+     561,
+     6105,
+     51393,
+     17661
+    ],
+    "engine_text": "This image shows **Earth** \u2014 specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+    "oracle_text": "This image shows **Earth** \u2014 specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+    "engine_text_raw": "This image shows **Earth** \u2014 specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+    "prompt_positions_all": {
+     "positions": [
+      0,
+      87
+     ],
+     "n": 88,
+     "argmax_equal": 86,
+     "max_abs_d_top5": 0.37212276458740234,
+     "worst_position": 82,
+     "argmax_mismatch_positions": [
+      37,
+      51
+     ]
+    },
+    "prompt_positions_from_frame": {
+     "positions": [
+      6,
+      87
+     ],
+     "n": 82,
+     "argmax_equal": 80,
+     "max_abs_d_top5": 0.37212276458740234,
+     "worst_position": 82,
+     "argmax_mismatch_positions": [
+      37,
+      51
+     ]
+    },
+    "last_position_vs_oracle": {
+     "top5_engine": [
+      1919,
+      760,
+      1061,
+      623,
+      112148
+     ],
+     "top5_oracle": [
+      1919,
+      760,
+      1061,
+      623,
+      112148
+     ],
+     "top5_ordered_equal": true,
+     "argmax_equal": true,
+     "cos": 0.9995638389949048,
+     "max_abs_d": 0.44784265756607056,
+     "ref_absmax": 27.67848014831543
+    },
+    "prompt_step_ms_median": 7.518270504078828,
+    "decode_ms_median": 7.439541994244792,
+    "seconds": 0.9994967090024147
+   },
+   "P2": {
+    "prompt_tokens": 89,
+    "rope_shift_start": 73,
+    "rope_shift_amount": 58,
+    "canvas_origin": 6,
+    "first_divergence": null,
+    "exact_prefix": 30,
+    "compared": 30,
+    "verdict": "PASS",
+    "rule": "no divergence over the compared steps",
+    "engine_gen": [
+     2014,
+     39438,
+     3565,
+     9485,
+     15392,
+     6345,
+     38823,
+     264,
+     47503,
+     629,
+     23542,
+     10932,
+     383,
+     1141,
+     6830,
+     10694,
+     11,
+     22152,
+     539,
+     90743,
+     24080,
+     321,
+     50017,
+     4965,
+     1172,
+     264,
+     71049,
+     12515,
+     13,
+     248046
+    ],
+    "oracle_gen": [
+     2014,
+     39438,
+     3565,
+     9485,
+     15392,
+     6345,
+     38823,
+     264,
+     47503,
+     629,
+     23542,
+     10932,
+     383,
+     1141,
+     6830,
+     10694,
+     11,
+     22152,
+     539,
+     90743,
+     24080,
+     321,
+     50017,
+     4965,
+     1172,
+     264,
+     71049,
+     12515,
+     13,
+     248046
+    ],
+    "engine_text": "An aerial black-and-white photo captures a Saturn V rocket standing on its launch pad, surrounded by barren terrain and runway lines under a cloudy sky.",
+    "oracle_text": "An aerial black-and-white photo captures a Saturn V rocket standing on its launch pad, surrounded by barren terrain and runway lines under a cloudy sky.",
+    "engine_text_raw": "An aerial black-and-white photo captures a Saturn V rocket standing on its launch pad, surrounded by barren terrain and runway lines under a cloudy sky.<|im_end|>",
+    "prompt_positions_all": {
+     "positions": [
+      0,
+      88
+     ],
+     "n": 89,
+     "argmax_equal": 85,
+     "max_abs_d_top5": 0.824925422668457,
+     "worst_position": 86,
+     "argmax_mismatch_positions": [
+      30,
+      53,
+      67,
+      86
+     ]
+    },
+    "prompt_positions_from_frame": {
+     "positions": [
+      6,
+      88
+     ],
+     "n": 83,
+     "argmax_equal": 79,
+     "max_abs_d_top5": 0.824925422668457,
+     "worst_position": 86,
+     "argmax_mismatch_positions": [
+      30,
+      53,
+      67,
+      86
+     ]
+    },
+    "last_position_vs_oracle": {
+     "top5_engine": [
+      2014,
+      1919,
+      32,
+      1473,
+      3702
+     ],
+     "top5_oracle": [
+      2014,
+      1919,
+      32,
+      1473,
+      3702
+     ],
+     "top5_ordered_equal": true,
+     "argmax_equal": true,
+     "cos": 0.9996689521574065,
+     "max_abs_d": 0.46865272521972656,
+     "ref_absmax": 29.468172073364258
+    },
+    "prompt_step_ms_median": 7.611791996168904,
+    "decode_ms_median": 7.792832999257371,
+    "seconds": 0.995187916996656
+   },
+   "P3": {
+    "prompt_tokens": 90,
+    "rope_shift_start": 73,
+    "rope_shift_amount": 58,
+    "canvas_origin": 6,
+    "first_divergence": null,
+    "exact_prefix": 2,
+    "compared": 2,
+    "verdict": "PASS",
+    "rule": "no divergence over the compared steps",
+    "engine_gen": [
+     47824,
+     248046
+    ],
+    "oracle_gen": [
+     47824,
+     248046
+    ],
+    "engine_text": "EXIT",
+    "oracle_text": "EXIT",
+    "engine_text_raw": "EXIT<|im_end|>",
+    "prompt_positions_all": {
+     "positions": [
+      0,
+      89
+     ],
+     "n": 90,
+     "argmax_equal": 88,
+     "max_abs_d_top5": 0.8102626800537109,
+     "worst_position": 84,
+     "argmax_mismatch_positions": [
+      71,
+      88
+     ]
+    },
+    "prompt_positions_from_frame": {
+     "positions": [
+      6,
+      89
+     ],
+     "n": 84,
+     "argmax_equal": 82,
+     "max_abs_d_top5": 0.8102626800537109,
+     "worst_position": 84,
+     "argmax_mismatch_positions": [
+      71,
+      88
+     ]
+    },
+    "last_position_vs_oracle": {
+     "top5_engine": [
+      47824,
+      13259,
+      14893,
+      28862,
+      3152
+     ],
+     "top5_oracle": [
+      47824,
+      13259,
+      14893,
+      28862,
+      3152
+     ],
+     "top5_ordered_equal": true,
+     "argmax_equal": true,
+     "cos": 0.9998027742542127,
+     "max_abs_d": 0.32190990447998047,
+     "ref_absmax": 30.280622482299805
+    },
+    "prompt_step_ms_median": 7.54845800838666,
+    "decode_ms_median": 7.735458013485186,
+    "seconds": 0.7749140840023756
+   },
+   "P4": {
+    "prompt_tokens": 99,
+    "rope_shift_start": 84,
+    "rope_shift_amount": 58,
+    "canvas_origin": 17,
+    "first_divergence": null,
+    "exact_prefix": 32,
+    "compared": 32,
+    "verdict": "PASS",
+    "rule": "no divergence over the compared steps",
+    "engine_gen": [
+     21765,
+     506,
+     411,
+     8964,
+     2099,
+     11,
+     353,
+     1436,
+     264,
+     8807,
+     7792,
+     314,
+     7736,
+     25,
+     271,
+     12,
+     2972,
+     10025,
+     92217,
+     3554,
+     1199,
+     505,
+     303,
+     279,
+     51393,
+     1892,
+     5365,
+     43285,
+     321,
+     28606,
+     55945,
+     1332
+    ],
+    "oracle_gen": [
+     21765,
+     506,
+     411,
+     8964,
+     2099,
+     11,
+     353,
+     1436,
+     264,
+     8807,
+     7792,
+     314,
+     7736,
+     25,
+     271,
+     12,
+     2972,
+     10025,
+     92217,
+     3554,
+     1199,
+     505,
+     303,
+     279,
+     51393,
+     1892,
+     5365,
+     43285,
+     321,
+     28606,
+     55945,
+     1332
+    ],
+    "engine_text": "Looking at this Earth image, I see a rich variety of colors:\n\n- **Blue**: Abundant in the oceans \u2014 deep navy and lighter cyan where",
+    "oracle_text": "Looking at this Earth image, I see a rich variety of colors:\n\n- **Blue**: Abundant in the oceans \u2014 deep navy and lighter cyan where",
+    "engine_text_raw": "Looking at this Earth image, I see a rich variety of colors:\n\n- **Blue**: Abundant in the oceans \u2014 deep navy and lighter cyan where",
+    "prompt_positions_all": {
+     "positions": [
+      0,
+      98
+     ],
+     "n": 99,
+     "argmax_equal": 95,
+     "max_abs_d_top5": 0.7391471862792969,
+     "worst_position": 65,
+     "argmax_mismatch_positions": [
+      32,
+      58,
+      73,
+      78
+     ]
+    },
+    "prompt_positions_from_frame": {
+     "positions": [
+      17,
+      98
+     ],
+     "n": 82,
+     "argmax_equal": 78,
+     "max_abs_d_top5": 0.7391471862792969,
+     "worst_position": 65,
+     "argmax_mismatch_positions": [
+      32,
+      58,
+      73,
+      78
+     ]
+    },
+    "last_position_vs_oracle": {
+     "top5_engine": [
+      21765,
+      623,
+      40,
+      4350,
+      760
+     ],
+     "top5_oracle": [
+      21765,
+      623,
+      40,
+      760,
+      4350
+     ],
+     "top5_ordered_equal": false,
+     "argmax_equal": true,
+     "cos": 0.9996429679305212,
+     "max_abs_d": 0.5368137359619141,
+     "ref_absmax": 23.77731704711914
+    },
+    "prompt_step_ms_median": 7.538874997408129,
+    "decode_ms_median": 7.604291997267865,
+    "seconds": 1.085543666005833
+   }
+  },
+  "pass": "4/4",
+  "verdict": "PASS"
+ },
+ "red_arms": {
+  "rule": "RED when the free-run differs from the green P1 run within the first 8 tokens, or the max |d| at the oracle's top-5 ids over positions >= canvas origin exceeds 2x the green run's",
+  "green": {
+   "gen_first": [
+    1919,
+    2099,
+    4774,
+    2972,
+    42373,
+    332,
+    1892,
+    11352
+   ],
+   "from_frame_max_abs_d_top5": 0.37212276458740234
+  },
+  "amount_plus_1": {
+   "start": 73,
+   "amount": 59,
+   "gen_first": [
+    1919,
+    2099,
+    4774,
+    2972,
+    42373,
+    332,
+    1892,
+    11352
+   ],
+   "text": "This image shows **Earth** \u2014 specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+   "from_frame": {
+    "positions": [
+     6,
+     87
+    ],
+    "n": 82,
+    "argmax_equal": 80,
+    "max_abs_d_top5": 0.44606781005859375,
+    "worst_position": 72,
+    "argmax_mismatch_positions": [
+     37,
+     51
+    ]
+   },
+   "free_run_moved": false,
+   "top5_d_over_2x_green": false,
+   "result": "NOT RED"
+  },
+  "image_embeds_zero": {
+   "start": 73,
+   "amount": 58,
+   "gen_first": [
+    760,
+    2099,
+    488,
+    3849,
+    3766,
+    7701,
+    310,
+    381
+   ],
+   "text": "The image you\u2019ve provided appears to be a simple, blank visual \u2014 likely a white or light background with no visible objects, text, figures, or details.",
+   "from_frame": {
+    "positions": [
+     6,
+     87
+    ],
+    "n": 82,
+    "argmax_equal": 14,
+    "max_abs_d_top5": 27.69242286682129,
+    "worst_position": 18,
+    "argmax_mismatch_positions": [
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     85,
+     87
+    ]
+   },
+   "free_run_moved": true,
+   "top5_d_over_2x_green": true,
+   "result": "RED"
+  },
+  "planes_1d": {
+   "start": 1073741824,
+   "amount": 0,
+   "gen_first": [
+    1919,
+    2099,
+    4774,
+    2972,
+    42373,
+    332,
+    1892,
+    11352
+   ],
+   "text": "This image shows **Earth** \u2014 specifically, a vivid, close-up view of the planet from space.\n\nKey features visible:\n- The blue oceans covering",
+   "from_frame": {
+    "positions": [
+     6,
+     87
+    ],
+    "n": 82,
+    "argmax_equal": 78,
+    "max_abs_d_top5": 11.983537673950195,
+    "worst_position": 71,
+    "argmax_mismatch_positions": [
+     32,
+     51,
+     54,
+     66
+    ]
+   },
+   "free_run_moved": false,
+   "top5_d_over_2x_green": true,
+   "result": "RED"
+  }
+ },
+ "reset_check": {
+  "sequence": "P0 teacher-forced",
+  "positions": 48,
+  "bit_equal": true,
+  "max_abs_diff": 0.0
+ },
+ "result": "PASS",
+ "wall_seconds": 12.462293708013021,
+ "gpu_utilization": {
+  "n": 38,
+  "period_s": 0.25,
+  "max": 64.0,
+  "median": 47.0,
+  "share_ge_50": 0.3684210526315789
+ },
+ "generated_at": "2026-10-13T07:38:12+00:00",
+ "script": {
+  "path": "conversion/minicpmv47/gate_decoder.py",
+  "sha256": "b8bd7ff2d270bc28f5946bb0ba178ec5aadfc7c83bfdfa27cd902ea4c2eed060"
+ }
+}

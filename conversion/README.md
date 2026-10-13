@@ -369,6 +369,19 @@ Apple's repo; each recipe names the script it runs.
   the iOS ~208 KB per-encode MPSGraph scratch heap — an engine bug, second reproducer).
   Model overlay: `models/macos/gemma4_vision.py` + the `Gemma4VLPipelined*` subclasses in
   `models/macos/gemma4_pipelined.py`. See [`../models/gemma4-vl/README.md`](../models/gemma4-vl/README.md).
+- **MiniCPM-V-4.7-1B (vision-language, OpenBMB; in [`minicpmv47/`](minicpmv47/)): decoder
+  `minicpmv47/export_decoder.py int8hu`, towers `minicpmv47/export_vision.py int8lin` (and `fp16`)** — the overlay's
+  Qwen3.5 hybrid with the embedding table in the graph, the 64 tower rows and `rope_shift_start` / `rope_shift_amount`
+  as static inputs, and canvas M-RoPE derived in the graph (`minicpmv47_vl_pipelined.py`, decider-2b-vision's contract
+  with the 8×8 grid baked); the tower re-authored from the checkpoint at 448×448 (`minicpmv47_vision.py`, 4.6's code).
+  The oracle runs in its own venv (Python 3.12, transformers 5.19.0, torch 2.14.1): `make_fixtures.py` →
+  `oracle_minicpmv47.py` (fp32, CPU, one thread; ids, pixels, tower rows, logits and the planes the rotary received) →
+  `oracle_margins.py` (knife edges). The rest run in the overlay venv: `parity_text.py` (48/48) → `parity_vl_torch.py`
+  (planes 433/433 + 458/458, red arms) → `dump_vision_stages.py` + `parity_vision.py` (tower cos min 0.9999999992) →
+  `export_dryrun_vision.py` → `parity_e2e_torch.py` → `fp16_precheck.py` → `host.py` → `export_decoder.py` /
+  `export_vision.py` → `aot_compile.py` (h16c; `--reshapes` for the decoder) → `gate_decoder.py` (G1 44/44, G2 4/4) →
+  `gate_vision.py` (G3) → `gate_e2e.py` (G4 4/4) → `timing_decoder.py --interleave`. Order and flags:
+  [`minicpmv47/README.md`](minicpmv47/README.md). Card: [`../models/minicpm-v-4.7-1b/README.md`](../models/minicpm-v-4.7-1b/README.md).
 - **Unlimited-OCR — document OCR, zoo's first doc-OCR, on the STOCK runtime (no patch): [`unlimited_ocr/`](unlimited_ocr)** —
   baidu/Unlimited-OCR (3B-A0.5B MoE, MIT) → fp16 DeepEncoder vision `.aimodel` + a sym8 DeepseekV2
   **R-SWA** MoE decoder (unified `prefill`+`decode` bundle). Driven on `inputs_embeds` directly, so

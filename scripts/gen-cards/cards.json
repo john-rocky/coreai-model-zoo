@@ -1340,6 +1340,40 @@
         }
       }
     },
+    "minicpm-v-4.7-1b": {
+      "zooCard": "models/minicpm-v-4.7-1b/README.md",
+      "runner": {
+        "dir": "Examples/VLChat",
+        "xcodeproj": "VLChat.xcodeproj",
+        "scheme": "VLChat",
+        "cliTarget": "vlchat-cli",
+        "cliArgs": "--image sample.jpg --prompt \"What is in this image?\"",
+        "blurb": "GUI + CLI, one app for every vision-language model in the catalog"
+      },
+      "quickstart": "Examples/VLChat/Sources/QuickStart.swift",
+      "product": "CoreAIKit",
+      "snippetImport": [
+        "CoreAIKit",
+        "FoundationModels"
+      ],
+      "snippetFreeVars": {
+        "prompt": "String",
+        "imageURL": "URL"
+      },
+      "snippetResultComment": "// reply.content: the answer about the image, generated fully on-device",
+      "takeHomeTagline": "— this exact code as one typed function, no UI; the CLI is an argument shell over it, and\nthe GUI drives the same `KitVisionModel(catalog:)` behind a `LanguageModelSession`.",
+      "takeHomeNote": "Multi-turn about the same image? Hold the `LanguageModelSession` and call `respond(to:)`\nper turn. The photo picker / file chooser is your app's own chrome — `ImageFile.load`\n(kit API) turns any image file into model input.",
+      "checklistInfoPlist": "Info.plist: `NSPhotoLibraryUsageDescription` — only if you use PhotosPicker",
+      "checklistEntitlements": "Entitlements (iOS): `com.apple.developer.kernel.increased-memory-limit`",
+      "op": {
+        "call": "CoreAI.caption(imageAt: url, options: .model(\"minicpm-v-4.7-1b\"))",
+        "result": "caption",
+        "isDefault": false,
+        "freeVars": {
+          "url": "URL"
+        }
+      }
+    },
     "colmodernvbert": {
       "zooCard": "models/colmodernvbert/README.md",
       "runner": {
