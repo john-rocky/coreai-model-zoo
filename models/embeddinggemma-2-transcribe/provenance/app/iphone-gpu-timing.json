@@ -1,0 +1,390 @@
+{
+ "what": "EG2 Transcribe app (reader v1, the shipped h19p bundles) on the iPhone 18 Pro: start-up with the model-cache check, the long recording, the demo clip, thermal and power",
+ "frame": {
+  "run": "r6a1255",
+  "probe": {
+   "milestones_s": null,
+   "device": {
+    "arch": "h19p",
+    "available_mb": 3521.722624,
+    "footprint_mb": 13.551336,
+    "machine": "iPhone19,2",
+    "os": "Version 27.2 (Build 24B5099f)",
+    "os_build": "24B5099f",
+    "physical_memory_gb": 12.12,
+    "power": {
+     "battery": "charging",
+     "level": 0.800000011920929,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "model_cache": null,
+   "stages": null,
+   "sampler": {
+    "available_least_mb": 3522.214144,
+    "footprint_peak_mb": 17.778432,
+    "thermal_changes": [],
+    "thermal_end": "nominal"
+   },
+   "transcribe": {
+    "audio_s": null,
+    "decode_s": null,
+    "log_mel_s": null,
+    "total_s": null,
+    "x_realtime": null,
+    "text": null
+   },
+   "error": null
+  },
+  "cold": {
+   "milestones_s": {
+    "load_and_warm_up": 1.0898919105529785,
+    "process_start_to_load_start": 0.08295607566833496,
+    "process_start_to_transcript": 1.2771220207214355,
+    "transcribe": 0.10427403450012207
+   },
+   "device": {
+    "arch": "h19p",
+    "available_mb": 3521.657112,
+    "footprint_mb": 13.797072,
+    "machine": "iPhone19,2",
+    "os": "Version 27.2 (Build 24B5099f)",
+    "os_build": "24B5099f",
+    "physical_memory_gb": 12.12,
+    "power": {
+     "battery": "charging",
+     "level": 0.800000011920929,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "model_cache": {
+    "cleared": true,
+    "fingerprint": "2e2e1a1925074c657b1146c7e61043d94b5590aaf6091c8b26f4c452a81be400",
+    "mode": "check",
+    "ms": 11.065791,
+    "previous": null
+   },
+   "stages": [
+    {
+     "aot": true,
+     "bundle": "eg2_audio_fp16_T3000.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.520539584,
+     "name": "encoder",
+     "warm_up_ms": 152.656667
+    },
+    {
+     "aot": true,
+     "bundle": "eg2_reader_fp16_T750.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.276540666,
+     "name": "reader",
+     "warm_up_ms": 100.124583
+    }
+   ],
+   "sampler": {
+    "available_least_mb": 2695.328992,
+    "footprint_peak_mb": 844.663584,
+    "thermal_changes": [],
+    "thermal_end": "nominal"
+   },
+   "transcribe": {
+    "audio_s": 10.435,
+    "decode_s": 0.012767875,
+    "log_mel_s": 0.000869708,
+    "total_s": 0.104259666,
+    "x_realtime": 100.08664328542929,
+    "text": "he hoped there would be stew for dinner turnips and carrots and bruised potatoes and fat muttered pieces to be ladled out in thick peppered flour fatten sauce"
+   },
+   "error": null
+  },
+  "warm": {
+   "milestones_s": {
+    "load_and_warm_up": 0.31466495990753174,
+    "process_start_to_load_start": 0.08220303058624268,
+    "process_start_to_transcript": 0.5103769302368164,
+    "transcribe": 0.11350893974304199
+   },
+   "device": {
+    "arch": "h19p",
+    "available_mb": 3521.657112,
+    "footprint_mb": 13.82984,
+    "machine": "iPhone19,2",
+    "os": "Version 27.2 (Build 24B5099f)",
+    "os_build": "24B5099f",
+    "physical_memory_gb": 12.12,
+    "power": {
+     "battery": "charging",
+     "level": 0.800000011920929,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "model_cache": {
+    "cleared": false,
+    "fingerprint": "2e2e1a1925074c657b1146c7e61043d94b5590aaf6091c8b26f4c452a81be400",
+    "mode": "check",
+    "ms": 1.8715,
+    "previous": "2e2e1a1925074c657b1146c7e61043d94b5590aaf6091c8b26f4c452a81be400"
+   },
+   "stages": [
+    {
+     "aot": true,
+     "bundle": "eg2_audio_fp16_T3000.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.095391583,
+     "name": "encoder",
+     "warm_up_ms": 98.953916
+    },
+    {
+     "aot": true,
+     "bundle": "eg2_reader_fp16_T750.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.0446345,
+     "name": "reader",
+     "warm_up_ms": 44.191125
+    }
+   ],
+   "sampler": {
+    "available_least_mb": 2697.999608,
+    "footprint_peak_mb": 841.992968,
+    "thermal_changes": [],
+    "thermal_end": "nominal"
+   },
+   "transcribe": {
+    "audio_s": 10.435,
+    "decode_s": 0.018186209,
+    "log_mel_s": 0.000815333,
+    "total_s": 0.11349604199999999,
+    "x_realtime": 91.94153219898189,
+    "text": "he hoped there would be stew for dinner turnips and carrots and bruised potatoes and fat muttered pieces to be ladled out in thick peppered flour fatten sauce"
+   },
+   "error": null
+  },
+  "long": {
+   "input": {
+    "audio": "audio.flac",
+    "audio_s": 3257.44325,
+    "converted": false,
+    "decode_s": 0.488071708,
+    "frames": 325744,
+    "log_mel_cpu_s": {
+     "blocks": 637,
+     "fft": 0.5949621569999999,
+     "log": 0.09767911500000007,
+     "mel": 0.22696038400000002,
+     "note": "CPU seconds summed over the parallel blocks of 512 frames: framing + FFT + |X|, mel product, log"
+    },
+    "log_mel_s": 0.160618959,
+    "samples": 52119092,
+    "source_rate": 16000
+   },
+   "passes": [
+    {
+     "order": 0,
+     "overlap": false,
+     "wall_s": 11.631452667,
+     "x_realtime": 280.0547225921149,
+     "stage_ms_median": [
+      57.799417,
+      34.4955
+     ],
+     "host_ms_per_window": 0.6978174399999997,
+     "thermal_start": "nominal",
+     "thermal_end": "nominal",
+     "cooled_s": 1.0728836059570312e-06,
+     "wer_errors": 571,
+     "wer": 0.05774092425927799,
+     "labels_differing_from_first_pass": 0,
+     "labels_differing_from_mac_python": 19,
+     "words_differing_from_mac_python": 6,
+     "top1_logit_max": 40.53125
+    },
+    {
+     "order": 1,
+     "overlap": true,
+     "wall_s": 11.679626291,
+     "x_realtime": 278.8996127821398,
+     "stage_ms_median": [
+      92.199375,
+      48.712208
+     ],
+     "host_ms_per_window": 1.210679424,
+     "thermal_start": "nominal",
+     "thermal_end": "nominal",
+     "cooled_s": 0,
+     "wer_errors": 571,
+     "wer": 0.05774092425927799,
+     "labels_differing_from_first_pass": 0,
+     "labels_differing_from_mac_python": 19,
+     "words_differing_from_mac_python": 6,
+     "top1_logit_max": 40.53125
+    },
+    {
+     "order": 2,
+     "overlap": false,
+     "wall_s": 12.366459125,
+     "x_realtime": 263.40953518495536,
+     "stage_ms_median": [
+      59.526667,
+      38.885959
+     ],
+     "host_ms_per_window": 0.7033300319999995,
+     "thermal_start": "nominal",
+     "thermal_end": "nominal",
+     "cooled_s": 0,
+     "wer_errors": 571,
+     "wer": 0.05774092425927799,
+     "labels_differing_from_first_pass": 0,
+     "labels_differing_from_mac_python": 19,
+     "words_differing_from_mac_python": 6,
+     "top1_logit_max": 40.53125
+    },
+    {
+     "order": 3,
+     "overlap": true,
+     "wall_s": 14.340012583,
+     "x_realtime": 227.1576284292581,
+     "stage_ms_median": [
+      115.943625,
+      60.6265
+     ],
+     "host_ms_per_window": 1.2726330559999999,
+     "thermal_start": "nominal",
+     "thermal_end": "nominal",
+     "cooled_s": 0,
+     "wer_errors": 571,
+     "wer": 0.05774092425927799,
+     "labels_differing_from_first_pass": 0,
+     "labels_differing_from_mac_python": 19,
+     "words_differing_from_mac_python": 6,
+     "top1_logit_max": 40.53125
+    }
+   ],
+   "sampler": {
+    "available_least_mb": 2286.4496,
+    "footprint_peak_mb": 1253.542976,
+    "thermal_changes": [],
+    "thermal_end": "nominal"
+   },
+   "device_start": {
+    "arch": "h19p",
+    "available_mb": 3521.771776,
+    "footprint_mb": 13.846272,
+    "machine": "iPhone19,2",
+    "os": "Version 27.2 (Build 24B5099f)",
+    "os_build": "24B5099f",
+    "physical_memory_gb": 12.12,
+    "power": {
+     "battery": "charging",
+     "level": 0.800000011920929,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "power_end": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "error": null
+  },
+  "ui": {
+   "audio_s": 8.6,
+   "decode_s": 0.010321833,
+   "device": {
+    "arch": "h19p",
+    "available_mb": 2721.199304,
+    "footprint_mb": 818.58028,
+    "machine": "iPhone19,2",
+    "os": "Version 27.2 (Build 24B5099f)",
+    "os_build": "24B5099f",
+    "physical_memory_gb": 12.12,
+    "power": {
+     "battery": "charging",
+     "level": 0.800000011920929,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "file": "speckled-band-opening.wav",
+   "form": "gpu",
+   "host_s": 0.0009686250000000001,
+   "log_mel_cpu_s": {
+    "blocks": 2,
+    "fft": 0.004009376,
+    "log": 0.000680375,
+    "mel": 0.001225666,
+    "note": "CPU seconds summed over the parallel blocks of 512 frames: framing + FFT + |X|, mel product, log"
+   },
+   "log_mel_s": 0.003624167,
+   "overlap": false,
+   "stage_ms_median": [
+    79.402084,
+    48.845792
+   ],
+   "total_s": 0.14326283299999998,
+   "windows": 1,
+   "windows_wall_s": 0.129316833,
+   "words": 27,
+   "x_realtime": 60.02952629032543
+  },
+  "core_ai_cache": {
+   "before": {
+    "file": "device/r6a_cache_before.txt",
+    "lines": 43,
+    "entries": [
+     {
+      "build": "24B5099f",
+      "namespace": "com.coreai.eg2transcribe",
+      "main_hash": "17df9b320b2f7a95fbebd561f0d6242c25478907bdee526ebee6fab794445606"
+     },
+     {
+      "build": "24B5099f",
+      "namespace": "com.coreai.eg2transcribe",
+      "main_hash": "755fe56bbd2b219f60f075808abf13b4400c574fe7573f311338ad33cdcead69"
+     }
+    ]
+   },
+   "after-cold": {
+    "file": "device/r6a_cache_after-cold.txt",
+    "lines": 45,
+    "entries": [
+     {
+      "build": "24B5099f",
+      "namespace": "com.coreai.eg2transcribe",
+      "main_hash": "46bcd1e57d2008457153ecd67ca27dacac4d26be696c42b377306c1f3a485bf5"
+     },
+     {
+      "build": "24B5099f",
+      "namespace": "com.coreai.eg2transcribe",
+      "main_hash": "7ad3b2b217af4b586eb8b776af4ff88210ccfbd3c31e51f7e3a88d89aaa353e6"
+     }
+    ]
+   },
+   "after-warm": {
+    "file": "device/r6a_cache_after-warm.txt",
+    "lines": 45,
+    "entries": [
+     {
+      "build": "24B5099f",
+      "namespace": "com.coreai.eg2transcribe",
+      "main_hash": "46bcd1e57d2008457153ecd67ca27dacac4d26be696c42b377306c1f3a485bf5"
+     },
+     {
+      "build": "24B5099f",
+      "namespace": "com.coreai.eg2transcribe",
+      "main_hash": "7ad3b2b217af4b586eb8b776af4ff88210ccfbd3c31e51f7e3a88d89aaa353e6"
+     }
+    ]
+   }
+  }
+ },
+ "hold_log": [
+  "[2026-10-14 12:55:39] eg2stt_r6a frame pid 41936 enqueued (supervisor coreai-8f, ~30 min); waiting for the hold",
+  "[2026-10-14 12:55:39] hold taken by eg2stt_r6a frame pid 41936: {\"pid\": 41936, \"script\": \"eg2stt_r6a\", \"device\": \"iPhone 18 Pro\", \"session\": \"EG2 STT r6a worker (Opus 5.5), supervisor coreai-8f\", \"started\": \"2026-10-14 12:55:39\"}",
+  "[2026-10-14 12:59:05] hold released by eg2stt_r6a frame pid 41936 after 206 s; thermal=nominal"
+ ]
+}

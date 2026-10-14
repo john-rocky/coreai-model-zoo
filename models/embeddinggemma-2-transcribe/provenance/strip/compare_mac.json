@@ -1,0 +1,108 @@
+{
+ "schema": "eg2-transcribe-strip-compare/1",
+ "status": "SAME",
+ "started": "2026-10-14T11:38:45+0900",
+ "finished": "2026-10-14T11:38:58+0900",
+ "what": "each gated bundle and its stripped copy, JIT .aimodel on this Mac, the 20 fixture clips (encoder: features + half_mask; reader: the clips' reference soft tokens in 750-token windows)",
+ "label": "eg2stt-r6b-strip-compare",
+ "pairs": [
+  {
+   "bundle": "eg2_audio_fp16_T3000",
+   "backend": "JIT, gpu preferred",
+   "calls": 20,
+   "equal_calls": 20,
+   "max_abs": {
+    "soft_tokens": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "3cce8936678c07a1c54a3af77c2c2b996861777db3cbdbc4713fc98357e8f1d9",
+    "cache_entry": "coreai-cache/26A428/python/3cce8936678c07a1c54a3af77c2c2b996861777db3cbdbc4713fc98357e8f1d9",
+    "cache_entry_exists": true,
+    "load_s": 1.39,
+    "first_call_s": 0.208,
+    "median_call_ms": 40.465
+   },
+   "stripped": {
+    "main_hash": "330ff806a36cc7299de0350b26d27c32b2e8dc96ffee8f2f437d4f86a103498a",
+    "cache_entry": "coreai-cache/26A428/python/330ff806a36cc7299de0350b26d27c32b2e8dc96ffee8f2f437d4f86a103498a",
+    "cache_entry_exists": true,
+    "load_s": 2.18,
+    "first_call_s": 0.0495,
+    "median_call_ms": 40.384
+   },
+   "control_one_step_differs": true,
+   "status": "SAME"
+  },
+  {
+   "bundle": "eg2_reader_fp16_T750",
+   "backend": "JIT, gpu preferred",
+   "calls": 20,
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "6fbf8f27ad7ffdd15e11173c2b7fad1101ba76af022bf14e0e707db57c276c2b",
+    "cache_entry": "coreai-cache/26A428/python/6fbf8f27ad7ffdd15e11173c2b7fad1101ba76af022bf14e0e707db57c276c2b",
+    "cache_entry_exists": true,
+    "load_s": 1.26,
+    "first_call_s": 0.0518,
+    "median_call_ms": 22.795
+   },
+   "stripped": {
+    "main_hash": "f7e5b2b886dd5dca92c39313ba85c0306daad1e695e64beb5597f2e7f13f2397",
+    "cache_entry": "coreai-cache/26A428/python/f7e5b2b886dd5dca92c39313ba85c0306daad1e695e64beb5597f2e7f13f2397",
+    "cache_entry_exists": true,
+    "load_s": 1.18,
+    "first_call_s": 0.0274,
+    "median_call_ms": 22.675
+   },
+   "status": "SAME"
+  },
+  {
+   "bundle": "eg2_reader_fp16_T750",
+   "backend": "JIT, ane preferred",
+   "calls": 20,
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "6fbf8f27ad7ffdd15e11173c2b7fad1101ba76af022bf14e0e707db57c276c2b",
+    "cache_entry": "coreai-cache/26A428/python/6fbf8f27ad7ffdd15e11173c2b7fad1101ba76af022bf14e0e707db57c276c2b",
+    "cache_entry_exists": true,
+    "load_s": 1.08,
+    "first_call_s": 0.0493,
+    "median_call_ms": 42.886
+   },
+   "stripped": {
+    "main_hash": "f7e5b2b886dd5dca92c39313ba85c0306daad1e695e64beb5597f2e7f13f2397",
+    "cache_entry": "coreai-cache/26A428/python/f7e5b2b886dd5dca92c39313ba85c0306daad1e695e64beb5597f2e7f13f2397",
+    "cache_entry_exists": true,
+    "load_s": 1.24,
+    "first_call_s": 0.0461,
+    "median_call_ms": 43.383
+   },
+   "status": "SAME"
+  }
+ ],
+ "code_sha256": {
+  "strip_ship.py": "63147229f7d1f2308c4b6e7fb09d345106da233fc6bce207f80d9f74b0c99dab"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428",
+  "coreai-core": "1.0.0b2",
+  "numpy": "2.3.5"
+ }
+}

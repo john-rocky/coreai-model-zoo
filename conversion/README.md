@@ -574,6 +574,19 @@ Apple's repo; each recipe names the script it runs.
   (5 upstream examples + FLEURS en/zh/ja) gated end-to-end on the engine with the margin rule; `apps/FunASRGate`
   runs the same gate on the iPhone. See [`funasr_nano/README.md`](funasr_nano/README.md) and
   [`../models/funasr-nano/README.md`](../models/funasr-nano/README.md).
+- **EmbeddingGemma 2 Transcribe (English speech→text: the EmbeddingGemma 2 audio encoder, frozen, + a trained
+  200,000-word reader, in [`eg2_transcribe/`](eg2_transcribe/)): `eg2_transcribe/export_encoder.py --form fp16 --bucket
+  3000` + `eg2_transcribe/export_reader.py --form fp16 --tokens 750` + `eg2_transcribe/strip_ship.py strip | aot`** —
+  the Gemma 4 audio tower and `embed_audio` re-authored in plain torch from `model.safetensors` (banded 12-key
+  attention, q / k scales folded into the projections, max-abs RMSNorm for fp16, plain subsampling LayerNorms) as one
+  30 s graph (`features [1,3000,128]` + `half_mask` → 750 soft tokens), and the reader (trained on LibriSpeech in the
+  eg2-transcribe repository) with its 200,000 × 768 word table as a second graph that returns the arg-max word, its
+  logit and the blank logit per token. Oracle = transformers 5.19.0 fp32 with the default attention (`eager` inverts
+  the audio mask in that version); per-token gate on 20 test-clean clips and label / WER gate on 220 utterances, with
+  red arms; `bench_pipeline.py long` runs a 54-minute recording end to end; `strip_ship.py` removes the debug
+  locations, compiles for h19p and compares the copies on the Mac. These scripts import no `coreai_models` code. See
+  [`eg2_transcribe/README.md`](eg2_transcribe/README.md) and
+  [`../models/embeddinggemma-2-transcribe/README.md`](../models/embeddinggemma-2-transcribe/README.md).
 - **RGBA-Image-2.1 (Qwen-Image-2.1 text-to-image with RGBA output, Alibaba Qwen, in [`qwenimage21/`](qwenimage21/)):
   `qwenimage21/export_dit.py`, `qwenimage21/export_encoder.py --aot --w16a32`,
   `qwenimage21/export_vae.py --size {256,512,1024} --aot`** — the 7B block-causal DiT and the

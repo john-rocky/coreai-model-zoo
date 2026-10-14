@@ -1,0 +1,816 @@
+{
+ "label": "reader_fp16-gpu-aot",
+ "chain": false,
+ "bucket": 750,
+ "route": "gpu-aot",
+ "stages": [
+  {
+   "allowed_compute_units": [
+    "cpu",
+    "gpu",
+    "neuralEngine"
+   ],
+   "available_after_load_mb": 3213.6,
+   "bucket": 750,
+   "bundle": "eg2_reader_fp16_T750_gpu_h19p.aimodelc",
+   "cache_entry_deleted": false,
+   "cold_requested": false,
+   "compute": "gpu",
+   "footprint_after_load_mb": 326.4,
+   "footprint_before_load_mb": 10,
+   "form": "reader_fp16",
+   "inputs": {
+    "soft_tokens": [
+     1,
+     750,
+     512
+    ],
+    "token_mask": [
+     1,
+     750
+    ]
+   },
+   "io_dtype": "f16",
+   "kind": "reader",
+   "label": "reader_fp16-gpu-aot",
+   "load_cpu_ms": 56.109,
+   "load_ms": 56.285,
+   "load_retry": null,
+   "output_types": {
+    "blank_logit": "float16",
+    "top1_index": "int32",
+    "top1_logit": "float16"
+   },
+   "outputs": {
+    "blank_logit": [
+     1,
+     750
+    ],
+    "top1_index": [
+     1,
+     750
+    ],
+    "top1_logit": [
+     1,
+     750
+    ]
+   },
+   "preferred_compute_unit": "gpu",
+   "route": "gpu-aot",
+   "specialization": "SpecializationOptions(allowedComputeUnitKinds: Set([CoreAIDelegates.ComputeUnitKind.gpu, CoreAIDelegates.ComputeUnitKind.cpu, CoreAIDelegates.ComputeUnitKind.neuralEngine]), preferredComputeUnitKind: Optional(CoreAIDelegates.ComputeUnitKind.gpu), enableEncodingFunctions: false, enableDefaultOSPreferredCompute: true, debugConfiguration: nil, expectFrequentReshapes: false, delegateOptionsOverride: nil)",
+   "thermal_after_load": "nominal"
+  }
+ ],
+ "timing_source": "fixtures/R750/timing.soft_tokens.f16.bin",
+ "device": {
+  "arch": "h19p",
+  "available_compute_units": [
+   "cpu",
+   "gpu",
+   "neuralEngine"
+  ],
+  "build": "24B5099f",
+  "machine": "iPhone19,2",
+  "os": "Version 27.2 (Build 24B5099f)",
+  "physical_memory_gb": 12.12
+ },
+ "coreai": {
+  "bundle_id": "com.apple.CoreAI",
+  "short": "1.0",
+  "version": "1"
+ },
+ "launch": {
+  "tag": "r4b20805-t-reader",
+  "started": "2026-10-13T23:05:29Z",
+  "finished": "2026-10-13T23:05:48Z",
+  "order": [
+   "reader_fp16-gpu-aot",
+   "reader_fp16-gpu-jit",
+   "reader_fp16-ane-jit"
+  ],
+  "note": "one process: every bundle loaded once, then rounds A/B/C...; rep 0 = cold clocks, reps 1.. = ramped; a chain call = stage 1 -> host cast -> stage 2, timed whole; two in flight = one block of calls windows, wall / calls",
+  "power_start": {
+   "battery": "charging",
+   "level": 0.800000011920929,
+   "low_power_mode": false
+  },
+  "power_end": {
+   "battery": "charging",
+   "level": 0.800000011920929,
+   "low_power_mode": false
+  },
+  "thermal_start": "nominal",
+  "thermal_end": "nominal",
+  "thermal_changes": []
+ },
+ "compared_in_launch_with": [
+  "reader_fp16-gpu-aot",
+  "reader_fp16-gpu-jit",
+  "reader_fp16-ane-jit"
+ ],
+ "summary": {
+  "cold_ms": 32.775,
+  "ramped_ms": 32.989,
+  "ramped_rep_median_range_ms": [
+   32.687,
+   33.075
+  ],
+  "ramped_p90_ms": 35.241,
+  "x_realtime_ramped": 909.4,
+  "x_realtime_cold": 915.3,
+  "audio_s_per_call": 30.0,
+  "reps": 8,
+  "calls_per_rep": 20,
+  "warmup_calls_per_rep": 3,
+  "cpu_ms_per_call_median": 2.96,
+  "launch_footprint_peak_mb": 1353,
+  "launch_available_least_mb": 2186.9,
+  "thermal_by_rep": [
+   "nominal->nominal",
+   "nominal->nominal",
+   "nominal->nominal",
+   "nominal->nominal",
+   "nominal->nominal",
+   "nominal->nominal",
+   "nominal->nominal",
+   "nominal->nominal"
+  ],
+  "cooled_s_total": 0,
+  "power_by_rep": [
+   "charging",
+   "charging",
+   "charging",
+   "charging",
+   "charging",
+   "charging",
+   "charging",
+   "charging"
+  ],
+  "usb_powered": true,
+  "battery_level_first_last": [
+   0.800000011920929,
+   0.800000011920929
+  ],
+  "last_output_finite_every_rep": true,
+  "stages": [
+   {
+    "label": "reader_fp16-gpu-aot",
+    "bundle": "eg2_reader_fp16_T750_gpu_h19p.aimodelc",
+    "route": "gpu-aot",
+    "kind": "reader",
+    "cold_ms": 32.741,
+    "ramped_ms": 32.961,
+    "cpu_median_ms_ramped": 1.366,
+    "load_ms": 56.285,
+    "load_cpu_ms": 56.109,
+    "footprint_after_load_mb": 326.4
+   }
+  ]
+ },
+ "app_summary": {
+  "cold_ms": 32.775,
+  "ramped_ms": 32.988,
+  "ramped_p90_ms": 35.241,
+  "x_realtime_ramped": 909.4,
+  "cpu_ms_per_call_median": 2.96,
+  "inflight_cold_ms_per_window": null,
+  "inflight_ramped_ms_per_window": null,
+  "inflight_x_realtime_ramped": null
+ },
+ "reps": [
+  {
+   "available_mb": 2196.5,
+   "block_s": 0.674,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 2.862,
+   "footprint_mb": 1343.5,
+   "last_output_finite": true,
+   "median_ms": 32.775,
+   "ms": [
+    35.097,
+    35.127,
+    35.507,
+    36.417,
+    32.264,
+    32.82,
+    35.813,
+    32.344,
+    32.729,
+    34.005,
+    32.719,
+    34.71,
+    32.364,
+    32.572,
+    34.727,
+    32.379,
+    32.546,
+    34.564,
+    32.4,
+    32.64
+   ],
+   "p90_ms": 35.538,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 0,
+   "sequence": 0,
+   "stage_cpu_median_ms": [
+    1.617
+   ],
+   "stage_median_ms": [
+    32.741
+   ],
+   "stage_ms": [
+    [
+     35.089,
+     35.12,
+     35.475,
+     36.397,
+     32.258,
+     32.784,
+     35.802,
+     32.34,
+     32.697,
+     33.995,
+     32.69,
+     34.702,
+     32.361,
+     32.541,
+     34.718,
+     32.376,
+     32.52,
+     34.556,
+     32.396,
+     32.604
+    ]
+   ],
+   "t_start_s": 0.13,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    58.993,
+    36.275,
+    34.91
+   ]
+  },
+  {
+   "available_mb": 2187.1,
+   "block_s": 0.671,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 3.302,
+   "footprint_mb": 1352.8,
+   "last_output_finite": true,
+   "median_ms": 32.687,
+   "ms": [
+    35.183,
+    32.484,
+    32.719,
+    34.777,
+    32.55,
+    35.091,
+    32.422,
+    32.657,
+    34.978,
+    32.471,
+    32.629,
+    35.107,
+    32.389,
+    32.717,
+    34.681,
+    32.634,
+    34.889,
+    32.617,
+    34.973,
+    32.462
+   ],
+   "p90_ms": 35.092,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 1,
+   "sequence": 3,
+   "stage_cpu_median_ms": [
+    1.407
+   ],
+   "stage_median_ms": [
+    32.654
+   ],
+   "stage_ms": [
+    [
+     35.173,
+     32.481,
+     32.684,
+     34.767,
+     32.517,
+     35.08,
+     32.419,
+     32.624,
+     34.967,
+     32.468,
+     32.599,
+     35.098,
+     32.386,
+     32.683,
+     34.671,
+     32.601,
+     34.88,
+     32.59,
+     34.964,
+     32.459
+    ]
+   ],
+   "t_start_s": 2.446,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    35.201,
+    32.422,
+    32.575
+   ]
+  },
+  {
+   "available_mb": 2187.3,
+   "block_s": 0.669,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 2.918,
+   "footprint_mb": 1352.6,
+   "last_output_finite": true,
+   "median_ms": 32.821,
+   "ms": [
+    32.568,
+    32.681,
+    35.1,
+    32.5,
+    32.833,
+    34.88,
+    32.746,
+    32.911,
+    35.25,
+    32.685,
+    32.856,
+    35.276,
+    32.52,
+    32.809,
+    35.051,
+    32.582,
+    32.764,
+    34.873,
+    32.972,
+    32.694
+   ],
+   "p90_ms": 35.115,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 2,
+   "sequence": 6,
+   "stage_cpu_median_ms": [
+    1.379
+   ],
+   "stage_median_ms": [
+    32.792
+   ],
+   "stage_ms": [
+    [
+     32.565,
+     32.653,
+     35.091,
+     32.498,
+     32.805,
+     34.871,
+     32.743,
+     32.877,
+     35.239,
+     32.682,
+     32.822,
+     35.266,
+     32.517,
+     32.78,
+     35.042,
+     32.58,
+     32.736,
+     34.864,
+     32.97,
+     32.669
+    ]
+   ],
+   "t_start_s": 4.752,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    32.66,
+    32.728,
+    35.288
+   ]
+  },
+  {
+   "available_mb": 2203.7,
+   "block_s": 0.671,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 2.915,
+   "footprint_mb": 1336.3,
+   "last_output_finite": true,
+   "median_ms": 32.812,
+   "ms": [
+    35.379,
+    32.589,
+    32.758,
+    35.089,
+    32.642,
+    32.733,
+    34.336,
+    32.569,
+    32.827,
+    35.434,
+    32.625,
+    32.803,
+    35.215,
+    32.935,
+    34.887,
+    32.701,
+    32.821,
+    34.841,
+    32.66,
+    32.78
+   ],
+   "p90_ms": 35.232,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 3,
+   "sequence": 9,
+   "stage_cpu_median_ms": [
+    1.361
+   ],
+   "stage_median_ms": [
+    32.782
+   ],
+   "stage_ms": [
+    [
+     35.37,
+     32.586,
+     32.728,
+     35.08,
+     32.639,
+     32.708,
+     34.329,
+     32.566,
+     32.796,
+     35.425,
+     32.622,
+     32.773,
+     35.206,
+     32.907,
+     34.878,
+     32.698,
+     32.792,
+     34.832,
+     32.657,
+     32.753
+    ]
+   ],
+   "t_start_s": 7.058,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    35.101,
+    32.737,
+    32.801
+   ]
+  },
+  {
+   "available_mb": 2203.7,
+   "block_s": 0.673,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 3.038,
+   "footprint_mb": 1336.3,
+   "last_output_finite": true,
+   "median_ms": 33.007,
+   "ms": [
+    35.483,
+    32.671,
+    32.882,
+    34.606,
+    32.718,
+    32.966,
+    35.447,
+    32.738,
+    32.953,
+    35.111,
+    32.795,
+    33.049,
+    35.205,
+    32.851,
+    33.047,
+    35.249,
+    32.919,
+    33.116,
+    34.734,
+    32.731
+   ],
+   "p90_ms": 35.269,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 4,
+   "sequence": 12,
+   "stage_cpu_median_ms": [
+    1.358
+   ],
+   "stage_median_ms": [
+    32.976
+   ],
+   "stage_ms": [
+    [
+     35.473,
+     32.668,
+     32.854,
+     34.598,
+     32.716,
+     32.936,
+     35.438,
+     32.736,
+     32.924,
+     35.103,
+     32.792,
+     33.02,
+     35.197,
+     32.848,
+     33.016,
+     35.24,
+     32.916,
+     33.089,
+     34.725,
+     32.728
+    ]
+   ],
+   "t_start_s": 9.368,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    35.352,
+    32.707,
+    32.884
+   ]
+  },
+  {
+   "available_mb": 2203.7,
+   "block_s": 0.672,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 2.876,
+   "footprint_mb": 1336.3,
+   "last_output_finite": true,
+   "median_ms": 32.988,
+   "ms": [
+    32.771,
+    32.912,
+    35.024,
+    32.816,
+    32.817,
+    35.077,
+    32.998,
+    34.705,
+    32.776,
+    32.979,
+    35.194,
+    33.028,
+    33.985,
+    32.732,
+    33.33,
+    35.021,
+    32.705,
+    32.916,
+    35.364,
+    32.768
+   ],
+   "p90_ms": 35.089,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 5,
+   "sequence": 15,
+   "stage_cpu_median_ms": [
+    1.317
+   ],
+   "stage_median_ms": [
+    32.961
+   ],
+   "stage_ms": [
+    [
+     32.768,
+     32.883,
+     35.014,
+     32.813,
+     32.789,
+     35.069,
+     32.973,
+     34.697,
+     32.773,
+     32.948,
+     35.185,
+     33.009,
+     33.979,
+     32.729,
+     33.304,
+     35.013,
+     32.702,
+     32.887,
+     35.355,
+     32.765
+    ]
+   ],
+   "t_start_s": 11.691,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    32.854,
+    33.06,
+    35.319
+   ]
+  },
+  {
+   "available_mb": 2203.7,
+   "block_s": 0.674,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 3.001,
+   "footprint_mb": 1336.3,
+   "last_output_finite": true,
+   "median_ms": 33.006,
+   "ms": [
+    35.463,
+    32.769,
+    32.817,
+    34.552,
+    32.794,
+    33.042,
+    35.24,
+    32.847,
+    33.006,
+    35.318,
+    33.049,
+    35.118,
+    32.909,
+    32.91,
+    35.015,
+    32.844,
+    32.935,
+    35.349,
+    32.776,
+    33.007
+   ],
+   "p90_ms": 35.321,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 6,
+   "sequence": 18,
+   "stage_cpu_median_ms": [
+    1.366
+   ],
+   "stage_median_ms": [
+    32.977
+   ],
+   "stage_ms": [
+    [
+     35.453,
+     32.766,
+     32.797,
+     34.546,
+     32.791,
+     33.013,
+     35.231,
+     32.844,
+     32.977,
+     35.309,
+     33.022,
+     35.109,
+     32.906,
+     32.882,
+     35.007,
+     32.841,
+     32.903,
+     35.34,
+     32.773,
+     32.978
+    ]
+   ],
+   "t_start_s": 14.009,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    35.394,
+    33.406,
+    33.041
+   ]
+  },
+  {
+   "available_mb": 2203.7,
+   "block_s": 0.676,
+   "cast_median_ms": null,
+   "cast_ms": [],
+   "cooled_s": 0,
+   "cpu_ms_per_call": 3.139,
+   "footprint_mb": 1336.3,
+   "last_output_finite": true,
+   "median_ms": 33.075,
+   "ms": [
+    35.225,
+    32.919,
+    32.997,
+    35.343,
+    32.886,
+    33.056,
+    35.517,
+    32.973,
+    33.068,
+    35.23,
+    32.988,
+    33.082,
+    35.375,
+    32.927,
+    33.133,
+    35.207,
+    32.945,
+    33.136,
+    35.233,
+    32.902
+   ],
+   "p90_ms": 35.347,
+   "power": {
+    "battery": "charging",
+    "level": 0.800000011920929,
+    "low_power_mode": false
+   },
+   "rep": 7,
+   "sequence": 21,
+   "stage_cpu_median_ms": [
+    1.38
+   ],
+   "stage_median_ms": [
+    33.046
+   ],
+   "stage_ms": [
+    [
+     35.217,
+     32.916,
+     32.968,
+     35.334,
+     32.883,
+     33.027,
+     35.508,
+     32.97,
+     33.04,
+     35.221,
+     32.985,
+     33.051,
+     35.365,
+     32.925,
+     33.105,
+     35.199,
+     32.942,
+     33.108,
+     35.225,
+     32.899
+    ]
+   ],
+   "t_start_s": 16.337,
+   "thermal_after": "nominal",
+   "thermal_before": "nominal",
+   "warm_ms": [
+    33.449,
+    35.421,
+    33.053
+   ]
+  }
+ ],
+ "made": "2026-10-14T08:43:14+0900",
+ "run_dir": "<work>/device/pull/r4b20805-t-reader"
+}

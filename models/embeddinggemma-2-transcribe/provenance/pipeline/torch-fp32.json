@@ -1,0 +1,85 @@
+{
+ "what": "torch float32 CPU: re-authored encoder (exact) + the reader's forward + greedy_labels, the same windows as `long`",
+ "audio_s": 3257.44325,
+ "tokens": 81436,
+ "windows": 125,
+ "window_contract": {
+  "frames": 3000,
+  "left_overlap_tokens": 96,
+  "dropped_last_tokens": 1
+ },
+ "reader": {
+  "kind": "release",
+  "weights": "<eg2-transcribe>/reader/reader.pt",
+  "weights_sha256": "67a06a857b9aeb066347f8947e4faeed11d2ec3e89e0c23974be0a2c20243d5b",
+  "arch": "a",
+  "k": null,
+  "params": 13268994,
+  "scale": 91.21830749511719,
+  "n_vocab": 200000,
+  "table": "<eg2-transcribe>/reader/word_table.npy",
+  "reader_dir": "<eg2-transcribe>/reader",
+  "model_py_sha256": "95a32e58defcda2d71931bea9c07a66272ff7ec8fa5cd39c1bce8e1f253b51c0",
+  "decode_py_sha256": "d8ecd41dea4322397c319d515cba80438b322c88aaf6471943cffbabca0f6462",
+  "config": {
+   "version": "v1",
+   "window": {
+    "seconds": 30,
+    "left_overlap_tokens": 96,
+    "right_extra_tokens": 1,
+    "note": "encoder is causal; the 83 tokens at the start of a window and its last token differ from a continuous run (fixtures/long-speckled-band: soft_tokens_w30 vs soft_tokens_continuous)"
+   },
+   "decode": "greedy argmax over N+1, collapse repeats, drop blank",
+   "scale": 91.21830749511719,
+   "wer": {
+    "dev-clean": {
+     "wer": 0.06566,
+     "utterances": 2703,
+     "ref_words": 54402
+    },
+    "dev-other": {
+     "wer": 0.14927,
+     "utterances": 2864,
+     "ref_words": 50948
+    },
+    "test-clean": {
+     "wer": 0.06807,
+     "utterances": 2620,
+     "ref_words": 52576
+    },
+    "test-other": {
+     "wer": 0.15102,
+     "utterances": 2939,
+     "ref_words": 52343
+    },
+    "fixtures": {
+     "wer": 0.04806,
+     "utterances": 20,
+     "ref_words": 541
+    },
+    "decode": "greedy, no language model"
+   }
+  }
+ },
+ "encoder_model_dir": "<work>/data/hf/embeddinggemma-2",
+ "wer": {
+  "wer": 0.05784204671857619,
+  "errors": 572,
+  "ref_words": 9889,
+  "hyp_words": 9930,
+  "engine": "word Levenshtein (numpy); jiwer: bench_pipeline.py score"
+ },
+ "seconds": 92.0,
+ "threads": 6,
+ "finished": "2026-10-14T09:09:22+0900",
+ "wer_jiwer": {
+  "engine": "jiwer 4.0.0",
+  "wer": 0.05784204671857619,
+  "substitutions": 379,
+  "deletions": 76,
+  "insertions": 117,
+  "ref_words": 9889,
+  "hyp_file": "<work>/exports/pipeline/hyp_long_torch.txt",
+  "matches_numpy": true
+ }
+}

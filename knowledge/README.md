@@ -447,6 +447,15 @@ For the long-form version of the same material, read
   weights with float32 arithmetic; keep the tied head tied (int8lin, not int8hu); two LayerNorm epsilons;
   `N = ceil(L/8)` audio rows; no audio marker token; funasr's dither is a constructor argument; and the
   knife-edge accounting that makes 150/155 vs 155/155 the same verdict.
+- [`embeddinggemma-2-transcribe-port.md`](embeddinggemma-2-transcribe-port.md) — EmbeddingGemma 2's audio encoder
+  (frozen) + a reader trained here that reads each token as the closest of 200,000 words, as English speech-to-text:
+  `half_mask` is the only mask a padded window needs; 30 s windows with 96 tokens of left overlap, each dropping its
+  last token; float16 needs a max-abs RMSNorm, and the subsampling LayerNorms must stay plain for the Neural Engine;
+  near-silent tokens are the float16 failure point on every backend (one float16 step on 12 inputs moves a token from
+  0.972 to 0.99996) → judge the app path by its transcripts; the Mac's Neural Engine passes only as a two-bundle cut,
+  the iPhone's runs none of the 30 s graphs; the 200,000-word table stays inside the graph; and the runtime traps (an
+  AOT `main.hash` ignores the weights, two calls of one function corrupt each other, export debug locations carry the
+  converting machine's paths).
 - [`kokoro-tts.md`](kokoro-tts.md) — Kokoro-82M (StyleTTS2 + iSTFTNet), the zoo's first **text-to-speech**:
   3 bundles cut at the one data-dependent length + host DSP, the `weight_norm`-random-init bug
   (non-determinism → suspect weight loading), variable length via **masked-unrolled bi-LSTM +

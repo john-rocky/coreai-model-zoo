@@ -1,0 +1,420 @@
+{
+ "what": "the app's self-test with reader v1 against the r4 bars and the r6a stop conditions",
+ "device": "mac",
+ "form": "gpu-ane",
+ "inputs": {
+  "gate": "<work>/exports/app/mac_v1/gate-gpu-ane-124904/result.json",
+  "long": "<work>/exports/app/mac_v1/long-gpu-ane-124917/result.json",
+  "iso": "<work>/exports/app/extractor_isolation_mac_v1_gpu-ane_124853.json",
+  "transcribe": [
+   "<work>/exports/app/mac_v1/transcribe-gpu-ane-clear-124858/result.json",
+   "<work>/exports/app/mac_v1/transcribe-gpu-ane-check-124903/result.json"
+  ]
+ },
+ "references": {
+  "ref_fixtures": {
+   "file": "ref_fixtures_coreai_path.json",
+   "finished": "2026-10-14T12:48:58+0900",
+   "transcripts_same_as_torch": 20
+  },
+  "torch": "exports/reader/ref_T750.npz, exports/reader/fp16/hyp_gpu_T750.tsv (v1)"
+ },
+ "device_record": {
+  "arch": "h16c",
+  "available_mb": null,
+  "footprint_mb": 3.392088,
+  "machine": "Mac16,9",
+  "os": "Version 27.0 (Build 26A428)",
+  "os_build": "26A428",
+  "physical_memory_gb": 137.44,
+  "power": {
+   "battery": "mac",
+   "level": null,
+   "low_power_mode": false
+  },
+  "thermal": "nominal"
+ },
+ "model": {
+  "cache": {
+   "cleared": false,
+   "fingerprint": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8",
+   "mode": "check",
+   "ms": 0.627042,
+   "previous": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8"
+  },
+  "folder": "eg2-transcribe",
+  "form": "gpu-ane",
+  "platform_folders": [
+   "macos"
+  ],
+  "reader_config_version": "v1",
+  "stages": [
+   {
+    "aot": false,
+    "bundle": "eg2_audio_fp16_T3000.aimodel",
+    "compute": "gpu",
+    "load_s": 0.133974166,
+    "name": "encoder",
+    "warm_up_ms": 104.626917
+   },
+   {
+    "aot": false,
+    "bundle": "eg2_reader_fp16_T750.aimodel",
+    "compute": "ane",
+    "load_s": 0.08123825,
+    "name": "reader",
+    "warm_up_ms": 49.123416
+   }
+  ],
+  "vocabulary": 200000,
+  "window": {
+   "drop_last": 1,
+   "frames": 3000,
+   "left_overlap": 96,
+   "tokens": 750
+  }
+ },
+ "fixtures": {
+  "source": "gate-gpu-ane-124904",
+  "utterances": 20,
+  "features_max_abs_diff": 4.76837158203125e-07,
+  "fp32_encoder_cos_min_app_features": 0.9999999995026775,
+  "fp32_encoder_cos_min_hf_features": 0.9999999990170414,
+  "iso_features_max_abs": 4.76837158203125e-07,
+  "extractor_pass": true,
+  "transcripts_same_as_torch": 19,
+  "mismatches": [
+   {
+    "id": "1188-133604-0000",
+    "transcript_app": "you will find me continually speaking of four men tion sublime turner and tiara in almost the same terms",
+    "transcript_torch": "you will find me continually speaking of four men tion sublime turner and tintoret in almost the same terms",
+    "positions": [
+     {
+      "token": 185,
+      "label_app": 177342,
+      "label_torch": 177983,
+      "app_top1_minus_blank": 5.7266,
+      "torch_top1_minus_blank": 5.7166,
+      "torch_top1_minus_top2_cos": 8.9e-05
+     }
+    ]
+   }
+  ],
+  "fixture_pass": true,
+  "fp16_soft_cos_mean_app_features": 0.9999941175021174,
+  "fp16_soft_cos_min_app_features": 0.989784733563025,
+  "fp16_soft_cos_min_reference_features": 0.9964469062042872,
+  "labels_same_both_features": 19,
+  "host_labels_equal_python_gpu_path_on_features_npy": 20
+ },
+ "long": {
+  "source": "long-gpu-ane-124917",
+  "audio_s": 3257.44325,
+  "decode_s": 0.634887292,
+  "log_mel_s": 0.050173,
+  "log_mel_cpu_s": {
+   "blocks": 637,
+   "fft": 0.5019028929999998,
+   "log": 0.07281616899999996,
+   "mel": 0.11522407699999994,
+   "note": "CPU seconds summed over the parallel blocks of 512 frames: framing + FFT + |X|, mel product, log"
+  },
+  "torch_wer": {
+   "wer": 0.05784204671857619,
+   "errors": 572,
+   "ref_words": 9889,
+   "hyp_words": 9930,
+   "engine": "word Levenshtein (numpy); jiwer: bench_pipeline.py score"
+  },
+  "python_path": {
+   "sequential_s": 10.708,
+   "overlap_s": 5.6814,
+   "overlap_s_pass2": 5.8143,
+   "errors": 574,
+   "ref_words": 9889,
+   "wer": 0.05804429163717262,
+   "x_realtime_overlap": 573.3,
+   "x_realtime_sequential": 304.2,
+   "reader_bundle": "eg2_reader_fp16_T750_ane_h16c.aimodelc",
+   "json": [
+    "pipeline_long_fp16_ane.json",
+    "pipeline_long_fp16_ane_overlap.json"
+   ],
+   "labels": "labels_long_fp16_ane_overlap.npy"
+  },
+  "features_max_abs_diff_long": 4.76837158203125e-07,
+  "host_long_labels_differing_on_features_npy": 0,
+  "host_long_word_distance_on_features_npy": 0,
+  "modes": {
+   "overlap_off": {
+    "wall_s": [
+     10.448345541,
+     10.798591875
+    ],
+    "x_realtime_windows": [
+     311.7664167228751,
+     301.654446033965
+    ],
+    "x_realtime_end_to_end": 292.58281777035086,
+    "stage_ms_median": [
+     40.629958,
+     41.955208
+    ],
+    "stage_ms_median_every_pass": [
+     [
+      40.629958,
+      41.955208
+     ],
+     [
+      40.562833,
+      41.770833
+     ]
+    ],
+    "host_ms_per_window": {
+     "collapse": 0.003569328,
+     "feed": 0.29721467199999985,
+     "inputs": 0.03152696800000001,
+     "labels": 0.008576992,
+     "total": 0.3408879599999998
+    },
+    "wer": {
+     "errors": 572,
+     "reference_words": 9889,
+     "wer": 0.05784204671857619
+    },
+    "wer_errors_every_pass": [
+     572,
+     572
+    ],
+    "word_distance_to_python_hyp": 3,
+    "labels_differing_from_python": 13,
+    "labels_differing_positions_s": [
+     291.48,
+     469.4,
+     603.24,
+     1020.76,
+     1047.0,
+     1720.08,
+     1818.44,
+     1999.92,
+     2080.56,
+     2080.6,
+     2441.64,
+     2773.84,
+     2773.92
+    ],
+    "top1_logit_max": 40.4375,
+    "labels_differing_pass2_vs_pass1": 0,
+    "soft_tokens_first_minutes_vs_continuous": {
+     "cos_mean": 0.9999893888428746,
+     "cos_min": 0.9470607199456169,
+     "reference": "soft_tokens_continuous.npy",
+     "tokens": 15000
+    }
+   },
+   "overlap_on": {
+    "wall_s": [
+     5.480012375,
+     5.498028166
+    ],
+    "x_realtime_windows": [
+     594.4226083978505,
+     592.4748203627154
+    ],
+    "x_realtime_end_to_end": 528.3706171763765,
+    "stage_ms_median": [
+     40.30025,
+     42.904
+    ],
+    "stage_ms_median_every_pass": [
+     [
+      40.30025,
+      42.904
+     ],
+     [
+      40.379417,
+      43.18075
+     ]
+    ],
+    "host_ms_per_window": {
+     "collapse": 0.003064,
+     "feed": 0.21146640800000005,
+     "inputs": 0.030885944000000002,
+     "labels": 0.007875311999999999,
+     "total": 0.2532916640000001
+    },
+    "wer": {
+     "errors": 572,
+     "reference_words": 9889,
+     "wer": 0.05784204671857619
+    },
+    "wer_errors_every_pass": [
+     572,
+     572
+    ],
+    "word_distance_to_python_hyp": 3,
+    "labels_differing_from_python": 13,
+    "labels_differing_positions_s": [
+     291.48,
+     469.4,
+     603.24,
+     1020.76,
+     1047.0,
+     1720.08,
+     1818.44,
+     1999.92,
+     2080.56,
+     2080.6,
+     2441.64,
+     2773.84,
+     2773.92
+    ],
+    "top1_logit_max": 40.4375,
+    "labels_differing_pass2_vs_pass1": 0
+   }
+  },
+  "errors": [
+   572,
+   572,
+   572,
+   572
+  ],
+  "long_vs_torch_pass": true,
+  "long_vs_python_pass": true,
+  "overlap_labels_same_as_sequential": true,
+  "speed": {
+   "python_sequential_s": 10.708,
+   "python_overlap_s": 5.6814,
+   "app_sequential_s": 10.448345541,
+   "app_overlap_s": 5.480012375,
+   "sequential_ratio": 0.9757513579566679,
+   "overlap_ratio": 0.9645531691132467
+  }
+ },
+ "transcribe": [
+  {
+   "source": "transcribe-gpu-ane-clear-124858",
+   "milestones_s": {
+    "load_and_warm_up": 5.113898992538452,
+    "process_start_to_load_start": 0.010068058967590332,
+    "process_start_to_transcript": 5.213732123374939,
+    "transcribe": 0.08976507186889648
+   },
+   "cache": {
+    "cleared": true,
+    "fingerprint": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8",
+    "mode": "clear",
+    "ms": 41.4955,
+    "previous": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8"
+   },
+   "stages": [
+    {
+     "aot": false,
+     "bundle": "eg2_audio_fp16_T3000.aimodel",
+     "compute": "gpu",
+     "load_s": 1.266170458,
+     "name": "encoder",
+     "warm_up_ms": 107.368042
+    },
+    {
+     "aot": false,
+     "bundle": "eg2_reader_fp16_T750.aimodel",
+     "compute": "ane",
+     "load_s": 3.6100365,
+     "name": "reader",
+     "warm_up_ms": 51.036667
+    }
+   ],
+   "result": {
+    "audio_s": 10.435,
+    "decode_s": 0.005991542,
+    "log_mel_s": 0.000941041,
+    "total_s": 0.08975037400000001,
+    "x_realtime": 116.26692497125416,
+    "text": "he hoped there would be stew for dinner turnips and carrots and bruised potatoes and fat muttered pieces to be ladled out in thick peppered flour fatten sauce"
+   },
+   "device": {
+    "arch": "h16c",
+    "available_mb": null,
+    "footprint_mb": 3.37568,
+    "machine": "Mac16,9",
+    "os": "Version 27.0 (Build 26A428)",
+    "os_build": "26A428",
+    "physical_memory_gb": 137.44,
+    "power": {
+     "battery": "mac",
+     "level": null,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "error": null
+  },
+  {
+   "source": "transcribe-gpu-ane-check-124903",
+   "milestones_s": {
+    "load_and_warm_up": 0.4048839807510376,
+    "process_start_to_load_start": 0.00967097282409668,
+    "process_start_to_transcript": 0.5038329362869263,
+    "transcribe": 0.08927798271179199
+   },
+   "cache": {
+    "cleared": false,
+    "fingerprint": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8",
+    "mode": "check",
+    "ms": 0.618,
+    "previous": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8"
+   },
+   "stages": [
+    {
+     "aot": false,
+     "bundle": "eg2_audio_fp16_T3000.aimodel",
+     "compute": "gpu",
+     "load_s": 0.135292584,
+     "name": "encoder",
+     "warm_up_ms": 103.62
+    },
+    {
+     "aot": false,
+     "bundle": "eg2_reader_fp16_T750.aimodel",
+     "compute": "ane",
+     "load_s": 0.079399792,
+     "name": "reader",
+     "warm_up_ms": 50.759416
+    }
+   ],
+   "result": {
+    "audio_s": 10.435,
+    "decode_s": 0.005810541,
+    "log_mel_s": 0.000970334,
+    "total_s": 0.089263167,
+    "x_realtime": 116.90152109436136,
+    "text": "he hoped there would be stew for dinner turnips and carrots and bruised potatoes and fat muttered pieces to be ladled out in thick peppered flour fatten sauce"
+   },
+   "device": {
+    "arch": "h16c",
+    "available_mb": null,
+    "footprint_mb": 3.37568,
+    "machine": "Mac16,9",
+    "os": "Version 27.0 (Build 26A428)",
+    "os_build": "26A428",
+    "physical_memory_gb": 137.44,
+    "power": {
+     "battery": "mac",
+     "level": null,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "error": null
+  }
+ ],
+ "verdicts": {
+  "extractor_pass": true,
+  "fixture_pass": true,
+  "long_vs_torch_pass": true,
+  "long_vs_python_pass": true
+ },
+ "pass": true,
+ "finished": "2026-10-14T12:49:58+0900"
+}

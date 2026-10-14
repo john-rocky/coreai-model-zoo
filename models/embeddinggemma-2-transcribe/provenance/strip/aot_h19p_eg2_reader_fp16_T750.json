@@ -1,0 +1,130 @@
+{
+ "schema": "eg2-transcribe-aot/1",
+ "status": "PASS",
+ "failures": [],
+ "name": "eg2_reader_fp16_T750",
+ "started": "2026-10-14T11:29:55+0900",
+ "source": {
+  "bundle": "macos/eg2_reader_fp16_T750.aimodel",
+  "main_mlirb_sha256": "f7e5b2b886dd5dca92c39313ba85c0306daad1e695e64beb5597f2e7f13f2397"
+ },
+ "command": [
+  "coreai-build",
+  "compile",
+  "macos/eg2_reader_fp16_T750.aimodel",
+  "--output",
+  "ios-h19p/eg2_reader_fp16_T750.aimodelc",
+  "--platform",
+  "iOS",
+  "--preferred-compute",
+  "gpu",
+  "--architecture",
+  "h19p"
+ ],
+ "coreai_build": "coreai-build 3600.83.1",
+ "returncode": 0,
+ "seconds": 2.2,
+ "log_tail": [
+  "Compiling h19p: 1 of 1"
+ ],
+ "after": {
+  "bundle": "ios-h19p/eg2_reader_fp16_T750.aimodelc",
+  "files": [
+   {
+    "path": "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist",
+    "bytes": 14634,
+    "sha256": "571de8626789baf121366c314dddf839fb2d9f63a903783e4c34fde24ea26d9f"
+   },
+   {
+    "path": "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin",
+    "bytes": 333930260,
+    "sha256": "f6228944df8eb07c7c331287a3810dc6ffef7b3590f592a76624b24945e57c76"
+   },
+   {
+    "path": "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph",
+    "bytes": 79249,
+    "sha256": "4b8509b73a580a3eb2f1ef0c0f28e01d1c8c3aefe724ec1f1cc1db714300064c"
+   },
+   {
+    "path": "main-h19p.mlirb",
+    "bytes": 985,
+    "sha256": "7ad3b2b217af4b586eb8b776af4ff88210ccfbd3c31e51f7e3a88d89aaa353e6"
+   },
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "f2a49f0008b3ea3ea76801fb7f9ed1a41ca5efb00c5b597c6c008595e401769f"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 730,
+    "sha256": "0d1afc078be7a6295a17522e92f7e2772734d168a235c13b7493d39eeea29e71"
+   },
+   {
+    "path": "stats.json",
+    "bytes": 1466,
+    "sha256": "b1566b4cca3f7760098dc5a0bdf7c1c8d5c147c94eb8c75544fc30664bd98c9e"
+   }
+  ],
+  "bytes": 334027356,
+  "source_hash": "F7E5B2B886DD5DCA92C39313BA85C0306DAAD1E695E64BEB5597F2E7F13F2397",
+  "ane_region_names": [],
+  "local_paths": {
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h19p.mlirb": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "stats.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  }
+ },
+ "vs_unstripped_h19p_compile": {
+  "bundle": "reader/fp16/eg2_reader_fp16_T750_gpu_h19p.aimodelc",
+  "files": {
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": "equal",
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": "equal",
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph": "differs",
+   "main-h19p.mlirb": "differs",
+   "main.hash": "differs",
+   "metadata.json": "differs",
+   "stats.json": "differs"
+  }
+ },
+ "note": "never loaded on this Mac; the phone gate runs this bundle",
+ "code_sha256": {
+  "strip_ship.py": "63147229f7d1f2308c4b6e7fb09d345106da233fc6bce207f80d9f74b0c99dab"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428"
+ }
+}

@@ -1,0 +1,96 @@
+{
+ "what": "red arm: the second half of the valid soft tokens set to 0, token_mask unchanged (r2d)",
+ "bundle": "<work>/exports/reader/fp16/eg2_reader_fp16_T750_gpu_h16c.aimodelc",
+ "backend": "gpu",
+ "form": "fp16",
+ "tokens": 750,
+ "load_s": 0.876,
+ "weights_sha256": "67a06a857b9aeb066347f8947e4faeed11d2ec3e89e0c23974be0a2c20243d5b",
+ "rule": "red = labels change on >= 9 of 10 utterances",
+ "utterances_with_labels_changed": 10,
+ "transcripts_changed": 10,
+ "red": true,
+ "utterances": [
+  {
+   "id": "2300-131720-0000",
+   "tokens": 127,
+   "zeroed_from_token": 63,
+   "labels_changed": 5,
+   "labels_changed_before_the_zeroed_half": 0,
+   "transcript_changed": true
+  },
+  {
+   "id": "121-121726-0001",
+   "tokens": 148,
+   "zeroed_from_token": 74,
+   "labels_changed": 8,
+   "labels_changed_before_the_zeroed_half": 1,
+   "transcript_changed": true
+  },
+  {
+   "id": "1089-134686-0002",
+   "tokens": 166,
+   "zeroed_from_token": 83,
+   "labels_changed": 11,
+   "labels_changed_before_the_zeroed_half": 0,
+   "transcript_changed": true
+  },
+  {
+   "id": "1284-1180-0001",
+   "tokens": 194,
+   "zeroed_from_token": 97,
+   "labels_changed": 15,
+   "labels_changed_before_the_zeroed_half": 1,
+   "transcript_changed": true
+  },
+  {
+   "id": "2094-142345-0001",
+   "tokens": 201,
+   "zeroed_from_token": 100,
+   "labels_changed": 12,
+   "labels_changed_before_the_zeroed_half": 0,
+   "transcript_changed": true
+  },
+  {
+   "id": "1284-1180-0000",
+   "tokens": 203,
+   "zeroed_from_token": 101,
+   "labels_changed": 14,
+   "labels_changed_before_the_zeroed_half": 1,
+   "transcript_changed": true
+  },
+  {
+   "id": "121-121726-0000",
+   "tokens": 212,
+   "zeroed_from_token": 106,
+   "labels_changed": 11,
+   "labels_changed_before_the_zeroed_half": 1,
+   "transcript_changed": true
+  },
+  {
+   "id": "1580-141083-0000",
+   "tokens": 224,
+   "zeroed_from_token": 112,
+   "labels_changed": 16,
+   "labels_changed_before_the_zeroed_half": 0,
+   "transcript_changed": true
+  },
+  {
+   "id": "1188-133604-0001",
+   "tokens": 226,
+   "zeroed_from_token": 113,
+   "labels_changed": 9,
+   "labels_changed_before_the_zeroed_half": 1,
+   "transcript_changed": true
+  },
+  {
+   "id": "1995-1826-0000",
+   "tokens": 237,
+   "zeroed_from_token": 118,
+   "labels_changed": 12,
+   "labels_changed_before_the_zeroed_half": 0,
+   "transcript_changed": true
+  }
+ ],
+ "finished": "2026-10-14T10:44:13+0900"
+}
