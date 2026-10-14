@@ -78,7 +78,7 @@ template, a tokenizer that silently disagrees with the source).
 - **Believing int4 because the loss looks fine.** int4 is a cliff, not a slope. Read generations.
 - **Timing with `cpu_only()`.** That is the parity option, not a performance option.
 - **Benchmarking through a chat UI.** Headless self-test entrypoint, or it did not happen.
-- **JIT-ing a ≥1 GB graph on device.** AOT-compile it (`--architecture h18p` for iPhone 17 Pro).
+- **Choosing AOT for a ≥1 GB graph without measuring the JIT.** On an iPhone 18 Pro a 1.3 GB int8 decoder specialized on device decodes at 98 tok/s; the same graph AOT-compiled for the phone (h19p, expect-frequent-reshapes) decodes at 51 tok/s because the AOT keeps an fp16 copy of the Linears (`models/minicpm-v-4.7-1b`). Measure both before choosing; AOT still wins the first load (1.3 s vs 6.4 s).
 - **Running an iOS bundle on a Mac.** Wedges the GPU stack; costs a reboot.
 - **Naked `exp()` in a hand-written kernel.** Three separate sessions lost to this; subtract the
   max first.

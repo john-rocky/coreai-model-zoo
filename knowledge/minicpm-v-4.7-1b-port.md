@@ -104,6 +104,35 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
 - The container's opening tower call took 2,214 ms, later launches' cold calls 82–91 ms with either form (Metal
   pipeline compile vs graph specialization not separated).
 - Towers on the phone = the Mac's same form at cos 0.999997 (max |d| 0.007 int8lin, 0.013 fp16).
+- The same bundles compiled on the Mac for the phone (`--platform iOS --architecture h19p`, the decoder with
+  `--expect-frequent-reshapes`, 2.81 GB) stay exact (23/23, 32/32 on three launches) and load in 1.3 s at the initial
+  load (JIT 6.4 s), but the AOT decoder decodes at 51.4 tok/s against the JIT's 98.0 / 98.3 in the same session (1.9×
+  slower; the asset holds an fp16 copy of the Linears beside the int8 weights, 2.15× the bytes of the JIT cache entry);
+  the AOT tower runs at the JIT's speed (66.4 / 69.0 vs 66.3 ms). The JIT `.aimodel` ships (lane `r5/DEVICE.md`).
+
+## Prefill in chunks and a second turn (Mac, not uploaded)
+
+- `export_decoder.py int8hu --prefill-chunk 16` (S=1 `main` + S=16 `prefill`; `export_qwen38vl_pipelined`'s
+  externalize retry fixed the static-S SDPA guard of the 6 full-attention layers on the initial export) answers P1–P4
+  token for token as the S=1 order and the oracle, and cuts P1's 88-token TTFT from 673.3 to 162.7 ms (4.14×); the
+  last prompt position is not bit-equal to the S=1 order (cos ≥ 0.999992, max |Δ| ≤ 0.0625), and S=32 would not help
+  P1 (88 = 2 × 32 + 24, and those 24 S=1 calls alone take 178 ms) (lane `r5/chunk.json`).
+- A second question on the same image: the template renders the conversation as turn 1's ids + its answer + 248046,
+  198 + the new turn, so the state after turn 1 is reusable — 20 calls (174.3 ms) instead of 140 (1,318.2 ms), the
+  answer = the fp32 oracle's 32 tokens, the carried and re-prefilled last-prompt logits bit-equal (lane `r5/state.json`).
+
+## CoreAIKit (VLChat)
+
+- The kit's MiniCPM-V 4.7 entry renders the processor's frame (`<image_id>0</image_id><image>` + 64 pads + `</image>`
+  + `"\n"`), shifts the canvas from the index where the pads begin + 66 by 58 (Qwen-VL's rule would give + 64 and 56:
+  4.7 counts `</image>` and the `"\n"` inside the frame), and puts `<think>\n\n</think>\n\n` after every assistant role
+  (thinking off); the rendered ids equal the processor's for P0–P4 and a two-turn prompt (140 ids).
+- Prompt order: the source processor and card put the image before the question; the kit renders a prompt's segments
+  in order and 4.7's template joins a turn's parts with `"\n"`, so the question placed before the image is a different
+  id sequence from anything the oracle ran — the kit's VLM examples were changed to put the image before the question.
+- On the iPhone 18 Pro the VLChat app needs `com.apple.developer.kernel.increased-memory-limit`: without it the tower's
+  MPSGraph specialization threw `std::bad_alloc` (`foldTransposeOp`) once the decoder's engine was up; signed with it,
+  the app's answers on P1–P4 equal the Mac kit's byte for byte, from the uploaded bundles.
 
 ## The bytes that ship
 
