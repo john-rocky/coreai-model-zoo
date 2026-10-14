@@ -1,0 +1,130 @@
+{
+ "schema": "eg2-transcribe-aot/1",
+ "status": "PASS",
+ "failures": [],
+ "name": "eg2_audio_fp16_T3000",
+ "started": "2026-10-14T11:29:52+0900",
+ "source": {
+  "bundle": "macos/eg2_audio_fp16_T3000.aimodel",
+  "main_mlirb_sha256": "330ff806a36cc7299de0350b26d27c32b2e8dc96ffee8f2f437d4f86a103498a"
+ },
+ "command": [
+  "coreai-build",
+  "compile",
+  "macos/eg2_audio_fp16_T3000.aimodel",
+  "--output",
+  "ios-h19p/eg2_audio_fp16_T3000.aimodelc",
+  "--platform",
+  "iOS",
+  "--preferred-compute",
+  "gpu",
+  "--architecture",
+  "h19p"
+ ],
+ "coreai_build": "coreai-build 3600.83.1",
+ "returncode": 0,
+ "seconds": 2.7,
+ "log_tail": [
+  "Compiling h19p: 1 of 1"
+ ],
+ "after": {
+  "bundle": "ios-h19p/eg2_audio_fp16_T3000.aimodelc",
+  "files": [
+   {
+    "path": "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist",
+    "bytes": 55518,
+    "sha256": "a44d86778f64769ebaf4aaec5add876b00a940b0e575c4ec56ff65115f553322"
+   },
+   {
+    "path": "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin",
+    "bytes": 586417336,
+    "sha256": "982ce817e95622dfdd2de324b06fd8d645dd090cb0872077f2f4efeaa19289ca"
+   },
+   {
+    "path": "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph",
+    "bytes": 830505,
+    "sha256": "55f275826dcfda773e5d70a550fac82b1b2052cf6a3b67631f4525ee68f4f7d0"
+   },
+   {
+    "path": "main-h19p.mlirb",
+    "bytes": 899,
+    "sha256": "46bcd1e57d2008457153ecd67ca27dacac4d26be696c42b377306c1f3a485bf5"
+   },
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "06f74173742d7d4333bc05c780062a5d7f90dc881ae4ed268310b8ba7501ea6a"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 543,
+    "sha256": "64eca72af8054bda3d0c360746e52cdd3ebad81407dfb0582b97ac1ef9764e4b"
+   },
+   {
+    "path": "stats.json",
+    "bytes": 1557,
+    "sha256": "0ddc0adceafde34166b6a09cd1ccc723c94f3f4a26743c4d625384d8bb2c0c6a"
+   }
+  ],
+  "bytes": 587306390,
+  "source_hash": "330FF806A36CC7299DE0350B26D27C32B2E8DC96FFEE8F2F437D4F86A103498A",
+  "ane_region_names": [],
+  "local_paths": {
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h19p.mlirb": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "stats.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  }
+ },
+ "vs_unstripped_h19p_compile": {
+  "bundle": "fp16/eg2_audio_fp16_T3000_gpu_h19p.aimodelc",
+  "files": {
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": "equal",
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": "equal",
+   "main-h19p-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph": "differs",
+   "main-h19p.mlirb": "differs",
+   "main.hash": "differs",
+   "metadata.json": "differs",
+   "stats.json": "differs"
+  }
+ },
+ "note": "never loaded on this Mac; the phone gate runs this bundle",
+ "code_sha256": {
+  "strip_ship.py": "63147229f7d1f2308c4b6e7fb09d345106da233fc6bce207f80d9f74b0c99dab"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428"
+ }
+}

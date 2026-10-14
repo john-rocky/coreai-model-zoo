@@ -1,0 +1,296 @@
+{
+ "what": "the app's self-test with reader v1 against the r4 bars and the r6a stop conditions",
+ "device": "mac",
+ "form": "gpu",
+ "inputs": {
+  "gate": "<work>/exports/app/mac_v1/gate-gpu-124958/result.json",
+  "long": "<work>/exports/app/mac_v1/long-gpu-125011/result.json",
+  "iso": "<work>/exports/app/extractor_isolation_mac_v1_gpu_124853.json",
+  "transcribe": []
+ },
+ "references": {
+  "ref_fixtures": {
+   "file": "ref_fixtures_coreai_path.json",
+   "finished": "2026-10-14T12:48:58+0900",
+   "transcripts_same_as_torch": 20
+  },
+  "torch": "exports/reader/ref_T750.npz, exports/reader/fp16/hyp_gpu_T750.tsv (v1)"
+ },
+ "device_record": {
+  "arch": "h16c",
+  "available_mb": null,
+  "footprint_mb": 3.37568,
+  "machine": "Mac16,9",
+  "os": "Version 27.0 (Build 26A428)",
+  "os_build": "26A428",
+  "physical_memory_gb": 137.44,
+  "power": {
+   "battery": "mac",
+   "level": null,
+   "low_power_mode": false
+  },
+  "thermal": "nominal"
+ },
+ "model": {
+  "cache": {
+   "cleared": false,
+   "fingerprint": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8",
+   "mode": "check",
+   "ms": 0.771792,
+   "previous": "e8429013ffe6a096df55e9a134e8e212948627a25dcc3b00736140a8d48c97c8"
+  },
+  "folder": "eg2-transcribe",
+  "form": "gpu",
+  "platform_folders": [
+   "macos"
+  ],
+  "reader_config_version": "v1",
+  "stages": [
+   {
+    "aot": false,
+    "bundle": "eg2_audio_fp16_T3000.aimodel",
+    "compute": "gpu",
+    "load_s": 0.819112042,
+    "name": "encoder",
+    "warm_up_ms": 101.078125
+   },
+   {
+    "aot": false,
+    "bundle": "eg2_reader_fp16_T750.aimodel",
+    "compute": "gpu",
+    "load_s": 1.054093583,
+    "name": "reader",
+    "warm_up_ms": 31.866583
+   }
+  ],
+  "vocabulary": 200000,
+  "window": {
+   "drop_last": 1,
+   "frames": 3000,
+   "left_overlap": 96,
+   "tokens": 750
+  }
+ },
+ "fixtures": {
+  "source": "gate-gpu-124958",
+  "utterances": 20,
+  "features_max_abs_diff": 4.76837158203125e-07,
+  "fp32_encoder_cos_min_app_features": 0.9999999995026775,
+  "fp32_encoder_cos_min_hf_features": 0.9999999990170414,
+  "iso_features_max_abs": 4.76837158203125e-07,
+  "extractor_pass": true,
+  "transcripts_same_as_torch": 20,
+  "mismatches": [],
+  "fixture_pass": true,
+  "fp16_soft_cos_mean_app_features": 0.9999941175021174,
+  "fp16_soft_cos_min_app_features": 0.989784733563025,
+  "fp16_soft_cos_min_reference_features": 0.9964469062042872,
+  "labels_same_both_features": 20,
+  "host_labels_equal_python_gpu_path_on_features_npy": 20,
+  "host_fixture_pass": true
+ },
+ "long": {
+  "source": "long-gpu-125011",
+  "audio_s": 3257.44325,
+  "decode_s": 0.627848167,
+  "log_mel_s": 0.05057975,
+  "log_mel_cpu_s": {
+   "blocks": 637,
+   "fft": 0.4922012929999999,
+   "log": 0.07533278500000001,
+   "mel": 0.12448558399999993,
+   "note": "CPU seconds summed over the parallel blocks of 512 frames: framing + FFT + |X|, mel product, log"
+  },
+  "torch_wer": {
+   "wer": 0.05784204671857619,
+   "errors": 572,
+   "ref_words": 9889,
+   "hyp_words": 9930,
+   "engine": "word Levenshtein (numpy); jiwer: bench_pipeline.py score"
+  },
+  "python_path": {
+   "sequential_s": 8.0933,
+   "overlap_s": 7.6403,
+   "overlap_s_pass2": 7.3074,
+   "errors": 573,
+   "ref_words": 9889,
+   "wer": 0.057943169177874405,
+   "x_realtime_overlap": 426.3,
+   "x_realtime_sequential": 402.5,
+   "reader_bundle": "eg2_reader_fp16_T750_gpu_h16c.aimodelc",
+   "json": [
+    "pipeline_long_fp16_gpu.json",
+    "pipeline_long_fp16_gpu_overlap.json"
+   ],
+   "labels": "labels_long_fp16_gpu_overlap.npy"
+  },
+  "features_max_abs_diff_long": 4.76837158203125e-07,
+  "host_long_labels_differing_on_features_npy": 0,
+  "host_long_word_distance_on_features_npy": 0,
+  "host_long_pass": true,
+  "modes": {
+   "overlap_off": {
+    "wall_s": [
+     7.860829167,
+     7.855387292
+    ],
+    "x_realtime_windows": [
+     414.3892687141511,
+     414.6763398053474
+    ],
+    "x_realtime_end_to_end": 381.4668205860049,
+    "stage_ms_median": [
+     39.954792,
+     22.517875
+    ],
+    "stage_ms_median_every_pass": [
+     [
+      39.954792,
+      22.517875
+     ],
+     [
+      39.924917,
+      22.550208
+     ]
+    ],
+    "host_ms_per_window": {
+     "collapse": 0.002753336,
+     "feed": 0.260046672,
+     "inputs": 0.030012351999999996,
+     "labels": 0.007232360000000001,
+     "total": 0.30004472
+    },
+    "wer": {
+     "errors": 571,
+     "reference_words": 9889,
+     "wer": 0.05774092425927799
+    },
+    "wer_errors_every_pass": [
+     571,
+     571
+    ],
+    "word_distance_to_python_hyp": 4,
+    "labels_differing_from_python": 16,
+    "labels_differing_positions_s": [
+     158.68,
+     291.48,
+     469.4,
+     996.36,
+     1020.76,
+     1047.0,
+     1054.0,
+     1720.08,
+     1818.44,
+     1999.92,
+     2080.56,
+     2080.6,
+     2441.64,
+     2773.84,
+     2773.92,
+     3200.48
+    ],
+    "top1_logit_max": 40.5,
+    "labels_differing_pass2_vs_pass1": 0,
+    "soft_tokens_first_minutes_vs_continuous": {
+     "cos_mean": 0.9999893888428746,
+     "cos_min": 0.9470607199456169,
+     "reference": "soft_tokens_continuous.npy",
+     "tokens": 15000
+    }
+   },
+   "overlap_on": {
+    "wall_s": [
+     7.288343667,
+     7.613621167
+    ],
+    "x_realtime_windows": [
+     446.93875574898846,
+     427.84414650401266
+    ],
+    "x_realtime_end_to_end": 408.8787052137982,
+    "stage_ms_median": [
+     57.842666,
+     30.488875
+    ],
+    "stage_ms_median_every_pass": [
+     [
+      57.842666,
+      30.488875
+     ],
+     [
+      57.829042,
+      30.453208
+     ]
+    ],
+    "host_ms_per_window": {
+     "collapse": 0.002750664,
+     "feed": 0.224006648,
+     "inputs": 0.03185366399999998,
+     "labels": 0.009281959999999995,
+     "total": 0.26789293599999997
+    },
+    "wer": {
+     "errors": 571,
+     "reference_words": 9889,
+     "wer": 0.05774092425927799
+    },
+    "wer_errors_every_pass": [
+     571,
+     571
+    ],
+    "word_distance_to_python_hyp": 4,
+    "labels_differing_from_python": 16,
+    "labels_differing_positions_s": [
+     158.68,
+     291.48,
+     469.4,
+     996.36,
+     1020.76,
+     1047.0,
+     1054.0,
+     1720.08,
+     1818.44,
+     1999.92,
+     2080.56,
+     2080.6,
+     2441.64,
+     2773.84,
+     2773.92,
+     3200.48
+    ],
+    "top1_logit_max": 40.5,
+    "labels_differing_pass2_vs_pass1": 0
+   }
+  },
+  "errors": [
+   571,
+   571,
+   571,
+   571
+  ],
+  "long_vs_torch_pass": true,
+  "long_vs_python_pass": true,
+  "overlap_labels_same_as_sequential": true,
+  "speed": {
+   "python_sequential_s": 8.0933,
+   "python_overlap_s": 7.6403,
+   "app_sequential_s": 7.860829167,
+   "app_overlap_s": 7.288343667,
+   "sequential_ratio": 0.9712761379165484,
+   "overlap_ratio": 0.9539342260120677
+  },
+  "speed_pass": true
+ },
+ "transcribe": [],
+ "verdicts": {
+  "extractor_pass": true,
+  "fixture_pass": true,
+  "host_fixture_pass": true,
+  "host_long_pass": true,
+  "long_vs_torch_pass": true,
+  "long_vs_python_pass": true,
+  "speed_pass": true
+ },
+ "pass": true,
+ "finished": "2026-10-14T12:50:53+0900"
+}

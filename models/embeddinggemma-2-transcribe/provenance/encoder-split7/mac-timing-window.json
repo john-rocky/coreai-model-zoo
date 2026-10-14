@@ -1,0 +1,116 @@
+{
+ "label": "eg2stt-r5-timing-split30b",
+ "started": "2026-10-13T23:03:12+0900",
+ "finished": "2026-10-13T23:04:50+0900",
+ "reps": 8,
+ "order": [
+  "splitlayer7:3000:gpu+ane",
+  "splitlayer8:3000:gpu+ane",
+  "fp16:3000:gpu",
+  "fp16:3000:ane"
+ ],
+ "warmup": 3,
+ "calls_per_rep": 20,
+ "configs": {
+  "splitlayer7:3000:gpu+ane": {
+   "reps_ok": 8,
+   "reps_failed": 0,
+   "audio_s_per_call": 30.0,
+   "ms_median_of_rep_medians": 57.397,
+   "ms_rep_median_range": [
+    57.325,
+    76.587
+   ],
+   "ms_p90_all_calls": 68.361,
+   "x_realtime": 522.7,
+   "cpu_ms_per_call_median": 11.152,
+   "load_s_first_process": 1.172,
+   "load_s_first_process_cold": false,
+   "load_s_warm_median": 0.186,
+   "peak_footprint_gb_max": 0.866,
+   "pipelined_ms_per_window_median": 30.961,
+   "pipelined_ms_per_window_range": [
+    30.738,
+    52.628
+   ],
+   "pipelined_x_realtime": 969.0,
+   "front_ms_median_of_rep_medians": 29.129,
+   "cast_ms_median_of_rep_medians": 0.578,
+   "body_ms_median_of_rep_medians": 27.748,
+   "load_s_body_median": 0.007
+  },
+  "splitlayer8:3000:gpu+ane": {
+   "reps_ok": 8,
+   "reps_failed": 0,
+   "audio_s_per_call": 30.0,
+   "ms_median_of_rep_medians": 54.183,
+   "ms_rep_median_range": [
+    53.907,
+    54.373
+   ],
+   "ms_p90_all_calls": 54.776,
+   "x_realtime": 553.7,
+   "cpu_ms_per_call_median": 11.858,
+   "load_s_first_process": 1.361,
+   "load_s_first_process_cold": false,
+   "load_s_warm_median": 0.198,
+   "peak_footprint_gb_max": 0.871,
+   "pipelined_ms_per_window_median": 34.003,
+   "pipelined_ms_per_window_range": [
+    33.747,
+    54.979
+   ],
+   "pipelined_x_realtime": 882.3,
+   "front_ms_median_of_rep_medians": 32.474,
+   "cast_ms_median_of_rep_medians": 0.583,
+   "body_ms_median_of_rep_medians": 21.114,
+   "load_s_body_median": 0.006
+  },
+  "fp16:3000:gpu": {
+   "reps_ok": 8,
+   "reps_failed": 0,
+   "audio_s_per_call": 30.0,
+   "ms_median_of_rep_medians": 40.041,
+   "ms_rep_median_range": [
+    39.947,
+    40.257
+   ],
+   "ms_p90_all_calls": 40.33,
+   "x_realtime": 749.2,
+   "cpu_ms_per_call_median": 14.429,
+   "load_s_first_process": 0.901,
+   "load_s_first_process_cold": false,
+   "load_s_warm_median": 0.175,
+   "peak_footprint_gb_max": 0.575,
+   "pipelined_ms_per_window_median": 39.508,
+   "pipelined_ms_per_window_range": [
+    39.419,
+    66.897
+   ],
+   "pipelined_x_realtime": 759.3
+  },
+  "fp16:3000:ane": {
+   "reps_ok": 8,
+   "reps_failed": 0,
+   "audio_s_per_call": 30.0,
+   "ms_median_of_rep_medians": 84.862,
+   "ms_rep_median_range": [
+    84.456,
+    85.044
+   ],
+   "ms_p90_all_calls": 85.205,
+   "x_realtime": 353.5,
+   "cpu_ms_per_call_median": 0.639,
+   "load_s_first_process": 0.098,
+   "load_s_first_process_cold": false,
+   "load_s_warm_median": 0.012,
+   "peak_footprint_gb_max": 0.113,
+   "pipelined_ms_per_window_median": 84.424,
+   "pipelined_ms_per_window_range": [
+    84.094,
+    84.703
+   ],
+   "pipelined_x_realtime": 355.3
+  }
+ }
+}

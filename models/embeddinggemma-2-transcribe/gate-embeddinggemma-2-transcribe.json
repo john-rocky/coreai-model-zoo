@@ -1,0 +1,138 @@
+{
+  "schema": "eg2-transcribe-gate-transcript/1",
+  "model": "embeddinggemma-2-transcribe",
+  "hf_repo": "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI",
+  "source": {
+    "hf_id": "google/embeddinggemma-2",
+    "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b"
+  },
+  "reference": "encoder: transformers 5.19.0 float32 soft tokens, default attention; reader: its own float32 PyTorch forward and greedy labels on the same windows",
+  "bars": {
+    "encoder": "every clip per-token cosine mean >= 0.999 and min >= 0.99, no non-finite value, drift 0, red arm fails",
+    "reader_fp16": "test-clean WER <= torch + 0.2 pt and fixture transcripts >= 19/20, drift 0, red arms fail",
+    "pipeline": "WER next to the float32 PyTorch path on the same windows, labels identical in two passes"
+  },
+  "written": "2026-10-14",
+  "rows": [
+    {
+      "what": "encoder fp16, Mac M4 Max GPU, AOT h16c (macOS 27.0 26A428)",
+      "ladder_row": "1",
+      "pass": true,
+      "clips": 20,
+      "tokens": 5036,
+      "cos_mean_of_means": 0.9999964339086356,
+      "cos_mean_worst_clip": 0.9999567811821155,
+      "cos_min": 0.9964469062042868,
+      "cos_min_clip": "121-121726-0001",
+      "record": "provenance/encoder/mac-gpu-gate.json",
+      "record_sha256": "7a9c355ec9cdbf0f8e8bf145804edc7375eaef4c00ca98e8bdf908e4f75356d2"
+    },
+    {
+      "what": "encoder fp16, iPhone 18 Pro GPU, AOT h19p (iOS 27.2 24B5099f)",
+      "ladder_row": "27",
+      "pass": true,
+      "clips": 20,
+      "tokens": 5036,
+      "cos_mean_of_means": 0.9999970271281511,
+      "cos_mean_worst_clip": 0.9999734424058659,
+      "cos_min": 0.9962582505090709,
+      "cos_min_clip": "1188-133604-0001",
+      "record": "provenance/encoder/iphone-gpu-aot-gate.json",
+      "record_sha256": "c77db323059c8b7e4161617e9d56d85fea6886d827b29d7a96f52b48cda78628"
+    },
+    {
+      "what": "encoder fp16, iPhone 18 Pro GPU, JIT .aimodel (iOS 27.2 24B5099f)",
+      "ladder_row": "27a",
+      "pass": true,
+      "clips": 20,
+      "tokens": 5036,
+      "cos_mean_of_means": 0.9999970271281511,
+      "cos_mean_worst_clip": 0.9999734424058659,
+      "cos_min": 0.9962582505090709,
+      "cos_min_clip": "1188-133604-0001",
+      "record": "provenance/encoder/iphone-gpu-jit-gate.json",
+      "record_sha256": "7ee36ee462ee61984a8c34e37454c7efe053f5f1af11a319a8da4e4484803df3"
+    },
+    {
+      "what": "reader v1 fp16 + table, Mac M4 Max GPU, AOT h16c",
+      "ladder_row": "53",
+      "pass": true,
+      "fixture_transcripts_same": 19,
+      "fixture_utterances": 20,
+      "test_clean_utterances": 200,
+      "test_clean_token_agreement": 0.9999744415478199,
+      "test_clean_wer_coreai": 0.058784676354029064,
+      "test_clean_wer_torch": 0.058784676354029064,
+      "record": "provenance/reader/mac-gpu-gate.json",
+      "record_sha256": "79e9a0b6c9abe0aa837dedeb9f9dab42b635c71d5a2fb5f900cb1d985038d770"
+    },
+    {
+      "what": "reader v1 fp16 + table, Mac M4 Max Neural Engine, AOT h16c",
+      "ladder_row": "56",
+      "pass": true,
+      "fixture_transcripts_same": 20,
+      "fixture_utterances": 20,
+      "test_clean_utterances": 200,
+      "test_clean_token_agreement": 0.9999744415478199,
+      "test_clean_wer_coreai": 0.05900484368119771,
+      "test_clean_wer_torch": 0.058784676354029064,
+      "record": "provenance/reader/mac-ane-gate.json",
+      "record_sha256": "54d7c1e932b97423408a3cbc156850a65394851490f52e6ef05045ead27aa69c"
+    },
+    {
+      "what": "3,257.4 s recording: encoder GPU and reader Neural Engine, 2 windows in flight",
+      "ladder_row": "73",
+      "audio_s": 3257.44325,
+      "windows": 125,
+      "tokens": 81436,
+      "wall_s": 5.6814,
+      "x_realtime": 573.3,
+      "wer": 0.05804429163717262,
+      "wer_torch_path": 0.05784204671857619,
+      "record": "provenance/pipeline/mac-encoder-gpu-reader-ane-overlap.json",
+      "record_sha256": "000974d3a74a96dc7bdda4300b13b6761b00d0370e8b79d2f9d3159ad795e958"
+    },
+    {
+      "what": "3,257.4 s recording: encoder GPU then reader GPU, one window at a time",
+      "ladder_row": "69",
+      "audio_s": 3257.44325,
+      "windows": 125,
+      "tokens": 81436,
+      "wall_s": 8.0933,
+      "x_realtime": 402.5,
+      "wer": 0.057943169177874405,
+      "wer_torch_path": 0.05784204671857619,
+      "record": "provenance/pipeline/mac-encoder-gpu-reader-gpu.json",
+      "record_sha256": "96b74d514caff52dbc4a6f54fada6a3b549d2a62012f1cacc824bd555f9793a3"
+    },
+    {
+      "what": "the published (stripped) bundles vs the gated ones, Mac runtime, 20 fixture clips",
+      "status": "SAME",
+      "pairs": [
+        {
+          "bundle": "eg2_audio_fp16_T3000",
+          "backend": "JIT, gpu preferred",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        },
+        {
+          "bundle": "eg2_reader_fp16_T750",
+          "backend": "JIT, gpu preferred",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        },
+        {
+          "bundle": "eg2_reader_fp16_T750",
+          "backend": "JIT, ane preferred",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        }
+      ],
+      "record": "provenance/strip/compare_mac.json",
+      "record_sha256": "ca3d569a7c00d86a6f367bdcdbd9a4865b482520323d00bb600ba6bbbb858f22"
+    }
+  ]
+}

@@ -1,0 +1,511 @@
+{
+ "form": "fp16",
+ "bucket_frames": 3000,
+ "backend": "gpu",
+ "window_label": "eg2stt-r5-timing-split30b",
+ "window_started": "2026-10-13T23:03:12+0900",
+ "window_finished": "2026-10-13T23:04:50+0900",
+ "compared_in_window_with": [
+  "splitlayer7:3000:gpu+ane",
+  "splitlayer8:3000:gpu+ane",
+  "fp16:3000:gpu",
+  "fp16:3000:ane"
+ ],
+ "summary": {
+  "reps_ok": 8,
+  "reps_failed": 0,
+  "audio_s_per_call": 30.0,
+  "ms_median_of_rep_medians": 40.041,
+  "ms_rep_median_range": [
+   39.947,
+   40.257
+  ],
+  "ms_p90_all_calls": 40.33,
+  "x_realtime": 749.2,
+  "cpu_ms_per_call_median": 14.429,
+  "load_s_first_process": 0.901,
+  "load_s_first_process_cold": false,
+  "load_s_warm_median": 0.175,
+  "peak_footprint_gb_max": 0.575,
+  "pipelined_ms_per_window_median": 39.508,
+  "pipelined_ms_per_window_range": [
+   39.419,
+   66.897
+  ],
+  "pipelined_x_realtime": 759.3
+ },
+ "reps": [
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 39.534,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.901,
+   "load_cpu_s": 0.295,
+   "warmup_ms": [
+    128.41,
+    40.16,
+    40.09
+   ],
+   "ms": [
+    39.974,
+    40.105,
+    39.929,
+    40.054,
+    40.235,
+    40.114,
+    39.987,
+    40.013,
+    40.1,
+    40.081,
+    39.914,
+    40.055,
+    40.164,
+    40.194,
+    40.095,
+    40.041,
+    40.109,
+    40.12,
+    40.04,
+    40.479
+   ],
+   "ms_median": 40.088,
+   "ms_p90": 40.198,
+   "cpu_ms_per_call": 14.982,
+   "x_realtime": 748.4,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 80839280,
+    "lifetime_max_phys_footprint": 80839280
+   },
+   "footprint_after_load": {
+    "phys_footprint": 173360328,
+    "lifetime_max_phys_footprint": 173376712
+   },
+   "footprint_end": {
+    "phys_footprint": 568641240,
+    "lifetime_max_phys_footprint": 574801624
+   },
+   "t_start": "23:03:23",
+   "rep": 0
+  },
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 39.483,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.181,
+   "load_cpu_s": 0.156,
+   "warmup_ms": [
+    127.05,
+    40.36,
+    40.0
+   ],
+   "ms": [
+    40.033,
+    39.93,
+    39.94,
+    39.924,
+    39.951,
+    39.948,
+    40.034,
+    40.025,
+    39.95,
+    40.151,
+    40.075,
+    40.112,
+    40.037,
+    40.076,
+    39.926,
+    39.865,
+    40.038,
+    39.839,
+    39.984,
+    40.016
+   ],
+   "ms_median": 40.0,
+   "ms_p90": 40.08,
+   "cpu_ms_per_call": 14.512,
+   "x_realtime": 750.0,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 81101424,
+    "lifetime_max_phys_footprint": 81101424
+   },
+   "footprint_after_load": {
+    "phys_footprint": 172868808,
+    "lifetime_max_phys_footprint": 172868808
+   },
+   "footprint_end": {
+    "phys_footprint": 566380320,
+    "lifetime_max_phys_footprint": 572540704
+   },
+   "t_start": "23:03:34",
+   "rep": 1
+  },
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 39.629,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.878,
+   "load_cpu_s": 0.215,
+   "warmup_ms": [
+    123.63,
+    39.96,
+    39.94
+   ],
+   "ms": [
+    40.216,
+    39.787,
+    40.073,
+    40.249,
+    39.988,
+    40.034,
+    40.047,
+    40.45,
+    40.134,
+    40.307,
+    40.374,
+    40.28,
+    40.264,
+    40.274,
+    40.22,
+    40.596,
+    40.181,
+    40.544,
+    40.562,
+    40.283
+   ],
+   "ms_median": 40.257,
+   "ms_p90": 40.546,
+   "cpu_ms_per_call": 14.601,
+   "x_realtime": 745.2,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 80822896,
+    "lifetime_max_phys_footprint": 80822896
+   },
+   "footprint_after_load": {
+    "phys_footprint": 173442272,
+    "lifetime_max_phys_footprint": 173458656
+   },
+   "footprint_end": {
+    "phys_footprint": 565118728,
+    "lifetime_max_phys_footprint": 571279112
+   },
+   "t_start": "23:03:49",
+   "rep": 2
+  },
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 39.472,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.164,
+   "load_cpu_s": 0.142,
+   "warmup_ms": [
+    119.22,
+    40.24,
+    39.98
+   ],
+   "ms": [
+    39.944,
+    39.982,
+    40.666,
+    40.5,
+    40.522,
+    40.015,
+    40.343,
+    39.91,
+    39.825,
+    40.023,
+    40.053,
+    39.982,
+    40.037,
+    39.949,
+    40.084,
+    40.094,
+    40.391,
+    39.994,
+    39.915,
+    39.983
+   ],
+   "ms_median": 40.019,
+   "ms_p90": 40.502,
+   "cpu_ms_per_call": 14.53,
+   "x_realtime": 749.6,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 78742104,
+    "lifetime_max_phys_footprint": 78742104
+   },
+   "footprint_after_load": {
+    "phys_footprint": 171541704,
+    "lifetime_max_phys_footprint": 171558088
+   },
+   "footprint_end": {
+    "phys_footprint": 549914400,
+    "lifetime_max_phys_footprint": 569919264
+   },
+   "t_start": "23:04:00",
+   "rep": 3
+  },
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 39.572,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.175,
+   "load_cpu_s": 0.152,
+   "warmup_ms": [
+    122.24,
+    40.19,
+    39.98
+   ],
+   "ms": [
+    39.853,
+    40.128,
+    40.068,
+    40.115,
+    40.09,
+    40.196,
+    40.106,
+    39.953,
+    40.192,
+    39.802,
+    39.847,
+    39.932,
+    40.012,
+    40.059,
+    39.969,
+    40.157,
+    39.854,
+    39.916,
+    40.229,
+    40.316
+   ],
+   "ms_median": 40.064,
+   "ms_p90": 40.199,
+   "cpu_ms_per_call": 14.136,
+   "x_realtime": 748.8,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 80642672,
+    "lifetime_max_phys_footprint": 80642672
+   },
+   "footprint_after_load": {
+    "phys_footprint": 175408328,
+    "lifetime_max_phys_footprint": 175424712
+   },
+   "footprint_end": {
+    "phys_footprint": 566167280,
+    "lifetime_max_phys_footprint": 572327664
+   },
+   "t_start": "23:04:13",
+   "rep": 4
+  },
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 39.439,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.17,
+   "load_cpu_s": 0.145,
+   "warmup_ms": [
+    126.43,
+    40.15,
+    39.93
+   ],
+   "ms": [
+    40.246,
+    40.003,
+    39.967,
+    39.95,
+    40.01,
+    39.921,
+    39.943,
+    39.887,
+    39.932,
+    40.1,
+    40.326,
+    39.941,
+    39.979,
+    39.893,
+    39.878,
+    40.009,
+    39.824,
+    39.906,
+    40.113,
+    39.943
+   ],
+   "ms_median": 39.947,
+   "ms_p90": 40.127,
+   "cpu_ms_per_call": 14.346,
+   "x_realtime": 751.0,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 78938712,
+    "lifetime_max_phys_footprint": 78938712
+   },
+   "footprint_after_load": {
+    "phys_footprint": 171689136,
+    "lifetime_max_phys_footprint": 171705520
+   },
+   "footprint_end": {
+    "phys_footprint": 567199496,
+    "lifetime_max_phys_footprint": 573359880
+   },
+   "t_start": "23:04:24",
+   "rep": 5
+  },
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 39.419,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.161,
+   "load_cpu_s": 0.138,
+   "warmup_ms": [
+    115.99,
+    40.94,
+    40.01
+   ],
+   "ms": [
+    40.047,
+    39.997,
+    39.953,
+    39.906,
+    39.898,
+    40.011,
+    39.931,
+    39.914,
+    40.156,
+    40.13,
+    40.028,
+    39.855,
+    40.077,
+    39.981,
+    40.011,
+    39.872,
+    39.813,
+    39.991,
+    39.788,
+    39.972
+   ],
+   "ms_median": 39.977,
+   "ms_p90": 40.083,
+   "cpu_ms_per_call": 13.612,
+   "x_realtime": 750.4,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 80446064,
+    "lifetime_max_phys_footprint": 80446064
+   },
+   "footprint_after_load": {
+    "phys_footprint": 173016240,
+    "lifetime_max_phys_footprint": 173032624
+   },
+   "footprint_end": {
+    "phys_footprint": 565151520,
+    "lifetime_max_phys_footprint": 571328288
+   },
+   "t_start": "23:04:34",
+   "rep": 6
+  },
+  {
+   "form": "fp16",
+   "bucket_frames": 3000,
+   "backend": "gpu",
+   "bundle": "<work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc",
+   "pipelined_ms_per_window": 66.897,
+   "pipelined_error": null,
+   "function": "main",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.175,
+   "load_cpu_s": 0.151,
+   "warmup_ms": [
+    126.43,
+    40.24,
+    40.5
+   ],
+   "ms": [
+    40.251,
+    40.051,
+    40.479,
+    40.463,
+    40.46,
+    40.156,
+    40.412,
+    40.315,
+    40.328,
+    40.371,
+    40.142,
+    40.18,
+    39.913,
+    39.86,
+    40.071,
+    39.901,
+    39.901,
+    39.962,
+    40.148,
+    40.054
+   ],
+   "ms_median": 40.152,
+   "ms_p90": 40.46,
+   "cpu_ms_per_call": 14.077,
+   "x_realtime": 747.2,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 78987864,
+    "lifetime_max_phys_footprint": 78987864
+   },
+   "footprint_after_load": {
+    "phys_footprint": 171820232,
+    "lifetime_max_phys_footprint": 171836616
+   },
+   "footprint_end": {
+    "phys_footprint": 566150944,
+    "lifetime_max_phys_footprint": 572294944
+   },
+   "t_start": "23:04:46",
+   "rep": 7
+  }
+ ]
+}

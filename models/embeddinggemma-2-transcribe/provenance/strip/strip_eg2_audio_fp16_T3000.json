@@ -1,0 +1,584 @@
+{
+ "schema": "eg2-transcribe-strip/1",
+ "status": "PASS",
+ "failures": [],
+ "name": "eg2_audio_fp16_T3000",
+ "started": "2026-10-14T11:29:42+0900",
+ "source": {
+  "bundle": "fp16/eg2_audio_fp16_T3000.aimodel",
+  "main_hash": "3cce8936678c07a1c54a3af77c2c2b996861777db3cbdbc4713fc98357e8f1d9",
+  "files": [
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "e11f6fba29519b7ab2e66902ba7bd3133601a987a9ec2c7afdd228f8d9f01d81"
+   },
+   {
+    "path": "main.mlirb",
+    "bytes": 587425020,
+    "sha256": "3cce8936678c07a1c54a3af77c2c2b996861777db3cbdbc4713fc98357e8f1d9"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 455,
+    "sha256": "02d9b800323b7f408897d053e398b7fd6a817c0c96bec3ffcfa361ae125ea390"
+   }
+  ],
+  "local_paths": {
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.mlirb": {
+    "users_dir": 6,
+    "home_dir": 6,
+    "user_name": 6
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  },
+  "op_total": 4559,
+  "metadata": {
+   "assetVersion": "2.0",
+   "producer": "coreai-core 1.0.0b2",
+   "description": "EmbeddingGemma 2 audio encoder (Gemma 4 audio tower + embed_audio): log-mel features [1,3000,128] + half_mask -> soft tokens [1,750,512]; fp16; source google/embeddinggemma-2@914f7f89",
+   "license": "Apache-2.0 + Gemma Prohibited Use Policy",
+   "author": "coreai-model-zoo community port; weights Google DeepMind (Gemma Team)",
+   "creationDate": "20261013T115526Z"
+  }
+ },
+ "how": "AIModelAsset.load(source).program -> coreai_torch.debugging.debug_info.strip_debug_info(program) -> program.save_asset(out, the source's AIModelAssetMetadata); one program object throughout",
+ "after": {
+  "bundle": "macos/eg2_audio_fp16_T3000.aimodel",
+  "main_hash": "330ff806a36cc7299de0350b26d27c32b2e8dc96ffee8f2f437d4f86a103498a",
+  "files": [
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "ae463dbfa9e57b58f4a1bc8b51a3b63aa6df794d63ab6e4f280a55ef60e520fb"
+   },
+   {
+    "path": "main.mlirb",
+    "bytes": 586856814,
+    "sha256": "330ff806a36cc7299de0350b26d27c32b2e8dc96ffee8f2f437d4f86a103498a"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 455,
+    "sha256": "9f832dab8f65a60098afee565887f1042fe670398b7d56a15c16ff86ecee223a"
+   }
+  ],
+  "local_paths": {
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.mlirb": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  },
+  "op_total": 4559,
+  "metadata": {
+   "producer": "coreai-core 1.0.0b2",
+   "author": "coreai-model-zoo community port; weights Google DeepMind (Gemma Team)",
+   "description": "EmbeddingGemma 2 audio encoder (Gemma 4 audio tower + embed_audio): log-mel features [1,3000,128] + half_mask -> soft tokens [1,750,512]; fp16; source google/embeddinggemma-2@914f7f89",
+   "creationDate": "20261014T022944Z",
+   "license": "Apache-2.0 + Gemma Prohibited Use Policy",
+   "assetVersion": "2.0"
+  }
+ },
+ "ops": {
+  "equal": true,
+  "source": 4559,
+  "stripped": 4559,
+  "saved_reloaded": 4559,
+  "op_counts": {
+   "builtin.module": 1,
+   "coreai.abs": 109,
+   "coreai.concat": 12,
+   "coreai.constant": 848,
+   "coreai.conv2d": 14,
+   "coreai.decomposable.broadcasting_add": 448,
+   "coreai.decomposable.broadcasting_batch_matmul": 123,
+   "coreai.decomposable.broadcasting_maximum": 325,
+   "coreai.decomposable.broadcasting_minimum": 216,
+   "coreai.decomposable.broadcasting_mul": 1093,
+   "coreai.decomposable.broadcasting_sub": 2,
+   "coreai.graph": 1,
+   "coreai.output": 1,
+   "coreai.pad": 38,
+   "coreai.reduce_max": 109,
+   "coreai.reduce_mean": 113,
+   "coreai.reduce_sum": 144,
+   "coreai.relu": 2,
+   "coreai.reshape": 76,
+   "coreai.rsqrt": 220,
+   "coreai.sigmoid": 12,
+   "coreai.silu": 36,
+   "coreai.slice": 456,
+   "coreai.softmax": 12,
+   "coreai.tanh": 12,
+   "coreai.transpose": 136
+  }
+ },
+ "inspect": {
+  "equal": true,
+  "source": {
+   "functions": [
+    {
+     "inputs": [
+      {
+       "type": "NDArray (Float16, 1 \u00d7 3000 \u00d7 128)",
+       "name": "features"
+      },
+      {
+       "name": "half_mask",
+       "type": "NDArray (Float16, 1 \u00d7 1500)"
+      }
+     ],
+     "outputs": [
+      {
+       "name": "soft_tokens",
+       "type": "NDArray (Float16, 1 \u00d7 750 \u00d7 512)"
+      }
+     ],
+     "name": "main"
+    }
+   ],
+   "storageTypes": [
+    {
+     "count": 293554907,
+     "name": "Float16"
+    },
+    {
+     "name": "Int32",
+     "count": 226
+    },
+    {
+     "name": "UInt32",
+     "count": 102
+    },
+    {
+     "count": 1,
+     "name": "UInt64"
+    }
+   ],
+   "compatibilityVersion": "27.0",
+   "computeTypes": [
+    "Float16",
+    "Float32",
+    "Int32",
+    "UInt32",
+    "UInt64"
+   ],
+   "operationDistribution": [
+    {
+     "name": "constant",
+     "count": 6550
+    },
+    {
+     "name": "broadcast_in_dims",
+     "count": 1456
+    },
+    {
+     "name": "reshape",
+     "count": 1278
+    },
+    {
+     "name": "mul",
+     "count": 1242
+    },
+    {
+     "count": 1129,
+     "name": "broadcasting_mul"
+    },
+    {
+     "count": 765,
+     "name": "add"
+    },
+    {
+     "name": "cast",
+     "count": 608
+    },
+    {
+     "name": "slice",
+     "count": 566
+    },
+    {
+     "name": "broadcasting_add",
+     "count": 496
+    },
+    {
+     "name": "reduce",
+     "count": 491
+    },
+    {
+     "count": 436,
+     "name": "maximum"
+    },
+    {
+     "count": 336,
+     "name": "broadcast_to"
+    },
+    {
+     "name": "broadcasting_maximum",
+     "count": 327
+    },
+    {
+     "count": 269,
+     "name": "reduce_sum"
+    },
+    {
+     "count": 220,
+     "name": "rsqrt"
+    },
+    {
+     "name": "broadcasting_minimum",
+     "count": 216
+    },
+    {
+     "count": 216,
+     "name": "minimum"
+    },
+    {
+     "count": 173,
+     "name": "broadcasting_divide"
+    },
+    {
+     "name": "divide",
+     "count": 173
+    },
+    {
+     "name": "transpose",
+     "count": 136
+    },
+    {
+     "count": 123,
+     "name": "batch_matmul"
+    },
+    {
+     "count": 123,
+     "name": "broadcasting_batch_matmul"
+    },
+    {
+     "count": 122,
+     "name": "concat"
+    },
+    {
+     "name": "broadcast_shapes",
+     "count": 113
+    },
+    {
+     "name": "gather_nd",
+     "count": 113
+    },
+    {
+     "name": "get_shape",
+     "count": 113
+    },
+    {
+     "name": "reduce_mean",
+     "count": 113
+    },
+    {
+     "name": "reduce_product",
+     "count": 113
+    },
+    {
+     "count": 109,
+     "name": "abs"
+    },
+    {
+     "name": "reduce_max",
+     "count": 109
+    },
+    {
+     "count": 60,
+     "name": "exp"
+    },
+    {
+     "count": 50,
+     "name": "broadcasting_sub"
+    },
+    {
+     "name": "sub",
+     "count": 50
+    },
+    {
+     "count": 38,
+     "name": "pad"
+    },
+    {
+     "name": "silu",
+     "count": 36
+    },
+    {
+     "name": "conv2d",
+     "count": 14
+    },
+    {
+     "name": "sigmoid",
+     "count": 12
+    },
+    {
+     "name": "softmax",
+     "count": 12
+    },
+    {
+     "name": "tanh",
+     "count": 12
+    },
+    {
+     "count": 2,
+     "name": "relu"
+    }
+   ]
+  },
+  "stripped": {
+   "operationDistribution": [
+    {
+     "name": "constant",
+     "count": 6550
+    },
+    {
+     "name": "broadcast_in_dims",
+     "count": 1456
+    },
+    {
+     "count": 1278,
+     "name": "reshape"
+    },
+    {
+     "name": "mul",
+     "count": 1242
+    },
+    {
+     "name": "broadcasting_mul",
+     "count": 1129
+    },
+    {
+     "count": 765,
+     "name": "add"
+    },
+    {
+     "name": "cast",
+     "count": 608
+    },
+    {
+     "name": "slice",
+     "count": 566
+    },
+    {
+     "name": "broadcasting_add",
+     "count": 496
+    },
+    {
+     "count": 491,
+     "name": "reduce"
+    },
+    {
+     "name": "maximum",
+     "count": 436
+    },
+    {
+     "name": "broadcast_to",
+     "count": 336
+    },
+    {
+     "name": "broadcasting_maximum",
+     "count": 327
+    },
+    {
+     "count": 269,
+     "name": "reduce_sum"
+    },
+    {
+     "name": "rsqrt",
+     "count": 220
+    },
+    {
+     "count": 216,
+     "name": "broadcasting_minimum"
+    },
+    {
+     "name": "minimum",
+     "count": 216
+    },
+    {
+     "count": 173,
+     "name": "broadcasting_divide"
+    },
+    {
+     "count": 173,
+     "name": "divide"
+    },
+    {
+     "count": 136,
+     "name": "transpose"
+    },
+    {
+     "count": 123,
+     "name": "batch_matmul"
+    },
+    {
+     "name": "broadcasting_batch_matmul",
+     "count": 123
+    },
+    {
+     "name": "concat",
+     "count": 122
+    },
+    {
+     "count": 113,
+     "name": "broadcast_shapes"
+    },
+    {
+     "count": 113,
+     "name": "gather_nd"
+    },
+    {
+     "count": 113,
+     "name": "get_shape"
+    },
+    {
+     "name": "reduce_mean",
+     "count": 113
+    },
+    {
+     "name": "reduce_product",
+     "count": 113
+    },
+    {
+     "count": 109,
+     "name": "abs"
+    },
+    {
+     "name": "reduce_max",
+     "count": 109
+    },
+    {
+     "name": "exp",
+     "count": 60
+    },
+    {
+     "name": "broadcasting_sub",
+     "count": 50
+    },
+    {
+     "count": 50,
+     "name": "sub"
+    },
+    {
+     "name": "pad",
+     "count": 38
+    },
+    {
+     "name": "silu",
+     "count": 36
+    },
+    {
+     "name": "conv2d",
+     "count": 14
+    },
+    {
+     "name": "sigmoid",
+     "count": 12
+    },
+    {
+     "count": 12,
+     "name": "softmax"
+    },
+    {
+     "name": "tanh",
+     "count": 12
+    },
+    {
+     "name": "relu",
+     "count": 2
+    }
+   ],
+   "compatibilityVersion": "27.0",
+   "functions": [
+    {
+     "name": "main",
+     "inputs": [
+      {
+       "name": "features",
+       "type": "NDArray (Float16, 1 \u00d7 3000 \u00d7 128)"
+      },
+      {
+       "type": "NDArray (Float16, 1 \u00d7 1500)",
+       "name": "half_mask"
+      }
+     ],
+     "outputs": [
+      {
+       "name": "soft_tokens",
+       "type": "NDArray (Float16, 1 \u00d7 750 \u00d7 512)"
+      }
+     ]
+    }
+   ],
+   "computeTypes": [
+    "Float16",
+    "Float32",
+    "Int32",
+    "UInt32",
+    "UInt64"
+   ],
+   "storageTypes": [
+    {
+     "count": 293554907,
+     "name": "Float16"
+    },
+    {
+     "count": 226,
+     "name": "Int32"
+    },
+    {
+     "count": 102,
+     "name": "UInt32"
+    },
+    {
+     "count": 1,
+     "name": "UInt64"
+    }
+   ]
+  }
+ },
+ "local_path_needles": [
+  "home_dir",
+  "user_name",
+  "users_dir"
+ ],
+ "seconds": {
+  "load": 0.22,
+  "strip": 0.07,
+  "save": 1.48,
+  "total": 3.85
+ },
+ "code_sha256": {
+  "strip_ship.py": "63147229f7d1f2308c4b6e7fb09d345106da233fc6bce207f80d9f74b0c99dab"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428",
+  "coreai-core": "1.0.0b2",
+  "coreai-torch": "0.4.1",
+  "torch": "2.9.0",
+  "numpy": "2.3.5",
+  "coreai_build": "coreai-build 3600.83.1"
+ }
+}

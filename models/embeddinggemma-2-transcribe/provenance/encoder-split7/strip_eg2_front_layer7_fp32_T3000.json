@@ -1,0 +1,564 @@
+{
+ "schema": "eg2-transcribe-strip/1",
+ "status": "PASS",
+ "failures": [],
+ "name": "eg2_front_layer7_fp32_T3000",
+ "started": "2026-10-14T15:49:31+0900",
+ "source": {
+  "bundle": "split/eg2_front_layer7_fp32_T3000.aimodel",
+  "main_hash": "b624423aa7dcf1cc10189d31df548524531c58d136c068c6c68b8a8ba4c9476b",
+  "files": [
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "25dcd5e356c827a30c4eceb4b48123102b69328a07b64e121bb3bed7452cb84e"
+   },
+   {
+    "path": "main.mlirb",
+    "bytes": 777588830,
+    "sha256": "b624423aa7dcf1cc10189d31df548524531c58d136c068c6c68b8a8ba4c9476b"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 435,
+    "sha256": "cc1c275c553f6ceda6350fca532e8d69fc64e15bccab344611b0511623d11a28"
+   }
+  ],
+  "local_paths": {
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.mlirb": {
+    "users_dir": 6,
+    "home_dir": 6,
+    "user_name": 6
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  },
+  "op_total": 2497,
+  "metadata": {
+   "license": "Apache-2.0 + Gemma Prohibited Use Policy",
+   "producer": "coreai-core 1.0.0b2",
+   "assetVersion": "2.0",
+   "author": "coreai-model-zoo community port; weights Google DeepMind (Gemma Team)",
+   "creationDate": "20261013T135049Z",
+   "description": "EmbeddingGemma 2 audio encoder, front of the cut after layer7 (float32): features, half_mask -> hidden; bucket 3000 frames; source google/embeddinggemma-2@914f7f89"
+  }
+ },
+ "how": "AIModelAsset.load(source).program -> coreai_torch.debugging.debug_info.strip_debug_info(program) -> program.save_asset(out, the source's AIModelAssetMetadata); one program object throughout",
+ "after": {
+  "bundle": "macos/eg2_front_layer7_fp32_T3000.aimodel",
+  "main_hash": "e1b87c6caf870ace687a36d1544268d99dc9b460d34d5d9953406322596dbb42",
+  "files": [
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "102d4bd5b14cae1d6f380d69a79603934d1ba79183000313a6e7eb93edf9601f"
+   },
+   {
+    "path": "main.mlirb",
+    "bytes": 777292179,
+    "sha256": "e1b87c6caf870ace687a36d1544268d99dc9b460d34d5d9953406322596dbb42"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 435,
+    "sha256": "21309e8eb585458b90fa4a89f48cd9dcd42b45eb04c0e13f10ed4592da3e1e08"
+   }
+  ],
+  "local_paths": {
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.mlirb": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  },
+  "op_total": 2497,
+  "metadata": {
+   "description": "EmbeddingGemma 2 audio encoder, front of the cut after layer7 (float32): features, half_mask -> hidden; bucket 3000 frames; source google/embeddinggemma-2@914f7f89",
+   "assetVersion": "2.0",
+   "author": "coreai-model-zoo community port; weights Google DeepMind (Gemma Team)",
+   "producer": "coreai-core 1.0.0b2",
+   "creationDate": "20261014T064933Z",
+   "license": "Apache-2.0 + Gemma Prohibited Use Policy"
+  }
+ },
+ "ops": {
+  "equal": true,
+  "source": 2497,
+  "stripped": 2497,
+  "saved_reloaded": 2497,
+  "op_counts": {
+   "builtin.module": 1,
+   "coreai.concat": 8,
+   "coreai.constant": 600,
+   "coreai.conv2d": 10,
+   "coreai.decomposable.broadcasting_add": 298,
+   "coreai.decomposable.broadcasting_batch_matmul": 81,
+   "coreai.decomposable.broadcasting_maximum": 144,
+   "coreai.decomposable.broadcasting_minimum": 144,
+   "coreai.decomposable.broadcasting_mul": 439,
+   "coreai.decomposable.broadcasting_sub": 2,
+   "coreai.graph": 1,
+   "coreai.output": 1,
+   "coreai.pad": 26,
+   "coreai.reduce_mean": 76,
+   "coreai.reduce_sum": 96,
+   "coreai.relu": 2,
+   "coreai.reshape": 52,
+   "coreai.rsqrt": 74,
+   "coreai.sigmoid": 8,
+   "coreai.silu": 24,
+   "coreai.slice": 304,
+   "coreai.softmax": 8,
+   "coreai.tanh": 8,
+   "coreai.transpose": 90
+  }
+ },
+ "inspect": {
+  "equal": true,
+  "source": {
+   "functions": [
+    {
+     "name": "main",
+     "inputs": [
+      {
+       "name": "features",
+       "type": "NDArray (Float32, 1 \u00d7 3000 \u00d7 128)"
+      },
+      {
+       "type": "NDArray (Float32, 1 \u00d7 1500)",
+       "name": "half_mask"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "NDArray (Float32, 1 \u00d7 750 \u00d7 1024)",
+       "name": "hidden"
+      }
+     ]
+    }
+   ],
+   "compatibilityVersion": "27.0",
+   "computeTypes": [
+    "Float32",
+    "Int32",
+    "UInt32",
+    "UInt64"
+   ],
+   "operationDistribution": [
+    {
+     "count": 3966,
+     "name": "constant"
+    },
+    {
+     "name": "broadcast_in_dims",
+     "count": 827
+    },
+    {
+     "name": "reshape",
+     "count": 782
+    },
+    {
+     "count": 539,
+     "name": "mul"
+    },
+    {
+     "name": "add",
+     "count": 510
+    },
+    {
+     "count": 463,
+     "name": "broadcasting_mul"
+    },
+    {
+     "count": 376,
+     "name": "slice"
+    },
+    {
+     "name": "broadcasting_add",
+     "count": 330
+    },
+    {
+     "count": 256,
+     "name": "reduce"
+    },
+    {
+     "count": 224,
+     "name": "broadcast_to"
+    },
+    {
+     "count": 180,
+     "name": "reduce_sum"
+    },
+    {
+     "count": 152,
+     "name": "cast"
+    },
+    {
+     "name": "broadcasting_maximum",
+     "count": 146
+    },
+    {
+     "count": 146,
+     "name": "maximum"
+    },
+    {
+     "name": "broadcasting_minimum",
+     "count": 144
+    },
+    {
+     "count": 144,
+     "name": "minimum"
+    },
+    {
+     "count": 116,
+     "name": "broadcasting_divide"
+    },
+    {
+     "name": "divide",
+     "count": 116
+    },
+    {
+     "count": 90,
+     "name": "transpose"
+    },
+    {
+     "count": 81,
+     "name": "batch_matmul"
+    },
+    {
+     "count": 81,
+     "name": "broadcasting_batch_matmul"
+    },
+    {
+     "name": "concat",
+     "count": 80
+    },
+    {
+     "name": "broadcast_shapes",
+     "count": 76
+    },
+    {
+     "name": "gather_nd",
+     "count": 76
+    },
+    {
+     "name": "get_shape",
+     "count": 76
+    },
+    {
+     "count": 76,
+     "name": "reduce_mean"
+    },
+    {
+     "count": 76,
+     "name": "reduce_product"
+    },
+    {
+     "count": 74,
+     "name": "rsqrt"
+    },
+    {
+     "name": "exp",
+     "count": 40
+    },
+    {
+     "name": "broadcasting_sub",
+     "count": 34
+    },
+    {
+     "name": "sub",
+     "count": 34
+    },
+    {
+     "count": 26,
+     "name": "pad"
+    },
+    {
+     "name": "silu",
+     "count": 24
+    },
+    {
+     "name": "conv2d",
+     "count": 10
+    },
+    {
+     "name": "sigmoid",
+     "count": 8
+    },
+    {
+     "name": "softmax",
+     "count": 8
+    },
+    {
+     "count": 8,
+     "name": "tanh"
+    },
+    {
+     "name": "relu",
+     "count": 2
+    }
+   ],
+   "storageTypes": [
+    {
+     "count": 194504883,
+     "name": "Float32"
+    },
+    {
+     "name": "Int32",
+     "count": 223
+    },
+    {
+     "name": "UInt32",
+     "count": 94
+    },
+    {
+     "name": "UInt64",
+     "count": 1
+    }
+   ]
+  },
+  "stripped": {
+   "storageTypes": [
+    {
+     "count": 194504883,
+     "name": "Float32"
+    },
+    {
+     "name": "Int32",
+     "count": 223
+    },
+    {
+     "count": 94,
+     "name": "UInt32"
+    },
+    {
+     "count": 1,
+     "name": "UInt64"
+    }
+   ],
+   "compatibilityVersion": "27.0",
+   "computeTypes": [
+    "Float32",
+    "Int32",
+    "UInt32",
+    "UInt64"
+   ],
+   "operationDistribution": [
+    {
+     "name": "constant",
+     "count": 3966
+    },
+    {
+     "name": "broadcast_in_dims",
+     "count": 827
+    },
+    {
+     "name": "reshape",
+     "count": 782
+    },
+    {
+     "name": "mul",
+     "count": 539
+    },
+    {
+     "name": "add",
+     "count": 510
+    },
+    {
+     "name": "broadcasting_mul",
+     "count": 463
+    },
+    {
+     "name": "slice",
+     "count": 376
+    },
+    {
+     "count": 330,
+     "name": "broadcasting_add"
+    },
+    {
+     "name": "reduce",
+     "count": 256
+    },
+    {
+     "name": "broadcast_to",
+     "count": 224
+    },
+    {
+     "count": 180,
+     "name": "reduce_sum"
+    },
+    {
+     "name": "cast",
+     "count": 152
+    },
+    {
+     "count": 146,
+     "name": "broadcasting_maximum"
+    },
+    {
+     "name": "maximum",
+     "count": 146
+    },
+    {
+     "name": "broadcasting_minimum",
+     "count": 144
+    },
+    {
+     "name": "minimum",
+     "count": 144
+    },
+    {
+     "name": "broadcasting_divide",
+     "count": 116
+    },
+    {
+     "name": "divide",
+     "count": 116
+    },
+    {
+     "name": "transpose",
+     "count": 90
+    },
+    {
+     "count": 81,
+     "name": "batch_matmul"
+    },
+    {
+     "name": "broadcasting_batch_matmul",
+     "count": 81
+    },
+    {
+     "count": 80,
+     "name": "concat"
+    },
+    {
+     "name": "broadcast_shapes",
+     "count": 76
+    },
+    {
+     "count": 76,
+     "name": "gather_nd"
+    },
+    {
+     "name": "get_shape",
+     "count": 76
+    },
+    {
+     "name": "reduce_mean",
+     "count": 76
+    },
+    {
+     "count": 76,
+     "name": "reduce_product"
+    },
+    {
+     "name": "rsqrt",
+     "count": 74
+    },
+    {
+     "count": 40,
+     "name": "exp"
+    },
+    {
+     "name": "broadcasting_sub",
+     "count": 34
+    },
+    {
+     "name": "sub",
+     "count": 34
+    },
+    {
+     "name": "pad",
+     "count": 26
+    },
+    {
+     "count": 24,
+     "name": "silu"
+    },
+    {
+     "name": "conv2d",
+     "count": 10
+    },
+    {
+     "name": "sigmoid",
+     "count": 8
+    },
+    {
+     "name": "softmax",
+     "count": 8
+    },
+    {
+     "name": "tanh",
+     "count": 8
+    },
+    {
+     "count": 2,
+     "name": "relu"
+    }
+   ],
+   "functions": [
+    {
+     "outputs": [
+      {
+       "type": "NDArray (Float32, 1 \u00d7 750 \u00d7 1024)",
+       "name": "hidden"
+      }
+     ],
+     "name": "main",
+     "inputs": [
+      {
+       "type": "NDArray (Float32, 1 \u00d7 3000 \u00d7 128)",
+       "name": "features"
+      },
+      {
+       "type": "NDArray (Float32, 1 \u00d7 1500)",
+       "name": "half_mask"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "local_path_needles": [
+  "home_dir",
+  "user_name",
+  "users_dir"
+ ],
+ "seconds": {
+  "load": 0.13,
+  "strip": 0.03,
+  "save": 1.5,
+  "total": 3.21
+ },
+ "code_sha256": {
+  "strip_ship.py": "63147229f7d1f2308c4b6e7fb09d345106da233fc6bce207f80d9f74b0c99dab"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428",
+  "coreai-core": "1.0.0b2",
+  "coreai-torch": "0.4.1",
+  "torch": "2.9.0",
+  "numpy": "2.3.5",
+  "coreai_build": "coreai-build 3600.83.1"
+ }
+}
