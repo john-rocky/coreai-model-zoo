@@ -1,0 +1,27 @@
+{
+ "what": "r8: the gate's torch transcripts (reader_coreai.py parity: the reader's own forward + greedy_labels, float32 CPU, one",
+ "gate_tsv": "exports/reader_v2/fp16/hyp_gpu_T750.tsv",
+ "sets": {
+  "fixture": {
+   "utterances": 20,
+   "missing_in_decode_tsv": 0,
+   "reference_text_differs": 0,
+   "transcripts_differ": 0,
+   "ref_words": 541,
+   "errors_gate_torch": 20,
+   "errors_decode_py": 20,
+   "differences": []
+  },
+  "test-clean": {
+   "utterances": 200,
+   "missing_in_decode_tsv": 0,
+   "reference_text_differs": 0,
+   "transcripts_differ": 0,
+   "ref_words": 4542,
+   "errors_gate_torch": 166,
+   "errors_decode_py": 166,
+   "differences": []
+  }
+ },
+ "pass": true
+}

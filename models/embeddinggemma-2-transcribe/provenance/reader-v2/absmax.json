@@ -1,0 +1,152 @@
+{
+ "reader": {
+  "kind": "release",
+  "weights": "<work>/exports/reader_v2/reader/reader.pt",
+  "weights_sha256": "d605f6fba8687497be6b5fd717ea6c51beaee5d5f69c30a64225da96ebe0d8c2",
+  "arch": "a",
+  "k": null,
+  "layers": 6,
+  "params": 19573762,
+  "scale": 216.3509979248047,
+  "n_vocab": 200000,
+  "table": "<work>/exports/reader_v2/reader/word_table.npy",
+  "reader_dir": "<work>/exports/reader_v2/reader",
+  "model_py_sha256": "d71d2bac4cf14f98f91029978c67ace2d940b6f01e1213350cfee330bfdbefe9",
+  "decode_py_sha256": "b447a21b5031f201ba60353e45c6cb13b32e97a9294f4c61728e1d8e29d35b2f",
+  "config": {
+   "version": "v2",
+   "window": {
+    "seconds": 30,
+    "left_overlap_tokens": 96,
+    "right_extra_tokens": 1,
+    "note": "encoder is causal; the 83 tokens at the start of a window and its last token differ from a continuous run (fixtures/long-speckled-band: soft_tokens_w30 vs soft_tokens_continuous)"
+   },
+   "decode": "greedy argmax over N+1, collapse repeats, drop blank",
+   "scale": 216.3509979248047,
+   "wer": {
+    "dev-clean": {
+     "wer": 0.03754,
+     "utterances": 2703,
+     "ref_words": 54402
+    },
+    "dev-other": {
+     "wer": 0.10263,
+     "utterances": 2864,
+     "ref_words": 50948
+    },
+    "test-clean": {
+     "wer": 0.04207,
+     "utterances": 2620,
+     "ref_words": 52576
+    },
+    "test-other": {
+     "wer": 0.10422,
+     "utterances": 2939,
+     "ref_words": 52343
+    },
+    "fixtures": {
+     "wer": 0.03697,
+     "utterances": 20,
+     "ref_words": 541
+    },
+    "decode": "greedy, no language model"
+   }
+  }
+ },
+ "tokens": 750,
+ "utterances": 220,
+ "absmax": {
+  "b0.ff1": 22.601652145385742,
+  "b0.ln1.in": 116.39410400390625,
+  "b0.ln2.in": 123.32774353027344,
+  "b0.qkv": 6.833707332611084,
+  "b0.residual": 1128.074951171875,
+  "b0.scores": 24.264652252197266,
+  "b1.ff1": 13.779134750366211,
+  "b1.ln1.in": 1128.074951171875,
+  "b1.ln2.in": 1133.8690185546875,
+  "b1.qkv": 8.902057647705078,
+  "b1.residual": 1137.072509765625,
+  "b1.scores": 31.428274154663086,
+  "b2.ff1": 16.349443435668945,
+  "b2.ln1.in": 1137.072509765625,
+  "b2.ln2.in": 1138.3564453125,
+  "b2.qkv": 8.122788429260254,
+  "b2.residual": 1156.231689453125,
+  "b2.scores": 34.463340759277344,
+  "b3.ff1": 15.84278678894043,
+  "b3.ln1.in": 1156.231689453125,
+  "b3.ln2.in": 1155.0394287109375,
+  "b3.qkv": 8.406047821044922,
+  "b3.residual": 1158.0037841796875,
+  "b3.scores": 23.992259979248047,
+  "b4.ff1": 38.952091217041016,
+  "b4.ln1.in": 1158.0037841796875,
+  "b4.ln2.in": 1146.289794921875,
+  "b4.qkv": 17.75752830505371,
+  "b4.residual": 1160.0506591796875,
+  "b4.scores": 360.15167236328125,
+  "b5.ff1": 32.008792877197266,
+  "b5.ln1.in": 1160.0506591796875,
+  "b5.ln2.in": 1147.1732177734375,
+  "b5.qkv": 14.408029556274414,
+  "b5.residual": 1149.3155517578125,
+  "b5.scores": 64.97552490234375,
+  "ln_in.in": 8.6875,
+  "ln_out.in": 1149.3155517578125,
+  "soft_tokens": 8.6875,
+  "v": 21.114574432373047
+ },
+ "blank_logit_range": [
+  -25.312294006347656,
+  40.908817291259766
+ ],
+ "top1_logit_range": [
+  -47.45948028564453,
+  73.84556579589844
+ ],
+ "norm_inputs_square_max": 1345717.5318632275,
+ "headroom_x_fp16": {
+  "b0.ff1": 2898.2,
+  "b0.ln1.in": 562.78,
+  "b0.ln2.in": 531.14,
+  "b0.qkv": 9585.43,
+  "b0.residual": 58.07,
+  "b0.scores": 2699.56,
+  "b1.ff1": 4753.85,
+  "b1.ln1.in": 58.07,
+  "b1.ln2.in": 57.77,
+  "b1.qkv": 7358.3,
+  "b1.residual": 57.61,
+  "b1.scores": 2084.24,
+  "b2.ff1": 4006.5,
+  "b2.ln1.in": 57.61,
+  "b2.ln2.in": 57.54,
+  "b2.qkv": 8064.23,
+  "b2.residual": 56.65,
+  "b2.scores": 1900.69,
+  "b3.ff1": 4134.63,
+  "b3.ln1.in": 56.65,
+  "b3.ln2.in": 56.71,
+  "b3.qkv": 7792.48,
+  "b3.residual": 56.57,
+  "b3.scores": 2730.21,
+  "b4.ff1": 1681.66,
+  "b4.ln1.in": 56.57,
+  "b4.ln2.in": 57.14,
+  "b4.qkv": 3688.8,
+  "b4.residual": 56.47,
+  "b4.scores": 181.88,
+  "b5.ff1": 2046.44,
+  "b5.ln1.in": 56.47,
+  "b5.ln2.in": 57.1,
+  "b5.qkv": 4546.35,
+  "b5.residual": 56.99,
+  "b5.scores": 1008.13,
+  "ln_in.in": 7540.03,
+  "ln_out.in": 56.99,
+  "soft_tokens": 7540.03,
+  "v": 3102.31
+ },
+ "note": "max |x| over every valid and padded position of the gate windows (float32 eager); a norm input's square is what an unscaled float16 norm would form"
+}

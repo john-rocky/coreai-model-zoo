@@ -1,0 +1,480 @@
+{
+ "form": "fp16",
+ "tokens": 750,
+ "backend": "gpu",
+ "window_label": "eg2stt-r8-bench-reader",
+ "window_started": "2026-10-15T11:15:23+0900",
+ "window_finished": "2026-10-15T11:16:03+0900",
+ "compared_in_window_with": [
+  "fp16:750:gpu",
+  "fp16:750:ane",
+  "fp16:750:gpu-jit"
+ ],
+ "summary": {
+  "reps_ok": 8,
+  "reps_failed": 0,
+  "audio_s_per_call": 30.0,
+  "ms_median_of_rep_medians": 23.846,
+  "ms_rep_median_range": [
+   23.667,
+   24.055
+  ],
+  "ms_p90_all_calls": 24.054,
+  "x_realtime": 1258.1,
+  "cpu_ms_per_call_median": 2.673,
+  "load_s_first_process": 0.999,
+  "load_s_first_process_cold": true,
+  "load_s_warm_median": 0.096,
+  "peak_footprint_gb_max": 1.037
+ },
+ "reps": [
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": true,
+   "cache_entry_deleted": true,
+   "load_s": 0.999,
+   "load_cpu_s": 0.253,
+   "warmup_ms": [
+    79.66,
+    24.12,
+    23.87
+   ],
+   "ms": [
+    23.918,
+    24.105,
+    24.077,
+    24.047,
+    24.051,
+    23.95,
+    23.993,
+    24.236,
+    24.169,
+    24.183,
+    24.023,
+    24.086,
+    24.056,
+    23.977,
+    24.054,
+    23.918,
+    23.99,
+    24.122,
+    24.07,
+    24.078
+   ],
+   "ms_median": 24.055,
+   "ms_p90": 24.17,
+   "cpu_ms_per_call": 2.802,
+   "x_realtime": 1247.1,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 205783880,
+    "lifetime_max_phys_footprint": 205783880
+   },
+   "footprint_after_load": {
+    "phys_footprint": 517653728,
+    "lifetime_max_phys_footprint": 517670112
+   },
+   "footprint_end": {
+    "phys_footprint": 1037272720,
+    "lifetime_max_phys_footprint": 1037272720
+   },
+   "t_start": "11:15:25",
+   "rep": 0
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.112,
+   "load_cpu_s": 0.086,
+   "warmup_ms": [
+    57.45,
+    24.41,
+    23.86
+   ],
+   "ms": [
+    23.766,
+    24.032,
+    23.858,
+    23.957,
+    24.163,
+    23.941,
+    23.886,
+    23.895,
+    23.878,
+    23.86,
+    23.861,
+    24.222,
+    23.869,
+    23.878,
+    23.869,
+    23.981,
+    23.794,
+    23.704,
+    23.717,
+    23.803
+   ],
+   "ms_median": 23.874,
+   "ms_p90": 24.045,
+   "cpu_ms_per_call": 2.66,
+   "x_realtime": 1256.6,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204079944,
+    "lifetime_max_phys_footprint": 204079944
+   },
+   "footprint_after_load": {
+    "phys_footprint": 513639624,
+    "lifetime_max_phys_footprint": 513656008
+   },
+   "footprint_end": {
+    "phys_footprint": 1034733176,
+    "lifetime_max_phys_footprint": 1034733176
+   },
+   "t_start": "11:15:32",
+   "rep": 1
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.101,
+   "load_cpu_s": 0.078,
+   "warmup_ms": [
+    50.24,
+    24.01,
+    23.86
+   ],
+   "ms": [
+    23.856,
+    23.913,
+    23.885,
+    23.781,
+    23.76,
+    23.716,
+    23.804,
+    23.735,
+    23.904,
+    23.89,
+    24.175,
+    23.924,
+    23.764,
+    23.909,
+    23.955,
+    24.339,
+    24.039,
+    24.09,
+    24.032,
+    24.013
+   ],
+   "ms_median": 23.907,
+   "ms_p90": 24.098,
+   "cpu_ms_per_call": 2.897,
+   "x_realtime": 1254.9,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204866376,
+    "lifetime_max_phys_footprint": 204866376
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514507952,
+    "lifetime_max_phys_footprint": 514524336
+   },
+   "footprint_end": {
+    "phys_footprint": 1033160336,
+    "lifetime_max_phys_footprint": 1033160336
+   },
+   "t_start": "11:15:37",
+   "rep": 2
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.091,
+   "load_cpu_s": 0.07,
+   "warmup_ms": [
+    45.57,
+    23.81,
+    23.68
+   ],
+   "ms": [
+    23.667,
+    23.704,
+    23.687,
+    23.648,
+    23.654,
+    23.838,
+    23.866,
+    23.901,
+    23.938,
+    23.833,
+    23.699,
+    23.571,
+    23.846,
+    23.603,
+    23.65,
+    23.78,
+    23.659,
+    23.736,
+    23.79,
+    23.756
+   ],
+   "ms_median": 23.72,
+   "ms_p90": 23.87,
+   "cpu_ms_per_call": 2.578,
+   "x_realtime": 1264.8,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204342088,
+    "lifetime_max_phys_footprint": 204342088
+   },
+   "footprint_after_load": {
+    "phys_footprint": 513787080,
+    "lifetime_max_phys_footprint": 513803464
+   },
+   "footprint_end": {
+    "phys_footprint": 1032029792,
+    "lifetime_max_phys_footprint": 1032029792
+   },
+   "t_start": "11:15:41",
+   "rep": 3
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.096,
+   "load_cpu_s": 0.073,
+   "warmup_ms": [
+    43.95,
+    23.8,
+    23.82
+   ],
+   "ms": [
+    23.656,
+    23.689,
+    23.735,
+    23.676,
+    23.612,
+    23.685,
+    23.815,
+    23.731,
+    23.786,
+    23.744,
+    23.803,
+    23.696,
+    23.93,
+    23.99,
+    23.86,
+    23.866,
+    23.779,
+    23.908,
+    23.834,
+    24.243
+   ],
+   "ms_median": 23.783,
+   "ms_p90": 23.936,
+   "cpu_ms_per_call": 2.648,
+   "x_realtime": 1261.4,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204358472,
+    "lifetime_max_phys_footprint": 204358472
+   },
+   "footprint_after_load": {
+    "phys_footprint": 513852640,
+    "lifetime_max_phys_footprint": 513869024
+   },
+   "footprint_end": {
+    "phys_footprint": 1031554680,
+    "lifetime_max_phys_footprint": 1032210040
+   },
+   "t_start": "11:15:45",
+   "rep": 4
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.09,
+   "load_cpu_s": 0.07,
+   "warmup_ms": [
+    47.69,
+    23.9,
+    23.77
+   ],
+   "ms": [
+    23.76,
+    23.812,
+    23.842,
+    23.639,
+    23.606,
+    23.688,
+    23.737,
+    23.673,
+    23.661,
+    23.658,
+    23.631,
+    23.593,
+    23.82,
+    23.891,
+    23.624,
+    23.681,
+    23.576,
+    23.606,
+    23.741,
+    23.579
+   ],
+   "ms_median": 23.667,
+   "ms_p90": 23.823,
+   "cpu_ms_per_call": 2.406,
+   "x_realtime": 1267.6,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204686152,
+    "lifetime_max_phys_footprint": 204686152
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514245808,
+    "lifetime_max_phys_footprint": 514245808
+   },
+   "footprint_end": {
+    "phys_footprint": 1032537720,
+    "lifetime_max_phys_footprint": 1032537720
+   },
+   "t_start": "11:15:51",
+   "rep": 5
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.094,
+   "load_cpu_s": 0.074,
+   "warmup_ms": [
+    45.92,
+    23.87,
+    23.88
+   ],
+   "ms": [
+    23.804,
+    23.783,
+    23.739,
+    23.665,
+    23.732,
+    23.661,
+    24.011,
+    23.737,
+    23.737,
+    23.832,
+    23.995,
+    23.88,
+    23.858,
+    23.924,
+    23.99,
+    23.846,
+    24.002,
+    23.865,
+    23.863,
+    23.906
+   ],
+   "ms_median": 23.852,
+   "ms_p90": 23.996,
+   "cpu_ms_per_call": 2.685,
+   "x_realtime": 1257.8,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 205652808,
+    "lifetime_max_phys_footprint": 205652808
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514737376,
+    "lifetime_max_phys_footprint": 514753760
+   },
+   "footprint_end": {
+    "phys_footprint": 1032980136,
+    "lifetime_max_phys_footprint": 1032980136
+   },
+   "t_start": "11:15:55",
+   "rep": 6
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.101,
+   "load_cpu_s": 0.078,
+   "warmup_ms": [
+    49.67,
+    24.3,
+    23.99
+   ],
+   "ms": [
+    23.887,
+    23.814,
+    23.842,
+    23.872,
+    23.937,
+    23.908,
+    23.838,
+    23.805,
+    23.96,
+    23.847,
+    23.818,
+    23.828,
+    23.937,
+    24.0,
+    23.929,
+    23.71,
+    23.818,
+    23.82,
+    23.713,
+    23.709
+   ],
+   "ms_median": 23.84,
+   "ms_p90": 23.94,
+   "cpu_ms_per_call": 2.719,
+   "x_realtime": 1258.4,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 205194056,
+    "lifetime_max_phys_footprint": 205194056
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514917600,
+    "lifetime_max_phys_footprint": 514933984
+   },
+   "footprint_end": {
+    "phys_footprint": 1033242232,
+    "lifetime_max_phys_footprint": 1033242232
+   },
+   "t_start": "11:16:00",
+   "rep": 7
+  }
+ ]
+}

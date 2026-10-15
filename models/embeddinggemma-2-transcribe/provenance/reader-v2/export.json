@@ -1,0 +1,243 @@
+{
+ "form": "fp16",
+ "tokens": 750,
+ "window_s": 30.0,
+ "name": "eg2_reader_v2_fp16_T750",
+ "name_tag": "v2",
+ "head": "argmax",
+ "io_dtype": "float16",
+ "reader": {
+  "kind": "release",
+  "weights": "<work>/exports/reader_v2/reader/reader.pt",
+  "weights_sha256": "d605f6fba8687497be6b5fd717ea6c51beaee5d5f69c30a64225da96ebe0d8c2",
+  "arch": "a",
+  "k": null,
+  "layers": 6,
+  "params": 19573762,
+  "scale": 216.3509979248047,
+  "n_vocab": 200000,
+  "table": "<work>/exports/reader_v2/reader/word_table.npy",
+  "reader_dir": "<work>/exports/reader_v2/reader",
+  "model_py_sha256": "d71d2bac4cf14f98f91029978c67ace2d940b6f01e1213350cfee330bfdbefe9",
+  "decode_py_sha256": "b447a21b5031f201ba60353e45c6cb13b32e97a9294f4c61728e1d8e29d35b2f",
+  "config": {
+   "version": "v2",
+   "window": {
+    "seconds": 30,
+    "left_overlap_tokens": 96,
+    "right_extra_tokens": 1,
+    "note": "encoder is causal; the 83 tokens at the start of a window and its last token differ from a continuous run (fixtures/long-speckled-band: soft_tokens_w30 vs soft_tokens_continuous)"
+   },
+   "decode": "greedy argmax over N+1, collapse repeats, drop blank",
+   "scale": 216.3509979248047,
+   "wer": {
+    "dev-clean": {
+     "wer": 0.03754,
+     "utterances": 2703,
+     "ref_words": 54402
+    },
+    "dev-other": {
+     "wer": 0.10263,
+     "utterances": 2864,
+     "ref_words": 50948
+    },
+    "test-clean": {
+     "wer": 0.04207,
+     "utterances": 2620,
+     "ref_words": 52576
+    },
+    "test-other": {
+     "wer": 0.10422,
+     "utterances": 2939,
+     "ref_words": 52343
+    },
+    "fixtures": {
+     "wer": 0.03697,
+     "utterances": 20,
+     "ref_words": 541
+    },
+    "decode": "greedy, no language model"
+   }
+  }
+ },
+ "norms": "max-abs rescaled, LayerNorm written out (float16)",
+ "software": {
+  "python": "3.11.13",
+  "torch": "2.9.0",
+  "coreai-core": "1.0.0b2",
+  "coreai-torch": "0.4.1",
+  "coreai-opt": "0.2.1"
+ },
+ "inputs": {
+  "soft_tokens": [
+   1,
+   750,
+   512
+  ],
+  "token_mask": [
+   1,
+   750
+  ]
+ },
+ "outputs": {
+  "top1_index": [
+   1,
+   750
+  ],
+  "top1_logit": [
+   1,
+   750
+  ],
+  "blank_logit": [
+   1,
+   750
+  ]
+ },
+ "eager_gate": {
+  "utterances": 2,
+  "transcripts_same": 2,
+  "token_agreement": 1.0,
+  "tokens": 349,
+  "max_abs_top1_logit": 0.1364002227783203,
+  "max_abs_blank_logit": 0.06196784973144531,
+  "rows": [
+   {
+    "set": "fixture",
+    "id": "1089-134686-0000",
+    "tokens": 261,
+    "tokens_same": 261,
+    "transcript_same": true,
+    "max_abs_top1_logit": 0.10126399993896484,
+    "max_abs_blank_logit": 0.06196784973144531
+   },
+   {
+    "set": "test-clean",
+    "id": "6930-75918-0000",
+    "tokens": 88,
+    "tokens_same": 88,
+    "transcript_same": true,
+    "max_abs_top1_logit": 0.1364002227783203,
+    "max_abs_blank_logit": 0.040701866149902344
+   }
+  ]
+ },
+ "decomposed_gate": {
+  "utterances": 2,
+  "transcripts_same": 2,
+  "token_agreement": 1.0,
+  "tokens": 349,
+  "max_abs_top1_logit": 0.1364002227783203,
+  "max_abs_blank_logit": 0.06196784973144531,
+  "rows": [
+   {
+    "set": "fixture",
+    "id": "1089-134686-0000",
+    "tokens": 261,
+    "tokens_same": 261,
+    "transcript_same": true,
+    "max_abs_top1_logit": 0.10126399993896484,
+    "max_abs_blank_logit": 0.06196784973144531
+   },
+   {
+    "set": "test-clean",
+    "id": "6930-75918-0000",
+    "tokens": 88,
+    "tokens_same": 88,
+    "transcript_same": true,
+    "max_abs_top1_logit": 0.1364002227783203,
+    "max_abs_blank_logit": 0.040701866149902344
+   }
+  ]
+ },
+ "convert_s": 0.2,
+ "optimize_s": 0.0,
+ "op_counts": {
+  "builtin.module": 1,
+  "coreai.abs": 15,
+  "coreai.argmax": 1,
+  "coreai.cast": 1,
+  "coreai.concat": 12,
+  "coreai.constant": 115,
+  "coreai.decomposable.broadcasting_add": 80,
+  "coreai.decomposable.broadcasting_batch_matmul": 30,
+  "coreai.decomposable.broadcasting_maximum": 15,
+  "coreai.decomposable.broadcasting_mul": 141,
+  "coreai.decomposable.broadcasting_sub": 15,
+  "coreai.gelu": 6,
+  "coreai.graph": 2,
+  "coreai.invoke": 6,
+  "coreai.output": 2,
+  "coreai.reduce_max": 16,
+  "coreai.reduce_mean": 28,
+  "coreai.reduce_sum": 1,
+  "coreai.reshape": 28,
+  "coreai.rsqrt": 30,
+  "coreai.slice": 42,
+  "coreai.softmax": 1,
+  "coreai.transpose": 51
+ },
+ "save_s": 0.4,
+ "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+ "bytes": 346661157,
+ "main_hash": "5f7948f5f6e1de11191cdffcdcc4c9ae9c6ef012a786c782488c1e766fa60c81",
+ "coreai_build": "coreai-build 3600.83.1",
+ "inspect_source": {
+  "returncode": 0,
+  "json": "<work>/exports/reader_v2/fp16/inspect_eg2_reader_v2_fp16_T750.json"
+ },
+ "aot": {
+  "gpu": {
+   "argv": "compile <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel --output <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc --platform macOS --preferred-compute gpu --architecture h16c",
+   "returncode": 0,
+   "seconds": 3.3,
+   "log_tail": [
+    "Compiling h16c: 1 of 1"
+   ],
+   "ane_validation_messages": 0,
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "bytes": 346749479,
+   "ane_regions": 0,
+   "ane_region_names": [],
+   "files": [
+    "main-h16c-delegates",
+    "main-h16c.mlirb",
+    "main.hash",
+    "metadata.json",
+    "stats.json"
+   ],
+   "inspect": {
+    "returncode": 0,
+    "json": "<work>/exports/reader_v2/fp16/inspect_eg2_reader_v2_fp16_T750_gpu_h16c.json"
+   }
+  },
+  "ane": {
+   "argv": "compile <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel --output <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc --platform macOS --preferred-compute neural-engine --architecture h16c",
+   "returncode": 0,
+   "seconds": 4.0,
+   "log_tail": [
+    "Compiling h16c: 1 of 1"
+   ],
+   "ane_validation_messages": 0,
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "bytes": 347380273,
+   "ane_regions": 2,
+   "ane_region_names": [
+    "main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0",
+    "main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_1"
+   ],
+   "files": [
+    "main-h16c-delegates",
+    "main-h16c.mlirb",
+    "main.hash",
+    "metadata.json",
+    "stats.json"
+   ],
+   "inspect": {
+    "returncode": 0,
+    "json": "<work>/exports/reader_v2/fp16/inspect_eg2_reader_v2_fp16_T750_ane_h16c.json"
+   }
+  }
+ },
+ "seconds": 158.6,
+ "finished": "2026-10-15T10:17:15+0900"
+}

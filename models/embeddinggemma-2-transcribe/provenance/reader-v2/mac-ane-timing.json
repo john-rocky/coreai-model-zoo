@@ -1,0 +1,480 @@
+{
+ "form": "fp16",
+ "tokens": 750,
+ "backend": "ane",
+ "window_label": "eg2stt-r8-bench-reader",
+ "window_started": "2026-10-15T11:15:23+0900",
+ "window_finished": "2026-10-15T11:16:03+0900",
+ "compared_in_window_with": [
+  "fp16:750:gpu",
+  "fp16:750:ane",
+  "fp16:750:gpu-jit"
+ ],
+ "summary": {
+  "reps_ok": 8,
+  "reps_failed": 0,
+  "audio_s_per_call": 30.0,
+  "ms_median_of_rep_medians": 49.981,
+  "ms_rep_median_range": [
+   47.184,
+   51.413
+  ],
+  "ms_p90_all_calls": 52.37,
+  "x_realtime": 600.2,
+  "cpu_ms_per_call_median": 10.598,
+  "load_s_first_process": 1.087,
+  "load_s_first_process_cold": true,
+  "load_s_warm_median": 0.129,
+  "peak_footprint_gb_max": 6.718
+ },
+ "reps": [
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": true,
+   "cache_entry_deleted": true,
+   "load_s": 1.087,
+   "load_cpu_s": 0.322,
+   "warmup_ms": [
+    68.64,
+    49.58,
+    50.22
+   ],
+   "ms": [
+    49.699,
+    49.145,
+    49.279,
+    49.609,
+    50.218,
+    49.773,
+    49.964,
+    50.235,
+    49.442,
+    49.585,
+    50.085,
+    49.525,
+    49.642,
+    49.398,
+    49.606,
+    49.817,
+    52.261,
+    50.66,
+    50.025,
+    50.402
+   ],
+   "ms_median": 49.736,
+   "ms_p90": 50.428,
+   "cpu_ms_per_call": 10.185,
+   "x_realtime": 603.2,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204391216,
+    "lifetime_max_phys_footprint": 204391216
+   },
+   "footprint_after_load": {
+    "phys_footprint": 211879160,
+    "lifetime_max_phys_footprint": 211895544
+   },
+   "footprint_end": {
+    "phys_footprint": 4619044352,
+    "lifetime_max_phys_footprint": 6419269120
+   },
+   "t_start": "11:15:28",
+   "rep": 0
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.138,
+   "load_cpu_s": 0.114,
+   "warmup_ms": [
+    68.46,
+    47.57,
+    46.61
+   ],
+   "ms": [
+    48.438,
+    47.48,
+    47.819,
+    47.289,
+    47.607,
+    47.229,
+    46.807,
+    46.288,
+    49.275,
+    52.7,
+    52.616,
+    52.39,
+    49.851,
+    49.956,
+    51.17,
+    50.475,
+    58.583,
+    50.548,
+    51.996,
+    48.532
+   ],
+   "ms_median": 49.563,
+   "ms_p90": 52.624,
+   "cpu_ms_per_call": 10.767,
+   "x_realtime": 605.3,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204178248,
+    "lifetime_max_phys_footprint": 204178248
+   },
+   "footprint_after_load": {
+    "phys_footprint": 209388840,
+    "lifetime_max_phys_footprint": 209405224
+   },
+   "footprint_end": {
+    "phys_footprint": 4617864800,
+    "lifetime_max_phys_footprint": 6418089568
+   },
+   "t_start": "11:15:34",
+   "rep": 1
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.129,
+   "load_cpu_s": 0.104,
+   "warmup_ms": [
+    65.58,
+    47.24,
+    48.23
+   ],
+   "ms": [
+    47.375,
+    47.823,
+    49.381,
+    49.489,
+    52.234,
+    52.579,
+    52.854,
+    51.28,
+    50.756,
+    51.321,
+    52.568,
+    51.701,
+    50.726,
+    50.584,
+    48.418,
+    46.434,
+    51.444,
+    52.538,
+    52.325,
+    50.437
+   ],
+   "ms_median": 51.018,
+   "ms_p90": 52.569,
+   "cpu_ms_per_call": 11.197,
+   "x_realtime": 588.0,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 205161312,
+    "lifetime_max_phys_footprint": 205161312
+   },
+   "footprint_after_load": {
+    "phys_footprint": 210224400,
+    "lifetime_max_phys_footprint": 210240784
+   },
+   "footprint_end": {
+    "phys_footprint": 4618405376,
+    "lifetime_max_phys_footprint": 6418580992
+   },
+   "t_start": "11:15:39",
+   "rep": 2
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.128,
+   "load_cpu_s": 0.105,
+   "warmup_ms": [
+    67.92,
+    47.21,
+    47.27
+   ],
+   "ms": [
+    46.474,
+    48.653,
+    49.12,
+    50.448,
+    51.973,
+    51.234,
+    50.409,
+    48.527,
+    47.059,
+    51.125,
+    48.014,
+    47.805,
+    46.696,
+    48.773,
+    50.173,
+    50.798,
+    49.854,
+    50.003,
+    50.224,
+    51.308
+   ],
+   "ms_median": 49.928,
+   "ms_p90": 51.242,
+   "cpu_ms_per_call": 10.43,
+   "x_realtime": 600.9,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204882736,
+    "lifetime_max_phys_footprint": 204882736
+   },
+   "footprint_after_load": {
+    "phys_footprint": 209618120,
+    "lifetime_max_phys_footprint": 209634504
+   },
+   "footprint_end": {
+    "phys_footprint": 4617995752,
+    "lifetime_max_phys_footprint": 6418220520
+   },
+   "t_start": "11:15:43",
+   "rep": 3
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.126,
+   "load_cpu_s": 0.102,
+   "warmup_ms": [
+    66.06,
+    46.22,
+    47.52
+   ],
+   "ms": [
+    47.108,
+    47.521,
+    48.644,
+    51.483,
+    49.711,
+    50.226,
+    50.908,
+    48.31,
+    50.538,
+    52.099,
+    50.194,
+    50.383,
+    50.91,
+    51.679,
+    50.941,
+    54.602,
+    50.327,
+    50.556,
+    51.701,
+    52.046
+   ],
+   "ms_median": 50.547,
+   "ms_p90": 52.051,
+   "cpu_ms_per_call": 11.062,
+   "x_realtime": 593.5,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204440392,
+    "lifetime_max_phys_footprint": 204440392
+   },
+   "footprint_after_load": {
+    "phys_footprint": 209552608,
+    "lifetime_max_phys_footprint": 209568992
+   },
+   "footprint_end": {
+    "phys_footprint": 4617635328,
+    "lifetime_max_phys_footprint": 6417810944
+   },
+   "t_start": "11:15:48",
+   "rep": 4
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.132,
+   "load_cpu_s": 0.107,
+   "warmup_ms": [
+    67.08,
+    46.94,
+    46.46
+   ],
+   "ms": [
+    46.363,
+    46.643,
+    45.956,
+    46.988,
+    47.035,
+    46.949,
+    46.049,
+    47.559,
+    49.273,
+    51.779,
+    50.372,
+    52.619,
+    50.897,
+    51.957,
+    51.158,
+    50.621,
+    49.74,
+    51.838,
+    50.329,
+    51.363
+   ],
+   "ms_median": 50.035,
+   "ms_p90": 51.85,
+   "cpu_ms_per_call": 10.428,
+   "x_realtime": 599.6,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204948296,
+    "lifetime_max_phys_footprint": 204948296
+   },
+   "footprint_after_load": {
+    "phys_footprint": 210109736,
+    "lifetime_max_phys_footprint": 210126120
+   },
+   "footprint_end": {
+    "phys_footprint": 4618061384,
+    "lifetime_max_phys_footprint": 6418302536
+   },
+   "t_start": "11:15:53",
+   "rep": 5
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.129,
+   "load_cpu_s": 0.104,
+   "warmup_ms": [
+    65.75,
+    46.77,
+    48.04
+   ],
+   "ms": [
+    47.697,
+    48.431,
+    47.63,
+    47.381,
+    48.933,
+    50.102,
+    52.031,
+    50.642,
+    52.458,
+    52.263,
+    52.902,
+    52.368,
+    53.029,
+    52.813,
+    52.925,
+    52.17,
+    52.677,
+    50.071,
+    50.795,
+    49.269
+   ],
+   "ms_median": 51.413,
+   "ms_p90": 52.904,
+   "cpu_ms_per_call": 11.393,
+   "x_realtime": 583.5,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204669768,
+    "lifetime_max_phys_footprint": 204669768
+   },
+   "footprint_after_load": {
+    "phys_footprint": 209667344,
+    "lifetime_max_phys_footprint": 209683728
+   },
+   "footprint_end": {
+    "phys_footprint": 4618159664,
+    "lifetime_max_phys_footprint": 6118360624
+   },
+   "t_start": "11:15:57",
+   "rep": 6
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "ane",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.125,
+   "load_cpu_s": 0.101,
+   "warmup_ms": [
+    66.72,
+    46.72,
+    48.16
+   ],
+   "ms": [
+    46.679,
+    47.122,
+    47.858,
+    46.963,
+    47.92,
+    47.246,
+    47.002,
+    47.463,
+    47.288,
+    47.85,
+    48.776,
+    48.06,
+    46.146,
+    45.94,
+    47.726,
+    46.935,
+    46.912,
+    47.54,
+    45.696,
+    46.802
+   ],
+   "ms_median": 47.184,
+   "ms_p90": 47.934,
+   "cpu_ms_per_call": 9.499,
+   "x_realtime": 635.8,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204686128,
+    "lifetime_max_phys_footprint": 204686128
+   },
+   "footprint_after_load": {
+    "phys_footprint": 209618120,
+    "lifetime_max_phys_footprint": 209634504
+   },
+   "footprint_end": {
+    "phys_footprint": 4618061312,
+    "lifetime_max_phys_footprint": 6718440960
+   },
+   "t_start": "11:16:01",
+   "rep": 7
+  }
+ ]
+}

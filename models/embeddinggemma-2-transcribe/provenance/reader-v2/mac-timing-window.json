@@ -1,0 +1,66 @@
+{
+ "label": "eg2stt-r8-bench-reader",
+ "started": "2026-10-15T11:15:23+0900",
+ "finished": "2026-10-15T11:16:03+0900",
+ "reps": 8,
+ "order": [
+  "fp16:750:gpu",
+  "fp16:750:ane",
+  "fp16:750:gpu-jit"
+ ],
+ "warmup": 3,
+ "calls_per_rep": 20,
+ "configs": {
+  "fp16:750:gpu": {
+   "reps_ok": 8,
+   "reps_failed": 0,
+   "audio_s_per_call": 30.0,
+   "ms_median_of_rep_medians": 23.846,
+   "ms_rep_median_range": [
+    23.667,
+    24.055
+   ],
+   "ms_p90_all_calls": 24.054,
+   "x_realtime": 1258.1,
+   "cpu_ms_per_call_median": 2.673,
+   "load_s_first_process": 0.999,
+   "load_s_first_process_cold": true,
+   "load_s_warm_median": 0.096,
+   "peak_footprint_gb_max": 1.037
+  },
+  "fp16:750:ane": {
+   "reps_ok": 8,
+   "reps_failed": 0,
+   "audio_s_per_call": 30.0,
+   "ms_median_of_rep_medians": 49.981,
+   "ms_rep_median_range": [
+    47.184,
+    51.413
+   ],
+   "ms_p90_all_calls": 52.37,
+   "x_realtime": 600.2,
+   "cpu_ms_per_call_median": 10.598,
+   "load_s_first_process": 1.087,
+   "load_s_first_process_cold": true,
+   "load_s_warm_median": 0.129,
+   "peak_footprint_gb_max": 6.718
+  },
+  "fp16:750:gpu-jit": {
+   "reps_ok": 8,
+   "reps_failed": 0,
+   "audio_s_per_call": 30.0,
+   "ms_median_of_rep_medians": 23.993,
+   "ms_rep_median_range": [
+    23.931,
+    24.178
+   ],
+   "ms_p90_all_calls": 24.264,
+   "x_realtime": 1250.3,
+   "cpu_ms_per_call_median": 3.41,
+   "load_s_first_process": 1.4,
+   "load_s_first_process_cold": true,
+   "load_s_warm_median": 0.098,
+   "peak_footprint_gb_max": 1.047
+  }
+ }
+}

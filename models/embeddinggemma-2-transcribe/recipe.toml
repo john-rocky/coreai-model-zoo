@@ -3,7 +3,7 @@
 # Run it with:  python3 ../../conversion/zoo_convert.py run <name>
 #
 # The EmbeddingGemma 2 audio encoder (Gemma 4 audio tower + embed_audio), re-authored from model.safetensors at
-# 914f7f89142e33e77833254d9c9b90c3cef7303b, and reader v1 with its 200,000-word table, as two static fp16 graphs for
+# 914f7f89142e33e77833254d9c9b90c3cef7303b, and reader v2 with its 200,000-word table, as two static fp16 graphs for
 # 30 s windows. Steps 1-3 build and check the graphs, step 4-5 strip their debug locations into the published
 # copies. conversion/eg2_transcribe/README.md lists the gates and the timing runs in order.
 
@@ -17,21 +17,29 @@ steps = [
   { script = "eg2_transcribe/export_encoder.py", args = ["--form", "fp16", "--bucket", "3000", "--aot", "gpu,neural-engine"] },
   { script = "eg2_transcribe/export_reader.py", args = ["--form", "fp16", "--tokens", "750", "--aot", "gpu,neural-engine"] },
   { script = "eg2_transcribe/strip_ship.py", args = ["strip", "--only", "eg2_audio_fp16_T3000"], bundle = "macos/eg2_audio_fp16_T3000.aimodel" },
-  { script = "eg2_transcribe/strip_ship.py", args = ["strip", "--only", "eg2_reader_fp16_T750"], bundle = "macos/eg2_reader_fp16_T750.aimodel" },
+  { script = "eg2_transcribe/strip_ship.py", args = ["strip", "--only", "eg2_reader_v2_fp16_T750"], bundle = "macos/eg2_reader_v2_fp16_T750.aimodel" },
 ]
 needs = [
   "The checkpoint: `hf download google/embeddinggemma-2 --revision 914f7f89142e33e77833254d9c9b90c3cef7303b`, found",
   "through EG2_MODEL_DIR or the Hugging Face cache (export_encoder.py checks model.safetensors by sha256).",
   "The fixtures: the reader/fixtures directory of the eg2-transcribe repository (test-clean-20 with features.npy and",
   "soft_tokens.npy from transformers 5.19.0 with the default attention, long-speckled-band, MANIFEST.json), EG2_FIXTURES.",
-  "Reader v1: the reader/ directory of the eg2-transcribe repository (train/model.py, train/decode.py, reader.pt,",
-  "word_table.npy, vocab.txt, reader_config.json), EG2_READER_DIR; the four release files are also",
-  "mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader.",
+  "Reader v2: the reader/ directory of the eg2-transcribe repository at its reader v2 commit (train/model.py with",
+  "Reader(..., layers), train/decode.py, reader.pt, word_table.npy, vocab.txt, reader_config.json with version v2 and",
+  "architecture.layers 6), EG2_READER_DIR; the four release files are also mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader",
+  "(reader v1: that repo's revision 1af9c5f5). The exports go to <work>/exports/reader_v2 as eg2_reader_v2_*.",
   "The zoo venv: coreai-core 1.0.0b2, coreai-torch 0.4.1, torch 2.9.0, safetensors, numpy; Xcode 27 with coreai-build",
   "3600.83.1 for the --aot compiles (h16c, the gates' bundles).",
 ]
 notes = [
-  "Published 2026-10-14 as Hub revision a4b7895d7c03a1691e216975a06002e9cddb39ce (80 files: the Hub's lfs sha256 and sizes of the 11 bundles' large files and the downloaded small files match SHA256SUMS). Reader weights: mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader revision 1af9c5f52991e90afe0ff5f792a135d6500bf3b3 (9 files, same check).",
+  "Reader v1 was published 2026-10-14 as Hub revision a4b7895d7c03a1691e216975a06002e9cddb39ce (80 files: the Hub's lfs sha256 and sizes of the 11 bundles' large files and the downloaded small files match SHA256SUMS). Reader weights: mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader revision 1af9c5f52991e90afe0ff5f792a135d6500bf3b3 (9 files, same check).",
+  "Reader v2 (6 layers, 19,573,762 parameters, trained on the 960 h of LibriSpeech; test-clean WER 4.21 %, test-other",
+  "10.42 %) replaces reader v1 in macos/, ios/ and ios-h19p/: published 2026-10-15 as Hub revision",
+  "76865ae46793e05617c2a7420454b0c7eb8541a4 (107 files; the Hub's lfs sha256 and sizes of the 12 large files and the git",
+  "blob ids of the 95 small files match the staging folder's SHA256SUMS, conversion/eg2_transcribe r8_hub_check PASS; the",
+  "same commit removed reader v1's three bundles). Reader weights: mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader revision",
+  "de224fd8fa4ed4519fdddd9aa4154432d46a1bd3 (9 files, same check).",
+  "Its fp16 graph is reader v1's with 6 layers: the residual stream reaches 1,160 (v1 60.5), 56x below the float16 limit.",
   "Graphs: encoder features [1,3000,128] + half_mask [1,1500] -> soft_tokens [1,750,512]; reader soft_tokens",
   "[1,750,512] + token_mask [1,750] -> top1_index (int32), top1_logit, blank_logit [1,750]; float16 inputs, weights,",
   "arithmetic and outputs. ios/ in the HF repo holds the same bytes as macos/ (JIT .aimodel for every iPhone).",
@@ -40,11 +48,13 @@ notes = [
   "the h16c Neural Engine compile). half_mask is the only mask: without it a window with n_frames % 4 == 2 gets a wrong",
   "last token. The reader graph holds the word table (float16 [200000, 768]) and the argmax; the host reads blank",
   "where blank_logit > top1_logit, merges repeats and drops blanks.",
-  "Gates (Mac M4 Max, macOS 27.0 26A428, 2026-10-13/14): gate_encoder.py on the fp16 GPU AOT h16c bundle, 20/20 clips,",
-  "per-token cosine min 0.99645; gate_reader.py on the fp16 GPU AOT h16c bundle, fixture 19/20 and test-clean (200",
-  "utterances) WER 5.878 % = torch; bench_pipeline.py long: 3,257.4 s in 5.681 s with the reader on the Neural Engine",
-  "and two windows in flight, WER 5.80 % (torch path 5.78 %). iPhone 18 Pro (iOS 27.2 24B5099f): the encoder JIT",
-  ".aimodel 59.88 ms and its AOT h19p 59.60 ms per 30 s window, 20/20 clips, min 0.99626.",
+  "Gates (Mac M4 Max, macOS 27.0 26A428): gate_encoder.py on the fp16 GPU AOT h16c bundle, 20/20 clips, per-token",
+  "cosine min 0.99645 (2026-10-13); gate_reader.py on reader v2's fp16 GPU AOT h16c bundle (2026-10-15), fixture 20/20",
+  "and test-clean (200 utterances) WER 3.633 % (torch 3.655 %), on its Neural Engine AOT h16c bundle fixture 20/20 and",
+  "3.721 %; bench_pipeline.py long: 3,257.4 s in 6.327 s with reader v2 on the Neural Engine and two windows in flight,",
+  "WER 3.80 % (torch path 3.81 %). Reader v1 (2026-10-14): fixture 19/20, WER 5.878 % = torch; 5.681 s, WER 5.80 %.",
+  "iPhone 18 Pro (iOS 27.2 24B5099f): the encoder JIT .aimodel 59.88 ms and its AOT h19p 59.60 ms per 30 s window,",
+  "20/20 clips, min 0.99626.",
   "An AOT bundle's main.hash does not include the weights and the Core AI cache is keyed by it: delete the cache entry",
   "after re-exporting a reader with new weights to the same path (conversion/eg2_transcribe/README.md, the cache).",
   "Steps 4-5 (strip_ship.py strip) remove the MLIR debug locations, which name the converting machine's files; the",
@@ -52,8 +62,7 @@ notes = [
   "these copies; the gated originals stay in the work directory.",
   "Conversion is not byte-deterministic (the converter names resources at random): reproduction is judged by the gates.",
 ]
-open_questions = [
-]
+open_questions = []
 
 ["embeddinggemma-2-transcribe-ios-h19p"]
 card = "README.md"
@@ -62,7 +71,7 @@ source_hf_id = "google/embeddinggemma-2"
 status = "verified"
 steps = [
   { script = "eg2_transcribe/strip_ship.py", args = ["aot", "--only", "eg2_audio_fp16_T3000"], bundle = "ios-h19p/eg2_audio_fp16_T3000.aimodelc" },
-  { script = "eg2_transcribe/strip_ship.py", args = ["aot", "--only", "eg2_reader_fp16_T750"], bundle = "ios-h19p/eg2_reader_fp16_T750.aimodelc" },
+  { script = "eg2_transcribe/strip_ship.py", args = ["aot", "--only", "eg2_reader_v2_fp16_T750"], bundle = "ios-h19p/eg2_reader_v2_fp16_T750.aimodelc" },
 ]
 needs = [
   "The stripped bundles of [embeddinggemma-2-transcribe] (its steps 4-5).",
@@ -72,11 +81,16 @@ needs = [
 notes = [
   "Compiled-only (.aimodelc): runs on the iPhone 18 Pro (h19p) and nothing else; any other iPhone takes ios/ (JIT).",
   "Never load it on a Mac. The phone gates of the unstripped compiles: encoder 20/20 clips, min 0.99626, 59.60 ms per",
-  "30 s window; the reader's graph 32.99 ms with an interim checkpoint's weights.",
+  "30 s window; reader v1's graph 32.99 ms with an interim checkpoint's weights.",
+  "Reader v2's h19p compile of the stripped graph: 346,673,956 bytes, 0 Neural Engine regions, the same resources.bin",
+  "as the compile of the gated graph (provenance/reader-v2/strip/aot_h19p_eg2_reader_v2_fp16_T750.json).",
+  "These two compiles on the phone (2026-10-15, the app's default): fixture 20/20 = torch, the 3,257.4 s recording in",
+  "12.011 s, WER 3.812 % (377 = torch); reader v2 alone 34.76 ms per 30 s window, reader v1's graph 33.05 ms in the",
+  "same launch (provenance/reader-v2/app/, provenance/reader-v2/iphone-gpu-aot-timing.json).",
+  "Published 2026-10-15 in Hub revision 76865ae46793e05617c2a7420454b0c7eb8541a4 (ios-h19p/ holds these two compiles; the",
+  "Hub's lfs sha256 and sizes match the staging folder's SHA256SUMS).",
 ]
-open_questions = [
-  "These compiles of the stripped graphs ran on the phone only inside the app (reader v1: fixture 20/20, WER 5.774 %).",
-]
+open_questions = []
 
 ["embeddinggemma-2-transcribe-macos-encoder-split7"]
 card = "README.md"

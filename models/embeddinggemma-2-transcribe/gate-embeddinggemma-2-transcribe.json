@@ -12,7 +12,7 @@
     "reader_fp16": "test-clean WER <= torch + 0.2 pt and fixture transcripts >= 19/20, drift 0, red arms fail",
     "pipeline": "WER next to the float32 PyTorch path on the same windows, labels identical in two passes"
   },
-  "written": "2026-10-14",
+  "written": "2026-10-15",
   "rows": [
     {
       "what": "encoder fp16, Mac M4 Max GPU, AOT h16c (macOS 27.0 26A428)",
@@ -54,6 +54,108 @@
       "record_sha256": "7ee36ee462ee61984a8c34e37454c7efe053f5f1af11a319a8da4e4484803df3"
     },
     {
+      "what": "reader v2 fp16 + table, Mac M4 Max GPU, AOT h16c",
+      "ladder_row": "96",
+      "pass": true,
+      "fixture_transcripts_same": 20,
+      "fixture_utterances": 20,
+      "test_clean_utterances": 200,
+      "test_clean_token_agreement": 0.9999488830956397,
+      "test_clean_wer_coreai": 0.03632760898282695,
+      "test_clean_wer_torch": 0.036547776309995596,
+      "record": "provenance/reader-v2/mac-gpu-gate.json",
+      "record_sha256": "f1554916b01c7378632a874ce8b84317c327b8a6fdefe347ecb5a9135d89270b"
+    },
+    {
+      "what": "reader v2 fp16 + table, Mac M4 Max Neural Engine, AOT h16c",
+      "ladder_row": "98",
+      "pass": true,
+      "fixture_transcripts_same": 20,
+      "fixture_utterances": 20,
+      "test_clean_utterances": 200,
+      "test_clean_token_agreement": 0.999821090834739,
+      "test_clean_wer_coreai": 0.03720827829150154,
+      "test_clean_wer_torch": 0.036547776309995596,
+      "record": "provenance/reader-v2/mac-ane-gate.json",
+      "record_sha256": "63136255b224930882bbc51eef51bfea8f030e34512a716126423e19b34eb9ae"
+    },
+    {
+      "what": "3,257.4 s recording, reader v2: encoder GPU and reader Neural Engine, 2 windows in flight",
+      "ladder_row": "102",
+      "audio_s": 3257.44325,
+      "windows": 125,
+      "tokens": 81436,
+      "wall_s": 6.3275,
+      "x_realtime": 514.8,
+      "wer": 0.03802204469612701,
+      "wer_torch_path": 0.03812316715542522,
+      "record": "provenance/reader-v2/pipeline/mac-encoder-gpu-reader-ane-overlap.json",
+      "record_sha256": "99a68e58d2cc8a7eef79ae06d3459c02e2480f08120c5bf1302f1aaa7f2a7178"
+    },
+    {
+      "what": "3,257.4 s recording, reader v2: encoder GPU then reader GPU, one window at a time",
+      "ladder_row": "99",
+      "audio_s": 3257.44325,
+      "windows": 125,
+      "tokens": 81436,
+      "wall_s": 8.9276,
+      "x_realtime": 364.9,
+      "wer": 0.03822428961472343,
+      "wer_torch_path": 0.03812316715542522,
+      "record": "provenance/reader-v2/pipeline/mac-encoder-gpu-reader-gpu-overlap.json",
+      "record_sha256": "e8d24653dc83391d965461901d6732bc68ed6f6f0fc1d5b5a7f2dacd8ffc3c13"
+    },
+    {
+      "what": "the published (stripped) reader v2 bundles vs the gated ones, Mac runtime, 20 fixture clips",
+      "status": "SAME",
+      "pairs": [
+        {
+          "bundle": "eg2_reader_v2_fp16_T750",
+          "backend": "JIT, gpu preferred",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        },
+        {
+          "bundle": "eg2_reader_v2_fp16_T750",
+          "backend": "JIT, ane preferred",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        },
+        {
+          "bundle": "eg2_reader_v2_fp16_T750",
+          "backend": "AOT h16c gpu (gated) vs AOT h16c gpu (stripped)",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        },
+        {
+          "bundle": "eg2_reader_v2_fp16_T750",
+          "backend": "AOT h16c gpu (gated) vs JIT gpu preferred (stripped)",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        },
+        {
+          "bundle": "eg2_reader_v2_fp16_T750",
+          "backend": "AOT h16c ane (gated) vs AOT h16c ane (stripped)",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        },
+        {
+          "bundle": "eg2_reader_v2_fp16_T750",
+          "backend": "AOT h16c ane (gated) vs JIT ane preferred (stripped)",
+          "calls": 20,
+          "equal_calls": 20,
+          "status": "SAME"
+        }
+      ],
+      "record": "provenance/reader-v2/strip/compare_mac_reader_v2.json",
+      "record_sha256": "5476dd1baa9c231df79996a3906ef3d30b6cdb36ac2c8184f1c98240333bb545"
+    },
+    {
       "what": "reader v1 fp16 + table, Mac M4 Max GPU, AOT h16c",
       "ladder_row": "53",
       "pass": true,
@@ -80,7 +182,7 @@
       "record_sha256": "54d7c1e932b97423408a3cbc156850a65394851490f52e6ef05045ead27aa69c"
     },
     {
-      "what": "3,257.4 s recording: encoder GPU and reader Neural Engine, 2 windows in flight",
+      "what": "3,257.4 s recording, reader v1: encoder GPU and reader Neural Engine, 2 windows in flight",
       "ladder_row": "73",
       "audio_s": 3257.44325,
       "windows": 125,
@@ -93,7 +195,7 @@
       "record_sha256": "000974d3a74a96dc7bdda4300b13b6761b00d0370e8b79d2f9d3159ad795e958"
     },
     {
-      "what": "3,257.4 s recording: encoder GPU then reader GPU, one window at a time",
+      "what": "3,257.4 s recording, reader v1: encoder GPU then reader GPU, one window at a time",
       "ladder_row": "69",
       "audio_s": 3257.44325,
       "windows": 125,
@@ -106,7 +208,7 @@
       "record_sha256": "96b74d514caff52dbc4a6f54fada6a3b549d2a62012f1cacc824bd555f9793a3"
     },
     {
-      "what": "the published (stripped) bundles vs the gated ones, Mac runtime, 20 fixture clips",
+      "what": "the published (stripped) bundles vs the gated ones, Mac runtime, 20 fixture clips (the encoder; reader v1)",
       "status": "SAME",
       "pairs": [
         {

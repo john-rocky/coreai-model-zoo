@@ -1,0 +1,179 @@
+{
+ "schema": "eg2-transcribe-aot/1",
+ "status": "PASS",
+ "failures": [],
+ "name": "eg2_reader_v2_fp16_T750",
+ "target": "h16c-ane",
+ "started": "2026-10-15T10:19:06+0900",
+ "source": {
+  "bundle": "macos/eg2_reader_v2_fp16_T750.aimodel",
+  "main_mlirb_sha256": "eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17"
+ },
+ "command": [
+  "coreai-build",
+  "compile",
+  "macos/eg2_reader_v2_fp16_T750.aimodel",
+  "--output",
+  "macos-h16c/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+  "--platform",
+  "macOS",
+  "--preferred-compute",
+  "neural-engine",
+  "--architecture",
+  "h16c"
+ ],
+ "coreai_build": "coreai-build 3600.83.1",
+ "returncode": 0,
+ "seconds": 3.8,
+ "log_tail": [
+  "Compiling h16c: 1 of 1"
+ ],
+ "after": {
+  "bundle": "macos-h16c/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+  "files": [
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/Manifest.json",
+    "bytes": 78,
+    "sha256": "0a52d8a9aca188474db634b4a5e2e326641b2aa13378497276255ac5a6fe13ee"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.bc/h16c/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.mlir.bc",
+    "bytes": 622350,
+    "sha256": "0eb6fbd742bddc74d24dd2d1d85bee5bb38cc73ac35871151acc212d3d60af8a"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.bc/h16c/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_1_0.mlir.bc",
+    "bytes": 2366,
+    "sha256": "1f96b9cb6f48dc411a81c2de32e7374d856a22465c3f167bc551043592e6189b"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist",
+    "bytes": 18702,
+    "sha256": "346b55a6818ab1fe653d74fdc700ad36601c50e93d91e3cf9cfdf61ca7e0de1b"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/original_model_0.mpsgraph",
+    "bytes": 41606,
+    "sha256": "3340bc72b5b951438dc07fa8f33db564c51c403e1fc097b732c974ca6263d499"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin",
+    "bytes": 346539908,
+    "sha256": "89da46022de86ad6234ef9e874a4ab281fe6cd682f55a2fe521c90914ab858d3"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_1.mpsgraph",
+    "bytes": 36582,
+    "sha256": "cb4be78bd2df383c3f010514f22c9eae4c167d1304c177fa6b54ed83c1881d88"
+   },
+   {
+    "path": "main-h16c.mlirb",
+    "bytes": 994,
+    "sha256": "4ce2dccf03a29c2c5662760d0b0ad8440b0cd1423a8866abc9450651d7c1a85e"
+   },
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "ce0475da6463f1c30646c72ffe25e982deca349d12f23be66546df92f165de24"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 781,
+    "sha256": "3695b122f95ea6f8eeb9e525b1529698e6b50225a708085fd84037ef1465e6da"
+   },
+   {
+    "path": "stats.json",
+    "bytes": 1468,
+    "sha256": "9f15a62f25c2028d514b9fa88e6a25fdb98cb2d04ff4ed66d7280076e3afdc1a"
+   }
+  ],
+  "bytes": 347264867,
+  "source_hash": "EB5580145F17DF29F5FEDC6ADB08B473922D4A263CC8C57986D7177ED0990C17",
+  "ane_region_names": [
+   "main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0",
+   "main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_1"
+  ],
+  "local_paths": {
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/Manifest.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.bc/h16c/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.mlir.bc": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.bc/h16c/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_1_0.mlir.bc": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/original_model_0.mpsgraph": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_1.mpsgraph": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c.mlirb": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "stats.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  }
+ },
+ "vs_unstripped_h16c-ane_compile": {
+  "bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+  "ane_regions": 2,
+  "files": {
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/Manifest.json": "equal",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.bc/h16c/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.mlir.bc": "equal",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/binary_0.llir.bundle/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_0_0.bc/h16c/main_9wemocz7YmEwKSHhsD5JpQ_0_ANE_region_1_0.mlir.bc": "equal",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": "equal",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/original_model_0.mpsgraph": "differs",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": "equal",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_1.mpsgraph": "differs",
+   "main-h16c.mlirb": "differs",
+   "main.hash": "differs",
+   "metadata.json": "differs",
+   "stats.json": "differs"
+  }
+ },
+ "note": "this Mac's compile of the stripped copy, compared with the gated one by `compare --aot`",
+ "code_sha256": {
+  "strip_ship.py": "9f395a11d4d94040adbc2d18f9fd2dedb911ffcf549984ca2a2e6fe20ee87b47"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428"
+ }
+}

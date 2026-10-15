@@ -70,7 +70,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import reader_coreai as RC  # noqa: E402
 from _common import exports_dir, fixtures_dir, write_json  # noqa: E402
 from bench_encoder import cache_entry, peak_footprint_bytes  # noqa: E402
-from gate_reader import FP16_FORMS, load_table_t, load_vocab, parse_name  # noqa: E402
+from gate_reader import FP16_FORMS, NAME, export_record, load_table_t, load_vocab, parse_name  # noqa: E402
 
 N_WINDOWS, WARMUP, CALLS = 20, 3, 20
 AOT_NAME = {"gpu": "gpu_h16c", "ane": "ane_h16c"}
@@ -83,9 +83,14 @@ def pl_dir(arg: str | None = None) -> Path:
 
 
 def bundle_path(out: Path, form: str, tokens: int, backend: str) -> Path:
-    if backend.endswith("-jit") or backend == "cpu":
-        return out / form / f"eg2_reader_{form}_T{tokens}.aimodel"
-    return out / form / f"eg2_reader_{form}_T{tokens}_{AOT_NAME[backend]}.aimodelc"
+    """The one bundle of <out>/<form>/ for this form, window and backend: eg2_reader_[<version>_]<form>_T<tokens>
+    + .aimodel (JIT, cpu) or _<gpu|ane>_h16c.aimodelc (AOT); a version part (v2, ...) is allowed, two matches are not."""
+    suffix = ".aimodel" if (backend.endswith("-jit") or backend == "cpu") else f"_{AOT_NAME[backend]}.aimodelc"
+    hits = [p for p in sorted((out / form).glob(f"eg2_reader_*{form}_T{tokens}{suffix}"))
+            if (m := NAME.match(p.name)) and m.group(2) == form and p.name == p.name[:m.end(3)] + suffix]
+    if len(hits) != 1:
+        raise SystemExit(f"{out / form}: {len(hits)} bundles for {form} T{tokens} {backend}: {[p.name for p in hits]}")
+    return hits[0]
 
 
 def options(rt, backend: str):
@@ -149,7 +154,7 @@ async def run_one(args) -> dict:
     cpu_per_call_ms = (time.process_time() - cpu1) / CALLS * 1000
     host = []
     if head == "h":
-        exp = json.loads((bundle.parent / f"export_eg2_reader_{args.form}_T{args.tokens}.json").read_text())
+        exp = json.loads(export_record(bundle).read_text())
         table_t = load_table_t(Path(exp["reader"]["table"]))
         for res in outs:
             t1 = time.perf_counter()
@@ -309,7 +314,7 @@ async def long_run(args) -> None:
     enc_dtype = np.float16 if "_fp16_" in enc_b.name else np.float32
     rd_dtype = np.float16 if form in FP16_FORMS else np.float32
     head = "h" if form.startswith("h-out") else "argmax"
-    exp = json.loads((rd_b.parent / f"export_eg2_reader_{form}_T{T}.json").read_text())
+    exp = json.loads(export_record(rd_b).read_text())
     vocab = load_vocab(Path(exp["reader"]["reader_dir"]))
     N, scale = len(vocab), float(exp["reader"]["scale"])
     table_t = load_table_t(Path(exp["reader"]["table"])) if head == "h" else None
@@ -538,7 +543,7 @@ async def cross(args) -> None:
         rd_b = Path(args.reader).expanduser().resolve()
         form, Tr = parse_name(rd_b)
         assert Tr == T and not form.startswith("h-out")
-        exp = json.loads((rd_b.parent / f"export_eg2_reader_{form}_T{Tr}.json").read_text())
+        exp = json.loads(export_record(rd_b).read_text())
         vocab = load_vocab(Path(exp["reader"]["reader_dir"]))
         N = len(vocab)
         dt = np.float16 if form in FP16_FORMS else np.float32
