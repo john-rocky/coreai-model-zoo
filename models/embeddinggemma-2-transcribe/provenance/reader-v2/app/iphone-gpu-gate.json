@@ -1,0 +1,335 @@
+{
+ "what": "the app's self-test with reader v2 against the r4 bars (r8: fixture >= 19/20, long WER <= torch + 0.1 pt)",
+ "device": "iphone",
+ "form": "gpu",
+ "inputs": {
+  "gate": "<work>/device/pull/r81433-gate/result.json",
+  "long": "<work>/device/pull/r81433-long/result.json",
+  "iso": "<work>/exports/app/extractor_isolation_mac_v1_gpu_124853.json",
+  "transcribe": [
+   "<work>/device/pull/r81433-cold/result.json",
+   "<work>/device/pull/r81433-warm/result.json"
+  ]
+ },
+ "references": {
+  "ref_fixtures": {
+   "file": "ref_fixtures_coreai_path_v2.json",
+   "finished": "2026-10-15T11:40:04+0900",
+   "transcripts_same_as_torch": 20
+  },
+  "torch": "exports/reader_v2/ref_T750.npz, exports/reader_v2/fp16/hyp_gpu_T750.tsv (v2)"
+ },
+ "device_record": {
+  "arch": "h19p",
+  "available_mb": 3521.78816,
+  "footprint_mb": 13.698816,
+  "machine": "iPhone19,2",
+  "os": "Version 27.2 (Build 24B5099f)",
+  "os_build": "24B5099f",
+  "physical_memory_gb": 12.12,
+  "power": {
+   "battery": "charging",
+   "level": 0.800000011920929,
+   "low_power_mode": false
+  },
+  "thermal": "serious"
+ },
+ "model": {
+  "cache": {
+   "cleared": false,
+   "fingerprint": "6ee00d06dac93d8efb5d96dba7b9bbb3b5f82d839d849de6c40cf4d95f65df34",
+   "mode": "check",
+   "ms": 1.720458,
+   "previous": "6ee00d06dac93d8efb5d96dba7b9bbb3b5f82d839d849de6c40cf4d95f65df34"
+  },
+  "folder": "eg2-transcribe",
+  "form": "gpu",
+  "platform_folders": [
+   "ios-h19p"
+  ],
+  "reader_config_version": "v2",
+  "stages": [
+   {
+    "aot": true,
+    "bundle": "eg2_audio_fp16_T3000.aimodelc",
+    "compute": "gpu",
+    "load_s": 0.107814084,
+    "name": "encoder",
+    "warm_up_ms": 95.821625
+   },
+   {
+    "aot": true,
+    "bundle": "eg2_reader_v2_fp16_T750.aimodelc",
+    "compute": "gpu",
+    "load_s": 0.0551815,
+    "name": "reader",
+    "warm_up_ms": 44.603584
+   }
+  ],
+  "vocabulary": 200000,
+  "window": {
+   "drop_last": 1,
+   "frames": 3000,
+   "left_overlap": 96,
+   "tokens": 750
+  }
+ },
+ "fixtures": {
+  "source": "r81433-gate",
+  "utterances": 20,
+  "features_max_abs_diff": 4.76837158203125e-07,
+  "fp32_encoder_cos_min_app_features": 0.9999999995026775,
+  "fp32_encoder_cos_min_hf_features": 0.9999999990170414,
+  "iso_features_max_abs": 4.76837158203125e-07,
+  "extractor_pass": true,
+  "transcripts_same_as_torch": 20,
+  "mismatches": [],
+  "fixture_pass": true,
+  "fp16_soft_cos_mean_app_features": 0.9999947903463485,
+  "fp16_soft_cos_min_app_features": 0.991114015115895,
+  "fp16_soft_cos_min_reference_features": 0.9962582505090712,
+  "labels_same_both_features": 20,
+  "host_labels_equal_python_gpu_path_on_features_npy": 20
+ },
+ "long": {
+  "source": "r81433-long",
+  "audio_s": 3257.44325,
+  "decode_s": 0.508828542,
+  "log_mel_s": 0.160261416,
+  "log_mel_cpu_s": {
+   "blocks": 637,
+   "fft": 0.576043251,
+   "log": 0.09334758899999998,
+   "mel": 0.25514287500000005,
+   "note": "CPU seconds summed over the parallel blocks of 512 frames: framing + FFT + |X|, mel product, log"
+  },
+  "torch_wer": {
+   "wer": 0.03812316715542522,
+   "errors": 377,
+   "ref_words": 9889,
+   "hyp_words": 9931,
+   "engine": "word Levenshtein (numpy); jiwer: bench_pipeline.py score"
+  },
+  "python_path": {
+   "sequential_s": 8.9276,
+   "overlap_s": 7.4047,
+   "overlap_s_pass2": 7.4072,
+   "errors": 378,
+   "ref_words": 9889,
+   "wer": 0.03822428961472343,
+   "x_realtime_overlap": 439.9,
+   "x_realtime_sequential": 364.9,
+   "reader_bundle": "eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "json": [
+    "pipeline_long_fp16_gpu_overlap.json",
+    "pipeline_long_fp16_gpu_overlap.json"
+   ],
+   "labels": "labels_long_fp16_gpu_overlap.npy"
+  },
+  "modes": {
+   "overlap_off": {
+    "wall_s": [
+     12.041956458,
+     12.010617375
+    ],
+    "x_realtime_windows": [
+     270.50780837493704,
+     271.21363942376024
+    ],
+    "x_realtime_end_to_end": null,
+    "stage_ms_median": [
+     59.123209,
+     36.702959
+    ],
+    "stage_ms_median_every_pass": [
+     [
+      59.123209,
+      36.702959
+     ],
+     [
+      58.930458,
+      36.671375
+     ]
+    ],
+    "host_ms_per_window": {
+     "collapse": 0.015567,
+     "feed": 0.62030476,
+     "inputs": 0.070143008,
+     "labels": 0.009892320000000001,
+     "total": 0.715907088
+    },
+    "wer": {
+     "errors": 377,
+     "reference_words": 9889,
+     "wer": 0.03812316715542522
+    },
+    "wer_errors_every_pass": [
+     377,
+     377
+    ],
+    "word_distance_to_python_hyp": 2,
+    "labels_differing_from_python": 10,
+    "labels_differing_positions_s": [
+     392.68,
+     781.52,
+     907.2,
+     1139.16,
+     1472.48,
+     1678.92,
+     2230.52,
+     2256.04,
+     2592.36,
+     2757.12
+    ],
+    "top1_logit_max": 67.125,
+    "thermal": [
+     {
+      "order": 0,
+      "start": "fair",
+      "end": "fair",
+      "cooled_s": 300.19027602672577
+     },
+     {
+      "order": 1,
+      "start": "nominal",
+      "end": "nominal",
+      "cooled_s": 300.43822395801544
+     }
+    ]
+   }
+  },
+  "errors": [
+   377,
+   377
+  ],
+  "long_vs_torch_pass": true,
+  "long_vs_python_pass": true,
+  "overlap_labels_same_as_sequential": true
+ },
+ "transcribe": [
+  {
+   "source": "r81433-cold",
+   "milestones_s": {
+    "load_and_warm_up": 1.197011947631836,
+    "process_start_to_load_start": 0.0842430591583252,
+    "process_start_to_transcript": 1.3971400260925293,
+    "transcribe": 0.11588501930236816
+   },
+   "cache": {
+    "cleared": true,
+    "fingerprint": "6ee00d06dac93d8efb5d96dba7b9bbb3b5f82d839d849de6c40cf4d95f65df34",
+    "mode": "check",
+    "ms": 16.169125,
+    "previous": "2e2e1a1925074c657b1146c7e61043d94b5590aaf6091c8b26f4c452a81be400"
+   },
+   "stages": [
+    {
+     "aot": true,
+     "bundle": "eg2_audio_fp16_T3000.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.584591375,
+     "name": "encoder",
+     "warm_up_ms": 144.878833
+    },
+    {
+     "aot": true,
+     "bundle": "eg2_reader_v2_fp16_T750.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.285370292,
+     "name": "reader",
+     "warm_up_ms": 130.675625
+    }
+   ],
+   "result": {
+    "audio_s": 10.435,
+    "decode_s": 0.021975125,
+    "log_mel_s": 0.002022458,
+    "total_s": 0.115870791,
+    "x_realtime": 90.05720863681685,
+    "text": "he hoped there would bestow stew for dinner turnips and carrots and bruised potatoes and fat mutton pieces to be ladled out in thick peppered flour fatten sauce"
+   },
+   "device": {
+    "arch": "h19p",
+    "available_mb": 3521.837336,
+    "footprint_mb": 13.731536,
+    "machine": "iPhone19,2",
+    "os": "Version 27.2 (Build 24B5099f)",
+    "os_build": "24B5099f",
+    "physical_memory_gb": 12.12,
+    "power": {
+     "battery": "charging",
+     "level": 0.800000011920929,
+     "low_power_mode": false
+    },
+    "thermal": "serious"
+   },
+   "error": null
+  },
+  {
+   "source": "r81433-warm",
+   "milestones_s": {
+    "load_and_warm_up": 0.3461790084838867,
+    "process_start_to_load_start": 0.0926440954208374,
+    "process_start_to_transcript": 0.5477601289749146,
+    "transcribe": 0.10893702507019043
+   },
+   "cache": {
+    "cleared": false,
+    "fingerprint": "6ee00d06dac93d8efb5d96dba7b9bbb3b5f82d839d849de6c40cf4d95f65df34",
+    "mode": "check",
+    "ms": 1.766,
+    "previous": "6ee00d06dac93d8efb5d96dba7b9bbb3b5f82d839d849de6c40cf4d95f65df34"
+   },
+   "stages": [
+    {
+     "aot": true,
+     "bundle": "eg2_audio_fp16_T3000.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.108297625,
+     "name": "encoder",
+     "warm_up_ms": 98.418625
+    },
+    {
+     "aot": true,
+     "bundle": "eg2_reader_v2_fp16_T750.aimodelc",
+     "compute": "gpu",
+     "load_s": 0.055567167,
+     "name": "reader",
+     "warm_up_ms": 45.308458
+    }
+   ],
+   "result": {
+    "audio_s": 10.435,
+    "decode_s": 0.015289792,
+    "log_mel_s": 0.001002417,
+    "total_s": 0.108919917,
+    "x_realtime": 95.80433301285017,
+    "text": "he hoped there would bestow stew for dinner turnips and carrots and bruised potatoes and fat mutton pieces to be ladled out in thick peppered flour fatten sauce"
+   },
+   "device": {
+    "arch": "h19p",
+    "available_mb": 3521.640704,
+    "footprint_mb": 13.862656,
+    "machine": "iPhone19,2",
+    "os": "Version 27.2 (Build 24B5099f)",
+    "os_build": "24B5099f",
+    "physical_memory_gb": 12.12,
+    "power": {
+     "battery": "charging",
+     "level": 0.800000011920929,
+     "low_power_mode": false
+    },
+    "thermal": "nominal"
+   },
+   "error": null
+  }
+ ],
+ "verdicts": {
+  "extractor_pass": true,
+  "fixture_pass": true,
+  "long_vs_torch_pass": true,
+  "long_vs_python_pass": true
+ },
+ "pass": true,
+ "finished": "2026-10-15T15:26:26+0900"
+}

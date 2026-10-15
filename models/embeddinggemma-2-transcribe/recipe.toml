@@ -82,9 +82,11 @@ notes = [
   "30 s window; reader v1's graph 32.99 ms with an interim checkpoint's weights.",
   "Reader v2's h19p compile of the stripped graph: 346,673,956 bytes, 0 Neural Engine regions, the same resources.bin",
   "as the compile of the gated graph (provenance/reader-v2/strip/aot_h19p_eg2_reader_v2_fp16_T750.json).",
+  "These two compiles on the phone (2026-10-15, the app's default): fixture 20/20 = torch, the 3,257.4 s recording in",
+  "12.011 s, WER 3.812 % (377 = torch); reader v2 alone 34.76 ms per 30 s window, reader v1's graph 33.05 ms in the",
+  "same launch (provenance/reader-v2/app/, provenance/reader-v2/iphone-gpu-aot-timing.json).",
 ]
 open_questions = [
-  "These compiles of the stripped graphs ran on the phone only inside the app, with reader v1 (fixture 20/20, WER 5.774 %); reader v2's has not run on the phone yet.",
   "Reader v2 is staged, not uploaded: pin the Hub revision of the upload, then set status = \"verified\".",
 ]
 

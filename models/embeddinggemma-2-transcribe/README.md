@@ -71,8 +71,8 @@ only).
 | Mac M4 Max | 3,257.4 s recording, the app | encoder GPU ∥ reader v2 Neural Engine, 2 windows in flight (the app's Mac default) | 5.946 s | 548 | WER 3.82 % (378 of 9,889 words; float32 PyTorch path 377); fixture transcripts 19/20 = PyTorch (one near-tie between two words) |
 | iPhone 18 Pro | encoder, one 30 s window | fp16, GPU, AOT h19p | 59.60 ms (58.49) | 503 | 20/20 clips pass, per-token cosine min 0.99626 |
 | iPhone 18 Pro | encoder, one 30 s window | fp16, GPU, JIT `.aimodel` | 59.88 ms (56.81) | 501 | outputs bit-identical to the AOT bundle |
-| iPhone 18 Pro | reader v1 + table, one 30 s window | fp16, GPU, AOT h19p | 32.99 ms (32.77) | 909 | reader v1's graph (4 layers), timed with an interim reader checkpoint's weights; reader v1 on the phone, through the app: fixture transcripts 20/20 = PyTorch, long-recording WER 5.77 % |
-| iPhone 18 Pro | 3,257.4 s recording, the app with reader v1 | encoder GPU → reader GPU, one window at a time (the app's iPhone default) | 11.631 s | 280 | WER 5.77 % (571 of 9,889 words; float32 PyTorch path 572); fixture transcripts 20/20 = PyTorch |
+| iPhone 18 Pro | reader v2 + table, one 30 s window | fp16, GPU, AOT h19p | 34.76 ms (34.28) | 863 | through the app: fixture transcripts 20/20 = PyTorch, long-recording WER 3.81 %; reader v1's graph in the same launch 33.05 ms |
+| iPhone 18 Pro | 3,257.4 s recording, the app | encoder GPU → reader v2 GPU, one window at a time (the app's iPhone default) | 12.011 s | 271 | WER 3.81 % (377 of 9,889 words; float32 PyTorch path 377); fixture transcripts 20/20 = PyTorch |
 
 - The Mac rows ran the AOT h16c compile of each graph; `macos/` in the HF repo holds the JIT `.aimodel`, which the Mac
   specializes when it loads it (encoder 40.50 ms, reader v2 23.99 ms, outputs identical to the AOT compile).
@@ -83,12 +83,11 @@ only).
   GPU and with the Neural Engine preferred, as the JIT `.aimodel` and as its AOT h16c compile,
   [`provenance/reader-v2/strip/compare_mac_reader_v2.json`](provenance/reader-v2/strip/compare_mac_reader_v2.json)),
   and the `ios-h19p/` compiles of the stripped graphs hold the same weights file (`resources.bin`, byte for byte) as
-  the compiles of the gated graphs. The Mac app row ran the HF repo's `macos/` bundles; the iPhone app row ran
-  revision `a4b7895d`'s `ios-h19p/` bundles (reader v1); the iPhone encoder and reader rows ran the compiles of the
-  unstripped graphs.
+  the compiles of the gated graphs. The app rows and the iPhone reader row ran the HF repo's bundles (`macos/` on the
+  Mac, `ios-h19p/` on the iPhone); the iPhone encoder rows ran the compiles of the unstripped graph.
 - The app rows: the eg2-transcribe app (Release build, Swift Core AI runtime) on the 125 windows, the log-mel computed
-  before the clock starts (decode and log-mel add 0.66 + 0.05 s on the Mac, 0.49 + 0.16 s on the iPhone); the iPhone
-  pass started and ended at thermal state nominal.
+  before the clock starts (decode and log-mel add 0.66 + 0.05 s on the Mac, 0.51 + 0.16 s on the iPhone); the iPhone
+  pass started and ended at thermal state nominal (the pass before it, started at thermal state fair: 12.042 s).
 - The Mac's Neural Engine: the fp16 encoder runs there as one region at 85.21 ms but misses the per-token bar at
   near-silent tokens (min 0.888). Cut in two after layer 7 (a float32 front on the GPU, a float16 body on the Neural
   Engine) it passes (min 0.99671) and runs 30.96 ms per window with two windows in flight (×969); that two-bundle form
@@ -110,10 +109,9 @@ only).
   bit-identical to the gated `.aimodel` bundles and to the AOT h16c compile the rows were measured on
   ([`provenance/encoder-split7/compare_mac.json`](provenance/encoder-split7/compare_mac.json)); recipe
   `embeddinggemma-2-transcribe-macos-encoder-split7`.
-- Not measured: reader v2 on the iPhone (the iPhone rows with a reader are reader v1's), a launch of the app right
-  after an install, the reader's own gate on the iPhone (the 200 test-clean utterances), other iPhones (the JIT
-  `.aimodel` specializes on each; the AOT bundle is h19p only), languages other than English, noisy or
-  conversational speech.
+- Not measured: a launch of the app right after an install, the reader's own gate on the iPhone (the 200 test-clean
+  utterances), other iPhones (the JIT `.aimodel` specializes on each; the AOT bundle is h19p only), languages other
+  than English, noisy or conversational speech.
 - Records: [`provenance/`](provenance/) holds the gate, timing, pipeline, strip and app records behind these rows (the
   work directory's paths replaced by `<work>`; `SOURCES.tsv` gives each original's sha256): reader v2's in
   [`provenance/reader-v2/`](provenance/reader-v2/), reader v1's in `reader/`, `pipeline/` and `app/`; and
@@ -184,10 +182,10 @@ With reader v2 on the 3,257.4 s recording (the Mac app row above): the Mac defau
 with both bundles on the GPU, 7.403 s with two windows in flight and 8.056 s one at a time (WER 3.83 %, fixture 20/20).
 From launch to the transcript of a 10.4 s clip on the Mac: 8.49 s right after the app cleared its Core AI cache (it
 found the new folder's fingerprint; loading the reader for the Neural Engine takes 5.59 s of it) and 0.57 s from the
-cache. With reader v1 (revision `a4b7895d`) the iPhone 18 Pro default took 11.631 s (×280; thermal state nominal, on
-USB power), WER 5.77 % (571), fixture transcripts 20/20 = PyTorch, and 1.28 s from launch to the transcript right
-after the cache clear, 0.51 s from the cache. Reader v2 on the iPhone and a launch right after an install: not yet
-measured.
+cache. On the iPhone 18 Pro (thermal state nominal, on USB power) the default takes 12.011 s (×271), WER 3.81 % (377),
+fixture transcripts 20/20 = PyTorch (reader v1, revision `a4b7895d`: 11.631 s, WER 5.77 %); from launch to the
+transcript, 1.40 s right after the cache clear (that launch began at thermal state serious) and 0.55 s from the cache.
+A launch right after an install: not yet measured.
 
 ## Licenses
 
