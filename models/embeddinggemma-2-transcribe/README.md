@@ -18,7 +18,7 @@ described in a post on 2026-10-13; that app's code and weights are not public. T
 here are this port's own, the reader trained from scratch (reader v2: test-clean WER 4.21 %, test-other 10.42 %,
 greedy, no language model; reader v1, trained on train-clean-100 alone: 6.81 % and 15.10 %). The Android build on
 LiteRT ([mlboydaisuke/EmbeddingGemma-2-Transcribe-LiteRT](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-LiteRT))
-carries reader v1.
+ships its own copy of the reader; that repository's card says which reader version it carries.
 
 Two static graphs, one 30 s window each (bytes of the JIT `.aimodel`; the iPhone 18 Pro AOT compiles are 587,306,390
 and 346,673,956):
