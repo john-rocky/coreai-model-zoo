@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14",
+ "generated": "2026-10-15",
  "how_to_use": {
   "list": "python3 conversion/zoo_convert.py list",
   "show": "python3 conversion/zoo_convert.py show <recipe>",
@@ -28,7 +28,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/AdcSR-CoreAI",
-     "downloads_30d": 42,
+     "downloads_30d": 25,
      "bundles": [
       "adcsr_x4_float32.aimodel"
      ],
@@ -67,7 +67,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Agents-A1-4B-CoreAI",
-     "downloads_30d": 111,
+     "downloads_30d": 113,
      "bundles": [
       "gpu-pipelined-b2/agents_a1_4b_decode_int8hu_block32_sym"
      ],
@@ -96,7 +96,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/APUS-Decision-v1-4B-CoreAI",
-     "downloads_30d": 38,
+     "downloads_30d": 39,
      "bundles": [
       "gpu-pipelined-b2/apus_decision_v1_4b_decode_int8hu_block32_sym"
      ],
@@ -156,7 +156,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/BitCPM-8B-CoreAI",
-     "downloads_30d": 96,
+     "downloads_30d": 94,
      "bundles": [
       "gpu-pipelined/bitcpm_8b_decode_ternary_s1"
      ],
@@ -195,7 +195,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/BitVLA-CoreAI",
-     "downloads_30d": 17,
+     "downloads_30d": 15,
      "bundles": [
       "aimodel/bitvla_llm_act/bitvla_llm_act.aimodel",
       "aimodel/bitvla_vision/bitvla_vision.aimodel",
@@ -258,7 +258,7 @@
    "repos": [
     {
      "id": "rahulrachuri/ternary-bonsai-2-27b-coreai",
-     "downloads_30d": 254,
+     "downloads_30d": 258,
      "bundles": [
       "aot_mac/bonsai2_27b_decode_pq2_0_pf64.h16s.aimodelc",
       "bonsai2_27b_decode_pq2_0_pf64.aimodel"
@@ -562,7 +562,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/decider-0.8b-CoreAI",
-     "downloads_30d": 57,
+     "downloads_30d": 58,
      "bundles": [
       "gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym"
      ],
@@ -627,7 +627,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/decider-2b-vision-CoreAI",
-     "downloads_30d": 37,
+     "downloads_30d": 38,
      "bundles": [
       "gpu-pipelined/decider_2b_vision_decode_fp16_pf16",
       "gpu-pipelined/decider_2b_vision_decode_int8mix_pf16",
@@ -671,7 +671,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Depth-Anything-3-CoreAI",
-     "downloads_30d": 32,
+     "downloads_30d": 33,
      "bundles": [
       "base/da3-base_float16.aimodel",
       "base/da3-base_float32.aimodel",
@@ -720,7 +720,7 @@
    "recipes": [
     {
      "name": "embeddinggemma-2-transcribe",
-     "status": "unverified",
+     "status": "verified",
      "source_model": null,
      "source_model_from": null,
      "hf_repo": "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI",
@@ -728,13 +728,11 @@
      "steps": 5,
      "run": "python3 conversion/zoo_convert.py run embeddinggemma-2-transcribe",
      "gate_transcript": "models/embeddinggemma-2-transcribe/gate-embeddinggemma-2-transcribe.json",
-     "open_questions": [
-      "Reader v2 is staged, not uploaded: pin the Hub revisions of the upload (this repo and the Reader repo) in notes and in the card's header, then set status = \"verified\"."
-     ]
+     "open_questions": []
     },
     {
      "name": "embeddinggemma-2-transcribe-ios-h19p",
-     "status": "unverified",
+     "status": "verified",
      "source_model": null,
      "source_model_from": null,
      "hf_repo": "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI",
@@ -742,9 +740,7 @@
      "steps": 2,
      "run": "python3 conversion/zoo_convert.py run embeddinggemma-2-transcribe-ios-h19p",
      "gate_transcript": null,
-     "open_questions": [
-      "Reader v2 is staged, not uploaded: pin the Hub revision of the upload, then set status = \"verified\"."
-     ]
+     "open_questions": []
     },
     {
      "name": "embeddinggemma-2-transcribe-macos-encoder-split7",
@@ -763,17 +759,24 @@
    ],
    "repos": [
     {
+     "id": "mlboydaisuke/EmbeddingGemma-2-Transcribe-LiteRT",
+     "downloads_30d": 40,
+     "bundles": [],
+     "tier1": {},
+     "smoke": []
+    },
+    {
      "id": "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI",
-     "downloads_30d": 0,
+     "downloads_30d": 15,
      "bundles": [
       "ios-h19p/eg2_audio_fp16_T3000.aimodelc",
-      "ios-h19p/eg2_reader_fp16_T750.aimodelc",
+      "ios-h19p/eg2_reader_v2_fp16_T750.aimodelc",
       "ios/eg2_audio_fp16_T3000.aimodel",
-      "ios/eg2_reader_fp16_T750.aimodel",
+      "ios/eg2_reader_v2_fp16_T750.aimodel",
       "macos-encoder-split7-30s/eg2_body_layer7_fp16_T3000.aimodel",
       "macos-encoder-split7-30s/eg2_front_layer7_fp32_T3000.aimodel",
       "macos/eg2_audio_fp16_T3000.aimodel",
-      "macos/eg2_reader_fp16_T750.aimodel"
+      "macos/eg2_reader_v2_fp16_T750.aimodel"
      ],
      "tier1": {},
      "smoke": []
@@ -807,7 +810,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/FastContext-1.0-4B-CoreAI",
-     "downloads_30d": 106,
+     "downloads_30d": 104,
      "bundles": [
       "gpu"
      ],
@@ -890,7 +893,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/FLUX.2-klein-4B-CoreAI",
-     "downloads_30d": 70,
+     "downloads_30d": 64,
      "bundles": [
       "macos-fp16",
       "macos-int8"
@@ -1014,7 +1017,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Gemma-4-12B-CoreAI",
-     "downloads_30d": 476,
+     "downloads_30d": 480,
      "bundles": [
       "gpu-pipelined/gemma4_12b_qat_decode_int4linsym_msdpa_g8",
       "gpu-pipelined/gemma4_12b_qat_decode_int8lin_msdpa_g8"
@@ -1061,7 +1064,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Gemma-4-31B-CoreAI",
-     "downloads_30d": 424,
+     "downloads_30d": 426,
      "bundles": [
       "gpu-pipelined/gemma4_31b_qat_decode_int4linsym_msdpa_g8"
      ],
@@ -1308,7 +1311,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/gemma-4-E4B-CoreAI",
-     "downloads_30d": 492,
+     "downloads_30d": 494,
      "bundles": [
       "gpu-pipelined/gemma4_e4b_qat_decode_int4lin",
       "gpu-pipelined/gemma4_e4b_qat_decode_int4lin_aotc_h18p",
@@ -1571,7 +1574,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/GLiNER2-PII-CoreAI",
-     "downloads_30d": 34,
+     "downloads_30d": 30,
      "bundles": [
       "ios-h18p/gliner2-pii_float16_s256_t96_m16.h18p.aimodelc",
       "ios/gliner2-pii_float16_s256_t96_m16.aimodel",
@@ -1619,7 +1622,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/GLiNER2.5-Decide-CoreAI",
-     "downloads_30d": 68,
+     "downloads_30d": 69,
      "bundles": [
       "ios-h19p/gliner25-decide_float16_s256_m32.h19p.aimodelc",
       "ios-h19p/gliner25-decide_float16_s512_m32.h19p.aimodelc",
@@ -1661,7 +1664,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/GLM-4.7-Flash-CoreAI",
-     "downloads_30d": 467,
+     "downloads_30d": 469,
      "bundles": [
       "gpu-pipelined/glm_4_7_flash_decode_sym8_gather"
      ],
@@ -1700,7 +1703,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/GLM-Image-CoreAI",
-     "downloads_30d": 21,
+     "downloads_30d": 19,
      "bundles": [
       "glm_image_ar.aimodelc",
       "glm_image_dit_1024.aimodelc",
@@ -1771,7 +1774,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/GLM-OCR-CoreAI",
-     "downloads_30d": 34,
+     "downloads_30d": 33,
      "bundles": [
       "decoder",
       "vision/glm_ocr_vision.aimodel"
@@ -1831,7 +1834,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/granite-4.0-h-CoreAI",
-     "downloads_30d": 23,
+     "downloads_30d": 21,
      "bundles": [
       "gpu-pipelined-b2/granite_4_0_h_1b_decode_int8hu_block32_sym",
       "gpu-pipelined/granite_4_0_h_1b_decode_int8hu_block32_sym",
@@ -1930,7 +1933,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI",
-     "downloads_30d": 317,
+     "downloads_30d": 321,
      "bundles": [
       "ios-h18p/fp32-s128/granite97m_fp32_s128_bound.h18p.aimodelc",
       "ios-h18p/fp32-s512/granite97m_fp32_s512_bound.h18p.aimodelc",
@@ -1970,7 +1973,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Holo2-4B-CoreAI",
-     "downloads_30d": 28,
+     "downloads_30d": 27,
      "bundles": [
       "gpu-pipelined/holo2_4b_decode_int8lin_s1",
       "gpu-pipelined/holo2_4b_vision/holo2_4b_vision.aimodel"
@@ -2109,7 +2112,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Kokoro-82M-CoreAI",
-     "downloads_30d": 36,
+     "downloads_30d": 33,
      "bundles": [
       "kokoro_predictor.aimodel",
       "kokoro_prosody.aimodel",
@@ -2229,7 +2232,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/LFM2.5-1.2B-CoreAI",
-     "downloads_30d": 446,
+     "downloads_30d": 445,
      "bundles": [
       "gpu-pipelined-b2/lfm2_5_1_2b_instruct_decode_int8hu_block32_sym",
       "gpu-pipelined/lfm2_5_1_2b_instruct_decode_int8hu_block32_sym",
@@ -2300,7 +2303,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/LFM2.5-2.6B-CoreAI",
-     "downloads_30d": 151,
+     "downloads_30d": 149,
      "bundles": [
       "gpu-pipelined/lfm2_5_2_6b_decode_int4lin",
       "gpu-pipelined/lfm2_5_2_6b_decode_int8hu_block32_sym"
@@ -2347,7 +2350,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/LFM2.5-8B-A1B-CoreAI",
-     "downloads_30d": 771,
+     "downloads_30d": 770,
      "bundles": [
       "gpu-pipelined/lfm2_5_8b_a1b_decode_sym8_gather"
      ],
@@ -2445,7 +2448,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/LFM2.5-VL-3B-CoreAI",
-     "downloads_30d": 22,
+     "downloads_30d": 21,
      "bundles": [
       "gpu-pipelined/lfm2_5_vl_3b_decode_int4lin",
       "gpu-pipelined/lfm2_5_vl_3b_decode_int8lin",
@@ -2504,7 +2507,7 @@
     },
     {
      "id": "mlboydaisuke/LFM2.5-VL-450M-CoreAI",
-     "downloads_30d": 22,
+     "downloads_30d": 18,
      "bundles": [
       "gpu-pipelined/lfm2_5_vl_450m_decode_int8lin",
       "gpu-pipelined/lfm2_5_vl_450m_decode_int8lin_textcore",
@@ -2583,7 +2586,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/LLaDA-8B-dLLM-CoreAI",
-     "downloads_30d": 21,
+     "downloads_30d": 20,
      "bundles": [
       "macos"
      ],
@@ -2622,7 +2625,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/LTX-Video-2B-CoreAI",
-     "downloads_30d": 30,
+     "downloads_30d": 29,
      "bundles": [
       "dit_fp16.aimodel",
       "t5_bf16.aimodel",
@@ -2677,7 +2680,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MelBandRoformer-Vocal-CoreAI",
-     "downloads_30d": 20,
+     "downloads_30d": 18,
      "bundles": [
       "mbr_full_fp16.aimodel",
       "mbr_full_fp16.h18p.aimodelc"
@@ -2724,7 +2727,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MinerU2.5-Pro-CoreAI",
-     "downloads_30d": 10,
+     "downloads_30d": 9,
      "bundles": [
       "decoder",
       "layout/decoder",
@@ -2788,7 +2791,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MiniCPM-V-4.6-CoreAI",
-     "downloads_30d": 36,
+     "downloads_30d": 35,
      "bundles": [
       "gpu-pipelined/minicpmv46_vision",
       "gpu-pipelined/minicpmv46_vision_int8lin",
@@ -2876,7 +2879,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI",
-     "downloads_30d": 12,
+     "downloads_30d": 20,
      "bundles": [
       "gpu-pipelined/minicpmv47_vision_fp16",
       "gpu-pipelined/minicpmv47_vision_int8lin",
@@ -2921,7 +2924,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MiniCPM5-1B-CoreAI",
-     "downloads_30d": 686,
+     "downloads_30d": 526,
      "bundles": [
       "int8",
       "ios-ane-h18p",
@@ -2978,7 +2981,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/MiniCPM5-2B-CoreAI",
-     "downloads_30d": 1350,
+     "downloads_30d": 1188,
      "bundles": [
       "int8",
       "ios-ane-h18p",
@@ -3019,7 +3022,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Muse-Glimmer-30B-CoreAI",
-     "downloads_30d": 245,
+     "downloads_30d": 246,
      "bundles": [
       "gpu-pipelined/muse_glimmer_30b_decode_int4hu_block32_sym"
      ],
@@ -3072,7 +3075,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Nanbeige4.1-3B-CoreAI",
-     "downloads_30d": 29,
+     "downloads_30d": 28,
      "bundles": [
       "gpu-pipelined-b2/nanbeige4_1_3b_decode_int8hu_block32_sym",
       "gpu-pipelined/nanbeige4_1_3b_decode_int8hu_block32_sym_s1"
@@ -3158,7 +3161,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Nemotron-3-Diarization-CoreAI",
-     "downloads_30d": 49,
+     "downloads_30d": 50,
      "bundles": [
       "n3d_offline_float16.aimodel",
       "n3d_offline_float16.h18p.aimodelc",
@@ -3190,7 +3193,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Nemotron-3-Nano-4B-CoreAI",
-     "downloads_30d": 5723,
+     "downloads_30d": 4931,
      "bundles": [
       "gpu-pipelined/nemotron_3_nano_4b_decode_int8hu",
       "ios-h18p/nemotron_3_nano_4b_decode_int8hu"
@@ -3237,7 +3240,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI",
-     "downloads_30d": 5690,
+     "downloads_30d": 4881,
      "bundles": [
       "ios-h18p/nemotron_asr_joint_float32.aimodel",
       "ios-h18p/nemotron_asr_predict_float32.aimodel",
@@ -3386,7 +3389,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/North-Micro-Vision-CoreAI",
-     "downloads_30d": 23,
+     "downloads_30d": 22,
      "bundles": [
       "gpu-pipelined/north_micro_vision_instruct_decode_int8lin",
       "gpu-pipelined/north_micro_vision_instruct_decode_int8lin_textcore",
@@ -3500,7 +3503,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Ornith-1.0-9B-CoreAI",
-     "downloads_30d": 158,
+     "downloads_30d": 157,
      "bundles": [
       "gpu-pipelined/ornith_1_0_9b_decode_int4lin",
       "gpu-pipelined/ornith_1_0_9b_decode_int8hu_block32_sym"
@@ -3547,7 +3550,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Parakeet-TDT-0.6B-CoreAI",
-     "downloads_30d": 33,
+     "downloads_30d": 28,
      "bundles": [
       "parakeet_encoder_float16_L2885.aimodel",
       "parakeet_joint_float32.aimodel",
@@ -3602,7 +3605,7 @@
    "repos": [
     {
      "id": "rahulrachuri/parakeet-tdt-0.6b-v2-coreai",
-     "downloads_30d": 7,
+     "downloads_30d": 6,
      "bundles": [
       "parakeet_encoder_float16_L2885.aimodel",
       "parakeet_joint_float32.aimodel",
@@ -3657,7 +3660,7 @@
    "repos": [
     {
      "id": "rahulrachuri/pocket-tts-coreai",
-     "downloads_30d": 62,
+     "downloads_30d": 61,
      "bundles": [
       "flow_decoder_float16_lsd1.aimodel",
       "flow_decoder_float32_lsd1.aimodel",
@@ -3728,7 +3731,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Qwen2.5-Omni-3B-Audio-CoreAI",
-     "downloads_30d": 5620,
+     "downloads_30d": 4825,
      "bundles": [
       "gpu-pipelined/qwen2_5_omni_3b_audio_encoder_fp16_k15/qwen2_5_omni_3b_audio_encoder_fp16_k15.aimodel",
       "gpu-pipelined/qwen2_5_omni_3b_thinker_int8lin_n750_s1",
@@ -3785,7 +3788,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/qwen3-0.6b-CoreAI-official",
-     "downloads_30d": 52,
+     "downloads_30d": 51,
      "bundles": [
       "ios",
       "macos",
@@ -3844,7 +3847,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/qwen3-1.7b-CoreAI-official",
-     "downloads_30d": 112,
+     "downloads_30d": 110,
      "bundles": [
       "ios-gpu"
      ],
@@ -3884,7 +3887,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/qwen3-4b-CoreAI-official",
-     "downloads_30d": 51,
+     "downloads_30d": 50,
      "bundles": [
       "ios",
       "macos"
@@ -3929,7 +3932,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Qwen3-ASR-1.7B-CoreAI",
-     "downloads_30d": 32,
+     "downloads_30d": 29,
      "bundles": [
       "gpu-pipelined/qwen3_asr_1.7b_audio_encoder_fp16_k30/qwen3_asr_1.7b_audio_encoder_fp16_k30.aimodel",
       "gpu-pipelined/qwen3_asr_1.7b_decode_int8hu_n390_s1"
@@ -3988,7 +3991,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Qwen3-Embedding-0.6B-CoreAI",
-     "downloads_30d": 55,
+     "downloads_30d": 41,
      "bundles": [
       "qwen3-embedding-0.6b_float16_s512_static.aimodel"
      ],
@@ -4007,7 +4010,7 @@
     },
     {
      "id": "mlboydaisuke/embeddinggemma-300m-CoreAI",
-     "downloads_30d": 21,
+     "downloads_30d": 17,
      "bundles": [
       "model/embeddinggemma-300m_float32_static.aimodel"
      ],
@@ -4046,7 +4049,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Qwen3-Reranker-0.6B-CoreAI",
-     "downloads_30d": 19,
+     "downloads_30d": 18,
      "bundles": [
       "qwen3-reranker-0.6b_float16_s512_static.aimodel"
      ],
@@ -4145,7 +4148,7 @@
     },
     {
      "id": "mlboydaisuke/Qwen3-VL-2B-CoreAI",
-     "downloads_30d": 27,
+     "downloads_30d": 26,
      "bundles": [
       "gpu-pipelined/qwen3_vl_2b_instruct_decode_int8hu_s1",
       "gpu-pipelined/qwen3_vl_2b_instruct_decode_int8lin_s1",
@@ -4181,7 +4184,7 @@
     },
     {
      "id": "mlboydaisuke/Qwen3-VL-8B-CoreAI",
-     "downloads_30d": 18,
+     "downloads_30d": 17,
      "bundles": [
       "gpu-pipelined/qwen3_vl_8b_instruct_decode_int8hu_s1",
       "gpu-pipelined/qwen3_vl_8b_instruct_decode_int8lin_s1",
@@ -4249,7 +4252,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/qwen3.5-0.8B-CoreAI",
-     "downloads_30d": 437,
+     "downloads_30d": 436,
      "bundles": [
       "gpu-pipelined-b2/qwen3_5_0_8b_decode_int8hu_block32_sym",
       "gpu-pipelined/qwen3_5_0_8b_decode_int8hu_block32_sym",
@@ -4333,7 +4336,7 @@
     },
     {
      "id": "mlboydaisuke/qwen3.5-2B-CoreAI",
-     "downloads_30d": 50,
+     "downloads_30d": 49,
      "bundles": [
       "gpu-pipelined-b2/qwen3_5_2b_decode_int8hu_block32_sym",
       "gpu-pipelined/qwen3_5_2b_decode_int8hu_block32_sym",
@@ -4408,7 +4411,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Qwen3.5-2B-Decision-CoreAI",
-     "downloads_30d": 44,
+     "downloads_30d": 45,
      "bundles": [
       "gpu-pipelined/qwen3_5_2b_decision_decode_fp16",
       "gpu-pipelined/qwen3_5_2b_decision_decode_int8hu_block32_sym"
@@ -4438,7 +4441,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/qwen3.5-4B-CoreAI",
-     "downloads_30d": 108,
+     "downloads_30d": 99,
      "bundles": [
       "gpu-pipelined-b2/qwen3_5_4b_decode_int8hu_block32_sym"
      ],
@@ -4584,7 +4587,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Qwen3.8-27B-CoreAI",
-     "downloads_30d": 76,
+     "downloads_30d": 75,
      "bundles": [
       "gpu-pipelined/qwen3_8_27b_decode_int4lin",
       "gpu-pipelined/qwen3_8_27b_decode_int8hu_block32_sym",
@@ -4885,7 +4888,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/RWKV7-Goose-1.5B-CoreAI",
-     "downloads_30d": 110,
+     "downloads_30d": 107,
      "bundles": [
       "aimodel/rwkv7_goose_1_5b/rwkv7_goose_1_5b.aimodel",
       "h18p/rwkv7_goose_1_5b/rwkv7_goose_1_5b.h18p.aimodelc"
@@ -4932,7 +4935,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/S1-mini-CoreAI",
-     "downloads_30d": 960,
+     "downloads_30d": 958,
      "bundles": [
       "gpu-pipelined/s1_mini_decode_int8lin"
      ],
@@ -4988,7 +4991,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Shieldstral-CoreAI",
-     "downloads_30d": 25,
+     "downloads_30d": 24,
      "bundles": [
       "gpu-classify/shieldstral_1_0_3b_classify_int4lin_s256/shieldstral_1_0_3b_classify_int4lin_s256.aimodel",
       "gpu-classify/shieldstral_1_0_3b_classify_int4lin_s512/shieldstral_1_0_3b_classify_int4lin_s512.aimodel",
@@ -5051,7 +5054,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Streaming-Sortformer-Diar-CoreAI",
-     "downloads_30d": 16,
+     "downloads_30d": 15,
      "bundles": [
       "sortformer_float16.aimodel",
       "sortformer_float16.h18p.aimodelc"
@@ -5098,7 +5101,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Stable-Audio-Open-Small-CoreAI",
-     "downloads_30d": 33,
+     "downloads_30d": 30,
      "bundles": [
       "macos"
      ],
@@ -5179,7 +5182,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/TimesFM-2.5-200M-CoreAI",
-     "downloads_30d": 133,
+     "downloads_30d": 132,
      "bundles": [
       "ios-h18p/timesfm_2p5_200m_ctx2048_fp16.h18p.aimodelc",
       "ios/timesfm_2p5_200m_ctx2048_fp16.aimodel",
@@ -5227,7 +5230,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/TripoSplat-CoreAI",
-     "downloads_30d": 21,
+     "downloads_30d": 20,
      "bundles": [
       "decode_fp32.aimodel",
       "dinov3_fp16.aimodel",
@@ -5353,7 +5356,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI",
-     "downloads_30d": 40,
+     "downloads_30d": 35,
      "bundles": [
       "ios-h18p/vibevoice_connector_fp16.h18p.aimodelc",
       "ios-h18p/vibevoice_decoder_fp16_t64.h18p.aimodelc",
@@ -5469,7 +5472,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI",
-     "downloads_30d": 1385,
+     "downloads_30d": 1228,
      "bundles": [
       "ios",
       "ios-h18p/vjepa2_ssv2_fp16.h18p.aimodelc",
@@ -5518,7 +5521,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/VoxCPM-0.5B-CoreAI",
-     "downloads_30d": 46,
+     "downloads_30d": 42,
      "bundles": [
       "ios-h18p/voxcpm_base_int8_decode_cl512.h18p.aimodelc",
       "ios-h18p/voxcpm_base_int8_prefill_t32.h18p.aimodelc",
@@ -5668,7 +5671,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/VoxCPM2-CoreAI",
-     "downloads_30d": 52,
+     "downloads_30d": 48,
      "bundles": [
       "ios-h18p/voxcpm2_base_int8_decode_cl512.h18p.aimodelc",
       "ios-h18p/voxcpm2_base_int8_prefill_t32.h18p.aimodelc",
@@ -5818,7 +5821,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/whisper-large-v3-turbo-CoreAI-official",
-     "downloads_30d": 41,
+     "downloads_30d": 40,
      "bundles": [
       "ios-h18p/whisper-large-v3-turbo_float16_fixed128.aimodel",
       "ios/whisper-large-v3-turbo_float16_fixed128.aimodel",
@@ -5872,7 +5875,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/YOLOX-CoreAI",
-     "downloads_30d": 26,
+     "downloads_30d": 25,
      "bundles": [
       "yolox-s_float32.aimodel"
      ],
@@ -5911,7 +5914,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Youtu-LLM-2B-CoreAI",
-     "downloads_30d": 22,
+     "downloads_30d": 20,
      "bundles": [
       "gpu-pipelined-b2/youtu_llm_2b_decode_absorbed_int8_msdpa_g32",
       "gpu-pipelined/youtu_llm_2b_decode_absorbed_int8_msdpa",
@@ -5966,7 +5969,7 @@
    "repos": [
     {
      "id": "mlboydaisuke/Z-Image-Turbo-CoreAI",
-     "downloads_30d": 12,
+     "downloads_30d": 10,
      "bundles": [
       "glue/zimage_t_embedder_fp32/zimage_t_embedder_fp32.aimodel",
       "zimage_dit_512_cap32_full_native_bf16_dyncap_dynimg_iofp32.aimodel",

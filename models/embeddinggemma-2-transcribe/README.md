@@ -2,7 +2,7 @@ Core AI is Apple's on-device ML runtime in iOS 27 / macOS 27 and the successor t
 
 # EmbeddingGemma 2 Transcribe — Core AI
 
-[🤗 mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI) (uploaded 2026-10-14, revision `a4b7895d`) · Apache-2.0, Gemma Prohibited Use Policy · source [google/embeddinggemma-2](https://huggingface.co/google/embeddinggemma-2/tree/914f7f89142e33e77833254d9c9b90c3cef7303b) (revision `914f7f89`) · reader weights [mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader)
+[🤗 mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI) (uploaded 2026-10-15, revision `76865ae4`) · Apache-2.0, Gemma Prohibited Use Policy · source [google/embeddinggemma-2](https://huggingface.co/google/embeddinggemma-2/tree/914f7f89142e33e77833254d9c9b90c3cef7303b) (revision `914f7f89`) · reader weights [mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader)
 
 ## What it is
 

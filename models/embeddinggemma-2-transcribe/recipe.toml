@@ -11,7 +11,7 @@
 card = "README.md"
 hf_repo = "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI"
 source_hf_id = "google/embeddinggemma-2"
-status = "unverified"
+status = "verified"
 steps = [
   { script = "eg2_transcribe/parity_encoder.py", args = ["parity"] },
   { script = "eg2_transcribe/export_encoder.py", args = ["--form", "fp16", "--bucket", "3000", "--aot", "gpu,neural-engine"] },
@@ -34,7 +34,11 @@ needs = [
 notes = [
   "Reader v1 was published 2026-10-14 as Hub revision a4b7895d7c03a1691e216975a06002e9cddb39ce (80 files: the Hub's lfs sha256 and sizes of the 11 bundles' large files and the downloaded small files match SHA256SUMS). Reader weights: mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader revision 1af9c5f52991e90afe0ff5f792a135d6500bf3b3 (9 files, same check).",
   "Reader v2 (6 layers, 19,573,762 parameters, trained on the 960 h of LibriSpeech; test-clean WER 4.21 %, test-other",
-  "10.42 %) replaces reader v1 in macos/, ios/ and ios-h19p/ (staged 2026-10-15; the Hub revisions: open_questions).",
+  "10.42 %) replaces reader v1 in macos/, ios/ and ios-h19p/: published 2026-10-15 as Hub revision",
+  "76865ae46793e05617c2a7420454b0c7eb8541a4 (107 files; the Hub's lfs sha256 and sizes of the 12 large files and the git",
+  "blob ids of the 95 small files match the staging folder's SHA256SUMS, conversion/eg2_transcribe r8_hub_check PASS; the",
+  "same commit removed reader v1's three bundles). Reader weights: mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader revision",
+  "de224fd8fa4ed4519fdddd9aa4154432d46a1bd3 (9 files, same check).",
   "Its fp16 graph is reader v1's with 6 layers: the residual stream reaches 1,160 (v1 60.5), 56x below the float16 limit.",
   "Graphs: encoder features [1,3000,128] + half_mask [1,1500] -> soft_tokens [1,750,512]; reader soft_tokens",
   "[1,750,512] + token_mask [1,750] -> top1_index (int32), top1_logit, blank_logit [1,750]; float16 inputs, weights,",
@@ -58,15 +62,13 @@ notes = [
   "these copies; the gated originals stay in the work directory.",
   "Conversion is not byte-deterministic (the converter names resources at random): reproduction is judged by the gates.",
 ]
-open_questions = [
-  "Reader v2 is staged, not uploaded: pin the Hub revisions of the upload (this repo and the Reader repo) in notes and in the card's header, then set status = \"verified\".",
-]
+open_questions = []
 
 ["embeddinggemma-2-transcribe-ios-h19p"]
 card = "README.md"
 hf_repo = "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI"
 source_hf_id = "google/embeddinggemma-2"
-status = "unverified"
+status = "verified"
 steps = [
   { script = "eg2_transcribe/strip_ship.py", args = ["aot", "--only", "eg2_audio_fp16_T3000"], bundle = "ios-h19p/eg2_audio_fp16_T3000.aimodelc" },
   { script = "eg2_transcribe/strip_ship.py", args = ["aot", "--only", "eg2_reader_v2_fp16_T750"], bundle = "ios-h19p/eg2_reader_v2_fp16_T750.aimodelc" },
@@ -85,10 +87,10 @@ notes = [
   "These two compiles on the phone (2026-10-15, the app's default): fixture 20/20 = torch, the 3,257.4 s recording in",
   "12.011 s, WER 3.812 % (377 = torch); reader v2 alone 34.76 ms per 30 s window, reader v1's graph 33.05 ms in the",
   "same launch (provenance/reader-v2/app/, provenance/reader-v2/iphone-gpu-aot-timing.json).",
+  "Published 2026-10-15 in Hub revision 76865ae46793e05617c2a7420454b0c7eb8541a4 (ios-h19p/ holds these two compiles; the",
+  "Hub's lfs sha256 and sizes match the staging folder's SHA256SUMS).",
 ]
-open_questions = [
-  "Reader v2 is staged, not uploaded: pin the Hub revision of the upload, then set status = \"verified\".",
-]
+open_questions = []
 
 ["embeddinggemma-2-transcribe-macos-encoder-split7"]
 card = "README.md"
