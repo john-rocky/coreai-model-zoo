@@ -1,0 +1,480 @@
+{
+ "form": "fp16",
+ "tokens": 750,
+ "backend": "gpu-jit",
+ "window_label": "eg2stt-r8-bench-reader",
+ "window_started": "2026-10-15T11:15:23+0900",
+ "window_finished": "2026-10-15T11:16:03+0900",
+ "compared_in_window_with": [
+  "fp16:750:gpu",
+  "fp16:750:ane",
+  "fp16:750:gpu-jit"
+ ],
+ "summary": {
+  "reps_ok": 8,
+  "reps_failed": 0,
+  "audio_s_per_call": 30.0,
+  "ms_median_of_rep_medians": 23.993,
+  "ms_rep_median_range": [
+   23.931,
+   24.178
+  ],
+  "ms_p90_all_calls": 24.264,
+  "x_realtime": 1250.3,
+  "cpu_ms_per_call_median": 3.41,
+  "load_s_first_process": 1.4,
+  "load_s_first_process_cold": true,
+  "load_s_warm_median": 0.098,
+  "peak_footprint_gb_max": 1.047
+ },
+ "reps": [
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": true,
+   "cache_entry_deleted": true,
+   "load_s": 1.4,
+   "load_cpu_s": 0.652,
+   "warmup_ms": [
+    53.71,
+    24.18,
+    24.16
+   ],
+   "ms": [
+    24.257,
+    24.145,
+    24.061,
+    23.974,
+    24.148,
+    24.106,
+    24.337,
+    24.762,
+    24.302,
+    25.647,
+    24.256,
+    24.101,
+    24.095,
+    24.008,
+    24.09,
+    24.26,
+    24.304,
+    24.198,
+    24.483,
+    24.158
+   ],
+   "ms_median": 24.178,
+   "ms_p90": 24.511,
+   "cpu_ms_per_call": 3.617,
+   "x_realtime": 1240.8,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 205947720,
+    "lifetime_max_phys_footprint": 205947720
+   },
+   "footprint_after_load": {
+    "phys_footprint": 527320288,
+    "lifetime_max_phys_footprint": 527336672
+   },
+   "footprint_end": {
+    "phys_footprint": 1047135936,
+    "lifetime_max_phys_footprint": 1047217856
+   },
+   "t_start": "11:15:31",
+   "rep": 0
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.104,
+   "load_cpu_s": 0.082,
+   "warmup_ms": [
+    50.51,
+    24.01,
+    23.92
+   ],
+   "ms": [
+    23.942,
+    23.864,
+    23.92,
+    23.92,
+    24.058,
+    24.067,
+    23.907,
+    23.953,
+    23.933,
+    23.89,
+    23.983,
+    24.032,
+    23.984,
+    23.991,
+    23.957,
+    24.0,
+    24.127,
+    24.052,
+    24.023,
+    23.92
+   ],
+   "ms_median": 23.97,
+   "ms_p90": 24.059,
+   "cpu_ms_per_call": 3.341,
+   "x_realtime": 1251.6,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 205128544,
+    "lifetime_max_phys_footprint": 205128544
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514721016,
+    "lifetime_max_phys_footprint": 514737400
+   },
+   "footprint_end": {
+    "phys_footprint": 1036420824,
+    "lifetime_max_phys_footprint": 1036502744
+   },
+   "t_start": "11:15:35",
+   "rep": 1
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.098,
+   "load_cpu_s": 0.077,
+   "warmup_ms": [
+    48.57,
+    24.0,
+    24.4
+   ],
+   "ms": [
+    24.553,
+    24.018,
+    23.991,
+    23.911,
+    23.924,
+    24.073,
+    24.107,
+    24.009,
+    23.971,
+    24.041,
+    23.996,
+    24.016,
+    23.938,
+    24.175,
+    24.159,
+    24.396,
+    24.425,
+    24.225,
+    24.224,
+    24.17
+   ],
+   "ms_median": 24.057,
+   "ms_p90": 24.399,
+   "cpu_ms_per_call": 3.645,
+   "x_realtime": 1247.0,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204981088,
+    "lifetime_max_phys_footprint": 204981088
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514737376,
+    "lifetime_max_phys_footprint": 514753760
+   },
+   "footprint_end": {
+    "phys_footprint": 1036175088,
+    "lifetime_max_phys_footprint": 1036355312
+   },
+   "t_start": "11:15:40",
+   "rep": 2
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.091,
+   "load_cpu_s": 0.07,
+   "warmup_ms": [
+    47.0,
+    24.03,
+    23.89
+   ],
+   "ms": [
+    23.759,
+    24.295,
+    24.365,
+    24.128,
+    24.005,
+    23.938,
+    23.907,
+    23.881,
+    23.958,
+    23.955,
+    24.07,
+    24.036,
+    23.989,
+    23.971,
+    24.243,
+    24.011,
+    23.911,
+    23.857,
+    23.822,
+    23.839
+   ],
+   "ms_median": 23.965,
+   "ms_p90": 24.248,
+   "cpu_ms_per_call": 3.372,
+   "x_realtime": 1251.8,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 206226272,
+    "lifetime_max_phys_footprint": 206226272
+   },
+   "footprint_after_load": {
+    "phys_footprint": 515409120,
+    "lifetime_max_phys_footprint": 515409120
+   },
+   "footprint_end": {
+    "phys_footprint": 1037076184,
+    "lifetime_max_phys_footprint": 1037158104
+   },
+   "t_start": "11:15:44",
+   "rep": 3
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.097,
+   "load_cpu_s": 0.075,
+   "warmup_ms": [
+    54.73,
+    24.14,
+    24.06
+   ],
+   "ms": [
+    24.147,
+    23.93,
+    23.919,
+    23.815,
+    24.049,
+    23.952,
+    23.923,
+    23.841,
+    23.888,
+    23.905,
+    23.971,
+    23.927,
+    23.961,
+    24.006,
+    24.142,
+    23.891,
+    23.913,
+    23.931,
+    23.96,
+    23.956
+   ],
+   "ms_median": 23.931,
+   "ms_p90": 24.058,
+   "cpu_ms_per_call": 3.155,
+   "x_realtime": 1253.6,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204702536,
+    "lifetime_max_phys_footprint": 204702536
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514458824,
+    "lifetime_max_phys_footprint": 514475208
+   },
+   "footprint_end": {
+    "phys_footprint": 1036289752,
+    "lifetime_max_phys_footprint": 1036371672
+   },
+   "t_start": "11:15:50",
+   "rep": 4
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.1,
+   "load_cpu_s": 0.078,
+   "warmup_ms": [
+    47.57,
+    24.27,
+    24.31
+   ],
+   "ms": [
+    24.128,
+    24.021,
+    24.063,
+    29.316,
+    24.581,
+    23.963,
+    23.938,
+    23.993,
+    23.909,
+    24.334,
+    23.987,
+    25.38,
+    27.153,
+    24.029,
+    24.023,
+    23.927,
+    23.913,
+    23.83,
+    23.884,
+    24.007
+   ],
+   "ms_median": 24.014,
+   "ms_p90": 25.557,
+   "cpu_ms_per_call": 3.735,
+   "x_realtime": 1249.3,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204030792,
+    "lifetime_max_phys_footprint": 204030792
+   },
+   "footprint_after_load": {
+    "phys_footprint": 515065032,
+    "lifetime_max_phys_footprint": 515081416
+   },
+   "footprint_end": {
+    "phys_footprint": 1038337752,
+    "lifetime_max_phys_footprint": 1038485208
+   },
+   "t_start": "11:15:54",
+   "rep": 5
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.113,
+   "load_cpu_s": 0.084,
+   "warmup_ms": [
+    48.73,
+    24.07,
+    23.96
+   ],
+   "ms": [
+    24.083,
+    24.224,
+    24.1,
+    24.037,
+    24.05,
+    23.992,
+    23.94,
+    23.893,
+    23.94,
+    24.007,
+    24.052,
+    23.944,
+    24.076,
+    23.916,
+    24.007,
+    24.009,
+    24.027,
+    24.086,
+    23.866,
+    23.987
+   ],
+   "ms_median": 24.008,
+   "ms_p90": 24.087,
+   "cpu_ms_per_call": 3.449,
+   "x_realtime": 1249.6,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 205177672,
+    "lifetime_max_phys_footprint": 205177672
+   },
+   "footprint_after_load": {
+    "phys_footprint": 514884808,
+    "lifetime_max_phys_footprint": 514884808
+   },
+   "footprint_end": {
+    "phys_footprint": 1036863144,
+    "lifetime_max_phys_footprint": 1037584040
+   },
+   "t_start": "11:15:58",
+   "rep": 6
+  },
+  {
+   "form": "fp16",
+   "tokens": 750,
+   "backend": "gpu-jit",
+   "bundle": "<work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "cold_requested": false,
+   "cache_entry_deleted": false,
+   "load_s": 0.089,
+   "load_cpu_s": 0.069,
+   "warmup_ms": [
+    48.45,
+    24.36,
+    24.14
+   ],
+   "ms": [
+    24.056,
+    24.059,
+    23.961,
+    24.165,
+    24.025,
+    23.979,
+    23.947,
+    24.057,
+    23.918,
+    23.922,
+    23.963,
+    23.89,
+    24.041,
+    24.028,
+    23.915,
+    23.92,
+    23.979,
+    24.022,
+    24.005,
+    23.972
+   ],
+   "ms_median": 23.979,
+   "ms_p90": 24.057,
+   "cpu_ms_per_call": 3.226,
+   "x_realtime": 1251.1,
+   "audio_s_per_call": 30.0,
+   "footprint_before_load": {
+    "phys_footprint": 204243784,
+    "lifetime_max_phys_footprint": 204243784
+   },
+   "footprint_after_load": {
+    "phys_footprint": 513901768,
+    "lifetime_max_phys_footprint": 513918152
+   },
+   "footprint_end": {
+    "phys_footprint": 1035667112,
+    "lifetime_max_phys_footprint": 1035749032
+   },
+   "t_start": "11:16:03",
+   "rep": 7
+  }
+ ]
+}

@@ -34,14 +34,19 @@ Measured: labels (host rule ``reader_coreai.host_labels``) per token vs the refe
 re-counts with jiwer); max |d| of top1_logit / blank_logit; argmax index agreement; for each label mismatch how
 close the reference was to a tie (top-1 minus top-2 cosine, blank minus top-1 logit). h-out forms: per-token
 cosine of h vs the reference h, the read-out on the host (``reader_coreai.host_argmax``). Every window runs
-twice (drift). Red arm: token_mask all ones on the 10 shortest fixture utterances, so attention sees the
-padding; their labels must change, i.e. the gate can fail.
+twice (drift). Two red arms on the 10 shortest fixture utterances, so the gate can fail: token_mask all ones
+(attention sees the padding; reader v1 learned to ignore zero padding, so at T = 250 this arm moves no label), and
+the second half of each utterance's valid soft tokens set to 0 with token_mask unchanged (red = the labels change on
+>= 9 of the 10).
 
 Bars (registered by the lane supervisor before the run):
     float32 forms (fp32, h-out)       fixture: 20/20 transcripts identical to torch; test-clean 200: token
                                        agreement >= 99.9 %
     float16 forms (fp16, h-out-fp16)  test-clean 200: WER <= torch WER + 0.2 pt; fixture: >= 19/20 transcripts
-PASS = the bar, label drift 0 and a red arm that changes labels.
+PASS = the bar, label drift 0 and a red arm that fires (token_mask: any label changes; zero-half: >= 9 of 10).
+
+Bundle names: eg2_reader_[<version>_]<form>_T<T>[_<backend>_<arch>].aimodel[c] (reader v1 has no version part,
+reader v2 is eg2_reader_v2_fp16_T750...); the export json beside the bundle is export_eg2_reader_[<version>_]<form>_T<T>.json.
 
 Writes ``<bundle dir>/gate_<backend>[_jit]_T<T>.json`` and ``hyp_<backend>[_jit]_T<T>.tsv``. Run ``gate`` inside a
 measurement window; ``warm`` (the initial load + one call) before it for a Neural Engine bundle, outside the window;
@@ -70,14 +75,35 @@ BAR_TOKEN_AGREEMENT = 0.999      # float32 forms, test-clean 200
 BAR_WER_DELTA = 0.002            # float16 forms: WER <= torch WER + 0.2 pt
 BAR_FIXTURE_FP16 = 19            # float16 forms: fixture transcripts identical
 RED_ARM_UTTERANCES = 10
+RED_ZERO_HALF_MIN = 9            # the zero-half arm is red when the labels change on >= 9 of the 10 utterances
 SPECIALIZATION = {"cpu": "cpu_only()", "gpu": "default()", "ane": "from_preferred_compute_unit_kind(neural_engine)"}
+NAME = re.compile(r"eg2_reader_(?:(v\d+)_)?(.+?)_T(\d+)(?:_|\.aimodel)")
 
 
 def parse_name(bundle: Path) -> tuple[str, int]:
-    m = re.match(r"eg2_reader_(.+?)_T(\d+)(?:_|\.aimodel)", bundle.name)
+    """-> (form, tokens) of a reader bundle name; the optional version part (v2, ...) is not part of the form."""
+    m = NAME.match(bundle.name)
     if not m:
         raise SystemExit(f"cannot read form and tokens from {bundle.name}")
-    return m.group(1), int(m.group(2))
+    return m.group(2), int(m.group(3))
+
+
+def export_record(bundle: Path) -> Path:
+    """export_eg2_reader_[<version>_]<form>_T<T>.json beside the bundle (written by export_reader.py)."""
+    m = NAME.match(bundle.name)
+    if not m:
+        raise SystemExit(f"cannot read form and tokens from {bundle.name}")
+    return bundle.parent / f"export_{bundle.name[:m.end(3)]}.json"
+
+
+def zero_half(utts: list[dict]) -> list[dict]:
+    """The zero-half red arm's inputs: each utterance's second half of valid soft tokens set to 0 (mask unchanged)."""
+    out = []
+    for u in utts:
+        x = np.array(u["x"], dtype=np.float32, copy=True)
+        x[x.shape[0] // 2:] = 0
+        out.append({**u, "x": x})
+    return out
 
 
 def load_vocab(rdir: Path) -> list[str]:
@@ -143,8 +169,8 @@ async def gate(args) -> None:
         raise SystemExit("cpu gates the JIT .aimodel (an h16c AOT bundle cannot be specialized for the CPU)")
     if args.backend != "cpu" and bundle.suffix != (".aimodel" if args.jit else ".aimodelc"):
         raise SystemExit("gpu / ane gate the AOT .aimodelc (or the JIT .aimodel with --jit)")
-    export_rec = json.loads((bundle.parent / f"export_eg2_reader_{form}_T{T}.json").read_text())
-    od = RC.out_dir(args.out_dir)
+    export_rec = json.loads(export_record(bundle).read_text())
+    od = RC.out_dir(args.out_dir, NAME.match(bundle.name).group(1) or "")
     ref = np.load(od / f"ref_T{T}.npz")
     if str(ref["meta/weights_sha256"]) != export_rec["reader"]["weights_sha256"]:
         raise SystemExit("ref npz and bundle come from different reader weights")
@@ -170,6 +196,7 @@ async def gate(args) -> None:
                     key=lambda i: utts[i]["x"].shape[0])[:RED_ARM_UTTERANCES]
     red_utts = [utts[i] for i in red_ix]
     red = await run_windows(fn, rt, red_utts, T, dtype, head, ones_mask=True)
+    red_zh = await run_windows(fn, rt, zero_half(red_utts), T, dtype, head)
 
     rows, mism, hyp_lines = [], [], []
     d_top = d_blank = drift_logit = 0.0
@@ -224,6 +251,20 @@ async def gate(args) -> None:
         red_rows.append({"id": u["id"], "tokens": int(o["labels"].size),
                          "labels_changed": int((o["labels"] != o1["labels"]).sum()),
                          "transcript_changed": RC.collapse(o["labels"], N) != RC.collapse(o1["labels"], N)})
+    zh_rows = []
+    for u, w, w1 in zip(red_utts, red_zh, [pass1[i] for i in red_ix]):
+        lb = read_out(w, head, table_t, scale, N)["labels"]
+        la = read_out(w1, head, table_t, scale, N)["labels"]
+        n, h = int(la.size), int(la.size) // 2
+        zh_rows.append({"id": u["id"], "tokens": n, "zeroed_from_token": h, "labels_changed": int((la != lb).sum()),
+                        "labels_changed_before_the_zeroed_half": int((la[:h] != lb[:h]).sum()),
+                        "transcript_changed": RC.collapse(la, N) != RC.collapse(lb, N)})
+    zh_changed = sum(r["labels_changed"] > 0 for r in zh_rows)
+    zero_half_arm = {"what": "the second half of the valid soft tokens set to 0, token_mask unchanged",
+                     "rule": f"red = labels change on >= {RED_ZERO_HALF_MIN} of {len(zh_rows)} utterances",
+                     "utterances_with_labels_changed": zh_changed,
+                     "transcripts_changed": sum(r["transcript_changed"] for r in zh_rows),
+                     "red": zh_changed >= RED_ZERO_HALF_MIN, "utterances": zh_rows}
 
     by_set = {}
     for s in ("fixture", "test-clean"):
@@ -244,7 +285,7 @@ async def gate(args) -> None:
     red_fails = any(r["transcript_changed"] or r["labels_changed"] for r in red_rows)
     secs = [r["s"] for ws in pass2 for r in ws]
     summary = {
-        "pass": bool(bar_ok and drift_labels == 0 and red_fails), "bar_met": bool(bar_ok),
+        "pass": bool(bar_ok and drift_labels == 0 and (red_fails or zero_half_arm["red"])), "bar_met": bool(bar_ok),
         "fixture": fx, "test_clean": tc, "token_agreement_all": sum(r["tokens_same"] for r in rows) / tok_total,
         "tokens": tok_total, "argmax_index_agreement": idx_same / tok_total,
         "label_mismatches": len(mism), "max_abs_top1_logit": d_top, "max_abs_blank_logit": d_blank,
@@ -252,6 +293,8 @@ async def gate(args) -> None:
         "drift_labels": drift_labels, "drift_max_abs_logit": drift_logit,
         "red_arm_changes_labels": red_fails,
         "red_arm_transcripts_changed": sum(r["transcript_changed"] for r in red_rows),
+        "red_arm_zero_half_red": zero_half_arm["red"],
+        "red_arm_zero_half_utterances_changed": zh_changed,
     }
     if head == "h":
         c = np.concatenate(cos_all)
@@ -264,6 +307,7 @@ async def gate(args) -> None:
         "ane_regions": len(regions), "ane_region_names": regions[:32], "input_dtype": np.dtype(dtype).name,
         "function_descriptor": desc, "reader": export_rec["reader"], "ref_npz": str(od / f"ref_T{T}.npz"),
         "bar": bar, "summary": summary, "mismatches": mism[:100], "red_arm_mask_all_ones": red_rows,
+        "red_arm_zero_half": zero_half_arm,
         "windows": sum(len(w) for w in pass1), "load_s": round(load_s, 2), "first_call_s": round(pass1[0][0]["s"], 4),
         "median_call_ms_pass2": round(float(np.median(secs)) * 1000, 3),
         "timing_note": "one pass over the gate windows; the timing gate is bench_pipeline.py",
@@ -278,7 +322,8 @@ async def gate(args) -> None:
           f"test-clean tokens {tc['token_agreement']:.6f} transcripts {tc['transcripts_same']}/{tc['utterances']}, "
           f"WER torch {100 * tc['wer_torch']['wer']:.3f} % vs coreai {100 * tc['wer_coreai']['wer']:.3f} %, "
           f"argmax {summary['argmax_index_agreement']:.6f}, max|d| top1 {d_top:.2e} blank {d_blank:.2e}, drift "
-          f"{drift_labels}, red arm {summary['red_arm_transcripts_changed']}/{len(red_rows)} transcripts changed, "
+          f"{drift_labels}, red arms: mask {summary['red_arm_transcripts_changed']}/{len(red_rows)} transcripts changed, "
+          f"zero-half labels changed on {zh_changed}/{len(zh_rows)}, "
           f"ANE regions {len(regions)}, load {load_s:.1f} s, call {result['median_call_ms_pass2']} ms -> {out}")
 
 
@@ -334,7 +379,8 @@ def main() -> None:
     g.add_argument("--reader-dir", help="vocab.txt source (default: the one recorded in the export json)")
     g.add_argument("--fixtures")
     g.add_argument("--cache")
-    g.add_argument("--out-dir", help="where ref_T<T>.npz is (default <work>/exports/reader)")
+    g.add_argument("--out-dir", help="where ref_T<T>.npz is (default <work>/exports/reader, or reader_<version> "
+                                         "for a bundle named eg2_reader_<version>_...)")
     g.add_argument("--out", help="default <bundle dir>/gate_<backend>_T<T>.json")
     g.add_argument("--label", default="", help="free text recorded in the json (e.g. the measurement window)")
     w = sub.add_parser("warm")

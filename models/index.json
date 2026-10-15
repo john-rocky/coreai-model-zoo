@@ -720,7 +720,7 @@
    "recipes": [
     {
      "name": "embeddinggemma-2-transcribe",
-     "status": "verified",
+     "status": "unverified",
      "source_model": null,
      "source_model_from": null,
      "hf_repo": "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI",
@@ -728,11 +728,13 @@
      "steps": 5,
      "run": "python3 conversion/zoo_convert.py run embeddinggemma-2-transcribe",
      "gate_transcript": "models/embeddinggemma-2-transcribe/gate-embeddinggemma-2-transcribe.json",
-     "open_questions": []
+     "open_questions": [
+      "Reader v2 is staged, not uploaded: pin the Hub revisions of the upload (this repo and the Reader repo) in notes and in the card's header, then set status = \"verified\"."
+     ]
     },
     {
      "name": "embeddinggemma-2-transcribe-ios-h19p",
-     "status": "verified",
+     "status": "unverified",
      "source_model": null,
      "source_model_from": null,
      "hf_repo": "mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI",
@@ -741,7 +743,8 @@
      "run": "python3 conversion/zoo_convert.py run embeddinggemma-2-transcribe-ios-h19p",
      "gate_transcript": null,
      "open_questions": [
-      "These compiles of the stripped graphs ran on the phone only inside the app (reader v1: fixture 20/20, WER 5.774 %)."
+      "These compiles of the stripped graphs ran on the phone only inside the app, with reader v1 (fixture 20/20, WER 5.774 %); reader v2's has not run on the phone yet.",
+      "Reader v2 is staged, not uploaded: pin the Hub revision of the upload, then set status = \"verified\"."
      ]
     },
     {

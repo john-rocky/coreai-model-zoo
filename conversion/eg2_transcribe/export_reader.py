@@ -36,7 +36,9 @@ torch.export -> coreai decompositions -> gate the eager and the decomposed graph
 against ``ref_T<T>.npz`` (written by ``reader_coreai.py parity`` for the same weights) -> TorchConverter ->
 optimize -> save_asset -> optionally ``coreai-build compile`` (macOS, h16c) for the GPU and the Neural Engine,
 counting ANE regions by unique name, and ``coreai-build inspect``. Writes ``<out>/<form>/export_<name>.json``,
-name = eg2_reader_<form>_T<T>.
+name = eg2_reader_<form>_T<T> for reader v1 and a --checkpoint, eg2_reader_<version>_<form>_T<T> for a later
+release (``reader_config.json`` ``version``, e.g. eg2_reader_v2_fp16_T750). The body's depth (``architecture.layers``)
+comes from the same config.
 
 ``--random-arch b|c`` exports a reader of that architecture with random weights (seed 0) to see whether the
 converter takes its ops; no gate, no AOT; json under ``<out>/random_arch/``.
@@ -67,8 +69,13 @@ from export_encoder import aot_compile, coreai_build, du_bytes, inspect, op_coun
 FORMS = {"fp32": (torch.float32, "argmax"), "fp16": (torch.float16, "argmax"),
          "h-out": (torch.float32, "h"), "h-out-fp16": (torch.float16, "h")}
 LICENSE = "Apache-2.0; word table from google/embeddinggemma-2 text embeddings (Gemma Prohibited Use Policy)"
-AUTHOR = ("coreai-model-zoo community port; reader trained with CTC on LibriSpeech train-clean-100 (CC BY 4.0); "
-          "word table: EmbeddingGemma 2 (Google DeepMind) embeddings of the LibriSpeech lexicon")
+TRAINED_ON = {"v1": "LibriSpeech train-clean-100", "v2": "LibriSpeech train-clean-100, train-clean-360 and train-other-500"}
+
+
+def author(version: str | None) -> str:
+    data = TRAINED_ON.get(version or "", "LibriSpeech")
+    return (f"coreai-model-zoo community port; reader trained with CTC on {data} (CC BY 4.0); "
+            "word table: EmbeddingGemma 2 (Google DeepMind) embeddings of the LibriSpeech lexicon")
 
 
 def example_inputs(tokens: int, dtype: torch.dtype) -> dict[str, torch.Tensor]:
@@ -120,12 +127,13 @@ def random_reader(arch: str, args) -> dict:
     with open(rdir / "vocab.txt", encoding="utf-8") as f:
         n_vocab = sum(1 for line in f if line.strip())
     torch.manual_seed(0)
-    model = M.Reader(arch, n_vocab, k=args.k or 4).eval()
+    layers = (args.layers or 4) if arch == "a" else None
+    model = M.Reader(arch, n_vocab, k=args.k or 4, layers=layers or 4).eval()
     table = Dc.load_table(str(rdir / "word_table.npy"), "cpu")
     source = {"kind": f"random weights (seed 0), arch {arch}", "arch": arch, "k": args.k or 4 if arch == "b" else None,
-              "params": sum(p.numel() for p in model.parameters()), "n_vocab": n_vocab,
+              "layers": layers, "params": sum(p.numel() for p in model.parameters()), "n_vocab": n_vocab,
               "model_py_sha256": RC.sha256_of(rdir / "train" / "model.py")}
-    return {"model": model, "table": table, "vocab": [None] * n_vocab, "arch": arch, "k": args.k,
+    return {"model": model, "table": table, "vocab": [None] * n_vocab, "arch": arch, "k": args.k, "layers": layers,
             "scale": float(model.scale.detach()), "source": source}
 
 
@@ -145,18 +153,20 @@ def main() -> None:
     ap.add_argument("--cache")
     ap.add_argument("--gate-utterances", type=int, default=0,
                     help="utterances in the torch gate (default: 8 for float32 forms, 2 for float16)")
-    ap.add_argument("--out-dir", help="default <work>/exports/reader; the bundle goes to <out>/<form>/")
+    ap.add_argument("--out-dir", help="default <work>/exports/reader (reader v1), <work>/exports/reader_<version> "
+                                         "(a later release, e.g. reader_v2); the bundle goes to <out>/<form>/")
     ap.add_argument("--threads", type=int, default=8)
     args = ap.parse_args()
     torch.set_num_threads(args.threads)
     dtype, head = FORMS[args.form]
-    od = RC.out_dir(args.out_dir)
+    tag = "" if args.random_arch else RC.config_tag(args)
+    od = RC.out_dir(args.out_dir, tag)
 
     if args.random_arch:
         name = f"eg2_reader_random{args.random_arch}_{args.form}_T{args.tokens}"
         form_dir = od / "random_arch"
     else:
-        name = f"eg2_reader_{args.form}_T{args.tokens}"
+        name = RC.bundle_stem(args.form, args.tokens, tag)
         form_dir = od / args.form
     form_dir.mkdir(parents=True, exist_ok=True)
     bundle = form_dir / f"{name}.aimodel"
@@ -172,7 +182,9 @@ def main() -> None:
 
     t0 = time.time()
     R = random_reader(args.random_arch, args) if args.random_arch else RC.load_reader(args)
+    assert args.random_arch or RC.name_tag(R) == tag, (RC.name_tag(R), tag)
     record: dict = {"form": args.form, "tokens": args.tokens, "window_s": RC.WINDOW_SECONDS[args.tokens],
+                    "name": name, "name_tag": tag,
                     "head": head, "io_dtype": str(dtype).replace("torch.", ""), "reader": R["source"],
                     "norms": "max-abs rescaled, LayerNorm written out (float16)" if dtype == torch.float16 else "exact",
                     "software": {"python": platform.python_version(), "torch": torch.__version__},
@@ -230,9 +242,12 @@ def main() -> None:
     record["optimize_s"] = round(time.time() - t1, 1)
     record["op_counts"] = op_counts(program)
     meta = AIModelAssetMetadata()
-    meta.author = AUTHOR
+    version = (R["source"].get("config") or {}).get("version")
+    meta.author = author(version)
     meta.license = LICENSE
-    meta.model_description = (f"EG2 transcribe reader (arch {R['arch']}, {R['source']['params']:,} parameters, "
+    body = f"arch {R['arch']}" + (f", {R['layers']} layers" if R.get("layers") else "")
+    meta.model_description = (f"EG2 transcribe reader {version + ' ' if version else ''}({body}, "
+                              f"{R['source']['params']:,} parameters, "
                               f"scale {R['scale']:.4f}) + {len(R['vocab']):,}-word table: soft tokens "
                               f"[1,{args.tokens},512] + token_mask -> "
                               + ("top-1 word index / logit, blank logit" if head == "argmax" else

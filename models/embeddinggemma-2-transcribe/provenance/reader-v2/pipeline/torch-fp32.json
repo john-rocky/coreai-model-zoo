@@ -1,0 +1,86 @@
+{
+ "what": "torch float32 CPU: re-authored encoder (exact) + the reader's forward + greedy_labels, the same windows as `long`",
+ "audio_s": 3257.44325,
+ "tokens": 81436,
+ "windows": 125,
+ "window_contract": {
+  "frames": 3000,
+  "left_overlap_tokens": 96,
+  "dropped_last_tokens": 1
+ },
+ "reader": {
+  "kind": "release",
+  "weights": "<work>/exports/reader_v2/reader/reader.pt",
+  "weights_sha256": "d605f6fba8687497be6b5fd717ea6c51beaee5d5f69c30a64225da96ebe0d8c2",
+  "arch": "a",
+  "k": null,
+  "layers": 6,
+  "params": 19573762,
+  "scale": 216.3509979248047,
+  "n_vocab": 200000,
+  "table": "<work>/exports/reader_v2/reader/word_table.npy",
+  "reader_dir": "<work>/exports/reader_v2/reader",
+  "model_py_sha256": "d71d2bac4cf14f98f91029978c67ace2d940b6f01e1213350cfee330bfdbefe9",
+  "decode_py_sha256": "b447a21b5031f201ba60353e45c6cb13b32e97a9294f4c61728e1d8e29d35b2f",
+  "config": {
+   "version": "v2",
+   "window": {
+    "seconds": 30,
+    "left_overlap_tokens": 96,
+    "right_extra_tokens": 1,
+    "note": "encoder is causal; the 83 tokens at the start of a window and its last token differ from a continuous run (fixtures/long-speckled-band: soft_tokens_w30 vs soft_tokens_continuous)"
+   },
+   "decode": "greedy argmax over N+1, collapse repeats, drop blank",
+   "scale": 216.3509979248047,
+   "wer": {
+    "dev-clean": {
+     "wer": 0.03754,
+     "utterances": 2703,
+     "ref_words": 54402
+    },
+    "dev-other": {
+     "wer": 0.10263,
+     "utterances": 2864,
+     "ref_words": 50948
+    },
+    "test-clean": {
+     "wer": 0.04207,
+     "utterances": 2620,
+     "ref_words": 52576
+    },
+    "test-other": {
+     "wer": 0.10422,
+     "utterances": 2939,
+     "ref_words": 52343
+    },
+    "fixtures": {
+     "wer": 0.03697,
+     "utterances": 20,
+     "ref_words": 541
+    },
+    "decode": "greedy, no language model"
+   }
+  }
+ },
+ "encoder_model_dir": "<work>/data/hf/embeddinggemma-2",
+ "wer": {
+  "wer": 0.03812316715542522,
+  "errors": 377,
+  "ref_words": 9889,
+  "hyp_words": 9931,
+  "engine": "word Levenshtein (numpy); jiwer: bench_pipeline.py score"
+ },
+ "seconds": 84.9,
+ "threads": 6,
+ "finished": "2026-10-15T10:18:47+0900",
+ "wer_jiwer": {
+  "engine": "jiwer 4.0.0",
+  "wer": 0.03812316715542522,
+  "substitutions": 229,
+  "deletions": 53,
+  "insertions": 95,
+  "ref_words": 9889,
+  "hyp_file": "<work>/exports/pipeline_v2/hyp_long_torch.txt",
+  "matches_numpy": true
+ }
+}

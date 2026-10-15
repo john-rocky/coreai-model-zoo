@@ -14,10 +14,12 @@
 # Community port — NOT an Apple or Google model.
 """The EG2 transcribe reader + its word table as one static Core AI graph, and the host side of the read-out.
 
-The reader (``reader/train/model.py`` of the eg2-transcribe repo, ``Reader(arch, n_vocab, k)``) maps the audio
-soft tokens of EmbeddingGemma 2 to one unit vector per 40 ms token plus a blank logit; each token reads the word
-whose table row is closest (scale * cosine) or blank, and greedy CTC (merge repeats, drop blanks) gives the
-words. ``ReaderGraph`` wraps a trained reader for export, one static graph per window of T tokens:
+The reader (``reader/train/model.py`` of the eg2-transcribe repo, ``Reader(arch, n_vocab, k, layers)``) maps the
+audio soft tokens of EmbeddingGemma 2 to one unit vector per 40 ms token plus a blank logit; each token reads the
+word whose table row is closest (scale * cosine) or blank, and greedy CTC (merge repeats, drop blanks) gives the
+words. The body's depth comes from ``reader_config.json`` (``architecture.layers``: reader v1 has 4, v2 has 6; a
+config without the field means 4). ``ReaderGraph`` wraps a trained reader for export, one static graph per window of
+T tokens:
 
     soft_tokens [1, T, 512] + token_mask [1, T]  ->  top1_index  [1, T] int32   argmax over the N words
                                                       top1_logit  [1, T]         scale * the largest cosine
@@ -101,9 +103,12 @@ def cache_dir(arg: str | None = None) -> Path:
     return Path(v).expanduser() if v else work_dir() / "cache"
 
 
-def out_dir(arg: str | None = None) -> Path:
-    """<work>/exports/reader unless given."""
-    return Path(arg).expanduser() if arg else exports_dir() / "reader"
+def out_dir(arg: str | None = None, tag: str = "") -> Path:
+    """Unless given: <work>/exports/reader for reader v1 and a --checkpoint, <work>/exports/reader_<version> for a later
+    release (reader_v2: the folder strip_ship.py reads reader v2 from)."""
+    if arg:
+        return Path(arg).expanduser()
+    return exports_dir() / ("reader" + (f"_{tag}" if tag else ""))
 
 
 def repo_modules(rdir: Path):
@@ -123,44 +128,75 @@ def add_reader_args(ap: argparse.ArgumentParser) -> None:
                                          "best_model.pt); vocab and table still come from the reader dir")
     ap.add_argument("--arch", choices=("a", "b", "c"), help="with --checkpoint: default from its metrics.json")
     ap.add_argument("--k", type=int, help="arch b: text layers kept (default from metrics.json, else 4)")
+    ap.add_argument("--layers", type=int, help="arch a with --checkpoint: transformer layers (default from its "
+                                               "metrics.json, else 4)")
 
 
 def load_reader(args) -> dict:
-    """-> model (eval, float32, CPU), table [N, 768] float32 unit rows, vocab, arch, k, scale, source record."""
+    """-> model (eval, float32, CPU), table [N, 768] float32 unit rows, vocab, arch, k, layers, scale, source record.
+
+    The architecture (name, k, layers) comes from reader_config.json for the release reader, from --arch / --k /
+    --layers or the metrics.json beside a --checkpoint otherwise; a missing ``layers`` means 4 (reader v1)."""
     rdir = reader_dir(args.reader_dir)
     M, Dc = repo_modules(rdir)
     with open(rdir / "vocab.txt", encoding="utf-8") as f:
         vocab = [line.rstrip("\n") for line in f if line.strip()]
     if args.checkpoint:
         ck = Path(args.checkpoint).expanduser().resolve()
-        arch, k = args.arch, args.k
+        arch, k, layers = args.arch, args.k, getattr(args, "layers", None)
         metrics = ck.parent / "metrics.json"
         if arch is None:
             met = json.loads(metrics.read_text())
             arch, k = met["arch"]["name"], k or met["arch"].get("k")
+            layers = layers or met["arch"].get("layers")
         kind, table_path, cfg = "checkpoint", rdir / "word_table.npy", None
     else:
         cfg = json.loads((rdir / "reader_config.json").read_text())
         arch, k = cfg["architecture"]["name"], args.k or cfg["architecture"].get("k")
+        layers = cfg["architecture"].get("layers")
         kind, ck, table_path = "release", rdir / cfg["weights"]["file"], rdir / cfg["table"]["file"]
+    if arch == "a":
+        layers = int(layers or 4)
+    else:
+        layers = None
     sd = torch.load(ck, map_location="cpu", weights_only=True)
     if isinstance(sd.get("model"), dict):          # a ckpt_epoch*.pt holds the state_dict under "model"
         sd = sd["model"]
-    model = M.Reader(arch, len(vocab), k=k or 4)
+    model = M.Reader(arch, len(vocab), k=k or 4, layers=layers or 4)
     model.load_state_dict(sd)
     model.eval()
     table = Dc.load_table(str(table_path), "cpu")
     if tuple(table.shape) != (len(vocab), D_OUT):
         raise SystemExit(f"table {tuple(table.shape)} does not match {len(vocab)} words")
     source = {"kind": kind, "weights": str(ck), "weights_sha256": sha256_of(ck), "arch": arch, "k": k,
-              "params": sum(p.numel() for p in model.parameters()), "scale": float(model.scale.detach()),
-              "n_vocab": len(vocab), "table": str(table_path), "reader_dir": str(rdir),
-              "model_py_sha256": sha256_of(rdir / "train" / "model.py"),
+              "layers": layers, "params": sum(p.numel() for p in model.parameters()),
+              "scale": float(model.scale.detach()), "n_vocab": len(vocab), "table": str(table_path),
+              "reader_dir": str(rdir), "model_py_sha256": sha256_of(rdir / "train" / "model.py"),
               "decode_py_sha256": sha256_of(rdir / "train" / "decode.py")}
     if cfg is not None:
         source["config"] = {key: cfg.get(key) for key in ("version", "window", "decode", "scale", "wer")}
-    return {"model": model, "table": table, "vocab": vocab, "arch": arch, "k": k, "scale": float(model.scale.detach()),
-            "source": source}
+    return {"model": model, "table": table, "vocab": vocab, "arch": arch, "k": k, "layers": layers,
+            "scale": float(model.scale.detach()), "source": source}
+
+
+def name_tag(R: dict) -> str:
+    """The version part of a bundle name: "" for reader v1 and for a --checkpoint (``eg2_reader_fp16_T750``), else
+    the release's ``version`` (``eg2_reader_v2_fp16_T750``), so the bundles of two readers never share a name."""
+    version = str((R["source"].get("config") or {}).get("version") or "")
+    return version if version and version != "v1" else ""
+
+
+def config_tag(args) -> str:
+    """name_tag() from reader_config.json alone (no weights loaded): what a bundle of these arguments is named."""
+    if getattr(args, "checkpoint", None):
+        return ""
+    cfg = json.loads((reader_dir(args.reader_dir) / "reader_config.json").read_text())
+    return name_tag({"source": {"config": {"version": cfg.get("version")}}})
+
+
+def bundle_stem(form: str, tokens: int, tag: str = "") -> str:
+    """eg2_reader_[<tag>_]<form>_T<tokens>: the .aimodel's name without its extension."""
+    return f"eg2_reader_{tag + '_' if tag else ''}{form}_T{tokens}"
 
 
 # ---------------------------------------------------------------- the export graph
@@ -442,7 +478,7 @@ def cmd_parity(args) -> None:
     R = load_reader(args)
     utts = load_utterances(fixtures_dir(args.fixtures), cache_dir(args.cache), args.n_test)
     N = len(R["vocab"])
-    od = out_dir(args.out_dir)
+    od = out_dir(args.out_dir, name_tag(R))
     od.mkdir(parents=True, exist_ok=True)
     result = {"reader": R["source"], "inputs": {"fixture": sum(u["set"] == "fixture" for u in utts),
                                                  "test-clean": sum(u["set"] == "test-clean" for u in utts)},
@@ -551,7 +587,7 @@ def cmd_absmax(args) -> None:
               "headroom_x_fp16": {k: round(fp16_max / v, 2) for k, v in probe.items() if v > 0},
               "note": "max |x| over every valid and padded position of the gate windows (float32 eager); a norm "
                       "input's square is what an unscaled float16 norm would form"}
-    dest = out_dir(args.out_dir) / "absmax_reader.json"
+    dest = out_dir(args.out_dir, name_tag(R)) / "absmax_reader.json"
     write_json(dest, result)
     worst = sorted(result["headroom_x_fp16"].items(), key=lambda kv: kv[1])[:6]
     print(f"absmax: largest {max(probe.items(), key=lambda kv: kv[1])}, blank {blank_rng}, top1 {top_rng}, "
@@ -579,7 +615,7 @@ def main() -> None:
     ap.add_argument("--fixtures")
     ap.add_argument("--cache", help="soft token cache root (default $EG2STT_CACHE or <work>/cache)")
     ap.add_argument("--n-test", type=int, default=N_TEST, help="the leading N test-clean utterances of the cache index")
-    ap.add_argument("--out-dir", help="default <work>/exports/reader")
+    ap.add_argument("--out-dir", help="default <work>/exports/reader (reader v1), <work>/exports/reader_<version> (later)")
     ap.add_argument("--threads", type=int, default=8)
     args = ap.parse_args()
     {"parity": cmd_parity, "absmax": cmd_absmax, "info": cmd_info}[args.cmd](args)

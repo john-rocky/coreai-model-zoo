@@ -1,0 +1,132 @@
+{
+ "schema": "eg2-transcribe-aot/1",
+ "status": "PASS",
+ "failures": [],
+ "name": "eg2_reader_v2_fp16_T750",
+ "target": "h16c-gpu",
+ "started": "2026-10-15T10:19:01+0900",
+ "source": {
+  "bundle": "macos/eg2_reader_v2_fp16_T750.aimodel",
+  "main_mlirb_sha256": "eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17"
+ },
+ "command": [
+  "coreai-build",
+  "compile",
+  "macos/eg2_reader_v2_fp16_T750.aimodel",
+  "--output",
+  "macos-h16c/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+  "--platform",
+  "macOS",
+  "--preferred-compute",
+  "gpu",
+  "--architecture",
+  "h16c"
+ ],
+ "coreai_build": "coreai-build 3600.83.1",
+ "returncode": 0,
+ "seconds": 3.2,
+ "log_tail": [
+  "Compiling h16c: 1 of 1"
+ ],
+ "after": {
+  "bundle": "macos-h16c/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+  "files": [
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist",
+    "bytes": 17393,
+    "sha256": "eaad5abe40995b522886920751f06644520cda6cef29915c776b2fed1ebadedd"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin",
+    "bytes": 346539908,
+    "sha256": "117fef54a9f7ddde439083f9e410513ae174d45c7e5accfc8bdf309158cc715a"
+   },
+   {
+    "path": "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph",
+    "bytes": 113393,
+    "sha256": "615dcc557c98807f9f3fbf152e3cb299ab2558e41248e1b456178665e24319df"
+   },
+   {
+    "path": "main-h16c.mlirb",
+    "bytes": 985,
+    "sha256": "0b2a1d7d78aeb24f87dec1aed793f366a7f9d236680105a637fb5e1dcb246d96"
+   },
+   {
+    "path": "main.hash",
+    "bytes": 32,
+    "sha256": "b622c6e72bba5c82796693ad04f131ead869d15eaac9d1ca3e4e1b3ddc6f9d9c"
+   },
+   {
+    "path": "metadata.json",
+    "bytes": 781,
+    "sha256": "5285ed83fbb661f7399e62d924089d3873043804a63483affb3241bee2a39fff"
+   },
+   {
+    "path": "stats.json",
+    "bytes": 1468,
+    "sha256": "3399aee94723f5d9df8eff34a7ea454a6fbfd4caad0c171123dd22acc9d090e7"
+   }
+  ],
+  "bytes": 346673960,
+  "source_hash": "EB5580145F17DF29F5FEDC6ADB08B473922D4A263CC8C57986D7177ED0990C17",
+  "ane_region_names": [],
+  "local_paths": {
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main-h16c.mlirb": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "main.hash": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "metadata.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   },
+   "stats.json": {
+    "users_dir": 0,
+    "home_dir": 0,
+    "user_name": 0
+   }
+  }
+ },
+ "vs_unstripped_h16c-gpu_compile": {
+  "bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+  "ane_regions": 0,
+  "files": {
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/manifest.plist": "equal",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/resources.bin": "equal",
+   "main-h16c-delegates/MPSGraph/mpsExecutable.mpsgraphpackage/specialized_model_0.mpsgraph": "differs",
+   "main-h16c.mlirb": "differs",
+   "main.hash": "differs",
+   "metadata.json": "differs",
+   "stats.json": "differs"
+  }
+ },
+ "note": "this Mac's compile of the stripped copy, compared with the gated one by `compare --aot`",
+ "code_sha256": {
+  "strip_ship.py": "9f395a11d4d94040adbc2d18f9fd2dedb911ffcf549984ca2a2e6fe20ee87b47"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428"
+ }
+}

@@ -2,8 +2,8 @@
 
 Lessons from porting the audio path of [`google/embeddinggemma-2`](https://huggingface.co/google/embeddinggemma-2)
 (revision `914f7f89`, Apache-2.0) to Core AI as an English speech-to-text pipeline: the Gemma 4 audio tower +
-`embed_audio` as one static graph, and a reader trained here (13.3 M parameters, CTC over a 200,000-word cosine table)
-as a second graph with the table inside. One fact per line. Card:
+`embed_audio` as one static graph, and a reader trained here (v2: 19.6 M parameters, v1: 13.3 M; CTC over a
+200,000-word cosine table) as a second graph with the table inside. One fact per line. Card:
 [`models/embeddinggemma-2-transcribe`](../models/embeddinggemma-2-transcribe/README.md); code and gates:
 [`conversion/eg2_transcribe`](../conversion/eg2_transcribe/README.md); records: the `provenance/` folder of
 [mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI);
@@ -88,13 +88,23 @@ the reader's release note: `RELEASE.md` of
 ## Reader
 
 - The reader learns what a frozen projection cannot: soft-token span mean → `embedding_projection` → nearest word gives top-1 0.013 (5,000-word vocabulary, 100 utterances), span audio through SentenceTransformer gives 0.41.
-- Objective: CTC over 200,000 words + blank, word logits = scale × cosine(h, table) with a learned scale (exp of a learned log, 91.218 at v1) against a fixed table of EmbeddingGemma 2 text embeddings (prompt `task: search result | query: `).
-- Data: LibriSpeech train-clean-100 without the utterances that hold an out-of-vocabulary word (26,422 utterances, 92.8 h); soft tokens computed once in float32, stored as float16.
+- Objective: CTC over 200,000 words + blank, word logits = scale × cosine(h, table) with a learned scale (exp of a learned log, 91.218 at v1, 216.351 at v2) against a fixed table of EmbeddingGemma 2 text embeddings (prompt `task: search result | query: `).
+- Data (v1): LibriSpeech train-clean-100 without the utterances that hold an out-of-vocabulary word (26,422 utterances, 92.8 h); soft tokens computed once in float32, stored as float16.
 - v1: 4-layer transformer from scratch, 8 epochs on one M4 Max (2.72 h active), dev-clean WER 6.57 %, test-clean 6.81 %, test-other 15.10 % (greedy, no language model).
 - CTC over 200,001 classes without moving [T, B, 200001] to the CPU: run `ctc_loss` on the columns of the utterance's words + blank only, compute the normalization over all 200,001 separately and correct the gradient by exp(log p); loss and gradient match the full CTC to 2e-15 in float64.
 - Learn the scale through its log: AdamW moves a raw scale only by about the learning rate per step.
 - MPS's caching allocator grows without bound on large buffers of changing shape (57 → 99 GB by step 200): pad to fixed lengths, cap with `torch.mps.set_per_process_memory_fraction`, call `empty_cache()`; a 10-step timing run does not show it.
 - After a dev decode, Metal allocations outside torch's pool stay until the process ends: run each epoch in its own process.
+
+### Reader v2 (the 960 h set, 6 layers)
+
+- v2: the same body with 6 layers (19,573,762 parameters) on the three LibriSpeech training sets (961 h; 890 h without the utterances that hold an out-of-vocabulary word), CTC as v1, 9 epochs with early stopping on dev-clean (best epoch 7) on one A100: test-clean 4.21 %, test-other 10.42 % (v1 6.81 / 15.10 %). The 4-layer body trained the same way reached 3.88 % on dev-clean against 3.75 % for 6 layers.
+- On an A100, TF32 matmuls train 2.4× faster per token than float32 (29 min per 960 h epoch); decode dev, test and fixtures in float32, and record which matmul mode trained the weights (`reader_config.json` → `weights.format`).
+- Batching the encoder (16 utterances of similar length per call, right-padded) keeps the soft tokens at per-token cosine ≥ 0.999999994 against one at a time; the 961 h took 80.6 min (×715) on the A100.
+- The export reads the depth from `reader_config.json` (`architecture.layers`, absent = 4): reader v1's config rebuilds v1's graph op for op (465 ops, the same `coreai-build inspect` distribution), v2's graph has 639. The bundle name carries the release's version (`eg2_reader_v2_fp16_T750`), so two readers never share a path; the AOT `main.hash` differs anyway, because the graph differs.
+- v2's residual stream reaches 1,160 (v1: 60.5); with every norm dividing by its row's max |x| first, the float16 graph keeps a ×56 headroom and passes: Mac GPU fixture 20/20, test-clean (200 utterances) WER 3.633 % against 3.655 % for PyTorch float32 (2 of 44,162 labels differ); the Neural Engine 20/20 and 3.721 %.
+- Every label the float16 graph changes is a near-tie, and one variable at a time names the rounding: a blank and a word 0.005 logits apart in float32 land on either side of a float16 step (0.0156 at logits 16–32) on the GPU, while the float16 table alone and the float16 graph in PyTorch keep the word; an exact float16 tie on the Neural Engine is read as the word by the strict host rule (`blank > top1`); one word ⇄ word tie (top-1 − top-2 cosine 1.2e-5) flips with the float16 table alone.
+- With the learned scale at 216 (v1: 91), `top1_logit` moves by up to 8.6 (GPU) and 20.5 (Neural Engine) at blank tokens, where the best word's cosine is small and its choice arbitrary: judge the labels, not the logits.
 
 ## Runtime traps
 

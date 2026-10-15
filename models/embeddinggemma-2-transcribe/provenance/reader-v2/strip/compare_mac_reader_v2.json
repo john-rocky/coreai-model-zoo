@@ -1,0 +1,214 @@
+{
+ "schema": "eg2-transcribe-strip-compare/1",
+ "status": "SAME",
+ "started": "2026-10-15T10:50:36+0900",
+ "finished": "2026-10-15T10:50:48+0900",
+ "what": "each gated bundle and its stripped copy, JIT .aimodel on this Mac, the 20 fixture clips (encoder: features + half_mask; reader: the clips' reference soft tokens in 750-token windows); with --aot the readers' h16c AOT compiles too",
+ "bundles": [
+  "eg2_reader_v2_fp16_T750"
+ ],
+ "label": "eg2stt-r8-gates",
+ "pairs": [
+  {
+   "bundle": "eg2_reader_v2_fp16_T750",
+   "backend": "JIT, gpu preferred",
+   "calls": 20,
+   "gated_bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "stripped_bundle": "macos/eg2_reader_v2_fp16_T750.aimodel",
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "5f7948f5f6e1de11191cdffcdcc4c9ae9c6ef012a786c782488c1e766fa60c81",
+    "cache_entry": "coreai-cache/26A428/python/5f7948f5f6e1de11191cdffcdcc4c9ae9c6ef012a786c782488c1e766fa60c81",
+    "cache_entry_exists": true,
+    "load_s": 0.11,
+    "first_call_s": 0.0535,
+    "median_call_ms": 25.061
+   },
+   "stripped": {
+    "main_hash": "eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry": "coreai-cache/26A428/python/eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry_exists": true,
+    "load_s": 1.2,
+    "first_call_s": 0.0326,
+    "median_call_ms": 24.162
+   },
+   "status": "SAME"
+  },
+  {
+   "bundle": "eg2_reader_v2_fp16_T750",
+   "backend": "JIT, ane preferred",
+   "calls": 20,
+   "gated_bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750.aimodel",
+   "stripped_bundle": "macos/eg2_reader_v2_fp16_T750.aimodel",
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "5f7948f5f6e1de11191cdffcdcc4c9ae9c6ef012a786c782488c1e766fa60c81",
+    "cache_entry": "coreai-cache/26A428/python/5f7948f5f6e1de11191cdffcdcc4c9ae9c6ef012a786c782488c1e766fa60c81",
+    "cache_entry_exists": true,
+    "load_s": 0.2,
+    "first_call_s": 0.0521,
+    "median_call_ms": 48.047
+   },
+   "stripped": {
+    "main_hash": "eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry": "coreai-cache/26A428/python/eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry_exists": true,
+    "load_s": 1.01,
+    "first_call_s": 0.0504,
+    "median_call_ms": 50.291
+   },
+   "status": "SAME"
+  },
+  {
+   "bundle": "eg2_reader_v2_fp16_T750",
+   "backend": "AOT h16c gpu (gated) vs AOT h16c gpu (stripped)",
+   "calls": 20,
+   "gated_bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "stripped_bundle": "macos-h16c/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "ea5042b3870a84d1e68e5fe431618b31ac4df0478ed0e45f7f76309b20577677",
+    "cache_entry": "coreai-cache/26A428/python/ea5042b3870a84d1e68e5fe431618b31ac4df0478ed0e45f7f76309b20577677",
+    "cache_entry_exists": true,
+    "load_s": 0.87,
+    "first_call_s": 0.0329,
+    "median_call_ms": 24.414
+   },
+   "stripped": {
+    "main_hash": "0b2a1d7d78aeb24f87dec1aed793f366a7f9d236680105a637fb5e1dcb246d96",
+    "cache_entry": "coreai-cache/26A428/python/0b2a1d7d78aeb24f87dec1aed793f366a7f9d236680105a637fb5e1dcb246d96",
+    "cache_entry_exists": true,
+    "load_s": 0.87,
+    "first_call_s": 0.0299,
+    "median_call_ms": 24.566
+   },
+   "status": "SAME"
+  },
+  {
+   "bundle": "eg2_reader_v2_fp16_T750",
+   "backend": "AOT h16c gpu (gated) vs JIT gpu preferred (stripped)",
+   "calls": 20,
+   "gated_bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc",
+   "stripped_bundle": "macos/eg2_reader_v2_fp16_T750.aimodel",
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "ea5042b3870a84d1e68e5fe431618b31ac4df0478ed0e45f7f76309b20577677",
+    "cache_entry": "coreai-cache/26A428/python/ea5042b3870a84d1e68e5fe431618b31ac4df0478ed0e45f7f76309b20577677",
+    "cache_entry_exists": true,
+    "load_s": 0.87,
+    "first_call_s": 0.0329,
+    "median_call_ms": 24.414
+   },
+   "stripped": {
+    "main_hash": "eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry": "coreai-cache/26A428/python/eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry_exists": true,
+    "load_s": 1.2,
+    "first_call_s": 0.0326,
+    "median_call_ms": 24.162
+   },
+   "status": "SAME"
+  },
+  {
+   "bundle": "eg2_reader_v2_fp16_T750",
+   "backend": "AOT h16c ane (gated) vs AOT h16c ane (stripped)",
+   "calls": 20,
+   "gated_bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "stripped_bundle": "macos-h16c/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "0799cf4e6b7d5aed49b9112baeefcee53f36fb87262f1c5e1f025e324f6eaf9a",
+    "cache_entry": "coreai-cache/26A428/python/0799cf4e6b7d5aed49b9112baeefcee53f36fb87262f1c5e1f025e324f6eaf9a",
+    "cache_entry_exists": true,
+    "load_s": 0.47,
+    "first_call_s": 0.0464,
+    "median_call_ms": 49.08
+   },
+   "stripped": {
+    "main_hash": "4ce2dccf03a29c2c5662760d0b0ad8440b0cd1423a8866abc9450651d7c1a85e",
+    "cache_entry": "coreai-cache/26A428/python/4ce2dccf03a29c2c5662760d0b0ad8440b0cd1423a8866abc9450651d7c1a85e",
+    "cache_entry_exists": true,
+    "load_s": 1.08,
+    "first_call_s": 0.0499,
+    "median_call_ms": 49.127
+   },
+   "status": "SAME"
+  },
+  {
+   "bundle": "eg2_reader_v2_fp16_T750",
+   "backend": "AOT h16c ane (gated) vs JIT ane preferred (stripped)",
+   "calls": 20,
+   "gated_bundle": "reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc",
+   "stripped_bundle": "macos/eg2_reader_v2_fp16_T750.aimodel",
+   "equal_calls": 20,
+   "max_abs": {
+    "top1_index": 0.0,
+    "top1_logit": 0.0,
+    "blank_logit": 0.0
+   },
+   "control_next_clip_differs": 19,
+   "control_calls": 19,
+   "gated": {
+    "main_hash": "0799cf4e6b7d5aed49b9112baeefcee53f36fb87262f1c5e1f025e324f6eaf9a",
+    "cache_entry": "coreai-cache/26A428/python/0799cf4e6b7d5aed49b9112baeefcee53f36fb87262f1c5e1f025e324f6eaf9a",
+    "cache_entry_exists": true,
+    "load_s": 0.47,
+    "first_call_s": 0.0464,
+    "median_call_ms": 49.08
+   },
+   "stripped": {
+    "main_hash": "eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry": "coreai-cache/26A428/python/eb5580145f17df29f5fedc6adb08b473922d4a263cc8c57986d7177ed0990c17",
+    "cache_entry_exists": true,
+    "load_s": 1.01,
+    "first_call_s": 0.0504,
+    "median_call_ms": 50.291
+   },
+   "status": "SAME"
+  }
+ ],
+ "code_sha256": {
+  "strip_ship.py": "9f395a11d4d94040adbc2d18f9fd2dedb911ffcf549984ca2a2e6fe20ee87b47"
+ },
+ "environment": {
+  "python": "3.11.13",
+  "macos_build": "26A428",
+  "coreai-core": "1.0.0b2",
+  "numpy": "2.3.5"
+ }
+}

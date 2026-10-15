@@ -380,11 +380,13 @@ published configuration. **Do not guess their `args`.**
 
 ### 3. Recipes recorded, shipped configuration unknown
 
-8 of the 138 recipes carry `status = "unverified"`:
+10 of the 138 recipes carry `status = "unverified"`:
 the script is known, the arguments that produced the published bundle are not,
 and nothing in the repo records them. `zoo_convert.py` refuses to run these
 without `--force`. Each needs one answer from the owner.
 
+- **`embeddinggemma-2-transcribe`** (mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI) — Reader v2 is staged, not uploaded: pin the Hub revisions of the upload (this repo and the Reader repo) in notes and in the card's header, then set status = "verified".
+- **`embeddinggemma-2-transcribe-ios-h19p`** (mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI) — These compiles of the stripped graphs ran on the phone only inside the app, with reader v1 (fixture 20/20, WER 5.774 %); reader v2's has not run on the phone yet. Reader v2 is staged, not uploaded: pin the Hub revision of the upload, then set status = "verified".
 - **`flux2-klein-4b-edit`** (mlboydaisuke/FLUX.2-klein-4B-CoreAI) — Transformer_edit / _edit_2ref / _edit_512 come from in-context-editing code added to the diffusion pipeline in the patched coreai-models checkout — commits d982f48 (Flux2Pipeline. editImages + transformer_edit export + runner --edit-image) and bc48d3d (multi-reference, transformer_edit_2ref). That code lives in coreai_models/diffusion/{components,flux2}.py. It IS in the overlay as of 2026-07-25 (regen.sh), so the code is reproducible now — what is still unrecorded is the invocation: which flag selects the edit transformer, how the 2ref and 512 variants are requested, and whether they were exported in one run or three.
 - **`glm-4.7-flash`** (mlboydaisuke/GLM-4.7-Flash-CoreAI) — Was --head-sym / --head-quant passed? Asked and closed as unknowable on 2026-07-25: the owner does not recall, and nothing published records it — the bundle name omits the head flags, the metadata declares no compression, and unlike embeddinggemma this repo ships no reference.json. For the twin port (qwen3.6-35b-a3b) knowledge/ recorded a bare `sym8`, but that is not evidence for this one. Settling it needs a re-export of the lm_head under both settings and a byte comparison against the published 30 GB bundle — the only remaining route. `sym8` alone (the args above) is the defensible partial record until then.
 - **`laya-multilingual-ios`** (mlboydaisuke/Laya-Multilingual-CoreAI) — Device gate on the iPhone 17 Pro not run (device not connected 2026-09-23). Whether the phone JIT keeps the fp16 weight constants or folds the casts (the Mac converter keeps them).

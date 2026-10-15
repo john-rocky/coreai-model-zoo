@@ -38,7 +38,7 @@ Reader + word table, one static graph per window of T tokens (T = 750 for a 30 s
 | `soft_tokens` | `[1, T, 512]` | fp32 (fp16 form: fp16) | one window of the encoder's soft tokens; the rows after the valid ones are masked |
 | `token_mask` | `[1, T]` | same as `soft_tokens` | 1 on the valid tokens, 0 after |
 | `top1_index` | `[1, T]` | int32 | argmax over the 200,000 words of cos(h_t, table_w) |
-| `top1_logit` | `[1, T]` | same as `soft_tokens` | scale · the largest cosine (scale 91.218 for reader v1) |
+| `top1_logit` | `[1, T]` | same as `soft_tokens` | scale · the largest cosine (scale 216.351 for reader v2, 91.218 for reader v1) |
 | `blank_logit` | `[1, T]` | same as `soft_tokens` | |
 
 Host read-out: label_t = blank if `blank_logit_t > top1_logit_t`, else `top1_index_t` (strict, so a tie reads the word,
@@ -56,8 +56,8 @@ tokens; their labels are concatenated before the collapse.
 | encoder `fp16` (ships) | fp16 / fp16, fp16 I/O | 587 MB | every RMSNorm divides by its row max-abs before squaring (the residual stream reaches 383; its square overflows fp16); the two subsampling LayerNorms stay plain |
 | encoder `int8` | Linear weights int8 symmetric per-block 32 (coreai-opt, weight only) / fp32 | 332 MB (compiled GPU bundle 1,174 MB) | fails the per-token bar |
 | encoder `fp16sf`, `fp16mm` | fp16 with one exact rewrite each (subsampling LayerNorm mean folded into the conv weights; RMSNorm mean of squares as a matmul) | 587 MB | Neural Engine experiments; both fail there |
-| reader `fp32` | reader + table, fp32 | 668 MB | |
-| reader `fp16` (ships) | reader + table, fp16 (inputs, weights, table, arithmetic, logits; int32 index) | 334 MB | every norm and the final L2 divide by the row's max \|x\| up front; LayerNorm written out (coreai-torch lowers `layer_norm` on an fp16 input with fp32 statistics) |
+| reader `fp32` | reader + table, fp32 | 668 MB (v1) | |
+| reader `fp16` (ships) | reader + table, fp16 (inputs, weights, table, arithmetic, logits; int32 index) | 347 MB (v2, 6 layers) / 334 MB (v1, 4 layers) | every norm and the final L2 divide by the row's max \|x\| up front; LayerNorm written out (coreai-torch lowers `layer_norm` on an fp16 input with fp32 statistics) |
 | reader `h-out`, `h-out-fp16` | the reader body alone: → `h [1, T, 768]` (L2-normalized) + `blank_logit`; the table product and argmax on the host (`host_argmax`) | 53.5 / 26.8 MB | the read-out comparison |
 
 ## Bars
@@ -209,11 +209,14 @@ torchao 0.17.0 for the int8 form, safetensors, numpy); `jiwer` for the `score` s
 - `EG2_MODEL_DIR` — a `google/embeddinggemma-2` snapshot at `914f7f89` (`model.safetensors` is checked by sha256).
 - `EG2_FIXTURES` — the eg2-transcribe `reader/fixtures` (`test-clean-20/<id>/{features,soft_tokens}.npy`,
   `long-speckled-band/features.npy`, `MANIFEST.json`), made with transformers 5.19.0 (default attention).
-- `EG2_READER_DIR` — the eg2-transcribe `reader/` directory: `train/model.py` and `train/decode.py`, `vocab.txt`,
-  `word_table.npy`, and the release's `reader.pt` + `reader_config.json` (the last four are also in the Reader repo
+- `EG2_READER_DIR` — the eg2-transcribe `reader/` directory (reader v2 since 2026-10-15; reader v1 is its earlier commit and
+  revision `1af9c5f5` of the Reader repo): `train/model.py` and `train/decode.py`, `vocab.txt`, `word_table.npy`, and the
+  release's `reader.pt` + `reader_config.json` (the last four are also in the Reader repo
   on the Hub).
 - `EG2STT_CACHE` — the soft-token cache with `test-clean/index.tsv` (the reader gate's 200 test-clean utterances).
-- `EG2STT_WORK` — exports and records (`<work>/exports/…`).
+- `EG2STT_WORK` — exports and records (`<work>/exports/…`; the reader's go to `<work>/exports/reader` for reader v1 and
+  `<work>/exports/reader_v2` for reader v2, from `reader_config.json`'s `version`, and so do its bundle names:
+  `eg2_reader_fp16_T750` (v1), `eg2_reader_v2_fp16_T750` (v2)).
 
 Run the GPU / Neural Engine steps alone on the machine: another job on the GPU changes the numbers and, at times, the
 results. In order:
@@ -225,26 +228,29 @@ $PY conversion/eg2_transcribe/parity_encoder.py parity
 $PY conversion/eg2_transcribe/parity_encoder.py absmax
 # 2. export (each export gates its torch-exported, decomposed graph on 4 clips before it saves)
 $PY conversion/eg2_transcribe/export_encoder.py --form fp16 --bucket 3000 --aot gpu,neural-engine
-$PY conversion/eg2_transcribe/reader_coreai.py parity          # the reader graph vs the reader's torch path
+$PY conversion/eg2_transcribe/reader_coreai.py parity --tokens 750    # the reader graph vs the reader's torch path
 $PY conversion/eg2_transcribe/export_reader.py --form fp16 --tokens 750 --aot gpu,neural-engine
 # 3. runtime gates
 $PY conversion/eg2_transcribe/gate_encoder.py --bundle <work>/exports/fp16/eg2_audio_fp16_T3000_gpu_h16c.aimodelc --backend gpu
-$PY conversion/eg2_transcribe/gate_reader.py gate --bundle <work>/exports/reader/fp16/eg2_reader_fp16_T750_gpu_h16c.aimodelc --backend gpu
-$PY conversion/eg2_transcribe/gate_reader.py warm --bundle <work>/exports/reader/fp16/eg2_reader_fp16_T750_ane_h16c.aimodelc --backend ane
-$PY conversion/eg2_transcribe/gate_reader.py gate --bundle <work>/exports/reader/fp16/eg2_reader_fp16_T750_ane_h16c.aimodelc --backend ane
-<venv with jiwer>/bin/python conversion/eg2_transcribe/gate_reader.py score --gate <work>/exports/reader/fp16/gate_gpu_T750.json
+$PY conversion/eg2_transcribe/gate_reader.py gate --bundle <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_gpu_h16c.aimodelc --backend gpu
+$PY conversion/eg2_transcribe/gate_reader.py warm --bundle <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc --backend ane
+$PY conversion/eg2_transcribe/gate_reader.py gate --bundle <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc --backend ane
+<venv with jiwer>/bin/python conversion/eg2_transcribe/gate_reader.py score --gate <work>/exports/reader_v2/fp16/gate_gpu_T750.json
 # 4. timing (forms interleaved in one window; --cold-first deletes each bundle's cache entry before rep 0)
 $PY conversion/eg2_transcribe/bench_encoder.py prepare
 $PY conversion/eg2_transcribe/bench_encoder.py ab --label gpu30 --config fp32:3000:gpu --config fp16:3000:gpu --reps 8 --cold-first
-$PY conversion/eg2_transcribe/bench_pipeline.py prepare
-$PY conversion/eg2_transcribe/bench_pipeline.py ab --label reader30 --config fp32:750:gpu --config fp16:750:gpu --reps 8 --cold-first
+$PY conversion/eg2_transcribe/bench_pipeline.py prepare --out-dir <work>/exports/reader_v2
+$PY conversion/eg2_transcribe/bench_pipeline.py ab --label reader30 --config fp16:750:gpu --config fp16:750:ane --config fp16:750:gpu-jit \
+    --reps 8 --cold-first --out-dir <work>/exports/reader_v2
 # 5. the long recording end to end (torch path, then the bundles, with and without 2 windows in flight)
-$PY conversion/eg2_transcribe/bench_pipeline.py torch-long
-$PY conversion/eg2_transcribe/bench_pipeline.py long --reader <work>/exports/reader/fp16/eg2_reader_fp16_T750_ane_h16c.aimodelc --backend ane --overlap
-# 6. the shipping pair: strip the debug locations, compile for the iPhone 18 Pro, compare on the Mac
+$PY conversion/eg2_transcribe/bench_pipeline.py torch-long --pl-dir <work>/exports/pipeline_v2
+$PY conversion/eg2_transcribe/bench_pipeline.py long --reader <work>/exports/reader_v2/fp16/eg2_reader_v2_fp16_T750_ane_h16c.aimodelc --backend ane --overlap --pl-dir <work>/exports/pipeline_v2
+# 6. the shipping pair (encoder + reader v2): strip the debug locations, compile for the iPhone 18 Pro (and the reader
+#    for this Mac, to compare with the gated AOT bundles), compare on the Mac
 $PY conversion/eg2_transcribe/strip_ship.py strip
-$PY conversion/eg2_transcribe/strip_ship.py aot
-$PY conversion/eg2_transcribe/strip_ship.py compare
+$PY conversion/eg2_transcribe/strip_ship.py aot --only eg2_audio_fp16_T3000
+$PY conversion/eg2_transcribe/strip_ship.py aot --only eg2_reader_v2_fp16_T750 --target h19p h16c-gpu h16c-ane
+$PY conversion/eg2_transcribe/strip_ship.py compare --only eg2_reader_v2_fp16_T750 --aot --record compare_mac_reader_v2.json
 ```
 
 Other forms: `export_encoder.py --form fp32 | fp16w32 | int8 | fp16sf | fp16mm --bucket 3000 | 1000`,
