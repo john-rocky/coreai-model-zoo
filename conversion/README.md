@@ -622,6 +622,19 @@ Apple's repo; each recipe names the script it runs.
   buckets beyond 128 tokens. `gliner25_decide/aot_compile.py` compiles for the iPhone 18 Pro (h19p);
   `gliner25_decide/stage_ship.py` lays out the Hub folder. See [`gliner25_decide/README.md`](gliner25_decide/README.md)
   and [`../models/gliner25-decide/README.md`](../models/gliner25-decide/README.md).
+- **Timestral-209M (time-series forecasting, Mistral AI; in [`timestral/`](timestral/)):
+  `timestral/export_timestral.py --form ane|fp16-attn32|fp32 --bucket L,h --rows R`** — one univariate series, one
+  decode block (≤ 1,024 steps): the patch embedding, 24 blocks and the monotone quantile head re-authored from the
+  safetensors (`timestral_core.py`, strict load, the fused wQKV's rows reordered from (qkv, head_dim, heads)), one
+  graph per bucket of context and horizon patches; the host (`host_forecast.py`, NumPy) does the released
+  `forecast()`'s float64 statistics, refine frame, cap and symmetric averaging. The mask is a 1 / 0 input selected
+  with `where` (the scores reach 2.4e5). `--form ane` (`timestral_ane.py`) is the Neural Engine form: RMSNorm on
+  x / 2^7, Q / K / V as three Linears, sigmoid and SiLU through tanh, 1x1-conv projections; `fp16-attn32` keeps the
+  attention scores in fp32 for the GPU. The oracle is the reference code's own `forecast()` (`oracle.py`, its own
+  environment) on an 84-window fixture (`fixture_build.py`); `gate_core.py`, `engine_l1.py` and `e2e_gate.py` are the
+  three lines (graph, fp32 end to end, fp16 / Neural Engine end to end), `timing_mac.py` the Mac milliseconds and
+  `device_pack.py` / `device_score.py` the iPhone gate with [`../apps/TimestralGate`](../apps/TimestralGate/).
+  See [`timestral/README.md`](timestral/README.md) and [`../models/timestral/README.md`](../models/timestral/README.md).
 
 ## Reproduce (env)
 

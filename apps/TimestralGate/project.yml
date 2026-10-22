@@ -1,0 +1,65 @@
+# TimestralGate — the device gate of the Timestral-209M Core AI port (conversion/timestral), headless: the iPhone app
+# (launch arguments in, Documents/out/<tag>/{log.txt,run.json,pass*/quantiles.f32.bin} out) and the same code as a Mac
+# command-line tool for the dry run and the Mac timing. Core AI is an SDK framework: no package, so no Package.resolved.
+# Build: ./_build.sh ios|mac (xcodegen generate + xcodebuild Release, everything under _work/).
+name: TimestralGate
+options:
+  bundleIdPrefix: com.coreai
+  createIntermediateGroups: true
+schemes:
+  TimestralGate:
+    build:
+      targets:
+        TimestralGate: all
+    run:
+      config: Release
+  TimestralGateMac:
+    build:
+      targets:
+        TimestralGateMac: all
+    run:
+      config: Release
+targets:
+  TimestralGate:
+    type: application
+    supportedDestinations: [iOS]
+    deploymentTarget:
+      iOS: "27.0"
+    sources:
+      - path: Sources/Gate
+      - path: Sources/iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.coreai.timestralgate
+        DEVELOPMENT_TEAM: MFN25KNUGJ
+        CODE_SIGN_STYLE: Automatic
+        # No increased-memory-limit entitlement: the graph is about 0.4-0.8 GB and the default limit is the one an app
+        # shipping this model would have.
+        SWIFT_VERSION: "6.0"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: "YES"
+        INFOPLIST_KEY_CFBundleDisplayName: TimestralGate
+        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: "YES"
+        INFOPLIST_KEY_UIFileSharingEnabled: "YES"
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: "YES"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: "NO"
+        SWIFT_APPROACHABLE_CONCURRENCY: "YES"
+  TimestralGateMac:
+    type: tool
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Sources/Gate
+      - path: Sources/macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.coreai.timestralgate.mac
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        SWIFT_VERSION: "6.0"
+        ARCHS: arm64
+        SWIFT_APPROACHABLE_CONCURRENCY: "YES"
