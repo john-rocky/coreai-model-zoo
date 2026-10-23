@@ -17,6 +17,26 @@ symmetric averaging (the series and its mirror, averaged), the advancing refine 
 re-denormalization of the block, `_refine_block`), the cap (the history's range widened by 10⁴ times the running
 standard deviation at its last step) and the non-negative clip.
 
+## Demo
+
+![Timestral-209M on an iPhone 18 Pro: a year of daily orders pasted in, the next 14 days forecast with a 10–90 % band](https://huggingface.co/mlboydaisuke/Timestral-209M-CoreAI/resolve/main/demo.gif)
+
+The kit's Forecast example ([`Examples/Forecast`](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Forecast))
+on an iPhone 18 Pro (iOS 27.2), 2026-10-24: a year (365 days) of made-up daily order counts goes into the paste box,
+and the next 14 days come back as a median with a 10–90 % band, drawn from the last observed day (the chart shows the
+last 96 days). The app's caption reads 29.5 ms for the forecast, 29.3 ms of it in the graph, on the Neural Engine. The
+app's scripted run puts the numbers in the box, as a paste does, and starts the forecast the button starts. The clip is
+one span of the recording, trimmed at both ends and the status bar cropped; no cut inside, no speed change
+([MP4](https://huggingface.co/mlboydaisuke/Timestral-209M-CoreAI/resolve/main/demo.mp4), 10.8 s).
+
+- That forecast is the first one after the app opens. Six launches that day forecast this series on the screen: the
+  first forecast took about 21 ms of graph time right at launch and 29–31 ms after the 6 s wait the clip has. The
+  [Measured](#measured) table's 8.42 ms for this graph is the median of repeated forecasts within one launch.
+- The clip's launch is a later one in the same install. The first forecast after installing the app downloads the
+  three graphs compiled for this phone (about 1.2 GB) and loads them: 66 s in this run.
+- The same app and install, replaying the same 365 values through `-fixture`, matches the released `forecast()`
+  within 0.19 % on all 294 numbers (21 quantiles × 14 days).
+
 ## What this port covers
 
 - One univariate series without covariates. The released model also forecasts several variates together and takes
