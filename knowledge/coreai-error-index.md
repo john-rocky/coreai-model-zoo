@@ -669,7 +669,19 @@ App terminated due to signal 6.
   ship the `.aimodelc`; the device mmaps the precompiled package with no JIT spike. Record:
   [`sam3-promptable-segmentation.md`](sam3-promptable-segmentation.md) (§4),
   [`swift-runtime.md`](swift-runtime.md).
-- **OS · toolchain:** iOS 27 betas, June–July 2026.
+  The same path — a transpose constant-folded for matmul canonicalization,
+  `BumpMmapResourceAllocator::allocateResource`, `operator new` throwing — ended coreai-kit's Forecast example
+  while it specialized TimesFM 2.5's 463 MB float16 JIT graph on an iPhone 18 Pro (iOS 27.2). The frames,
+  outermost first: `-[MPSGraphExecutable specializedModuleWithDevice:shapedEntryPoints:compilationDescriptor:error:]`
+  → `CanonicalizeMatMulTransposeConstantRHS::matchAndRewrite` → `foldTransposeOp` → `allocateBufferTensorBlob` →
+  `BumpMmapResourceAllocator::allocateResource` → `operator new(unsigned long, std::align_val_t)` → `__cxa_throw`
+  → `abort`. The report carries these frames and `abort() called`, not the exception's name; no console was
+  captured, so the line in this heading was not seen in that run. Which limit the allocation hit was not
+  measured. There the entitlement was enough: the same source, app id, profile and phone with the key loaded the
+  graph and forecast on two launches (2026-10-24, [coreai-kit#76](https://github.com/john-rocky/coreai-kit/pull/76)).
+  Log: `~/code/coreai/_timestral/tf11/device/crash/Forecast-2026-10-24-041950.ips`, `tf11/device/runs/tfB1.jsonl`,
+  `tfB2.jsonl`.
+- **OS · toolchain:** iOS 27 betas, June–July 2026; the TimesFM case in (b): iOS 27.2 (24B5099f), October 2026.
 
 ## 'mps_spi.copy_discarding_constraints' op input must have tensor constraints
 
