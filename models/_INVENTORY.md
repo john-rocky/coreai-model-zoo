@@ -15,305 +15,306 @@ configuration; a single bundle answers that question by itself.
 
 | metric | count |
 | --- | --- |
-| published repos | 301 |
+| published repos | 302 |
 | Core AI repos | 106 |
 | Core AI bundles inside them | 435 |
 | Core AI repos with a `models/<family>/` card | 99 |
 | repos covered by a recipe | 101 |
-| Core AI repos with 0 downloads in the last 30 days | 4 |
+| Core AI repos with 0 downloads in the last 30 days | 3 |
 
 ## All repos, by 30-day downloads
 
 | repo | 30d DL | ♥ | fmt | role | bundles | tier-1 | tier-0 load | model | recipe | kit |
 | --- | ---: | ---: | --- | --- | ---: | --- | --- | --- | --- | --- |
-| [mlboydaisuke/S1-mini-CoreAI](https://huggingface.co/mlboydaisuke/S1-mini-CoreAI) | 992 | 0 | coreai | port | 1 | 1 pass | 1 load (26A428) | [s1-mini](s1-mini/README.md) | `s1-mini` | `s1-mini` |
-| [mlboydaisuke/MiniCPM5-2B-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM5-2B-CoreAI) | 878 | 0 | coreai | port | 3 | 1 pass | 1 deferred | [minicpm5-2b](minicpm5-2b/README.md) | `minicpm5-2b`, `minicpm5-2b-ane` | `minicpm5-2b` |
-| [mlboydaisuke/LFM2.5-8B-A1B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-8B-A1B-CoreAI) | 779 | 2 | coreai | port | 1 | **1 DIFF** | 1 load (26A428) | [lfm2.5-8b-a1b-moe](lfm2.5-8b-a1b-moe/README.md) | `lfm2.5-8b-a1b` | `lfm2.5-8b-a1b` |
-| [mlboydaisuke/LaMa-CoreML](https://huggingface.co/mlboydaisuke/LaMa-CoreML) | 754 | 1 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3.6-27B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.6-27B-CoreAI) | 673 | 1 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3.6-27b](qwen3.6-27b/README.md) | `qwen3.6-27b` | `qwen3.6-27b` |
-| [mlboydaisuke/gemma-4-E2B-CoreAI](https://huggingface.co/mlboydaisuke/gemma-4-E2B-CoreAI) | 507 | 2 | coreai | port | 22 | 19 pass 3 skipped | 3 load (26A428) 2 device-only 17 deferred | [gemma4-e2b](gemma4-e2b/README.md), [gemma4-vl](gemma4-vl/README.md) | `gemma-4-e2b`, `gemma-4-e2b-vl` | `gemma-4-e2b` |
-| [mlboydaisuke/gemma-4-E4B-CoreAI](https://huggingface.co/mlboydaisuke/gemma-4-E4B-CoreAI) | 503 | 0 | coreai | port | 3 | 3 pass | 2 load (26A428) 1 device-only | [gemma4-e4b](gemma4-e4b/README.md) | `gemma-4-e4b` | `gemma-4-e4b` |
-| [mlboydaisuke/GFPGAN-CoreML](https://huggingface.co/mlboydaisuke/GFPGAN-CoreML) | 501 | 3 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/MiniCPM5-1B-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM5-1B-CoreAI) | 497 | 4 | coreai | port | 3 | 1 pass | 1 load (26A428) | [minicpm5-1b](minicpm5-1b/README.md) | `minicpm5-1b`, `minicpm5-1b-ane` | `minicpm5-1b` |
+| [mlboydaisuke/S1-mini-CoreAI](https://huggingface.co/mlboydaisuke/S1-mini-CoreAI) | 997 | 0 | coreai | port | 1 | 1 pass | 1 load (26A428) | [s1-mini](s1-mini/README.md) | `s1-mini` | `s1-mini` |
+| [mlboydaisuke/LFM2.5-8B-A1B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-8B-A1B-CoreAI) | 776 | 2 | coreai | port | 1 | **1 DIFF** | 1 load (26A428) | [lfm2.5-8b-a1b-moe](lfm2.5-8b-a1b-moe/README.md) | `lfm2.5-8b-a1b` | `lfm2.5-8b-a1b` |
+| [mlboydaisuke/MiniCPM5-2B-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM5-2B-CoreAI) | 775 | 0 | coreai | port | 3 | 1 pass | 1 deferred | [minicpm5-2b](minicpm5-2b/README.md) | `minicpm5-2b`, `minicpm5-2b-ane` | `minicpm5-2b` |
+| [mlboydaisuke/LaMa-CoreML](https://huggingface.co/mlboydaisuke/LaMa-CoreML) | 765 | 1 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3.6-27B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.6-27B-CoreAI) | 668 | 1 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3.6-27b](qwen3.6-27b/README.md) | `qwen3.6-27b` | `qwen3.6-27b` |
+| [mlboydaisuke/gemma-4-E2B-CoreAI](https://huggingface.co/mlboydaisuke/gemma-4-E2B-CoreAI) | 503 | 2 | coreai | port | 22 | 19 pass 3 skipped | 3 load (26A428) 2 device-only 17 deferred | [gemma4-e2b](gemma4-e2b/README.md), [gemma4-vl](gemma4-vl/README.md) | `gemma-4-e2b`, `gemma-4-e2b-vl` | `gemma-4-e2b` |
+| [mlboydaisuke/gemma-4-E4B-CoreAI](https://huggingface.co/mlboydaisuke/gemma-4-E4B-CoreAI) | 499 | 0 | coreai | port | 3 | 3 pass | 2 load (26A428) 1 device-only | [gemma4-e4b](gemma4-e4b/README.md) | `gemma-4-e4b` | `gemma-4-e4b` |
+| [mlboydaisuke/GFPGAN-CoreML](https://huggingface.co/mlboydaisuke/GFPGAN-CoreML) | 499 | 3 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/MiniCPM5-1B-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM5-1B-CoreAI) | 486 | 4 | coreai | port | 3 | 1 pass | 1 load (26A428) | [minicpm5-1b](minicpm5-1b/README.md) | `minicpm5-1b`, `minicpm5-1b-ane` | `minicpm5-1b` |
 | [mlboydaisuke/Gemma-4-12B-CoreAI](https://huggingface.co/mlboydaisuke/Gemma-4-12B-CoreAI) | 483 | 1 | coreai | port | 2 | 2 pass | 2 deferred | [gemma4-12b](gemma4-12b/README.md) | `gemma-4-12b`, `gemma-4-12b-int8` | `gemma-4-12b` |
-| [mlboydaisuke/Qwen2.5-3B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/Qwen2.5-3B-Instruct-LiteRT) | 480 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/GLM-4.7-Flash-CoreAI](https://huggingface.co/mlboydaisuke/GLM-4.7-Flash-CoreAI) | 479 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [glm-4.7-flash](glm-4.7-flash/README.md) | `glm-4.7-flash` | `glm-4.7-flash` |
-| [mlboydaisuke/Qwen3.6-35B-A3B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.6-35B-A3B-CoreAI) | 473 | 5 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3.6](qwen3.6/README.md) | `qwen3.6-35b-a3b` | `qwen3.6-35b-a3b` |
-| [mlboydaisuke/qwen3.5-2B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreML) | 462 | 1 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/LFM2.5-1.2B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-1.2B-CoreAI) | 456 | 0 | coreai | port | 3 | **3 DIFF** | 1 load (26A428) 2 deferred | [lfm2.5](lfm2.5/README.md) | `lfm2.5-1.2b` | `lfm2.5-1.2b` |
-| [mlboydaisuke/qwen3.5-0.8B-CoreAI](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreAI) | 447 | 1 | coreai | port | 9 | 7 pass 2 skipped | 1 load (26A428) 8 deferred | [qwen3.5](qwen3.5/README.md) | `qwen3.5-0.8b`, `qwen3.5-2b` | `qwen3.5-0.8b` |
-| [mlboydaisuke/Gemma-4-31B-CoreAI](https://huggingface.co/mlboydaisuke/Gemma-4-31B-CoreAI) | 432 | 1 | coreai | port | 1 | 1 pass | 1 deferred | [gemma4-31b](gemma4-31b/README.md) | `gemma-4-31b` | `gemma-4-31b` |
-| [mlboydaisuke/qwen3.5-0.8B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreML) | 422 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Pocket-TTS-LiteRT](https://huggingface.co/mlboydaisuke/Pocket-TTS-LiteRT) | 307 | 6 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI](https://huggingface.co/mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI) | 288 | 3 | coreai | port | 12 | — | — | [granite-embedding-97m](granite-embedding-97m/README.md) | `granite-embedding-97m`, `granite-embedding-97m-ios-h18p`, `granite-embedding-97m-w8`, `granite-embedding-97m-w8-ios-h18p` | — |
-| [mlboydaisuke/Nemotron-3-Nano-4B-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Nano-4B-CoreAI) | 286 | 0 | coreai | port | 2 | 2 pass | 1 load (26A428) 1 device-only | [nemotron-3-nano](nemotron-3-nano/README.md) | `nemotron-3-nano-4b` | `nemotron-3-nano-4b` |
+| [mlboydaisuke/Qwen2.5-3B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/Qwen2.5-3B-Instruct-LiteRT) | 482 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/GLM-4.7-Flash-CoreAI](https://huggingface.co/mlboydaisuke/GLM-4.7-Flash-CoreAI) | 478 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [glm-4.7-flash](glm-4.7-flash/README.md) | `glm-4.7-flash` | `glm-4.7-flash` |
+| [mlboydaisuke/Qwen3.6-35B-A3B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.6-35B-A3B-CoreAI) | 475 | 5 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3.6](qwen3.6/README.md) | `qwen3.6-35b-a3b` | `qwen3.6-35b-a3b` |
+| [mlboydaisuke/qwen3.5-2B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreML) | 458 | 1 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/LFM2.5-1.2B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-1.2B-CoreAI) | 457 | 0 | coreai | port | 3 | **3 DIFF** | 1 load (26A428) 2 deferred | [lfm2.5](lfm2.5/README.md) | `lfm2.5-1.2b` | `lfm2.5-1.2b` |
+| [mlboydaisuke/qwen3.5-0.8B-CoreAI](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreAI) | 448 | 1 | coreai | port | 9 | 7 pass 2 skipped | 1 load (26A428) 8 deferred | [qwen3.5](qwen3.5/README.md) | `qwen3.5-0.8b`, `qwen3.5-2b` | `qwen3.5-0.8b` |
+| [mlboydaisuke/Gemma-4-31B-CoreAI](https://huggingface.co/mlboydaisuke/Gemma-4-31B-CoreAI) | 430 | 1 | coreai | port | 1 | 1 pass | 1 deferred | [gemma4-31b](gemma4-31b/README.md) | `gemma-4-31b` | `gemma-4-31b` |
+| [mlboydaisuke/qwen3.5-0.8B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreML) | 410 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Pocket-TTS-LiteRT](https://huggingface.co/mlboydaisuke/Pocket-TTS-LiteRT) | 296 | 6 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI](https://huggingface.co/mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI) | 284 | 3 | coreai | port | 12 | — | — | [granite-embedding-97m](granite-embedding-97m/README.md) | `granite-embedding-97m`, `granite-embedding-97m-ios-h18p`, `granite-embedding-97m-w8`, `granite-embedding-97m-w8-ios-h18p` | — |
 | [mlboydaisuke/MiniCPM5-2B-LiteRT](https://huggingface.co/mlboydaisuke/MiniCPM5-2B-LiteRT) | 279 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/CLIP-ViT-B32-ExecuTorch](https://huggingface.co/mlboydaisuke/CLIP-ViT-B32-ExecuTorch) | 259 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI](https://huggingface.co/mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI) | 255 | 1 | coreai | port | 3 | 1 pass 1 skipped | 1 load (26A428) 1 device-only | [vjepa2](vjepa2/README.md) | `vjepa2-vitl-ssv2` | `vjepa2-vitl-ssv2` |
-| [mlboydaisuke/Muse-Glimmer-30B-CoreAI](https://huggingface.co/mlboydaisuke/Muse-Glimmer-30B-CoreAI) | 226 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [muse-glimmer-30b](muse-glimmer-30b/README.md) | `muse-glimmer-30b` | — |
-| [mlboydaisuke/ECAPA-TDNN-Speaker-ExecuTorch](https://huggingface.co/mlboydaisuke/ECAPA-TDNN-Speaker-ExecuTorch) | 225 | 1 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI) | 225 | 2 | coreai | port | 18 | 12 pass | 6 load (26A428) 6 device-only | [nemotron-asr-streaming](nemotron-asr-streaming/README.md) | `nemotron-3.5-asr-streaming` | `nemotron-3.5-asr-streaming-0.6b` |
-| [mlboydaisuke/Qwen2.5-Omni-3B-Audio-CoreAI](https://huggingface.co/mlboydaisuke/Qwen2.5-Omni-3B-Audio-CoreAI) | 225 | 2 | coreai | port | 3 | 3 pass | 2 load (26A428) 1 deferred | [qwen2.5-omni-audio](qwen2.5-omni-audio/README.md) | `qwen2.5-omni-3b-audio` | `qwen2.5-omni-3b-audio` |
-| [mlboydaisuke/EdgeTAM-ExecuTorch](https://huggingface.co/mlboydaisuke/EdgeTAM-ExecuTorch) | 215 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Florence-2-base-ExecuTorch](https://huggingface.co/mlboydaisuke/Florence-2-base-ExecuTorch) | 204 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Nemotron-3-Nano-4B-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Nano-4B-CoreAI) | 277 | 0 | coreai | port | 2 | 2 pass | 1 load (26A428) 1 device-only | [nemotron-3-nano](nemotron-3-nano/README.md) | `nemotron-3-nano-4b` | `nemotron-3-nano-4b` |
+| [mlboydaisuke/CLIP-ViT-B32-ExecuTorch](https://huggingface.co/mlboydaisuke/CLIP-ViT-B32-ExecuTorch) | 252 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI](https://huggingface.co/mlboydaisuke/VJEPA2-ViTL-SSv2-CoreAI) | 248 | 1 | coreai | port | 3 | 1 pass 1 skipped | 1 load (26A428) 1 device-only | [vjepa2](vjepa2/README.md) | `vjepa2-vitl-ssv2` | `vjepa2-vitl-ssv2` |
+| [mlboydaisuke/EdgeTAM-ExecuTorch](https://huggingface.co/mlboydaisuke/EdgeTAM-ExecuTorch) | 221 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3.5-ASR-Streaming-CoreAI) | 218 | 2 | coreai | port | 18 | 12 pass | 6 load (26A428) 6 device-only | [nemotron-asr-streaming](nemotron-asr-streaming/README.md) | `nemotron-3.5-asr-streaming` | `nemotron-3.5-asr-streaming-0.6b` |
+| [mlboydaisuke/Qwen2.5-Omni-3B-Audio-CoreAI](https://huggingface.co/mlboydaisuke/Qwen2.5-Omni-3B-Audio-CoreAI) | 218 | 2 | coreai | port | 3 | 3 pass | 2 load (26A428) 1 deferred | [qwen2.5-omni-audio](qwen2.5-omni-audio/README.md) | `qwen2.5-omni-3b-audio` | `qwen2.5-omni-3b-audio` |
+| [mlboydaisuke/Muse-Glimmer-30B-CoreAI](https://huggingface.co/mlboydaisuke/Muse-Glimmer-30B-CoreAI) | 215 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [muse-glimmer-30b](muse-glimmer-30b/README.md) | `muse-glimmer-30b` | — |
+| [mlboydaisuke/SAM2.1-hiera-tiny-ExecuTorch](https://huggingface.co/mlboydaisuke/SAM2.1-hiera-tiny-ExecuTorch) | 204 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Florence-2-base-ExecuTorch](https://huggingface.co/mlboydaisuke/Florence-2-base-ExecuTorch) | 199 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/RTMPose-s-Body-ExecuTorch](https://huggingface.co/mlboydaisuke/RTMPose-s-Body-ExecuTorch) | 198 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/manga-ocr-ExecuTorch](https://huggingface.co/mlboydaisuke/manga-ocr-ExecuTorch) | 191 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SAM2.1-hiera-tiny-ExecuTorch](https://huggingface.co/mlboydaisuke/SAM2.1-hiera-tiny-ExecuTorch) | 190 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/MobileSAM-CoreML](https://huggingface.co/mlboydaisuke/MobileSAM-CoreML) | 172 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/ECAPA-TDNN-Speaker-ExecuTorch](https://huggingface.co/mlboydaisuke/ECAPA-TDNN-Speaker-ExecuTorch) | 177 | 1 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/MobileSAM-CoreML](https://huggingface.co/mlboydaisuke/MobileSAM-CoreML) | 174 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Confucius4-R2T2-LiteRT](https://huggingface.co/mlboydaisuke/Confucius4-R2T2-LiteRT) | 154 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Ornith-1.0-9B-CoreAI](https://huggingface.co/mlboydaisuke/Ornith-1.0-9B-CoreAI) | 149 | 2 | coreai | port | 2 | 2 pass | 1 load (26A428) 1 deferred | [ornith-1.0-9b](ornith-1.0-9b/README.md) | `ornith-1.0-9b` | — |
-| [mlboydaisuke/LFM2.5-2.6B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-2.6B-CoreAI) | 144 | 0 | coreai | port | 2 | 2 pass | 2 load (26A428) | [lfm2.5-2.6b](lfm2.5-2.6b/README.md) | `lfm2.5-2.6b`, `lfm2.5-2.6b-int4` | `lfm2.5-2.6b` |
-| [mlboydaisuke/Qwen3-0.6B-LiteRT-gpu-composites](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-LiteRT-gpu-composites) | 143 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SAM3-LiteRT](https://huggingface.co/mlboydaisuke/SAM3-LiteRT) | 143 | 4 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-0.6B-LiteRT-gpu-composites](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-LiteRT-gpu-composites) | 145 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Ornith-1.0-9B-CoreAI](https://huggingface.co/mlboydaisuke/Ornith-1.0-9B-CoreAI) | 144 | 2 | coreai | port | 2 | 2 pass | 1 load (26A428) 1 deferred | [ornith-1.0-9b](ornith-1.0-9b/README.md) | `ornith-1.0-9b` | — |
+| [mlboydaisuke/Llama-3.2-3B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/Llama-3.2-3B-Instruct-LiteRT) | 142 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/LFM2.5-2.6B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-2.6B-CoreAI) | 141 | 0 | coreai | port | 2 | 2 pass | 2 load (26A428) | [lfm2.5-2.6b](lfm2.5-2.6b/README.md) | `lfm2.5-2.6b`, `lfm2.5-2.6b-int4` | `lfm2.5-2.6b` |
 | [mlboydaisuke/MoGe-2-ViT-S-ExecuTorch](https://huggingface.co/mlboydaisuke/MoGe-2-ViT-S-ExecuTorch) | 140 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Real-ESRGAN-x4-CoreML](https://huggingface.co/mlboydaisuke/Real-ESRGAN-x4-CoreML) | 137 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Llama-3.2-3B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/Llama-3.2-3B-Instruct-LiteRT) | 136 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/SAM3-LiteRT](https://huggingface.co/mlboydaisuke/SAM3-LiteRT) | 140 | 4 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Real-ESRGAN-x4-CoreML](https://huggingface.co/mlboydaisuke/Real-ESRGAN-x4-CoreML) | 134 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/TimesFM-2.5-200M-CoreAI](https://huggingface.co/mlboydaisuke/TimesFM-2.5-200M-CoreAI) | 130 | 1 | coreai | port | 3 | 2 pass | 2 deferred | [timesfm](timesfm/README.md) | `timesfm-2.5-200m` | `timesfm-2.5-200m` |
-| [mlboydaisuke/TwIL-LM3-LiteRT](https://huggingface.co/mlboydaisuke/TwIL-LM3-LiteRT) | 125 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3-4B-LiteRT-gpu-composites](https://huggingface.co/mlboydaisuke/Qwen3-4B-LiteRT-gpu-composites) | 118 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/multilingual-e5-base-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-base-ExecuTorch) | 117 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/zero-dce-litert](https://huggingface.co/mlboydaisuke/zero-dce-litert) | 116 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/TwIL-LM3-LiteRT](https://huggingface.co/mlboydaisuke/TwIL-LM3-LiteRT) | 126 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-4B-LiteRT-gpu-composites](https://huggingface.co/mlboydaisuke/Qwen3-4B-LiteRT-gpu-composites) | 119 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/zero-dce-litert](https://huggingface.co/mlboydaisuke/zero-dce-litert) | 114 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/OvisOCR2-LiteRT](https://huggingface.co/mlboydaisuke/OvisOCR2-LiteRT) | 105 | 1 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Depth-Anything-V2-Small-ExecuTorch](https://huggingface.co/mlboydaisuke/Depth-Anything-V2-Small-ExecuTorch) | 104 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Whisper-tiny-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-tiny-ExecuTorch) | 103 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/ormbg-ExecuTorch](https://huggingface.co/mlboydaisuke/ormbg-ExecuTorch) | 99 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Mimi-LiteRT](https://huggingface.co/mlboydaisuke/Mimi-LiteRT) | 95 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/manga-ocr-ExecuTorch](https://huggingface.co/mlboydaisuke/manga-ocr-ExecuTorch) | 103 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/multilingual-e5-base-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-base-ExecuTorch) | 99 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/paraphrase-multilingual-MiniLM-L12-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/paraphrase-multilingual-MiniLM-L12-v2-ExecuTorch) | 98 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/ormbg-ExecuTorch](https://huggingface.co/mlboydaisuke/ormbg-ExecuTorch) | 95 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/EmbeddingGemma-2-Transcribe-LiteRT](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-LiteRT) | 94 | 5 | litert | port | 0 | — | — | [embeddinggemma-2-transcribe](embeddinggemma-2-transcribe/README.md) | `embeddinggemma-2-transcribe`, `embeddinggemma-2-transcribe-ios-h19p`, `embeddinggemma-2-transcribe-macos-encoder-split7` | — |
+| [mlboydaisuke/Mimi-LiteRT](https://huggingface.co/mlboydaisuke/Mimi-LiteRT) | 93 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Ministral-3-3B-Instruct-2512-LiteRT](https://huggingface.co/mlboydaisuke/Ministral-3-3B-Instruct-2512-LiteRT) | 93 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/paraphrase-multilingual-MiniLM-L12-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/paraphrase-multilingual-MiniLM-L12-v2-ExecuTorch) | 93 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/bge-small-en-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-small-en-v1.5-ExecuTorch) | 90 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/DINOv2-ViT-S14-ExecuTorch](https://huggingface.co/mlboydaisuke/DINOv2-ViT-S14-ExecuTorch) | 85 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/MODNet-ExecuTorch](https://huggingface.co/mlboydaisuke/MODNet-ExecuTorch) | 85 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3.5-0.8B-MTP-repro-LiteRT](https://huggingface.co/mlboydaisuke/Qwen3.5-0.8B-MTP-repro-LiteRT) | 85 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/EmbeddingGemma-2-Transcribe-LiteRT](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-LiteRT) | 84 | 5 | litert | port | 0 | — | — | [embeddinggemma-2-transcribe](embeddinggemma-2-transcribe/README.md) | `embeddinggemma-2-transcribe`, `embeddinggemma-2-transcribe-ios-h19p`, `embeddinggemma-2-transcribe-macos-encoder-split7` | — |
-| [mlboydaisuke/qwen3-1.7b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-1.7b-CoreAI-official) | 82 | 1 | coreai | official | 1 | — | 1 deferred | [qwen3-1.7b-official](qwen3-1.7b-official/README.md) | `qwen3-1.7b-official-ane` | — |
-| [mlboydaisuke/GLiNER2.5-Decide-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2.5-Decide-CoreAI) | 81 | 1 | coreai | port | 6 | — | — | [gliner25-decide](gliner25-decide/README.md) | `gliner25-decide` | — |
+| [mlboydaisuke/DINOv2-ViT-S14-ExecuTorch](https://huggingface.co/mlboydaisuke/DINOv2-ViT-S14-ExecuTorch) | 90 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3.5-0.8B-MTP-repro-LiteRT](https://huggingface.co/mlboydaisuke/Qwen3.5-0.8B-MTP-repro-LiteRT) | 87 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/OpenVoice-V2-CoreML](https://huggingface.co/mlboydaisuke/OpenVoice-V2-CoreML) | 85 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/GLiNER2.5-Decide-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2.5-Decide-CoreAI) | 83 | 1 | coreai | port | 6 | — | — | [gliner25-decide](gliner25-decide/README.md) | `gliner25-decide` | `gliner2.5-decide` |
+| [mlboydaisuke/Whisper-tiny-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-tiny-ExecuTorch) | 83 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/S1-mini-LiteRT](https://huggingface.co/mlboydaisuke/S1-mini-LiteRT) | 81 | 3 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Whisper-small-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-small-ExecuTorch) | 81 | 0 | other | port | 0 | — | — | — | — | — |
-| [rahulrachuri/ternary-bonsai-2-27b-coreai](https://huggingface.co/rahulrachuri/ternary-bonsai-2-27b-coreai) | 81 | 0 | coreai | port | 2 | — | — | [bonsai2-27b](bonsai2-27b/README.md) | `bonsai2-27b` | — |
-| [mlboydaisuke/MobileSAM-ExecuTorch](https://huggingface.co/mlboydaisuke/MobileSAM-ExecuTorch) | 79 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/LFM2.5-350M-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2.5-350M-ExecuTorch) | 78 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/RWKV7-Goose-1.5B-CoreAI](https://huggingface.co/mlboydaisuke/RWKV7-Goose-1.5B-CoreAI) | 77 | 0 | coreai | port | 2 | 2 skipped | 2 deferred | [rwkv7-goose](rwkv7-goose/README.md) | `rwkv7-goose-1.5b` | — |
-| [mlboydaisuke/LFM2.5-1.2B-Instruct-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2.5-1.2B-Instruct-ExecuTorch) | 76 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/RT-DETRv2-S-ExecuTorch](https://huggingface.co/mlboydaisuke/RT-DETRv2-S-ExecuTorch) | 76 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/FastContext-1.0-4B-CoreAI](https://huggingface.co/mlboydaisuke/FastContext-1.0-4B-CoreAI) | 75 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [fastcontext](fastcontext/README.md) | `fastcontext-4b` | — |
-| [mlboydaisuke/OpenVoice-V2-CoreML](https://huggingface.co/mlboydaisuke/OpenVoice-V2-CoreML) | 75 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/DeepSeek-R1-Distill-Qwen-1.5B-LiteRT](https://huggingface.co/mlboydaisuke/DeepSeek-R1-Distill-Qwen-1.5B-LiteRT) | 74 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Falcon3-3B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/Falcon3-3B-Instruct-LiteRT) | 72 | 3 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/DeepSeek-R1-Distill-Qwen-7B-LiteRT](https://huggingface.co/mlboydaisuke/DeepSeek-R1-Distill-Qwen-7B-LiteRT) | 70 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/qwen3.5-4B-CoreAI](https://huggingface.co/mlboydaisuke/qwen3.5-4B-CoreAI) | 69 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3.5-4b](qwen3.5-4b/README.md) | `qwen3.5-4b` | — |
-| [mlboydaisuke/BitCPM-8B-CoreAI](https://huggingface.co/mlboydaisuke/BitCPM-8B-CoreAI) | 68 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [bitcpm-8b](bitcpm-8b/README.md) | `bitcpm-8b` | — |
-| [mlboydaisuke/Face-Parsing-CoreML](https://huggingface.co/mlboydaisuke/Face-Parsing-CoreML) | 68 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/multilingual-e5-large-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-large-ExecuTorch) | 68 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3.5-0.8B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3.5-0.8B-ExecuTorch) | 68 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/YOLOX-s-ExecuTorch](https://huggingface.co/mlboydaisuke/YOLOX-s-ExecuTorch) | 67 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SmolLM3-3B-LiteRT](https://huggingface.co/mlboydaisuke/SmolLM3-3B-LiteRT) | 66 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Depth-Anything-3-Small-CoreML](https://huggingface.co/mlboydaisuke/Depth-Anything-3-Small-CoreML) | 64 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SSDLite320-MobileNetV3-ExecuTorch](https://huggingface.co/mlboydaisuke/SSDLite320-MobileNetV3-ExecuTorch) | 64 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/EDSR-x4-ExecuTorch](https://huggingface.co/mlboydaisuke/EDSR-x4-ExecuTorch) | 63 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/bge-base-en-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-base-en-v1.5-ExecuTorch) | 62 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Matcha-TTS-LiteRT](https://huggingface.co/mlboydaisuke/Matcha-TTS-LiteRT) | 61 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Depth-Anything-3-Base-CoreML](https://huggingface.co/mlboydaisuke/Depth-Anything-3-Base-CoreML) | 60 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [rahulrachuri/pocket-tts-coreai](https://huggingface.co/rahulrachuri/pocket-tts-coreai) | 59 | 0 | coreai | port | 5 | 5 pass | 5 deferred | [pocket-tts](pocket-tts/README.md) | `pocket-tts` | — |
-| [mlboydaisuke/Laya-Multilingual-CoreAI](https://huggingface.co/mlboydaisuke/Laya-Multilingual-CoreAI) | 58 | 0 | coreai | port | 8 | — | — | [laya-multilingual](laya-multilingual/README.md) | `laya-multilingual`, `laya-multilingual-ios`, `laya-multilingual-ios-h18p` | — |
-| [mlboydaisuke/Qwen3-0.6B-wo4-float-repro-LiteRT](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-wo4-float-repro-LiteRT) | 58 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3-0.6B-Code-Expert-LiteRT](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-Code-Expert-LiteRT) | 57 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3-Reranker-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-Reranker-0.6B-ExecuTorch) | 57 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/all-MiniLM-L12-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/all-MiniLM-L12-v2-ExecuTorch) | 56 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Fun-ASR-Nano-2512-CoreAI](https://huggingface.co/mlboydaisuke/Fun-ASR-Nano-2512-CoreAI) | 55 | 2 | coreai | port | 2 | — | — | [funasr-nano](funasr-nano/README.md) | `funasr-nano-2512` | — |
-| [mlboydaisuke/FLUX.2-klein-4B-CoreAI](https://huggingface.co/mlboydaisuke/FLUX.2-klein-4B-CoreAI) | 54 | 3 | coreai | port | 2 | 7 skipped | 7 deferred | [flux2-klein](flux2-klein/README.md) | `flux2-klein-4b`, `flux2-klein-4b-edit`, `flux2-klein-4b-fp16`, `flux2-klein-4b-int8` | — |
-| [mlboydaisuke/gemma-4-E2B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E2B-coreml) | 54 | 12 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/LaMa-Inpainting-ExecuTorch](https://huggingface.co/mlboydaisuke/LaMa-Inpainting-ExecuTorch) | 54 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/ms-marco-MiniLM-L6-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/ms-marco-MiniLM-L6-v2-ExecuTorch) | 54 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Nemotron-3-Diarization-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Diarization-CoreAI) | 54 | 2 | coreai | port | 4 | — | — | [nemotron-3-diarization](nemotron-3-diarization/README.md) | `nemotron-3-diarization` | — |
+| [mlboydaisuke/MODNet-ExecuTorch](https://huggingface.co/mlboydaisuke/MODNet-ExecuTorch) | 79 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Whisper-small-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-small-ExecuTorch) | 79 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/MobileSAM-ExecuTorch](https://huggingface.co/mlboydaisuke/MobileSAM-ExecuTorch) | 78 | 0 | other | port | 0 | — | — | — | — | — |
+| [rahulrachuri/ternary-bonsai-2-27b-coreai](https://huggingface.co/rahulrachuri/ternary-bonsai-2-27b-coreai) | 78 | 0 | coreai | port | 2 | — | — | [bonsai2-27b](bonsai2-27b/README.md) | `bonsai2-27b` | — |
+| [mlboydaisuke/LFM2.5-1.2B-Instruct-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2.5-1.2B-Instruct-ExecuTorch) | 77 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen3-1.7b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-1.7b-CoreAI-official) | 76 | 1 | coreai | official | 1 | — | 1 deferred | [qwen3-1.7b-official](qwen3-1.7b-official/README.md) | `qwen3-1.7b-official-ane` | — |
+| [mlboydaisuke/SSDLite320-MobileNetV3-ExecuTorch](https://huggingface.co/mlboydaisuke/SSDLite320-MobileNetV3-ExecuTorch) | 75 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/LFM2.5-350M-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2.5-350M-ExecuTorch) | 74 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Falcon3-3B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/Falcon3-3B-Instruct-LiteRT) | 73 | 3 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/RWKV7-Goose-1.5B-CoreAI](https://huggingface.co/mlboydaisuke/RWKV7-Goose-1.5B-CoreAI) | 73 | 0 | coreai | port | 2 | 2 skipped | 2 deferred | [rwkv7-goose](rwkv7-goose/README.md) | `rwkv7-goose-1.5b` | — |
+| [mlboydaisuke/DeepSeek-R1-Distill-Qwen-7B-LiteRT](https://huggingface.co/mlboydaisuke/DeepSeek-R1-Distill-Qwen-7B-LiteRT) | 72 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/YOLOX-s-ExecuTorch](https://huggingface.co/mlboydaisuke/YOLOX-s-ExecuTorch) | 71 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Face-Parsing-CoreML](https://huggingface.co/mlboydaisuke/Face-Parsing-CoreML) | 70 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/FastContext-1.0-4B-CoreAI](https://huggingface.co/mlboydaisuke/FastContext-1.0-4B-CoreAI) | 70 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [fastcontext](fastcontext/README.md) | `fastcontext-4b` | — |
+| [mlboydaisuke/RT-DETRv2-S-ExecuTorch](https://huggingface.co/mlboydaisuke/RT-DETRv2-S-ExecuTorch) | 70 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/SmolLM3-3B-LiteRT](https://huggingface.co/mlboydaisuke/SmolLM3-3B-LiteRT) | 68 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/DeepSeek-R1-Distill-Qwen-1.5B-LiteRT](https://huggingface.co/mlboydaisuke/DeepSeek-R1-Distill-Qwen-1.5B-LiteRT) | 67 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/bge-base-en-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-base-en-v1.5-ExecuTorch) | 66 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3.5-0.8B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3.5-0.8B-ExecuTorch) | 66 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen3.5-4B-CoreAI](https://huggingface.co/mlboydaisuke/qwen3.5-4B-CoreAI) | 65 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3.5-4b](qwen3.5-4b/README.md) | `qwen3.5-4b` | — |
+| [mlboydaisuke/BitCPM-8B-CoreAI](https://huggingface.co/mlboydaisuke/BitCPM-8B-CoreAI) | 64 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [bitcpm-8b](bitcpm-8b/README.md) | `bitcpm-8b` | — |
+| [mlboydaisuke/Depth-Anything-3-Small-CoreML](https://huggingface.co/mlboydaisuke/Depth-Anything-3-Small-CoreML) | 63 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Matcha-TTS-LiteRT](https://huggingface.co/mlboydaisuke/Matcha-TTS-LiteRT) | 63 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/EDSR-x4-ExecuTorch](https://huggingface.co/mlboydaisuke/EDSR-x4-ExecuTorch) | 62 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-0.6B-wo4-float-repro-LiteRT](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-wo4-float-repro-LiteRT) | 62 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-Reranker-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-Reranker-0.6B-ExecuTorch) | 61 | 0 | other | port | 0 | — | — | — | — | — |
+| [rahulrachuri/pocket-tts-coreai](https://huggingface.co/rahulrachuri/pocket-tts-coreai) | 60 | 0 | coreai | port | 5 | 5 pass | 5 deferred | [pocket-tts](pocket-tts/README.md) | `pocket-tts` | — |
+| [mlboydaisuke/Depth-Anything-3-Base-CoreML](https://huggingface.co/mlboydaisuke/Depth-Anything-3-Base-CoreML) | 59 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/multilingual-e5-large-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-large-ExecuTorch) | 58 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/ms-marco-MiniLM-L6-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/ms-marco-MiniLM-L6-v2-ExecuTorch) | 56 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Fun-ASR-Nano-2512-CoreAI](https://huggingface.co/mlboydaisuke/Fun-ASR-Nano-2512-CoreAI) | 55 | 2 | coreai | port | 2 | — | — | [funasr-nano](funasr-nano/README.md) | `funasr-nano-2512` | `fun-asr-nano-2512` |
+| [mlboydaisuke/Qwen3-0.6B-Code-Expert-LiteRT](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-Code-Expert-LiteRT) | 55 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3.8-27B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.8-27B-CoreAI) | 55 | 1 | coreai | port | 7 | 7 pass | 7 deferred | [qwen3.8-27b](qwen3.8-27b/README.md) | `qwen3.8-27b`, `qwen3.8-27b-vision`, `qwen3.8-27b-vl` | `qwen3.8-27b` |
+| [mlboydaisuke/Nemotron-3-Diarization-CoreAI](https://huggingface.co/mlboydaisuke/Nemotron-3-Diarization-CoreAI) | 54 | 2 | coreai | port | 4 | — | — | [nemotron-3-diarization](nemotron-3-diarization/README.md) | `nemotron-3-diarization` | `nemotron-3-diarization` |
+| [mlboydaisuke/FLUX.2-klein-4B-CoreAI](https://huggingface.co/mlboydaisuke/FLUX.2-klein-4B-CoreAI) | 53 | 3 | coreai | port | 2 | 7 skipped | 7 deferred | [flux2-klein](flux2-klein/README.md) | `flux2-klein-4b`, `flux2-klein-4b-edit`, `flux2-klein-4b-fp16`, `flux2-klein-4b-int8` | — |
+| [mlboydaisuke/LaMa-Inpainting-ExecuTorch](https://huggingface.co/mlboydaisuke/LaMa-Inpainting-ExecuTorch) | 53 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/ms-marco-MiniLM-L12-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/ms-marco-MiniLM-L12-v2-ExecuTorch) | 52 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/qwen3-vl-2b-stateful-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-2b-stateful-coreml) | 52 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3.8-27B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.8-27B-CoreAI) | 52 | 1 | coreai | port | 7 | 7 pass | 7 deferred | [qwen3.8-27b](qwen3.8-27b/README.md) | `qwen3.8-27b`, `qwen3.8-27b-vision`, `qwen3.8-27b-vl` | `qwen3.8-27b` |
 | [mlboydaisuke/decider-2b-coreai-ft](https://huggingface.co/mlboydaisuke/decider-2b-coreai-ft) | 51 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Kev-0.8B-CoreAI](https://huggingface.co/mlboydaisuke/Kev-0.8B-CoreAI) | 50 | 0 | coreai | port | 1 | — | — | [kev-0.8b](kev-0.8b/README.md) | `kev-0.8b` | — |
-| [mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI) | 49 | 1 | coreai | port | 8 | — | — | [embeddinggemma-2-transcribe](embeddinggemma-2-transcribe/README.md) | `embeddinggemma-2-transcribe`, `embeddinggemma-2-transcribe-ios-h19p`, `embeddinggemma-2-transcribe-macos-encoder-split7` | — |
+| [mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-CoreAI) | 51 | 1 | coreai | port | 8 | — | — | [embeddinggemma-2-transcribe](embeddinggemma-2-transcribe/README.md) | `embeddinggemma-2-transcribe`, `embeddinggemma-2-transcribe-ios-h19p`, `embeddinggemma-2-transcribe-macos-encoder-split7` | — |
+| [mlboydaisuke/wav2vec2-XLSR53-Russian-ExecuTorch](https://huggingface.co/mlboydaisuke/wav2vec2-XLSR53-Russian-ExecuTorch) | 51 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Kev-0.8B-CoreAI](https://huggingface.co/mlboydaisuke/Kev-0.8B-CoreAI) | 50 | 0 | coreai | port | 1 | — | — | [kev-0.8b](kev-0.8b/README.md) | `kev-0.8b` | `kev-0.8b` |
 | [mlboydaisuke/qwen3.5-2B-CoreAI](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreAI) | 49 | 1 | coreai | port | 4 | 4 pass | 4 deferred | [qwen3.5](qwen3.5/README.md) | `qwen3.5-0.8b`, `qwen3.5-2b` | `qwen3.5-2b` |
-| [mlboydaisuke/wav2vec2-XLSR53-Russian-ExecuTorch](https://huggingface.co/mlboydaisuke/wav2vec2-XLSR53-Russian-ExecuTorch) | 49 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/all-MiniLM-L12-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/all-MiniLM-L12-v2-ExecuTorch) | 48 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Real-ESRGAN-x4v3-ExecuTorch](https://huggingface.co/mlboydaisuke/Real-ESRGAN-x4v3-ExecuTorch) | 48 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/VibeVoice-Realtime-0.5B-LiteRT](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-LiteRT) | 48 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/decider-2b-vision-CoreAI](https://huggingface.co/mlboydaisuke/decider-2b-vision-CoreAI) | 47 | 1 | coreai | port | 4 | — | — | [decider-2b-vision](decider-2b-vision/README.md) | `decider-2b-vision`, `decider-2b-vision-fp16`, `decider-2b-vision-tower-g256`, `decider-2b-vision-tower-g448` | `decider-2b-vision` |
 | [mlboydaisuke/docTR-CRNN-MobileNetV3-Small-ExecuTorch](https://huggingface.co/mlboydaisuke/docTR-CRNN-MobileNetV3-Small-ExecuTorch) | 47 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/nomic-embed-text-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/nomic-embed-text-v1.5-ExecuTorch) | 47 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/OLMo-2-1B-Instruct-LiteRT](https://huggingface.co/mlboydaisuke/OLMo-2-1B-Instruct-LiteRT) | 47 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Real-ESRGAN-x4v3-ExecuTorch](https://huggingface.co/mlboydaisuke/Real-ESRGAN-x4v3-ExecuTorch) | 47 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/VibeVoice-Realtime-0.5B-LiteRT](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-LiteRT) | 47 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/bge-large-en-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-large-en-v1.5-ExecuTorch) | 46 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/decider-0.8b-CoreAI](https://huggingface.co/mlboydaisuke/decider-0.8b-CoreAI) | 46 | 2 | coreai | port | 1 | — | — | [decider-0.8b](decider-0.8b/README.md) | `decider-0.8b` | — |
-| [mlboydaisuke/decider-2b-vision-CoreAI](https://huggingface.co/mlboydaisuke/decider-2b-vision-CoreAI) | 46 | 1 | coreai | port | 4 | — | — | [decider-2b-vision](decider-2b-vision/README.md) | `decider-2b-vision`, `decider-2b-vision-fp16`, `decider-2b-vision-tower-g256`, `decider-2b-vision-tower-g448` | — |
-| [mlboydaisuke/Whisper-base-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-base-ExecuTorch) | 46 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/TwinLiteNet-ExecuTorch](https://huggingface.co/mlboydaisuke/TwinLiteNet-ExecuTorch) | 47 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/VoxCPM2-CoreAI](https://huggingface.co/mlboydaisuke/VoxCPM2-CoreAI) | 46 | 4 | coreai | port | 21 | 14 pass | 14 deferred | [voxcpm2](voxcpm2/README.md) | `voxcpm2-2b` | `voxcpm2-2b` |
+| [mlboydaisuke/CLAP-HTSAT-fused-ExecuTorch](https://huggingface.co/mlboydaisuke/CLAP-HTSAT-fused-ExecuTorch) | 45 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/LaMa-Dilated-LiteRT](https://huggingface.co/mlboydaisuke/LaMa-Dilated-LiteRT) | 45 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/VoxCPM2-CoreAI](https://huggingface.co/mlboydaisuke/VoxCPM2-CoreAI) | 45 | 4 | coreai | port | 21 | 14 pass | 14 deferred | [voxcpm2](voxcpm2/README.md) | `voxcpm2-2b` | `voxcpm2-2b` |
-| [mlboydaisuke/TwinLiteNet-ExecuTorch](https://huggingface.co/mlboydaisuke/TwinLiteNet-ExecuTorch) | 44 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/nomic-embed-text-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/nomic-embed-text-v1.5-ExecuTorch) | 43 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/RF-DETR-CoreAI](https://huggingface.co/mlboydaisuke/RF-DETR-CoreAI) | 43 | 3 | coreai | port | 14 | 10 pass 4 skipped | 14 deferred | [rf-detr](rf-detr/README.md) | `rf-detr` | `rf-detr` |
-| [mlboydaisuke/CLAP-HTSAT-fused-ExecuTorch](https://huggingface.co/mlboydaisuke/CLAP-HTSAT-fused-ExecuTorch) | 42 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/OpenThai-SystemOne-CoreAI](https://huggingface.co/mlboydaisuke/OpenThai-SystemOne-CoreAI) | 42 | 0 | coreai | port | 2 | — | — | [openthai-systemone](openthai-systemone/README.md) | `openthai-systemone`, `openthai-systemone-fp16` | — |
-| [mlboydaisuke/bekko-embedding-v1-a25m-LiteRT](https://huggingface.co/mlboydaisuke/bekko-embedding-v1-a25m-LiteRT) | 41 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/ModernBERT-Ja-310M-Decision-LiteRT](https://huggingface.co/mlboydaisuke/ModernBERT-Ja-310M-Decision-LiteRT) | 41 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SAM2-hiera-tiny-LiteRT](https://huggingface.co/mlboydaisuke/SAM2-hiera-tiny-LiteRT) | 41 | 2 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SigLIP2-base-patch16-224-ExecuTorch](https://huggingface.co/mlboydaisuke/SigLIP2-base-patch16-224-ExecuTorch) | 41 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/clef-flash-CoreAI](https://huggingface.co/mlboydaisuke/clef-flash-CoreAI) | 40 | 0 | coreai | port | 5 | — | — | [clef-flash](clef-flash/README.md) | `clef-flash`, `clef-flash-head`, `clef-flash-int8mix`, `clef-flash-lm-head-table`, `clef-flash-tower-g256`, `clef-flash-tower-g448` | — |
-| [mlboydaisuke/Stable-Audio-Open-Small-CoreML](https://huggingface.co/mlboydaisuke/Stable-Audio-Open-Small-CoreML) | 39 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Dia2-1B-LiteRT](https://huggingface.co/mlboydaisuke/Dia2-1B-LiteRT) | 38 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/gemma-4-E2B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E2B-coreml) | 44 | 12 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/ModernBERT-Ja-310M-Decision-LiteRT](https://huggingface.co/mlboydaisuke/ModernBERT-Ja-310M-Decision-LiteRT) | 43 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/SAM2-hiera-tiny-LiteRT](https://huggingface.co/mlboydaisuke/SAM2-hiera-tiny-LiteRT) | 43 | 2 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Whisper-base-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-base-ExecuTorch) | 43 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/bge-large-en-v1.5-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-large-en-v1.5-ExecuTorch) | 42 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/OpenThai-SystemOne-CoreAI](https://huggingface.co/mlboydaisuke/OpenThai-SystemOne-CoreAI) | 42 | 0 | coreai | port | 2 | — | — | [openthai-systemone](openthai-systemone/README.md) | `openthai-systemone`, `openthai-systemone-fp16` | `openthai-systemone` |
+| [mlboydaisuke/RF-DETR-CoreAI](https://huggingface.co/mlboydaisuke/RF-DETR-CoreAI) | 42 | 3 | coreai | port | 14 | 10 pass 4 skipped | 14 deferred | [rf-detr](rf-detr/README.md) | `rf-detr` | `rf-detr` |
+| [mlboydaisuke/Dia2-1B-LiteRT](https://huggingface.co/mlboydaisuke/Dia2-1B-LiteRT) | 41 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/clef-flash-CoreAI](https://huggingface.co/mlboydaisuke/clef-flash-CoreAI) | 40 | 0 | coreai | port | 5 | — | — | [clef-flash](clef-flash/README.md) | `clef-flash`, `clef-flash-head`, `clef-flash-int8mix`, `clef-flash-lm-head-table`, `clef-flash-tower-g256`, `clef-flash-tower-g448` | `clef-flash` |
+| [mlboydaisuke/decider-0.8b-CoreAI](https://huggingface.co/mlboydaisuke/decider-0.8b-CoreAI) | 40 | 2 | coreai | port | 1 | — | — | [decider-0.8b](decider-0.8b/README.md) | `decider-0.8b` | `decider-0.8b` |
+| [mlboydaisuke/Florence-2-large-ExecuTorch](https://huggingface.co/mlboydaisuke/Florence-2-large-ExecuTorch) | 39 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/ms-marco-MiniLM-L4-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/ms-marco-MiniLM-L4-v2-ExecuTorch) | 38 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/SigLIP2-base-patch16-224-ExecuTorch](https://huggingface.co/mlboydaisuke/SigLIP2-base-patch16-224-ExecuTorch) | 38 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/VoxCPM-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VoxCPM-0.5B-CoreAI) | 38 | 1 | coreai | port | 21 | 14 pass | 14 deferred | [voxcpm](voxcpm/README.md) | `voxcpm-0.5b` | `voxcpm-0.5b` |
 | [mlboydaisuke/multilingual-e5-small-ExecuTorch](https://huggingface.co/mlboydaisuke/multilingual-e5-small-ExecuTorch) | 37 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/VoxCPM-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VoxCPM-0.5B-CoreAI) | 37 | 1 | coreai | port | 21 | 14 pass | 14 deferred | [voxcpm](voxcpm/README.md) | `voxcpm-0.5b` | `voxcpm-0.5b` |
 | [mlboydaisuke/DIS-ISNet-ExecuTorch](https://huggingface.co/mlboydaisuke/DIS-ISNet-ExecuTorch) | 36 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/midas-small-litert](https://huggingface.co/mlboydaisuke/midas-small-litert) | 36 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3-VL-4B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-VL-4B-CoreAI) | 36 | 0 | coreai | port | 3 | 2 pass 1 skipped | 3 deferred | [qwen3-vl](qwen3-vl/README.md) | `qwen3-vl-2b`, `qwen3-vl-4b`, `qwen3-vl-8b` | `qwen3-vl-4b` |
-| [mlboydaisuke/Unlimited-OCR-CoreAI](https://huggingface.co/mlboydaisuke/Unlimited-OCR-CoreAI) | 36 | 6 | coreai | port | 2 | 2 skipped | 2 deferred | [unlimited-ocr](unlimited-ocr/README.md) | `unlimited-ocr` | `unlimited-ocr` |
 | [mlboydaisuke/AST-AudioSet-ExecuTorch](https://huggingface.co/mlboydaisuke/AST-AudioSet-ExecuTorch) | 35 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/bge-reranker-base-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-reranker-base-ExecuTorch) | 35 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/bekko-embedding-v1-a25m-LiteRT](https://huggingface.co/mlboydaisuke/bekko-embedding-v1-a25m-LiteRT) | 35 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/MiniCPM-V-4.6-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM-V-4.6-CoreAI) | 35 | 4 | coreai | port | 4 | 3 pass 1 skipped | 4 deferred | [minicpm-v-4.6](minicpm-v-4.6/README.md) | `minicpm-v-4.6` | `minicpm-v-4.6` |
 | [mlboydaisuke/qwen2.5-0.5b-coreml](https://huggingface.co/mlboydaisuke/qwen2.5-0.5b-coreml) | 35 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch) | 35 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-VL-4B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-VL-4B-CoreAI) | 35 | 0 | coreai | port | 3 | 2 pass 1 skipped | 3 deferred | [qwen3-vl](qwen3-vl/README.md) | `qwen3-vl-2b`, `qwen3-vl-4b`, `qwen3-vl-8b` | `qwen3-vl-4b` |
 | [mlboydaisuke/RGBA-Image-2.1-Turbo-CoreAI](https://huggingface.co/mlboydaisuke/RGBA-Image-2.1-Turbo-CoreAI) | 35 | 2 | coreai | port | 6 | — | — | [rgba-image-2.1-turbo](rgba-image-2.1-turbo/README.md) | `rgba-image-2.1-turbo` | — |
-| [mlboydaisuke/APUS-Decision-v1-4B-CoreAI](https://huggingface.co/mlboydaisuke/APUS-Decision-v1-4B-CoreAI) | 34 | 0 | coreai | port | 1 | — | — | [apus-decision-v1-4b](apus-decision-v1-4b/README.md) | `apus-decision-v1-4b` | — |
-| [mlboydaisuke/Florence-2-large-ExecuTorch](https://huggingface.co/mlboydaisuke/Florence-2-large-ExecuTorch) | 34 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Stable-Audio-Open-Small-CoreML](https://huggingface.co/mlboydaisuke/Stable-Audio-Open-Small-CoreML) | 35 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Unlimited-OCR-CoreAI](https://huggingface.co/mlboydaisuke/Unlimited-OCR-CoreAI) | 35 | 6 | coreai | port | 2 | 2 skipped | 2 deferred | [unlimited-ocr](unlimited-ocr/README.md) | `unlimited-ocr` | `unlimited-ocr` |
+| [mlboydaisuke/bge-reranker-base-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-reranker-base-ExecuTorch) | 34 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Metric3D-v2-LiteRT](https://huggingface.co/mlboydaisuke/Metric3D-v2-LiteRT) | 34 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI](https://huggingface.co/mlboydaisuke/VibeVoice-Realtime-0.5B-CoreAI) | 34 | 1 | coreai | port | 15 | 10 pass | 10 deferred | [vibevoice](vibevoice/README.md) | `vibevoice-realtime-0.5b` | `vibevoice-realtime-0.5b` |
-| [mlboydaisuke/ssdlite320-mobilenetv3-litert](https://huggingface.co/mlboydaisuke/ssdlite320-mobilenetv3-litert) | 33 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Laya-Multilingual-CoreAI](https://huggingface.co/mlboydaisuke/Laya-Multilingual-CoreAI) | 33 | 0 | coreai | port | 8 | — | — | [laya-multilingual](laya-multilingual/README.md) | `laya-multilingual`, `laya-multilingual-ios`, `laya-multilingual-ios-h18p` | `laya-multilingual` |
+| [mlboydaisuke/Qwen3-ASR-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-ASR-0.6B-ExecuTorch) | 33 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-Embedding-0.6B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-Embedding-0.6B-CoreAI) | 33 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3-embedding](qwen3-embedding/README.md) | `embeddinggemma-300m`, `qwen3-embedding-0.6b` | — |
+| [mlboydaisuke/all-MiniLM-L6-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/all-MiniLM-L6-v2-ExecuTorch) | 32 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/EfficientNet-B1-ExecuTorch](https://huggingface.co/mlboydaisuke/EfficientNet-B1-ExecuTorch) | 32 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/qwen3-0.6b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-0.6b-CoreAI-official) | 32 | 0 | coreai | official | 3 | — | 3 deferred | [qwen3-0.6b-official](qwen3-0.6b-official/README.md) | `qwen3-0.6b-official-ane` | `qwen3-0.6b` |
-| [mlboydaisuke/Qwen3-Embedding-0.6B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-Embedding-0.6B-CoreAI) | 32 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3-embedding](qwen3-embedding/README.md) | `embeddinggemma-300m`, `qwen3-embedding-0.6b` | — |
-| [mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-Embedding-0.6B-ExecuTorch) | 32 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3.5-2B-Decision-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.5-2B-Decision-CoreAI) | 32 | 0 | coreai | port | 2 | — | — | [qwen3.5-2b-decision](qwen3.5-2b-decision/README.md) | `qwen3.5-2b-decision`, `qwen3.5-2b-decision-fp16` | — |
+| [mlboydaisuke/midas-small-litert](https://huggingface.co/mlboydaisuke/midas-small-litert) | 32 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch](https://huggingface.co/mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch) | 32 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/sam3-CoreAI-official](https://huggingface.co/mlboydaisuke/sam3-CoreAI-official) | 32 | 2 | coreai | official | 1 | — | 1 deferred | — | — | — |
-| [mlboydaisuke/whisper-large-v3-turbo-CoreAI-official](https://huggingface.co/mlboydaisuke/whisper-large-v3-turbo-CoreAI-official) | 32 | 0 | coreai | official | 4 | — | 3 deferred | [whisper-large-v3-turbo](whisper-large-v3-turbo/README.md) | `whisper-large-v3-turbo` | `whisper-large-v3-turbo` |
-| [mlboydaisuke/Qwen3-ASR-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-ASR-0.6B-ExecuTorch) | 31 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/qwen3-vl-2b-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-2b-coreml) | 31 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/all-MiniLM-L6-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/all-MiniLM-L6-v2-ExecuTorch) | 30 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/U2Net-ExecuTorch](https://huggingface.co/mlboydaisuke/U2Net-ExecuTorch) | 32 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/DAC-16kHz-LiteRT](https://huggingface.co/mlboydaisuke/DAC-16kHz-LiteRT) | 31 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen3-0.6b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-0.6b-CoreAI-official) | 31 | 0 | coreai | official | 3 | — | 3 deferred | [qwen3-0.6b-official](qwen3-0.6b-official/README.md) | `qwen3-0.6b-official-ane` | `qwen3-0.6b` |
+| [mlboydaisuke/whisper-large-v3-turbo-CoreAI-official](https://huggingface.co/mlboydaisuke/whisper-large-v3-turbo-CoreAI-official) | 31 | 0 | coreai | official | 4 | — | 3 deferred | [whisper-large-v3-turbo](whisper-large-v3-turbo/README.md) | `whisper-large-v3-turbo` | `whisper-large-v3-turbo` |
+| [mlboydaisuke/all-mpnet-base-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/all-mpnet-base-v2-ExecuTorch) | 30 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/CLIPSeg-rd64-refined-ExecuTorch](https://huggingface.co/mlboydaisuke/CLIPSeg-rd64-refined-ExecuTorch) | 30 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/d1-3B-CoreAI](https://huggingface.co/mlboydaisuke/d1-3B-CoreAI) | 30 | 2 | coreai | port | 3 | — | — | [d1-3b](d1-3b/README.md) | `d1-3b`, `d1-3b-int8mlp`, `d1-3b-tower` | — |
-| [mlboydaisuke/Florence-2-base-CoreML](https://huggingface.co/mlboydaisuke/Florence-2-base-CoreML) | 30 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch](https://huggingface.co/mlboydaisuke/PIDNet-S-Cityscapes-ExecuTorch) | 30 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/all-mpnet-base-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/all-mpnet-base-v2-ExecuTorch) | 29 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/d1-3B-CoreAI](https://huggingface.co/mlboydaisuke/d1-3B-CoreAI) | 30 | 2 | coreai | port | 3 | — | — | [d1-3b](d1-3b/README.md) | `d1-3b`, `d1-3b-int8mlp`, `d1-3b-tower` | `d1-3b` |
+| [mlboydaisuke/ssdlite320-mobilenetv3-litert](https://huggingface.co/mlboydaisuke/ssdlite320-mobilenetv3-litert) | 29 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/ColModernVBERT-CoreAI](https://huggingface.co/mlboydaisuke/ColModernVBERT-CoreAI) | 28 | 0 | coreai | port | 4 | 4 pass | 4 deferred | [colmodernvbert](colmodernvbert/README.md) | `colmodernvbert` | `colmodernvbert` |
 | [mlboydaisuke/GLiNER2-PII-CoreAI](https://huggingface.co/mlboydaisuke/GLiNER2-PII-CoreAI) | 28 | 0 | coreai | port | 3 | 2 pass | 2 deferred | [gliner2-pii](gliner2-pii/README.md) | `gliner2-pii` | — |
+| [mlboydaisuke/Holo2-4B-CoreAI](https://huggingface.co/mlboydaisuke/Holo2-4B-CoreAI) | 28 | 2 | coreai | port | 2 | 1 pass 1 skipped | 2 deferred | [holo2](holo2/README.md) | `holo2-4b` | `holo2-4b` |
 | [mlboydaisuke/lightweight-openpose-litert](https://huggingface.co/mlboydaisuke/lightweight-openpose-litert) | 28 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/U2Net-ExecuTorch](https://huggingface.co/mlboydaisuke/U2Net-ExecuTorch) | 28 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/ColModernVBERT-CoreAI](https://huggingface.co/mlboydaisuke/ColModernVBERT-CoreAI) | 27 | 0 | coreai | port | 4 | 4 pass | 4 deferred | [colmodernvbert](colmodernvbert/README.md) | `colmodernvbert` | `colmodernvbert` |
-| [mlboydaisuke/GLM-OCR-CoreAI](https://huggingface.co/mlboydaisuke/GLM-OCR-CoreAI) | 27 | 6 | coreai | port | 2 | 1 pass 1 skipped | 2 deferred | [glm-ocr](glm-ocr/README.md) | `glm-ocr` | `glm-ocr` |
-| [mlboydaisuke/Holo2-4B-CoreAI](https://huggingface.co/mlboydaisuke/Holo2-4B-CoreAI) | 27 | 2 | coreai | port | 2 | 1 pass 1 skipped | 2 deferred | [holo2](holo2/README.md) | `holo2-4b` | `holo2-4b` |
+| [mlboydaisuke/Qwen3.5-2B-Decision-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.5-2B-Decision-CoreAI) | 28 | 0 | coreai | port | 2 | — | — | [qwen3.5-2b-decision](qwen3.5-2b-decision/README.md) | `qwen3.5-2b-decision`, `qwen3.5-2b-decision-fp16` | `qwen3.5-2b-decision` |
+| [mlboydaisuke/Florence-2-base-CoreML](https://huggingface.co/mlboydaisuke/Florence-2-base-CoreML) | 27 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/HTDemucs-CoreML](https://huggingface.co/mlboydaisuke/HTDemucs-CoreML) | 27 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Kokoro-82M-CoreAI](https://huggingface.co/mlboydaisuke/Kokoro-82M-CoreAI) | 27 | 2 | coreai | port | 3 | 3 skipped | 3 deferred | [kokoro-82m](kokoro-82m/README.md) | `kokoro-82m` | `kokoro-82m` |
-| [mlboydaisuke/Kokoro-82M-LiteRT](https://huggingface.co/mlboydaisuke/Kokoro-82M-LiteRT) | 27 | 1 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/mistral-7b-v0.3-CoreAI-official](https://huggingface.co/mlboydaisuke/mistral-7b-v0.3-CoreAI-official) | 27 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `mistral-7b-v0.3` |
 | [mlboydaisuke/Parakeet-TDT-0.6B-CoreAI](https://huggingface.co/mlboydaisuke/Parakeet-TDT-0.6B-CoreAI) | 27 | 1 | coreai | port | 3 | 3 pass | 3 deferred | [parakeet](parakeet/README.md) | `parakeet-tdt-0.6b` | `parakeet-tdt-0.6b-v3` |
-| [mlboydaisuke/Stable-Audio-Open-Small-CoreAI](https://huggingface.co/mlboydaisuke/Stable-Audio-Open-Small-CoreAI) | 27 | 2 | coreai | port | 1 | 1 skipped | 1 deferred | [stable-audio-open-small](stable-audio-open-small/README.md) | `stable-audio-open-small` | `stable-audio-open-small` |
-| [mlboydaisuke/wav2vec2-XLSR53-Portuguese-ExecuTorch](https://huggingface.co/mlboydaisuke/wav2vec2-XLSR53-Portuguese-ExecuTorch) | 27 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Audio8-TTS-Preview-0.6b-CoreAI](https://huggingface.co/mlboydaisuke/Audio8-TTS-Preview-0.6b-CoreAI) | 26 | 0 | coreai | port | 3 | — | — | [audio8-tts](audio8-tts/README.md) | `audio8-tts-preview-0.6b` | — |
-| [mlboydaisuke/DAC-16kHz-LiteRT](https://huggingface.co/mlboydaisuke/DAC-16kHz-LiteRT) | 26 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI) | 26 | 0 | coreai | port | 3 | — | — | [minicpm-v-4.7-1b](minicpm-v-4.7-1b/README.md) | `minicpm-v-4.7-1b`, `minicpm-v-4.7-1b-tower-fp16`, `minicpm-v-4.7-1b-tower-int8lin` | — |
+| [mlboydaisuke/Audio8-TTS-Preview-0.6b-CoreAI](https://huggingface.co/mlboydaisuke/Audio8-TTS-Preview-0.6b-CoreAI) | 26 | 0 | coreai | port | 3 | — | — | [audio8-tts](audio8-tts/README.md) | `audio8-tts-preview-0.6b` | `audio8-tts-preview-0.6b` |
+| [mlboydaisuke/GLM-OCR-CoreAI](https://huggingface.co/mlboydaisuke/GLM-OCR-CoreAI) | 26 | 6 | coreai | port | 2 | 1 pass 1 skipped | 2 deferred | [glm-ocr](glm-ocr/README.md) | `glm-ocr` | `glm-ocr` |
+| [mlboydaisuke/Kokoro-82M-CoreAI](https://huggingface.co/mlboydaisuke/Kokoro-82M-CoreAI) | 26 | 2 | coreai | port | 3 | 3 skipped | 3 deferred | [kokoro-82m](kokoro-82m/README.md) | `kokoro-82m` | `kokoro-82m` |
+| [mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI](https://huggingface.co/mlboydaisuke/MiniCPM-V-4.7-1B-CoreAI) | 26 | 0 | coreai | port | 3 | — | — | [minicpm-v-4.7-1b](minicpm-v-4.7-1b/README.md) | `minicpm-v-4.7-1b`, `minicpm-v-4.7-1b-tower-fp16`, `minicpm-v-4.7-1b-tower-int8lin` | `minicpm-v-4.7-1b` |
 | [mlboydaisuke/Parakeet-TDT-0.6B-v3-LiteRT](https://huggingface.co/mlboydaisuke/Parakeet-TDT-0.6B-v3-LiteRT) | 26 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/qwen3-vl-4b-stateful-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-4b-stateful-coreml) | 26 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/RTMPose-m-Animal-ExecuTorch](https://huggingface.co/mlboydaisuke/RTMPose-m-Animal-ExecuTorch) | 26 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/gemma-3-4b-it-CoreAI-official](https://huggingface.co/mlboydaisuke/gemma-3-4b-it-CoreAI-official) | 25 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `gemma-3-4b-it` |
-| [mlboydaisuke/ms-marco-MiniLM-L4-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/ms-marco-MiniLM-L4-v2-ExecuTorch) | 25 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Whisper-large-v3-turbo-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-large-v3-turbo-ExecuTorch) | 25 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/bge-m3-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-m3-ExecuTorch) | 24 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/docTR-DB-MobileNetV3-Large-ExecuTorch](https://huggingface.co/mlboydaisuke/docTR-DB-MobileNetV3-Large-ExecuTorch) | 24 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/GroundingDINO-tiny-ExecuTorch](https://huggingface.co/mlboydaisuke/GroundingDINO-tiny-ExecuTorch) | 24 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/qwen3-4b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-4b-CoreAI-official) | 24 | 0 | coreai | official | 2 | — | 2 deferred | [qwen3-4b-official](qwen3-4b-official/README.md) | `qwen3-4b-official-ane` | `qwen3-4b` |
-| [mlboydaisuke/RAFT-small-OpticalFlow-ExecuTorch](https://huggingface.co/mlboydaisuke/RAFT-small-OpticalFlow-ExecuTorch) | 24 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/AdaFace-IR18-CoreML](https://huggingface.co/mlboydaisuke/AdaFace-IR18-CoreML) | 23 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Kokoro-82M-LiteRT](https://huggingface.co/mlboydaisuke/Kokoro-82M-LiteRT) | 25 | 1 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-ASR-1.7B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-ASR-1.7B-CoreAI) | 25 | 2 | coreai | port | 2 | 2 pass | 2 deferred | [qwen3-asr](qwen3-asr/README.md) | `qwen3-asr-1.7b` | `qwen3-asr-1.7b` |
+| [mlboydaisuke/Stable-Audio-Open-Small-CoreAI](https://huggingface.co/mlboydaisuke/Stable-Audio-Open-Small-CoreAI) | 25 | 2 | coreai | port | 1 | 1 skipped | 1 deferred | [stable-audio-open-small](stable-audio-open-small/README.md) | `stable-audio-open-small` | `stable-audio-open-small` |
 | [mlboydaisuke/Julia-1-CoreAI](https://huggingface.co/mlboydaisuke/Julia-1-CoreAI) | 23 | 1 | coreai | port | 2 | — | — | [julia-1](julia-1/README.md) | `julia-1` | — |
-| [mlboydaisuke/Kev-4B-CoreAI](https://huggingface.co/mlboydaisuke/Kev-4B-CoreAI) | 23 | 0 | coreai | port | 1 | — | — | [kev-4b](kev-4b/README.md) | `kev-4b` | — |
-| [mlboydaisuke/LTX-Video-2B-CoreAI](https://huggingface.co/mlboydaisuke/LTX-Video-2B-CoreAI) | 23 | 2 | coreai | port | 3 | 3 pass | 3 deferred | [ltxvideo](ltxvideo/README.md) | `ltx-video-2b` | — |
-| [mlboydaisuke/Qwen3-ASR-1.7B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-ASR-1.7B-CoreAI) | 23 | 2 | coreai | port | 2 | 2 pass | 2 deferred | [qwen3-asr](qwen3-asr/README.md) | `qwen3-asr-1.7b` | `qwen3-asr-1.7b` |
-| [mlboydaisuke/Qwen3-VL-2B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-VL-2B-CoreAI) | 23 | 0 | coreai | port | 3 | 2 pass 1 skipped | 3 deferred | [qwen3-vl](qwen3-vl/README.md) | `qwen3-vl-2b`, `qwen3-vl-4b`, `qwen3-vl-8b` | `qwen3-vl-2b` |
+| [mlboydaisuke/Kev-4B-CoreAI](https://huggingface.co/mlboydaisuke/Kev-4B-CoreAI) | 23 | 0 | coreai | port | 1 | — | — | [kev-4b](kev-4b/README.md) | `kev-4b` | `kev-4b` |
+| [mlboydaisuke/qwen3-4b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-4b-CoreAI-official) | 23 | 0 | coreai | official | 2 | — | 2 deferred | [qwen3-4b-official](qwen3-4b-official/README.md) | `qwen3-4b-official-ane` | `qwen3-4b` |
+| [mlboydaisuke/RAFT-small-OpticalFlow-ExecuTorch](https://huggingface.co/mlboydaisuke/RAFT-small-OpticalFlow-ExecuTorch) | 23 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/U-2-Net-LiteRT](https://huggingface.co/mlboydaisuke/U-2-Net-LiteRT) | 23 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Whisper-large-v3-turbo-ExecuTorch](https://huggingface.co/mlboydaisuke/Whisper-large-v3-turbo-ExecuTorch) | 23 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLOX-CoreAI](https://huggingface.co/mlboydaisuke/YOLOX-CoreAI) | 23 | 1 | coreai | port | 1 | 1 pass | 1 deferred | [yolox](yolox/README.md) | `yolox-s` | `yolox-s` |
-| [mlboydaisuke/AdcSR-CoreAI](https://huggingface.co/mlboydaisuke/AdcSR-CoreAI) | 22 | 4 | coreai | port | 1 | 1 pass | 1 deferred | [adcsr](adcsr/README.md) | `adcsr-x4` | `adcsr-x4` |
-| [mlboydaisuke/DDColor-Tiny-CoreML](https://huggingface.co/mlboydaisuke/DDColor-Tiny-CoreML) | 22 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Hyper-SD-1step-CoreML](https://huggingface.co/mlboydaisuke/Hyper-SD-1step-CoreML) | 22 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/U-2-Net-LiteRT](https://huggingface.co/mlboydaisuke/U-2-Net-LiteRT) | 22 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/LTX-Video-2B-CoreAI](https://huggingface.co/mlboydaisuke/LTX-Video-2B-CoreAI) | 22 | 2 | coreai | port | 3 | 3 pass | 3 deferred | [ltxvideo](ltxvideo/README.md) | `ltx-video-2b` | — |
+| [mlboydaisuke/Qwen3-VL-2B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-VL-2B-CoreAI) | 22 | 0 | coreai | port | 3 | 2 pass 1 skipped | 3 deferred | [qwen3-vl](qwen3-vl/README.md) | `qwen3-vl-2b`, `qwen3-vl-4b`, `qwen3-vl-8b` | `qwen3-vl-2b` |
+| [mlboydaisuke/AdcSR-CoreAI](https://huggingface.co/mlboydaisuke/AdcSR-CoreAI) | 21 | 4 | coreai | port | 1 | 1 pass | 1 deferred | [adcsr](adcsr/README.md) | `adcsr-x4` | `adcsr-x4` |
+| [mlboydaisuke/DDColor-Tiny-CoreML](https://huggingface.co/mlboydaisuke/DDColor-Tiny-CoreML) | 21 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Depth-Anything-3-CoreAI](https://huggingface.co/mlboydaisuke/Depth-Anything-3-CoreAI) | 21 | 3 | coreai | port | 4 | 4 pass | 4 deferred | [depth-anything-3](depth-anything-3/README.md) | `depth-anything-3-base`, `depth-anything-3-small` | `depth-anything-3-small` |
-| [mlboydaisuke/gpt-oss-20b-CoreAI-official](https://huggingface.co/mlboydaisuke/gpt-oss-20b-CoreAI-official) | 21 | 0 | coreai | official | 1 | — | 1 deferred | — | — | — |
+| [mlboydaisuke/docTR-DB-MobileNetV3-Large-ExecuTorch](https://huggingface.co/mlboydaisuke/docTR-DB-MobileNetV3-Large-ExecuTorch) | 21 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/MoGe-2-LiteRT](https://huggingface.co/mlboydaisuke/MoGe-2-LiteRT) | 21 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Nanbeige4.1-3B-CoreAI](https://huggingface.co/mlboydaisuke/Nanbeige4.1-3B-CoreAI) | 21 | 0 | coreai | port | 2 | 2 pass | 2 deferred | [nanbeige4.1-3b](nanbeige4.1-3b/README.md) | `nanbeige4.1-3b`, `nanbeige4.1-3b-ane` | `nanbeige4.1-3b` |
+| [mlboydaisuke/RGBA-Image-2.1-CoreAI](https://huggingface.co/mlboydaisuke/RGBA-Image-2.1-CoreAI) | 21 | 1 | coreai | port | 5 | — | — | [rgba-image-2.1](rgba-image-2.1/README.md) | `rgba-image-2.1` | — |
 | [mlboydaisuke/RTMPose-m-Face-ExecuTorch](https://huggingface.co/mlboydaisuke/RTMPose-m-Face-ExecuTorch) | 21 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/AdaFace-IR18-CoreML](https://huggingface.co/mlboydaisuke/AdaFace-IR18-CoreML) | 20 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/APUS-Decision-v1-4B-CoreAI](https://huggingface.co/mlboydaisuke/APUS-Decision-v1-4B-CoreAI) | 20 | 0 | coreai | port | 1 | — | — | [apus-decision-v1-4b](apus-decision-v1-4b/README.md) | `apus-decision-v1-4b` | `apus-decision-v1-4b` |
+| [mlboydaisuke/gpt-oss-20b-CoreAI-official](https://huggingface.co/mlboydaisuke/gpt-oss-20b-CoreAI-official) | 20 | 0 | coreai | official | 1 | — | 1 deferred | — | — | — |
+| [mlboydaisuke/Nanbeige4.1-3B-CoreAI](https://huggingface.co/mlboydaisuke/Nanbeige4.1-3B-CoreAI) | 20 | 0 | coreai | port | 2 | 2 pass | 2 deferred | [nanbeige4.1-3b](nanbeige4.1-3b/README.md) | `nanbeige4.1-3b`, `nanbeige4.1-3b-ane` | `nanbeige4.1-3b` |
 | [mlboydaisuke/North-Micro-Vision-CoreAI](https://huggingface.co/mlboydaisuke/North-Micro-Vision-CoreAI) | 20 | 0 | coreai | port | 5 | **2 DIFF** 3 pass | 5 deferred | [north-micro-vision](north-micro-vision/README.md) | `north-micro-vision`, `north-micro-vision-textcore` | `north-micro-vision` |
-| [mlboydaisuke/RGBA-Image-2.1-CoreAI](https://huggingface.co/mlboydaisuke/RGBA-Image-2.1-CoreAI) | 20 | 1 | coreai | port | 5 | — | — | [rgba-image-2.1](rgba-image-2.1/README.md) | `rgba-image-2.1` | — |
-| [mlboydaisuke/Depth-Anything-3-LiteRT](https://huggingface.co/mlboydaisuke/Depth-Anything-3-LiteRT) | 19 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/LFM2.5-VL-3B-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-VL-3B-CoreAI) | 19 | 0 | coreai | port | 6 | 6 pass | 6 deferred | [lfm2.5-vl](lfm2.5-vl/README.md) | `lfm2.5-vl-3b`, `lfm2.5-vl-3b-int4`, `lfm2.5-vl-3b-textcore`, `lfm2.5-vl-450m`, `lfm2.5-vl-450m-textcore` | `lfm2.5-vl-3b` |
-| [mlboydaisuke/qwen3-8b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-8b-CoreAI-official) | 19 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `qwen3-8b` |
 | [mlboydaisuke/RTMPose-m-Hand-ExecuTorch](https://huggingface.co/mlboydaisuke/RTMPose-m-Hand-ExecuTorch) | 19 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/ViTPose-plus-base-ExecuTorch](https://huggingface.co/mlboydaisuke/ViTPose-plus-base-ExecuTorch) | 19 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Agents-A1-4B-CoreAI](https://huggingface.co/mlboydaisuke/Agents-A1-4B-CoreAI) | 18 | 0 | coreai | port | 1 | — | — | [agents-a1-4b](agents-a1-4b/README.md) | `agents-a1-4b` | — |
 | [mlboydaisuke/granite-4.0-h-CoreAI](https://huggingface.co/mlboydaisuke/granite-4.0-h-CoreAI) | 18 | 0 | coreai | port | 4 | 4 pass | 4 deferred | [granite-4.0-h](granite-4.0-h/README.md) | `granite-4.0-h-1b`, `granite-4.0-h-350m` | `granite-4.0-h-1b` |
+| [mlboydaisuke/LFM2.5-VL-450M-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-VL-450M-CoreAI) | 18 | 0 | coreai | port | 6 | 6 pass | 6 deferred | [lfm2.5-vl](lfm2.5-vl/README.md) | `lfm2.5-vl-3b`, `lfm2.5-vl-3b-int4`, `lfm2.5-vl-3b-textcore`, `lfm2.5-vl-450m`, `lfm2.5-vl-450m-textcore` | `lfm2.5-vl-450m` |
+| [mlboydaisuke/qwen3-8b-CoreAI-official](https://huggingface.co/mlboydaisuke/qwen3-8b-CoreAI-official) | 18 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `qwen3-8b` |
 | [mlboydaisuke/TripoSplat-CoreAI](https://huggingface.co/mlboydaisuke/TripoSplat-CoreAI) | 18 | 7 | coreai | port | 6 | 6 pass | 6 deferred | [triposplat](triposplat/README.md) | `triposplat` | — |
 | [mlboydaisuke/wav2vec2-XLSR53-Japanese-ExecuTorch](https://huggingface.co/mlboydaisuke/wav2vec2-XLSR53-Japanese-ExecuTorch) | 18 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Agents-A1-4B-CoreAI](https://huggingface.co/mlboydaisuke/Agents-A1-4B-CoreAI) | 17 | 0 | coreai | port | 1 | — | — | [agents-a1-4b](agents-a1-4b/README.md) | `agents-a1-4b` | — |
 | [mlboydaisuke/bge-reranker-v2-m3-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-reranker-v2-m3-ExecuTorch) | 17 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/D-FINE-S-ExecuTorch](https://huggingface.co/mlboydaisuke/D-FINE-S-ExecuTorch) | 17 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/LFM2-700M-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2-700M-ExecuTorch) | 17 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/LFM2.5-VL-450M-CoreAI](https://huggingface.co/mlboydaisuke/LFM2.5-VL-450M-CoreAI) | 17 | 0 | coreai | port | 6 | 6 pass | 6 deferred | [lfm2.5-vl](lfm2.5-vl/README.md) | `lfm2.5-vl-3b`, `lfm2.5-vl-3b-int4`, `lfm2.5-vl-3b-textcore`, `lfm2.5-vl-450m`, `lfm2.5-vl-450m-textcore` | `lfm2.5-vl-450m` |
 | [mlboydaisuke/LLaDA-8B-dLLM-CoreAI](https://huggingface.co/mlboydaisuke/LLaDA-8B-dLLM-CoreAI) | 17 | 2 | coreai | port | 1 | 1 pass | 1 deferred | [llada-8b](llada-8b/README.md) | `llada-8b-dllm` | `llada-8b` |
-| [mlboydaisuke/paraphrase-multilingual-mpnet-base-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/paraphrase-multilingual-mpnet-base-v2-ExecuTorch) | 17 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-VL-8B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-VL-8B-CoreAI) | 17 | 0 | coreai | port | 3 | 2 pass 1 skipped | 3 deferred | [qwen3-vl](qwen3-vl/README.md) | `qwen3-vl-2b`, `qwen3-vl-4b`, `qwen3-vl-8b` | `qwen3-vl-8b` |
 | [mlboydaisuke/SinSR-CoreML](https://huggingface.co/mlboydaisuke/SinSR-CoreML) | 17 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/ViT-Base-ImageNet-ExecuTorch](https://huggingface.co/mlboydaisuke/ViT-Base-ImageNet-ExecuTorch) | 17 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/D-FINE-S-ExecuTorch](https://huggingface.co/mlboydaisuke/D-FINE-S-ExecuTorch) | 16 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/wav2vec2-XLSR53-Portuguese-ExecuTorch](https://huggingface.co/mlboydaisuke/wav2vec2-XLSR53-Portuguese-ExecuTorch) | 17 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/yolox-nano-litert](https://huggingface.co/mlboydaisuke/yolox-nano-litert) | 17 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/6DRepNet-HeadPose-ExecuTorch](https://huggingface.co/mlboydaisuke/6DRepNet-HeadPose-ExecuTorch) | 16 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/GLM-Image-CoreAI](https://huggingface.co/mlboydaisuke/GLM-Image-CoreAI) | 16 | 2 | coreai | port | 5 | 5 skipped | 5 deferred | [glm-image](glm-image/README.md) | `glm-image` | — |
-| [mlboydaisuke/LFM2.5-VL-450M-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2.5-VL-450M-ExecuTorch) | 16 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/MoGe-2-ViT-B-CoreML](https://huggingface.co/mlboydaisuke/MoGe-2-ViT-B-CoreML) | 16 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/GroundingDINO-tiny-ExecuTorch](https://huggingface.co/mlboydaisuke/GroundingDINO-tiny-ExecuTorch) | 16 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/qwen3-vl-2b-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-2b-coreml) | 16 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/qwen3-vl-8b-stateful-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-8b-stateful-coreml) | 16 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/yolox-nano-litert](https://huggingface.co/mlboydaisuke/yolox-nano-litert) | 16 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/ViTPose-plus-base-ExecuTorch](https://huggingface.co/mlboydaisuke/ViTPose-plus-base-ExecuTorch) | 16 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/BitVLA-CoreAI](https://huggingface.co/mlboydaisuke/BitVLA-CoreAI) | 15 | 0 | coreai | port | 4 | 4 skipped | 4 deferred | [bitvla](bitvla/README.md) | `bitvla` | — |
 | [mlboydaisuke/gemma-3-12b-it-CoreAI-official](https://huggingface.co/mlboydaisuke/gemma-3-12b-it-CoreAI-official) | 15 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `gemma-3-12b-it` |
+| [mlboydaisuke/LFM2.5-VL-450M-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2.5-VL-450M-ExecuTorch) | 15 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/MatAnyone-CoreML](https://huggingface.co/mlboydaisuke/MatAnyone-CoreML) | 15 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/MelBandRoformer-Vocal-CoreAI](https://huggingface.co/mlboydaisuke/MelBandRoformer-Vocal-CoreAI) | 15 | 1 | coreai | port | 2 | 2 pass | 2 deferred | [melband-roformer](melband-roformer/README.md) | `melband-roformer-vocal` | `melband-roformer-vocal` |
-| [mlboydaisuke/Youtu-LLM-2B-CoreAI](https://huggingface.co/mlboydaisuke/Youtu-LLM-2B-CoreAI) | 15 | 1 | coreai | port | 3 | 3 pass | 3 deferred | [youtu](youtu/README.md) | `youtu-llm-2b` | `youtu-llm-2b` |
-| [mlboydaisuke/6DRepNet-HeadPose-ExecuTorch](https://huggingface.co/mlboydaisuke/6DRepNet-HeadPose-ExecuTorch) | 14 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Kokoro-82M-CoreML](https://huggingface.co/mlboydaisuke/Kokoro-82M-CoreML) | 14 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-Reranker-0.6B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3-Reranker-0.6B-CoreAI) | 14 | 0 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3-reranker](qwen3-reranker/README.md) | `qwen3-reranker-0.6b` | — |
 | [mlboydaisuke/SmolVLM2-500M-ExecuTorch](https://huggingface.co/mlboydaisuke/SmolVLM2-500M-ExecuTorch) | 14 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/vdsr-litert](https://huggingface.co/mlboydaisuke/vdsr-litert) | 14 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/clip-vit-b32-litert](https://huggingface.co/mlboydaisuke/clip-vit-b32-litert) | 12 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/clip-vit-base-patch32-CoreAI-official](https://huggingface.co/mlboydaisuke/clip-vit-base-patch32-CoreAI-official) | 12 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `clip-vit-b32` |
+| [mlboydaisuke/Youtu-LLM-2B-CoreAI](https://huggingface.co/mlboydaisuke/Youtu-LLM-2B-CoreAI) | 14 | 1 | coreai | port | 3 | 3 pass | 3 deferred | [youtu](youtu/README.md) | `youtu-llm-2b` | `youtu-llm-2b` |
+| [mlboydaisuke/clip-vit-base-patch32-CoreAI-official](https://huggingface.co/mlboydaisuke/clip-vit-base-patch32-CoreAI-official) | 13 | 0 | coreai | official | 1 | — | 1 deferred | — | — | `clip-vit-b32` |
+| [mlboydaisuke/MoGe-2-ViT-B-CoreML](https://huggingface.co/mlboydaisuke/MoGe-2-ViT-B-CoreML) | 13 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/PE-Core-base-patch16-224-LiteRT](https://huggingface.co/mlboydaisuke/PE-Core-base-patch16-224-LiteRT) | 13 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/bge-m3-ExecuTorch](https://huggingface.co/mlboydaisuke/bge-m3-ExecuTorch) | 12 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Kokoro-G2P-en-US-LiteRT](https://huggingface.co/mlboydaisuke/Kokoro-G2P-en-US-LiteRT) | 12 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch) | 12 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Shieldstral-CoreAI](https://huggingface.co/mlboydaisuke/Shieldstral-CoreAI) | 12 | 1 | coreai | port | 4 | 4 pass | 4 deferred | [shieldstral](shieldstral/README.md) | `shieldstral-s256`, `shieldstral-s512` | `shieldstral-3b` |
+| [mlboydaisuke/yolox-tiny-litert](https://huggingface.co/mlboydaisuke/yolox-tiny-litert) | 12 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/embeddinggemma-300m-CoreAI](https://huggingface.co/mlboydaisuke/embeddinggemma-300m-CoreAI) | 11 | 1 | coreai | port | 1 | 1 pass | 1 deferred | [qwen3-embedding](qwen3-embedding/README.md) | `embeddinggemma-300m`, `qwen3-embedding-0.6b` | `embeddinggemma-300m` |
 | [mlboydaisuke/Kokoro-82M-ExecuTorch](https://huggingface.co/mlboydaisuke/Kokoro-82M-ExecuTorch) | 11 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/RMBG-1.4-CoreML](https://huggingface.co/mlboydaisuke/RMBG-1.4-CoreML) | 11 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/xfeat-litert](https://huggingface.co/mlboydaisuke/xfeat-litert) | 11 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/yolox-tiny-litert](https://huggingface.co/mlboydaisuke/yolox-tiny-litert) | 11 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Timestral-209M-CoreAI](https://huggingface.co/mlboydaisuke/Timestral-209M-CoreAI) | 11 | 0 | coreai | port | 9 | — | — | [timestral](timestral/README.md) | `timestral-209m` | `timestral-209m` |
 | [mlboydaisuke/Depth-Anything-3-Small-LiteRT](https://huggingface.co/mlboydaisuke/Depth-Anything-3-Small-LiteRT) | 10 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/nsfw-image-detection-ExecuTorch](https://huggingface.co/mlboydaisuke/nsfw-image-detection-ExecuTorch) | 10 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-VL-2B-Instruct-ExecuTorch) | 10 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/real-esrgan-x4v3-litert](https://huggingface.co/mlboydaisuke/real-esrgan-x4v3-litert) | 10 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SigLIP-base-patch16-224-CoreML](https://huggingface.co/mlboydaisuke/SigLIP-base-patch16-224-CoreML) | 10 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/SigLIP2-base-patch16-224-LiteRT](https://huggingface.co/mlboydaisuke/SigLIP2-base-patch16-224-LiteRT) | 10 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Streaming-Sortformer-Diar-CoreAI](https://huggingface.co/mlboydaisuke/Streaming-Sortformer-Diar-CoreAI) | 10 | 2 | coreai | port | 2 | 2 pass | 1 load (26A428) 1 device-only | [sortformer-diar](sortformer-diar/README.md) | `sortformer-diar` | `sortformer-diar-v2` |
-| [mlboydaisuke/yolox-s-litert](https://huggingface.co/mlboydaisuke/yolox-s-litert) | 10 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/3DDFA-V2-CoreML](https://huggingface.co/mlboydaisuke/3DDFA-V2-CoreML) | 9 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/PE-Core-base-patch16-224-LiteRT](https://huggingface.co/mlboydaisuke/PE-Core-base-patch16-224-LiteRT) | 9 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Depth-Anything-3-LiteRT](https://huggingface.co/mlboydaisuke/Depth-Anything-3-LiteRT) | 9 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/paraphrase-multilingual-mpnet-base-v2-ExecuTorch](https://huggingface.co/mlboydaisuke/paraphrase-multilingual-mpnet-base-v2-ExecuTorch) | 9 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen2.5-1.5B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen2.5-1.5B-ExecuTorch) | 9 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-4B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-4B-ExecuTorch) | 9 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Qwen3.5-4B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3.5-4B-ExecuTorch) | 8 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Qwen3.5-4B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3.5-4B-ExecuTorch) | 9 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/SigLIP-base-patch16-224-CoreML](https://huggingface.co/mlboydaisuke/SigLIP-base-patch16-224-CoreML) | 9 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/yolox-s-litert](https://huggingface.co/mlboydaisuke/yolox-s-litert) | 9 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/clip-vit-b32-litert](https://huggingface.co/mlboydaisuke/clip-vit-b32-litert) | 8 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/RF-DETR-Nano-CoreML](https://huggingface.co/mlboydaisuke/RF-DETR-Nano-CoreML) | 8 | 1 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/RMBG-1.4-CoreML](https://huggingface.co/mlboydaisuke/RMBG-1.4-CoreML) | 8 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/TableTransformer-ExecuTorch](https://huggingface.co/mlboydaisuke/TableTransformer-ExecuTorch) | 8 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/xfeat-litert](https://huggingface.co/mlboydaisuke/xfeat-litert) | 8 | 0 | litert | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Z-Image-Turbo-CoreAI](https://huggingface.co/mlboydaisuke/Z-Image-Turbo-CoreAI) | 8 | 0 | coreai | port | 6 | 6 pass | 6 deferred | [z-image-turbo](z-image-turbo/README.md) | `z-image-turbo` | — |
 | [mlboydaisuke/Phi-4-mini-instruct-ExecuTorch](https://huggingface.co/mlboydaisuke/Phi-4-mini-instruct-ExecuTorch) | 7 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/RTMW-m-WholeBody-ExecuTorch](https://huggingface.co/mlboydaisuke/RTMW-m-WholeBody-ExecuTorch) | 7 | 0 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/yolox-m-litert](https://huggingface.co/mlboydaisuke/yolox-m-litert) | 7 | 0 | litert | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-1.7B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-1.7B-ExecuTorch) | 6 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3.5-2B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3.5-2B-ExecuTorch) | 6 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/SAM2.1-Hiera-Tiny-Image-Encoder-LiteRT](https://huggingface.co/mlboydaisuke/SAM2.1-Hiera-Tiny-Image-Encoder-LiteRT) | 6 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/YOLO-World-V2-S-CoreML](https://huggingface.co/mlboydaisuke/YOLO-World-V2-S-CoreML) | 6 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Z-Image-Turbo-CoreAI](https://huggingface.co/mlboydaisuke/Z-Image-Turbo-CoreAI) | 6 | 0 | coreai | port | 6 | 6 pass | 6 deferred | [z-image-turbo](z-image-turbo/README.md) | `z-image-turbo` | — |
 | [mlboydaisuke/MinerU2.5-Pro-CoreAI](https://huggingface.co/mlboydaisuke/MinerU2.5-Pro-CoreAI) | 5 | 1 | coreai | port | 4 | 2 pass 2 skipped | 4 deferred | [mineru](mineru/README.md) | `mineru-2.5-pro` | `mineru2.5-pro` |
-| [mlboydaisuke/Pixelization-CoreML](https://huggingface.co/mlboydaisuke/Pixelization-CoreML) | 5 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/SmolVLM2-256M-ExecuTorch](https://huggingface.co/mlboydaisuke/SmolVLM2-256M-ExecuTorch) | 5 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLO26s-CoreML](https://huggingface.co/mlboydaisuke/YOLO26s-CoreML) | 5 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/yolox-m-litert](https://huggingface.co/mlboydaisuke/yolox-m-litert) | 5 | 0 | litert | port | 0 | — | — | — | — | — |
 | [rahulrachuri/parakeet-tdt-0.6b-v2-coreai](https://huggingface.co/rahulrachuri/parakeet-tdt-0.6b-v2-coreai) | 5 | 0 | coreai | port | 3 | 3 pass | 3 deferred | [parakeet-v2](parakeet-v2/README.md) | `parakeet-tdt-0.6b-v2` | — |
+| [mlboydaisuke/3DDFA-V2-CoreML](https://huggingface.co/mlboydaisuke/3DDFA-V2-CoreML) | 4 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/LFM2-350M-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2-350M-ExecuTorch) | 4 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Nitro-E-CoreML](https://huggingface.co/mlboydaisuke/Nitro-E-CoreML) | 4 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Qwen3-0.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/Qwen3-0.6B-ExecuTorch) | 4 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/SmolVLM2-256M-ExecuTorch](https://huggingface.co/mlboydaisuke/SmolVLM2-256M-ExecuTorch) | 4 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/YOLO-World-V2-S-CoreML](https://huggingface.co/mlboydaisuke/YOLO-World-V2-S-CoreML) | 4 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLO11s-CoreML](https://huggingface.co/mlboydaisuke/YOLO11s-CoreML) | 4 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/LFM2.5-VL-1.6B-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2.5-VL-1.6B-ExecuTorch) | 3 | 0 | other | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/Pixelization-CoreML](https://huggingface.co/mlboydaisuke/Pixelization-CoreML) | 3 | 0 | coreml | port | 0 | — | — | — | — | — |
+| [mlboydaisuke/EfficientAD-CoreML](https://huggingface.co/mlboydaisuke/EfficientAD-CoreML) | 2 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLOE-S-CoreML](https://huggingface.co/mlboydaisuke/YOLOE-S-CoreML) | 2 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/YOLOv10n-CoreML](https://huggingface.co/mlboydaisuke/YOLOv10n-CoreML) | 2 | 0 | coreml | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/EfficientAD-CoreML](https://huggingface.co/mlboydaisuke/EfficientAD-CoreML) | 1 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/LFM2-1.2B-ExecuTorch](https://huggingface.co/mlboydaisuke/LFM2-1.2B-ExecuTorch) | 1 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/pyannote-segmentation-3.0-CoreML](https://huggingface.co/mlboydaisuke/pyannote-segmentation-3.0-CoreML) | 1 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/coreml-zoo](https://huggingface.co/mlboydaisuke/coreml-zoo) | 0 | 1 | other | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/d1-omni-600M-CoreAI](https://huggingface.co/mlboydaisuke/d1-omni-600M-CoreAI) | 0 | 0 | coreai | port | 35 | — | — | [d1-omni-600m](d1-omni-600m/README.md) | `d1-omni-600m` | — |
-| [mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader) | 0 | 0 | other | port | 0 | — | — | [embeddinggemma-2-transcribe](embeddinggemma-2-transcribe/README.md) | `embeddinggemma-2-transcribe`, `embeddinggemma-2-transcribe-ios-h19p`, `embeddinggemma-2-transcribe-macos-encoder-split7` | — |
+| [mlboydaisuke/d1-omni-600M-CoreAI](https://huggingface.co/mlboydaisuke/d1-omni-600M-CoreAI) | 0 | 0 | coreai | port | 35 | — | — | [d1-omni-600m](d1-omni-600m/README.md) | `d1-omni-600m` | `d1-omni-600m` |
+| [mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader](https://huggingface.co/mlboydaisuke/EmbeddingGemma-2-Transcribe-Reader) | 0 | 1 | other | port | 0 | — | — | [embeddinggemma-2-transcribe](embeddinggemma-2-transcribe/README.md) | `embeddinggemma-2-transcribe`, `embeddinggemma-2-transcribe-ios-h19p`, `embeddinggemma-2-transcribe-macos-encoder-split7` | — |
 | [mlboydaisuke/embeddinggemma-300m-coreml](https://huggingface.co/mlboydaisuke/embeddinggemma-300m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/functiongemma-270m-coreml](https://huggingface.co/mlboydaisuke/functiongemma-270m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/gemma-3-270m-it-NPU-LiteRT](https://huggingface.co/mlboydaisuke/gemma-3-270m-it-NPU-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
@@ -323,9 +324,9 @@ configuration; a single bundle answers that question by itself.
 | [mlboydaisuke/lfm2.5-350m-coreml](https://huggingface.co/mlboydaisuke/lfm2.5-350m-coreml) | 0 | 0 | coreml | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/magenta-arbitrary-style-transfer-litert](https://huggingface.co/mlboydaisuke/magenta-arbitrary-style-transfer-litert) | 0 | 0 | other | port | 0 | — | — | — | — | — |
 | [mlboydaisuke/Mordant-3B-Think-LiteRT](https://huggingface.co/mlboydaisuke/Mordant-3B-Think-LiteRT) | 0 | 1 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI](https://huggingface.co/mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [system-one-scorer-4b](system-one-scorer-4b/README.md) | `system-one-scorer-4b`, `system-one-scorer-4b-fp16` | — |
+| [mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI](https://huggingface.co/mlboydaisuke/system-one-qwen3.5-4b-scorer-CoreAI) | 0 | 0 | coreai | port | 2 | — | — | [system-one-scorer-4b](system-one-scorer-4b/README.md) | `system-one-scorer-4b`, `system-one-scorer-4b-fp16` | `system-one-scorer-4b` |
 | [mlboydaisuke/Tashkeel-350M-v2-LiteRT](https://huggingface.co/mlboydaisuke/Tashkeel-350M-v2-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
-| [mlboydaisuke/Timestral-209M-CoreAI](https://huggingface.co/mlboydaisuke/Timestral-209M-CoreAI) | 0 | 0 | coreai | port | 9 | — | — | [timestral](timestral/README.md) | `timestral-209m` | — |
+| [mlboydaisuke/Timestral-209M-LiteRT](https://huggingface.co/mlboydaisuke/Timestral-209M-LiteRT) | 0 | 0 | litert | port | 0 | — | — | — | — | — |
 | [ukint-vs/Nanbeige4.2-3B-CoreAI](https://huggingface.co/ukint-vs/Nanbeige4.2-3B-CoreAI) | 0 | 1 | coreai | port | 1 | **1 DIFF** | 1 deferred | [nanbeige4.2-3b](nanbeige4.2-3b/README.md) | `nanbeige4.2-3b` | `nanbeige4.2-3b` |
 
 ## Tier-1 defects
