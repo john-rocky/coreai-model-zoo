@@ -1,0 +1,55 @@
+# Recipe for timestral — the configuration that produces each staged bundle.
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# mistralai/Timestral-209M re-authored from model.safetensors at 9874d252ab0aae16f7f7c999f98f98d6ad7d8365
+# (strict: every tensor used, the export pins the revision and records the file's sha256). One bundle per
+# (bucket, form); conversion/timestral/README.md lists the gates that come before the export, in order.
+
+["timestral-209m"]
+card = "README.md"
+hf_repo = "mlboydaisuke/Timestral-209M-CoreAI"
+source_hf_id = "mistralai/Timestral-209M"
+status = "verified"
+steps = [
+  { script = "timestral/export_timestral.py", args = ["--form", "ane", "--bucket", "64,32", "--rows", "1"], bundle = "macos/timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv.aimodel" },
+  { script = "timestral/export_timestral.py", args = ["--form", "ane", "--bucket", "64,4", "--rows", "2"], bundle = "macos/timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv.aimodel" },
+  { script = "timestral/export_timestral.py", args = ["--form", "fp16-attn32", "--bucket", "256,32", "--rows", "2"], bundle = "macos/timestral_209m_L256_h32_r2_fp16-attn32.aimodel" },
+  { script = "timestral/export_timestral.py", args = ["--form", "ane", "--bucket", "64,32", "--rows", "2"], bundle = "ios/timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv.aimodel" },
+  { script = "timestral/export_timestral.py", args = ["--form", "ane", "--bucket", "256,32", "--rows", "1"], bundle = "ios/timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv.aimodel" },
+  { script = "timestral/aot_timestral.py", args = ["--aimodel", "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv", "--arch", "h19p", "--preferred-compute", "neural-engine"], bundle = "ios-h19p/timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv.h19p.aimodelc" },
+  { script = "timestral/aot_timestral.py", args = ["--aimodel", "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv", "--arch", "h19p", "--preferred-compute", "neural-engine"], bundle = "ios-h19p/timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv.h19p.aimodelc" },
+  { script = "timestral/aot_timestral.py", args = ["--aimodel", "timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv", "--arch", "h19p", "--preferred-compute", "neural-engine"], bundle = "ios-h19p/timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv.h19p.aimodelc" },
+]
+needs = [
+  "The checkpoint in the Hugging Face cache, which the export reads by default:",
+  "`hf download mistralai/Timestral-209M --revision 9874d252ab0aae16f7f7c999f98f98d6ad7d8365` (or pass --st <model.safetensors>).",
+  "The zoo venv: torch 2.9.0, coreai-torch 0.4.1, coreai-core 1.0.0b2, numpy 2.3.5, safetensors 0.7.0; Xcode 27 for coreai-build (the h19p steps).",
+  "The gates read the fixture and the oracle's quantiles: the oracle runs in the reference code's own environment",
+  "(github.com/mistralai/timestral @ a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff, `uv sync --frozen`), see conversion/timestral/README.md.",
+]
+notes = [
+  "Graph: patches [R, L, 64], cos / sin [L+h, 64], attn_mask [1, 1, L+h, L+h] (1 = attend) -> quantiles [R, h*32, 21],",
+  "monotone, in the normalized space of the last context patch; the host (conversion/timestral/host_forecast.py) does",
+  "the float64 statistics, the asinh, the refine frame, the cap, symmetric averaging and the clip.",
+  "Buckets: L64 h32 = context <= 2,048 steps and horizon <= 1,024; L64 h4 = horizon <= 128; L256 h32 = context <= 8,192.",
+  "Per device the passing form with the lowest latency (SPEED_LADDER): the Mac (Swift runtime) = the ane form R1 / ane h4 R2 / GPU",
+  "fp16-attn32 L256; the iPhone 18 Pro = the ane form R2 / ane h4 R2 / ane L256 R1, as the h19p compiles. The h4 bundle is",
+  "the same file in macos/ and ios/.",
+  "The ane form (timestral_ane.py) runs on the Neural Engine only: its attention scores are fp16, and the same graph on",
+  "the GPU saturates at +-65,504. fp16-attn32 = fp16 compute with the attention scores and softmax in fp32 (the scores",
+  "reach 2.4e5 on the fixture). The bundle names carry the form: fp16p7-qkv4-tanh-conv = the ane form.",
+  "Hub bytes: ios/, ios-h19p/ and the h4 bundle that macos/ shares with ios/ are the bundles measured on the iPhone 18 Pro",
+  "(an earlier export of the same graph); the other two macos/ bundles were rebuilt by these steps.",
+  "An export is not byte-reproducible: the same command twice gives a different main.hash. The rebuilt bundles were run",
+  "again on every fixture window on the Mac: their outputs equal the measured bundles' bit for bit (10 forms;",
+  "gate-timestral-209m.json).",
+  "Pass bars: fp32 forms L2 (MASE and CRPS within 0.1 % of the released forecaster's, every fixture group and overall);",
+  "fp16 / Neural Engine forms L3 (<= 1.010 x, no NaN / inf, monotone).",
+  "Scope: one univariate series, no covariates, one decode block (<= 1,024 steps), context <= 8,192 steps.",
+  "Published: mlboydaisuke/Timestral-209M-CoreAI revision 5d1713f56f7867c54214c95f9d4c280a2859c7e5 (2026-10-23);",
+  "mirror coreai-community/Timestral-209M-CoreAI revision 7079a35a6b0c7d9afb6d91820e20fefd6f6ac846.",
+]
+open_questions = [
+  "Not exported here: multivariate series, covariates, horizons beyond one block, contexts beyond 8,192 steps.",
+]

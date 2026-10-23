@@ -356,6 +356,13 @@ For the long-form version of the same material, read
   converter traps they encode.
 - [`timesfm-port.md`](timesfm-port.md) — TimesFM 2.5: the zoo's first **time-series forecasting**
   foundation model (stateless graph + host RevIN DSP).
+- [`timestral-port.md`](timestral-port.md) — Timestral-209M (Mistral AI): a **time-series patch transformer on the
+  GPU and the Neural Engine**. A finite additive mask stops masking when attention scores reach 2.4e5; fp16 compute
+  overflows through the scores (fp32 scores fix it, and fp16 compute runs 2.4× faster than fp32 on the iPhone 18 Pro's
+  GPU, no faster on the M4 Max's); the Neural Engine's near miss was its sigmoid / SiLU (written through tanh, the
+  graph passes, and has the lowest latency on the iPhone 18 Pro in every bucket); R = 2 compiles for the Neural Engine
+  only with 1×1-conv projections; an AOT compile's cache entry name ignores the weights; int8's cliff is the patch
+  embedding and the head.
 - [`esam3-port.md`](esam3-port.md) — EfficientSAM3: a **dropped** port (device-verified but redundant
   vs the official SAM 3) — kept for what transferred.
 - [`magenta-rt2-port.md`](magenta-rt2-port.md) — Magenta RealTime 2: a **parked** port (not shipped,

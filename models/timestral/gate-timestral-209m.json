@@ -1,0 +1,2401 @@
+{
+  "model": "mistralai/Timestral-209M",
+  "model_sha": "9874d252ab0aae16f7f7c999f98f98d6ad7d8365",
+  "safetensors_sha256": "1456effb9927e3daa8c7234f10497e3424233869245a9c72b8ecebaf7ad2b7fa",
+  "reference_code": "github.com/mistralai/timestral@a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff",
+  "hf_repo": "mlboydaisuke/Timestral-209M-CoreAI",
+  "lines": {
+    "L1": "graph alone, fp32: max |d| vs the released module on the same inputs <= 2 x (released fp32 vs released .double()) = 0.129380 (L64 h32) / 5.2461e-5 (L256 h32), monotone",
+    "L2": "fp32 forms, host + graph vs the oracle: |MASE ratio - 1| and |CRPS ratio - 1| <= 0.001 in every fixture group and overall",
+    "L3": "fp16 / Neural Engine / quantized forms: MASE and CRPS ratio <= 1.010 in every group and overall, no NaN / inf, monotone over the 21 levels",
+    "L4": "another runtime or device: the same L1 / L3 verdicts as the Mac Python engine for the same form"
+  },
+  "environment": {
+    "mac": "M4 Max (Mac16,9), macOS 27.0 26A428, Xcode 27.0 RC, coreai-build 3600.83.1, coreai-core 1.0.0b2, coreai-torch 0.4.1, torch 2.9.0",
+    "iphone": "iPhone 18 Pro (iPhone19,2), iOS 27.2 24B5099f",
+    "oracle": "Python 3.12.11, torch 2.14.1, numpy 2.5.4, timestral 1.0.0, fp32 CPU, 12 threads"
+  },
+  "gates": [
+    {
+      "stage": "fixture + oracle",
+      "manifest": {
+        "path": "<fixtures>/manifest.json",
+        "sha256": "2848c0c7a26c4806f1269675046182654cacc2c5710e47c66bcea390987cb9e0"
+      },
+      "oracle_run": {
+        "path": "<fixtures>/oracle_run.json",
+        "sha256": "fa1cb6dd09be9f57c22470294cb3109355c0fb56b4f9cc44d0edacac44eec2a1"
+      },
+      "result": {
+        "groups": 22,
+        "windows": 84,
+        "nan": 0,
+        "rerun_max_abs_diff": 0.0,
+        "commit": "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff"
+      }
+    },
+    {
+      "stage": "L1 torch re-author, L64 h32 (red arm: wQKV rows not reordered)",
+      "record": {
+        "path": "<lane>/gates/l1_torch_L64_h32.json",
+        "sha256": "a19764e8c1f751722d68e722d6555366292313388ec4322ac19898cbd11b7c83"
+      },
+      "result": {
+        "l1_max": 0.00014400482177734375,
+        "bar": 0.12937975920024858,
+        "floor_double": 0.06468987960012429,
+        "rerun": 0.0,
+        "red_max": 23.531512439250946,
+        "red_fails": true,
+        "median_corr_min": 0.9999999996856197,
+        "monotone_all": true,
+        "mirror_inputs_equal_all": true,
+        "l1_pass": true,
+        "windows": 71
+      }
+    },
+    {
+      "stage": "L1 torch re-author, L256 h32",
+      "record": {
+        "path": "<lane>/gates/l1_torch_L256_h32.json",
+        "sha256": "4bf4ea1e6e1ef728eaa02a8532095d8ba6d35f3fc4416222a76164397e3cd0f3"
+      },
+      "result": {
+        "l1_max": 0.000020563602447509766,
+        "bar": 0.000052461041518014895,
+        "floor_double": 0.000026230520759007447,
+        "rerun": 0.0,
+        "red_max": 6.676825284957886,
+        "red_fails": true,
+        "median_corr_min": 0.9999999999956696,
+        "monotone_all": true,
+        "mirror_inputs_equal_all": true,
+        "l1_pass": true,
+        "windows": 13
+      }
+    },
+    {
+      "stage": "L2 torch (NumPy host + re-authored graph), all 84 windows",
+      "record": {
+        "path": "<lane>/gates/l2_torch_fp32.json",
+        "sha256": "fb5a5d6ef560ad075c2b866c0cb29a0eedb7639db0d3fcfed2d9cafa7f89bb7d"
+      },
+      "result": {
+        "passed": true,
+        "level": "l2",
+        "engine": "torch",
+        "unit": "torch-cpu",
+        "dtype": "float32",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 84,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 1.0000001881558453,
+        "crps_ratio": 1.0000000820164847,
+        "worst_group": {
+          "group": "syn_short_20",
+          "ratio": 1.0000007219138347
+        },
+        "groups": 22
+      }
+    },
+    {
+      "stage": "L2 torch red arm (wQKV rows not reordered): must fail",
+      "record": {
+        "path": "<lane>/gates/l2_torch_red_qkv.json",
+        "sha256": "fb0ca1a3bbdba1ce7f4cf575a8afb25cb303e7e5684829ef852cace0206bc3fc"
+      },
+      "result": {
+        "passed": false,
+        "level": "l2",
+        "engine": "torch",
+        "unit": "torch-cpu",
+        "dtype": "float32",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 84,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 5.77640398715807,
+        "crps_ratio": 2.654363980423865,
+        "worst_group": {
+          "group": "syn_level_shift",
+          "ratio": 27.10607456982447
+        },
+        "groups": 22
+      }
+    },
+    {
+      "stage": "L1 Core AI fp32, GPU AOT h16c, L64 h32",
+      "record": {
+        "path": "<lane>/gates/l1_engine_timestral_209m_L64_h32_r2_fp32_gpu.json",
+        "sha256": "be04c93ad2980e694a8e7cb6eeb0324801730120a6e02b145b6138f09277fe79"
+      },
+      "result": {
+        "unit": "gpu",
+        "spec_used": "gpu",
+        "dtype": "float32",
+        "rows_graph": 2,
+        "windows": 71,
+        "max_abs": 0.00018167495727539062,
+        "bar": 0.12937975920024858,
+        "median_corr_min": 0.999999999594176,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "l1_pass": true
+      }
+    },
+    {
+      "stage": "L2 Core AI fp32 GPU, L64 h32",
+      "record": {
+        "path": "<lane>/gates/e2e_main_fp32_gpu.json",
+        "sha256": "5d6f8a554e56caea2343b67e13191be7535db214045064ca329cf98a35542ac0"
+      },
+      "result": {
+        "passed": true,
+        "level": "l2",
+        "engine": "coreai",
+        "unit": "gpu",
+        "dtype": "float32",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 71,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 1.0000001237917475,
+        "crps_ratio": 1.0000001410113664,
+        "worst_group": {
+          "group": "syn_short_20",
+          "ratio": 1.0000011106366689
+        },
+        "groups": 18
+      }
+    },
+    {
+      "stage": "L2 Core AI fp32 GPU, L64 h4",
+      "record": {
+        "path": "<lane>/gates/e2e_short_fp32_gpu.json",
+        "sha256": "848be42db78e7116dbd535e8cd8fe049b1ec1af0eb53eafe26f1bad39b1c32e3"
+      },
+      "result": {
+        "passed": true,
+        "level": "l2",
+        "engine": "coreai",
+        "unit": "gpu",
+        "dtype": "float32",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 39,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 1.000000230685052,
+        "crps_ratio": 1.0000001966093208,
+        "worst_group": {
+          "group": "syn_short_20",
+          "ratio": 1.0000011384025855
+        },
+        "groups": 15
+      }
+    },
+    {
+      "stage": "L2 Core AI fp32 GPU, L256 h32",
+      "record": {
+        "path": "<lane>/gates/e2e_long_fp32_gpu.json",
+        "sha256": "c3f2f14f0d2fd2658f13e0c9ca1d24a91580808e185382e52d8c09111fa6ad1a"
+      },
+      "result": {
+        "passed": true,
+        "level": "l2",
+        "engine": "coreai",
+        "unit": "gpu",
+        "dtype": "float32",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 13,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 0.999999977897089,
+        "crps_ratio": 0.9999999875786049,
+        "worst_group": {
+          "group": "airq_h168_c8192",
+          "ratio": 1.0000000491703303
+        },
+        "groups": 4
+      }
+    },
+    {
+      "stage": "L3 fp16-attn32 GPU, L256 h32",
+      "record": {
+        "path": "<lane>/gates/e2e_long_fp16-attn32_gpu.json",
+        "sha256": "60224d1c241dd7e2ee5abab883f6c9914fa22b4bb08f9b1a7899a426a3c2df8a"
+      },
+      "result": {
+        "passed": true,
+        "level": "l3",
+        "engine": "coreai",
+        "unit": "gpu",
+        "dtype": "float16",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 13,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 0.9999675439440243,
+        "crps_ratio": 1.0000249771548948,
+        "worst_group": {
+          "group": "airq_h168_c8192",
+          "ratio": 1.0002045882999615
+        },
+        "groups": 4
+      }
+    },
+    {
+      "stage": "L3 near miss: the initial fp16 Neural Engine form (sigmoid / SiLU, LayerNorm RMSNorm), L64 h32 R1",
+      "record": {
+        "path": "<lane>/gates/e2e_main_fp16-layernorm_ane_r1split.json",
+        "sha256": "2b95300ca169b2c6031f9be6fd392d689cde79d5d84fce27e4274a018f0f01e6"
+      },
+      "result": {
+        "passed": false,
+        "level": "l3",
+        "engine": "coreai",
+        "unit": "neural_engine",
+        "dtype": "float16",
+        "rows": 1,
+        "mode": "split",
+        "forecasts": 71,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 1.0013597091742512,
+        "crps_ratio": 1.0037714339061334,
+        "worst_group": {
+          "group": "boom1855_h24_c2048",
+          "ratio": 1.0108960169324555
+        },
+        "groups": 18
+      }
+    },
+    {
+      "stage": "L3 Neural Engine form (tanh), L64 h32 R1, Mac",
+      "record": {
+        "path": "<lane>/r3/gates/e2e_L64_h32_r1_fp16p7-qkv4-tanh-conv-ane.json",
+        "sha256": "a657a1be413feb239025d0d2891f82feb953d2d391265fff3b5c9dff1357d187"
+      },
+      "result": {
+        "passed": true,
+        "level": "l3",
+        "engine": "coreai",
+        "unit": "neural_engine",
+        "dtype": "float16",
+        "rows": 1,
+        "mode": "split",
+        "forecasts": 71,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 0.9979975533764348,
+        "crps_ratio": 1.0005066882287612,
+        "worst_group": {
+          "group": "syn_short_100",
+          "ratio": 1.0051709523000416
+        },
+        "groups": 18
+      }
+    },
+    {
+      "stage": "L3 Neural Engine form (tanh), L64 h32 R2, Mac",
+      "record": {
+        "path": "<lane>/r3/gates/e2e_L64_h32_r2_fp16p7-qkv4-tanh-conv-ane.json",
+        "sha256": "8c5c71cda9792d039e3d94c0b5bb23fcea3041c728383c0bc908fb237229adc3"
+      },
+      "result": {
+        "passed": true,
+        "level": "l3",
+        "engine": "coreai",
+        "unit": "neural_engine",
+        "dtype": "float16",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 71,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 0.9979975533764348,
+        "crps_ratio": 1.0005066882287612,
+        "worst_group": {
+          "group": "syn_short_100",
+          "ratio": 1.0051709523000416
+        },
+        "groups": 18
+      }
+    },
+    {
+      "stage": "L3 Neural Engine form (tanh), L64 h4 R2, Mac",
+      "record": {
+        "path": "<lane>/r3/gates/e2e_L64_h4_r2_fp16p7-qkv4-tanh-conv-ane-short.json",
+        "sha256": "d50a79631588defba3854d88a26ff473dc830d8da12ff4c921361fa5114d2a8c"
+      },
+      "result": {
+        "passed": true,
+        "level": "l3",
+        "engine": "coreai",
+        "unit": "neural_engine",
+        "dtype": "float16",
+        "rows": 2,
+        "mode": "batched",
+        "forecasts": 39,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 0.9978233267942298,
+        "crps_ratio": 1.0008144382172515,
+        "worst_group": {
+          "group": "syn_short_100",
+          "ratio": 1.0051709523000416
+        },
+        "groups": 15
+      }
+    },
+    {
+      "stage": "L3 Neural Engine form (tanh), L256 h32 R1, Mac",
+      "record": {
+        "path": "<lane>/r3/gates/e2e_L256_h32_r1_fp16p7-qkv4-tanh-conv-ane-long.json",
+        "sha256": "c613293ed323b4460ff4197b01c107170a61980a0fcf5a8eb62da11cf89afba2"
+      },
+      "result": {
+        "passed": true,
+        "level": "l3",
+        "engine": "coreai",
+        "unit": "neural_engine",
+        "dtype": "float16",
+        "rows": 1,
+        "mode": "split",
+        "forecasts": 13,
+        "nan_inf": 0,
+        "non_monotone": 0,
+        "failures": 0,
+        "mase_ratio": 0.9992370587205478,
+        "crps_ratio": 0.9999181809846778,
+        "worst_group": {
+          "group": "boom1062_h288_c8192",
+          "ratio": 1.00020542577732
+        },
+        "groups": 4
+      }
+    },
+    {
+      "stage": "iPhone 18 Pro, r4-L64h32r2-tanh-aot-ane (L4 vs the Mac)",
+      "record": {
+        "path": "<lane>/device/scored_r4/r4-L64h32r2-tanh-aot-ane.json",
+        "sha256": "c7d618b21be4d9169696e2363b05c9b9376a4330806e1fef1461b6c56b37ff91"
+      },
+      "run": {
+        "path": "<lane>/device/pull/r4-L64h32r2-tanh-aot-ane/run.json",
+        "sha256": "553df5d3fa5b1625b2a26f24277385daf3e3ddbc46812f86b136522dfc0a2e10"
+      },
+      "result": {
+        "device": {
+          "arch": "h19p",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "24B5099f",
+          "machine": "iPhone19,2",
+          "os": "Version 27.2 (Build 24B5099f)",
+          "physical_memory_gb": 12.12
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv.h19p.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L64_h32",
+        "load_ms": 1044.313,
+        "l1": {
+          "max_abs": 0.987579345703125,
+          "bar": 0.12937975920024858,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 71,
+          "mase_ratio": 0.9979975533764348,
+          "crps_ratio": 1.0005066882287612,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "jit": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          },
+          "gpu": {
+            "bit_identical": false,
+            "bit_different_elements": 3043746,
+            "max_abs": 65529.3125
+          },
+          "r1": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "iPhone 18 Pro, r4-L64h4r2-tanh-aot-ane (L4 vs the Mac)",
+      "record": {
+        "path": "<lane>/device/scored_r4/r4-L64h4r2-tanh-aot-ane.json",
+        "sha256": "47e685e9d29ae6f9fd83f07bb10d36e43827be6b6eb2dc81174b3ccfbf0bff42"
+      },
+      "run": {
+        "path": "<lane>/device/pull/r4-L64h4r2-tanh-aot-ane/run.json",
+        "sha256": "67b6a73678d0ec824d989ec9855338905726b8998080794fa090c126ce6feff0"
+      },
+      "result": {
+        "device": {
+          "arch": "h19p",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "24B5099f",
+          "machine": "iPhone19,2",
+          "os": "Version 27.2 (Build 24B5099f)",
+          "physical_memory_gb": 12.12
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv.h19p.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L64_h4",
+        "load_ms": 1102.624,
+        "l1": null,
+        "l3": {
+          "forecasts": 39,
+          "mase_ratio": 0.9978233267942298,
+          "crps_ratio": 1.0008144382172515,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "jit": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          },
+          "gpu": {
+            "bit_identical": false,
+            "bit_different_elements": 209664,
+            "max_abs": 65511.140625
+          },
+          "r1": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": true
+        },
+        "l4": {
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "iPhone 18 Pro, r4-L256h32r1-tanh-aot-ane (L4 vs the Mac)",
+      "record": {
+        "path": "<lane>/device/scored_r4/r4-L256h32r1-tanh-aot-ane.json",
+        "sha256": "1f22d58a6e64e1f2502e7a9f482e7e4ee2c2e7f4f2c79b5cb1e3d8438b8d1e86"
+      },
+      "run": {
+        "path": "<lane>/device/pull/r4-L256h32r1-tanh-aot-ane/run.json",
+        "sha256": "792e5129f0310ce21167b55ba5bc091b14c998c25e43bc48e903854914865360"
+      },
+      "result": {
+        "device": {
+          "arch": "h19p",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "24B5099f",
+          "machine": "iPhone19,2",
+          "os": "Version 27.2 (Build 24B5099f)",
+          "physical_memory_gb": 12.12
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv.h19p.aimodelc",
+        "rows_graph": 1,
+        "bucket": "L256_h32",
+        "load_ms": 1033.525,
+        "l1": {
+          "max_abs": 0.04708051681518555,
+          "bar": 0.000052461041518014895,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 13,
+          "mase_ratio": 0.9992370587205478,
+          "crps_ratio": 0.9999181809846778,
+          "max_ratio": 1.00020542577732,
+          "worst_group": {
+            "group": "boom1062_h288_c8192",
+            "mase_ratio": 1.000128066920436,
+            "crps_ratio": 1.00020542577732
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "jit": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          },
+          "gpu": {
+            "bit_identical": false,
+            "bit_different_elements": 556346,
+            "max_abs": 65506.806640625
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "Mac ms: Neural Engine form R1 x 2, L64 h32",
+      "record": {
+        "path": "<lane>/r3/ms/ms_A4.json",
+        "sha256": "4ccbe70eb9ecb873c49084a0780a7db2f9d001ae9e1aaeb6145b317ff2967740"
+      },
+      "runtime": "Python (coreai-core 1.0.0b2), AOT h16c",
+      "form": "r1_fp16p7-qkv4-tanh-conv-ane",
+      "result": {
+        "graph_ms": {
+          "n": 32,
+          "median": 9.914,
+          "min": 9.731,
+          "max": 13.378
+        },
+        "drift": 0,
+        "max_rel_vs_oracle": 0.00461839654588554,
+        "spec_used": "neural_engine"
+      }
+    },
+    {
+      "stage": "Mac ms: Neural Engine form R2, L64 h32 (same run)",
+      "record": {
+        "path": "<lane>/r3/ms/ms_A4.json",
+        "sha256": "4ccbe70eb9ecb873c49084a0780a7db2f9d001ae9e1aaeb6145b317ff2967740"
+      },
+      "runtime": "Python (coreai-core 1.0.0b2), AOT h16c",
+      "form": "r2_fp16p7-qkv4-tanh-conv-ane",
+      "result": {
+        "graph_ms": {
+          "n": 32,
+          "median": 10.195,
+          "min": 10.043,
+          "max": 11.408
+        },
+        "drift": 0,
+        "max_rel_vs_oracle": 0.00461839654588554,
+        "spec_used": "neural_engine"
+      }
+    },
+    {
+      "stage": "Mac ms: GPU fp32 R2, L64 h32 (same run)",
+      "record": {
+        "path": "<lane>/r3/ms/ms_A4.json",
+        "sha256": "4ccbe70eb9ecb873c49084a0780a7db2f9d001ae9e1aaeb6145b317ff2967740"
+      },
+      "runtime": "Python (coreai-core 1.0.0b2), AOT h16c",
+      "form": "r1-fp32-gpu",
+      "result": {
+        "graph_ms": {
+          "n": 32,
+          "median": 11.416,
+          "min": 11.201,
+          "max": 12.956
+        },
+        "drift": 0,
+        "max_rel_vs_oracle": 6.349475110057569E-7,
+        "spec_used": "gpu"
+      }
+    },
+    {
+      "stage": "Mac ms: Neural Engine form R2, L64 h4",
+      "record": {
+        "path": "<lane>/r3/ms/ms_C3.json",
+        "sha256": "f07896afda4209c24420728c8b55e2e9373f0b927e3cb64ec395e80d3b01cf5d"
+      },
+      "runtime": "Python (coreai-core 1.0.0b2), AOT h16c",
+      "form": "L64_h4_r2_fp16p7-qkv4-tanh-conv-ane",
+      "result": {
+        "graph_ms": {
+          "n": 32,
+          "median": 8.442,
+          "min": 8.368,
+          "max": 10.414
+        },
+        "drift": 0,
+        "max_rel_vs_oracle": 0.0072945909603145944,
+        "spec_used": "neural_engine"
+      }
+    },
+    {
+      "stage": "Mac ms: GPU fp32 R2, L64 h4 (same run)",
+      "record": {
+        "path": "<lane>/r3/ms/ms_C3.json",
+        "sha256": "f07896afda4209c24420728c8b55e2e9373f0b927e3cb64ec395e80d3b01cf5d"
+      },
+      "runtime": "Python (coreai-core 1.0.0b2), AOT h16c",
+      "form": "r1-L64h4-fp32-gpu",
+      "result": {
+        "graph_ms": {
+          "n": 32,
+          "median": 10.183,
+          "min": 10.0,
+          "max": 10.391
+        },
+        "drift": 0,
+        "max_rel_vs_oracle": 9.07343859731898E-7,
+        "spec_used": "gpu"
+      }
+    },
+    {
+      "stage": "Mac ms: GPU fp32 R2, L256 h32",
+      "record": {
+        "path": "<lane>/r3/ms/ms_B3.json",
+        "sha256": "e3a6fbef26dd109542fbfea310ed73f910b04a35bb19f475b4713940aa699f83"
+      },
+      "runtime": "Python (coreai-core 1.0.0b2), AOT h16c",
+      "form": "r1-L256-fp32-gpu",
+      "result": {
+        "graph_ms": {
+          "n": 32,
+          "median": 26.232,
+          "min": 25.961,
+          "max": 26.431
+        },
+        "drift": 0,
+        "max_rel_vs_oracle": 6.497405640072966E-7,
+        "spec_used": "gpu"
+      }
+    },
+    {
+      "stage": "Mac ms: Neural Engine form R1 x 2, L256 h32 (same run)",
+      "record": {
+        "path": "<lane>/r3/ms/ms_B3.json",
+        "sha256": "e3a6fbef26dd109542fbfea310ed73f910b04a35bb19f475b4713940aa699f83"
+      },
+      "runtime": "Python (coreai-core 1.0.0b2), AOT h16c",
+      "form": "L256_h32_r1_fp16p7-qkv4-tanh-conv-ane",
+      "result": {
+        "graph_ms": {
+          "n": 32,
+          "median": 35.918,
+          "min": 35.602,
+          "max": 37.582
+        },
+        "drift": 0,
+        "max_rel_vs_oracle": 0.003003858917499733,
+        "spec_used": "neural_engine"
+      }
+    },
+    {
+      "stage": "iPhone 18 Pro ms: r4-ms-main",
+      "record": {
+        "path": "<lane>/device/pull/r4-ms-main/run.json",
+        "sha256": "99590101aa2ea2d3745cbc0134f8e9db82b89f06c9678296082140ddc4142947"
+      },
+      "runtime": "Swift (TimestralGate)",
+      "result": {
+        "device": {
+          "arch": "h19p",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "24B5099f",
+          "machine": "iPhone19,2",
+          "os": "Version 27.2 (Build 24B5099f)",
+          "physical_memory_gb": 12.12
+        },
+        "window": "airq_h168_c2048/0",
+        "rounds_completed": 9,
+        "truncated": null,
+        "thermal_start": "nominal",
+        "thermal_end": "nominal",
+        "configs": [
+          {
+            "label": "timestral_209m_L64_h32_r2_fp16-attn32@gpu-jit",
+            "rows": 2,
+            "load_ms": 957.915,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 29.84,
+            "warm_median_ms": 14.5835,
+            "warm_round_range_ms": [
+              14.554,
+              14.641
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-h19p-ane@ane-aot",
+            "rows": 1,
+            "load_ms": 930.213,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 26.875,
+            "warm_median_ms": 10.1865,
+            "warm_round_range_ms": [
+              9.775,
+              10.365
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 1,
+            "load_ms": 21797.242,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 30.088,
+            "warm_median_ms": 10.223,
+            "warm_round_range_ms": [
+              9.736,
+              10.333
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-h19p-ane@ane-aot",
+            "rows": 2,
+            "load_ms": 956.232,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 24.654,
+            "warm_median_ms": 9.439,
+            "warm_round_range_ms": [
+              9.273,
+              9.649
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 2,
+            "load_ms": 59063.06,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 44.39,
+            "warm_median_ms": 9.534500000000001,
+            "warm_round_range_ms": [
+              9.358,
+              9.741
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          }
+        ]
+      }
+    },
+    {
+      "stage": "iPhone 18 Pro ms: r4-ms-short",
+      "record": {
+        "path": "<lane>/device/pull/r4-ms-short/run.json",
+        "sha256": "9514e79a29a0b1aaf27cb4fa08a441fc016f2dfcb6ad934504ee81f6420bf91d"
+      },
+      "runtime": "Swift (TimestralGate)",
+      "result": {
+        "device": {
+          "arch": "h19p",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "24B5099f",
+          "machine": "iPhone19,2",
+          "os": "Version 27.2 (Build 24B5099f)",
+          "physical_memory_gb": 12.12
+        },
+        "window": "boom1631_h96_c2048/0",
+        "rounds_completed": 9,
+        "truncated": null,
+        "thermal_start": "nominal",
+        "thermal_end": "nominal",
+        "configs": [
+          {
+            "label": "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-h19p-ane@ane-aot",
+            "rows": 2,
+            "load_ms": 967.118,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 22.413,
+            "warm_median_ms": 8.4175,
+            "warm_round_range_ms": [
+              8.291,
+              8.654
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 2,
+            "load_ms": 54605.904,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 19.434,
+            "warm_median_ms": 8.4295,
+            "warm_round_range_ms": [
+              8.271,
+              8.648
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r1_fp16p7-qkv4-tanh-conv-h19p-ane@ane-aot",
+            "rows": 1,
+            "load_ms": 871.651,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 21.652,
+            "warm_median_ms": 9.7355,
+            "warm_round_range_ms": [
+              9.482,
+              9.958
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r1_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 1,
+            "load_ms": 26027.24,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 27.528,
+            "warm_median_ms": 9.7795,
+            "warm_round_range_ms": [
+              9.519,
+              10.094
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r2_fp16a32@gpu-jit",
+            "rows": 2,
+            "load_ms": 1052.13,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 35.912,
+            "warm_median_ms": 13.898,
+            "warm_round_range_ms": [
+              13.876,
+              13.943
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r2_fp16a32-h19p@gpu-aot",
+            "rows": 2,
+            "load_ms": 676.472,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 27.654,
+            "warm_median_ms": 14.1665,
+            "warm_round_range_ms": [
+              14.065,
+              14.281
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r2_fp32@gpu-jit",
+            "rows": 2,
+            "load_ms": 1960.821,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 45.197,
+            "warm_median_ms": 27.8585,
+            "warm_round_range_ms": [
+              27.796,
+              27.933
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          }
+        ]
+      }
+    },
+    {
+      "stage": "iPhone 18 Pro ms: r4-ms-long",
+      "record": {
+        "path": "<lane>/device/pull/r4-ms-long/run.json",
+        "sha256": "b4bd630aec245230e474abeccbd52ca9c22be71c01dfcdbec470c8d53b86f3b9"
+      },
+      "runtime": "Swift (TimestralGate)",
+      "result": {
+        "device": {
+          "arch": "h19p",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "24B5099f",
+          "machine": "iPhone19,2",
+          "os": "Version 27.2 (Build 24B5099f)",
+          "physical_memory_gb": 12.12
+        },
+        "window": "airq_h168_c8192/0",
+        "rounds_completed": 9,
+        "truncated": null,
+        "thermal_start": "nominal",
+        "thermal_end": "nominal",
+        "configs": [
+          {
+            "label": "timestral_209m_L256_h32_r2_fp16-attn32@gpu-jit",
+            "rows": 2,
+            "load_ms": 1054.094,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 55.896,
+            "warm_median_ms": 40.1345,
+            "warm_round_range_ms": [
+              39.693,
+              42.256
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv-h19p-ane@ane-aot",
+            "rows": 1,
+            "load_ms": 1041.754,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 50.039,
+            "warm_median_ms": 33.861000000000004,
+            "warm_round_range_ms": [
+              33.455,
+              35.06
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 1,
+            "load_ms": 30079.518,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 46.611,
+            "warm_median_ms": 34.144000000000005,
+            "warm_round_range_ms": [
+              33.311,
+              35.574
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r2_fp16p7-qkv4-tanh-conv-h19p-ane@ane-aot",
+            "rows": 2,
+            "load_ms": 1094.284,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 50.646,
+            "warm_median_ms": 37.3635,
+            "warm_round_range_ms": [
+              36.77,
+              38.728
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r2_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 2,
+            "load_ms": 52756.693,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 46.865,
+            "warm_median_ms": 34.738,
+            "warm_round_range_ms": [
+              34.517,
+              34.823
+            ],
+            "rounds_kept": 8,
+            "drift": 0
+          }
+        ]
+      }
+    },
+    {
+      "stage": "Mac ms (Swift runtime): r6-ms-long",
+      "record": {
+        "path": "<lane>/stage/r6/swift/out/r6-ms-long/run.json",
+        "sha256": "695d7868eb4ab29ff3689dae3a684fdf2a6134fea2a1b5e87d6246ee9ff05cda"
+      },
+      "runtime": "Swift (TimestralGate)",
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "window": "airq_h168_c8192/0",
+        "rounds_completed": 12,
+        "truncated": null,
+        "thermal_start": "nominal",
+        "thermal_end": "nominal",
+        "configs": [
+          {
+            "label": "timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 1,
+            "load_ms": 9288.767,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 47.374,
+            "warm_median_ms": 35.308,
+            "warm_round_range_ms": [
+              35.193,
+              35.514
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv-h16c-ane@ane-aot",
+            "rows": 1,
+            "load_ms": 141.444,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 43.175,
+            "warm_median_ms": 35.337,
+            "warm_round_range_ms": [
+              35.159,
+              35.718
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r2_fp32@gpu-jit",
+            "rows": 2,
+            "load_ms": 952.248,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 55.808,
+            "warm_median_ms": 25.927,
+            "warm_round_range_ms": [
+              25.763,
+              25.99
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r2_fp32-h16c@gpu-aot",
+            "rows": 2,
+            "load_ms": 1053.769,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 37.883,
+            "warm_median_ms": 25.854,
+            "warm_round_range_ms": [
+              25.727,
+              25.941
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r2_fp16-attn32@gpu-jit",
+            "rows": 2,
+            "load_ms": 1038.456,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 41.603,
+            "warm_median_ms": 24.726,
+            "warm_round_range_ms": [
+              24.652,
+              24.878
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L256_h32_r2_fp16-attn32-h16c@gpu-aot",
+            "rows": 2,
+            "load_ms": 535.465,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 34.37,
+            "warm_median_ms": 24.671,
+            "warm_round_range_ms": [
+              24.594,
+              24.748
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          }
+        ]
+      }
+    },
+    {
+      "stage": "Mac ms (Swift runtime): r6-ms-main",
+      "record": {
+        "path": "<lane>/stage/r6/swift/out/r6-ms-main/run.json",
+        "sha256": "fa8e60b0ee773813b3249c69cdd481072b592c3af42268e1cf3d389fae2a854e"
+      },
+      "runtime": "Swift (TimestralGate)",
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "window": "airq_h168_c2048/0",
+        "rounds_completed": 12,
+        "truncated": null,
+        "thermal_start": "nominal",
+        "thermal_end": "nominal",
+        "configs": [
+          {
+            "label": "timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 1,
+            "load_ms": 4716.362,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 17.16,
+            "warm_median_ms": 9.461,
+            "warm_round_range_ms": [
+              9.416,
+              9.632
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-h16c-ane@ane-aot",
+            "rows": 1,
+            "load_ms": 539.595,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 11.234,
+            "warm_median_ms": 9.481,
+            "warm_round_range_ms": [
+              9.37,
+              9.522
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 2,
+            "load_ms": 8893.343,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 13.741,
+            "warm_median_ms": 9.96,
+            "warm_round_range_ms": [
+              9.863,
+              10.089
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-h16c-ane@ane-aot",
+            "rows": 2,
+            "load_ms": 162.196,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 12.034,
+            "warm_median_ms": 9.943,
+            "warm_round_range_ms": [
+              9.861,
+              10.122
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r2_fp32@gpu-jit",
+            "rows": 2,
+            "load_ms": 2189.685,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 38.896,
+            "warm_median_ms": 11.185,
+            "warm_round_range_ms": [
+              11.08,
+              11.343
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h32_r2_fp16-attn32@gpu-jit",
+            "rows": 2,
+            "load_ms": 1072.129,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 31.076,
+            "warm_median_ms": 11.407,
+            "warm_round_range_ms": [
+              11.366,
+              11.49
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          }
+        ]
+      }
+    },
+    {
+      "stage": "Mac ms (Swift runtime): r6-ms-short",
+      "record": {
+        "path": "<lane>/stage/r6/swift/out/r6-ms-short/run.json",
+        "sha256": "b6f5cdfceb52b18107f087c645dd72016ba98c50df190f98ce0e149c952f3670"
+      },
+      "runtime": "Swift (TimestralGate)",
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "window": "boom1631_h96_c2048/0",
+        "rounds_completed": 12,
+        "truncated": null,
+        "thermal_start": "nominal",
+        "thermal_end": "nominal",
+        "configs": [
+          {
+            "label": "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv@ane-jit",
+            "rows": 2,
+            "load_ms": 8578.404,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 12.113,
+            "warm_median_ms": 8.241,
+            "warm_round_range_ms": [
+              8.161,
+              8.295
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-h16c-ane@ane-aot",
+            "rows": 2,
+            "load_ms": 145.684,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 8.597,
+            "warm_median_ms": 8.217,
+            "warm_round_range_ms": [
+              8.138,
+              8.347
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r2_fp32@gpu-jit",
+            "rows": 2,
+            "load_ms": 2828.271,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 40.187,
+            "warm_median_ms": 9.842,
+            "warm_round_range_ms": [
+              9.732,
+              10.022
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          },
+          {
+            "label": "timestral_209m_L64_h4_r2_fp32-h16c@gpu-aot",
+            "rows": 2,
+            "load_ms": 1901.769,
+            "cache_entry_deleted": true,
+            "cold_forecast_ms": 26.948,
+            "warm_median_ms": 9.833,
+            "warm_round_range_ms": [
+              9.771,
+              9.928
+            ],
+            "rounds_kept": 11,
+            "drift": 0
+          }
+        ]
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-red-sigmoid-L64h32r1-aot-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-red-sigmoid-L64h32r1-aot-ane.json",
+        "sha256": "73d75b04e2d8dcd4ef6c42f03ee1e82385ef8ddefb17ea5af64d4ba430c58ce3"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-red-sigmoid-L64h32r1-aot-ane/run.json",
+        "sha256": "ef5dd6794f3c7e84526192a6fb464945393e6412e6ab2a26fb2f00689a1de219"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h32_r1_fp16p7-qkv4-conv.h16c.aimodelc",
+        "rows_graph": 1,
+        "bucket": "L64_h32",
+        "load_ms": 46371.929,
+        "l1": {
+          "max_abs": 5.6296796798706055,
+          "bar": 0.12937975920024858,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 71,
+          "mase_ratio": 1.0011923776639795,
+          "crps_ratio": 1.00395939898431,
+          "max_ratio": 1.0109424438086427,
+          "worst_group": {
+            "group": "boom1855_h24_c2048",
+            "mase_ratio": 1.0109424438086427,
+            "crps_ratio": 1.0013380348946903
+          },
+          "l3_pass": false,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": false,
+            "bit_different_elements": 2954725,
+            "max_abs": 5.18701171875
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": null
+        },
+        "l4": {
+          "l4_pass": null,
+          "reason": "no Mac verdict"
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv-aot-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv-aot-ane.json",
+        "sha256": "b0d0ed90623acf2dfe08f3c8bfb34126846b5cd276acf1535d11a2640fee0d9b"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv-aot-ane/run.json",
+        "sha256": "62c50fac6bed79566824f292d8b5f9cbe0be22b7241071df3d54477eb205e6e6"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L256_h32_r1_fp16p7-qkv4-tanh-conv.h16c.aimodelc",
+        "rows_graph": 1,
+        "bucket": "L256_h32",
+        "load_ms": 47001.612,
+        "l1": {
+          "max_abs": 0.04708051681518555,
+          "bar": 0.000052461041518014895,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 13,
+          "mase_ratio": 0.9992370587205478,
+          "crps_ratio": 0.9999181809846778,
+          "max_ratio": 1.00020542577732,
+          "worst_group": {
+            "group": "boom1062_h288_c8192",
+            "mase_ratio": 1.000128066920436,
+            "crps_ratio": 1.00020542577732
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L256_h32_r2_fp16-attn32-aot-gpu",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L256_h32_r2_fp16-attn32-aot-gpu.json",
+        "sha256": "4657faca18f579a0f43d11fb092b60097432ec999bd65f8068ed963d5127af31"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L256_h32_r2_fp16-attn32-aot-gpu/run.json",
+        "sha256": "ead6b0d0f92ee0c80bb7aca641dd7eeccc82578c1068ff985aee62e89a1a34ec"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "gpu-aot",
+        "compute": "gpu",
+        "bundle": "timestral_209m_L256_h32_r2_fp16-attn32.h16c.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L256_h32",
+        "load_ms": 1166.289,
+        "l1": {
+          "max_abs": 0.025069892406463623,
+          "bar": 0.000052461041518014895,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 13,
+          "mase_ratio": 0.9999675439440243,
+          "crps_ratio": 1.0000249771548948,
+          "max_ratio": 1.0002045882999615,
+          "worst_group": {
+            "group": "airq_h168_c8192",
+            "mase_ratio": 1.0002045882999615,
+            "crps_ratio": 1.0001900294021804
+          },
+          "l3_pass": true,
+          "l2_pass": true,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L256_h32_r2_fp16-attn32-jit-gpu",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L256_h32_r2_fp16-attn32-jit-gpu.json",
+        "sha256": "c7c4343352110db3fc3bc82be1feb640166280286a957f81027da5c53c0c9820"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L256_h32_r2_fp16-attn32-jit-gpu/run.json",
+        "sha256": "a5d37fd287dcd3a24995d212c5505eafa96268b7cf2823b2a0e63d3d9c944edf"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "gpu-jit",
+        "compute": "gpu",
+        "bundle": "timestral_209m_L256_h32_r2_fp16-attn32.aimodel",
+        "rows_graph": 2,
+        "bucket": "L256_h32",
+        "load_ms": 651.98,
+        "l1": {
+          "max_abs": 0.025069892406463623,
+          "bar": 0.000052461041518014895,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 13,
+          "mase_ratio": 0.9999675439440243,
+          "crps_ratio": 1.0000249771548948,
+          "max_ratio": 1.0002045882999615,
+          "worst_group": {
+            "group": "airq_h168_c8192",
+            "mase_ratio": 1.0002045882999615,
+            "crps_ratio": 1.0001900294021804
+          },
+          "l3_pass": true,
+          "l2_pass": true,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "aot": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": true
+        },
+        "l4": {
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L256_h32_r2_fp16p7-qkv4-tanh-conv-aot-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L256_h32_r2_fp16p7-qkv4-tanh-conv-aot-ane.json",
+        "sha256": "ba5e9109f05da598292f8d384785c3e993e0c651b227a56f9f11e99198478506"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L256_h32_r2_fp16p7-qkv4-tanh-conv-aot-ane/run.json",
+        "sha256": "ddb56f6853eb443729b4254cf9f883b54221c92ce24de7c9872bc900b5c3f508"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L256_h32_r2_fp16p7-qkv4-tanh-conv.h16c.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L256_h32",
+        "load_ms": 46824.022,
+        "l1": {
+          "max_abs": 0.04708051681518555,
+          "bar": 0.000052461041518014895,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 13,
+          "mase_ratio": 0.9992370587205478,
+          "crps_ratio": 0.9999181809846778,
+          "max_ratio": 1.00020542577732,
+          "worst_group": {
+            "group": "boom1062_h288_c8192",
+            "mase_ratio": 1.000128066920436,
+            "crps_ratio": 1.00020542577732
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L256_h32_r2_fp32-aot-gpu",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L256_h32_r2_fp32-aot-gpu.json",
+        "sha256": "e79700243e23ae56e35c6bc88925c8ff8469cb03f7dae9941f0e41b9545d1c66"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L256_h32_r2_fp32-aot-gpu/run.json",
+        "sha256": "846a40df6dde7805fcfd3c1791150093d90975b60db6c0310c5864a7fdae3635"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "gpu-aot",
+        "compute": "gpu",
+        "bundle": "timestral_209m_L256_h32_r2_fp32.h16c.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L256_h32",
+        "load_ms": 1988.286,
+        "l1": {
+          "max_abs": 0.00001621246337890625,
+          "bar": 0.000052461041518014895,
+          "l1_pass": true
+        },
+        "l3": {
+          "forecasts": 13,
+          "mase_ratio": 0.999999977897089,
+          "crps_ratio": 0.9999999875786049,
+          "max_ratio": 1.0000000491703303,
+          "worst_group": {
+            "group": "airq_h168_c8192",
+            "mase_ratio": 1.0000000453253823,
+            "crps_ratio": 1.0000000491703303
+          },
+          "l3_pass": true,
+          "l2_pass": true,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": true,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-aot-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-aot-ane.json",
+        "sha256": "d86791777e5c4ee1547c33864fc1b20b980bb48b9470fb0637b82a5fb1c9a37e"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-aot-ane/run.json",
+        "sha256": "3019a9d748aa7e5f5742e08005b26952895c7988c43a78f329e9d7a8f275c22f"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv.h16c.aimodelc",
+        "rows_graph": 1,
+        "bucket": "L64_h32",
+        "load_ms": 36478.025,
+        "l1": {
+          "max_abs": 0.987579345703125,
+          "bar": 0.12937975920024858,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 71,
+          "mase_ratio": 0.9979975533764348,
+          "crps_ratio": 1.0005066882287612,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-jit-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-jit-ane.json",
+        "sha256": "a7179eeaccf24157f2dfee9aa2a8f5281ad22b9a62773909d25c4494262d9134"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv-jit-ane/run.json",
+        "sha256": "bc19ca727503d85f1e63db19b5cfc99f3d165b6fc372c24886a667ac50881006"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-jit",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h32_r1_fp16p7-qkv4-tanh-conv.aimodel",
+        "rows_graph": 1,
+        "bucket": "L64_h32",
+        "load_ms": 4650.725,
+        "l1": {
+          "max_abs": 0.987579345703125,
+          "bar": 0.12937975920024858,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 71,
+          "mase_ratio": 0.9979975533764348,
+          "crps_ratio": 1.0005066882287612,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "aot": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": null
+        },
+        "l4": {
+          "l4_pass": null,
+          "reason": "no Mac verdict"
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h32_r2_fp16-attn32-aot-gpu",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h32_r2_fp16-attn32-aot-gpu.json",
+        "sha256": "c3bfcebc6c069a97d491066bd214c187339f994970c4bc9ebc361fd7900be6f3"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h32_r2_fp16-attn32-aot-gpu/run.json",
+        "sha256": "6d02df09532ff1437d137ea88e306e34d1470dd3a79cae2e23c5a7ed618c49bd"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "gpu-aot",
+        "compute": "gpu",
+        "bundle": "timestral_209m_L64_h32_r2_fp16-attn32.h16c.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L64_h32",
+        "load_ms": 1026.163,
+        "l1": {
+          "max_abs": 0.4222102165222168,
+          "bar": 0.12937975920024858,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 71,
+          "mase_ratio": 0.9992945304729418,
+          "crps_ratio": 0.9996368597718057,
+          "max_ratio": 1.0006345629394362,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0006345629394362,
+            "crps_ratio": 1.0004143484387082
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-aot-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-aot-ane.json",
+        "sha256": "a12423e79deddb4edf2d873efa5cf8439b6a5fe425e8e8f0635bffab48d3d836"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-aot-ane/run.json",
+        "sha256": "5f4358680457197fdc403d260df852bd7593c2ac122cec089309dc0115cc3b76"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv.h16c.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L64_h32",
+        "load_ms": 41106.371,
+        "l1": {
+          "max_abs": 0.987579345703125,
+          "bar": 0.12937975920024858,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 71,
+          "mase_ratio": 0.9979975533764348,
+          "crps_ratio": 1.0005066882287612,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": false,
+          "l3_pass": true
+        },
+        "l4": {
+          "l1_same": true,
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-jit-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-jit-ane.json",
+        "sha256": "1e1153643ed6849542f52e75e93484d93aec97484999a0408b9aaf5c91f0a87d"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv-jit-ane/run.json",
+        "sha256": "f344b81167a2decb80ae3a83a0c4d4d349a5642292381c7e008acd2842a26b7d"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-jit",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h32_r2_fp16p7-qkv4-tanh-conv.aimodel",
+        "rows_graph": 2,
+        "bucket": "L64_h32",
+        "load_ms": 8119.865,
+        "l1": {
+          "max_abs": 0.987579345703125,
+          "bar": 0.12937975920024858,
+          "l1_pass": false
+        },
+        "l3": {
+          "forecasts": 71,
+          "mase_ratio": 0.9979975533764348,
+          "crps_ratio": 1.0005066882287612,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "aot": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": null
+        },
+        "l4": {
+          "l4_pass": null,
+          "reason": "no Mac verdict"
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h4_r1_fp16p7-qkv4-tanh-conv-aot-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h4_r1_fp16p7-qkv4-tanh-conv-aot-ane.json",
+        "sha256": "d0db27fe5efbca1671c3ebfe9a3bc6651a2c1fa2c83554e40248b984602444b7"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h4_r1_fp16p7-qkv4-tanh-conv-aot-ane/run.json",
+        "sha256": "19b1d076cefefa73302ecfeaf577d4c2497d5ac7f1e246a40376681ad0211db2"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h4_r1_fp16p7-qkv4-tanh-conv.h16c.aimodelc",
+        "rows_graph": 1,
+        "bucket": "L64_h4",
+        "load_ms": 46603.347,
+        "l1": null,
+        "l3": {
+          "forecasts": 39,
+          "mase_ratio": 0.9978233267942298,
+          "crps_ratio": 1.0008144382172515,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": true
+        },
+        "l4": {
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h4_r2_fp16-attn32-aot-gpu",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h4_r2_fp16-attn32-aot-gpu.json",
+        "sha256": "b40ed732c58d8d96d9c51518500add19587ca041e26a41bcba111167ab94aecf"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h4_r2_fp16-attn32-aot-gpu/run.json",
+        "sha256": "ec5406df1ad14adfec2740bedcd5a00478bf28b3cad01ad5fd4c9e270a7b20e0"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "gpu-aot",
+        "compute": "gpu",
+        "bundle": "timestral_209m_L64_h4_r2_fp16-attn32.h16c.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L64_h4",
+        "load_ms": 605.225,
+        "l1": null,
+        "l3": {
+          "forecasts": 39,
+          "mase_ratio": 0.9992286413835647,
+          "crps_ratio": 0.9994892699811675,
+          "max_ratio": 1.0006345629394362,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0006345629394362,
+            "crps_ratio": 1.0004143484387082
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": true
+        },
+        "l4": {
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-aot-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-aot-ane.json",
+        "sha256": "50b14ba9f164a831445dad0b52bed64be8c8ca58d0919cb651eb319b33f05a93"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-aot-ane/run.json",
+        "sha256": "f6dd99d6f8b0142b2d1f555cbf04c5077d6eaf4455f7b199d2b6638595452e77"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-aot",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv.h16c.aimodelc",
+        "rows_graph": 2,
+        "bucket": "L64_h4",
+        "load_ms": 52983.403,
+        "l1": null,
+        "l3": {
+          "forecasts": 39,
+          "mase_ratio": 0.9978233267942298,
+          "crps_ratio": 1.0008144382172515,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "ladder": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": true
+        },
+        "l4": {
+          "l3_same": true,
+          "l4_pass": true
+        }
+      }
+    },
+    {
+      "stage": "rebuilt from conversion/timestral, Swift tool on the Mac: r6-timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-jit-ane",
+      "record": {
+        "path": "<lane>/stage/r6/gates/score_r6-timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-jit-ane.json",
+        "sha256": "12783cbec4d0093472c065f9daf216626b6809c7a92cd49f5ea215e46d4a5367"
+      },
+      "run": {
+        "path": "<lane>/stage/r6/swift/out/r6-timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv-jit-ane/run.json",
+        "sha256": "b1cad84d90162fcd3f66589e47ff22b1b4bda976151e4c2d7e2496d7b56a7910"
+      },
+      "result": {
+        "device": {
+          "arch": "h16c",
+          "available_compute_units": [
+            "cpu",
+            "gpu",
+            "neuralEngine"
+          ],
+          "build": "26A428",
+          "machine": "Mac16,9",
+          "os": "Version 27.0 (Build 26A428)",
+          "physical_memory_gb": 137.44
+        },
+        "route": "ane-jit",
+        "compute": "ane",
+        "bundle": "timestral_209m_L64_h4_r2_fp16p7-qkv4-tanh-conv.aimodel",
+        "rows_graph": 2,
+        "bucket": "L64_h4",
+        "load_ms": 8945.737,
+        "l1": null,
+        "l3": {
+          "forecasts": 39,
+          "mase_ratio": 0.9978233267942298,
+          "crps_ratio": 1.0008144382172515,
+          "max_ratio": 1.0051709523000416,
+          "worst_group": {
+            "group": "syn_short_100",
+            "mase_ratio": 1.0051709523000416,
+            "crps_ratio": 1.0044560501804995
+          },
+          "l3_pass": true,
+          "l2_pass": false,
+          "nan_inf": 0,
+          "non_monotone": 0
+        },
+        "vs": {
+          "aot": {
+            "bit_identical": true,
+            "bit_different_elements": 0,
+            "max_abs": 0.0
+          }
+        },
+        "mac": {
+          "l1_pass": null,
+          "l3_pass": null
+        },
+        "l4": {
+          "l4_pass": null,
+          "reason": "no Mac verdict"
+        }
+      }
+    },
+    {
+      "stage": "rebuild check: hashcmp.txt",
+      "record": {
+        "path": "<lane>/stage/r6/hashcmp.txt",
+        "sha256": "9aabb2cae0ddc000ab820fd53340c7cd2ca246770788b5b33f63f5368c78ad51"
+      }
+    },
+    {
+      "stage": "rebuild check: repro.txt",
+      "record": {
+        "path": "<lane>/stage/r6/repro.txt",
+        "sha256": "fa65c20ea45dfb31b525a13ce782395c5e10b83dbfad06cc88794f4052bb8459"
+      }
+    },
+    {
+      "stage": "rebuild check: aotcmp.txt",
+      "record": {
+        "path": "<lane>/stage/r6/aotcmp.txt",
+        "sha256": "e1255137778197c3f78585c6570c573a09803709f2a24637b6a5496cbdd4818d"
+      }
+    },
+    {
+      "stage": "rebuild check: stage_hf.log",
+      "record": {
+        "path": "<lane>/stage/stage_hf.log",
+        "sha256": "4ff1a4f71d93a77e184804cc95bf4734c0b4b06af3d113cc55da399d80e57cb3"
+      }
+    }
+  ]
+}
