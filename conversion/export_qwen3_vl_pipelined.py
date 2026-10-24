@@ -40,11 +40,18 @@ from _bundle import head_quant_spec, write_bundle_metadata
 
 from coreai_models.export._constants import TRACE_KV_CACHE_SEQ_LEN
 from coreai_models.export.macos import _EXTERNALIZE_SPECS, export_to_coreai
-from coreai_models.models.macos.qwen3_vl import (
-    PIPELINED_STATE_NAMES,
-    Qwen3VLPipelinedForCausalLM,
-    Qwen3VLVisionEncoder,
-)
+try:
+    from coreai_models.models.macos.qwen3_vl_pipelined import (
+        PIPELINED_STATE_NAMES,
+        Qwen3VLPipelinedForCausalLM,
+        Qwen3VLVisionEncoder,
+    )
+except ImportError:  # overlays that keep the classes in qwen3_vl.py
+    from coreai_models.models.macos.qwen3_vl import (
+        PIPELINED_STATE_NAMES,
+        Qwen3VLPipelinedForCausalLM,
+        Qwen3VLVisionEncoder,
+    )
 
 DTYPE = torch.float16
 

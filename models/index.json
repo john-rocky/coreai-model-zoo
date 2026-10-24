@@ -5841,6 +5841,70 @@
    ]
   },
   {
+   "family": "wevisone-vl-2b",
+   "card": "models/wevisone-vl-2b/README.md",
+   "recipes": [
+    {
+     "name": "wevisone-vl-2b",
+     "status": "unverified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/WeVisOne-VL-2B-CoreAI",
+     "bundle": "ios/wevisone_vl_2b_decode_int8hu_pf64",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run wevisone-vl-2b",
+     "gate_transcript": null,
+     "open_questions": [
+      "The Hub revision: the repository is not uploaded yet (2026-10-25). The decoder's bar D is the maintainer's call:",
+      "this recipe ships the int8 decoder on A, B and the task suite with D recorded as measured (record LANE.md section 3-7)."
+     ]
+    },
+    {
+     "name": "wevisone-vl-2b-vision-taps",
+     "status": "unverified",
+     "source_model": "tencent/WeVisOne-VL-2B",
+     "source_model_from": "exporter",
+     "hf_repo": "mlboydaisuke/WeVisOne-VL-2B-CoreAI",
+     "bundle": "ios/wevisone_vl_2b_vision_taps_g14.aimodel",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run wevisone-vl-2b-vision-taps",
+     "gate_transcript": null,
+     "open_questions": [
+      "The Hub revision: the repository is not uploaded yet (2026-10-25)."
+     ]
+    },
+    {
+     "name": "wevisone-vl-2b-mask-a",
+     "status": "unverified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/WeVisOne-VL-2B-CoreAI",
+     "bundle": "ios/wv_mask_a_g28_n16_fp16_hf.aimodel",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run wevisone-vl-2b-mask-a",
+     "gate_transcript": null,
+     "open_questions": [
+      "The Hub revision: the repository is not uploaded yet (2026-10-25)."
+     ]
+    },
+    {
+     "name": "wevisone-vl-2b-mask-b",
+     "status": "unverified",
+     "source_model": null,
+     "source_model_from": null,
+     "hf_repo": "mlboydaisuke/WeVisOne-VL-2B-CoreAI",
+     "bundle": "ios/wv_mask_b_fp16.aimodel",
+     "steps": 1,
+     "run": "python3 conversion/zoo_convert.py run wevisone-vl-2b-mask-b",
+     "gate_transcript": null,
+     "open_questions": [
+      "The Hub revision: the repository is not uploaded yet (2026-10-25)."
+     ]
+    }
+   ],
+   "repos": []
+  },
+  {
    "family": "whisper-large-v3-turbo",
    "card": "models/whisper-large-v3-turbo/README.md",
    "recipes": [

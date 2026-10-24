@@ -413,6 +413,15 @@ For the long-form version of the same material, read
   and the GPU's fp16 tower still passes; the Mac AOT and the iPhone both store the int8lin tower as fp16, so int8 buys
   download, not speed; iPhone 18 Pro device JIT 98.0 tok/s decode; coreai-torch's debug paths in `main.mlirb` and how
   the strip was re-gated.
+- [`wevisone-vl-2b-port.md`](wevisone-vl-2b-port.md) — WeVisOne-VL-2B: built upon Qwen3-VL, with a 9.5M-parameter
+  **pixel decoder** that turns the hidden state of each `<OBJ>` into an alpha matte. The decoder returns `last_hidden`
+  as a second output, which the pipelined engine runs but never hands out, so the app drives the four graphs on the
+  low-level runtime; the pixel decoder as two static graphs (one answer's queries attend to each other); one fp32 ulp in
+  a box moves the matte through its 2^k Fourier prior, on the GPU (the log term) and on the host (Darwin's `logf`
+  rounds 7 of the 3,494 possible widths apart from torch's); the decoder bar D sits on the fp16 floor; the prompt's
+  tail padded into one prefill call (30 ms against up to 1.1 s one token at a time on an iPhone 18 Pro); iOS's
+  1,024-position KV cap; the image path in the ANE's static form (host-made M-RoPE; 8-bit passes, no hidden state);
+  PixelShuffle and ConvTranspose2d on the ANE; why a re-export is never the same bytes.
 
 ## Image generation & editing (diffusion)
 - [`zimage-port.md`](zimage-port.md) — Z-Image-Turbo, a 6B Single-Stream DiT text-to-image — and why
