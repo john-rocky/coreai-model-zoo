@@ -134,6 +134,30 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
   MPSGraph specialization threw `std::bad_alloc` (`foldTransposeOp`) once the decoder's engine was up; signed with it,
   the app's answers on P1–P4 equal the Mac kit's byte for byte, from the uploaded bundles.
 
+## CoreAIKit (Look): asking where, not only whether
+
+- To place a reaction on a frame, the Look example asks *where* in a second new session on the same frame,
+  after the yes / no answer, in the model's own grounding form: `Detect <condition> in the picture and output
+  its bounding box.` The answer carries `<box>x1 y1 x2 y2</box>` in per mille of the input frame. On 24 frames
+  of the example video (Mac, the kit's `vlchat-cli`, boxes drawn by eye before any answer) it parsed 24 of 24.
+- The model boxes the subject of the sentence: for *a river flowing under a bridge* the box went on the water
+  (or the whole picture) and its middle was on the bridge in 1 of 5 frames; for *a road bridge crossing over
+  the river* the box sat on the bridge's deck in 5 of 5, and the yes / no answer was yes on the same seconds.
+  Write the condition with the thing to point at as its subject.
+- Read the first box tag only. The answers vary: `<ref>…</ref>:<box>…</box>`, `The region matching "…"
+  is<box>…</box>.`, `The region matching<ref>…<ref>is<box>…</box>.` (two opening `<ref>` tags and no closing
+  one), `… is at<box>…</box>`, `…, with coordinates<box>…</box>`; a
+  reader that expects a `<ref>…</ref>` pair misses some of them. The detokenized text keeps the tags as written.
+- Leave room for the answer: they ran 23–33 tokens, and one reasoning-style answer reached its first `</box>`
+  at token 47 — a 32-token cap cuts it before the box; Look caps at 48.
+- The other forms did worse on the same frames: four integers asked for in words came back as words for the
+  bridge (`top right bottom`); a point came back as about `400 400` nearly every time; one of 3 × 3 cells named
+  in words hit the right cell on 79 % of the frames, where answering the middle cell every time would score
+  71 %; and putting the cell into the yes / no prompt made the model write reasoning (up to the 512-token cap)
+  and broke the yes / no answers.
+- On the iPhone 18 Pro (iOS 27.2, the uploaded `gpu-pipelined` bundles) the box question took 1.28–1.34 s
+  for 24–29 tokens: the first token after 1.06–1.07 s, then about 9.4 ms a token.
+
 ## The bytes that ship
 
 - coreai-torch 0.4.1 writes each op's source location into `main.mlirb`: the three exports held 19 / 12 / 7
