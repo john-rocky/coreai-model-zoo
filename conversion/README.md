@@ -382,6 +382,19 @@ Apple's repo; each recipe names the script it runs.
   `export_vision.py` → `aot_compile.py` (h16c; `--reshapes` for the decoder) → `gate_decoder.py` (G1 44/44, G2 4/4) →
   `gate_vision.py` (G3) → `gate_e2e.py` (G4 4/4) → `timing_decoder.py --interleave`. Order and flags:
   [`minicpmv47/README.md`](minicpmv47/README.md). Card: [`../models/minicpm-v-4.7-1b/README.md`](../models/minicpm-v-4.7-1b/README.md).
+- **WeVisOne-VL-2B (vision-language with a pixel decoder, Tencent; in [`wevisone/`](wevisone/)): decoder
+  `wevisone/mask/mask_hidden.py int8hu-pf64`, tower `wevisone/mask/mask_vision_taps.py build --grid 14`, mask decoder
+  `wevisone/mask/mask_build.py a --grid 28 --host-fourier --precision fp16` and `b --precision fp16`, then
+  `wevisone/strip_stage.py`** — the Qwen3-VL exporter on this checkpoint (`export_wevisone.py`: the revision pinned
+  through `refs/main`, the checkpoint's own tokenizer files) with a second decoder output `last_hidden` (the state the
+  pixel decoder reads at each `<OBJ>`) and a third tower output (the ViT maps it reads), and the package's mask decoder
+  restructured into two static graphs (`mask/mask_graph.py`: per answer with key padding, per match). The oracle is the
+  package itself in fp32 (`oracle_wevisone.py`, its own venv: transformers 5.12.1, torch 2.11.0); then
+  `parity_torch_ladder.py`, the engine gates (`gate_decoder.py` A / B / D, `gate_prefill.py`, `chunked.py`,
+  `gate_report.py`), the task suite (`suite_coreai.py`, `suite.py`), the mask gates (`mask/mask_torch_check.py`,
+  `mask/mask_coreai_run.py`, `mask/mask_hidden_run.py`, `mask/mask_e2e.py`) and the Swift host's checks
+  (`host/check_boxpe.py`, `host/check_fixture.py`). Order and flags: [`wevisone/README.md`](wevisone/README.md). Card:
+  [`../models/wevisone-vl-2b/README.md`](../models/wevisone-vl-2b/README.md).
 - **Unlimited-OCR — document OCR, zoo's first doc-OCR, on the STOCK runtime (no patch): [`unlimited_ocr/`](unlimited_ocr)** —
   baidu/Unlimited-OCR (3B-A0.5B MoE, MIT) → fp16 DeepEncoder vision `.aimodel` + a sym8 DeepseekV2
   **R-SWA** MoE decoder (unified `prefill`+`decode` bundle). Driven on `inputs_embeds` directly, so

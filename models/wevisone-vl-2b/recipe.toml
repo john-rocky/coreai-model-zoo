@@ -1,0 +1,124 @@
+# Recipe for wevisone-vl-2b — the configuration that produced each graph staged for mlboydaisuke/WeVisOne-VL-2B-CoreAI.
+# Schema and the rules for `status`: ../README.md. Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# A cut-out request needs all four graphs. The decoder and the tower are the zoo's Qwen3-VL exporter
+# (conversion/export_qwen3_vl_pipelined.py) driven by conversion/wevisone/; the mask decoder is restructured in
+# conversion/wevisone/mask/mask_graph.py. conversion/wevisone/README.md lists the oracle, the exports, the AOT compiles
+# and the gates in order. Each staged .aimodel is its export with the MLIR debug locations stripped
+# (conversion/wevisone/strip_stage.py: AIModelAsset.load -> strip_debug_info -> save_asset with the source's metadata,
+# the method of conversion/d1_omni/strip_ship.py), which gives the staged main.mlirb of all four byte for byte from the
+# 2026-10-24 exports (exports/r2/); the macOS AOT is compiled from the stripped .aimodel. The exporter names its externalized composites
+# and resources anew on every export, so a new export equals the staged graph in weights and ops, not in bytes.
+# zoo_convert.py runs every step in conversion/; from there ../../_wevisone is the work directory under the default work
+# root (conversion/_paths.py: the repository's parent). The recipes write to ../../_wevisone/exports/ship/, apart from
+# the 2026-10-24 exports (exports/r2/) the staging was made from (mask_vision_taps.py replaces an existing output folder).
+
+["wevisone-vl-2b"]
+script = "wevisone/mask/mask_hidden.py"
+args = ["int8hu-pf64", "--out-root", "../../_wevisone/exports/ship/hidden", "--record", "../../_wevisone/exports/ship/hidden_export_int8hu-pf64.json"]
+card = "README.md"
+hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
+source_hf_id = "tencent/WeVisOne-VL-2B"
+source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
+bundle = "ios/wevisone_vl_2b_decode_int8hu_pf64"
+status = "verified"
+overlay = true
+runtime_patches = []
+needs = [
+  "The source snapshot at 3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf in the Hugging Face cache with refs/main naming it",
+  "(the exporter's loaders read the default branch; export_wevisone.py asserts it and sets HF_HUB_OFFLINE=1). The",
+  "overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0, transformers 4.57.6) and",
+  "Xcode 27.0 RC as DEVELOPER_DIR for the AOT and strip_stage.py.",
+]
+aot = "xcrun coreai-build compile wevisone_vl_2b_decode_int8hu_pf64.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes"
+notes = [
+  "The decoder with a second output: the overlay's Qwen3-VL pipelined decoder returning (logits, last_hidden), the last",
+  "layer's output before the final norm (what the package's LastHiddenCapture reads at each <OBJ>). The exporter call is",
+  "export_wevisone.py's: --grid 14 --max-ctx 4096 --skip-vision --skip-dynamic --skip-s1 --prefill-chunk 64, i.e. main",
+  "S=1 + prefill S=64 sharing keyCache / valueCache [28, 1, 8, -1, 128]; int8hu = the body linears int8 per block of 32",
+  "symmetric_with_clipping, the untied head int8 per block of 32 absmax; the checkpoint's tokenizer.json,",
+  "tokenizer_config.json and chat_template.jinja copied byte for byte. The staged graph came from the 2026-10-24 export",
+  "(exports/r2/hidden/int8hu-pf64/ under the work root): .aimodel 2,456,047,997 B, 2,467,662,022 B with metadata.json",
+  "and tokenizer/; stripped .aimodel 2,455,690,498 B, main.mlirb 2,455,690,361 B, sha256",
+  "f62a162875ab9411a8d3c24d5173b91e2a76f7f244adf4d8c287026ea75bc94e.",
+  "Gates vs the package's fp32 reference on the fixed 448 grid (33 rows, Mac AOT h16c, Python runtime): A 33/33, B 33/33,",
+  "D (16 teacher-forced steps at cosine >= 0.9999 each) 0/33 with the lowest step 0.99581 (record GATE.md); the logits",
+  "equal the one-output bundle's bit for bit on 10 rows at every step; the <OBJ> states' cosine to the reference's",
+  ">= 0.99863 (record r2/hidden_int8hu-pf64.json).",
+  "Published 2026-10-27 as revision c370b50f3f4ef7e580c97ec72ccd7379683af5ee: all 53 files match the staged SHA256SUMS",
+  "(LFS sha256 from the Hub, the small files downloaded and hashed; record r10/hf_readback.txt).",
+]
+open_questions = [
+  "The decoder's bar D: the maintainer chose (2026-10-25) to ship the int8 decoder on A, B and the task suite with D",
+  "recorded as measured (the card's Decoder accuracy section; record LANE.md section 3-7).",
+]
+
+["wevisone-vl-2b-vision-taps"]
+script = "wevisone/mask/mask_vision_taps.py"
+args = ["build", "--grid", "14", "--out-root", "../../_wevisone/exports/ship", "--record", "../../_wevisone/exports/ship/build_wevisone_vl_2b_vision_taps_g14.json"]
+card = "README.md"
+hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
+source_hf_id = "tencent/WeVisOne-VL-2B"
+source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
+bundle = "ios/wevisone_vl_2b_vision_taps_g14.aimodel"
+status = "verified"
+overlay = true
+runtime_patches = []
+aot = "xcrun coreai-build compile wevisone_vl_2b_vision_taps_g14.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "patches fp16 [784, 1536] -> image_embeds [196, 2048], deepstack_embeds [588, 2048], taps [4, 1024, 28, 28] (the",
+  "outputs of ViT layers 5 / 11 / 17 / 23 before the mergers, row-major), fp16. Staged from the 2026-10-24 export",
+  "(811,256,785 B); stripped main.mlirb 811,114,637 B, sha256 d8dd7a3f69c47cb95829f7f268d061704214548283eebbfb57acb5d914f56264.",
+  "The script gained an fp16w32 option after that export; exported again with it on 2026-10-25 (fp16, the default) the",
+  "stripped main.mlirb equals the staged one in its first 811,102,801 bytes (the weights), in coreai-build inspect and in",
+  "op counts, and differs in the last 12 KB of names only (record r10/strip_reexport.json). image_embeds / deepstack_embeds",
+  "bit-equal to the two-output tower on 10 rows; taps cos min 0.998621 (1 of 40 level-rows under 0.999), the matte",
+  "through them within MAE 5.15e-5 (record r2/vision_taps_g14.json).",
+]
+open_questions = []
+
+["wevisone-vl-2b-mask-a"]
+script = "wevisone/mask/mask_build.py"
+args = ["a", "--grid", "28", "--host-fourier", "--precision", "fp16", "--pkg", "../../_wevisone/ref/wevisone", "--sidecar", "<snapshot>/mask_decoder.pt", "--out-root", "../../_wevisone/exports/ship", "--record", "../../_wevisone/exports/ship/build_wv_mask_a_g28_n16_fp16_hf.json"]
+card = "README.md"
+hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
+source_hf_id = "tencent/WeVisOne-VL-2B"
+source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
+bundle = "ios/wv_mask_a_g28_n16_fp16_hf.aimodel"
+status = "verified"
+overlay = true
+runtime_patches = []
+needs = [
+  "--pkg: a checkout of Tencent/WeVisOne-VL at 40f735b8daed437ece982db9718e9c9856f52a79 (the directory holding",
+  "wevisone_vl/). --sidecar: the snapshot's mask_decoder.pt, a path on this machine; append `-- --sidecar <path>` to",
+  "the run (zoo_convert.py adds extra arguments last, and the last --sidecar wins).",
+]
+aot = "xcrun coreai-build compile wv_mask_a_g28_n16_fp16_hf.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "Mask decoder part A, 16 queries per call (the package's decoder_batch_size), the box Fourier encoding as an input",
+  "(box_pe, made on the host). Staged from the 2026-10-24 export (19,710,454 B); stripped main.mlirb 19,540,442 B, sha256",
+  "ffcf2e67979851773849aa9d7d28cf2c1b006c45333375422e59ba7249288ac8. With part B (fp16) on the reference's inputs, 20",
+  "rows / 46 instances vs the package's fp32 decoder: alpha MAE max 2.09e-4, IoU min 0.99208 (record r2/coreai_afp16_bfp16.json).",
+]
+open_questions = []
+
+["wevisone-vl-2b-mask-b"]
+script = "wevisone/mask/mask_build.py"
+args = ["b", "--precision", "fp16", "--pkg", "../../_wevisone/ref/wevisone", "--sidecar", "<snapshot>/mask_decoder.pt", "--out-root", "../../_wevisone/exports/ship", "--record", "../../_wevisone/exports/ship/build_wv_mask_b_fp16.json"]
+card = "README.md"
+hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
+source_hf_id = "tencent/WeVisOne-VL-2B"
+source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
+bundle = "ios/wv_mask_b_fp16.aimodel"
+status = "verified"
+overlay = true
+runtime_patches = []
+needs = [
+  "--pkg and --sidecar as for wevisone-vl-2b-mask-a.",
+]
+aot = "xcrun coreai-build compile wv_mask_b_fp16.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
+notes = [
+  "Mask decoder part B, one call per instance: mask_logits fp32 [1, 1024, 1024]. Staged from the 2026-10-24 export",
+  "(873,435 B); stripped main.mlirb 851,018 B, sha256 13bd5dfef16b7967fb3378727731d7a3930dc058b429e504c607f467a96ac4b2.",
+]
+open_questions = []
