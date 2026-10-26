@@ -1,6 +1,6 @@
 # WeVisOne-VL-2B — Core AI
 
-[🤗 mlboydaisuke/WeVisOne-VL-2B-CoreAI](https://huggingface.co/mlboydaisuke/WeVisOne-VL-2B-CoreAI) (upload pending) · Apache-2.0 · source [tencent/WeVisOne-VL-2B](https://huggingface.co/tencent/WeVisOne-VL-2B/tree/3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf) (revision `3dad9ce8`)
+[🤗 mlboydaisuke/WeVisOne-VL-2B-CoreAI](https://huggingface.co/mlboydaisuke/WeVisOne-VL-2B-CoreAI) (revision `c370b50f`) · Apache-2.0 · source [tencent/WeVisOne-VL-2B](https://huggingface.co/tencent/WeVisOne-VL-2B/tree/3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf) (revision `3dad9ce8`)
 
 On an iPhone 18 Pro (iOS 27.2), cutting out what a few words name in a photo — each match's box and its alpha matte —
 took 0.99–1.00 s for one match and 4.1 s for seven, measured 2026-10-25 in CoreAIKit's `Examples/Cutout` (warm
@@ -11,7 +11,7 @@ cites as `record …` are the conversion's working records; they live under `$ZO
 repository.
 
 The kit example [`Examples/Cutout`](https://github.com/john-rocky/coreai-kit/tree/main/Examples/Cutout) (CoreAIKit,
-pull request pending) runs the four graphs on an iPhone and a Mac: pick or take a photo, type what to cut out, and save
+pull request [#79](https://github.com/john-rocky/coreai-kit/pull/79)) runs the four graphs on an iPhone and a Mac: pick or take a photo, type what to cut out, and save
 the cut-out as a PNG with the background removed.
 
 ## What it is
@@ -126,8 +126,6 @@ objects. The bars were written before the runs; a matte passes at MAE ≤ 0.01 a
   33 answers, every box and count the same, 93.6 % of points (record `SUITE.md`, table iii).
 - **JPEG decoding.** ImageIO and Pillow decode JPEG to slightly different pixels, which moved one box coordinate by a bin
   on one row (`nasa_jungle_mat`: y2 1000 against 994); PNG pixels are identical (record `r4/fixture_mac_check.json`).
-- **Saving to Photos on the iPhone is not confirmed.** The app asked for permission and made the PNG (1,187,126 B);
-  the save after an answer of Allow has not been seen on the phone.
 
 ## Neural Engine (measured, not in the bundle)
 

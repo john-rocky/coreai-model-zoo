@@ -21,7 +21,7 @@ hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
 source_hf_id = "tencent/WeVisOne-VL-2B"
 source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
 bundle = "ios/wevisone_vl_2b_decode_int8hu_pf64"
-status = "unverified"
+status = "verified"
 overlay = true
 runtime_patches = []
 needs = [
@@ -45,10 +45,12 @@ notes = [
   "D (16 teacher-forced steps at cosine >= 0.9999 each) 0/33 with the lowest step 0.99581 (record GATE.md); the logits",
   "equal the one-output bundle's bit for bit on 10 rows at every step; the <OBJ> states' cosine to the reference's",
   ">= 0.99863 (record r2/hidden_int8hu-pf64.json).",
+  "Published 2026-10-27 as revision c370b50f3f4ef7e580c97ec72ccd7379683af5ee: all 53 files match the staged SHA256SUMS",
+  "(LFS sha256 from the Hub, the small files downloaded and hashed; record r10/hf_readback.txt).",
 ]
 open_questions = [
-  "The Hub revision: the repository is not uploaded yet (2026-10-25). The decoder's bar D is the maintainer's call:",
-  "this recipe ships the int8 decoder on A, B and the task suite with D recorded as measured (record LANE.md section 3-7).",
+  "The decoder's bar D: the maintainer chose (2026-10-25) to ship the int8 decoder on A, B and the task suite with D",
+  "recorded as measured (the card's Decoder accuracy section; record LANE.md section 3-7).",
 ]
 
 ["wevisone-vl-2b-vision-taps"]
@@ -59,7 +61,7 @@ hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
 source_hf_id = "tencent/WeVisOne-VL-2B"
 source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
 bundle = "ios/wevisone_vl_2b_vision_taps_g14.aimodel"
-status = "unverified"
+status = "verified"
 overlay = true
 runtime_patches = []
 aot = "xcrun coreai-build compile wevisone_vl_2b_vision_taps_g14.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c"
@@ -73,9 +75,7 @@ notes = [
   "bit-equal to the two-output tower on 10 rows; taps cos min 0.998621 (1 of 40 level-rows under 0.999), the matte",
   "through them within MAE 5.15e-5 (record r2/vision_taps_g14.json).",
 ]
-open_questions = [
-  "The Hub revision: the repository is not uploaded yet (2026-10-25).",
-]
+open_questions = []
 
 ["wevisone-vl-2b-mask-a"]
 script = "wevisone/mask/mask_build.py"
@@ -85,7 +85,7 @@ hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
 source_hf_id = "tencent/WeVisOne-VL-2B"
 source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
 bundle = "ios/wv_mask_a_g28_n16_fp16_hf.aimodel"
-status = "unverified"
+status = "verified"
 overlay = true
 runtime_patches = []
 needs = [
@@ -100,9 +100,7 @@ notes = [
   "ffcf2e67979851773849aa9d7d28cf2c1b006c45333375422e59ba7249288ac8. With part B (fp16) on the reference's inputs, 20",
   "rows / 46 instances vs the package's fp32 decoder: alpha MAE max 2.09e-4, IoU min 0.99208 (record r2/coreai_afp16_bfp16.json).",
 ]
-open_questions = [
-  "The Hub revision: the repository is not uploaded yet (2026-10-25).",
-]
+open_questions = []
 
 ["wevisone-vl-2b-mask-b"]
 script = "wevisone/mask/mask_build.py"
@@ -112,7 +110,7 @@ hf_repo = "mlboydaisuke/WeVisOne-VL-2B-CoreAI"
 source_hf_id = "tencent/WeVisOne-VL-2B"
 source_revision = "3dad9ce8bcb6fbe0aea945bf8860bd2cfc3663bf"
 bundle = "ios/wv_mask_b_fp16.aimodel"
-status = "unverified"
+status = "verified"
 overlay = true
 runtime_patches = []
 needs = [
@@ -123,6 +121,4 @@ notes = [
   "Mask decoder part B, one call per instance: mask_logits fp32 [1, 1024, 1024]. Staged from the 2026-10-24 export",
   "(873,435 B); stripped main.mlirb 851,018 B, sha256 13bd5dfef16b7967fb3378727731d7a3930dc058b429e504c607f467a96ac4b2.",
 ]
-open_questions = [
-  "The Hub revision: the repository is not uploaded yet (2026-10-25).",
-]
+open_questions = []
