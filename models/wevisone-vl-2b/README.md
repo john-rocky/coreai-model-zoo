@@ -14,9 +14,10 @@ The kit example [`Examples/Cutout`](https://github.com/john-rocky/coreai-kit/tre
 pull request [#79](https://github.com/john-rocky/coreai-kit/pull/79)) runs the four graphs on an iPhone and a Mac: pick or take a photo, type what to cut out, and save
 the cut-out as a PNG with the background removed.
 
-A recorded run on an iPhone 18 Pro — a photo of a kitten and a puppy, "the kitten" typed, only the kitten cut out and
-saved to Photos, boxes 0.59 s and matte 0.62 s on the screen — is the 14.6 s clip
-[`demos/wevisone-vl-2b-cutout-iphone-20261027.mp4`](https://github.com/john-rocky/coreai-assets/blob/main/demos/wevisone-vl-2b-cutout-iphone-20261027.mp4)
+A recorded run on an iPhone 18 Pro — a photo of three lit jack-o'-lanterns among small uncarved pumpkins, "every carved
+pumpkin" typed: 3 found, boxes 0.83 s and matte 1.42 s on the screen, only the three carved ones cut out, then lined up
+on one sheet and saved to Photos — is the 14.5 s clip
+[`demos/wevisone-vl-2b-pumpkins-iphone-20261027.mp4`](https://github.com/john-rocky/coreai-assets/blob/main/demos/wevisone-vl-2b-pumpkins-iphone-20261027.mp4)
 in coreai-assets (its `demos/README.md` has the run's numbers; the photo is CC0).
 
 ## What it is
