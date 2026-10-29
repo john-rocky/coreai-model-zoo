@@ -55,6 +55,7 @@ except in int8hu and int4hu.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import shutil
 from pathlib import Path
 
@@ -270,7 +271,8 @@ def export_lfm3_decode(
     ``config_key`` pick the decoder inside a multimodal checkpoint (lfm3.py
     ``lfm3_from_hf``). ``tokenizer_src`` defaults to ``src`` (a VL / Omni /
     Audio checkpoint carries its own tokenizer); pass ``""`` to skip it.
-    ``chat_template`` (a path) replaces the source `chat_template.jinja`.
+    ``chat_template`` (a path) replaces the source `chat_template.jinja`; its
+    sha256 goes to metadata.json as `language.chat_template_sha256`.
     ``hf_id`` names the source in metadata.json (default: ``src`` when it is
     not a local dir). ``prefill_chunk`` = P > 1 adds the static S=P
     "prefill" function (module docstring); ``pad_tail`` gives it the
@@ -369,6 +371,10 @@ def export_lfm3_decode(
     language_extra = {}
     if embeds:
         language_extra["inputs_embeds"] = [1, 1, cfg.hidden_size]
+    tok_src = src if tokenizer_src is None else tokenizer_src
+    if tok_src and chat_template:
+        # The bundle carries a template other than the source's: record which one.
+        language_extra["chat_template_sha256"] = hashlib.sha256(Path(chat_template).read_bytes()).hexdigest()
     extra = {"lfm3": {"inputs": list(spec["input_names"]), "outputs": list(spec["output_names"]),
                       "states": list(spec["state_names"]),
                       "kv_slots": cfg.attention_layer_ids, "conv_slots": cfg.conv_layer_ids,
@@ -381,7 +387,6 @@ def export_lfm3_decode(
                           weights=str(src) if local_src else None, mode=mode,
                           functions=("main", "prefill") if prefill_chunk else ("main",),
                           language_extra=language_extra or None, extra=extra)
-    tok_src = src if tokenizer_src is None else tokenizer_src
     if tok_src:
         save_tokenizer(tok_src, out / "tokenizer", revision=None if Path(tok_src).is_dir() else revision,
                        chat_template=chat_template)

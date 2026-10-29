@@ -600,6 +600,19 @@ Apple's repo; each recipe names the script it runs.
   locations, compiles for h19p and compares the copies on the Mac. These scripts import no `coreai_models` code. See
   [`eg2_transcribe/README.md`](eg2_transcribe/README.md) and
   [`../models/embeddinggemma-2-transcribe/README.md`](../models/embeddinggemma-2-transcribe/README.md).
+- **LFM3-1.7B (reasoning, XML tool calls, LiquidAI; in this dir): `lfm3_chat_template.py <template.jinja>`, then
+  `export_lfm3_decode_pipelined.py int8hu --head-quant block32 --head-sym --prefill-chunk 64 --chat-template
+  <template.jinja>`** — the LFM3 decoder re-authored from the safetensors (`models/macos/lfm3.py` in
+  [`overlay/`](overlay/): 13 short-conv + 11 gated attention layers, the 256-token sliding window as the SDPA
+  composite's `window_size`, the zero-tail rotary) as one asset with two functions over the same weights, `main` (one
+  token) and `prefill` (a static 64-token chunk). `lfm3_chat_template.py` writes the bundle's chat template: the
+  vendor's with eight rewrites that change no rendered string and parse in swift-jinja 2.3.2 to 2.5.2. The published
+  `.aimodel` is the export re-saved without its source locations (`d1/strip_bundle.py` does it); a new export has
+  another `main.hash`, because each export draws new names for its externalized graphs and weight resources.
+  `export_lfm3_ane_static.py` exports the static iOS (Neural Engine) form from `models/ios/lfm3.py`. The same module is
+  the language model of the LFM3-VL / -Omni / -Audio ports. See
+  [`../models/lfm3-1.7b/README.md`](../models/lfm3-1.7b/README.md) and
+  [`../knowledge/lfm3-1.7b-port.md`](../knowledge/lfm3-1.7b-port.md).
 - **RGBA-Image-2.1 (Qwen-Image-2.1 text-to-image with RGBA output, Alibaba Qwen, in [`qwenimage21/`](qwenimage21/)):
   `qwenimage21/export_dit.py`, `qwenimage21/export_encoder.py --aot --w16a32`,
   `qwenimage21/export_vae.py --size {256,512,1024} --aot`** — the 7B block-causal DiT and the
