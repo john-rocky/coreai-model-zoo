@@ -9,7 +9,7 @@ then AOT for the Neural Engine with the ANE regions counted by unique name.
     python conversion/export_lfm3_ane_static.py --src <LFM3 checkpoint dir> --out-dir <dir> [--name NAME] \\
         [--qconfig <kmeans_palettization_config yaml> | --no-palettize] [--max-context-length 4096] \\
         [--act tanh|stock] [--history block|column] [--num-layers N] [--aot h16c,h18p,h19p] \\
-        [--tokenizer-src <dir>] [--chat-template <file>]
+        [--tokenizer-src <dir>] [--chat-template <file>] [--emit-hidden] [--fp16-table]
     python conversion/export_lfm3_ane_static.py --tiny --out-dir <dir> --aot h16c     # random 5-layer probe
 
 Why not `coreai.llm.export --platform iOS` with a runtime `register()` (the LFM2.5 path,
@@ -23,7 +23,12 @@ load_embeddings.
 The default palettization (no --qconfig) = 8-bit k-means per-grouped-channel g32 on every Conv2d (LFM2.5's and
 MiniCPM5-1B's ANE recipe; 4-bit g8 does not compile for the ANE), the embedding table int8 per tensor (Apple's
 iOS table, also the tied head), the attention output gate (16 rows < one group of 32) left fp16, the depthwise conv
-taps and the norms are bare parameters (never palettized).
+taps and the norms are bare parameters (never palettized). `--fp16-table`: the table, and so the tied head, stays fp16
+(the builder's disable_embedding_quantization; 128000 x 2048 x 2 B = 524 MB instead of 262 MB; the check form's host
+gather reads it from the same emb_int8.npy with scale 1.0, emb.json records the dtype); the default name gets
+`_fp16table`. It does not compile for the Neural Engine (r7: the first function's ANE region fails in
+ANECCompileOffline, aneCompileStatus=1, and the whole package leaves the ANE = 0 regions at h16c and h18p): a GPU /
+check-form variant for now (on the Mac GPU it moved line A2 from 96.38 to 97.24 % top-1, the same palettization).
 
 AOT (`--aot`): h16c (Mac) = `--platform macOS`, h18p / h19p (iPhone 17 / 18 Pro) = `--platform iOS`, all
 `--preferred-compute neural-engine` (Xcode 27.0.0 RC's coreai-build) = the placement check (ANE regions by unique
@@ -35,6 +40,22 @@ numbers (palettized weights, int8 table, the builder's reads) on the GPU, not th
 `conversion/wevisone/ane/export_vl.py`): the same palettized weights in the same process, only
 `extend_<ctx>_8` / `extend_<ctx>_64` at one context (`--check-ctx`, default 2048 = every line-1 sequence fits), no
 hardware constraints.
+
+`--emit-hidden` (the builder's emit_hidden): every extend_<ctx>_<q> function (and the check form's) returns two
+outputs, `out_logits` and `hidden` = the final-norm hidden [1, q, 1, hidden_size] fp16 (the head's input in the
+residual stream's layout = transformer_input's; the speech paths' depth decoders read it; a [1, q, hidden_size]
+reshape crashes the ANE compiler, see the builder); prompt_opt, the gather and load functions and both states are
+unchanged. Apple's
+`_convert_to_coreai` names one output per forward function, so its converter class is swapped for the call by one
+that names the extend entrypoint's two (`_extend_outputs_converter`); its static shapes, constraints and passes are
+the ones applied. The default name gets `_hidden`.
+
+Placement cap (r7): one ANE package places about 255 region inputs + results across its functions (coreai-build
+3600.83.1, h16c and h18p; above it the last functions in name order leave the ANE with no compile error). This
+builder's extend region takes 8 inputs (the KV rows, the table, cos, sin, the mask, transformer_input, in_step) and
+returns 1 result (2 with hidden), prompt_opt's 7 + 1, per (ctx, q) of the 256 .. max ctx x {8, 16, 64} ladder: the
+default form at max ctx 4096 uses 255, the hidden form fits at max ctx <= 2048 (216). The export warns above the cap
+(`ane_region_io`).
 """
 from __future__ import annotations
 
@@ -57,6 +78,8 @@ AOT_XCODE = "/Applications/Xcode-27.0.0-RC.app/Contents/Developer"
 ARCH_PLATFORM = {"h16c": "macOS", "h18p": "iOS", "h19p": "iOS"}
 HF_ID = "LiquidAI/LFM3-1.7B"
 LICENSE = "LFM Open License v1.0"
+# region inputs + results one ANE package places (module docstring, r7)
+ANE_REGION_IO_CAP = 255
 
 PAL8_G32 = {
     "global_config": {"op_state_spec": {"weight": {
@@ -151,11 +174,41 @@ class _CheckExtend(torch.nn.Module):
         return self.extend(transformer_input, position_ids, in_step, causal_mask, key_cache, value_cache, self.table)
 
 
+def ane_region_io(max_ctx: int, emit_hidden: bool) -> int:
+    """This builder's ANE region inputs + results over the 2 x ctx x q transformer functions (module docstring)."""
+    n_ctx = sum(1 for i in range(16) if 256 * 2 ** i <= max_ctx)
+    return n_ctx * 3 * ((8 + 1 + int(emit_hidden)) + (7 + 1))
+
+
+def extend_output_names(emit_hidden: bool) -> list[str]:
+    """The extend functions' outputs in order: Apple's `out_logits`, then the builder's `hidden` with emit_hidden."""
+    from coreai_models.export import ios as X
+    from coreai_models.models.ios import lfm3 as L
+
+    return [X.OUTPUT_LOGITS_NAME] + ([L.HIDDEN_OUTPUT_NAME] if emit_hidden else [])
+
+
+def _extend_outputs_converter(base, extend_name: str, output_names: list[str]):
+    """A ``base`` (TorchConverter) subclass that names the ``extend_name`` entrypoint's outputs ``output_names``;
+    every other entrypoint goes through as Apple's `_convert_to_coreai` stages it."""
+
+    class ExtendOutputsConverter(base):
+        def add_exported_program(self, exported_program, *, entrypoint_name="main", **kw):
+            if entrypoint_name == extend_name:
+                n = len(exported_program.graph_signature.user_outputs)
+                if n != len(output_names):
+                    raise ValueError(f"{extend_name} returns {n} outputs, names {output_names}")
+                kw["output_names"] = list(output_names)
+            return super().add_exported_program(exported_program, entrypoint_name=entrypoint_name, **kw)
+
+    return ExtendOutputsConverter
+
+
 async def convert_check_form(model, inputs, *, cache_len: int, hidden_size: int, kv_cached_embed_size: int,
                              num_layers: int, query_lengths=(8, 64)):
     """Apple's `_export_ios_programs` + `_convert_to_coreai` (export/ios.py) for the Mac check form: the decode
     entrypoint only (no prompt_opt, no gather / load), the table inside the graph, one context, no IOSurface /
-    interleave constraints."""
+    interleave constraints. Its outputs follow the builder's emit_hidden (extend_output_names)."""
     from coreai_torch import TorchConverter
 
     from coreai_models.export import ios as X
@@ -178,8 +231,8 @@ async def convert_check_form(model, inputs, *, cache_len: int, hidden_size: int,
         program,
         input_names=[X.TRANSFORMER_INPUT_NAME, X.POSITION_IDS_INPUT_NAME, X.IN_STEP_INPUT_NAME,
                      X.CAUSAL_MASK_INPUT_NAME],
-        state_names=[X.KEY_CACHE_INPUT_NAME, X.VALUE_CACHE_INPUT_NAME], output_names=[X.OUTPUT_LOGITS_NAME],
-        entrypoint_name=X.EXTEND_FUNCTION_NAME)
+        state_names=[X.KEY_CACHE_INPUT_NAME, X.VALUE_CACHE_INPUT_NAME],
+        output_names=extend_output_names(model.extend.emit_hidden), entrypoint_name=X.EXTEND_FUNCTION_NAME)
     prog = converter.to_coreai()
     prog.set_static_shape_config(X.EXTEND_FUNCTION_NAME, {
         f'"{cache_len}_{q}"': {
@@ -207,7 +260,8 @@ def save_tokenizer(src: Path, dest: Path, chat_template: str | None) -> None:
 
 
 def _save_form(prog, out: Path, name: str, *, cfg, cache_width: int, max_ctx: int, hf_id: str, revision, src,
-               palettize: bool, act: str, history: str, form: str, tokenizer_src, chat_template) -> Path:
+               palettize: bool, act: str, history: str, form: str, tokenizer_src, chat_template,
+               emit_hidden: bool = False, fp16_table: bool = False) -> Path:
     import coreai.runtime as rt
 
     from _bundle import write_bundle_metadata
@@ -221,7 +275,9 @@ def _save_form(prog, out: Path, name: str, *, cfg, cache_width: int, max_ctx: in
     md.license = LICENSE
     md.model_description = (f"{hf_id} — Apple static iOS export for the Neural Engine (LFM3 static builder: conv "
                             f"history in the KV rows, sliding window from the runner's mask, act {act}, "
-                            f"history {history}, {'8-bit k-means g32' if palettize else 'fp16'}; form {form})")
+                            f"history {history}, {'8-bit k-means g32' if palettize else 'fp16'}"
+                            f"{', fp16 embedding table' if fp16_table else ''}"
+                            f"{', extend also returns the final-norm hidden' if emit_hidden else ''}; form {form})")
     md.creation_date = int(time.time())
     assert md.author == "LiquidAI" and md.license == LICENSE, "AIModelAssetMetadata dropped a field"
     prog.save_asset(aimodel, md)
@@ -233,7 +289,9 @@ def _save_form(prog, out: Path, name: str, *, cfg, cache_width: int, max_ctx: in
                                                  "attention_layers": cfg.attention_layer_ids,
                                                  "conv_layers": cfg.conv_layer_ids,
                                                  "sliding_window": cfg.sliding_window, "act": act,
-                                                 "history": history}})
+                                                 "history": history, "emit_hidden": emit_hidden,
+                                                 "extend_outputs": extend_output_names(emit_hidden),
+                                                 "embedding_table": "fp16" if fp16_table else "int8 per tensor"}})
     if tokenizer_src:
         save_tokenizer(Path(tokenizer_src), out / "tokenizer", chat_template)
     return aimodel
@@ -243,10 +301,12 @@ def export_lfm3_ane_static(src: str, out_dir: Path, name: str, *, qconfig: str |
                            max_ctx: int = 4096, num_layers: int | None = None, act: str = "tanh",
                            history: str = "block", tokenizer_src: str | None = None, chat_template: str | None = None,
                            hf_id: str = HF_ID, revision: str | None = None, seed: int = 0,
-                           check_form: bool = False, check_ctx: int = 2048) -> tuple[dict, dict]:
+                           check_form: bool = False, check_ctx: int = 2048,
+                           emit_hidden: bool = False, fp16_table: bool = False) -> tuple[dict, dict]:
     """Export the static bundle dir `out_dir/name` (`name.aimodel` + metadata.json + tokenizer/), and with
-    ``check_form`` the Mac check form `out_dir/name_maccheck` from the same palettized model. Returns
-    ({form: aimodel path}, timing / size record)."""
+    ``check_form`` the Mac check form `out_dir/name_maccheck` from the same palettized model. ``emit_hidden``: the
+    extend functions also return `hidden`; ``fp16_table``: the table / tied head fp16, not int8 per tensor (module
+    docstring). Returns ({form: aimodel path}, timing / size record)."""
     from coreai_models.export import ios as ios_export
     from coreai_models.export.compression import palettize_pytorch_model
     from coreai_models.models.ios import lfm3 as L
@@ -254,19 +314,31 @@ def export_lfm3_ane_static(src: str, out_dir: Path, name: str, *, qconfig: str |
     torch.manual_seed(seed)
     rec: dict = {"src": str(src), "name": name, "max_ctx": max_ctx, "num_layers": num_layers, "act": act,
                  "history": history, "palettize": palettize, "qconfig": qconfig or ("PAL8_G32" if palettize else None),
-                 "norm_k": L.NORM_K, "builder": "coreai_models.models.ios.lfm3"}
+                 "norm_k": L.NORM_K, "builder": "coreai_models.models.ios.lfm3", "emit_hidden": emit_hidden,
+                 "extend_outputs": extend_output_names(emit_hidden),
+                 "embedding_table": "fp16" if fp16_table else "int8 per tensor",
+                 "ane_region_io": ane_region_io(max_ctx, emit_hidden)}
+    if rec["ane_region_io"] > ANE_REGION_IO_CAP:
+        print(f"WARNING: {rec['ane_region_io']} ANE region inputs + results > {ANE_REGION_IO_CAP} (max ctx {max_ctx}"
+              f"{', emit_hidden' if emit_hidden else ''}): the last functions in name order will leave the ANE",
+              flush=True)
+    if fp16_table:
+        print("WARNING: the fp16 table does not compile for the Neural Engine (0 ANE regions, r7): GPU / check form",
+              flush=True)
     t0 = time.time()
     model = L.lfm3_ios_from_hf(src, dtype=torch.float16, max_context_length=max_ctx, act=act, history=history,
-                               num_layers=num_layers)
+                               num_layers=num_layers, disable_embedding_quantization=fp16_table)
     cfg = model.config
     rec["load_s"] = time.time() - t0
     if palettize:
+        # traced with the default (logits-only) output; emit_hidden selects an output and changes no weight
         t1 = time.time()
         model = palettize_pytorch_model(model, L.palettization_example_inputs(model), load_qconfig(qconfig))
         rec["palettize_s"] = time.time() - t1
+    model.extend.emit_hidden = emit_hidden
     save = dict(cfg=cfg, cache_width=model.cache_width, max_ctx=max_ctx, hf_id=hf_id, revision=revision, src=src,
                 palettize=palettize, act=act, history=history, tokenizer_src=tokenizer_src,
-                chat_template=chat_template)
+                chat_template=chat_template, emit_hidden=emit_hidden, fp16_table=fp16_table)
     forms: dict[str, Path] = {}
 
     t2 = time.time()
@@ -274,9 +346,16 @@ def export_lfm3_ane_static(src: str, out_dir: Path, name: str, *, qconfig: str |
     programs = ios_export._export_ios_programs(model, inputs)
     rec["trace_s"] = time.time() - t2
     t3 = time.time()
-    prog = asyncio.run(ios_export._convert_to_coreai(
-        *programs, max_context_length=max_ctx, kv_cached_embed_size=model.cache_width,
-        hidden_size=cfg.hidden_size, num_layers=cfg.num_hidden_layers))
+    apple_converter = ios_export.TorchConverter
+    if emit_hidden:
+        ios_export.TorchConverter = _extend_outputs_converter(apple_converter, ios_export.EXTEND_FUNCTION_NAME,
+                                                              extend_output_names(True))
+    try:
+        prog = asyncio.run(ios_export._convert_to_coreai(
+            *programs, max_context_length=max_ctx, kv_cached_embed_size=model.cache_width,
+            hidden_size=cfg.hidden_size, num_layers=cfg.num_hidden_layers))
+    finally:
+        ios_export.TorchConverter = apple_converter
     rec["convert_s"] = time.time() - t3
     forms["ios"] = _save_form(prog, out_dir / name, name, form="ios", **save)
     del prog, programs
@@ -290,7 +369,8 @@ def export_lfm3_ane_static(src: str, out_dir: Path, name: str, *, qconfig: str |
         rec["check_form_s"] = time.time() - t5
         forms["maccheck"] = _save_form(prog, out_dir / f"{name}_maccheck", f"{name}_maccheck", form="maccheck",
                                        **save)
-        # the host gather of the check form: the iOS table (int8 [V, d]) and its fp16 scale
+        # the host gather of the check form: the iOS table (int8 [V, d], or fp16 with --fp16-table: the same file
+        # name, scale 1.0) and its fp16 scale
         import numpy as np
 
         table = model.load_embeddings.embedding_table.data
@@ -365,6 +445,10 @@ def main() -> None:
     ap.add_argument("--hf-id", default=HF_ID)
     ap.add_argument("--revision", default=None)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--emit-hidden", action="store_true",
+                    help="extend also returns the final-norm hidden `hidden` [1, q, 1, hidden_size] (see above)")
+    ap.add_argument("--fp16-table", action="store_true",
+                    help="the embedding table / tied head fp16 instead of int8 per tensor (see above)")
     a = ap.parse_args()
 
     out_dir = Path(a.out_dir).resolve()
@@ -375,12 +459,14 @@ def main() -> None:
     if not src:
         raise SystemExit("--src or --tiny")
     tag = "pal8" if not a.no_palettize else "fp16"
-    name = a.name or f"lfm3_{'tiny' if a.tiny else '1_7b'}_static_{tag}_{a.act}_{a.history}_c{a.max_context_length}"
+    name = a.name or (f"lfm3_{'tiny' if a.tiny else '1_7b'}_static_{tag}_{a.act}_{a.history}_c{a.max_context_length}"
+                      f"{'_hidden' if a.emit_hidden else ''}{'_fp16table' if a.fp16_table else ''}")
     forms, rec = export_lfm3_ane_static(src, out_dir, name, qconfig=a.qconfig, palettize=not a.no_palettize,
                                         max_ctx=a.max_context_length, num_layers=a.num_layers, act=a.act,
                                         history=a.history, tokenizer_src=a.tokenizer_src,
                                         chat_template=a.chat_template, hf_id=a.hf_id, revision=a.revision,
-                                        seed=a.seed, check_form=a.check_form, check_ctx=a.check_ctx)
+                                        seed=a.seed, check_form=a.check_form, check_ctx=a.check_ctx,
+                                        emit_hidden=a.emit_hidden, fp16_table=a.fp16_table)
     for f, p in forms.items():
         print(f"exported {f}: {p} ({rec['aimodel_bytes'][f]:,} B)", flush=True)
     print(f"export total {rec['export_total_s']:.0f} s", flush=True)
