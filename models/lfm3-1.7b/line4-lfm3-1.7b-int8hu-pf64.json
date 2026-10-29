@@ -1,0 +1,183 @@
+{
+ "bundle": "lfm3_1_7b_decode_int8hu_block32_sym_pf64",
+ "aimodel_main_hash": "5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171",
+ "line_4x_tool": {
+  "pass": true,
+  "runs": {
+   "zoo": [
+    {
+     "run": 1,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "2WLS-ZPN4",
+     "answer": "The value stored under the key \"alpha\" is **2WLS-ZPN4**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 2,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "E3GW-B3F5",
+     "answer": "The value stored under the key \"alpha\" is **E3GW-B3F5**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 3,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "5CWR-RLWY",
+     "answer": "The value stored under the key \"alpha\" is **5CWR-RLWY**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    }
+   ],
+   "kit": [
+    {
+     "run": 1,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "6XTD-UAKP",
+     "answer": "The value stored under the key \"alpha\" is **6XTD-UAKP**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "declares_tool_calling": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 2,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "DJAF-V628",
+     "answer": "The value stored under the key \"alpha\" is **DJAF-V628**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "declares_tool_calling": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 3,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "QHF7-96ZW",
+     "answer": "The value stored under the key \"alpha\" is **QHF7-96ZW**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "declares_tool_calling": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    }
+   ]
+  },
+  "protocol": "lookup_secret(key) returning a fresh random value per run; zoo = ZooLanguageModel(resourcesAt:) on CM 397b337's engine, kit = KitLanguageModel(bundleAt:, .pipelined) on CoreAIKit's pin (coreai-models 0.2.8-zoo); the bundle = the stripped .aimodel compiled AOT h16c; greedy, maximumResponseTokens 2048"
+ },
+ "line_4k_kit_catalog": {
+  "ask_reply": "42",
+  "chat_on": {
+   "pass": true,
+   "answer": "17 + 25 = 42",
+   "thinking_chars": 176
+  },
+  "chat_off": {
+   "pass": true,
+   "answer": "17 + 25 = 42.",
+   "thinking_chars": 0
+  },
+  "tool_catalog": {
+   "pass": true,
+   "answer": "The value stored under the key \"alpha\" is **GUZF-Z2TT**."
+  },
+  "multiturn_answers": [
+   "I'll remember the code word TANGERINE-7319 for later.",
+   "42",
+   "TANGERINE-7319"
+  ],
+  "card_snippets_default_configuration": {
+   "first_run": {
+    "pass": false,
+    "off_reply": "16 + 24 = 40 (since 17 + 25 = 17 + 20 + 5 = 37 + 5? Wait, 17 + 25 = 42). Let me compute properly: 17 + 25 = 42. Brief answer: 42.</think>42",
+    "checks": {
+     "off_no_markup_in_reply": false,
+     "off_reply_nonempty": true,
+     "on_answer_nonempty": true,
+     "on_no_markup_in_answer": true,
+     "on_thinking_nonempty": true
+    }
+   },
+   "split_20_runs_each": {
+    "pf64": {
+     "runs": 20,
+     "pass": 20,
+     "off_leaks": 0,
+     "on_leaks": 0
+    },
+    "i8": {
+     "runs": 20,
+     "pass": 20,
+     "off_leaks": 0,
+     "on_leaks": 0
+    }
+   },
+   "reading": "temperature 0.7 (the card's default configuration): one thinking-off reply in 21 runs on this bundle carried a stray </think>, 0 in 21 on the main-only build; the 22-token prompt never reaches prefill and main gives the main-only build's values = a sampling event of the model with thinking off, not the bundle"
+  },
+  "protocol": "ChatSession(catalog: \"lfm3-1.7b\") resolved through the catalog row's path (gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym in a scratch home's store) holding this ship form, JIT on the Mac; ask = the card's QuickStart snippet; chat = greedy, enableThinking true / false; tool = KitLanguageModel from the catalog entry; multiturn = 3 greedy turns"
+ },
+ "kit_path_chunked_prefill": {
+  "engine_log": [
+   "Pipelined engine loaded 'prefill' function: static chunk S=64",
+   "Pipelined additional states: convState"
+  ],
+  "ttft_1233_token_prompt_s": {
+   "pf64_catalog": [
+    1.079,
+    0.683,
+    0.68
+   ],
+   "int8hu_bundle": [
+    7.722,
+    7.363,
+    7.771
+   ]
+  },
+  "note": "outside a quiet window (other lanes' jobs ran): a record that the kit's pinned engine runs prefill, not a speed figure"
+ }
+}

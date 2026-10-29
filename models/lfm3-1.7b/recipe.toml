@@ -3,8 +3,9 @@
 # Run it with:  python3 ../../conversion/zoo_convert.py run <name>
 #
 # The decoder is the LFM3 authoring module (coreai_models/models/macos/lfm3.py: 13 short-conv layers and 11 attention
-# layers, the sliding window inside the SDPA composite, the zero-tail rotary, the output gate) exported S=1 for the
-# pipelined engine by conversion/export_lfm3_decode_pipelined.py. The staged .aimodel is that export with the MLIR debug
+# layers, the sliding window inside the SDPA composite, the zero-tail rotary, the output gate) exported for the
+# pipelined engine by conversion/export_lfm3_decode_pipelined.py as one asset with two functions: "main" (one token)
+# and "prefill" (a static 64-token chunk, --prefill-chunk 64). The staged .aimodel is that export with the MLIR debug
 # locations stripped (coreai-torch 0.4.1 strip_debug_info: AIModelAsset.load -> strip_debug_info(program) ->
 # program.save_asset with the source asset's metadata, the method of conversion/d1_omni/strip_ship.py), which has its
 # own main.hash; the notes give both. Status stays "unverified" until the bundle is published and its revision pinned.
@@ -12,7 +13,7 @@
 ["lfm3-1.7b"]
 script = "export_lfm3_decode_pipelined.py"
 args = [
-  "int8hu", "--head-quant", "block32", "--head-sym",
+  "int8hu", "--head-quant", "block32", "--head-sym", "--prefill-chunk", "64",
   "--src", "LiquidAI/LFM3-1.7B", "--revision", "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7",
   "--hf-id", "LiquidAI/LFM3-1.7B", "--max-ctx", "4096",
   "--chat-template", "<the bundle's chat_template.jinja, sha256 48f23f8579dda4c39f48ff0a9c5f22e68e6b3267898dc9316e9b4161e56643be>",
@@ -21,7 +22,7 @@ card = "README.md"
 hf_repo = "mlboydaisuke/LFM3-1.7B-CoreAI"
 source_hf_id = "LiquidAI/LFM3-1.7B"
 source_revision = "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7"
-bundle = "gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym"
+bundle = "gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym_pf64"
 status = "unverified"
 overlay = true
 runtime_patches = ["apps/coreai-pipelined-extra-states.patch", "apps/coreai-shared-product.patch"]
@@ -32,21 +33,25 @@ needs = [
   "The gates ran llm-runner built from the zoo's coreai-models fork at 397b337 (its pipelined engine carries the extra",
   "state) with Xcode 27.0 RC, after dropping one argument label that the RC SDK rejects (CoreAILanguageModel.swift:51).",
 ]
-aot = "not shipped: the gates ran the AOT of each .aimodel (xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes); the Mac loads the .aimodel and specializes it on first load"
+aot = "not shipped: the gates and the speed figures ran the AOT of each .aimodel (xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes); the Mac loads the .aimodel and specializes it on first load"
 notes = [
   "int8hu = the MLP (w1 / w3 / w2) and conv-mixer (in / out) linears int8 per block of 32, symmetric_with_clipping; the",
   "head untied and int8 per block of 32, symmetric (absmax); embedding, conv1d and norms fp16; q / k / v / o, the",
   "attention gate_proj and the q / k norm weights fp32. Export 2026-10-29 (macOS 27.0 26A428, M4 Max): .aimodel",
-  "2,701,810,017 B, main.hash e2beca44db66f8ef66bd67e9a58e37d57d50534d02fbffd5aaaf7187dd6acfe2. Staged (stripped) .aimodel:",
-  "main.mlirb 2,701,543,755 B, main.hash cc23467a6e436a57e4642512ccba5103a1a4903721bc854194bc641a45c7db7b, the same 2,017",
-  "ops (39 kinds); its teacher-forced values equal the export's at all 2,683 positions, and the gates below pass on it.",
-  "Teacher-forced on the GPU (AOT h16c) over 17 sequences vs transformers 5.20.2 fp32: top-1 2637/2682 = 98.32 %",
-  "(bar 93 %), max|dlogit| 3.105, p50 0.285. 8 questions thinking off: 8/8, the verdicts of transformers bf16.",
-  "coreai_gate.py -n 16: 16/16 on the alphabet prompt, 8/8 then <|im_end|> on 'What is 17 + 25? Answer briefly.'.",
-  "'Reply with only the number: 1+1=?' (thinking off) stops on <|im_end|> after 2 tokens. Thinking on (greedy, 3,584",
-  "tokens, 3 runs of fresh processes): 8/8 each, </think> after 40-237 tokens. A tool round trip through Apple's",
-  "LanguageModelSession with a value the model cannot guess: 3/3 through CoreAIKit's KitLanguageModel, 3/3 through",
-  "the zoo's ZooLanguageModel, and once through the kit catalog row (ChatSession / KitLanguageModel, JIT on the Mac).",
+  "main.mlirb 2,701,984,448 B (the main-only export: 2,701,810,017 B; the second graph adds 174 KB, the weights are",
+  "shared), main.hash a3a59a7a44b5a573bea4f01928de6be4ff5f539a56f3fbacb50bc2ea5494a961. Staged (stripped) .aimodel:",
+  "main.mlirb 2,701,679,977 B, main.hash 5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171, the same 3,971",
+  "ops (40 kinds); its teacher-forced values equal the export's at all 2,683 positions, chunked and through main alone.",
+  "Teacher-forced on the GPU (AOT h16c) over 17 sequences vs transformers 5.20.2 fp32, the prompts fed as the engine",
+  "feeds them (64-token chunks through prefill, the rest through main): top-1 2639/2682 = 98.40 % (bar 93 %); through",
+  "main alone 2637/2682 = 98.32 %, max|dlogit| 3.105, p50 0.285; the chunk boundaries' logits vs main alone cos >=",
+  "0.9999922. 8 questions thinking off: 8/8, the verdicts of transformers bf16. coreai_gate.py -n 16: 16/16 on the",
+  "alphabet prompt and on a 215-token prompt that rides three chunks. 'Reply with only the number: 1+1=?' (thinking",
+  "off) stops on <|im_end|> after 2 tokens. A tool round trip through Apple's LanguageModelSession with a value the",
+  "model cannot guess: 3/3 through CoreAIKit's KitLanguageModel, 3/3 through the zoo's ZooLanguageModel; the kit's",
+  "catalog path (ChatSession, JIT on the Mac) answers with thinking on and off, runs the tool, recalls a 3-turn chat.",
+  "Thinking on (greedy, 3,584 tokens, 3 runs of fresh processes) ran on the main-only build of the same weights: 8/8",
+  "each, </think> after 40-237 tokens (those prompts never reach prefill, and main gives the same values).",
   "The tokenizer files are the source's, byte for byte, except chat_template.jinja: the vendor template (sha256",
   "f45005c50cd2a97329722bf3a2dee9f16c04cdf825a589b280fb7e99e6827818) with 8 rewrites that render the same string under",
   "transformers and parse in swift-jinja 2.3.2 / 2.3.6 / 2.5.2 (knowledge/lfm3-1.7b-port.md).",
@@ -54,5 +59,5 @@ notes = [
 open_questions = [
   "The script that writes the bundle's chat_template.jinja from the vendor template is not in conversion/ yet.",
   "The LFM3 authoring module (models/macos/lfm3.py) is not in conversion/overlay/ yet; until it is, this recipe cannot run.",
-  "No speed figure is recorded here yet, and no iPhone run (iOS caps the pipelined engine's dynamic KV at 1,024 tokens).",
+  "No iPhone run yet (iOS caps the pipelined engine's dynamic KV at 1,024 tokens). Mac speed is on the card.",
 ]

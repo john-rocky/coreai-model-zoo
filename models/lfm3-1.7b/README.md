@@ -2,13 +2,14 @@
 
 LiquidAI's [LFM3-1.7B](https://huggingface.co/LiquidAI/LFM3-1.7B) on Apple's Core AI: a 1.7B model that
 reasons before it answers and calls tools in XML, as one int8 `.aimodel` on the `coreai-pipelined` GPU engine
-with a 4,096-token context, driven from CoreAIKit's `ChatSession` or Apple's `LanguageModelSession`.
+with a 4,096-token context that prefills a prompt 64 tokens at a time, driven from CoreAIKit's `ChatSession` or
+Apple's `LanguageModelSession`.
 
 Source checkpoint: revision `ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7` (LFM Open License v1.0).
 
 **⬇️ Converted bundle:
 [mlboydaisuke/LFM3-1.7B-CoreAI](https://huggingface.co/mlboydaisuke/LFM3-1.7B-CoreAI)** —
-`gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym/` (2.72 GB: the `.aimodel`, `metadata.json` and the
+`gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym_pf64/` (2.72 GB: the `.aimodel`, `metadata.json` and the
 tokenizer with its chat template), with the upstream LICENSE beside it.
 
 ## What it is
@@ -24,12 +25,25 @@ positions only. What is new against LFM2.5, and how each part was gated:
 
 The bundle is `int8hu`: the MLP and conv-mixer linears int8 per-block-32, the head untied and int8
 per-block-32 symmetric, the attention projections (q, k, v, o and the gate) and the q / k norms in fp32,
-everything else fp16.
+everything else fp16. The `.aimodel` holds two functions over the same weights: `main`, the one-token decode
+graph, and `prefill`, a static 64-token query over the same positions, KV and conv state. The pipelined engine
+finds `prefill` by name and sends every full 64-token piece of a prompt through it; the rest of the prompt and
+the decode go through `main`.
 
 ## Speed
 
-<!-- r2 の数字待ち: the Mac row = the speed ladder's ship row (llm-benchmark, prefill 1024 / decode 256, ctx 2048) once r2 closes; iPhone stays "not measured" until a device run -->
-Mac: not published yet. iPhone: not measured.
+Mac (M4 Max, macOS 27.0): the `.aimodel` compiled for the Mac GPU (`coreai-build compile … --architecture h16c
+--expect-frequent-reshapes`), `llm-benchmark` with 256 generated tokens, one process per run (its warm-up + one
+timed trial), alternated with the `main`-only build of the same weights in the same quiet windows; median of the
+runs, the range in brackets. Measured on the export before its source locations were stripped (the same ops).
+
+| prompt | build | prefill tok/s | first token | decode tok/s | peak footprint | runs |
+|---:|---|---:|---:|---:|---:|---:|
+| 1,024 | **this bundle** | **1,030** [952–1,033] | **0.99 s** | **94.9** [93.1–95.9] | 2.08 GB | 8 |
+| 1,024 | `main` only | 108 [105–109] | 9.44 s | 95.5 [94.8–96.1] | 0.42 GB | 9 |
+| 3,712 | this bundle | 1,713 [1,697–1,718] | 2.17 s | 93.1 [89.9–94.3] | 2.13 GB | 8 |
+
+iPhone: not measured.
 
 ## Accuracy — what was checked
 
@@ -41,13 +55,14 @@ directory.
 | the re-authored module | PyTorch fp32 vs transformers fp32 on 17 sequences (8 questions with thinking off and on, a 1,648-token document): one call per sequence, S=1, and the engine's own walk | max\|Δlogit\| ≤ 2.61e-3, top-1 2682 / 2682 |
 | the graph in fp32 | the fp32 export on the GPU, teacher-forced, the same 17 | 2.20e-3, top-1 2682 / 2682 |
 | the graph in fp16 | the same | max 0.353, top-1 2676 / 2682 — under the strict bar; the module run in fp16 in PyTorch shows the same width, so it is the fp16 activations, not the conversion |
-| **this bundle** | the same, vs transformers fp32 | **top-1 2637 / 2682 = 98.32 %** (bar ≥ 93 %): 1027 / 1035 on the short sequences, 1610 / 1647 on the document |
+| **this bundle** | the same, vs transformers fp32, the prompts fed as the engine feeds them (64-token chunks through `prefill`, the rest through `main`) | **top-1 2639 / 2682 = 98.40 %** (bar ≥ 93 %); through `main` alone 2637 / 2682 (1027 / 1035 on the short sequences, 1610 / 1647 on the document) |
+| the chunked prefill | the same bundle, chunked vs `main` alone | the logits at the 49 chunk boundaries agree to cos ≥ 0.9999922; `main` alone equals the `main`-only build at all 2,683 positions |
 | 8 short questions, thinking off | greedy; right = the reply holds the expected answer (42, Tokyo, cold, 7, merci, 56, 0.9, blue) | 8 / 8, the verdicts of transformers bf16; 7 of 8 replies word for word |
-| token gate | `conversion/coreai_gate.py`, 16 greedy tokens vs the fp32 oracle | 16 / 16 (alphabet); 8 / 8 then `<\|im_end\|>` (17 + 25) |
+| token gate | `conversion/coreai_gate.py`, 16 greedy tokens vs the fp32 oracle | 16 / 16 (alphabet); 16 / 16 on a 215-token prompt that rides three chunks; 8 / 8 then `<\|im_end\|>` (17 + 25, the `main`-only build) |
 | stop token | "Reply with only the number: 1+1=?", thinking off | stops on `<\|im_end\|>` after 2 tokens |
-| thinking on | the 8 questions with thinking on, greedy, a 3,584-token budget, 3 runs of fresh processes | every run 8 / 8: `</think>` closes after 40–237 tokens of reasoning (median 56) and the answer after it is right; the three runs answer alike |
+| thinking on | the 8 questions with thinking on, greedy, a 3,584-token budget, 3 runs of fresh processes, on the `main`-only build (these prompts never reach `prefill`, and `main` gives the same values) | every run 8 / 8: `</think>` closes after 40–237 tokens of reasoning (median 56) and the answer after it is right; the three runs answer alike |
 | a tool call | one tool returning a fresh random value per run, through CoreAIKit's `KitLanguageModel` and the zoo's `ZooLanguageModel` behind Apple's `LanguageModelSession`, 3 runs each | 6 / 6: the XML call parsed into `lookup_secret(key: "alpha")`, run by the framework, the value in the answer verbatim, the reasoning kept out of it |
-| the published bytes | the `.aimodel` re-saved without its source locations (a new `main.hash`), the checks above run again on it | teacher-forced values equal to the export's at all 2,683 positions (top-1 2637 / 2682); 8 / 8; 16 / 16 and 8 / 8; stops after 2 tokens |
+| the published bytes | the `.aimodel` re-saved without its source locations (a new `main.hash`), the checks above run again on it | teacher-forced values equal to the export's at all 2,683 positions, chunked and through `main` alone; 8 / 8; 16 / 16 (alphabet and the 215-token prompt); stops after 2 tokens; the tool call 6 / 6; CoreAIKit's catalog path answers with thinking on and off and runs the tool |
 
 ## Use it
 
@@ -136,6 +151,8 @@ reasoning in its own transcript entry.
   FoundationModels providers re-render the history every turn and, when the engine refuses the rewind, prefill
   it again from zero state — a three-turn chat recalled its first turn through both `ChatSession` and the zoo's
   provider. Each turn costs a full prefill of the conversation.
+- **The tail of a prompt goes one token at a time.** A prompt's last partial chunk (up to 63 tokens) runs
+  through `main` at about the decode speed — at 1,024 tokens that tail is about half of the first-token time.
 - **4,096 tokens.** The bundle is exported with a 4,096-token context; the checkpoint itself allows more.
 - **iPhone: not measured, no iOS variant.** On iOS the pipelined engine caps the dynamic KV at 1,024 tokens,
   so a turn there is prompt + answer ≤ 1,024 — tight for a model that thinks first.
@@ -155,10 +172,10 @@ reasoning in its own transcript entry.
 
 ```bash
 coreai-models/.venv/bin/python conversion/export_lfm3_decode_pipelined.py int8hu \
-    --head-quant block32 --head-sym \
+    --head-quant block32 --head-sym --prefill-chunk 64 \
     --src LiquidAI/LFM3-1.7B --revision ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7 \
     --hf-id LiquidAI/LFM3-1.7B --max-ctx 4096 --chat-template <the bundle's chat_template.jinja>
-python3 conversion/coreai_gate.py exports/lfm3_1_7b_decode_int8hu_block32_sym LiquidAI/LFM3-1.7B \
+python3 conversion/coreai_gate.py exports/lfm3_1_7b_decode_int8hu_block32_sym_pf64 LiquidAI/LFM3-1.7B \
     --revision ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7 --arch lfm3 -n 16
 ```
 
@@ -166,8 +183,9 @@ The export needs the LFM3 authoring module (`coreai_models/models/macos/lfm3.py`
 checkout. The exported `main.mlirb` records the export machine's source paths; the published `.aimodel` is the
 export re-saved after coreai-torch's `strip_debug_info` (`conversion/d1/strip_bundle.py` does this for a
 bundle whose `assets.main` is the `.aimodel`), which is a new `main.hash`, so the gates above were run again
-on it. Running the bundle needs the pipelined engine with one extra state and `COREAI_CHUNK_THRESHOLD=1` (S=1
-prefill); `llm-runner` takes `--inference-engine-variant coreai-pipelined --warmup off`.
+on it. Running the bundle needs the pipelined engine with one extra state and `COREAI_CHUNK_THRESHOLD=1`
+(`main` takes one token; the engine feeds `prefill` whatever the threshold); `llm-runner` takes
+`--inference-engine-variant coreai-pipelined --warmup off`.
 
 ## License
 

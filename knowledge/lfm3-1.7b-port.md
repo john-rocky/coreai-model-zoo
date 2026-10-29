@@ -157,13 +157,69 @@ a newer swift-jinja being resolved.
   its parsed reasoning and call has the generated turn's token count (50, with no whitespace after `</think>`)
   but not all of its tokens (where they differ was not isolated).
 
+## Chunked prefill: the bundle's second function
+
+- One asset, two functions: `main` is the S=1 decode graph (the composites' own causal and window masks) and
+  `prefill` is a static 64-token query over the same positions, KV and conv state, with the masks built from the
+  positions (`Lfm3Model.set_explicit_mask()`; coreai-torch re-runs each entry's export function when it
+  externalizes the composites, so the exporter switches the mask inside it). Exporter flag `--prefill-chunk 64`
+  (bundle suffix `_pf64`). The weights are shared in the `.aimodel` (+174 KB for the second graph); the Mac AOT
+  (h16c, expect-frequent-reshapes) holds an fp16 copy of the int8 Linears per function (resources.bin 6.39 →
+  10.08 GB).
+- The pipelined engine finds `prefill` by name — apple/coreai-models at 397b337 and CoreAIKit's pinned fork
+  (0.2.8-zoo) alike: while at least 65 prompt tokens are left, 64 of them ride `prefill`; the rest go S=1 through
+  `main`, the last one as the sampled step. Its log line (`CLILogger` level 1, off by default in an app):
+  `Pipelined engine loaded 'prefill' function: static chunk S=64`.
+- Fed that way and teacher-forced on the 17 sequences: top-1 2639 / 2682 = 98.40 % (`main` alone: 2637); the
+  logits at the chunk boundaries equal the `main`-only path's at cos ≥ 0.9999922; `main` gives the `main`-only
+  bundle's values at all 2,683 positions. Greedy, a 215-token prompt that rides 3 chunks gives the fp32 oracle's
+  16 tokens; the stripped `.aimodel` gives the export's values at every position, chunked and not.
+- Through CoreAIKit's pinned engine (JIT on the Mac, a 1,233-token prompt, outside a quiet window): the first
+  token after 0.68 s with `prefill`, 7.4–7.8 s with `main` only. A tool round trip's prompts (127 and 197 tokens)
+  ride it too.
+- A prompt's last partial chunk (up to 63 tokens) goes S=1 through `main`; at a 1,024-token prompt that tail is
+  about half of the first-token time.
+
+### A padded last chunk (`--pad-tail`, not in an engine yet)
+
+- The exporter's `--pad-tail` gives `prefill` a chunk padded at its end: the engine writes token 0 and position
+  id -1 into the padded rows, and the graph reads the new conv state after the chunk's real tokens — columns
+  [n, n + 6) of [state | Bx], n = the number of query position ids ≥ 0 — instead of the last 6. Nothing else
+  changes: the causal mask comes from indices, so no real query sees a pad; the KV rows the pads write lie past
+  the cursor and are written again before anything reads them. A full chunk (n = 64) reads the last 6 columns,
+  so an engine that never pads computes exactly what `_pf64` computes (all 2,683 positions equal, chunked and
+  through `main`), and the AOT keeps `_pf64`'s bytes (resources.bin 10,078,970,328 B both).
+- With the prompt's tail as one padded call (a pipelined-engine copy that pads tails of 4 or more tokens): top-1
+  2639 / 2682 (every sequence through one padded call), the call boundaries' logits vs `main` alone cos ≥
+  0.9999922, the token gate 16 / 16 on the alphabet (14 tokens + 50 pads) and on the 215-token prompt (22 + 42),
+  the stop-token check passes.
+- The control that has to go red: `_pf64`'s graph walked the same way keeps the pads' columns as its conv state —
+  the boundary cos falls to 0.8645 while top-1 stays at 95.79 %, above the 93 % bar. Top-1 alone does not catch
+  a wrong conv state; the boundary cos does.
+
+### Turn 2 from a conv-state checkpoint (lane B's engine patch, not in the kit's pin yet)
+
+- Today the kit and the zoo re-prefill the whole history every LFM3 turn: the conv state is a fixed-shape state,
+  and the engine refuses to rewind into the middle of it.
+- A checkpoint of the conv state (13 × 2048 × 6 fp16 = 320 KB) at the end of turn 1's prompt, written back when
+  turn 2 rewinds to it, with the KV cursor moved back (the KV rows need no copy): the pipelined engine of
+  0.2.8-zoo with lane B's `checkpoint()` patch, driven the kit's way (rewind to the shared prefix, then generate),
+  gives turn 2 the full re-prefill's 16 greedy tokens on 3 conversations (thinking on, off, a 1,648-token
+  document); on the two short ones the first token's logits are bit-equal. With the conv state not written back
+  the logits move by up to 9.2 — the check goes red.
+- What the kit would have to call: `engine.checkpoint()` after a turn's prompt; its existing rewind to the
+  longest shared prefix then lands on the checkpoint.
+
 ## Shipping
 
 - The exported `main.mlirb` carries the export machine's absolute paths (every op's source location). The
   shipped `.aimodel` is re-saved after coreai-torch's `strip_debug_info`; that is a new asset (a new
   `main.hash`, a new compile-cache entry), so its gates are run again on the stripped bytes.
-- The bundle's `metadata.json` points `assets.main` at the `.aimodel`; on the Mac the engine specializes it on
-  first load.
+- The bundle's `metadata.json` points `assets.main` at the `.aimodel` (functions `main` and `prefill`); on the
+  Mac the engine specializes it on first load.
+- Thinking off under sampling (temperature 0.7, the card's default configuration) put a stray `</think>` into one
+  answer in 21 runs (0 in 21 on the `main`-only build; the prompt never reaches `prefill`): CoreAIKit's
+  `ChatSession` passes it into the reply.
 
 ## Toolchain notes from the way
 
@@ -177,12 +233,12 @@ a newer swift-jinja being resolved.
   `Constraints violated (d_32)`: the externalized SDPA has no lower bound on the KV length and meets the
   composite's `_check_is_size(k_len − q_len)`. `Lfm3Model.set_explicit_mask()` switches the layers to a bool
   mask built from the positions (the composite then runs without its window); a tiny static S=16 graph passes
-  on the GPU with it. The 1.7B's S>1 graph has not been measured.
+  on the GPU with it. The 1.7B's S=64 graph: "Chunked prefill" above.
 - mlx-lm 0.32.2 (the newest release) and its main branch have no `lfm3` model type: loading LiquidAI's own
   `LFM3-1.7B-MLX-8bit` / `-4bit` stops at `ValueError: Model type lfm3 not supported.`, so there is no MLX
   number to compare with yet.
 
 ## Not measured
 
-iPhone (the pipelined engine caps the iOS dynamic KV at 1,024 tokens, so prompt + answer ≤ 1,024 there), the
-Neural Engine, and a static S>1 prefill on the 1.7B. Speed is on the card.
+iPhone (the pipelined engine caps the iOS dynamic KV at 1,024 tokens, so prompt + answer ≤ 1,024 there) and the
+Neural Engine. Speed is on the card.
