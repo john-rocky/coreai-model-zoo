@@ -17,6 +17,12 @@ engine. Prefill runs as pipelined S=1 steps: set `COREAI_CHUNK_THRESHOLD=1`.
 the same positions / KV / conv state, weights shared. The pipelined engine
 finds "prefill" by name and feeds every full P-token piece of a prompt through
 it, the rest as S=1 steps on "main" (CoreAIPipelinedEngine.processChunkedInput).
+`--pad-tail` (with `--prefill-chunk`, suffix `_pfPpad`) makes the "prefill"
+graph take a chunk padded at its end: padded query rows carry position id -1
+and the conv state is read after the chunk's real tokens (`_set_pad_tail`). A
+full chunk computes what the plain chunk graph computes, so an engine that
+never pads runs the bundle as `_pfP`; an engine that pads a prompt's last
+partial chunk replaces its S=1 tail (up to P - 1 steps) with one call.
 AOT for the Mac: `xcrun coreai-build compile <name>.aimodel --output <dir>
 --platform macOS --preferred-compute gpu --architecture h16c
 --expect-frequent-reshapes`, then point metadata.json `assets.main` at the
@@ -31,6 +37,7 @@ Run:  python export_lfm3_decode_pipelined.py [fp16|int8lin|int8hu|int4lin|int4li
           --emit-hidden   ONE graph returns logits AND the final-norm hidden [1, 1, hidden]
       --prefill-chunk P   also a static S=P "prefill" function (chunked prefill; works with
                           --embeds / --emit-hidden: the chunk query is [1, P] ids or [1, P, hidden])
+      --pad-tail          the "prefill" function also takes a chunk padded at its end (position id -1)
       The same as a function: `export_lfm3_decode(src, out_dir, mode=..., ...)`.
 
 Modes: fp16 - baseline; int8lin - per-block-32 linear int8 (scale-multiply
@@ -53,6 +60,7 @@ from pathlib import Path
 
 import coreai_torch
 import torch
+import torch.nn.functional as F
 from _bundle import head_quant_spec, write_bundle_metadata
 from _paths import exports_dir
 
@@ -112,23 +120,76 @@ def linear_quant_config(dtype: str = "int8", rescue_int8_regex: str | None = Non
     }
 
 
+def _pad_tail_conv(conv, x, conv_in, cols):
+    """`Lfm2ShortConv.forward`'s stateful path (lfm2.py) with the new state read
+    at ``cols`` of [state | Bx] instead of its last kernel - 1 columns."""
+    BCx = conv.in_proj(x).transpose(1, 2)  # [b, 3d, s]
+    gate_b, gate_c, xv = BCx.chunk(3, dim=1)
+    w = torch.cat([conv_in, gate_b * xv], dim=-1)  # [b, d, (kernel-1)+s]
+    conv_out = F.conv1d(w, conv.conv.weight, bias=conv.conv.bias, padding=0, groups=conv.d)
+    return conv.out_proj((gate_c * conv_out).transpose(1, 2)), w.index_select(-1, cols)
+
+
+def _set_pad_tail(model, on: bool) -> None:
+    """Switch the chunk graph to the padded-chunk form (``--pad-tail``) or back.
+
+    The engine pads a prompt's last partial chunk at its end and gives the
+    padded query rows position id -1. With `set_explicit_mask` the causal mask
+    comes from indices, so no real query sees a pad; the KV rows the pads write
+    lie past the cursor and are written again before anything reads them; RoPE
+    reads the ids only for the pads' own rows. That leaves the conv state, which
+    the plain graph takes from the chunk's last kernel - 1 columns: here it is
+    read after the chunk's n real tokens, n = #(query position ids >= 0), i.e.
+    columns [n, n + kernel - 1) of [state | Bx]. A full chunk (n = P) reads the
+    last kernel - 1 columns = the plain graph's values."""
+    m = model.model
+    convs = [layer.conv for layer in m.layers if not layer.is_attention]
+    if not on:
+        m.__dict__.pop("forward_stateful_embeds", None)
+        for c in convs:
+            c.__dict__.pop("forward", None)
+        return
+    held = {}
+    width = convs[0].kernel - 1
+
+    def forward_stateful_embeds(inputs_embeds, position_ids, kv_cache, conv_state):
+        s = inputs_embeds.shape[1]
+        q_pos = position_ids.narrow(1, position_ids.shape[1] - s, s)
+        held["cols"] = torch.arange(width) + (q_pos >= 0).sum(dim=1)
+        return type(m).forward_stateful_embeds(m, inputs_embeds, position_ids, kv_cache, conv_state)
+
+    def conv_forward(conv):
+        def forward(x, conv_in=None):
+            if conv_in is None:
+                return type(conv).forward(conv, x)
+            return _pad_tail_conv(conv, x, conv_in, held["cols"])
+        return forward
+
+    m.forward_stateful_embeds = forward_stateful_embeds
+    for c in convs:
+        c.forward = conv_forward(c)
+
+
 def export_multifunction(model, entries, externalize_modules):
     """`export_to_coreai_multifunction` with a mask mode per entry.
 
-    ``entries`` = ``[(entrypoint, spec, explicit_mask)]``. The static S>1
+    ``entries`` = ``[(entrypoint, spec, explicit_mask[, pad_tail])]``. The static S>1
     chunk graph needs `Lfm3Model.set_explicit_mask()` (the composite's own
     lower-right mask fails torch.export there) while the S=1 "main" graph
     keeps the composites' own causal / window masks = the S=1 ship graph.
     coreai-torch re-runs each entry's export_fn at `to_coreai()` before it
     exports that entry's composites (whose attrs it then reads off the
     modules), so the mode is set inside export_fn; the externalized graphs
-    get unique names per entry, the weights are shared."""
+    get unique names per entry, the weights are shared. ``pad_tail`` (default
+    off) gives that entry the padded-chunk form (`_set_pad_tail`), switched the
+    same way."""
     model.eval()
     converter = coreai_torch.TorchConverter()
-    for entrypoint, spec, explicit in entries:
+    for entrypoint, spec, explicit, *rest in entries:
         def export_fn(module, _inputs=spec["reference_inputs"], _dyn=spec["dynamic_shapes"],
-                      _explicit=explicit):
+                      _explicit=explicit, _pad=bool(rest and rest[0])):
             module.model.set_explicit_mask(_explicit)
+            _set_pad_tail(module, _pad)
             with torch.no_grad():
                 ep = torch.export.export(module, args=(), kwargs=_inputs, dynamic_shapes=_dyn)
             ep = ep.run_decompositions(coreai_torch.get_decomp_table())
@@ -144,6 +205,7 @@ def export_multifunction(model, entries, externalize_modules):
         return converter.to_coreai()
     finally:
         model.model.set_explicit_mask(False)
+        _set_pad_tail(model, False)
 
 
 def save_tokenizer(src: str, dest: Path, revision: str | None = None,
@@ -199,6 +261,7 @@ def export_lfm3_decode(
     chat_template: str | None = None,
     hf_id: str | None = None,
     prefill_chunk: int = 0,
+    pad_tail: bool = False,
 ) -> Path:
     """Export one decode bundle (`<out_dir>/<name>/`: .aimodel, metadata.json,
     tokenizer/) and return its directory.
@@ -210,12 +273,15 @@ def export_lfm3_decode(
     ``chat_template`` (a path) replaces the source `chat_template.jinja`.
     ``hf_id`` names the source in metadata.json (default: ``src`` when it is
     not a local dir). ``prefill_chunk`` = P > 1 adds the static S=P
-    "prefill" function (module docstring).
+    "prefill" function (module docstring); ``pad_tail`` gives it the
+    padded-chunk form (`_set_pad_tail`).
     """
     if mode not in MODES:
         raise ValueError(f"mode {mode!r} not in {MODES}")
     if prefill_chunk == 1 or prefill_chunk < 0:
         raise ValueError("prefill_chunk is 0 (none) or a chunk length > 1")
+    if pad_tail and not prefill_chunk:
+        raise ValueError("pad_tail needs prefill_chunk")
     if name is None:
         short = (hf_id or src).rstrip("/").rsplit("/", 1)[-1].lower()
         short = short.replace(".", "_").replace("-", "_")
@@ -223,7 +289,7 @@ def export_lfm3_decode(
         if mode in HEAD_MODES and (head_quant != "block32" or head_sym):
             name += f"_{head_quant}" + ("_sym" if head_sym else "")
         if prefill_chunk:
-            name += f"_pf{prefill_chunk}"
+            name += f"_pf{prefill_chunk}" + ("pad" if pad_tail else "")
 
     print(f"loading {src} (prefix {key_prefix!r}{', config ' + config_key if config_key else ''}) fp16 ...")
     model = lfm3_from_hf(src, key_prefix=key_prefix, config=config, config_key=config_key,
@@ -267,10 +333,11 @@ def export_lfm3_decode(
             cfg, target_dtype=DTYPE, max_context_length=max_ctx,
             trace_kv_len=TRACE_KV_CACHE_SEQ_LEN, trace_query=prefill_chunk, trace_past=64,
             embeds=embeds, emit_hidden=emit_hidden, static_query=True)
-        print(f"exporting multifunction graph (main S=1 + prefill S={prefill_chunk}, inputs "
+        print(f"exporting multifunction graph (main S=1 + prefill S={prefill_chunk}"
+              f"{' padded-chunk form' if pad_tail else ''}, inputs "
               f"{spec['input_names']}, outputs {spec['output_names']}) ...")
         prog = export_multifunction(
-            model, [("main", spec, False), ("prefill", pf_spec, True)], specs)
+            model, [("main", spec, False), ("prefill", pf_spec, True, pad_tail)], specs)
     else:
         print(f"exporting decode-only graph to Core AI dialect (inputs {spec['input_names']}, "
               f"outputs {spec['output_names']}) ...")
@@ -308,6 +375,8 @@ def export_lfm3_decode(
                       "sliding_window": cfg.sliding_window}}
     if prefill_chunk:
         extra["lfm3"]["prefill_chunk"] = prefill_chunk
+        if pad_tail:
+            extra["lfm3"]["prefill_pad_tail"] = "padded query rows: position id -1"
     write_bundle_metadata(out, name, meta_id, cfg.vocab_size, max_ctx, revision=revision,
                           weights=str(src) if local_src else None, mode=mode,
                           functions=("main", "prefill") if prefill_chunk else ("main",),
@@ -350,6 +419,8 @@ def main() -> None:
     ap.add_argument("--int4-block", type=int, default=32)
     ap.add_argument("--prefill-chunk", type=int, default=0,
                     help="also a static S=P 'prefill' function in the same asset (suffix _pfP; 0 = none)")
+    ap.add_argument("--pad-tail", action="store_true",
+                    help="with --prefill-chunk: 'prefill' also takes a chunk padded at its end (suffix _pfPpad)")
     args = ap.parse_args()
 
     config = args.config_json
@@ -362,6 +433,7 @@ def main() -> None:
         head_quant=args.head_quant, head_sym=args.head_sym, rescue_regex=args.rescue_regex,
         int4_block=args.int4_block, tokenizer_src=args.tokenizer_src,
         chat_template=args.chat_template, hf_id=args.hf_id, prefill_chunk=args.prefill_chunk,
+        pad_tail=args.pad_tail,
     )
     print("run: COREAI_CHUNK_THRESHOLD=1 llm-benchmark --model <bundle> -p 128 -g 256 -n 3")
 
