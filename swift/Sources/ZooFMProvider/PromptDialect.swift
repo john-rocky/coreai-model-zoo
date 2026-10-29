@@ -89,6 +89,11 @@ public func defaultDialect(probing tokenizer: any Tokenizer) -> any PromptDialec
         guard let id = tokenizer.convertTokenToId(token) else { return false }
         return id != tokenizer.unknownTokenId
     }
+    // LFM3 calls in XML through single `<function=` / `<parameter=` tokens and also keeps LFM2.5's
+    // `<|tool_call_start|>` pair, so its check runs before LFM2.5's.
+    if has("<function="), has("<parameter=") {
+        return LFM3Dialect()
+    }
     if has("<|tool_call_start|>"), has("<|tool_call_end|>") {
         return LFMDialect()
     }
