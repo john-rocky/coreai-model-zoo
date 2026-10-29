@@ -197,13 +197,14 @@ a newer swift-jinja being resolved.
   the boundary cos falls to 0.8645 while top-1 stays at 95.79 %, above the 93 % bar. Top-1 alone does not catch
   a wrong conv state; the boundary cos does.
 
-### Turn 2 from a conv-state checkpoint (lane B's engine patch, not in the kit's pin yet)
+### Turn 2 from a conv-state checkpoint (an engine patch, not in the kit's pin yet)
 
 - Today the kit and the zoo re-prefill the whole history every LFM3 turn: the conv state is a fixed-shape state,
   and the engine refuses to rewind into the middle of it.
 - A checkpoint of the conv state (13 × 2048 × 6 fp16 = 320 KB) at the end of turn 1's prompt, written back when
   turn 2 rewinds to it, with the KV cursor moved back (the KV rows need no copy): the pipelined engine of
-  0.2.8-zoo with lane B's `checkpoint()` patch, driven the kit's way (rewind to the shared prefix, then generate),
+  0.2.8-zoo with a patch that implements `checkpoint()` for it (the fork's `InferenceEngine` declares it; only the
+  sequential engine had it), driven the kit's way (rewind to the shared prefix, then generate),
   gives turn 2 the full re-prefill's 16 greedy tokens on 3 conversations (thinking on, off, a 1,648-token
   document); on the two short ones the first token's logits are bit-equal. With the conv state not written back
   the logits move by up to 9.2 — the check goes red.
