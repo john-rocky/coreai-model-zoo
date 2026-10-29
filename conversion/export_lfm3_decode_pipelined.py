@@ -17,7 +17,7 @@ AOT for the Mac: `xcrun coreai-build compile <name>.aimodel --output <dir>
 --expect-frequent-reshapes`, then point metadata.json `assets.main` at the
 `.aimodelc` (a real directory, not a symlink).
 
-Run:  python export_lfm3_decode_pipelined.py [fp16|int8lin|int8hu|int4lin|int4lin8] \
+Run:  python export_lfm3_decode_pipelined.py [fp16|int8lin|int8hu|int4lin|int4lin8|int4hu] \
           [--src LiquidAI/LFM3-1.7B | <local checkpoint dir>] [--revision REV] [--out-dir DIR]
       Multimodal checkpoints (the LFM3-VL / -Omni / -Audio decoders):
           --key-prefix model.language_model. --config-json <repo>/config.json --config-key text_config
@@ -30,10 +30,13 @@ Modes: fp16 - baseline; int8lin - per-block-32 linear int8 (scale-multiply
 dequant, no LUT); int8hu - int8lin + untied int8 lm_head (`--head-quant block32
 --head-sym` = the ship shape for big-vocab heads); int4lin - per-block-32 linear
 int4; int4lin8 - int4 with the rescue set (default: the conv-mixer projections)
-kept int8. In every quantized mode the embedding, conv1d, norms and the
-attention q/k/v/o/gate projections stay high precision (the attention set is
-the GPU-delegate precision path, fp32 — lfm3.py IMPORTANT #2); lm_head stays
-fp16 except in int8hu.
+kept int8; int4hu - int4lin8 + the untied int8 lm_head of int8hu (mixed int4:
+`--rescue-regex` names every body FC that stays int8, e.g. only the MLP w1 / w3
+at int4 = `--rescue-regex '.*(feed_forward\\.down_proj|conv\\.(in_proj|out_proj))$'`).
+In every quantized mode the embedding, conv1d, norms and the attention
+q/k/v/o/gate projections stay high precision (the attention set is the
+GPU-delegate precision path, fp32 — lfm3.py IMPORTANT #2); lm_head stays fp16
+except in int8hu and int4hu.
 """
 from __future__ import annotations
 
@@ -54,7 +57,8 @@ from coreai_models.models.macos.lfm3 import (
 )
 
 DTYPE = torch.float16
-MODES = ("fp16", "int8lin", "int8hu", "int4lin", "int4lin8")
+MODES = ("fp16", "int8lin", "int8hu", "int4lin", "int4lin8", "int4hu")
+HEAD_MODES = ("int8hu", "int4hu")  # untied int8 lm_head on top of the body recipe
 
 
 def linear_quant_config(dtype: str = "int8", rescue_int8_regex: str | None = None,
@@ -169,7 +173,7 @@ def export_lfm3_decode(
         short = (hf_id or src).rstrip("/").rsplit("/", 1)[-1].lower()
         short = short.replace(".", "_").replace("-", "_")
         name = f"{short}_decode_{mode}" + ("_embeds" if embeds else "") + ("_hidden" if emit_hidden else "")
-        if mode == "int8hu" and (head_quant != "block32" or head_sym):
+        if mode in HEAD_MODES and (head_quant != "block32" or head_sym):
             name += f"_{head_quant}" + ("_sym" if head_sym else "")
 
     print(f"loading {src} (prefix {key_prefix!r}{', config ' + config_key if config_key else ''}) fp16 ...")
@@ -191,16 +195,17 @@ def export_lfm3_decode(
         from coreai_models.export.compression import quantize_pytorch_model
 
         dtype = "int8" if mode in ("int8lin", "int8hu") else "int4"
-        rescue = (rescue_regex or r".*conv\.(in_proj|out_proj)$") if mode == "int4lin8" else None
+        rescue = (rescue_regex or r".*conv\.(in_proj|out_proj)$") if mode in ("int4lin8", "int4hu") else None
         block = int4_block if dtype == "int4" else 32
         cfg_q = linear_quant_config(dtype, rescue_int8_regex=rescue, block=block)
-        if mode == "int8hu":
+        if mode in HEAD_MODES:
             # Untie the head (the eager quantizer skips shared params) and
-            # quantize ONLY it on top of int8lin.
+            # quantize it at int8 on top of the body recipe.
             cfg_q["module_name_configs"][r".*lm_head$"] = head_quant_spec(head_quant, head_sym)
             model.lm_head.weight = torch.nn.Parameter(model.lm_head.weight.detach().clone())
         print(f"quantizing (linear {dtype} per-block-{block}, mode={mode}"
-              f"{', conv-mixer rescued to int8' if rescue else ''}) ...")
+              f"{f', rescued to int8: {rescue}' if rescue else ''}"
+              f"{', head int8 ' + head_quant + (' sym' if head_sym else '') if mode in HEAD_MODES else ''}) ...")
         model = quantize_pytorch_model(
             model, tuple(spec["reference_inputs"].values()), spec["dynamic_shapes"], cfg_q)
 
@@ -274,11 +279,11 @@ def main() -> None:
     ap.add_argument("--max-ctx", type=int, default=4096)
     ap.add_argument("--head-quant", default="block32",
                     choices=["block32", "block16", "block8", "perchan"],
-                    help="int8hu only: lm_head weight granularity (ship=block32; perchan is BROKEN on the beta GPU delegate)")
+                    help="int8hu / int4hu only: lm_head weight granularity (ship=block32; perchan is BROKEN on the beta GPU delegate)")
     ap.add_argument("--head-sym", action="store_true",
-                    help="int8hu only: plain symmetric (absmax, no clipping) for the head")
+                    help="int8hu / int4hu only: plain symmetric (absmax, no clipping) for the head")
     ap.add_argument("--rescue-regex", default=None,
-                    help="int4lin8 only: the int8-rescue module regex (default = the conv-mixer projections)")
+                    help="int4lin8 / int4hu only: the int8-rescue module regex (default = the conv-mixer projections)")
     ap.add_argument("--int4-block", type=int, default=32)
     args = ap.parse_args()
 
