@@ -69,6 +69,7 @@ ARCH = {
     "youtu": {},
     "nanbeige": {},
     "lfm2_moe": {},
+    "lfm3": {},
     "qwen3_6_moe": {},
     "muse_glimmer": {},
     # Plain dense qwen3 (Qwen3-0.6B and its finetunes). LAST on purpose:
@@ -250,6 +251,12 @@ def build(arch, hf_id):
     elif arch == "lfm2_moe":
         from coreai_models.models.macos.lfm2_moe import lfm2_moe_from_hf, build_decode_state
         m = lfm2_moe_from_hf(hf_id, target_dtype=FP32)
+        st = build_decode_state(m.config, max_seq_len=CTX, dtype=FP32); order = ["k_cache","v_cache","conv_state"]
+    elif arch == "lfm3":
+        # LFM3 text decoder (conv + full + sliding attention). The loader takes the revision,
+        # so this branch's weights ARE the pinned ones.
+        from coreai_models.models.macos.lfm3 import lfm3_from_hf, build_decode_state
+        m = lfm3_from_hf(hf_id, target_dtype=FP32, stateful=True, revision=revision)
         st = build_decode_state(m.config, max_seq_len=CTX, dtype=FP32); order = ["k_cache","v_cache","conv_state"]
     elif arch == "qwen3_6_moe":
         from coreai_models.models.macos.qwen3_5_moe import Qwen3_5MoeStatefulForCausalLM, build_decode_state
