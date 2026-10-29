@@ -12,6 +12,11 @@ composite's own mask over the full-length KV) + ONE fixed-shape conv state
 input_ids (or inputs_embeds) is STATIC [1,1]; position_ids and the KV seq dim
 stay dynamic, so `EngineFactory` classifies the bundle as dynamic -> pipelined
 engine. Prefill runs as pipelined S=1 steps: set `COREAI_CHUNK_THRESHOLD=1`.
+`--prefill-chunk P` adds a second function to the same asset (suffix `_pfP`):
+"main" stays the S=1 graph above, "prefill" takes a STATIC [1, P] query over
+the same positions / KV / conv state, weights shared. The pipelined engine
+finds "prefill" by name and feeds every full P-token piece of a prompt through
+it, the rest as S=1 steps on "main" (CoreAIPipelinedEngine.processChunkedInput).
 AOT for the Mac: `xcrun coreai-build compile <name>.aimodel --output <dir>
 --platform macOS --preferred-compute gpu --architecture h16c
 --expect-frequent-reshapes`, then point metadata.json `assets.main` at the
@@ -24,6 +29,8 @@ Run:  python export_lfm3_decode_pipelined.py [fp16|int8lin|int8hu|int4lin|int4li
           --key-prefix lfm.model.            --config-json <repo>/config.json --config-key lfm
           --embeds        query = inputs_embeds [1, 1, hidden] instead of input_ids
           --emit-hidden   ONE graph returns logits AND the final-norm hidden [1, 1, hidden]
+      --prefill-chunk P   also a static S=P "prefill" function (chunked prefill; works with
+                          --embeds / --emit-hidden: the chunk query is [1, P] ids or [1, P, hidden])
       The same as a function: `export_lfm3_decode(src, out_dir, mode=..., ...)`.
 
 Modes: fp16 - baseline; int8lin - per-block-32 linear int8 (scale-multiply
@@ -44,12 +51,14 @@ import argparse
 import shutil
 from pathlib import Path
 
+import coreai_torch
 import torch
 from _bundle import head_quant_spec, write_bundle_metadata
 from _paths import exports_dir
 
 from coreai_models.export._constants import TRACE_KV_CACHE_SEQ_LEN
 from coreai_models.export.macos import _EXTERNALIZE_SPECS, export_to_coreai
+from coreai_models.export.mlir_ops import register_custom_torch_lowering, remove_functionalization
 from coreai_models.models.macos.lfm3 import (
     build_pipelined_export_spec,
     lfm3_from_hf,
@@ -101,6 +110,40 @@ def linear_quant_config(dtype: str = "int8", rescue_int8_regex: str | None = Non
         },
         "module_name_configs": name_configs,
     }
+
+
+def export_multifunction(model, entries, externalize_modules):
+    """`export_to_coreai_multifunction` with a mask mode per entry.
+
+    ``entries`` = ``[(entrypoint, spec, explicit_mask)]``. The static S>1
+    chunk graph needs `Lfm3Model.set_explicit_mask()` (the composite's own
+    lower-right mask fails torch.export there) while the S=1 "main" graph
+    keeps the composites' own causal / window masks = the S=1 ship graph.
+    coreai-torch re-runs each entry's export_fn at `to_coreai()` before it
+    exports that entry's composites (whose attrs it then reads off the
+    modules), so the mode is set inside export_fn; the externalized graphs
+    get unique names per entry, the weights are shared."""
+    model.eval()
+    converter = coreai_torch.TorchConverter()
+    for entrypoint, spec, explicit in entries:
+        def export_fn(module, _inputs=spec["reference_inputs"], _dyn=spec["dynamic_shapes"],
+                      _explicit=explicit):
+            module.model.set_explicit_mask(_explicit)
+            with torch.no_grad():
+                ep = torch.export.export(module, args=(), kwargs=_inputs, dynamic_shapes=_dyn)
+            ep = ep.run_decompositions(coreai_torch.get_decomp_table())
+            remove_functionalization(ep)
+            return ep
+
+        converter.add_pytorch_module(
+            model, export_fn=export_fn, externalize_modules=list(externalize_modules) or None,
+            input_names=spec["input_names"], output_names=spec["output_names"],
+            state_names=spec["state_names"], entrypoint_name=entrypoint)
+    register_custom_torch_lowering(converter)
+    try:
+        return converter.to_coreai()
+    finally:
+        model.model.set_explicit_mask(False)
 
 
 def save_tokenizer(src: str, dest: Path, revision: str | None = None,
@@ -155,6 +198,7 @@ def export_lfm3_decode(
     tokenizer_src: str | None = None,
     chat_template: str | None = None,
     hf_id: str | None = None,
+    prefill_chunk: int = 0,
 ) -> Path:
     """Export one decode bundle (`<out_dir>/<name>/`: .aimodel, metadata.json,
     tokenizer/) and return its directory.
@@ -165,16 +209,21 @@ def export_lfm3_decode(
     Audio checkpoint carries its own tokenizer); pass ``""`` to skip it.
     ``chat_template`` (a path) replaces the source `chat_template.jinja`.
     ``hf_id`` names the source in metadata.json (default: ``src`` when it is
-    not a local dir).
+    not a local dir). ``prefill_chunk`` = P > 1 adds the static S=P
+    "prefill" function (module docstring).
     """
     if mode not in MODES:
         raise ValueError(f"mode {mode!r} not in {MODES}")
+    if prefill_chunk == 1 or prefill_chunk < 0:
+        raise ValueError("prefill_chunk is 0 (none) or a chunk length > 1")
     if name is None:
         short = (hf_id or src).rstrip("/").rsplit("/", 1)[-1].lower()
         short = short.replace(".", "_").replace("-", "_")
         name = f"{short}_decode_{mode}" + ("_embeds" if embeds else "") + ("_hidden" if emit_hidden else "")
         if mode in HEAD_MODES and (head_quant != "block32" or head_sym):
             name += f"_{head_quant}" + ("_sym" if head_sym else "")
+        if prefill_chunk:
+            name += f"_pf{prefill_chunk}"
 
     print(f"loading {src} (prefix {key_prefix!r}{', config ' + config_key if config_key else ''}) fp16 ...")
     model = lfm3_from_hf(src, key_prefix=key_prefix, config=config, config_key=config_key,
@@ -212,17 +261,28 @@ def export_lfm3_decode(
     # No GatedDeltaUpdate in LFM3 — drop its externalize spec. RMSNorm/SDPA
     # stay fused composites for the GPU delegate.
     specs = [s for s in _EXTERNALIZE_SPECS if s.composite_op_name != "gated_delta_update"]
-    print(f"exporting decode-only graph to Core AI dialect (inputs {spec['input_names']}, "
-          f"outputs {spec['output_names']}) ...")
-    prog = export_to_coreai(
-        model,
-        spec["reference_inputs"],
-        dynamic_shapes=spec["dynamic_shapes"],
-        input_names=spec["input_names"],
-        output_names=spec["output_names"],
-        state_names=spec["state_names"],
-        externalize_modules=specs,
-    )
+    if prefill_chunk:
+        # Chunk trace: static S=P query; positions / KV seq dynamic as in main.
+        pf_spec = build_pipelined_export_spec(
+            cfg, target_dtype=DTYPE, max_context_length=max_ctx,
+            trace_kv_len=TRACE_KV_CACHE_SEQ_LEN, trace_query=prefill_chunk, trace_past=64,
+            embeds=embeds, emit_hidden=emit_hidden, static_query=True)
+        print(f"exporting multifunction graph (main S=1 + prefill S={prefill_chunk}, inputs "
+              f"{spec['input_names']}, outputs {spec['output_names']}) ...")
+        prog = export_multifunction(
+            model, [("main", spec, False), ("prefill", pf_spec, True)], specs)
+    else:
+        print(f"exporting decode-only graph to Core AI dialect (inputs {spec['input_names']}, "
+              f"outputs {spec['output_names']}) ...")
+        prog = export_to_coreai(
+            model,
+            spec["reference_inputs"],
+            dynamic_shapes=spec["dynamic_shapes"],
+            input_names=spec["input_names"],
+            output_names=spec["output_names"],
+            state_names=spec["state_names"],
+            externalize_modules=specs,
+        )
     print("optimizing ...")
     prog.optimize()
 
@@ -246,8 +306,11 @@ def export_lfm3_decode(
                       "states": list(spec["state_names"]),
                       "kv_slots": cfg.attention_layer_ids, "conv_slots": cfg.conv_layer_ids,
                       "sliding_window": cfg.sliding_window}}
+    if prefill_chunk:
+        extra["lfm3"]["prefill_chunk"] = prefill_chunk
     write_bundle_metadata(out, name, meta_id, cfg.vocab_size, max_ctx, revision=revision,
                           weights=str(src) if local_src else None, mode=mode,
+                          functions=("main", "prefill") if prefill_chunk else ("main",),
                           language_extra=language_extra or None, extra=extra)
     tok_src = src if tokenizer_src is None else tokenizer_src
     if tok_src:
@@ -285,6 +348,8 @@ def main() -> None:
     ap.add_argument("--rescue-regex", default=None,
                     help="int4lin8 / int4hu only: the int8-rescue module regex (default = the conv-mixer projections)")
     ap.add_argument("--int4-block", type=int, default=32)
+    ap.add_argument("--prefill-chunk", type=int, default=0,
+                    help="also a static S=P 'prefill' function in the same asset (suffix _pfP; 0 = none)")
     args = ap.parse_args()
 
     config = args.config_json
@@ -296,7 +361,7 @@ def main() -> None:
         emit_hidden=args.emit_hidden, max_ctx=args.max_ctx, name=args.name,
         head_quant=args.head_quant, head_sym=args.head_sym, rescue_regex=args.rescue_regex,
         int4_block=args.int4_block, tokenizer_src=args.tokenizer_src,
-        chat_template=args.chat_template, hf_id=args.hf_id,
+        chat_template=args.chat_template, hf_id=args.hf_id, prefill_chunk=args.prefill_chunk,
     )
     print("run: COREAI_CHUNK_THRESHOLD=1 llm-benchmark --model <bundle> -p 128 -g 256 -n 3")
 
