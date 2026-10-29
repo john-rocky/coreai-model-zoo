@@ -1,0 +1,90 @@
+{
+  "result": "PASS",
+  "arch": "lfm3",
+  "bundle": "lfm3_1_7b_decode_fp16",
+  "artifact": null,
+  "source_model": {
+    "hf_id": "LiquidAI/LFM3-1.7B",
+    "revision": "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7",
+    "weights_pinned": false,
+    "note": "the oracle loads the source repo's default branch; the recipe's revision pins the export, not this comparison"
+  },
+  "protocol": {
+    "prompt": "<|startoftext|><|im_start|>user\nWhat is 17 + 25? Answer briefly.<|im_end|>\n<|im_start|>assistant\n<think></think>",
+    "max_new_tokens": 16,
+    "greedy": true,
+    "oracle_dtype": "fp32",
+    "engine_variant": "coreai-pipelined",
+    "warmup": "off",
+    "env": {
+      "COREAI_CHUNK_THRESHOLD": "1"
+    },
+    "tie_rule": "a first divergence passes only where the oracle's top-2 margin < 0.1"
+  },
+  "input_ids": [
+    124894,
+    124899,
+    5922,
+    207,
+    2992,
+    355,
+    229,
+    916,
+    1510,
+    229,
+    1197,
+    39,
+    41774,
+    21422,
+    22,
+    124900,
+    207,
+    124899,
+    63514,
+    207,
+    124901,
+    124902
+  ],
+  "oracle": {
+    "gen_ids": [
+      916,
+      1510,
+      229,
+      1197,
+      550,
+      229,
+      3843,
+      22
+    ],
+    "gen_text": "17 + 25 = 42.",
+    "top2_margins": [
+      0.7813506126403809,
+      0.9994637370109558,
+      0.9999964833259583,
+      0.9999968409538269,
+      0.9934760332107544,
+      0.9891754984855652,
+      0.999987781047821,
+      0.48076513409614563
+    ]
+  },
+  "engine": {
+    "gen_text": "17 + 25 = 42."
+  },
+  "match": {
+    "exact_prefix": 8,
+    "of": 8,
+    "first_divergence": null
+  },
+  "schema": "coreai-gate-transcript/1",
+  "generated_at": "2026-10-29T05:59:12+00:00",
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "python": "3.14.6",
+    "runner": "~/code/coreai/_lfm3/build/swift/release/llm-runner"
+  },
+  "recheck": {
+    "engine_side_only": "Download the bundle at the pinned revision, then feed the recorded input_ids to llm-runner with the protocol above (greedy, warmup off, coreai-pipelined, COREAI_CHUNK_THRESHOLD=1). The output must equal engine.gen_text. No oracle, no fp32 weights, no GPU beyond the one running the bundle.",
+    "full_gate": "python3 conversion/coreai_gate.py <bundle> LiquidAI/LFM3-1.7B --revision ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7 --arch lfm3 --prompt '<|startoftext|><|im_start|>user\\nWhat is 17 + 25? Answer briefly.<|im_end|>\\n<|im_start|>assistant\\n<think></think>' -n 16"
+  }
+}

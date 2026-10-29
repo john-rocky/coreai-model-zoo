@@ -1,0 +1,315 @@
+{
+ "bundle": "lfm3_1_7b_decode_int8hu_block32_sym",
+ "line_4t_thinking_on": {
+  "pass": true,
+  "runs": [
+   {
+    "run": 1,
+    "closed": 8,
+    "answered": 8,
+    "right": 8,
+    "pass": true,
+    "think_tag_in_answer": 0
+   },
+   {
+    "run": 2,
+    "closed": 8,
+    "answered": 8,
+    "right": 8,
+    "pass": true,
+    "think_tag_in_answer": 0
+   },
+   {
+    "run": 3,
+    "closed": 8,
+    "answered": 8,
+    "right": 8,
+    "pass": true,
+    "think_tag_in_answer": 0
+   }
+  ],
+  "think_tokens": {
+   "n": 24,
+   "min": 40,
+   "p50": 56.0,
+   "max": 237
+  },
+  "answers_identical_across_runs": true,
+  "rows": [
+   {
+    "question": "17+25=42",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 50,
+    "generated_tokens": 58,
+    "answer": "17 + 25 = 42"
+   },
+   {
+    "question": "capital=Tokyo",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 40,
+    "generated_tokens": 50,
+    "answer": "The capital of Japan is **Tokyo**."
+   },
+   {
+    "question": "opp(hot)=cold",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 135,
+    "generated_tokens": 139,
+    "answer": "Cold."
+   },
+   {
+    "question": "days/week=7",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 51,
+    "generated_tokens": 62,
+    "answer": "There are **7 days** in a week."
+   },
+   {
+    "question": "thanks(fr)=merci",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 141,
+    "generated_tokens": 172,
+    "answer": "In French, \"thank you\" is **\"Merci\"** (informal) or **\"Je vous remercie\"** (formal)."
+   },
+   {
+    "question": "8*7=56",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 61,
+    "generated_tokens": 70,
+    "answer": "8 times 7 is 56."
+   },
+   {
+    "question": "0.9>0.11",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 45,
+    "generated_tokens": 57,
+    "answer": "0.9 is larger than 0.11."
+   },
+   {
+    "question": "rhyme=blue",
+    "closed": true,
+    "right": true,
+    "think_tokens_reencoded": 237,
+    "generated_tokens": 239,
+    "answer": "blue"
+   }
+  ],
+  "protocol": "8 questions, thinking on (HF template prompt ids ending <think>), greedy, max 3584 tokens, one fresh llm-runner process per question (coreai-pipelined, COREAI_CHUNK_THRESHOLD=1, warmup off), 3 runs, AOT h16c of the int8hu .aimodel"
+ },
+ "line_4x_tool": {
+  "pass": true,
+  "runs": {
+   "zoo": [
+    {
+     "run": 1,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "H9GH-A2TF",
+     "answer": "The value stored under the key \"alpha\" is **H9GH-A2TF**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 2,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "XUR8-HX3H",
+     "answer": "The value stored under the key \"alpha\" is **XUR8-HX3H**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 3,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "6KXH-AV4C",
+     "answer": "The value stored under the key \"alpha\" is **6KXH-AV4C**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    }
+   ],
+   "kit": [
+    {
+     "run": 1,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "Z7LH-GZXY",
+     "answer": "The value stored under the key \"alpha\" is **Z7LH-GZXY**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "declares_tool_calling": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 2,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "NLDS-67JM",
+     "answer": "The value stored under the key \"alpha\" is **NLDS-67JM**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "declares_tool_calling": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    },
+    {
+     "run": 3,
+     "pass": true,
+     "tool_keys": [
+      "alpha"
+     ],
+     "secret": "T7HN-C38J",
+     "answer": "The value stored under the key \"alpha\" is **T7HN-C38J**.",
+     "checks": {
+      "answer_has_value_verbatim": true,
+      "declares_tool_calling": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "tool_ran_with_key_alpha": true,
+      "transcript_order_call_output_answer": true
+     }
+    }
+   ]
+  },
+  "protocol": "LanguageModelSession with one tool lookup_secret(key) returning a fresh random value; zoo = ZooLanguageModel(resourcesAt:) (probed dialect), kit = KitLanguageModel(bundleAt:, .pipelined); greedy, maximumResponseTokens 2048"
+ },
+ "line_4k_kit_catalog": {
+  "pass": true,
+  "card_snippet_ask": "17 + 25 = 42",
+  "thinking_on": {
+   "answer": "17 + 25 = 42",
+   "checks": {
+    "answer_matches_\\b42\\b": true,
+    "answer_nonempty": true,
+    "no_markup_in_answer": true,
+    "thinking_nonempty": true
+   },
+   "prompt_tokens": 21,
+   "generated_tokens": 57
+  },
+  "thinking_off": {
+   "answer": "17 + 25 = 42.",
+   "checks": {
+    "answer_matches_\\b42\\b": true,
+    "answer_nonempty": true,
+    "no_markup_in_answer": true,
+    "thinking_empty": true
+   },
+   "prompt_tokens": 22,
+   "generated_tokens": 8
+  },
+  "card_snippets": {
+   "on_answer": "17 + 25 = 42.",
+   "off_reply": "17 + 25 = 42.",
+   "checks": {
+    "off_no_markup_in_reply": true,
+    "off_reply_nonempty": true,
+    "on_answer_nonempty": true,
+    "on_no_markup_in_answer": true,
+    "on_thinking_nonempty": true
+   }
+  },
+  "tool_via_catalog": {
+   "answer": "The value stored under the key \"alpha\" is **ABGX-LQLE**.",
+   "secret": "ABGX-LQLE",
+   "tool_keys": [
+    "alpha"
+   ],
+   "checks": {
+    "answer_has_value_verbatim": true,
+    "declares_tool_calling": true,
+    "no_markup_in_answer": true,
+    "no_reasoning_in_answer": true,
+    "tool_ran_with_key_alpha": true,
+    "transcript_order_call_output_answer": true
+   }
+  },
+  "multiturn_answers": [
+   "I'll remember the code word TANGERINE-7319 for later.",
+   "42",
+   "TANGERINE-7319"
+  ],
+  "protocol": "ChatSession(catalog: \"lfm3-1.7b\") / KitLanguageModel from ModelCatalog.entry(forID:), the ship form (stripped .aimodel) in the store, specialized on first load (JIT)"
+ },
+ "shipped_bytes_regate": {
+  "pass": true,
+  "main_mlirb_sha256": "cc23467a6e436a57e4642512ccba5103a1a4903721bc854194bc641a45c7db7b",
+  "main_mlirb_bytes": 2701543755,
+  "from_main_mlirb_sha256": "e2beca44db66f8ef66bd67e9a58e37d57d50534d02fbffd5aaaf7187dd6acfe2",
+  "op_counts_equal": true,
+  "teacher_forced_identical_to_unstripped": true,
+  "teacher_forced_max_diff": 0.0,
+  "top1": "2637/2682",
+  "eight_questions_off": "8/8, verdicts = HF bf16 8/8",
+  "coreai_gate_alphabet": {
+   "exact_prefix": 16,
+   "of": 16,
+   "first_divergence": null
+  },
+  "coreai_gate_q1off": {
+   "exact_prefix": 8,
+   "of": 8,
+   "first_divergence": null
+  },
+  "eos_gate": {
+   "pass": true,
+   "engine_tokens": 2,
+   "engine_text": "1"
+  }
+ },
+ "r3a_finding_5_whitespace_record": {
+  "zoo_prompt_equals_hf_per_turn": [
+   true,
+   true,
+   true
+  ],
+  "kit_prompt_equals_hf_per_later_turn": [
+   true,
+   true
+  ],
+  "zoo_answers_leading": [
+   "\"I'll remembe\"",
+   "'42'",
+   "'TANGERINE-73'"
+  ]
+ }
+}

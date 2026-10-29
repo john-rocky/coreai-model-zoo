@@ -1,0 +1,30 @@
+{
+ "cmd": [
+  "~/code/coreai/_lfm3/build/swift/release/llm-runner",
+  "--model",
+  "~/code/coreai/_lfm3/export/lfm3_1_7b_decode_int8hu_block32_sym",
+  "--raw-tokens",
+  "<raw tokens json>",
+  "--max-tokens",
+  "17",
+  "--temperature",
+  "0.0",
+  "--inference-engine-variant",
+  "coreai-pipelined",
+  "--warmup",
+  "off"
+ ],
+ "env": {
+  "COREAI_CHUNK_THRESHOLD": "1"
+ },
+ "engine_text": "1",
+ "engine_tokens": 2,
+ "oracle_text": "1",
+ "oracle_eos_step": 2,
+ "halted_within_16": true,
+ "text_equal": true,
+ "pass": true,
+ "stdout_tail": "\n⏳ Preparing AI asset from compiled... done in 0.492s\n\nGenerating...\n1\n\n⏱️  Performance Summary:\n==================================================\nModel Load: 491.6ms\nPrompt:     598.0ms, 23 tokens, 38.5 tokens/sec\nGeneration: 11.1ms, 2 tokens, 180.5 tokens/sec\nTotal:      1.514s\n==================================================\n",
+ "stderr_tail": "",
+ "rc": 0
+}
