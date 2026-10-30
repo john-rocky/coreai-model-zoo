@@ -9,7 +9,7 @@ by an unknown one; the ops and the weights are not touched), the other files cop
 sha256 and bytes, the tool and its versions). A stripped `.aimodel` is a new asset (a new `main.hash`, a new runtime
 cache entry, other AOT bytes), so it is gated again; the d1 release ships the stripped bundles.
 
-    python strip_bundle.py <bundle> <out bundle> [--aot]
+    python strip_bundle.py <bundle> <out bundle> [--aot] [--keep-asset-metadata]
 
     python strip_bundle.py $K/exports/bundles/d1_3b_decode_fp16_pf64 $K/exports/bundles_ship/d1_3b_decode_fp16_pf64_s --aot
     python strip_bundle.py $K/exports/vision/d1_3b_vision_fp16w32 $K/exports/bundles_ship/d1_3b_vision_fp16w32_s --aot
@@ -17,6 +17,11 @@ cache entry, other AOT bytes), so it is gated again; the d1 release ships the st
 `--aot` compiles the stripped `.aimodel` for the Mac GPU into `<out parent>_aotc/<name>.h16c.aimodelc` with the
 exporters' flags (`--platform macOS --preferred-compute gpu --architecture h16c`, plus `--expect-frequent-reshapes`
 for a decoder), where the gates and `decide.py` look for it.
+
+`--keep-asset-metadata` saves the stripped `.aimodel` with the source asset's own metadata (author, license,
+description: what the export set, as d1_omni/strip_ship.py keeps it) instead of an empty one; a compile of the
+`.aimodel` carries it into the `.aimodelc`'s `metadata.json`. LFM3's static iOS export sets it
+(models/lfm3-1.7b/recipe.toml).
 
 Keep one program object: `AIModelAsset.program` builds a new object on every access, so
 `strip_debug_info(asset.program)` followed by `asset.program.save_asset(...)` saves the unstripped program.
@@ -83,6 +88,8 @@ def main() -> int:
     ap.add_argument("bundle", help="the exported bundle directory (metadata.json + <name>.aimodel + its files)")
     ap.add_argument("out", help="the new bundle directory; its name becomes the bundle's and the asset's name")
     ap.add_argument("--aot", action="store_true", help="also compile the stripped .aimodel (h16c) into <out parent>_aotc/")
+    ap.add_argument("--keep-asset-metadata", action="store_true",
+                    help="save with the source asset's author / license / description instead of empty metadata")
     a = ap.parse_args()
     from coreai.authoring import AIModelAsset
     from coreai_torch.debugging.debug_info import strip_debug_info
@@ -104,9 +111,10 @@ def main() -> int:
     before = {"bytes": (src_asset / "main.mlirb").stat().st_size, "sha256": sha256_file(src_asset / "main.mlirb"),
               "home_paths": count(src_asset / "main.mlirb", home)}
     t0 = time.monotonic()
-    program = AIModelAsset.load(src_asset).program      # one object: strip and save the same program
+    asset = AIModelAsset.load(src_asset)
+    program = asset.program                             # one object: strip and save the same program
     strip_debug_info(program)
-    program.save_asset(dst_asset, rt.AIModelAssetMetadata())
+    program.save_asset(dst_asset, asset.metadata if a.keep_asset_metadata else rt.AIModelAssetMetadata())
     secs = round(time.monotonic() - t0, 1)
     after = {"bytes": (dst_asset / "main.mlirb").stat().st_size, "sha256": sha256_file(dst_asset / "main.mlirb"),
              "home_paths": count(dst_asset / "main.mlirb", home)}

@@ -6,11 +6,17 @@
 embedding table), palettized by Apple's coreai-opt k-means call (`export.compression.palettize_pytorch_model`),
 then AOT for the Neural Engine with the ANE regions counted by unique name.
 
-    python conversion/export_lfm3_ane_static.py --src <LFM3 checkpoint dir> --out-dir <dir> [--name NAME] \\
-        [--qconfig <kmeans_palettization_config yaml> | --no-palettize] [--max-context-length 4096] \\
+    python conversion/export_lfm3_ane_static.py --src <LFM3 checkpoint dir | HF id> [--revision REV] --out-dir <dir> \\
+        [--name NAME] [--qconfig <kmeans_palettization_config yaml> | --no-palettize] [--max-context-length 4096] \\
         [--act tanh|stock] [--history block|column] [--num-layers N] [--aot h16c,h18p,h19p] \\
-        [--tokenizer-src <dir>] [--chat-template <file>] [--emit-hidden] [--fp16-table]
+        [--tokenizer-src <dir | HF id>] [--chat-template <file>] [--emit-hidden] [--fp16-table]
     python conversion/export_lfm3_ane_static.py --tiny --out-dir <dir> --aot h16c     # random 5-layer probe
+
+An HF id is read at `--revision` (the weights and the tokenizer files, through snapshot_download, as in
+export_lfm3_decode_pipelined.py), and metadata.json then names the checkpoint by its revision only; a local `--src`
+is also recorded as `source.weights`. The published iPhone bundle is this export stripped of its source locations
+(`d1/strip_bundle.py`) and compiled for one phone with the command `ios_device_bundle.py` runs
+(models/lfm3-1.7b/recipe.toml).
 
 Why not `coreai.llm.export --platform iOS` with a runtime `register()` (the LFM2.5 path,
 export_lfm25_ane_static.py): on this checkout (coreai-models zoo-0.2) the stock iOS path sizes the cache rows from
@@ -61,6 +67,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import os
 import shutil
@@ -246,13 +253,19 @@ async def convert_check_form(model, inputs, *, cache_len: int, hidden_size: int,
     return prog
 
 
-def save_tokenizer(src: Path, dest: Path, chat_template: str | None) -> None:
+def save_tokenizer(src: str, dest: Path, chat_template: str | None, revision: str | None = None) -> None:
     """The source tokenizer files verbatim (+ ``chat_template`` in place of the source template), as the lane's
-    dynamic exporter does (export_lfm3_decode_pipelined.save_tokenizer)."""
-    from _bundle import is_tokenizer_file
+    dynamic exporter does (export_lfm3_decode_pipelined.save_tokenizer). ``src`` is a local checkpoint dir or an HF
+    id, read at ``revision``."""
+    from _bundle import _TOKENIZER_PATTERNS, is_tokenizer_file
 
+    snap = Path(src)
+    if not snap.is_dir():
+        from huggingface_hub import snapshot_download
+
+        snap = Path(snapshot_download(str(src), revision=revision, allow_patterns=_TOKENIZER_PATTERNS))
     dest.mkdir(parents=True, exist_ok=True)
-    for f in sorted(src.iterdir()):
+    for f in sorted(snap.iterdir()):
         if f.is_file() and is_tokenizer_file(f.name):
             shutil.copy2(f, dest / f.name)
     if chat_template:
@@ -281,8 +294,15 @@ def _save_form(prog, out: Path, name: str, *, cfg, cache_width: int, max_ctx: in
     md.creation_date = int(time.time())
     assert md.author == "LiquidAI" and md.license == LICENSE, "AIModelAssetMetadata dropped a field"
     prog.save_asset(aimodel, md)
+    # As the dynamic exporter: a local checkpoint is named under source.weights, an HF id by its revision alone
+    # (a local path in a published metadata.json is the export machine's); a template the bundle carries in place of
+    # the source's is recorded by its sha256.
+    language_extra = None
+    if tokenizer_src and chat_template:
+        language_extra = {"chat_template_sha256": hashlib.sha256(Path(chat_template).read_bytes()).hexdigest()}
     write_bundle_metadata(out, name, hf_id, cfg.vocab_size, max_ctx, revision=revision,
-                          weights=str(src), mode="pal8_g32" if palettize else "fp16",
+                          weights=str(src) if Path(str(src)).is_dir() else None,
+                          mode="pal8_g32" if palettize else "fp16", language_extra=language_extra,
                           extra={"lfm3_static": {"form": form,
                                                  "cache_rows": [cfg.num_hidden_layers, 1, cache_width, 1],
                                                  "kv_width": cfg.num_key_value_heads * cfg.head_dim,
@@ -293,7 +313,8 @@ def _save_form(prog, out: Path, name: str, *, cfg, cache_width: int, max_ctx: in
                                                  "extend_outputs": extend_output_names(emit_hidden),
                                                  "embedding_table": "fp16" if fp16_table else "int8 per tensor"}})
     if tokenizer_src:
-        save_tokenizer(Path(tokenizer_src), out / "tokenizer", chat_template)
+        save_tokenizer(tokenizer_src, out / "tokenizer", chat_template,
+                       revision=None if Path(str(tokenizer_src)).is_dir() else revision)
     return aimodel
 
 
@@ -327,7 +348,7 @@ def export_lfm3_ane_static(src: str, out_dir: Path, name: str, *, qconfig: str |
               flush=True)
     t0 = time.time()
     model = L.lfm3_ios_from_hf(src, dtype=torch.float16, max_context_length=max_ctx, act=act, history=history,
-                               num_layers=num_layers, disable_embedding_quantization=fp16_table)
+                               num_layers=num_layers, disable_embedding_quantization=fp16_table, revision=revision)
     cfg = model.config
     rec["load_s"] = time.time() - t0
     if palettize:
@@ -426,7 +447,8 @@ def aot(aimodel: Path, dest: Path, arch: str, log: Path, compute: str = "neural-
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--src", default=None, help="LFM3 checkpoint dir (config.json + *.safetensors)")
+    ap.add_argument("--src", default=None,
+                    help="LFM3 checkpoint dir (config.json + *.safetensors) or HF id (read at --revision)")
     ap.add_argument("--tiny", action="store_true", help="random 5-layer LFM3-shaped checkpoint (compile probe)")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--name", default=None)
@@ -440,10 +462,10 @@ def main() -> None:
     ap.add_argument("--aot-gpu", default="", help="gpu compiles (Mac check): comma list, h16c")
     ap.add_argument("--check-form", action="store_true", help="also export the Mac check form (see above)")
     ap.add_argument("--check-ctx", type=int, default=2048)
-    ap.add_argument("--tokenizer-src", default=None)
+    ap.add_argument("--tokenizer-src", default=None, help="the tokenizer files' dir or HF id (read at --revision)")
     ap.add_argument("--chat-template", default=None)
     ap.add_argument("--hf-id", default=HF_ID)
-    ap.add_argument("--revision", default=None)
+    ap.add_argument("--revision", default=None, help="HF revision to pin (HF ids only; also metadata.json)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--emit-hidden", action="store_true",
                     help="extend also returns the final-norm hidden `hidden` [1, q, 1, hidden_size] (see above)")
