@@ -167,7 +167,8 @@ reasoning in its own transcript entry.
 
 ## Reproduce
 
-`recipe.toml` holds the export; `conversion/export_lfm3_decode_pipelined.py` is the exporter and
+`recipe.toml` holds the export: `python3 conversion/zoo_convert.py run --force lfm3-1.7b` runs its three steps
+(the chat template, the export, the strip). `conversion/export_lfm3_decode_pipelined.py` is the exporter and
 `conversion/coreai_gate.py --arch lfm3` the token gate.
 
 ```bash
@@ -185,7 +186,7 @@ exported `main.mlirb` records the export machine's source paths; the published `
 re-saved after coreai-torch's `strip_debug_info` (`conversion/d1/strip_bundle.py` does this for a bundle whose
 `assets.main` is the `.aimodel`), which is a new `main.hash`, so the gates above were run again on it. A
 re-export does not reproduce that `main.hash`: each export draws new names for its externalized graphs and
-weight resources (on 2026-10-30 three re-exports from a fresh clone matched the published `main.mlirb` section
+weight resources (on 2026-10-30 four re-exports from a fresh clone matched the published `main.mlirb` section
 by section except for those names and the lengths that encode them, with the same 3,971 ops). Running the
 bundle needs the pipelined engine with one extra state and `COREAI_CHUNK_THRESHOLD=1`
 (`main` takes one token; the engine feeds `prefill` whatever the threshold); `llm-runner` takes
