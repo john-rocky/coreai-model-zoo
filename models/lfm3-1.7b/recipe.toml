@@ -42,8 +42,9 @@ needs = [
   "The overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0, transformers 4.57.6); the",
   "LFM3 modules come with conversion/overlay/ (files/python/src/coreai_models/models/{macos,ios}/lfm3.py), and",
   "transformers 4.57.6 has no lfm3, so the module reads the safetensors itself.",
-  "The gates ran llm-runner built from the zoo's coreai-models fork at 397b337 (its pipelined engine carries the extra",
-  "state) with Xcode 27.0 RC, after dropping one argument label that the RC SDK rejects (CoreAILanguageModel.swift:51).",
+  "The gates ran llm-runner built from the zoo's coreai-models fork (john-rocky/coreai-models, branch zoo-0.2 at",
+  "661a5d4; its pipelined engine carries the extra state) with Xcode 27.0 RC, after dropping one argument label that the",
+  "RC SDK rejects (CoreAILanguageModel.swift:51).",
 ]
 aot = "not shipped: the gates and the speed figures ran the AOT of each .aimodel (xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes); the Mac loads the .aimodel and specializes it on first load"
 notes = [
@@ -70,5 +71,5 @@ notes = [
 ]
 open_questions = [
   "A re-export does not reproduce the published main.hash (5d4b6a89…): each export draws new random names for its 9 externalized graphs (coreai-torch 0.4.1, externalize.py uuid4().hex[:8]) and its 364 weight resources (64-bit decimal numbers, so their length changes too). Checked 2026-10-30 on four re-exports from a fresh clone of the overlay's base, the stripped main.mlirb section by section: the header and every section but the string section are byte-equal (the weights included), and the string section holds the same strings in the same order once those names are replaced (each file's size entries and section length checked against its strings); the 3,971 ops are the same.",
-  "No iPhone run yet (iOS caps the pipelined engine's dynamic KV at 1,024 tokens). Mac speed is on the card.",
+  "This release has no iOS bundle; what ran on iPhones (iOS 27.2) is in knowledge/lfm3-1.7b-port.md (iPhone). Mac speed is on the card.",
 ]

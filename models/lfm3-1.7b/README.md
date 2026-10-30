@@ -23,12 +23,12 @@ one fixed conv state `[13, 1, 2048, 6]`; the window is applied inside the graph,
 positions only. What is new against LFM2.5, and how each part was gated:
 [`knowledge/lfm3-1.7b-port.md`](../../knowledge/lfm3-1.7b-port.md).
 
-The bundle is `int8hu`: the MLP and conv-mixer linears int8 per-block-32, the head untied and int8
-per-block-32 symmetric, the attention projections (q, k, v, o and the gate) and the q / k norms in fp32,
-everything else fp16. The `.aimodel` holds two functions over the same weights: `main`, the one-token decode
-graph, and `prefill`, a static 64-token query over the same positions, KV and conv state. The pipelined engine
-finds `prefill` by name and sends every full 64-token piece of a prompt through it; the rest of the prompt and
-the decode go through `main`.
+The bundle is `int8hu`: the MLP and conv-mixer linears int8 per-block-32, the head untied and int8 per-block-32
+symmetric, the attention projections (q, k, v, o and the gate) and the q / k norms in fp32, everything else fp16.
+The `.aimodel` holds two functions over the same weights: `main`, the one-token decode graph, and `prefill`, a
+static 64-token query over the same positions, KV and conv state. The pipelined engine finds `prefill` by name and
+sends the prompt through it 64 tokens at a time while more than 64 tokens remain; the last 1–64 tokens of the
+prompt and the decode go through `main`.
 
 ## Speed
 
@@ -133,11 +133,11 @@ let entry = try await ModelCatalog.entry(forID: "lfm3-1.7b", expecting: .chat)
 guard let id = entry.modelID else { throw CoreAIKitError.modelNotAvailableOnPlatform(id: entry.id) }
 let model = try await KitLanguageModel(model: id, engineVariant: .pipelined)
 let session = LanguageModelSession(
-    model: model, tools: [LookupSecretTool(secret: "ABGX-LQLE")], instructions: "You are a helpful assistant.")
+    model: model, tools: [LookupSecretTool(secret: "GUZF-Z2TT")], instructions: "You are a helpful assistant.")
 let answer = try await session.respond(
     to: "Use the lookup_secret tool to read the value stored under the key \"alpha\", then tell me that value.",
     options: GenerationOptions(samplingMode: .greedy, maximumResponseTokens: 2048))
-// answer.content: The value stored under the key "alpha" is **ABGX-LQLE**.
+// answer.content: The value stored under the key "alpha" is **GUZF-Z2TT**.
 ```
 
 Run 3 times through each provider with a fresh value the model cannot guess, and once more through the catalog
@@ -151,26 +151,28 @@ reasoning in its own transcript entry.
   FoundationModels providers re-render the history every turn and, when the engine refuses the rewind, prefill
   it again from zero state — a three-turn chat recalled its first turn through both `ChatSession` and the zoo's
   provider. Each turn costs a full prefill of the conversation.
-- **The tail of a prompt goes one token at a time.** A prompt's last partial chunk (up to 63 tokens) runs
-  through `main` at about the decode speed — at 1,024 tokens that tail is about half of the first-token time.
+- **The tail of a prompt goes one token at a time.** The engine keeps the last prompt token for `main`, so a
+  prompt's final 1–64 tokens run through `main` at about the decode speed; a 1,024-token prompt is 15 chunks and
+  then 64 single steps, about half of its first-token time.
 - **4,096 tokens.** The bundle is exported with a 4,096-token context; the checkpoint itself allows more.
-- **No iOS bundle in this release.** On an iPhone 17 Pro (iOS 27.2; a 768-token prompt, 256 generated tokens), the
-  same int8 weights, built with `main` only and compiled ahead of time for its GPU, gave the Mac's tokens on 8
-  questions but prefilled at 10.0 and decoded at 9.25 tok/s, and the phone reached the thermal state serious in
-  the second run. A static Neural Engine export of the model (8-bit palettized weights, not in this release)
-  prefilled at 339.6 and decoded at 32.86 tok/s with the phone at thermal fair, kept top-1 on 692 of 721
-  teacher-forced steps against transformers fp32 and gave the 8 questions' verdicts of transformers bf16;
-  thinking, tool calls and CoreAIKit were not checked on it. On iOS the pipelined engine caps the dynamic KV at
-  1,024 tokens, so a turn there is prompt + answer ≤ 1,024 — tight for a model that thinks first. Details: [the
-  port notes](../../knowledge/lfm3-1.7b-port.md#iphone).
+- **No iOS bundle in this release.** On an iPhone 17 Pro (iOS 27.2; a 768-token prompt, 256 generated tokens),
+  these weights built with `main` only and compiled ahead of time for its GPU gave the Mac's tokens on 8 questions
+  but prefilled at 10.0 and decoded at 9.25 tok/s, medians of 4 trials at thermal state serious (the first run, at
+  fair, decoded at 10.5). A static Neural Engine export (8-bit palettized weights, not in this release) prefilled
+  at 339.6 and decoded at 32.86 tok/s with the phone at thermal fair; it kept top-1 on 692 of 721 teacher-forced
+  steps against transformers fp32 and gave the 8 questions' verdicts of transformers bf16, but thinking, tool
+  calls and CoreAIKit were not checked on it. On iOS the pipelined engine caps the dynamic KV at 1,024 tokens, so
+  a turn there is prompt + answer ≤ 1,024 — tight for a model that thinks first. Details: [the port
+  notes](../../knowledge/lfm3-1.7b-port.md#iphone).
 - **fp16 activations.** Teacher-forced over a 1,648-token document, the fp16 graph changes the top-1 at 6
   positions where transformers' own top-2 gap is 0.003–0.061, which the fp32 graph keeps; the int8 bundle's
-  98.32 % includes that floor.
-- **The chat template is rewritten, not changed.** The vendor template does not parse in swift-jinja 2.3.2
-  (the pin of `apple/coreai-models`) and renders tool definitions differently in 2.3.6; the bundle's template
-  has eight rewrites that render the same string as the vendor's under transformers. A Core AI stack that
-  cannot parse a template falls back to the raw prompt without saying so — check the rendered prompt when you
-  swap the tokenizer.
+  98.40 % (98.32 % through `main` alone) includes that floor.
+- **The chat template is rewritten, and renders the same string.** The vendor template does not parse in
+  swift-jinja 2.3.2 (the pin of `apple/coreai-models`) and renders tool definitions differently in 2.3.6; the
+  bundle's template has eight rewrites that render the same string as the vendor's under transformers. When it
+  cannot parse a template, `CoreAILanguageModel` in `apple/coreai-models` (and in the zoo's fork of it) falls back
+  to the messages' text joined by newlines, without a chat template, and logs one line that is off by default —
+  check the rendered prompt when you swap the tokenizer.
 
 ## Reproduce
 
