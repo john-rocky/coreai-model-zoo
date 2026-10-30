@@ -52,7 +52,10 @@ even when it is no:
 - **GAP** — Apple's stock stack does not already ship this capability. If it does, stop.
 - **EDGE** — the Core AI port will be at least as good as the realistic alternative, especially
   MLX. A Mac-only port of something MLX already runs fast is a "worse-MLX"; this repo has shipped
-  and then pulled two of those.
+  and then pulled two of those. **Measure it before writing code, not after the port is done:** run
+  the existing alternatives (MLX, llama.cpp, and any other Core AI or Core ML port of the same
+  model) on the same Mac with the same prompt and budget, and write the numbers down. LFM3-Audio-2B
+  (2026-10-30) measured them only at the end and found three alternatives faster.
 
 State in one sentence what the port does that stock Apple + MLX do not. If you cannot write that
 sentence, say so instead of porting. "The user asked for it" is not an answer to EDGE.
@@ -65,9 +68,18 @@ sentence, say so instead of porting. "The user asked for it" is not an answer to
 2. **Host processing gated in NumPy first** — resize, mel, tokenize, detokenize. Write it in
    NumPy and gate it *before* porting it to Swift. Host bugs are unfindable inside an app.
 
-Then re-run gate 1 **after** compression — compression is where ports die — and check the
-published bundle with `python3 conversion/zoo_verify.py <hf-repo>` (catches a missing chat
-template, a tokenizer that silently disagrees with the source).
+Gate 1 proves the export is right; run it on the uncompressed graph. Judge the compressed form on
+the task, not on its hidden states: the shipped bundle passes when its error rate on the task (WER
+for speech; for an LLM or VLM, the score on a fixed set of greedy-answered prompts judged against
+the fp32 reference's answers) stays within the bar you wrote down before measuring. The
+chat-templated turn that must reach EOS (the trap "Reading token-exact as 'the head is fine'"
+below) still runs on the shipped bundle. Hidden-state cosine after compression is a meter to read,
+not a line to pass: an 8-bit LM at hidden cos 0.961 had the same ASR WER as its fp16 form
+(LFM3-Audio-2B, 2026-10-30), and holding it to 0.999 left an fp16 LM as the shipping form, at 1.7x
+the bytes of FluidAudio's uint8 LM (3.69 vs 2.16 GB) and slower than all three alternatives
+measured. Compression is still where ports die — read the generations — and check the published
+bundle with `python3 conversion/zoo_verify.py <hf-repo>` (catches a missing chat template, a
+tokenizer that silently disagrees with the source).
 
 ## Traps that specifically catch agents
 
@@ -79,6 +91,16 @@ template, a tokenizer that silently disagrees with the source).
 - **Timing with `cpu_only()`.** That is the parity option, not a performance option.
 - **Benchmarking through a chat UI.** Headless self-test entrypoint, or it did not happen.
 - **Choosing AOT for a ≥1 GB graph without measuring the JIT.** On an iPhone 18 Pro a 1.3 GB int8 decoder specialized on device decodes at 98 tok/s; the same graph AOT-compiled for the phone (h19p, expect-frequent-reshapes) decodes at 51 tok/s because the AOT keeps an fp16 copy of the Linears (`models/minicpm-v-4.7-1b`). Measure both before choosing; AOT still wins the first load (1.3 s vs 6.4 s).
+- **Timing 8-bit through the Mac's AOT path.** An AOT bundle (expect-frequent-reshapes) keeps an
+  fp16 copy of 8-bit Linear weights, so 8-bit times the same as fp16 there: LFM3-Audio-2B's 8-bit
+  LM decoded at 92.65 tok/s against 92.63 for its fp16, and the port chose fp16 without timing the
+  8-bit LM through the JIT. Through Swift's JIT, an 8-bit LM of the same backbone decoded 1.34x
+  faster than its fp16 (LFM3-Omni, 123 vs 92 tok/s; both on a Mac M4 Max). Time a compressed form
+  on the path you ship.
+- **Designing speech output to stream later.** First-audio latency is set by how the prompt is fed
+  and how many codec frames go out first: LFM3-Audio-2B fed its TTS prompt one position at a time
+  and emitted codec frames twelve at a time, and its first audio came at 0.83 s against 0.09 s for
+  FluidAudio's Core AI port. Design for streaming from the start.
 - **Running an iOS bundle on a Mac.** Wedges the GPU stack; costs a reboot.
 - **Naked `exp()` in a hand-written kernel.** Three separate sessions lost to this; subtract the
   max first.

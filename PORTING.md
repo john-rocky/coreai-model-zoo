@@ -226,11 +226,12 @@ Rules of thumb the zoo has paid to learn (details and per-scheme mechanics:
   weights — blockwise-linear int4 is a GPU-only format there. If you aren't explicitly targeting
   ANE, target GPU and move on.
 
-Whatever you ship, re-run **Gate A on the compressed bundle** — compression is part of the model,
-so it gates like the model.
+Whatever you ship, re-run **Gate A on the compressed bundle** and record its numbers: compression is
+part of the model, and Gate A shows what it changed. The compressed bundle passes on the task bar
+(AGENTS.md, "The two gates a port must pass"), not on Gate A's per-token bars.
 
-> **Checkpoint 6** — the shipping-precision bundle passes Gate A; size and precision are recorded
-> for the model card.
+> **Checkpoint 6** — the shipping-precision bundle passes the task bar, its Gate A numbers are
+> recorded, and size and precision are recorded for the model card.
 
 ---
 
