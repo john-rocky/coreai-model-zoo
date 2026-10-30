@@ -157,12 +157,9 @@ reasoning in its own transcript entry.
 - **4,096 tokens.** The bundle is exported with a 4,096-token context; the checkpoint itself allows more.
 - **No iOS bundle in this release.** On an iPhone 17 Pro (iOS 27.2; a 768-token prompt, 256 generated tokens),
   these weights built with `main` only and compiled ahead of time for its GPU gave the Mac's tokens on 8 questions
-  but prefilled at 10.0 and decoded at 9.25 tok/s, medians of 4 trials at thermal state serious (the first run, at
-  fair, decoded at 10.5). A static Neural Engine export (8-bit palettized weights, not in this release) prefilled
-  at 339.6 and decoded at 32.86 tok/s with the phone at thermal fair; it kept top-1 on 692 of 721 teacher-forced
-  steps against transformers fp32 and gave the 8 questions' verdicts of transformers bf16, but thinking, tool
-  calls and CoreAIKit were not checked on it. On iOS the pipelined engine caps the dynamic KV at 1,024 tokens, so
-  a turn there is prompt + answer ≤ 1,024 — tight for a model that thinks first. Details: [the port
+  but decoded at 9.25 tok/s with the phone at thermal state serious; a static Neural Engine export (not in this
+  release) decoded at 32.86 tok/s, but thinking, tool calls and CoreAIKit were not checked on it. On iOS the
+  pipelined engine caps prompt + answer at 1,024 tokens — tight for a model that thinks first. Details: [the port
   notes](../../knowledge/lfm3-1.7b-port.md#iphone).
 - **fp16 activations.** Teacher-forced over a 1,648-token document, the fp16 graph changes the top-1 at 6
   positions where transformers' own top-2 gap is 0.003–0.061, which the fp32 graph keeps; the int8 bundle's
