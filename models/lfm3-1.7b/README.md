@@ -158,9 +158,10 @@ reasoning in its own transcript entry.
 - **No iOS bundle in this release.** On an iPhone 17 Pro (iOS 27.2; a 768-token prompt, 256 generated tokens),
   these weights built with `main` only and compiled ahead of time for its GPU gave the Mac's tokens on 8 questions
   but decoded at 9.25 tok/s with the phone at thermal state serious; a static Neural Engine export (not in this
-  release) decoded at 32.86 tok/s, but thinking, tool calls and CoreAIKit were not checked on it. On iOS the
-  pipelined engine caps prompt + answer at 1,024 tokens — tight for a model that thinks first. Details: [the port
-  notes](../../knowledge/lfm3-1.7b-port.md#iphone).
+  release) decoded at 32.86 tok/s, but thinking, tool calls and CoreAIKit were not checked on it. On an iPhone 18 Pro
+  the `main`-only `.aimodel`, specialized on the phone (device JIT), had not built its engine 300 s after launch
+  (the cause is not isolated). On iOS the pipelined engine caps prompt + answer at 1,024 tokens — tight for a
+  model that thinks first. Details: [the port notes](../../knowledge/lfm3-1.7b-port.md#iphone).
 - **fp16 activations.** Teacher-forced over a 1,648-token document, the fp16 graph changes the top-1 at 6
   positions where transformers' own top-2 gap is 0.003–0.061, which the fp32 graph keeps; the int8 bundle's
   98.40 % (98.32 % through `main` alone) includes that floor.
