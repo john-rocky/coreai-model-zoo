@@ -239,7 +239,24 @@ a newer swift-jinja being resolved.
   `LFM3-1.7B-MLX-8bit` / `-4bit` stops at `ValueError: Model type lfm3 not supported.`, so there is no MLX
   number to compare with yet.
 
-## Not measured
+## iPhone
 
-iPhone (the pipelined engine caps the iOS dynamic KV at 1,024 tokens, so prompt + answer ≤ 1,024 there) and the
-Neural Engine. Speed is on the card.
+This release has no iOS bundle. What ran on iPhones (iOS 27.2), with a 768-token prompt and 256 generated
+tokens — prompt + answer = 1,024, the cap the pipelined engine puts on the dynamic KV on iOS:
+
+| form, on an iPhone 17 Pro | prefill / decode tok/s | thermal | answers |
+|---|---|---|---|
+| int8hu, the shipped weights in a `main`-only build, compiled ahead of time for the GPU (h18p, `--expect-frequent-reshapes`: 6.39 GB, the int8 Linears' fp16 copies), on the pipelined engine with an S=1 prefill | 10.0 [9.2–11.0] / 9.25 [8.0–10.7], 4 warm trials; a 768 + 256 turn 104.37 s | nominal → fair in the first run, serious from the second | the 8 questions' greedy tokens = the Mac's on 8 / 8; the token gate 16 / 16 in all 3 runs; stops where the Mac stops |
+| the static Neural Engine form (`conversion/export_lfm3_ane_static.py` over `models/ios/lfm3.py`: 8-bit palettized weights, the tied head as an int8 table, contexts up to 4,096; `.aimodel` 1.76 GB, compiled for h18p 2.15 GB with each of the 30 transformer functions in a Neural Engine region), on Apple's `StaticShapeEngine` | 339.6 [336.1–340.6] / 32.86 [32.36–33.17], n = 6; a 768 + 256 turn 10.02 s | fair at the start and end of every speed run | top-1 692 / 721 = 95.98 % teacher-forced vs transformers fp32 (bar 93 %); the 8 questions' verdicts of transformers bf16, 8 / 8; stops on `<\|im_end\|>` |
+
+- Per turn the static form is 10.4× faster (prefill 34×, decode 3.6×). The AOT build was ready 13.2 s after a
+  cold launch and 2.9 s after a warm one, at a peak footprint of 0.205 GB; the static form loaded in 51.8 s the
+  first time, then in 6.8 and 0.07 s, at a peak footprint of 2.79 GB.
+- The static form has not been checked for thinking on, tool calls or the CoreAIKit path. A static iOS bundle
+  is checked on the phone only, so the Mac's checks above do not cover it.
+- The `.aimodel` specialized on the phone (device JIT) was not tried on the 17 Pro: the device JIT of two other
+  LFM3 decoders on that phone had ended without an engine, with jetsam events. On an iPhone 18 Pro the int8hu
+  `.aimodel` (`main` only) had not built its engine 300 s after launch (the cause is not isolated); the shipped
+  `_pf64` `.aimodel`, the h19p AOT and the h19p static form were not run there.
+
+Mac speed is on the card.

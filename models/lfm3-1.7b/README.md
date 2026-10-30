@@ -43,7 +43,7 @@ runs, the range in brackets. Measured on the export before its source locations 
 | 1,024 | `main` only | 108 [105–109] | 9.44 s | 95.5 [94.8–96.1] | 0.42 GB | 9 |
 | 3,712 | this bundle | 1,713 [1,697–1,718] | 2.17 s | 93.1 [89.9–94.3] | 2.13 GB | 8 |
 
-iPhone: not measured.
+No iOS bundle in this release: the iPhone runs are under [Known limits](#known-limits).
 
 ## Accuracy — what was checked
 
@@ -66,8 +66,8 @@ directory.
 
 ## Use it
 
-Needs a CoreAIKit release whose catalog lists `lfm3-1.7b` (0.7.3 does not). Mac only until an iPhone run has
-been measured.
+Needs a CoreAIKit build that supports LFM3 (0.7.3 does not). The catalog entry is for macOS: this release has
+no iOS bundle.
 
 ```swift
 import CoreAIKit
@@ -154,8 +154,15 @@ reasoning in its own transcript entry.
 - **The tail of a prompt goes one token at a time.** A prompt's last partial chunk (up to 63 tokens) runs
   through `main` at about the decode speed — at 1,024 tokens that tail is about half of the first-token time.
 - **4,096 tokens.** The bundle is exported with a 4,096-token context; the checkpoint itself allows more.
-- **iPhone: not measured, no iOS variant.** On iOS the pipelined engine caps the dynamic KV at 1,024 tokens,
-  so a turn there is prompt + answer ≤ 1,024 — tight for a model that thinks first.
+- **No iOS bundle in this release.** On an iPhone 17 Pro (iOS 27.2; a 768-token prompt, 256 generated tokens), the
+  same int8 weights, built with `main` only and compiled ahead of time for its GPU, gave the Mac's tokens on 8
+  questions but prefilled at 10.0 and decoded at 9.25 tok/s, and the phone reached the thermal state serious in
+  the second run. A static Neural Engine export of the model (8-bit palettized weights, not in this release)
+  prefilled at 339.6 and decoded at 32.86 tok/s with the phone at thermal fair, kept top-1 on 692 of 721
+  teacher-forced steps against transformers fp32 and gave the 8 questions' verdicts of transformers bf16;
+  thinking, tool calls and CoreAIKit were not checked on it. On iOS the pipelined engine caps the dynamic KV at
+  1,024 tokens, so a turn there is prompt + answer ≤ 1,024 — tight for a model that thinks first. Details: [the
+  port notes](../../knowledge/lfm3-1.7b-port.md#iphone).
 - **fp16 activations.** Teacher-forced over a 1,648-token document, the fp16 graph changes the top-1 at 6
   positions where transformers' own top-2 gap is 0.003–0.061, which the fp32 graph keeps; the int8 bundle's
   98.32 % includes that floor.
