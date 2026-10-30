@@ -38,7 +38,7 @@ call over the whole sequence, S=1 with a 4,096-slot KV, and the engine's own wal
 doubling): worst max|Δlogit| 1.22e-3 / 2.61e-3 / 2.61e-3, top-1 2682/2682 on every path (one position whose HF
 fp32 top-2 gap is under 1e-3 left out). Three negative controls turn it red: dropping the output gate (23.4 on the
 long sequence, top-1 889/1647), rotating every dimension (16.8, 1450/1647), and removing the window (24.3,
-1081/1647; q1_off, at 31 tokens, stays green: under 256 tokens the window never bites).
+1081/1647; the 31-token sequence stays green: under 256 tokens the window never bites).
 
 ## The sliding window is the SDPA composite's `window_size`, with no mask input
 
@@ -61,7 +61,7 @@ Two things were checked before trusting it:
   sequence.
 
 A ring-buffer KV for the five sliding layers (256 slots) was not built: the decode over a ~3.7–4k KV is only 1.9 %
-slower than over ~1–1.3k for all 11 attention layers, so a ring on 5 of them is worth at most about 0.9 % at a
+slower than over ~1–1.3k for all 11 attention layers, so a ring on 5 of them would win back about 1 % at a
 4,096-token context.
 
 ## The partial rotary is a zero tail, and there are two θ per step
@@ -161,7 +161,7 @@ instead of relying on a newer swift-jinja being resolved.
 - **A tool round trip** through Apple's `LanguageModelSession`, with one tool that returns a fresh random value
   each run: 3 / 3 through CoreAIKit's `KitLanguageModel` and 3 / 3 through the zoo's `ZooLanguageModel`. The model
   reasons, calls `lookup_secret` in XML with `key: alpha`, reasons over the result and answers with the value
-  verbatim; the reasoning lands in the transcript's reasoning entries, in none of the six runs in the answer.
+  verbatim; the reasoning lands in the transcript's reasoning entries and stays out of the answer in all six runs.
 - **Neither provider reused the KV across LFM3 turns.** The kit's pin refuses a partial rewind over the conv
   state, so CoreAIKit falls back to a full reset, and the zoo executor resets when its cached tokens diverge from
   the next prompt; both re-prefill the next prompt in full, which costs time, not correctness (the re-rendered
@@ -188,7 +188,8 @@ instead of relying on a newer swift-jinja being resolved.
 - Fed that way and teacher-forced on the 17 sequences: top-1 2639 / 2682 = 98.40 % (`main` alone: 2637); the
   logits at the chunk boundaries equal the `main`-only path's at cos ≥ 0.9999922; `main` gives the `main`-only
   bundle's values at all 2,683 positions. Greedy, a 215-token prompt that rides 3 chunks gives the fp32 oracle's
-  16 tokens (the token gate: `conversion/coreai_gate.py`, 16 greedy tokens against transformers fp32); the
+  16 tokens (the token gate: `conversion/coreai_gate.py`, 16 greedy tokens against the fp32 oracle — the PyTorch
+  module run in fp32); the
   stripped `.aimodel` gives the export's values at every position, chunked and not.
 - Through the kit's pin (the `.aimodel` specialized on first load on the Mac, a 1,233-token prompt, timed while
   other jobs ran on the Mac): the first token after 0.68 s with `prefill`, 7.4–7.8 s with `main` only. A tool
@@ -196,7 +197,7 @@ instead of relying on a newer swift-jinja being resolved.
 - The last 1–64 prompt tokens go S=1 through `main`; at a 1,024-token prompt those 64 steps are about half of the
   first-token time.
 
-### A padded last chunk (`--pad-tail`, not in an engine yet)
+### A padded last chunk (`--pad-tail`, not in a pinned engine yet)
 
 - What it buys: the prompt's tail goes through `prefill` as one padded call instead of one token at a time — at a
   1,000-token prompt the first token comes after 0.444 s instead of 0.767 s, at 200 tokens after 0.122 s instead
@@ -279,7 +280,7 @@ prompt + answer = 1,024, the cap the fork's pipelined engine puts on the dynamic
   int8 table, contexts up to 4,096; `.aimodel` 1.76 GB, compiled for h18p 2.15 GB with each of the 30 transformer
   functions in a Neural Engine region.
 - The turn column is computed from the medians (768 / prefill + 255 / decode), not timed. B's top-1 counts the 721
-  reply steps of the 17 sequences (up to 64 a sequence, after its prompt); the Mac checks above count all 2,682
+  reply steps of the 17 sequences (up to 64 a sequence, after its prompt); the Mac checks above count the 2,682
   positions of the same sequences, prompts included.
 - Per turn the static form came out 10.4× faster (prefill 34×, decode 3.6×); the two forms were measured in
   separate runs 40 minutes apart, not alternated, and A's warm trials ran with the phone at thermal serious. A was
