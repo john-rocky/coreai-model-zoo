@@ -399,8 +399,10 @@ For the long-form version of the same material, read
   LFM3-VL / -Omni / -Audio ports share: six differences from LFM2.5, the sliding window as the SDPA composite's own
   `window_size` with no mask input, the partial rotary as a zero tail with two θ per step, what stays fp32 in an int8
   export and the fp16 activation floor, a chat template with eight rewrites that change no rendered string so that it
-  parses in swift-jinja 2.3.2, and a second `prefill` function in the same asset that cuts the first token from 9.44
-  to 0.99 s.
+  parses in swift-jinja 2.3.2, a second `prefill` function in the same asset that cuts the first token from 9.44
+  to 0.99 s in one ahead-of-time window (0.83 s on the shipped path), and the static Neural Engine form on the iPhone
+  18 Pro: a 768 + 256 turn in 6.71 s on the kit's pinned engine with the same tokens as on Apple's, and CoreAIKit's
+  catalog path running it with thinking and a tool call.
 - [`qwen3.8-27b-port.md`](qwen3.8-27b-port.md) — Qwen3.8-27B, a **generation bump that was a
   verified weight swap** (config + weight map byte-identical to 3.6-27B), and what a
   **release-day download** actually costs: HF CDN at ~0.15 MB/s per connection with a ~2.7 MiB/s

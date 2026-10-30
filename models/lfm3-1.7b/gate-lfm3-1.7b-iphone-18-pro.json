@@ -1,0 +1,763 @@
+{
+ "bundle": "ios-h19p/lfm3_1_7b_static_pal8_tanh_block_c4096.h19p.ane.aimodelc",
+ "aimodelc_main_hash": "c55b16c3c83ac30b274fc8bed4d6075d5b25618dc1c43c6f34536a2bcc480a9c",
+ "resources_bin_sha256": "2adb77950e4807f510e3f09c5682bbdee1b7c5c59f23f215ab20b35ceaa1a85d",
+ "device": {
+  "model": "iPhone19,2",
+  "os": "Version 27.2 (Build 24B5099f)",
+  "arch": "h19p"
+ },
+ "engine": "CoreAIKit's pinned engine: john-rocky/coreai-models tag 0.2.8-zoo (3dc4ceb5), StaticShapeEngine",
+ "date": "2026-10-30",
+ "line_k6_engine_gate": {
+  "app": "AneGateRunner: the zoo's apps/AneGate source (AneGateRunnerApp.swift, the same bytes) with the lane's LFM3 additions (thermal and speed probes), built against the kit's pinned engine",
+  "tf_top1_vs_hf_fp32": {
+   "agree": 692,
+   "of": 721,
+   "rate": 0.9598,
+   "agree_where_fp32_gap_ge_1e-3": 692,
+   "of_where_fp32_gap_ge_1e-3": 721,
+   "per_prompt": {
+    "q1_off": [
+     9,
+     9
+    ],
+    "q1_on": [
+     57,
+     58
+    ],
+    "q2_off": [
+     7,
+     8
+    ],
+    "q2_on": [
+     61,
+     64
+    ],
+    "q3_off": [
+     12,
+     12
+    ],
+    "q3_on": [
+     59,
+     64
+    ],
+    "q4_off": [
+     8,
+     8
+    ],
+    "q4_on": [
+     60,
+     62
+    ],
+    "q5_off": [
+     14,
+     15
+    ],
+    "q5_on": [
+     62,
+     64
+    ],
+    "q6_off": [
+     8,
+     9
+    ],
+    "q6_on": [
+     64,
+     64
+    ],
+    "q7_off": [
+     42,
+     43
+    ],
+    "q7_on": [
+     56,
+     57
+    ],
+    "q8_off": [
+     52,
+     56
+    ],
+    "q8_on": [
+     57,
+     64
+    ],
+    "long_license": [
+     64,
+     64
+    ]
+   },
+   "control_shifted_by_one": {
+    "agree": 4,
+    "of": 721
+   }
+  },
+  "bar": "top-1 >= 93 % over the steps where HF fp32's top-2 gap >= 1e-3",
+  "q8_thinking_off": [
+   {
+    "q": "q1_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 9,
+    "reply": "17 + 25 = 42."
+   },
+   {
+    "q": "q2_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 10,
+    "reply": "The capital of Japan is **Tokyo**."
+   },
+   {
+    "q": "q3_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 12,
+    "reply": "The opposite of \"hot\" is \"cold.\""
+   },
+   {
+    "q": "q4_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 8,
+    "reply": "A week has **7 days**."
+   },
+   {
+    "q": "q5_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 112,
+    "reply": "<think>We need to answer the question: \"How do you say 'thank you' in French? Answer briefly.\" This is a straightforward translation. The common phrase is \"Merci\" or \"Merci beaucoup\" or \"Je vous remercie\". The most basic and brief is \"Merci\". I'll give a concise answer.</think>In French, \"thank you\" is **\"Merci\"** (informal) or **\"Je vous remercie\"** (formal). The most common brief form is **\"Merci\"**."
+   },
+   {
+    "q": "q6_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 8,
+    "reply": "8 × 7 = 56"
+   },
+   {
+    "q": "q7_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 40,
+    "reply": "0.9 is larger than 0.11 because 0.9 = 0.90, and 0.90 > 0.11.\n\n**Answer:** 0.9"
+   },
+   {
+    "q": "q8_off",
+    "device_ok": true,
+    "hf_bf16_ok": true,
+    "same_verdict": true,
+    "stop": true,
+    "steps": 30,
+    "reply": "The rhyme is from a traditional song: \"Roses are red, violets are **blue**.\" So the answer is **blue**."
+   }
+  ],
+  "q8_same_verdicts": 8,
+  "eos_gate": {
+   "ids": [
+    25,
+    19,
+    25,
+    37,
+    26,
+    124900
+   ],
+   "stops_within_16": true
+  },
+  "red_fixture": {
+   "fixture": "lfm3_1_7b/fixture_red.json",
+   "poisoned": true,
+   "verdict": "FAIL"
+  },
+  "ids_vs_apple_main_on_iphone_17_pro": {
+   "ag_clean": {
+    "compared": 18,
+    "tf_same": 18,
+    "fr_same": 18
+   },
+   "ag_q8": {
+    "compared": 8,
+    "tf_same": 8,
+    "fr_same": 8
+   }
+  },
+  "speed_p768_g256": {
+   "prefill_tok_s": {
+    "median": 590.55,
+    "min": 583.7,
+    "max": 592.7,
+    "n": 6
+   },
+   "decode_tok_s": {
+    "median": 47.17,
+    "min": 46.28,
+    "max": 47.22,
+    "n": 6
+   },
+   "trials": [
+    {
+     "i": 1,
+     "p": 768,
+     "g": 256,
+     "prefill": 589.7,
+     "decode": 47.22,
+     "tokens": 256
+    },
+    {
+     "i": 2,
+     "p": 768,
+     "g": 256,
+     "prefill": 590.5,
+     "decode": 47.18,
+     "tokens": 256
+    },
+    {
+     "i": 3,
+     "p": 768,
+     "g": 256,
+     "prefill": 583.7,
+     "decode": 47.17,
+     "tokens": 256
+    },
+    {
+     "i": 1,
+     "p": 768,
+     "g": 256,
+     "prefill": 590.6,
+     "decode": 47.18,
+     "tokens": 256
+    },
+    {
+     "i": 2,
+     "p": 768,
+     "g": 256,
+     "prefill": 591.0,
+     "decode": 47.15,
+     "tokens": 256
+    },
+    {
+     "i": 3,
+     "p": 768,
+     "g": 256,
+     "prefill": 592.7,
+     "decode": 46.28,
+     "tokens": 256
+    }
+   ],
+   "turn_s": 6.706,
+   "turn": "768 / prefill median + 255 / decode median"
+  },
+  "peak_footprint_gb": 2.818,
+  "thermal_per_run": {
+   "ag_clean": [
+    "nominal",
+    "nominal"
+   ],
+   "ag_q8": [
+    "nominal",
+    "nominal"
+   ],
+   "ag_red": [
+    "nominal",
+    "nominal"
+   ],
+   "ag_speed1": [
+    "nominal",
+    "nominal"
+   ],
+   "ag_speed2": [
+    "nominal",
+    "nominal"
+   ]
+  },
+  "load_s_per_run": {
+   "ag_clean": 0.115,
+   "ag_q8": 0.044,
+   "ag_red": 4.374,
+   "ag_speed1": 0.043,
+   "ag_speed2": 0.043
+  },
+  "note": "load: the first frame on the phone (21:12, stopped by a JetsamEvent of another app) loaded in 34.9 s; this frame's first load 4.374 s, then 0.04-0.12 s",
+  "pass": true
+ },
+ "line_k4_kit_path": {
+  "app": "Line4Harness, CoreAIKit by path (catalog variant ios with engine static-shape)",
+  "launches": [
+   {
+    "tag": "k4_k",
+    "mode": "k",
+    "run": 1,
+    "catalog_source": "builtin",
+    "subtree": "ios-h19p",
+    "arch": "h19p",
+    "engine": {
+     "engine_resolved_variant": "static-shape",
+     "engine_created": "Creating static-shape engine",
+     "load_s": 0.419933834
+    },
+    "kit_path_ok": true,
+    "peak_footprint_bytes": 2926220200,
+    "thermal": [
+     "nominal",
+     "nominal"
+    ],
+    "kit_path": {
+     "done": true,
+     "variant_key_ios": true,
+     "engine_hint_static": true,
+     "subtree_ios_arch": true,
+     "graph_compiled_for_arch": true,
+     "engine_factory_static": true
+    }
+   },
+   {
+    "tag": "k4_o",
+    "mode": "o",
+    "run": 1,
+    "catalog_source": "builtin",
+    "subtree": "ios-h19p",
+    "arch": "h19p",
+    "engine": {
+     "engine_resolved_variant": "static-shape",
+     "engine_created": "Creating static-shape engine",
+     "load_s": 0.418629459
+    },
+    "kit_path_ok": true,
+    "peak_footprint_bytes": 2943980456,
+    "thermal": [
+     "nominal",
+     "nominal"
+    ],
+    "kit_path": {
+     "done": true,
+     "variant_key_ios": true,
+     "engine_hint_static": true,
+     "subtree_ios_arch": true,
+     "graph_compiled_for_arch": true,
+     "engine_factory_static": true
+    }
+   },
+   {
+    "tag": "k4_t1",
+    "mode": "t",
+    "run": 1,
+    "catalog_source": "builtin",
+    "subtree": "ios-h19p",
+    "arch": "h19p",
+    "engine": {
+     "engine_resolved_variant": "static-shape",
+     "engine_created": "Creating static-shape engine",
+     "load_s": 3.718955583
+    },
+    "kit_path_ok": true,
+    "peak_footprint_bytes": 2847773704,
+    "thermal": [
+     "nominal",
+     "nominal"
+    ],
+    "kit_path": {
+     "done": true,
+     "variant_key_ios": true,
+     "engine_hint_static": true,
+     "subtree_ios_arch": true,
+     "graph_compiled_for_arch": true,
+     "engine_factory_static": true
+    }
+   },
+   {
+    "tag": "k4_t2",
+    "mode": "t",
+    "run": 2,
+    "catalog_source": "builtin",
+    "subtree": "ios-h19p",
+    "arch": "h19p",
+    "engine": {
+     "engine_resolved_variant": "static-shape",
+     "engine_created": "Creating static-shape engine",
+     "load_s": 0.425543958
+    },
+    "kit_path_ok": true,
+    "peak_footprint_bytes": 2926334864,
+    "thermal": [
+     "nominal",
+     "nominal"
+    ],
+    "kit_path": {
+     "done": true,
+     "variant_key_ios": true,
+     "engine_hint_static": true,
+     "subtree_ios_arch": true,
+     "graph_compiled_for_arch": true,
+     "engine_factory_static": true
+    }
+   },
+   {
+    "tag": "k4_t3",
+    "mode": "t",
+    "run": 3,
+    "catalog_source": "builtin",
+    "subtree": "ios-h19p",
+    "arch": "h19p",
+    "engine": {
+     "engine_resolved_variant": "static-shape",
+     "engine_created": "Creating static-shape engine",
+     "load_s": 0.420062125
+    },
+    "kit_path_ok": true,
+    "peak_footprint_bytes": 2927776656,
+    "thermal": [
+     "nominal",
+     "nominal"
+    ],
+    "kit_path": {
+     "done": true,
+     "variant_key_ios": true,
+     "engine_hint_static": true,
+     "subtree_ios_arch": true,
+     "graph_compiled_for_arch": true,
+     "engine_factory_static": true
+    }
+   },
+   {
+    "tag": "k4_x",
+    "mode": "x",
+    "run": 1,
+    "catalog_source": "builtin",
+    "subtree": "ios-h19p",
+    "arch": "h19p",
+    "engine": {
+     "engine_resolved_variant": "static-shape",
+     "engine_created": "Creating static-shape engine",
+     "load_s": 0.420837958
+    },
+    "kit_path_ok": true,
+    "peak_footprint_bytes": 2807239544,
+    "thermal": [
+     "nominal",
+     "nominal"
+    ],
+    "kit_path": {
+     "done": true,
+     "variant_key_ios": true,
+     "engine_hint_static": true,
+     "subtree_ios_arch": true,
+     "graph_compiled_for_arch": true,
+     "engine_factory_static": true
+    }
+   }
+  ],
+  "catalog_note": "catalog_source builtin = ModelCatalog.entry(forID:) took the kit's built-in row (the live catalog had no lfm3-1.7b yet); the bundle was placed in the store where a download puts it",
+  "4t_thinking_on": {
+   "launches": [
+    {
+     "tag": "k4_t1",
+     "run": 1,
+     "n": 8,
+     "passes": 8,
+     "closed": 8,
+     "right": 8,
+     "pass": true
+    },
+    {
+     "tag": "k4_t2",
+     "run": 2,
+     "n": 8,
+     "passes": 8,
+     "closed": 8,
+     "right": 8,
+     "pass": true
+    },
+    {
+     "tag": "k4_t3",
+     "run": 3,
+     "n": 8,
+     "passes": 8,
+     "closed": 8,
+     "right": 8,
+     "pass": true
+    }
+   ],
+   "answers_identical_across_launches": true,
+   "stats": {
+    "think_tokens": {
+     "median": 62.0,
+     "min": 47,
+     "max": 508,
+     "n": 24
+    },
+    "generated_tokens": {
+     "median": 70.5,
+     "min": 54,
+     "max": 524,
+     "n": 24
+    },
+    "ttft_s": {
+     "median": 0.1103215835,
+     "min": 0.109162708,
+     "max": 2.23231375,
+     "n": 24
+    },
+    "tok_s_decode": {
+     "median": 49.96539522914515,
+     "min": 45.503388776448006,
+     "max": 50.43377207146609,
+     "n": 24
+    }
+   },
+   "pass": true
+  },
+  "4o_thinking_off": {
+   "rows": [
+    {
+     "qi": 1,
+     "label": "17+25=42",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": true,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "17 + 25 = 42."
+    },
+    {
+     "qi": 2,
+     "label": "capital=Tokyo",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": true,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "The capital of Japan is **Tokyo**."
+    },
+    {
+     "qi": 3,
+     "label": "opp(hot)=cold",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": true,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "The opposite of \"hot\" is \"cold.\""
+    },
+    {
+     "qi": 4,
+     "label": "days/week=7",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": true,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "A week has **7 days**."
+    },
+    {
+     "qi": 5,
+     "label": "thanks(fr)=merci",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": false,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "In French, \"thank you\" is **\"Merci\"** (informal) or **\"Je vous remercie\"** (formal). The most common brief form is **\"Merci\"**."
+    },
+    {
+     "qi": 6,
+     "label": "8*7=56",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": true,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "8 × 7 = 56"
+    },
+    {
+     "qi": 7,
+     "label": "0.9>0.11",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": true,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "0.9 is larger than 0.11 because 0.9 = 0.90, and 0.90 > 0.11.\n\n**Answer:** 0.9"
+    },
+    {
+     "qi": 8,
+     "label": "rhyme=blue",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "reasoning_empty": true,
+     "markup_in_answer": false,
+     "stop": "stop_token",
+     "answer": "The rhyme is from a traditional song: \"Roses are red, violets are **blue**.\" So the answer is **blue**."
+    }
+   ],
+   "same_verdicts": 8,
+   "q5_think_tokens": 68,
+   "judge_pass": false,
+   "line_pass": true,
+   "note": "the registered line's bar for 4-o is the 8 verdicts = HF bf16's (8/8); the judge also records 'no reasoning when thinking is off', which q5 fails: the static form opens <think> there (68 thinking tokens, 111 generated), as Apple's engine does on the iPhone 17 Pro (the K6 ids equal that run's 18/18)"
+  },
+  "4x_tool": {
+   "sessions": [
+    {
+     "session": 1,
+     "secret": "L5SY-PYGY",
+     "answer": "The value stored under the key \"alpha\" is **L5SY-PYGY**.",
+     "checks": {
+      "declares_tool_calling": true,
+      "tool_ran_with_key_alpha": true,
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "transcript_order_call_output_answer": true,
+      "no_error": true
+     }
+    },
+    {
+     "session": 2,
+     "secret": "V458-QPFD",
+     "answer": "The value stored under the key \"alpha\" is **V458-QPFD**.",
+     "checks": {
+      "declares_tool_calling": true,
+      "tool_ran_with_key_alpha": true,
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "transcript_order_call_output_answer": true,
+      "no_error": true
+     }
+    },
+    {
+     "session": 3,
+     "secret": "TUMJ-TC2X",
+     "answer": "The value stored under the key \"alpha\" is **TUMJ-TC2X**.",
+     "checks": {
+      "declares_tool_calling": true,
+      "tool_ran_with_key_alpha": true,
+      "answer_has_value_verbatim": true,
+      "no_markup_in_answer": true,
+      "no_reasoning_in_answer": true,
+      "transcript_order_call_output_answer": true,
+      "no_error": true
+     }
+    }
+   ],
+   "respond_s": [
+    3.830592667,
+    2.447721541,
+    2.596075875
+   ],
+   "pass": true
+  },
+  "4k_card_snippet_and_turns": {
+   "ask": [
+    {
+     "tag": "k4_k",
+     "reply": "17 + 25 = 42.",
+     "checks": {
+      "matches_42": true,
+      "no_markup": true,
+      "inside_default_budget": true
+     },
+     "pass": true
+    }
+   ],
+   "turns": [
+    {
+     "turn": 1,
+     "generated_tokens": 221,
+     "cached_prompt_tokens": 0,
+     "response": "Understood—I'll keep TANGERINE-7319 in mind.",
+     "checks": {
+      "stop_token": true,
+      "answer_nonempty": true,
+      "no_markup": true
+     },
+     "pass": true
+    },
+    {
+     "turn": 2,
+     "generated_tokens": 127,
+     "cached_prompt_tokens": 32,
+     "response": "12 + 30 = 42.",
+     "checks": {
+      "stop_token": true,
+      "answer_nonempty": true,
+      "no_markup": true
+     },
+     "pass": true
+    },
+    {
+     "turn": 3,
+     "generated_tokens": 58,
+     "cached_prompt_tokens": 70,
+     "response": "TANGERINE-7319",
+     "checks": {
+      "stop_token": true,
+      "answer_nonempty": true,
+      "no_markup": true,
+      "code_word": true
+     },
+     "pass": true
+    }
+   ],
+   "turn_stats": [
+    {
+     "turn": 1,
+     "generated": 221,
+     "cached_prompt_tokens": 0,
+     "prompt_tokens": 32,
+     "ttft_s": 1.138613542,
+     "tok_s_decode": 49.25240815160972,
+     "tok_s_rolling": 50.49173452341809,
+     "wall_s": 5.605400208
+    },
+    {
+     "turn": 2,
+     "generated": 127,
+     "cached_prompt_tokens": 32,
+     "prompt_tokens": 70,
+     "ttft_s": 0.134420042,
+     "tok_s_decode": 50.43053231855933,
+     "tok_s_rolling": 50.867029919722825,
+     "wall_s": 2.632906459
+    },
+    {
+     "turn": 3,
+     "generated": 58,
+     "cached_prompt_tokens": 70,
+     "prompt_tokens": 109,
+     "ttft_s": 0.110261125,
+     "tok_s_decode": 49.89764963468026,
+     "tok_s_rolling": 51.02992311067981,
+     "wall_s": 1.2525995
+    }
+   ],
+   "pass": true
+  },
+  "kit_path_ok": true,
+  "judge_pass": false,
+  "line_pass": true
+ }
+}

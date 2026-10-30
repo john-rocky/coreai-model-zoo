@@ -609,8 +609,10 @@ Apple's repo; each recipe names the script it runs.
   vendor's with eight rewrites that change no rendered string and parse in swift-jinja 2.3.2 to 2.5.2. The published
   `.aimodel` is the export re-saved without its source locations (`d1/strip_bundle.py` does it); a new export has
   another `main.hash`, because each export draws new names for its externalized graphs and weight resources.
-  `export_lfm3_ane_static.py` exports the static iOS (Neural Engine) form from `models/ios/lfm3.py`. The same module is
-  the language model of the LFM3-VL / -Omni / -Audio ports. See
+  `export_lfm3_ane_static.py` exports the static iOS (Neural Engine) form from `models/ios/lfm3.py`; the iPhone 18 Pro
+  bundle is that export stripped the same way and compiled for h19p with the command `ios_device_bundle.py` runs (the
+  `.aimodelc`, a `metadata.json` without the export machine's paths, and the tokenizer: `ios-h19p/`). The same module is the
+  language model of the LFM3-VL / -Omni / -Audio ports. See
   [`../models/lfm3-1.7b/README.md`](../models/lfm3-1.7b/README.md) and
   [`../knowledge/lfm3-1.7b-port.md`](../knowledge/lfm3-1.7b-port.md).
 - **RGBA-Image-2.1 (Qwen-Image-2.1 text-to-image with RGBA output, Alibaba Qwen, in [`qwenimage21/`](qwenimage21/)):

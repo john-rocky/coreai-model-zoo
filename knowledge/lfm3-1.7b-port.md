@@ -180,20 +180,25 @@ instead of relying on a newer swift-jinja being resolved.
   "prefill chunk 64"). The weights are shared in the `.aimodel` (+174 KB for the second graph); the Mac AOT
   (`--architecture h16c --expect-frequent-reshapes`; the architecture codes this port compiled for are h16c on the
   M4 Max, h18p on the iPhone 17 Pro and h19p on the iPhone 18 Pro) holds an fp16 copy of the int8 Linears per
-  function (resources.bin 6.39 → 10.08 GB).
+  function (resources.bin 6.39 → 10.08 GB); when the `.aimodel` is specialized on load instead, its compile-cache
+  entry holds a 3.74 GB `resources.bin`.
 - The pipelined engine finds `prefill` by name — the fork and the kit's pin alike: a prompt of N tokens runs
   floor((N − 1) / 64) chunks through `prefill` and the rest one token at a time through `main`, the last one as
   the sampled step (a 1,024-token prompt: 15 chunks, then 64 single steps). Its log line (`CLILogger` level 1, off
   by default in an app): `Pipelined engine loaded 'prefill' function: static chunk S=64`.
-- Fed that way and teacher-forced on the 17 sequences: top-1 2639 / 2682 = 98.40 % (`main` alone: 2637); the
+- Fed that way and teacher-forced on the 17 sequences (the AOT h16c, as the Mac gates ran): top-1 2639 / 2682 =
+  98.40 % (`main` alone: 2637); the
   logits at the chunk boundaries equal the `main`-only path's at cos ≥ 0.9999922; `main` gives the `main`-only
   bundle's values at all 2,683 positions. Greedy, a 215-token prompt that rides 3 chunks gives the fp32 oracle's
   16 tokens (the token gate: `conversion/coreai_gate.py`, 16 greedy tokens against the fp32 oracle — the PyTorch
   module run in fp32); the
   stripped `.aimodel` gives the export's values at every position, chunked and not.
-- Through the kit's pin (the `.aimodel` specialized on first load on the Mac, a 1,233-token prompt, timed while
-  other jobs ran on the Mac): the first token after 0.68 s with `prefill`, 7.4–7.8 s with `main` only. A tool
-  round trip's prompts (127 and 197 tokens) ride it too.
+- Through the kit's pin (the `.aimodel` specialized on load on the Mac), in one measurement window on 2026-10-31 from a
+  1,024-token prompt: the first token after 0.83 s and a decode of 169.5 tok/s (median of 8); the same `.aimodel`
+  compiled ahead of time, on the same engine in the same window, 1.00 s and 105.5 tok/s, so the Mac bundle ships as
+  the `.aimodel`. Earlier, timed while other jobs ran on the Mac, a 1,233-token prompt reached the first token after
+  0.68 s with `prefill` and 7.4–7.8 s with `main` only. A tool round trip's prompts (127 and 197 tokens) ride it
+  too.
 - The last 1–64 prompt tokens go S=1 through `main`; at a 1,024-token prompt those 64 steps are about half of the
   first-token time.
 
@@ -241,8 +246,11 @@ instead of relying on a newer swift-jinja being resolved.
 - The exported `main.mlirb` carries the export machine's absolute paths (every op's source location). The
   shipped `.aimodel` is re-saved after coreai-torch's `strip_debug_info`; that is a new asset (a new
   `main.hash`, a new compile-cache entry), so its gates are run again on the stripped bytes.
-- The bundle's `metadata.json` points `assets.main` at the `.aimodel` (functions `main` and `prefill`); on the
+- The Mac bundle's `metadata.json` points `assets.main` at the `.aimodel` (functions `main` and `prefill`); on the
   Mac the engine specializes it on first load.
+- The iPhone bundle `ios-h19p/` is the static form's stripped `.aimodel` compiled for h19p: its `metadata.json`
+  points `assets.main` at the `.aimodelc`, records the compile command and the checkpoint revision, and drops the
+  export machine's checkpoint path ("iPhone" below).
 - Thinking off under sampling (temperature 0.7, the card's default configuration) put a stray `</think>` into one
   answer in 21 runs (0 in 21 on the `main`-only build; the prompt never reaches `prefill`): CoreAIKit's
   `ChatSession` passes it into the reply.
@@ -261,37 +269,79 @@ instead of relying on a newer swift-jinja being resolved.
   mask built from the positions (the composite then runs without its window); a tiny static S=16 graph passes
   on the GPU with it. The 1.7B's S=64 graph: "Chunked prefill" above.
 - mlx-lm 0.32.2 (the newest release on 2026-10-29) and its main branch that day have no `lfm3` model type: loading
-  LiquidAI's own `LFM3-1.7B-MLX-8bit` / `-4bit` stops at `ValueError: Model type lfm3 not supported.`, so there is
-  no MLX number to compare with yet.
+  LiquidAI's own `LFM3-1.7B-MLX-8bit` / `-4bit` stops at `ValueError: Model type lfm3 not supported.` mlx-vlm
+  0.7.11 loads them; the card's comparison with MLX runs through it.
 
 ## iPhone
 
-This release has no iOS bundle. What ran on iPhones (iOS 27.2), with a 768-token prompt and 256 generated tokens —
-prompt + answer = 1,024, the cap the fork's pipelined engine puts on the dynamic KV on iOS:
+The iPhone bundle (`ios-h19p/`) is the static Neural Engine form (B below), stripped of its source locations and
+compiled for the iPhone 18 Pro, and it runs on CoreAIKit's path. Every run here is on iOS 27.2; the speed columns use
+a 768-token prompt and 256 generated tokens (for A, prompt + answer = 1,024 is the cap that coreai-models' bd8dcf7
+puts on the pipelined engine's dynamic KV on iOS):
 
-| form, on an iPhone 17 Pro | prefill / decode tok/s | a 768 + 256 turn | thermal | answers |
-|---|---|---|---|---|
-| A. `int8hu`, `main` only, compiled ahead of time for the GPU, on the pipelined engine | 10.0 [9.2–11.0] / 9.25 [8.0–10.7], the 4 warm trials (the cold trial: 12.1 / 10.5) | 104.37 s | nominal → fair in the first run, serious from the second (all 4 warm trials at serious) | the 8 questions' greedy tokens = the Mac's on 8 / 8; the token gate 16 / 16 in all 3 runs; stops where the Mac stops |
-| B. the static Neural Engine form, on Apple's `StaticShapeEngine` | 339.6 [336.1–340.6] / 32.86 [32.36–33.17], n = 6 | 10.02 s | fair at the start and end of both speed runs (serious in the three correctness runs) | top-1 692 / 721 = 95.98 % teacher-forced vs transformers fp32 (bar 93 %); the 8 questions' verdicts of transformers bf16, 8 / 8; stops on `<\|im_end\|>` |
+| form | phone, engine | prefill / decode tok/s | a 768 + 256 turn | thermal | answers |
+|---|---|---|---|---|---|
+| A. `int8hu`, `main` only, compiled ahead of time for the GPU (h18p) | iPhone 17 Pro, PipelinedBench on a coreai-models pipelined engine with bd8dcf7's iOS KV cap | 10.0 [9.2–11.0] / 9.25 [8.0–10.7], the 4 warm trials (the cold trial: 12.1 / 10.5) | 104.37 s | nominal → fair in the first run, serious from the second (all 4 warm trials at serious) | the 8 questions' greedy tokens = the Mac's on 8 / 8; the token gate 16 / 16 in all 3 runs; stops where the Mac stops |
+| B. the static Neural Engine form (h18p) | iPhone 17 Pro, Apple's `StaticShapeEngine` (apple/coreai-models' main) | 339.6 [336.1–340.6] / 32.86 [32.36–33.17], n = 6 | 10.02 s | fair at the start and end of both speed runs (serious in the three correctness runs) | top-1 692 / 721 = 95.98 % teacher-forced vs transformers fp32 (bar 93 %); the 8 questions' verdicts of transformers bf16, 8 / 8; stops on `<\|im_end\|>` |
+| **B, the published bytes (h19p)** | **iPhone 18 Pro, the `StaticShapeEngine` CoreAIKit pins** | **590.6 [583.7–592.7] / 47.17 [46.28–47.22]**, n = 6 | **6.71 s** | nominal at the start and end of every run | the same tokens as the row above on every prompt ("The kit's engine against Apple's", below) |
 
-- A is the shipped weights in a `main`-only build, compiled for h18p with `--expect-frequent-reshapes` (6.39 GB:
-  the int8 Linears' fp16 copies), on the pipelined engine with an S=1 prefill. B is
+- A is the shipped Mac weights in a `main`-only build, compiled for h18p with `--expect-frequent-reshapes` (6.39
+  GB: the int8 Linears' fp16 copies), on the pipelined engine with an S=1 prefill. B is
   `conversion/export_lfm3_ane_static.py` over `models/ios/lfm3.py`: 8-bit palettized weights, the tied head as an
-  int8 table, contexts up to 4,096; `.aimodel` 1.76 GB, compiled for h18p 2.15 GB with each of the 30 transformer
-  functions in a Neural Engine region.
+  int8 table, contexts up to 4,096; `.aimodel` 1.76 GB (1.75 GB after the strip), compiled for h18p or h19p 2.15 GB
+  with each of the 30
+  transformer functions in a Neural Engine region.
 - The turn column is computed from the medians (768 / prefill + 255 / decode), not timed. B's top-1 counts the 721
   reply steps of the 17 sequences (up to 64 a sequence, after its prompt); the Mac checks above count the 2,682
   positions of the same sequences, prompts included.
-- Per turn the static form came out 10.4× faster (prefill 34×, decode 3.6×); the two forms were measured in
-  separate runs 40 minutes apart, not alternated, and A's warm trials ran with the phone at thermal serious. A was
-  ready 13.2 s after a cold launch and 2.9 s after a warm one, at a peak footprint of 0.205 GB; B loaded in 51.8 s
-  the first time, in 0.2 s for the two correctness runs after it, and in 6.8 and 0.07 s for the two speed runs
-  after a reinstall, at a peak footprint of 2.79 GB.
-- The static form has not been checked for thinking on, tool calls or the CoreAIKit path. A static iOS bundle is
-  checked on the phone only, so the Mac's checks above do not cover it.
+- **The published bytes are the gated ones.** The stripped `.aimodel` keeps the export's 138,196 operations in 33
+  kinds, and its h19p compile has the same 30 Neural Engine programs and the same `resources.bin` (1,476,692,332 B)
+  as the compile of the unstripped export, byte for byte; what changes is the location table in `main-h19p.mlirb`,
+  the MPSGraph delegate's two graphs (about 1.2 MB smaller each) and the metadata, and the export machine's paths go
+  from 35 hits in 4 files to none. The strip changes nothing the phone computes.
+- **The kit's engine against Apple's.** CoreAIKit pins the fork's tag `0.2.8-zoo`, whose `StaticShapeEngine` differs
+  from apple/coreai-models' main by 177 lines (main allocates the step inputs once and resolves input names from a
+  table; the fork allocates them per call and matches names by substring). For this bundle's five inputs, two states
+  and one output, both engines write the same values into the same tensors (checked by reading the code, not by
+  running it), and on the phones the
+  tokens agree: the iPhone 18 Pro on the kit's engine and the iPhone 17 Pro on Apple's give the same tokens on all
+  18 prompts (the 17 sequences and the stop-token prompt), teacher-forced and generated, and on the 8 questions.
+- **CoreAIKit's path on the iPhone 18 Pro.** `ChatSession(catalog: "lfm3-1.7b")` reads the catalog's `ios` variant
+  (engine `static-shape`), takes `ios-h19p/` because Core AI reports the phone's architecture as `h19p`
+  (`AIModel.deviceArchitectureName`), and loads it on the static-shape engine; each of 6 launches logged that
+  subtree, the graph `main-h19p.mlirb` and "Creating static-shape engine". The bundle was copied into the kit's
+  model store at the path a download would use, and the catalog entry came from the kit's built-in catalog (the live
+  catalog did not list the model yet). Thinking on, the 8 questions in 3 launches: 8 / 8 each, `</think>` closed
+  within the token budget, the reasoning in
+  `.reasoning` and out of the answer, the same answers in all 3 (reasoning 47–508 tokens, median 62). Thinking off:
+  the 8 verdicts of transformers bf16. A tool round trip through `KitLanguageModel` (`engineVariant: .staticShape`)
+  and `LanguageModelSession`: 3 / 3 with the tool's value verbatim. A 3-turn chat recalled its first turn; every
+  turn ended on the stop token; turns 2 and 3 reused the earlier turns' prompt tokens (32, then 70) and reached their
+  first token after 0.13 and 0.11 s against 1.14 s on turn 1.
+- **Thinking off is not always off on the static form.** One of the 8 questions ("How do you say 'thank you' in
+  French?") opens `<think>` with thinking off and reasons for 68 tokens before it answers "Merci" (111 tokens in
+  all), on the kit's engine on the 18 Pro and on Apple's on the 17 Pro alike; transformers bf16 and the Mac bundle
+  answer it directly. The verdict is still transformers bf16's.
+- Both test apps on the 18 Pro carried the `com.apple.developer.kernel.increased-memory-limit` entitlement (peak
+  footprint 2.82 GB in the gate app, up to 2.94 GB through `ChatSession`); a run without it was not tried.
+- On the 18 Pro the bundle loaded in 34.9 s the first time, in 4.37 s after the app was reinstalled and in 0.04–0.12
+  s within a launch, as if the phone kept the Neural Engine compile across the uninstall (where it keeps it was not
+  found).
+- CoreAIKit's path has not run on the iPhone 17 Pro, so the repo carries no `ios-h18p/`: on that phone the kit
+  throws `variantNotFound` without downloading anything.
+- Per turn the static form came out 10.4× faster than A on the 17 Pro (prefill 34×, decode 3.6×); the two forms were
+  measured in separate runs 40 minutes apart, not alternated, and A's warm trials ran with the phone at thermal
+  serious. A was ready 13.2 s after a cold launch and 2.9 s after a warm one, at a peak footprint of 0.205 GB; B
+  loaded in 51.8 s the first time, in 0.2 s for the two correctness runs after it, and in 6.8 and 0.07 s for the two
+  speed runs after a reinstall, at a peak footprint of 2.79 GB.
 - The `.aimodel` specialized on the phone (device JIT) was not tried on the 17 Pro: the device JIT of two other
   LFM3 decoders on that phone had ended without an engine, with jetsam events. On an iPhone 18 Pro the int8hu
-  `.aimodel` (`main` only) had not built its engine 300 s after launch (the cause is not isolated); the shipped
-  `_pf64` `.aimodel`, the h19p AOT and the h19p static form were not run there.
+  `.aimodel` (`main` only) had not built its engine 300 s after launch (the cause is not isolated); the Mac bundle's
+  `.aimodel` and the int8hu GPU compile for h19p were not run there.
+- Two compiles of one graph in one app: on a Mac, Core AI named the
+  compile-cache entry of an ahead-of-time compile after its graph and not its weights, so a second compile of the same
+  graph with other weights ran with the first one's weights (5 of 5 cases, on graphs of the LFM3-VL, -Omni and
+  -Audio ports; not checked on an iPhone). An app that ships two compiles of one graph deletes that entry before it
+  switches; `.aimodel` files are named after their weights and did not collide (0 of 3).
 
 Mac speed is on the card.

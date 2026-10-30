@@ -1,0 +1,424 @@
+{
+ "bundle": "gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym_pf64",
+ "aimodel_main_hash": "5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171",
+ "path": "the published .aimodel specialized on load (JIT) by CoreAIKit's pinned engine (john-rocky/coreai-models tag 0.2.8-zoo = 3dc4ceb5), COREAI_CHUNK_THRESHOLD=1; llm-runner / llm-benchmark built from that tag",
+ "machine": "Mac16,9 M4 Max 128 GB, macOS 27.0 (26A428)",
+ "date": "2026-10-31",
+ "line_f3": {
+  "q8_thinking_off": {
+   "max_tokens": 512,
+   "thinking": "off",
+   "decode": "greedy (temperature 0), coreai-pipelined, COREAI_CHUNK_THRESHOLD=1, warmup off",
+   "score": 8,
+   "same_verdicts": 8,
+   "same_replies": 7,
+   "think_tag_in_answer": 0,
+   "pass": true,
+   "rows": [
+    {
+     "label": "17+25=42",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "17 + 25 = 42.",
+     "hf_bf16_answer": "17 + 25 = 42.",
+     "gen_tokens": 9
+    },
+    {
+     "label": "capital=Tokyo",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "The capital of Japan is Tokyo.",
+     "hf_bf16_answer": "The capital of Japan is Tokyo.",
+     "gen_tokens": 8
+    },
+    {
+     "label": "opp(hot)=cold",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "The opposite of \"hot\" is \"cold.\"",
+     "hf_bf16_answer": "The opposite of \"hot\" is \"cold.\"",
+     "gen_tokens": 12
+    },
+    {
+     "label": "days/week=7",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "A week has **7 days**.",
+     "hf_bf16_answer": "A week has **7 days**.",
+     "gen_tokens": 8
+    },
+    {
+     "label": "thanks(fr)=merci",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "In French, \"thank you\" is **\"Merci\"**.",
+     "hf_bf16_answer": "In French, \"thank you\" is **\"Merci\"**.",
+     "gen_tokens": 15
+    },
+    {
+     "label": "8*7=56",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "8 times 7 is 56.",
+     "hf_bf16_answer": "8 times 7 is 56.",
+     "gen_tokens": 9
+    },
+    {
+     "label": "0.9>0.11",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "0.9 is larger than 0.11 because 0.9 = 0.90, and 0.90 > 0.11.\n\n**Answer:** 0.9 is larger.",
+     "hf_bf16_answer": "0.9 is larger than 0.11 because 0.9 = 0.90, and 0.90 > 0.11.\n\n**Answer:** 0.9 is larger.",
+     "gen_tokens": 43
+    },
+    {
+     "label": "rhyme=blue",
+     "ok": true,
+     "hf_bf16_ok": true,
+     "same_verdict": true,
+     "answer": "The classic rhyme goes: \"Roses are red, violets are **blue**.\" (Though in reality, violets are purple, the traditional line uses \"blue\" as part of the rhyme's pattern.)\n\n**Answer: blue**",
+     "hf_bf16_answer": "The classic rhyme goes: \"Roses are red, violets are **blue**.\" (from \"As is a rose, so is a violet\" / \"Roses are red, violets are blue, and you only need one to know the difference.\")",
+     "gen_tokens": 51
+    }
+   ]
+  },
+  "coreai_gate": {
+   "alphabet": {
+    "prompt_tokens": 15,
+    "result": "PASS",
+    "exact_prefix": 16,
+    "of": 16,
+    "first_divergence": null,
+    "engine_gen_text": " G, H, I, J, K, L, M, N,",
+    "oracle_gen_text": " G, H, I, J, K, L, M, N,",
+    "same_text_as_r6_engine": true
+   },
+   "count70": {
+    "prompt_tokens": 215,
+    "result": "PASS",
+    "exact_prefix": 16,
+    "of": 16,
+    "first_divergence": null,
+    "engine_gen_text": " 71, 72, 73, 74, 75, ",
+    "oracle_gen_text": " 71, 72, 73, 74, 75, ",
+    "same_text_as_r6_engine": true
+   },
+   "pass": true
+  },
+  "eos_gate": {
+   "engine_text": "1+1=2",
+   "engine_tokens": 6,
+   "oracle_text": "1",
+   "oracle_eos_step": 2,
+   "halted_within_16": true,
+   "pass": true
+  }
+ },
+ "window_2026_10_31": {
+  "label": "lfm3ios-r3-edge 00:10:45-00:24:29 JST, the same 1,024 prompt ids for every runtime, 256 tokens greedy without a stop, one process per run, 8 rounds with the order rotated",
+  "rows": {
+   "ca_pf64_kit": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 0.8295916670000001,
+     "min": 0.821813917,
+     "max": 0.841499083
+    },
+    "prefill_tok_s": {
+     "median": 1234.3422040172734,
+     "min": 1216.8759546942965,
+     "max": 1246.0241653464236
+    },
+    "decode_tok_s": {
+     "median": 169.52005717839003,
+     "min": 159.54170023661268,
+     "max": 171.06143621169358
+    },
+    "peak_footprint_bytes": 536219788.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 7,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "source": "LiquidAI/LFM3-1.7B @ ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7 (export, r4 / r6 strip)",
+     "aimodel_main_mlirb_sha256": "5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171",
+     "asset": "lfm3_1_7b_decode_int8hu_block32_sym_pf64.aimodel",
+     "asset_main_hash": "5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171"
+    }
+   },
+   "ca_pf64_aot_kit": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 1.0010497085,
+     "min": 0.989256459,
+     "max": 1.016293584
+    },
+    "prefill_tok_s": {
+     "median": 1022.9264249199539,
+     "min": 1007.5828639689611,
+     "max": 1035.1208634362831
+    },
+    "decode_tok_s": {
+     "median": 105.49683192996397,
+     "min": 103.83658889883029,
+     "max": 106.57599674595981
+    },
+    "peak_footprint_bytes": 2092409988.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 7,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "source": "LiquidAI/LFM3-1.7B @ ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7 (export, r4 / r6 strip)",
+     "aimodel_main_mlirb_sha256": "5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171",
+     "asset": "lfm3_1_7b_decode_int8hu_block32_sym_pf64.h16c.aimodelc",
+     "asset_main_hash": "fba1377407c737947170e3583360042624bda9e616d48030eb0e450b25c24f4b"
+    }
+   },
+   "ca_pf64": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 1.0099525205000002,
+     "min": 0.9925537499999999,
+     "max": 3.8320541670000003
+    },
+    "prefill_tok_s": {
+     "median": 1013.9125966462957,
+     "min": 267.2196047796628,
+     "max": 1031.6821633085362
+    },
+    "decode_tok_s": {
+     "median": 95.81502671127512,
+     "min": 89.31134776829708,
+     "max": 96.67144116173293
+    },
+    "peak_footprint_bytes": 2087208080.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 7,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "source": "LiquidAI/LFM3-1.7B @ ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7 (export, r4 / r6 strip)",
+     "aimodel_main_mlirb_sha256": "5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171",
+     "asset": "lfm3_1_7b_decode_int8hu_block32_sym_pf64.h16c.aimodelc",
+     "asset_main_hash": "fba1377407c737947170e3583360042624bda9e616d48030eb0e450b25c24f4b"
+    }
+   },
+   "mlx_bf16": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 0.2324391040019691,
+     "min": 0.2319004579912871,
+     "max": 0.23375370795838535
+    },
+    "prefill_tok_s": {
+     "median": 4405.454958952301,
+     "min": 4380.679172722686,
+     "max": 4415.687700101366
+    },
+    "decode_tok_s": {
+     "median": 113.07238418853854,
+     "min": 49.685573130453555,
+     "max": 114.79279185535411
+    },
+    "peak_footprint_bytes": 4510871320.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 7,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "repo": "LiquidAI/LFM3-1.7B-MLX-bf16",
+     "file": "model.safetensors",
+     "revision": "3446e6018fbc4ed3dde0892d32654a9fb531c4f6",
+     "sha256": "91983df3e2f1ae164cb714daff3c5094cc17c8997a876f3e97b52711149bda70",
+     "size": 3457639585
+    }
+   },
+   "mlx_8bit": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 0.24393114598933607,
+     "min": 0.24320008303038776,
+     "max": 0.24543208396062255
+    },
+    "prefill_tok_s": {
+     "median": 4197.906054738738,
+     "min": 4172.233652077419,
+     "max": 4210.524878283251
+    },
+    "decode_tok_s": {
+     "median": 189.76034077288548,
+     "min": 176.79867518619014,
+     "max": 192.0438793697549
+    },
+    "peak_footprint_bytes": 3037031136.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 6,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "repo": "LiquidAI/LFM3-1.7B-MLX-8bit",
+     "file": "model.safetensors",
+     "revision": "ee7667f3cfccb2a41725f91820531823fcabc6b7",
+     "sha256": "2b06cea98d75527c248a0b04383f7cf0a1c72fb4ed7b45096618fc4e59d015ad",
+     "size": 1837290805
+    }
+   },
+   "mlx_4bit": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 0.24173339607659727,
+     "min": 0.2410246250219643,
+     "max": 0.2460769999306649
+    },
+    "prefill_tok_s": {
+     "median": 4236.07174600702,
+     "min": 4161.299106737014,
+     "max": 4248.528547266422
+    },
+    "decode_tok_s": {
+     "median": 286.85340310219135,
+     "min": 246.8461374506989,
+     "max": 290.16380247518003
+    },
+    "peak_footprint_bytes": 2401061156.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 3,
+     "cap_hits": 0,
+     "think_tag": 1
+    },
+    "weights": {
+     "repo": "LiquidAI/LFM3-1.7B-MLX-4bit",
+     "file": "model.safetensors",
+     "revision": "d0ca73dcfa70ce18733754a492cdc1fb0123262d",
+     "sha256": "1be5bf672013cd91aa62148f77c5eea8d2784a95845d5fe826e08c7b84823815",
+     "size": 973083386
+    }
+   },
+   "lcpp_F16": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 0.24294700000000002,
+     "min": 0.241868,
+     "max": 0.251058
+    },
+    "prefill_tok_s": {
+     "median": 4214.911072924248,
+     "min": 4078.738777493647,
+     "max": 4233.714257363521
+    },
+    "decode_tok_s": {
+     "median": 111.06968440773292,
+     "min": 57.758782562646196,
+     "max": 114.12209452979235
+    },
+    "peak_footprint_bytes": 397782604.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 3,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "repo": "LiquidAI/LFM3-1.7B-GGUF",
+     "file": "LFM3-1.7B-F16.gguf",
+     "revision": "bad5729bba61d076fff20d2548e62526665af215",
+     "sha256": "b7ab8b69a85e4dfbf62cdfd0e02d7d051ed09f2c5b84c701771dddb073b85970",
+     "size": 3466626336
+    }
+   },
+   "lcpp_Q8_0": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 0.251047,
+     "min": 0.24953,
+     "max": 0.252799
+    },
+    "prefill_tok_s": {
+     "median": 4078.9182070691786,
+     "min": 4050.6489345290133,
+     "max": 4103.71498417024
+    },
+    "decode_tok_s": {
+     "median": 180.19978002883715,
+     "min": 172.32757105978078,
+     "max": 183.61902293077566
+    },
+    "peak_footprint_bytes": 397388200.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 4,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "repo": "LiquidAI/LFM3-1.7B-GGUF",
+     "file": "LFM3-1.7B-Q8_0.gguf",
+     "revision": "bad5729bba61d076fff20d2548e62526665af215",
+     "sha256": "8f6b24182258205e9e01e21f1f24a1f208c1e8115578825d202ce39976af20b6",
+     "size": 1846238496
+    }
+   },
+   "lcpp_Q4_K_M": {
+    "runs_ok": 8,
+    "first_token_s": {
+     "median": 0.262506,
+     "min": 0.261804,
+     "max": 0.265638
+    },
+    "prefill_tok_s": {
+     "median": 3900.8698783186182,
+     "min": 3854.8701616485596,
+     "max": 3911.3229744388937
+    },
+    "decode_tok_s": {
+     "median": 242.06762025472233,
+     "min": 219.81128985264886,
+     "max": 244.92500972496362
+    },
+    "peak_footprint_bytes": 397199220.0,
+    "q8": {
+     "right": 8,
+     "same_verdicts": 8,
+     "same_replies": 1,
+     "cap_hits": 0,
+     "think_tag": 0
+    },
+    "weights": {
+     "repo": "LiquidAI/LFM3-1.7B-GGUF",
+     "file": "LFM3-1.7B-Q4_K_M.gguf",
+     "revision": "bad5729bba61d076fff20d2548e62526665af215",
+     "sha256": "3793e1e6e2266919d6e015287221b41100175a98eddaba92e111aed3b05c93c4",
+     "size": 1099627808
+    }
+   }
+  },
+  "verdict": "FAIL"
+ }
+}
