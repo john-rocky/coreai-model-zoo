@@ -7,16 +7,27 @@
 # pipelined engine by conversion/export_lfm3_decode_pipelined.py as one asset with two functions: "main" (one token)
 # and "prefill" (a static 64-token chunk, --prefill-chunk 64). The staged .aimodel is that export with the MLIR debug
 # locations stripped (coreai-torch 0.4.1 strip_debug_info: AIModelAsset.load -> strip_debug_info(program) ->
-# program.save_asset with the source asset's metadata, the method of conversion/d1_omni/strip_ship.py), which has its
-# own main.hash; the notes give both. Status stays "unverified" until the bundle is published and its revision pinned.
+# program.save_asset; conversion/d1/strip_bundle.py does it), which has its own main.hash; the notes give both.
+# Status stays "unverified" until the bundle is published and its revision pinned.
+#
+# Step 1 writes the bundle's chat template from the vendor's (conversion/lfm3_chat_template.py), step 2 exports with
+# it, step 3 strips. zoo_convert.py runs every step in conversion/, so the paths are relative to it: every file goes
+# to ../../coreai-models/exports, the exports directory of the coreai-models checkout beside this one.
 
 ["lfm3-1.7b"]
-script = "export_lfm3_decode_pipelined.py"
-args = [
-  "int8hu", "--head-quant", "block32", "--head-sym", "--prefill-chunk", "64",
-  "--src", "LiquidAI/LFM3-1.7B", "--revision", "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7",
-  "--hf-id", "LiquidAI/LFM3-1.7B", "--max-ctx", "4096",
-  "--chat-template", "<the bundle's chat_template.jinja, sha256 48f23f8579dda4c39f48ff0a9c5f22e68e6b3267898dc9316e9b4161e56643be>",
+steps = [
+  { script = "lfm3_chat_template.py", args = ["../../coreai-models/exports/lfm3-1.7b.chat_template.jinja"] },
+  { script = "export_lfm3_decode_pipelined.py", args = [
+      "int8hu", "--head-quant", "block32", "--head-sym", "--prefill-chunk", "64",
+      "--src", "LiquidAI/LFM3-1.7B", "--revision", "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7",
+      "--hf-id", "LiquidAI/LFM3-1.7B", "--max-ctx", "4096",
+      "--chat-template", "../../coreai-models/exports/lfm3-1.7b.chat_template.jinja",
+      "--out-dir", "../../coreai-models/exports",
+  ] },
+  { script = "d1/strip_bundle.py", args = [
+      "../../coreai-models/exports/lfm3_1_7b_decode_int8hu_block32_sym_pf64",
+      "../../coreai-models/exports/ship/lfm3_1_7b_decode_int8hu_block32_sym_pf64",
+  ], bundle = "gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym_pf64" },
 ]
 card = "README.md"
 hf_repo = "mlboydaisuke/LFM3-1.7B-CoreAI"
@@ -28,8 +39,9 @@ overlay = true
 runtime_patches = ["apps/coreai-pipelined-extra-states.patch", "apps/coreai-shared-product.patch"]
 runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
 needs = [
-  "The overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0, transformers 4.57.6) with the",
-  "LFM3 module on the coreai-models checkout; transformers 4.57.6 has no lfm3, so the module reads the safetensors itself.",
+  "The overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0, transformers 4.57.6); the",
+  "LFM3 modules come with conversion/overlay/ (files/python/src/coreai_models/models/{macos,ios}/lfm3.py), and",
+  "transformers 4.57.6 has no lfm3, so the module reads the safetensors itself.",
   "The gates ran llm-runner built from the zoo's coreai-models fork at 397b337 (its pipelined engine carries the extra",
   "state) with Xcode 27.0 RC, after dropping one argument label that the RC SDK rejects (CoreAILanguageModel.swift:51).",
 ]
@@ -57,7 +69,6 @@ notes = [
   "transformers and parse in swift-jinja 2.3.2 / 2.3.6 / 2.5.2 (knowledge/lfm3-1.7b-port.md).",
 ]
 open_questions = [
-  "The script that writes the bundle's chat_template.jinja from the vendor template is not in conversion/ yet.",
-  "The LFM3 authoring module (models/macos/lfm3.py) is not in conversion/overlay/ yet; until it is, this recipe cannot run.",
+  "A re-export does not reproduce the published main.hash (5d4b6a89…): each export draws new random names for its 9 externalized graphs (coreai-torch 0.4.1, externalize.py uuid4().hex[:8]) and its 364 weight resources (64-bit decimal numbers, so their length changes too). Checked 2026-10-30 on three re-exports from a fresh clone of the overlay's base, the stripped main.mlirb section by section: the header and every section but the string section are byte-equal (the weights included), and the string section holds the same strings in the same order once those names are replaced (each file's size entries and section length checked against its strings); the 3,971 ops are the same.",
   "No iPhone run yet (iOS caps the pipelined engine's dynamic KV at 1,024 tokens). Mac speed is on the card.",
 ]

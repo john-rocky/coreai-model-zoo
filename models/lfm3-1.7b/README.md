@@ -179,11 +179,15 @@ python3 conversion/coreai_gate.py exports/lfm3_1_7b_decode_int8hu_block32_sym_pf
     --revision ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7 --arch lfm3 -n 16
 ```
 
-The export needs the LFM3 authoring module (`coreai_models/models/macos/lfm3.py`) on the `coreai-models`
-checkout. The exported `main.mlirb` records the export machine's source paths; the published `.aimodel` is the
-export re-saved after coreai-torch's `strip_debug_info` (`conversion/d1/strip_bundle.py` does this for a
-bundle whose `assets.main` is the `.aimodel`), which is a new `main.hash`, so the gates above were run again
-on it. Running the bundle needs the pipelined engine with one extra state and `COREAI_CHUNK_THRESHOLD=1`
+The export needs the zoo's overlay of `apple/coreai-models` (`conversion/overlay/`; the LFM3 modules are in its
+`files/`), and `conversion/lfm3_chat_template.py` writes the bundle's chat template from the vendor's. The
+exported `main.mlirb` records the export machine's source paths; the published `.aimodel` is the export
+re-saved after coreai-torch's `strip_debug_info` (`conversion/d1/strip_bundle.py` does this for a bundle whose
+`assets.main` is the `.aimodel`), which is a new `main.hash`, so the gates above were run again on it. A
+re-export does not reproduce that `main.hash`: each export draws new names for its externalized graphs and
+weight resources (on 2026-10-30 three re-exports from a fresh clone matched the published `main.mlirb` section
+by section except for those names and the lengths that encode them, with the same 3,971 ops). Running the
+bundle needs the pipelined engine with one extra state and `COREAI_CHUNK_THRESHOLD=1`
 (`main` takes one token; the engine feeds `prefill` whatever the threshold); `llm-runner` takes
 `--inference-engine-variant coreai-pipelined --warmup off`.
 
