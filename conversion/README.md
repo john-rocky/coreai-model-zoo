@@ -611,8 +611,9 @@ Apple's repo; each recipe names the script it runs.
   another `main.hash`, because each export draws new names for its externalized graphs and weight resources.
   `export_lfm3_ane_static.py` exports the static iOS (Neural Engine) form from `models/ios/lfm3.py`; the iPhone 18 Pro
   bundle is that export stripped the same way and compiled for h19p with the command `ios_device_bundle.py` runs (the
-  `.aimodelc`, a `metadata.json` without the export machine's paths, and the tokenizer: `ios-h19p/`). The same module is the
-  language model of the LFM3-VL / -Omni / -Audio ports. See
+  `.aimodelc`, a `metadata.json` without the export machine's paths, and the tokenizer: `ios-h19p/`); a new export has
+  the same weights and IR under new random names, and its compile is not byte-equal to `ios-h19p/`. The same module is
+  the language model of the LFM3-VL / -Omni / -Audio ports. See
   [`../models/lfm3-1.7b/README.md`](../models/lfm3-1.7b/README.md) and
   [`../knowledge/lfm3-1.7b-port.md`](../knowledge/lfm3-1.7b-port.md).
 - **RGBA-Image-2.1 (Qwen-Image-2.1 text-to-image with RGBA output, Alibaba Qwen, in [`qwenimage21/`](qwenimage21/)):

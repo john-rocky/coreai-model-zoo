@@ -1,5 +1,6 @@
-# Recipe for lfm3-1.7b — the configuration that produced the staged Mac bundle and rebuilds the iPhone 18 Pro's (the
-# staged ios-h19p/ came from the lane's scripts with the same exporter, strip and compile command: open_questions).
+# Recipe for lfm3-1.7b — the configuration that produced the staged Mac bundle and the iPhone 18 Pro's (the staged
+# ios-h19p/ came from the lane's scripts with the same exporter, strip and compile command; steps 4-6 re-export the
+# same graph and weights, but their compile is not byte-equal to it: open_questions).
 # Schema and the rules for `status`: ../README.md.
 # Run it with:  python3 ../../conversion/zoo_convert.py run <name>
 #
@@ -12,7 +13,8 @@
 # The iPhone bundle is the static Neural Engine form (coreai_models/models/ios/lfm3.py through Apple's iOS export
 # functions, conversion/export_lfm3_ane_static.py: 8-bit k-means g32, max context 4096), stripped the same way and
 # compiled for the iPhone 18 Pro's Neural Engine (h19p); step 6, conversion/ios_device_bundle.py, runs that compile (the
-# staged bundle was compiled by the lane's script with the same command).
+# staged bundle was compiled by the lane's script with the same command; a re-export draws new random names, and its
+# compile is not byte-equal to the staged one: open_questions).
 # Status stays "unverified" until the bundles are published and their revision pinned.
 #
 # Step 1 writes the bundle's chat template from the vendor's (conversion/lfm3_chat_template.py), step 2 exports with
@@ -110,6 +112,6 @@ notes = [
 ]
 open_questions = [
   "A re-export does not reproduce the published main.hash (5d4b6a89…): each export draws new random names for its 9 externalized graphs (coreai-torch 0.4.1, externalize.py uuid4().hex[:8]) and its 364 weight resources (64-bit decimal numbers, so their length changes too). Checked 2026-10-30 on four re-exports from a fresh clone of the overlay's base, the stripped main.mlirb section by section: the header and every section but the string section are byte-equal (the weights included), and the string section holds the same strings in the same order once those names are replaced (each file's size entries and section length checked against its strings); the 3,971 ops are the same.",
-  "The staged ios-h19p/ was built before steps 4-6 were written here, by the lane's scripts: the same exporter and builder before their emit_hidden switch (on the tiny model, the builder here with the switch off exports the same torch programs for all four functions as the earlier one; the 1.7B was not compared that way), a strip that kept the asset metadata as step 5 does, and step 6's compile command. Steps 4-6 have not been re-run against it yet; a re-run is expected to draw new names as the Mac export does (not yet checked for this form), so it will be compared by its Neural Engine programs and resources.bin, not by main.hash.",
+  "The staged ios-h19p/ was built before steps 4-6 were written here, by the lane's scripts: the same exporter and builder before their emit_hidden switch (on the tiny model, the builder here with the switch off exports the same torch programs for all four functions as the earlier one), a strip that kept the asset metadata as step 5 does, and step 6's compile command. Steps 4-6, re-run on 2026-10-31 from a fresh clone of the overlay's base, make a bundle that is not byte-equal to it. (1) The re-export's stripped main.mlirb has the staged export's weights (1,743,036,000 bytes), IR, attributes and properties; 9 of its 612 strings differ, each in the random 8-letter suffix of an op name (rope_gather_*, fused_interleaved_embedding_gather_dequant_reshape_*), and its weight resources have new random names. (2) Its h19p compile puts the 30 transformer functions on the Neural Engine with no ANECCompileOffline failure and the same operation statistics, and its resources.bin has the same size and the same bytes in another order (every byte value occurs the same number of times in both; the staged file's first 64 bytes sit 1.0 GB into the new one). (3) The 30 Neural Engine programs match over the first 78-80 % of their bytes and differ after that. The compiler gave byte-equal programs and resources.bin for two inputs that differ only in debug locations (the staged export compiled before and after the strip), and the re-export differs from the staged export only in those names, so the names move the compiled layout; a compile with the staged names put back was not tried. The bundle's metadata.json differs where expected (compilation.date, the strip record, three lfm3_static keys the exporter added since). The published ios-h19p/ is the staged bytes, the ones the iPhone 18 Pro checks ran on.",
   "The iPhone 17 Pro has no bundle: the same static form compiled for h18p passed the same checks on Apple's engine, but CoreAIKit's path has not run on that phone (knowledge/lfm3-1.7b-port.md, iPhone).",
 ]

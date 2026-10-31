@@ -16,7 +16,8 @@ An HF id is read at `--revision` (the weights and the tokenizer files, through s
 export_lfm3_decode_pipelined.py), and metadata.json then names the checkpoint by its revision only; a local `--src`
 is also recorded as `source.weights`. The published iPhone bundle is this export stripped of its source locations
 (`d1/strip_bundle.py`) and compiled for one phone with the command `ios_device_bundle.py` runs
-(models/lfm3-1.7b/recipe.toml).
+(models/lfm3-1.7b/recipe.toml). A re-export has the same weights and IR but draws new random names (op-name suffixes,
+weight resource names), and its compile is not byte-equal to the published one (the recipe's open_questions).
 
 Why not `coreai.llm.export --platform iOS` with a runtime `register()` (the LFM2.5 path,
 export_lfm25_ane_static.py): on this checkout (coreai-models zoo-0.2) the stock iOS path sizes the cache rows from
