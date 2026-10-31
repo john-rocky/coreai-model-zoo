@@ -15,7 +15,6 @@
 # compiled for the iPhone 18 Pro's Neural Engine (h19p); step 6, conversion/ios_device_bundle.py, runs that compile (the
 # staged bundle was compiled by the lane's script with the same command; a re-export draws new random names, and its
 # compile is not byte-equal to the staged one: open_questions).
-# Status stays "unverified" until the bundles are published and their revision pinned.
 #
 # Step 1 writes the bundle's chat template from the vendor's (conversion/lfm3_chat_template.py), step 2 exports with
 # it, step 3 strips: the Mac bundle. Step 4 exports the static form with the same template, step 5 strips it (keeping
@@ -58,7 +57,7 @@ hf_repo = "mlboydaisuke/LFM3-1.7B-CoreAI"
 source_hf_id = "LiquidAI/LFM3-1.7B"
 source_revision = "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7"
 bundle = "gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym_pf64"
-status = "unverified"
+status = "verified"
 overlay = true
 runtime_patches = ["apps/coreai-pipelined-extra-states.patch", "apps/coreai-shared-product.patch"]
 runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
@@ -109,6 +108,8 @@ notes = [
   "compile) on all 18 prompts; prefill 590.6 / decode 47.17 tok/s at 768 + 256 (6.71 s a turn, peak footprint 2.82 GB).",
   "CoreAIKit's catalog path there (ChatSession(catalog:) -> ios -> ios-h19p/ -> the static-shape engine): thinking on 3",
   "launches x 8/8, thinking off 8/8, a tool round trip 3/3, a 3-turn chat on the stop token.",
+  "Published 2026-10-31 as revision 8621dc42f2a6f25b1ad3f955aab39d608dbdfef4: all 56 files match the staged SHA256SUMS (the LFS files by the",
+  "Hub's sha256 and size, the others downloaded and hashed).",
 ]
 open_questions = [
   "A re-export does not reproduce the published main.hash (5d4b6a89…): each export draws new random names for its 9 externalized graphs (coreai-torch 0.4.1, externalize.py uuid4().hex[:8]) and its 364 weight resources (64-bit decimal numbers, so their length changes too). Checked 2026-10-30 on four re-exports from a fresh clone of the overlay's base, the stripped main.mlirb section by section: the header and every section but the string section are byte-equal (the weights included), and the string section holds the same strings in the same order once those names are replaced (each file's size entries and section length checked against its strings); the 3,971 ops are the same.",
