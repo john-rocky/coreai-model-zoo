@@ -4,7 +4,8 @@ LiquidAI's [LFM3-1.7B](https://huggingface.co/LiquidAI/LFM3-1.7B) on Apple's Cor
 reasons before it answers and calls tools in XML, in two bundles with a 4,096-token context. For the Mac, one
 int8 `.aimodel` on the `coreai-pipelined` GPU engine that prefills a prompt 64 tokens at a time; for the iPhone
 18 Pro, a Neural Engine build with fixed input shapes, compiled in advance for that phone's chip (`h19p`).
-CoreAIKit's `ChatSession` and Apple's `LanguageModelSession` drive both.
+CoreAIKit's `ChatSession` and Apple's `LanguageModelSession` drove both in the checks below; CoreAIKit's LFM3
+support is not in a release or on the kit's main branch ([Use it](#use-it)).
 
 Source checkpoint: revision `ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7` (LFM Open License v1.0).
 
@@ -81,7 +82,8 @@ median, the range in brackets.
 |---:|---:|---:|---:|---|---|
 | **590.6** [583.7–592.7] | **47.17** [46.28–47.22] | 6.71 s | 2.82 GB | nominal at the start and end of every run | in this app: 34.9 s the first time on the phone, then 4.4 s or less |
 
-CoreAIKit's test app, with the bundle at its own path, loaded it in 32.4 s the first time, then in 3.7 s and 0.4 s.
+A test app built on CoreAIKit (`ChatSession(catalog:)`), with the bundle at its own path, loaded it in 32.4 s the
+first time, then in 3.7 s and 0.4 s.
 
 The turn column is computed from the medians (768 / prefill + 255 / decode), not timed. Through
 `ChatSession(catalog:)` on the same phone, the kit's own counters gave a median decode of 50.0 tok/s over the
@@ -118,8 +120,11 @@ itself, not from CoreAIKit's engine.
 
 ## Use it
 
-Needs a CoreAIKit build that supports LFM3 (0.7.3 does not). The catalog entry has a macOS variant (the Mac bundle
-on the pipelined engine) and an iOS variant (`ios`, on the static-shape engine).
+Needs a CoreAIKit build that supports LFM3 — the XML tool calls, reading a reply that starts inside the thinking block, the
+thinking switch (`enableThinking`) and the `lfm3-1.7b` catalog entry. That support is not in a CoreAIKit release or on the kit's main branch (0.7.3 does not
+support LFM3); the kit checks above ran a build that has it, whose catalog entry has a macOS variant (the Mac
+bundle on the pipelined engine) and an iOS variant (`ios`, on the static-shape engine). Without CoreAIKit, the Mac bundle runs through the zoo's
+`ZooLanguageModel` ([Tool calling](#tool-calling)) or `llm-runner` ([Reproduce](#reproduce)).
 
 ```swift
 import CoreAIKit
@@ -170,7 +175,10 @@ alpha
 
 CoreAIKit's `KitLanguageModel` and the zoo's `ZooLanguageModel` (`swift/Sources/ZooFMProvider`) render the
 tool definitions the way the chat template does, parse these blocks (values typed by the tool's schema) and
-hand them to Apple's `LanguageModelSession`, which runs the tool and asks again:
+hand them to Apple's `LanguageModelSession`, which runs the tool and asks again. The example below goes through
+CoreAIKit, so it needs the kit build described in [Use it](#use-it); on the Mac the zoo's
+`ZooLanguageModel(resourcesAt:)` goes into the same `LanguageModelSession` without the kit
+([`swift/README.md`](../../swift/README.md)):
 
 ```swift
 import CoreAIKit
