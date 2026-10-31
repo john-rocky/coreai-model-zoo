@@ -24,6 +24,20 @@ working tree.
   history inside the key/value cache rows so the unmodified Apple runner can drive the bundle. It is
   not wired into Apple's `models/registry.py`; call its `register()` before `coreai.llm.export`'s
   `main()` (`conversion/export_lfm25_ane_static.py` does exactly that).
+
+  `files/python/src/coreai_models/models/macos/lfm3.py` and `models/ios/lfm3.py` (2026-10-30) are the LFM3
+  decoder modules (LFM3-1.7B, and the language model of the LFM3-VL / -Omni / -Audio ports). They were copied in
+  by hand, not by `regen.sh`, which would also have taken the source checkout's other work in progress. The macOS
+  module is the decoder for the pipelined GPU engine: it imports `Lfm2ShortConv`, `_rotate_half`,
+  `DECODE_STATE_NAMES` and `_MLP_KEY_MAP` from `models/macos/lfm2.py` (in the patch) and reads the safetensors
+  itself, since transformers 4.57 has no lfm3; `conversion/export_lfm3_decode_pipelined.py` drives it. The iOS
+  module is the static (Neural Engine) builder and imports the macOS one. Its `register()` does not make
+  `coreai.llm.export --platform iOS` work for LFM3 (that path sizes the cache rows from n_kv × head_dim and needs a
+  transformers config), so `conversion/export_lfm3_ane_static.py` loads it with `lfm3_ios_from_hf(...)` and calls
+  `_export_ios_programs` / `_convert_to_coreai` (`export/ios.py`) with `build_ios_reference_inputs(...)`. Checked on
+  a fresh clone of BASE after `apply.py`: both modules and every `coreai_models` file the two exporters load come
+  from the applied tree, the zoo's three LFM3 tiny smokes pass, and `zoo_convert.py run lfm3-1.7b` exports the
+  published graph (byte for byte but for the names each export draws at random and the lengths that encode them).
 - `apply.py` — applies patch + files onto a pinned checkout (verifies the base commit).
 - `regen.sh` — regenerates patch + files from a live checkout (run after new porting work).
 

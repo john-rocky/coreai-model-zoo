@@ -1,0 +1,118 @@
+# Recipe for lfm3-1.7b — the configuration that produced the staged Mac bundle and the iPhone 18 Pro's (the staged
+# ios-h19p/ came from the lane's scripts with the same exporter, strip and compile command; steps 4-6 re-export the
+# same graph and weights, but their compile is not byte-equal to it: open_questions).
+# Schema and the rules for `status`: ../README.md.
+# Run it with:  python3 ../../conversion/zoo_convert.py run <name>
+#
+# The decoder is the LFM3 authoring module (coreai_models/models/macos/lfm3.py: 13 short-conv layers and 11 attention
+# layers, the sliding window inside the SDPA composite, the zero-tail rotary, the output gate) exported for the
+# pipelined engine by conversion/export_lfm3_decode_pipelined.py as one asset with two functions: "main" (one token)
+# and "prefill" (a static 64-token chunk, --prefill-chunk 64). The staged .aimodel is that export with the MLIR debug
+# locations stripped (coreai-torch 0.4.1 strip_debug_info: AIModelAsset.load -> strip_debug_info(program) ->
+# program.save_asset; conversion/d1/strip_bundle.py does it), which has its own main.hash; the notes give both.
+# The iPhone bundle is the static Neural Engine form (coreai_models/models/ios/lfm3.py through Apple's iOS export
+# functions, conversion/export_lfm3_ane_static.py: 8-bit k-means g32, max context 4096), stripped the same way and
+# compiled for the iPhone 18 Pro's Neural Engine (h19p); step 6, conversion/ios_device_bundle.py, runs that compile (the
+# staged bundle was compiled by the lane's script with the same command; a re-export draws new random names, and its
+# compile is not byte-equal to the staged one: open_questions).
+#
+# Step 1 writes the bundle's chat template from the vendor's (conversion/lfm3_chat_template.py), step 2 exports with
+# it, step 3 strips: the Mac bundle. Step 4 exports the static form with the same template, step 5 strips it (keeping
+# the export's asset metadata: author, licence, description), step 6 compiles it for h19p into the iPhone bundle.
+# zoo_convert.py runs every step in conversion/, so the paths are relative to it: every file goes to
+# ../../coreai-models/exports, the exports directory of the coreai-models checkout beside this one.
+
+["lfm3-1.7b"]
+steps = [
+  { script = "lfm3_chat_template.py", args = ["../../coreai-models/exports/lfm3-1.7b.chat_template.jinja"] },
+  { script = "export_lfm3_decode_pipelined.py", args = [
+      "int8hu", "--head-quant", "block32", "--head-sym", "--prefill-chunk", "64",
+      "--src", "LiquidAI/LFM3-1.7B", "--revision", "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7",
+      "--hf-id", "LiquidAI/LFM3-1.7B", "--max-ctx", "4096",
+      "--chat-template", "../../coreai-models/exports/lfm3-1.7b.chat_template.jinja",
+      "--out-dir", "../../coreai-models/exports",
+  ] },
+  { script = "d1/strip_bundle.py", args = [
+      "../../coreai-models/exports/lfm3_1_7b_decode_int8hu_block32_sym_pf64",
+      "../../coreai-models/exports/ship/lfm3_1_7b_decode_int8hu_block32_sym_pf64",
+  ], bundle = "gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym_pf64" },
+  { script = "export_lfm3_ane_static.py", args = [
+      "--src", "LiquidAI/LFM3-1.7B", "--revision", "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7",
+      "--hf-id", "LiquidAI/LFM3-1.7B", "--tokenizer-src", "LiquidAI/LFM3-1.7B",
+      "--chat-template", "../../coreai-models/exports/lfm3-1.7b.chat_template.jinja",
+      "--max-context-length", "4096", "--name", "lfm3_1_7b_static_pal8_tanh_block_c4096",
+      "--out-dir", "../../coreai-models/exports",
+  ] },
+  { script = "d1/strip_bundle.py", args = [
+      "../../coreai-models/exports/lfm3_1_7b_static_pal8_tanh_block_c4096",
+      "../../coreai-models/exports/ship/lfm3_1_7b_static_pal8_tanh_block_c4096", "--keep-asset-metadata",
+  ] },
+  { script = "ios_device_bundle.py", args = [
+      "../../coreai-models/exports/ship/lfm3_1_7b_static_pal8_tanh_block_c4096",
+      "../../coreai-models/exports/ios-h19p", "--arch", "h19p", "--expect-regions", "30",
+  ], bundle = "ios-h19p" },
+]
+card = "README.md"
+hf_repo = "mlboydaisuke/LFM3-1.7B-CoreAI"
+source_hf_id = "LiquidAI/LFM3-1.7B"
+source_revision = "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7"
+bundle = "gpu-pipelined/lfm3_1_7b_decode_int8hu_block32_sym_pf64"
+status = "verified"
+overlay = true
+runtime_patches = ["apps/coreai-pipelined-extra-states.patch", "apps/coreai-shared-product.patch"]
+runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
+needs = [
+  "The overlay venv (coreai-core 1.0.0b2, coreai-torch 0.4.1, coreai-opt 0.2.1, torch 2.9.0, transformers 4.57.6); the",
+  "LFM3 modules come with conversion/overlay/ (files/python/src/coreai_models/models/{macos,ios}/lfm3.py), and",
+  "transformers 4.57.6 has no lfm3, so the module reads the safetensors itself.",
+  "The gates ran llm-runner built from the zoo's coreai-models fork (john-rocky/coreai-models, branch zoo-0.2 at",
+  "661a5d4; its pipelined engine carries the extra state) with Xcode 27.0 RC, after dropping one argument label that the",
+  "RC SDK rejects (CoreAILanguageModel.swift:51).",
+  "Step 6 compiles with Xcode 27.0 RC's coreai-build (3600.83.1; export_lfm3_ane_static.aot sets DEVELOPER_DIR to",
+  "/Applications/Xcode-27.0.0-RC.app/Contents/Developer). The iPhone bundle is never loaded on the Mac; its checks ran",
+  "on an iPhone 18 Pro (iOS 27.2) through CoreAIKit's pinned engine (the fork's tag 0.2.8-zoo, StaticShapeEngine).",
+]
+aot = "Mac: not shipped. The Mac loads the .aimodel and specializes it on first load (the kit's path); in one window it decoded 169.5 tok/s against 105.5 for the AOT. The Mac gates ran that AOT: xcrun coreai-build compile <name>.aimodel --output <dir> --platform macOS --preferred-compute gpu --architecture h16c --expect-frequent-reshapes. iPhone 18 Pro: shipped as ios-h19p/ (step 6: --platform iOS --preferred-compute neural-engine --architecture h19p; no --expect-frequent-reshapes, every function is static)."
+notes = [
+  "int8hu = the MLP (w1 / w3 / w2) and conv-mixer (in / out) linears int8 per block of 32, symmetric_with_clipping; the",
+  "head untied and int8 per block of 32, symmetric (absmax); embedding, conv1d and norms fp16; q / k / v / o, the",
+  "attention gate_proj and the q / k norm weights fp32. Export 2026-10-29 (macOS 27.0 26A428, M4 Max): .aimodel",
+  "main.mlirb 2,701,984,448 B (the main-only export: 2,701,810,017 B; the second graph adds 174 KB, the weights are",
+  "shared), main.hash a3a59a7a44b5a573bea4f01928de6be4ff5f539a56f3fbacb50bc2ea5494a961. Staged (stripped) .aimodel:",
+  "main.mlirb 2,701,679,977 B, main.hash 5d4b6a8986bb81efc9ae5a66e7d53ca7d7e8b89d1d5e23188f6f89ec06fec171, the same 3,971",
+  "ops (40 kinds); its teacher-forced values equal the export's at all 2,683 positions, chunked and through main alone.",
+  "Teacher-forced on the GPU (AOT h16c) over 17 sequences vs transformers 5.20.2 fp32, the prompts fed as the engine",
+  "feeds them (64-token chunks through prefill, the rest through main): top-1 2639/2682 = 98.40 % (bar 93 %); through",
+  "main alone 2637/2682 = 98.32 %, max|dlogit| 3.105, p50 0.285; the chunk boundaries' logits vs main alone cos >=",
+  "0.9999922. 8 questions thinking off: 8/8, the verdicts of transformers bf16. coreai_gate.py -n 16: 16/16 on the",
+  "alphabet prompt and on a 215-token prompt that rides three chunks. 'Reply with only the number: 1+1=?' (thinking",
+  "off) stops on <|im_end|> after 2 tokens. A tool round trip through Apple's LanguageModelSession with a value the",
+  "model cannot guess: 3/3 through CoreAIKit's KitLanguageModel, 3/3 through the zoo's ZooLanguageModel; the kit's",
+  "catalog path (ChatSession, JIT on the Mac) answers with thinking on and off, runs the tool, recalls a 3-turn chat.",
+  "Thinking on (greedy, 3,584 tokens, 3 runs of fresh processes) ran on the main-only build of the same weights: 8/8",
+  "each, </think> after 40-237 tokens (those prompts never reach prefill, and main gives the same values).",
+  "The tokenizer files are the source's, byte for byte, except chat_template.jinja: the vendor template (sha256",
+  "f45005c50cd2a97329722bf3a2dee9f16c04cdf825a589b280fb7e99e6827818) with 8 rewrites that render the same string under",
+  "transformers and parse in swift-jinja 2.3.2 / 2.3.6 / 2.5.2 (knowledge/lfm3-1.7b-port.md).",
+  "iPhone bundle: the static form (8-bit k-means per-grouped-channel g32, the attention gate_proj fp16, the embedding",
+  "table, and so the tied head, int8 per tensor; contexts 256..4096 x queries 8 / 16 / 64, 34 functions). Export",
+  "2026-10-29: .aimodel",
+  "main.mlirb 1,755,556,786 B (c5473e4c...); stripped 1,754,028,891 B, main.hash",
+  "b2fe3868df8aba9beeb3c18db004fce520dedba39a7029d5ff0f420575d65c84, the same 138,196 ops (33 kinds). Its h19p compile:",
+  "209.8 s, 30/30 transformer functions in a Neural Engine region, no ANECCompileOffline failure, .aimodelc",
+  "2,146,054,948 B, main.hash c55b16c3c83ac30b274fc8bed4d6075d5b25618dc1c43c6f34536a2bcc480a9c, resources.bin",
+  "1,476,692,332 B (2adb7795...); its 30 Neural Engine programs and resources.bin are byte-identical to the compile of",
+  "the unstripped export. On an iPhone 18 Pro through the kit's engine: teacher-forced top-1 692/721 = 95.98 % vs",
+  "transformers fp32 over the 17 sequences' replies, 8 questions thinking off 8/8 with transformers bf16's verdicts, the",
+  "stop-token prompt stops after 6 tokens, the tokens equal Apple's StaticShapeEngine's on an iPhone 17 Pro (the h18p",
+  "compile) on all 18 prompts; prefill 590.6 / decode 47.17 tok/s at 768 + 256 (6.71 s a turn, peak footprint 2.82 GB).",
+  "CoreAIKit's catalog path there (ChatSession(catalog:) -> ios -> ios-h19p/ -> the static-shape engine): thinking on 3",
+  "launches x 8/8, thinking off 8/8, a tool round trip 3/3, a 3-turn chat on the stop token.",
+  "Published 2026-10-31 as revision 8621dc42f2a6f25b1ad3f955aab39d608dbdfef4: all 56 files match the staged SHA256SUMS (the LFS files by the",
+  "Hub's sha256 and size, the others downloaded and hashed).",
+]
+open_questions = [
+  "A re-export does not reproduce the published main.hash (5d4b6a89…): each export draws new random names for its 9 externalized graphs (coreai-torch 0.4.1, externalize.py uuid4().hex[:8]) and its 364 weight resources (64-bit decimal numbers, so their length changes too). Checked 2026-10-30 on four re-exports from a fresh clone of the overlay's base, the stripped main.mlirb section by section: the header and every section but the string section are byte-equal (the weights included), and the string section holds the same strings in the same order once those names are replaced (each file's size entries and section length checked against its strings); the 3,971 ops are the same.",
+  "The staged ios-h19p/ was built before steps 4-6 were written here, by the lane's scripts: the same exporter and builder before their emit_hidden switch (on the tiny model, the builder here with the switch off exports the same torch programs for all four functions as the earlier one), a strip that kept the asset metadata as step 5 does, and step 6's compile command. Steps 4-6, re-run on 2026-10-31 from a fresh clone of the overlay's base, make a bundle that is not byte-equal to it. (1) The re-export's stripped main.mlirb has the staged export's weights (1,743,036,000 bytes), IR, attributes and properties; 9 of its 612 strings differ, each in the random 8-letter suffix of an op name (rope_gather_*, fused_interleaved_embedding_gather_dequant_reshape_*), and its weight resources have new random names. (2) Its h19p compile puts the 30 transformer functions on the Neural Engine with no ANECCompileOffline failure and the same operation statistics, and its resources.bin has the same size and the same bytes in another order (every byte value occurs the same number of times in both; the staged file's first 64 bytes sit 1.0 GB into the new one). (3) The 30 Neural Engine programs match over the first 78-80 % of their bytes and differ after that. The compiler gave byte-equal programs and resources.bin for two inputs that differ only in debug locations (the staged export compiled before and after the strip), and the re-export differs from the staged export only in those names, so the names move the compiled layout; a compile with the staged names put back was not tried. The bundle's metadata.json differs where expected (compilation.date, the strip record, three lfm3_static keys the exporter added since). The published ios-h19p/ is the staged bytes, the ones the iPhone 18 Pro checks ran on.",
+  "The iPhone 17 Pro has no bundle: the same static form compiled for h18p passed the same checks on Apple's engine, but CoreAIKit's path has not run on that phone (knowledge/lfm3-1.7b-port.md, iPhone).",
+]

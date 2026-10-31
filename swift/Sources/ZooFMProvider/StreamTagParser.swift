@@ -23,6 +23,11 @@ import Foundation
 /// at end of stream — an unterminated tool-call body is flushed as a (likely
 /// truncated) `.toolCallPayload` and left to the dialect parser to accept or
 /// reject.
+///
+/// A prompt that ends inside an open thinking block (LFM3's template with
+/// thinking on ends `…<think>`) leaves the model mid-reasoning: its first
+/// marker is the close tag. `startsInReasoning` (decided by
+/// `promptOpensThinking`) starts the parser there instead of in text.
 package struct StreamTagParser {
     package enum Event: Equatable {
         case text(String)
@@ -47,12 +52,24 @@ package struct StreamTagParser {
 
     package init(
         thinkOpen: String = "<think>", thinkClose: String = "</think>",
-        toolOpen: String = "<tool_call>", toolClose: String = "</tool_call>"
+        toolOpen: String = "<tool_call>", toolClose: String = "</tool_call>",
+        startsInReasoning: Bool = false
     ) {
         self.thinkOpen = thinkOpen
         self.thinkClose = thinkClose
         self.toolOpen = toolOpen
         self.toolClose = toolClose
+        self.mode = startsInReasoning ? .reasoning : .text
+    }
+
+    /// Whether a rendered prompt ends inside an open thinking block: its last
+    /// marker is `thinkOpen`, followed by nothing but newlines (`…<think>`,
+    /// `…<think>\n`). One rule for every model — a prompt ending anywhere else
+    /// (a closed `<think></think>`, or no marker) starts in text as before.
+    package static func promptOpensThinking(_ prompt: String, thinkOpen: String = "<think>") -> Bool {
+        var tail = Substring(prompt)
+        while let last = tail.last, last.isNewline { tail = tail.dropLast() }
+        return tail.hasSuffix(thinkOpen)
     }
 
     package mutating func consume(_ delta: String) -> [Event] {

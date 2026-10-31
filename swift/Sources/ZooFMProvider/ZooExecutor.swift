@@ -210,11 +210,15 @@ public struct ZooExecutor: LanguageModelExecutor {
         // 5) Stream: incremental UTF-8-safe detok (U+FFFD hold + one retained
         //    context token, same contract as Apple's adapter) feeding the tag
         //    parser; text goes out the moment it decodes.
+        let thinkOpen = thinkingMarkers?.open ?? "<think>"
         var parser = StreamTagParser(
-            thinkOpen: thinkingMarkers?.open ?? "<think>",
+            thinkOpen: thinkOpen,
             thinkClose: thinkingMarkers?.close ?? "</think>",
             toolOpen: dialect.toolCallOpen,
-            toolClose: dialect.toolCallClose)
+            toolClose: dialect.toolCallClose,
+            // A prompt that ends in an open think block (LFM3, thinking on) makes the
+            // first generated text reasoning.
+            startsInReasoning: StreamTagParser.promptOpensThinking(promptText, thinkOpen: thinkOpen))
         var pendingTokens: [Int] = []
         var previousDecodedText = ""
         var generatedCount = 0

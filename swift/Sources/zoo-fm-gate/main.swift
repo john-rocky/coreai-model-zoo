@@ -267,6 +267,7 @@ struct ZooFMGate {
             try selftest()
             return
         }
+        if args.count == 2, args[1] == "lfm3-selftest" { try lfm3Selftest(); return }
         if args.count == 2, args[1] == "mock" {
             try await mock()
             return
