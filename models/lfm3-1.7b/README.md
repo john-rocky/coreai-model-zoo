@@ -5,7 +5,7 @@ reasons before it answers and calls tools in XML, in two bundles with a 4,096-to
 int8 `.aimodel` on the `coreai-pipelined` GPU engine that prefills a prompt 64 tokens at a time; for the iPhone
 18 Pro, a Neural Engine build with fixed input shapes, compiled in advance for that phone's chip (`h19p`).
 CoreAIKit's `ChatSession` and Apple's `LanguageModelSession` drove both in the checks below; CoreAIKit's LFM3
-support is not in a release or on the kit's main branch ([Use it](#use-it)).
+support is on the kit's main branch since `9e9143bc`, not yet in a release ([Use it](#use-it)).
 
 Source checkpoint: revision `ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7` (LFM Open License v1.0).
 
@@ -48,7 +48,7 @@ queries of 8, 16 and 64. Compiled for the iPhone 18 Pro (`h19p`, `--preferred-co
 **Mac** (M4 Max, macOS 27.0): one measurement window on 2026-10-31, the same 1,024 prompt ids for every runtime,
 256 tokens generated greedily without a stop, one process per run (its warm-up + one timed request), 8 rounds with
 the order rotated; median of the 8 runs, the range in brackets. This bundle on CoreAIKit's path is the published
-`.aimodel`, compiled on first load, run by the coreai-models version CoreAIKit pins: the path an app that uses
+`.aimodel`, compiled on first load, run by the coreai-models version CoreAIKit pinned then: the path an app that uses
 CoreAIKit takes (`llm-benchmark` built from the coreai-models fork's tag `0.2.8-zoo`); the other rows are
 LiquidAI's own MLX and GGUF files.
 
@@ -75,7 +75,7 @@ reached it in 9.44 s against this bundle's 0.99 s at about the same decode speed
 at 93.1 tok/s.
 
 **iPhone 18 Pro** (iOS 27.2): `ios-h19p/` on the fixed-shape (`static-shape`) engine of the coreai-models version
-CoreAIKit pins (a test app around that engine), a 768-token prompt and 256 generated tokens, 2 launches × 3 trials;
+CoreAIKit pinned then (a test app around that engine), a 768-token prompt and 256 generated tokens, 2 launches × 3 trials;
 median, the range in brackets.
 
 | prefill tok/s | decode tok/s | a 768 + 256 turn | peak footprint | thermal state | load |
@@ -107,7 +107,7 @@ Against transformers 5.20.2 on the same weights. Mac rows: M4 Max, macOS 27.0; i
 | thinking on | the 8 questions with thinking on, greedy, a 3,584-token budget, 3 runs of fresh processes, on the `main`-only build (these prompts never reach `prefill`, and `main` gives the same values) | every run 8 / 8: `</think>` closes after 40–237 tokens of reasoning (median 56) and the answer after it is right; the three runs answer alike |
 | a tool call | one tool returning a fresh random value per run, through CoreAIKit's `KitLanguageModel` and the zoo's `ZooLanguageModel` behind Apple's `LanguageModelSession`, 3 runs each | 6 / 6: the XML call parsed into `lookup_secret(key: "alpha")`, run by the framework, the value in the answer verbatim, the reasoning kept out of it |
 | the published bytes | the `.aimodel` re-saved without its source locations (a new `main.hash`), the checks above run again on it | teacher-forced values equal to the export's at all 2,683 positions, chunked and through `main` alone; 8 / 8; 16 / 16 (alphabet and the 215-token prompt); stops after 2 tokens; the tool call 6 / 6; CoreAIKit's catalog path answers with thinking on and off and runs the tool |
-| the kit's path on the Mac | the published `.aimodel` specialized on load by the kit's pinned engine (`llm-runner` from the fork's tag `0.2.8-zoo`), and CoreAIKit's `ChatSession(catalog:)` / `KitLanguageModel` on it (the teacher-forced pass above was not repeated on this path) | 8 / 8 with the replies of the ahead-of-time build; 16 / 16 (alphabet and the 215-token prompt); the stop-token prompt stops after 6 tokens (`1+1=2`; transformers fp32 stops after 2, at a step where its own top-2 gap is 0.005); thinking on 3 launches × 8 / 8, thinking off 8 / 8, the tool round trip 3 / 3, a 3-turn chat |
+| the kit's path on the Mac | the published `.aimodel` specialized on load by the kit's engine pinned then (`llm-runner` from the fork's tag `0.2.8-zoo`), and CoreAIKit's `ChatSession(catalog:)` / `KitLanguageModel` on it (the teacher-forced pass above was not repeated on this path) | 8 / 8 with the replies of the ahead-of-time build; 16 / 16 (alphabet and the 215-token prompt); the stop-token prompt stops after 6 tokens (`1+1=2`; transformers fp32 stops after 2, at a step where its own top-2 gap is 0.005); thinking on 3 launches × 8 / 8, thinking off 8 / 8, the tool round trip 3 / 3, a 3-turn chat |
 | **the iPhone bundle** | `ios-h19p/` on the kit's static-shape engine, teacher-forced over the replies of the 17 sequences (721 steps, up to 64 a sequence after its prompt) vs transformers fp32 | **top-1 692 / 721 = 95.98 %** (bar ≥ 93 %; every step's fp32 top-2 gap ≥ 1e-3); a poisoned fixture fails, as it must |
 | against Apple's engine | the same 18 prompts through `StaticShapeEngine` of apple/coreai-models' main on an iPhone 17 Pro (the same weights compiled for h18p) | the same tokens on all 18, teacher-forced and generated |
 | iPhone: 8 short questions, the stop token | thinking off, greedy | 8 / 8, the verdicts of transformers bf16; the stop-token prompt stops after 6 tokens |
@@ -121,8 +121,8 @@ itself, not from CoreAIKit's engine.
 ## Use it
 
 Needs a CoreAIKit build that supports LFM3 — the XML tool calls, reading a reply that starts inside the thinking block, the
-thinking switch (`enableThinking`) and the `lfm3-1.7b` catalog entry. That support is not in a CoreAIKit release or on the kit's main branch (0.7.3 does not
-support LFM3); the kit checks above ran a build that has it, whose catalog entry has a macOS variant (the Mac
+thinking switch (`enableThinking`) and the `lfm3-1.7b` catalog entry. That support is on the kit's main branch since `9e9143bc` ([coreai-kit#83](https://github.com/john-rocky/coreai-kit/pull/83)), not yet in a CoreAIKit release
+(0.7.3 does not support LFM3); the kit checks above ran a build that has it, whose catalog entry has a macOS variant (the Mac
 bundle on the pipelined engine) and an iOS variant (`ios`, on the static-shape engine). Without CoreAIKit, the Mac bundle runs through the zoo's
 `ZooLanguageModel` ([Tool calling](#tool-calling)) or `llm-runner` ([Reproduce](#reproduce)).
 
@@ -214,11 +214,14 @@ iOS variant's engine, `entry.resolvedEngine`) did the same 3 times out of 3.
 
 ## Known limits
 
-- **The Mac bundle cannot resume a conversation from its middle.** The conv state is not indexed by position, so
-  the engine cannot rewind its conv state; a new conversation starts from zero state. `ChatSession`
-  and the FoundationModels providers re-render the history every turn and, when the engine refuses the rewind,
-  prefill it again from zero state — a three-turn chat recalled its first turn through both `ChatSession` and the
-  zoo's provider. Each turn costs a full prefill of the conversation. The iPhone bundle keeps the conv history in
+- **The Mac bundle cannot rewind its conv state by position; CoreAIKit resumes a chat from a checkpoint.** The
+  conv state is not indexed by position. Since coreai-models `0.2.9-zoo` (CoreAIKit's pin since
+  [coreai-kit#82](https://github.com/john-rocky/coreai-kit/pull/82)), the pipelined engine checkpoints that state at the end of the
+  prompt's last message, on the 64-token chunk grid, when the caller asks; CoreAIKit's `ChatSession` and
+  `KitLanguageModel` ask on every turn and prefill only what follows the checkpoint; a history shorter than one chunk is prefilled
+  again (in a three-turn chat on the kit's main branch, turn 2, after a 32-token first prompt, prefilled all of its 71
+  tokens, and turn 3 reused 64 of its 103). The zoo's provider does not ask, so it still prefills the
+  whole conversation from zero state each turn. The iPhone bundle keeps the conv history in
   the KV cache: in the 3-turn chat on the phone the static-shape engine reused the earlier turns' prompt tokens
   (32, then 70).
 - **On the Mac the tail of a prompt goes one token at a time.** The engine always runs the last prompt token
