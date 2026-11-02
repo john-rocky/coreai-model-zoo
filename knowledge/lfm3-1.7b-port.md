@@ -114,11 +114,15 @@ quantization.
 The vendor `chat_template.jinja` (sha256 `f45005c5…`) uses Python-jinja constructs the Swift renderer does
 not handle in every version that ships:
 
+<!-- {% raw %} -->
+
 | swift-jinja | vendor template | the bundle's template |
 |---|---|---|
 | 2.3.2 (the pin of `apple/coreai-models`) | does not parse: `Expected '%}' after for loop.. Got or instead` (`{% for tool in tools or [] %}`) | 30/30 |
 | 2.3.6 (CoreAIKit's pin) | parses; the 10 conversations with tools differ (`tojson` is a JSONEncoder: sorted keys, no spaces, `\uXXXX`, `\/`) | 30/30 |
 | 2.5.2 | 30/30 | 30/30 |
+
+<!-- {% endraw %} -->
 
 30 conversations = 15 scenes with thinking off and on — the 8 questions, a three-turn chat with reasoning in the
 history, a turn with a system prompt and no tools, and five tool scenes (a round trip with and without a system
