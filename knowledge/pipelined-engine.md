@@ -217,9 +217,17 @@ qwen3.5 — pattern- and model-dependent, so treat them as authoring rules:
    layer's new state slice and issue ONE fused full-state `slice_update` per step** (reads
    stay per-layer narrows of the input state; slots are disjoint, so semantics are
    identical). The KV growing pair is unaffected (its written values are re-read in-graph).
+   Re-checked 2026-11-06 (macOS 27.0 26A428, coreai-torch 0.4.3, M4 Max; LFM2.5-1.2B not re-run): a 3-slot chained repro keeps every write on
+   the GPU, crashes on the CPU from 2 slots (exit −11), and under the Neural Engine preference loses the write, as the
+   fused form does, when the state's last axis is not a multiple of 64 bytes
+   ([apple/coreai-models#469](https://github.com/apple/coreai-models/issues/469)). A state read in the same call as a
+   write can return the wrong value ([#468](https://github.com/apple/coreai-models/issues/468)).
 2. **fp16 matmuls in the attention prologue lose ~1.3% relative accuracy under a
    dynamic-shape graph** (the same projection in an all-static graph measures 0.07% — the
    delegate appears to pick an fp16-accumulation kernel when dynamic dims are present).
+   Re-checked 2026-11-06 (macOS 27.0 26A428, coreai-torch 0.4.3, M4 Max) on one fp16 1024 × 1024 Linear over 64
+   positions: relative error 0.032% dynamic against 0.021% static on the GPU, and 0.021% both ways with the input
+   scaled by 14. The LFM2.5 projections were not re-run.
    Whether that matters is model-dependent: LFM2.5's large q/k-norm gains (|k| up to ~14)
    amplify it and the error compounds across the stack into garbage logits (full-stack cos
    0.71 vs eager); qwen3.5's modest activations shrug it off. **Rule: if the oracle gate
@@ -507,7 +515,8 @@ positions). New, generalizable findings:
 - **Doesn't fit**: pure-RNN models (no growing KV — the engine's state model assumes one),
   models whose embed+head can't live in-graph, big MoE (different problem).
 
-Apple's `coreai-models` repo is **issues-only** (no PRs), so engine capabilities ship from this
+Apple's `coreai-models` does not take major new features or changes to its Swift package's public API
+(CONTRIBUTING.md, read 2026-11-06), so engine capabilities ship from this
 repo as a **patch stack** in [`../apps/`](../apps/), applied in order on a fresh upstream clone
 (`git -C coreai-models apply <p1> <p2> <p3> <p4>` — see [`../apps/README.md`](../apps/README.md)):
 `coreai-shared-product.patch` → `coreai-pipelined-extra-states.patch` →

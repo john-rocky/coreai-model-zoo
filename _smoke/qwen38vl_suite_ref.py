@@ -36,7 +36,7 @@ N_LOGITS_STEPS = 16
 OUT = Path(__file__).resolve().parent / "qwen38vl_suite_512.npz"
 IMG_DIR = Path(__file__).resolve().parent / "qwen38vl_images"
 
-IMAGES = [  # fixed COCO val2017: two cats on a couch, a bathroom, a bear
+IMAGES = [  # fixed COCO val2017: two cats on a couch, two kitchens
     "http://images.cocodataset.org/val2017/000000039769.jpg",
     "http://images.cocodataset.org/val2017/000000397133.jpg",
     "http://images.cocodataset.org/val2017/000000037777.jpg",

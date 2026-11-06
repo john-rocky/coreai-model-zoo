@@ -27,6 +27,8 @@ local and private. [`Qwen/Qwen3-Embedding-0.6B`](https://huggingface.co/Qwen/Qwe
 > that takes a **task instruction** in the query, and the only one with **Matryoshka** truncation
 > (1024 → 32 dims, re-normalize on the host, zero ranking flips measured). Those are capabilities
 > the other two do not have. The retrieval-accuracy claim was the part that was not measured.
+> Apple's `coreai-models` has since added EmbeddingGemma 2 ([#369](https://github.com/apple/coreai-models/pull/369),
+> 2026-11-05), whose 768-dim vector also truncates to 512, 256 or 128 dims.
 
 **This is an encoder, not a generator** — one forward over the (right-padded) input returns one
 pooled vector. No autoregressive loop, no KV cache, no LM head, no sampling. It runs like the

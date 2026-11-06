@@ -1,8 +1,8 @@
 # coreai_models python overlay
 
 The zoo's conversion scripts import re-authored model definitions and export-pipeline hooks
-that Apple's `coreai-models` does not ship (it takes no PRs and does not register newer
-models). This directory packages those additions so the zoo is **self-contained**: anyone can
+that Apple's `coreai-models` does not ship (its CONTRIBUTING.md, read 2026-11-06, accepts bug fixes, new model
+recipes and docs, with an issue first for anything beyond a trivial fix). This directory packages those additions so the zoo is **self-contained**: anyone can
 reproduce the conversion environment from a pinned upstream checkout instead of needing our
 working tree.
 

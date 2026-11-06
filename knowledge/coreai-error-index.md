@@ -426,16 +426,20 @@ isolated here, the compile was fine.
   and verify by listing the device, never by exit code. Record:
   [`conversion-guide.md`](conversion-guide.md) (Gotchas), [`ovisocr2-port.md`](ovisocr2-port.md),
   [`ternary-chunked-prefill.md`](ternary-chunked-prefill.md) (§6).
-- **(b) A symlinked bundle path in Swift.** `AIModel(contentsOf:)` does not follow symlinks to the
-  arch-specific delegate dir (`main-h16c-delegates`); the Python runtime does. **Fix:**
+- **(b) A symlinked bundle path in Swift.** `AIModel(contentsOf:)` did not follow symlinks to the
+  arch-specific delegate dir (`main-h16c-delegates`) in July 2026; the Python runtime does. On macOS 27.0 (26A428) a
+  Swift load through a symlinked `.aimodelc` runs on the Mac (2026-11-06; iPhone not re-checked). **Fix:**
   `url.resolvingSymlinksInPath()`. Record: [`glm-image-port.md`](glm-image-port.md). `coreai doctor`:
   `ASSET-SYMLINK`.
 - **(c) Forcing `preferredComputeUnitKind: .gpu` on an AOT `.aimodelc`.** That re-specializes the
   baked graph on device (JIT) and wedges the 9 GB GLM-Image graphs; GUI apps hit it reliably.
-  **Fix:** load AOT bundles with `SpecializationOptions.default()` or `.cpuOnly`. Record:
+  **Fix:** load AOT bundles with `SpecializationOptions.default()`. `.cpuOnly`, the other option recorded here,
+  fails with `failedToSpecialize` on a Mac with macOS 27.0 (26A428), see (d). Record:
   [`glm-image-port.md`](glm-image-port.md). `coreai doctor`: `AOTC-LOAD-OPTIONS`.
 - **(d) An asset compiled `--preferred-compute none`** fails to specialize CPU-only on device,
-  while the `gpu` and `neural-engine` compiles of the same graph load. Not isolated further. Issue:
+  while the `gpu` and `neural-engine` compiles of the same graph load. Not isolated further. On a Mac with
+  macOS 27.0 (26A428) and `coreai-build` 3600.83.1, small conv test graphs fail CPU-only under all three compiles (`AIModelError` 1 in Python;
+  Swift reports `failedToSpecialize` for the `gpu` one; 2026-11-06, not re-checked on a device). Issue:
   the closing note of [apple/coreai-torch#66](https://github.com/apple/coreai-torch/issues/66).
 - **OS · toolchain:** iOS 27 betas 24A5380h–24A5418b, `coreai-build` 3600.75.3–3600.82.1.
 
@@ -740,7 +744,9 @@ the op; two triggers verified here.
   1.000000 / 68 dB fp16. Or keep the query block small: pocket-tts prefills through a 16-token
   window and never triggers it. Record: [`lfm2audio-port.md`](lfm2audio-port.md),
   [`pocket-tts-port.md`](pocket-tts-port.md). (The LFM2-Audio note spells the string `AICode→MPS`;
-  the log prints `AICode -> MPS`.)
+  the log prints `AICode -> MPS`.) Re-checked 2026-11-06 (macOS 27.0 26A428,
+  coreai-torch 0.4.3, M4 Max): a bare causal SDPA composite, 4 heads × 64 in fp16, runs on the GPU at S=384 (also
+  with a 64-token window) and S=512; the LFM2-Audio backbone was not re-run.
 - **OS · toolchain:** macOS 27 betas, June–August 2026.
 
 ---
@@ -1205,6 +1211,9 @@ runs on the GPU.
   `qwen3_0_6b_mixed_4bit_8bit.yaml` shape on a g8 base) on MiniCPM5-2B, 2026-09-16; reproduced with the compile run alone.
   4-bit g32, 6-bit g8 and 8-bit g32 compile 31/31 from the same IR. The failing region is the first graph compiled
   (`extend_1024_16_…_ANE_region_0_0`); the compiler gives no reason beyond `CompilationFailure`.
+  Not every g8 export hits it: Qwen3-0.6B with `4bit_weight_palettized_group8` compiles with 18 ANE regions for
+  `h18p` and `h19p` (2026-11-06, macOS 27.0 26A428, `coreai-build` 3600.83.1, coreai-torch 0.4.3; compiled, not run;
+  MiniCPM5-2B not re-run).
 - **Fix:** none for the recipe — use g32 at 4 bits or 6-bit g8. Always count `*ANE_region*` after an AOT
   (`apps/AneGate/_ane_export_s1.py` exits 3 on zero).
 - **Evidence:** log `~/code/coreai/coreai-models/exports/minicpm5_2b_ios_pal4_g8/_export.log`; record

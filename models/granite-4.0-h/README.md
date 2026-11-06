@@ -106,7 +106,7 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
 | **1b int8 linear per-block-32 (ship)** | **1.6 GB** | **136.7** | **136.5** | **16/16 oracle gate + HF-seeded decode step — on a margin-clean oracle (min top-2 margin 0.137, decode 2.53)** |
 | **1b int8lin, iPhone 17 Pro** (PipelinedBench, n=2×2) | 1.6 GB | 30.1–32.2 | **30.8 avg r1 (26.4–31.3)** | **nat 24/24 + oracle 24/24 on BOTH runs — token-identical to the M4 Max GPU sequences** |
 | **1b + untied per-block-32 absmax int8 head (`int8hu --head-sym`) = device SHIP** | 1.8 GB | 134.9 | 134.2 | 16/16 oracle gate + decode step; oracle greedy ≡ int8lin, natural forks at +7 (post-`<\|end_of_text\|>` filler — fp16-noise class). **Mac-flat (−1.7%)** — but see the iPhone row |
-| **1b int8hu --head-sym, iPhone 17 Pro** (PipelinedBench, n=3×2, settled) | 1.8 GB | 35.1–37.0 | **35.4–37.1 typical (one thermal-dip trial 31.7)** | **nat 24/24 + oracle 24/24 on ALL 3 runs — token-identical to the M4 Max GPU sequences. +17–21% over int8lin's 30.2–31.3: the third "Mac no-win ≠ device no-win" confirmation (head ≈ 10% of per-token read on the BW-saturated surface; ~88% of the ~41 naive ceiling)** |
+| **1b int8hu --head-sym, iPhone 17 Pro** (PipelinedBench, n=3×2, settled, 2026-06-11) | 1.8 GB | 35.1–37.0 | **35.4–37.1 typical (one thermal-dip trial 31.7)** | **nat 24/24 + oracle 24/24 on ALL 3 runs — token-identical to the M4 Max GPU sequences. +17–21% over int8lin's 30.2–31.3: the third "Mac no-win ≠ device no-win" confirmation (head ≈ 10% of per-token read on the BW-saturated surface; ~88% of the ~41 naive ceiling)** |
 | 1b fp16 (control) | 2.8 GB | 103.7 | 103.6 | 16/16 oracle gate + decode step |
 | 350m fp16 (ship at this size) | 0.66 GB | 193.2 | 191.1 | 16/16 oracle gate + decode step; engine path ≡ torch 24/24 greedy ×2 prompts; `llm-runner` 217.9 tok/s short-run |
 | 350m int8 (lin/b8/sel/mix) | — | — | 185.8–186.6 | **not shipped**: gate FAILs *and* no speed win (see below) |
@@ -116,13 +116,15 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
   int8 made it *slower* (185.8 vs 191.1) — at ~0.7 GB/token the GPU isn't waiting on
   weights, so dequant work is pure cost. Ship rule of thumb: quantize for speed only
   when the model is big enough to be bandwidth-bound on your device.
-- **iPhone: ~31 tok/s ≈ ~84% of the naive BW ceiling** (~60 GB/s ÷ 1.6 GB ≈ 37) — like
+- **iPhone, int8lin (2026-06-11): ~31 tok/s ≈ ~84% of the naive BW ceiling** (~60 GB/s ÷ 1.6 GB ≈ 37) — like
   LFM2.5 (~87%), the device is effectively memory-bandwidth saturated; the SSM scan costs
   nothing extra at S=1. Cold GPU specialization 5.7 s / warm load 1.9 s (no AOT needed,
   no increased-memory entitlement issue at 1.6 GB). One trial dipped to 26.4 decode
   (install-adjacent/thermal — the knowledge-page caveat); typical trials 30.2–31.3.
   Cross-device determinism held again: all four numerics checks (2 runs × 2 prompts)
-  were 24/24 token-identical to the M4 Max GPU rollouts.
+  were 24/24 token-identical to the M4 Max GPU rollouts. The DeviceMark line near the top (31 tok/s on the
+  iPhone) is the board's value for the `int8hu` bundle, entered 2026-07-13, from a different run than the table's
+  35.4–37.1 (2026-06-11).
 
 ## Why the 350m int8 gate fails (and why that's two separate findings)
 

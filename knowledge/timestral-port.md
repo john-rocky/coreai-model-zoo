@@ -108,7 +108,10 @@ and iOS `h19p`). Cut down to one block, only the attention sublayer fails; the M
 embedding and the head compile at R = 2. Heads as rank 5, rank 4 (Q / K / V as three Linears) or rank 3 (rows folded
 into heads) all abort. With every Linear as a 1×1 `Conv2d` over (R, C, 1, S) the R = 2 graph compiles to one region,
 and conv and Linear give bit-identical outputs on the Neural Engine (R = 1 and R = 2 too). Lane `r3/aot/
-*_r2_*-h16c-ane.aot.json`, `coreai-build.log` beside each.
+*_r2_*-h16c-ane.aot.json`, `coreai-build.log` beside each. A minimal attention block narrows this (2026-11-05, macOS 27.0 26A428,
+coreai-torch 0.4.3, `h16c`): with Linear projections at R = 2, the abort needs the where-mask, a sigmoid gating branch and
+the output Linear together (at D = 256 dropping any one of them compiles to one region; D = 512 with all three
+aborts too), and 1×1-conv projections compile at both sizes.
 
 ## An AOT compile's cache entry name ignores the weights
 

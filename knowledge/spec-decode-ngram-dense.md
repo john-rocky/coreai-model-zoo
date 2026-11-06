@@ -142,7 +142,7 @@ needed to rule a model OUT:
 
 | requirement | fails when |
 | --- | --- |
-| dense, **KV pair only** (2 states) | GDN/SSM hybrids need the snapshot + re-anchor discipline AND cap at ~1.2–1.3× (c_v ≈ 1.67, measured on the 27B) |
+| dense, **KV pair only** (2 states) | GDN/SSM hybrids need the snapshot + re-anchor discipline; the ~1.2–1.3× cap read off c_v ≈ 1.67 did not hold (the 27B's own MTP head measured 1.30× on int4 and 1.71× on int8, on code, M4 Max, 2026-08-17) |
 | **dynamic `input_ids`** | a `--static-ids` graph is pinned to S=1 and cannot verify at all |
 | head on all positions | no `[1, q, vocab]`, nothing to verify against |
 

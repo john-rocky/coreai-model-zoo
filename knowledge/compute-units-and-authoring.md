@@ -115,7 +115,9 @@ filename; the full `.trace` bundles are not published.
 `SpecializationOptions(preferredComputeUnitKind: .cpu)` and `.gpu` declare the **same**
 `allowedComputeUnitKinds` — `[cpu, gpu, neuralEngine]` — and differ only in which unit is
 preferred. That preference is a partitioning input, and on some graphs it places a region on a
-different unit and silently changes the numbers. `cpu_only()` collapses the allowed set to one
+different unit and silently changes the numbers (recorded 2026-08-14). On macOS 27.0 (26A428) with
+coreai-torch 0.4.3 (2026-11-06), a synthetic fp32 transformer of the recorded size (6 layers, d_model 1024, 16
+positions) gives bit-identical outputs under preferred `.cpu` and `cpu_only()`; the two recorded models were not re-run. `cpu_only()` collapses the allowed set to one
 unit and is exact. It scales with fragmentation rather than model size, and the blast radius runs
 from rounding-scale to anti-correlated. Full evidence, from two unrelated models, in
 [`pocket-tts-port.md`](pocket-tts-port.md#preferredcomputeunitkind-cpu-is-a-partitioning-hazard-not-a-compute-unit-choice).

@@ -74,8 +74,9 @@ language-model graphs are the largest int8 static graphs the phone has specializ
   returns in milliseconds and the load time moves into `loadFunction(named:)` (0.16–0.50 s here); the first call
   drops from 1.1–2.1 s to 72–317 ms.
 - **A directory that carries the JIT files next to another architecture's AOT files is not a fallback.** The
-  shipped GLiNER2-PII `ios/` bundle (JIT IR plus `h18p` delegates, the layout `coreai-build compile` leaves when it
-  writes into the `.aimodel` directory) is refused on the 18 Pro exactly like a pure `h18p` `.aimodelc` — the same
+  shipped GLiNER2-PII `ios/` bundle (JIT IR plus `h18p` delegates in one directory; on macOS 27.0 26A428, `coreai-build compile` 3600.83.1
+  with `--architecture h17c` writing into an `.aimodel` directory nests a `<name>.h17c.aimodelc/` bundle there
+  instead, 2026-11-06) is refused on the 18 Pro exactly like a pure `h18p` `.aimodelc` — the same
   error in 2 ms, so the IR beside the delegates is not used as a fallback (the runtime's internal order is not
   observed, only that outcome). It loaded only when the container already
   held the specialization of the same `main.hash` (0.08 s, right after the JIT-only copy had been loaded). This

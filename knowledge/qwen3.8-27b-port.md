@@ -136,9 +136,9 @@ CGContext resize produces slightly different patches than the gated PIL path, an
 difference alone was enough to tip the pf32 chunk over its fp16 cliff — host-side image
 resampling is part of the numerics surface, not cosmetics.
 
-## Not ported, deliberately
+## The MTP draft head, ported later
 
-- **`mtp.*` (15 tensors, MTP draft head).** Settled conclusion from the spec-decode work:
-  GDN hybrids pay c_v≈1.67 verify cost, capping any draft-style speculation at ~1.2–1.3×;
-  draft heads only pay off on dense-attention targets. The checkpoint's own MTP head does
-  not change that arithmetic. Not worth a graph.
+- **`mtp.*` (15 tensors, MTP draft head).** First left out on the reading that GDN hybrids cap draft-style
+  speculation at ~1.2–1.3× (verify c_v≈1.67). As a lossless drafter pair
+  (`conversion/export_qwen3_8_mtp.py`) it then measured 1.30× over int4 decode (22.2 → 29.0 tok/s) and 1.71× over
+  int8 (15.6 → 26.7) on code, and 0.79× on prose (int4; M4 Max, macOS 27.0 beta 26A5406e, 2026-08-17).

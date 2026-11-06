@@ -28,7 +28,7 @@ import torch
 FP32 = torch.float32
 DEFAULT_ID = "CohereLabs/North-Micro-Vision-Instruct"
 
-# Fixed COCO val2017 images: two cats on a couch, a bathroom scene, a bear.
+# Fixed COCO val2017 images: two cats on a couch, two kitchens.
 IMAGES = [
     "http://images.cocodataset.org/val2017/000000039769.jpg",
     "http://images.cocodataset.org/val2017/000000397133.jpg",

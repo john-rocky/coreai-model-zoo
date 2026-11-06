@@ -14,12 +14,12 @@ The graph is the Qwen3.5 hybrid decoder run dense: 64 layers on a 3:1 interleave
 attention** (24 q / 4 KV, head_dim 256, partial mRoPE θ=1e7, swish output gate), dense
 `MLP(17408)` FFNs, untied 248 320-vocab head, 262 144 native context.
 
-One thing the checkpoint carries that this port deliberately does not:
+One thing the checkpoint carries that this port first left out:
 
-- **`mtp.*` (a built-in MTP draft head).** On GDN hybrids the verify forward is
-  structurally expensive (c_v ≈ 1.67), capping draft-style speculation at ~1.2–1.3× —
-  measured on this engine during the spec-decode work. The bundled draft head does not
-  change that arithmetic, so it is not worth a graph.
+- **`mtp.*` (a built-in MTP draft head).** Left out on the reading that GDN hybrids cap draft-style speculation
+  at ~1.2–1.3× (c_v ≈ 1.67). As a lossless drafter pair it then measured 1.30× over int4 decode (22.2 → 29.0
+  tok/s) and 1.71× over int8 (15.6 → 26.7) on code, and 0.79× on prose (int4; M4 Max, macOS 27.0 beta 26A5406e, 2026-08-17).
+  The [HF repo](https://huggingface.co/mlboydaisuke/Qwen3.8-27B-CoreAI) has the bundles.
 
 It is also a **reasoning model**: the vendor chat template opens a `<think>` span, and
 generations spend their first tokens thinking. Budget `max-tokens` accordingly.

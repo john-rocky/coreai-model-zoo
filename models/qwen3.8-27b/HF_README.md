@@ -59,8 +59,9 @@ real photos), so the ship chunk stays inside the provable fp16 range. Suite gate
 oracle, greedy 24 tokens, full-chain (NumPy preprocess → tower → embed splice → decoder).
 The fp16 eager control on the mixed text+image sequences is 32/32 token-exact.
 
-The checkpoint's MTP draft head is **not** included: GDN-hybrid verify cost caps
-speculation at ~1.2–1.3× (measured on this engine).
+The checkpoint's MTP draft head is included as a lossless drafter pair: on code it measured 1.30× over int4
+decode (22.2 → 29.0 tok/s) and 1.71× over int8 (15.6 → 26.7); on prose it is slower (0.79×, int4), so prose
+stays on plain decode (M4 Max, macOS 27.0 beta 26A5406e, 2026-08-17).
 
 **No iPhone numbers are published here because none were measured** (28 GB is far past the
 iPhone ceiling; the tower alone would fit but has no on-device decoder to feed).

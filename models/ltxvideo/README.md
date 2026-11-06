@@ -2,7 +2,10 @@
 
 The zoo's **first video model**. Lightricks'
 [LTX-Video](https://github.com/Lightricks/LTX-Video), config `ltxv-2b-0.9.6-distilled`
-(MIT / OpenRAIL-M) — **text → video** via an 8-step distilled flow-matching DiT.
+(code Apache-2.0; the 0.9.6-distilled weights are under the
+[LTXV Open Weights License 0.X](https://huggingface.co/Lightricks/LTX-Video/blob/main/LTX-Video-Open-Weights-License-0.X.txt),
+under which commercial use by entities with $10M or more annual revenue needs a paid license) — **text → video**
+via an 8-step distilled flow-matching DiT.
 All three neural nets run as Core AI `.aimodel` bundles; only the FlowMatch sampler
 loop stays on host (the standard zoo pattern — convert the heavy nets, keep the
 data-dependent control flow in Python).

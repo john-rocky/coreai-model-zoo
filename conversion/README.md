@@ -447,8 +447,9 @@ Apple's repo; each recipe names the script it runs.
   --head-sym` = **28 GB bundle, 15.7 tok/s decode / 16.2 prefill on M4 Max** (bandwidth-bound
   dense 27B, matches the 3.6 within noise). Gate: fp16 control **16/16 exact** vs the bf16
   oracle (cleaner than 3.6 — no bf16 artifact), int8hu 15/16 with zero confident flips (the
-  miss is a 0.061-margin tie). `mtp.*` deliberately skipped (GDN-hybrid spec-decode caps at
-  ~1.2–1.3× so the MTP head isn't worth a graph). Release-day HF CDN crawl routed via
+  miss is a 0.061-margin tie). `mtp.*` was skipped at first, then exported
+  (`export_qwen3_8_mtp.py`) as a lossless drafter pair: 1.30× over int4 decode and 1.71× over int8 on code
+  (M4 Max, macOS 27.0 beta 26A5406e, 2026-08-17). Release-day HF CDN crawl routed via
   sha256-verified ModelScope — see
   [`../knowledge/qwen3.8-27b-port.md`](../knowledge/qwen3.8-27b-port.md) and
   [`../models/qwen3.8-27b/README.md`](../models/qwen3.8-27b/README.md).

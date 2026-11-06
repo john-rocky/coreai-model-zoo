@@ -141,7 +141,9 @@ The ~20 ms intercept is the weight read, the slope is the chunk's compute. Prefi
 270 GB/s bus — it is **compute-bound**, so quantization barely helps it and the device number will
 ride the A19's FLOPs (est. ~150–250 tok/s → 512-token TTFT ~2–3 s vs today's 34 s). PipelinedBench has
 a `PB_CHUNKED` host loop for the companion graph; chunks beyond chunk_size need only a decay-weighted
-carry of h_out, no graph change.
+carry of h_out, no graph change. On an iPhone 17 Pro this form did not run: the companion graph (AOT
+`h18p`) logged `ANECompile FAILED` and `MTL4CommandQueueError`, then a GPU fault rebooted the phone (2026-07-11).
+The device estimate above is unmeasured.
 
 ---
 

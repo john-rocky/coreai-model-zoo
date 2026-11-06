@@ -119,12 +119,17 @@ its KV state at 1,024 slots on both platforms.
   the phone's times in the next item, were measured with a system permission alert on the phone's screen; the effect
   is not measured. D is 0/6 for both (record `ROUND9.md`). These graphs return logits only, not the hidden state the
   pixel decoder needs.
-- **The pixel decoder**: on the Mac ANE, `PixelShuffle(2)` and `ConvTranspose2d` (k4 s2 p1) return values unrelated to
+- **The pixel decoder**: on the Mac ANE (coreai-torch 0.4.1), `PixelShuffle(2)` after graph A's first upsampling conv (3×3, 192 → 768
+  channels) and `ConvTranspose2d` (k4 s2 p1) return values unrelated to
   torch's (cos 0.365 / −0.005) while conv 3×3, GroupNorm, bilinear and cat + 1×1 agree; `PixelShuffle` written as a
   rank-5 reshape / permute runs on the ANE within the matte bar, and graph A then runs 1.63 × faster on the phone's ANE
   than on its GPU alone (54.7 against 89.3 ms), but the GPU's graph B after it takes 45–55 ms longer, so the request is
   no faster. Graph B's fp32 islands (its resizes and logit sums) fail the ANE compile from the S/2 stage on, and its
   fp16-only form misses the bar in two rewrites of the transposed convolution (record `ROUND8.md`).
+  Re-measured 2026-11-05 with coreai-torch 0.4.3 on the same macOS 27.0 (26A428): a lone `PixelShuffle(2)` is
+  correct, and the wrong bias appears after a 3×3 conv with bias and 456 or more output channels
+  ([apple/coreai-models#427](https://github.com/apple/coreai-models/issues/427)); the same `ConvTranspose2d`
+  (48 channels, 512 → 1024) alone gives cos 1.0. Graphs A and B were not re-run.
 
 ## The bytes that ship
 

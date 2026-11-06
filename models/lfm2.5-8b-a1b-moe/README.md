@@ -108,7 +108,9 @@ composes with the stateful KV+conv decode graph.
 | int8km-gather (Mac), M4 Max | 8.4 GB | 141.0 | +5 flips/41 | superseded by sym8 (k-means lossier) |
 | int4km-gather, M4 Max / **iPhone 17 Pro** — *not shipped* | **4.7 GB** | 162.7 / **31.3** | +12 flips/41 (degraded) | *validated to run* on iPhone, but NOT clean |
 
-**Honest bottom line:** the gather kernel gives the 3.6× speed on both int8 and int4. With the
+**Honest bottom line:** the gather kernel gives the 3.6× speed on int8 only (39.2 → 140.4 tok/s). On int4 it
+gains nothing: the int4km-gather bundle decodes 162.7 tok/s against 169.6 for plain int4, which is already not
+bandwidth-bound (M4 Max, 2026-06-13). With the
 **symmetric-linear int8 kernel (`sym8`) the Mac bundle is BOTH 3.6× faster AND clean** (matches
 the shipped int8-linear quality) — **this is what ships.** The **iPhone** needs int4 for size
 (8.8 GB int8 won't fit even with the memory-limit entitlement), and **non-QAT int4 is a hard
