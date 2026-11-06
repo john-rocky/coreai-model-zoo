@@ -768,8 +768,13 @@ App terminated due to signal 6.
   E4B full layers (8 × 512 = 8 KB) fit. **Fix (verified 2026-06-13):** replace the full layers'
   MPSGraph SDPA with a custom flash-decode Metal kernel; the 12B then runs on the stock pipelined
   engine, greedy-exact against the fp32 oracle. Apple reproduced the overflow on an M2 in July and
-  closed the issue 2026-08-26 as not reproducible on a recent macOS beta; the Mac 12B case has not
-  been re-measured here since. Log: `~/code/coreai/_gemma12b_llmrunner.log`,
+  closed the issue 2026-08-26 as not reproducible on a recent macOS beta. Re-measured here
+  2026-11-06 on macOS 27.0 (26A428): the full 48-layer int8 export without the kernel runs on the
+  default and the sequential engine of Apple's `llm-runner` (`main` 8a2d32a) with no overflow and
+  answers "The capital of France is Paris." (default engine run with `COREAI_CHUNK_THRESHOLD=1` and
+  `--warmup exact --warmup-length 1`; without the warmup flag this decode-only bundle stops at
+  [Shape at dimension 1 of 256](#shape-at-dimension-1-of-256-is-not-a-valid-substitution-for-source-shape-1)
+  (b)). Log: `~/code/coreai/_upstream/issues-a/r1/` (2026-11-06), `~/code/coreai/_gemma12b_llmrunner.log`,
   `_gemma12b_bench_int8.log`, `_gemma12b_bench_int4.log`, `_gemma12b_int4_coherence.log`
   (2026-06-12); issue: [apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27);
   record: `~/code/coreai/GEMMA4_12B_STATE.md`.

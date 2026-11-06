@@ -484,11 +484,12 @@ Apple's repo; each recipe names the script it runs.
   head, no `v_proj`, value = raw k_proj). Both attention shapes ride ONE growing KV pair
   (`[48,1,8,S,512]`, sliding padded 256→512, full padded 1→8 heads), so the bundle loads on the
   **stock pipelined engine — no engine patch** (2 states). In-graph embed + tied head + softcap.
-  **`--metal-sdpa` is required to RUN:** the full layers' 16-head × 512 Q (16 KB fp16) overflows
-  MPSGraph's SDPA scratch heap ([apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27)),
+  **`--metal-sdpa` was required to run on the June 2026 macOS 27 beta:** the full layers' 16-head × 512 Q
+  (16 KB fp16) overflowed MPSGraph's SDPA scratch heap ([apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27)),
   so the full layers' SDPA op is swapped for a custom flash-decode Metal kernel
   (`models/macos/gemma4_dense_metal_sdpa.py`) — the first Core AI runtime for a ≥16-head × 512
-  full-attention model. Ship = `int8lin --metal-sdpa` (verified-clean, M4 Max 22.2 tok/s decode) +
+  full-attention model. On macOS 27.0 (26A428) the `int8lin` export without `--metal-sdpa` runs and
+  decodes at the same 22.5 tok/s as the kernel bundle (M4 Max, 2026-11-06; int4 not re-run). Ship = `int8lin --metal-sdpa` (verified-clean, M4 Max 22.2 tok/s decode) +
   `int4lin --lin-sym --metal-sdpa` (faster 4-bit, 33.0 tok/s). Overlays:
   `models/macos/gemma4_dense_{text,pipelined,metal_sdpa}.py`. Gate via
   `_smoke/engine_tokenmatch_gemma4_12b.py`, run SOLO (parallel python-GPU → MTL4CommandQueueError).
@@ -497,7 +498,7 @@ Apple's repo; each recipe names the script it runs.
   the **frontier dense** twin of the 12B (60 layers, hidden 5376, 32 heads, **4 global KV heads**,
   same dual head_dim 256/512). Reuses the 12B overlay verbatim — the `--metal-sdpa` kernel does
   block GQA over the unified cache (`repeat_interleave` replication: correct for the 31B's 4 global
-  heads, a no-op for the 12B's 1). Same #27 scratch-heap bypass. Ship = `int4lin --lin-sym`
+  heads, a no-op for the 12B's 1). Same #27 scratch-heap bypass (a full 31B export without it has not been run on macOS 27.0 26A428). Ship = `int4lin --lin-sym`
   (q4_0 QAT, ~19 GB Mac-only, M4 Max 17.2 tok/s decode). See [`../models/gemma4-31b/README.md`](../models/gemma4-31b/README.md).
 
 - **RF-DETR (object detection, in this dir): `export_rf_detr.py --variant {nano|small|medium|large}`** —

@@ -13,13 +13,15 @@ custom flash-decode SDPA kernel** as the 12B.
 — `gpu-pipelined/` decode-only **int4linsym** (19 GB, Mac-only), with the higher-occupancy
 flash-decode kernel (`_g8`).
 
-> **Same engine blocker, same bypass as the 12B.** The full (global) attention layers have a
-> 16-byte-KB-class Q tensor (here **32 heads × 512** = 32 KB fp16) that overflows MPSGraph's GPU
-> decode scratch heap — the stock SDPA crashes at the first token
+> **Same bypass as the 12B.** The full (global) attention layers have a **32 heads × 512** Q
+> tensor (32 KB fp16), twice the 12B's 16 KB Q that overflowed MPSGraph's GPU decode scratch heap
+> on the June 2026 macOS 27 beta, where the stock SDPA crashed at the first token
 > ([apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27)). `--metal-sdpa`
 > swaps the full layers' SDPA for a custom Metal flash-decode kernel, so the 31B runs on the stock
-> pipelined engine. **The 31B has 4 global KV heads** (vs the 12B's 1), so the kernel does block
-> GQA over the unified cache (validated bit-exact vs ground-truth GQA).
+> pipelined engine. A full 60-layer 31B export without the kernel has not been run on macOS 27.0
+> (26A428), where the 12B's int8 export without it runs (2026-11-06,
+> [12B card](../gemma4-12b/README.md)). **The 31B has 4 global KV heads** (vs the 12B's 1), so the
+> kernel does block GQA over the unified cache (validated bit-exact vs ground-truth GQA).
 
 <!-- gen-cards:use-it begin id=gemma-4-31b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
@@ -126,9 +128,11 @@ composite SDPA / ground-truth GQA (eager parity, both the 12B's 1-global-head an
 | `int4linsym_msdpa_g8` | **17.2 tok/s** | 22.1 tok/s | 19 GB |
 
 A frontier 31B dense at int4 is bandwidth-bound, so decode (17.2 tok/s) is in the public Q4 Mac
-range (Ollama ~18-24) — the win is "Core AI runs a frontier dense model that the stock engine
-**cannot**." The custom flash-decode kernel (necessary to run at all) adds some overhead vs the raw
-bandwidth ceiling. Public Q4 figures of 40-50 tok/s use Gemma 4's MTP speculative drafters, which
+range (Ollama ~18-24). The custom flash-decode kernel exists because the stock SDPA crashed on the
+12B's 16-head × 512 full-attention layers on the June 2026 macOS 27 beta (#27); it adds some
+overhead vs the raw bandwidth ceiling. A full 31B export without it has not been run on macOS 27.0
+(26A428), where the 12B's int8 export runs without the kernel at the same speed as with it
+(2026-11-06). Public Q4 figures of 40-50 tok/s use Gemma 4's MTP speculative drafters, which
 Core AI does not have — compare plain-decode to plain-decode.
 
 ## Reproduce

@@ -11,13 +11,17 @@ decodes at interactive speed on an M4 Max.
 **⬇️ Converted `.aimodel` bundles:
 [mlboydaisuke/Gemma-4-12B-CoreAI](https://huggingface.co/mlboydaisuke/Gemma-4-12B-CoreAI)**
 — `gpu-pipelined/` decode-only **int8lin** (14 GB, verified-clean) and **int4linsym** (8.2 GB,
-faster 4-bit), both built with the **custom flash-decode SDPA kernel** (`--metal-sdpa`) that lets
-the 12B run on the engine at all (see *Throughput* below).
+faster 4-bit), both built with the **custom flash-decode SDPA kernel** (`--metal-sdpa`) that the
+12B needed to run on the June 2026 macOS 27 beta (see *The engine blocker* below).
 
-> **First Core AI runtime for a ≥16-head × head_dim-512 full-attention model.** The stock
-> MPSGraph SDPA crashes on this layout (a GPU scratch-heap `ViewOp` overflow); the ship bundles
-> replace that op on the full layers with a custom Metal flash-decode kernel. Use the `_msdpa`
-> bundles — the plain (non-kernel) bundles still crash on the current engine.
+> **First Core AI runtime for a ≥16-head × head_dim-512 full-attention model.** On the June 2026
+> macOS 27 beta (26A5353q) the stock MPSGraph SDPA crashed on this layout (a GPU scratch-heap
+> `ViewOp` overflow, [apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27));
+> the ship bundles replace that op on the full layers with a custom Metal flash-decode kernel. On
+> macOS 27.0 (26A428) the int8 12B runs without the kernel: an `int8lin` export without
+> `--metal-sdpa` runs all 48 layers and decodes at the same 22.5 tok/s as `int8lin_msdpa_g8`
+> (M4 Max, 2026-11-06; see *Reproduce*). The published bundles keep the kernel; the int4 export
+> was not re-run without it.
 
 <!-- gen-cards:use-it begin id=gemma-4-12b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it
@@ -145,22 +149,24 @@ Gate numerics via the **eager teacher-forced** path; the GPU raw `AIModel.load` 
 to an fp16/ANE compile (uniform cos 0.98 + a spurious NaN) that does *not* reflect the
 engine's real numerics.
 
-## The engine blocker — and the custom-kernel bypass
+## The engine blocker on the June 2026 beta — and the custom-kernel bypass
 
-The full 48-layer bundle hits an **MPSGraph memory-planning bug**: the stock SDPA lowering of a
-**full-attention** layer's Q tensor (`[1, 16, 1, 512]` fp16 = 16 heads × `global_head_dim` 512 =
-16 384 B) materialises a `ViewOp` that overflows MPSGraph's ~208 KB GPU decode scratch heap, and
-the engine aborts at the **first** decode token:
+On the June 2026 macOS 27 beta (26A5353q) the full 48-layer bundle hit an **MPSGraph
+memory-planning bug**: the stock SDPA lowering of a **full-attention** layer's Q tensor
+(`[1, 16, 1, 512]` fp16 = 16 heads × `global_head_dim` 512 = 16 384 B) materialised a `ViewOp`
+that overflowed MPSGraph's ~208 KB GPU decode scratch heap, and the engine aborted at the
+**first** decode token:
 
 ```
 allocateMTLBufferFromMTLHeap: offset 204544 + size 32768 exceeds heap total 229376
 GPUMemrefOps.mm:687: failed assertion 'Failed to acquire the source buffer for the ViewOp'
 ```
 
-Sliding-layer Q (16 × 256 = 8 KB) fits, and **E2B/E4B full layers (8 heads × 512 = 8 KB) also
-fit** — only the 12B's **16-head × 512** full Q tips the heap over. It is invariant to every
+Sliding-layer Q (16 × 256 = 8 KB) fit, and **E2B/E4B full layers (8 heads × 512 = 8 KB) also
+fit** — only the 12B's **16-head × 512** full Q tipped the heap over. It was invariant to every
 model-side change (KV pad↔replicate, `.contiguous()`, SDPA variant), because they all keep
-MPSGraph's SDPA op. Filed as [apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27).
+MPSGraph's SDPA op. Filed as [apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27);
+it was closed 2026-08-26 as not reproducible on a later macOS beta.
 
 **The fix (this is what ships):** replace the SDPA *op* on the full layers with a **custom Metal
 flash-decode kernel** (`models/macos/gemma4_dense_metal_sdpa.py`, registered via
@@ -168,7 +174,9 @@ flash-decode kernel** (`models/macos/gemma4_dense_metal_sdpa.py`, registered via
 entirely. The full (global) layers carry a single global KV head, and a q=1 decode attends every
 grown key, so the kernel is a mask-free GQA-16:1 flash decode (scale 1.0, fp32 online softmax,
 one SIMD-group per query head); sliding layers keep MPSGraph SDPA (their window mask is unchanged).
-With it, **Gemma 4 12B runs on the stock pipelined engine for the first time.**
+With it, **Gemma 4 12B runs on the stock pipelined engine for the first time.** On macOS 27.0
+(26A428) the int8 export without the kernel runs too, at the same decode speed (2026-11-06; see
+*Reproduce*).
 
 ## Throughput (M4 Max, `--metal-sdpa`, `-p 128 -g 256 -n 3`)
 
@@ -202,8 +210,9 @@ short context). MLX's own 4-bit bench stays blocked by `mlx_lm` not yet supporti
 # overlay (on the coreai-models checkout): gemma4_dense_text.py + gemma4_dense_pipelined.py
 #   + gemma4_dense_metal_sdpa.py (the full-layer flash-decode SDPA kernel)
 cd coreai-models
-# clean ship (int8) — --metal-sdpa bypasses the scratch-heap crash; --split-g 8 (the default) is
-# the higher-occupancy kernel (use --split-g 0 for the simple 1-SIMD-group kernel):
+# clean ship (int8) — --metal-sdpa bypassed the June-2026-beta scratch-heap crash (#27); on macOS
+# 27.0 (26A428) the int8 export runs without it. --split-g 8 (the default) is the
+# higher-occupancy kernel (use --split-g 0 for the simple 1-SIMD-group kernel):
 .venv/bin/python ../coreai-models-community/conversion/export_gemma4_12b_decode_pipelined.py \
     int8lin --metal-sdpa --max-ctx 4096
 # faster 4-bit option:
@@ -217,8 +226,17 @@ COREAI_CHUNK_THRESHOLD=1 .build/release/llm-benchmark \
     --model exports/gemma4_12b_qat_decode_int8lin_msdpa_g8 -p 128 -g 256 -n 3
 ```
 
-> Without `--metal-sdpa` the bundle still exports and is numerically clean, but **crashes on the
-> current engine** at the first decode token (the full-attention scratch-heap `ViewOp` bug). The
-> truncated `--num-layers N` bundles do *not* reproduce the crash (the heap only overflows under
-> the full 48-layer graph's pressure) — probe the full bundle via the real `llm-runner`, not raw
-> `AIModel.load(gpu)` (which ANE-falls-back on the 14 GB graph and can't run the GPU-only kernel).
+> Without `--metal-sdpa` the bundle still exports and is numerically clean. On the June 2026 macOS 27
+> beta it crashed at the first decode token (the full-attention scratch-heap `ViewOp` bug, #27). On
+> macOS 27.0 (26A428) it runs: the full 48-layer `int8lin` export runs with Apple's `llm-runner`
+> (`main` `8a2d32a`) on the default and the sequential engine, answers "The capital of France is
+> Paris.", picks the fp32 reference's token at 31 of 32 teacher-forced positions (the miss is a
+> 0.02-logit near-tie in the reference; `_msdpa_g8` also gets 31), and decodes 22.5 tok/s in
+> `llm-benchmark`, the same as `_msdpa_g8` (`-p 128 -g 256 -n 3`, M4 Max, 2026-11-06). On
+> `llm-runner`'s default engine pass `--warmup exact --warmup-length 1` (with
+> `COREAI_CHUNK_THRESHOLD=1`, as in the bench line above) with either bundle: the default warmup
+> runs a 1-token and a 256-token shape, and these decode-only bundles (`input_ids` fixed at 1 × 1)
+> stop on the second with `Shape at dimension 1 of 256 is not a valid substitution for source
+> shape 1` (`llm-benchmark` warms up through a real trial and needs no flag). Probe a full bundle
+> via the real `llm-runner`, not raw `AIModel.load(gpu)` (which ANE-falls-back on the 14 GB graph
+> and can't run the GPU-only kernel).

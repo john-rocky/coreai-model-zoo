@@ -19,7 +19,7 @@ dense** — no experts, no router, just the proven token mixers at scale. 64 lay
 quality of a large dense model, at the memory-bandwidth speed that implies on a Mac.
 
 **Why it runs on this Mac today:** head_dim 256 keeps the full-attention Q buffer small, so
-it side-steps the macOS 27 beta MPSGraph decode-heap bug (apple/coreai-models#27, not re-tested on the release OS) that blocked the
+it side-steps the macOS 27 beta MPSGraph decode-heap bug (apple/coreai-models#27; on macOS 27.0 26A428 the 12B's int8 export runs without its kernel, 2026-11-06) that blocked the
 head_dim-512 Gemma 4 12B. The qwen3.5 family already runs on this engine.
 
 **⬇️ Converted `.aimodel` bundle:** `qwen3_6_27b_decode_int8hu_block32_sym/` (28 GB,

@@ -367,9 +367,11 @@ Measured on the iOS 27 / macOS 27 developer betas (June–September 2026 builds;
 kernels (ANE column + **†**/**‡** excepted). **†** = MoE bundle using the custom
 [`gather_qmm`](knowledge/compute-units-and-authoring.md) Metal kernel (reads only the routed
 experts). **‡** = dense bundle whose full/global-attention SDPA is a custom flash-decode Metal
-kernel — the stock MPSGraph SDPA crashed on the ≥16-head × 512 Q on the OS 27 betas (a GPU scratch-heap overflow, not re-tested on the release OS,
-[apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27)), so these models are
-**unrunnable without it**. Prefill, sizes, per-model caveats, and the Mac-only big models: [`models/`](models/).
+kernel — the stock MPSGraph SDPA crashed on the 12B's 16-head × 512 Q on the June 2026 macOS 27 beta (a GPU scratch-heap overflow,
+[apple/coreai-models#27](https://github.com/apple/coreai-models/issues/27)). On macOS 27.0 (26A428)
+the 12B's int8 export runs without the kernel, at the same 22.5 tok/s as the published int8 bundle
+on that build (M4 Max, 2026-11-06; the table keeps the beta figure); a full 31B export without the
+kernel has not been run there. Prefill, sizes, per-model caveats, and the Mac-only big models: [`models/`](models/).
 
 <p align="center">
   <img width="380" alt="CoreAIChat screen recording" src="https://github.com/user-attachments/assets/999dbd95-45b5-468f-b1a8-34112ee3b74d" />
