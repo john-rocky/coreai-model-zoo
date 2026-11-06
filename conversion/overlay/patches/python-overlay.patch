@@ -15047,7 +15047,7 @@ index 0000000..ae57bdf
 +        }
 diff --git a/python/src/coreai_models/models/macos/glm_ocr.py b/python/src/coreai_models/models/macos/glm_ocr.py
 new file mode 100644
-index 0000000..204b614
+index 0000000..23016f0
 --- /dev/null
 +++ b/python/src/coreai_models/models/macos/glm_ocr.py
 @@ -0,0 +1,604 @@
@@ -15169,7 +15169,7 @@ index 0000000..204b614
 +        theta = _rope_theta(config)
 +        half = self.head_dim // 2
 +        inv_freq = 1.0 / (theta ** (torch.arange(0, self.head_dim, 2).float() / self.head_dim))
-+        self.register_buffer("inv_freq", inv_freq, persistent=False)  # [half]
++        self.inv_freq = inv_freq  # [half] fp32 attribute, not a buffer: .to(dtype) can't round it
 +        assert sum(self.section) == half, (self.section, half)
 +
 +    def _cos_sin(self, pos_t, pos_h, pos_w):

@@ -32,6 +32,20 @@ MLA**. The vision tower runs once; its `image_embeds` are injected at the image 
 
 ## Verified (M4 Max, GPU, Core AI pipelined engine)
 
+- **2026-11-07 (JST): decoder re-exported with its RoPE frequencies kept in fp32.** The previous
+  decoder stored its 64 RoPE frequencies rounded to fp16 precision (relative error up to 4.1e-4); the
+  new one stores them bit-equal to fp32 (64/64), and that is the only constant that changed. Only
+  `decoder/` is replaced; `vision/` and the tokenizer files are unchanged. On everything measured the
+  output did not change (M4 Max, macOS 27.0, pipelined engine, greedy): on the synthetic document both
+  decoders give 40/40, and all 93 tokens up to the end-of-turn token, identical to the fp32 HF
+  reference; on three text-only prompts of 2100, 2800 and 3400 tokens (64 generated each, reaching
+  positions 2163, 2863 and 3463) they agree token for token — on the 2800-token prompt both leave the
+  fp32 reference at step 5, where its top two logits differ by 0.036. One near-tie does flip: on the
+  bare prompt `Text Recognition:` with no image, the fp32 reference stops at once with the end-of-turn
+  token, 0.056 logits ahead of the backtick token; the previous decoder also stopped at once, the new
+  one starts with a backtick instead. Decode speed is unchanged (after / before = 1.004, measured back
+  to back on the same Mac). On iPhone 18 Pro (iOS 27.2) the new decoder gives the same 93 tokens on
+  the synthetic document and the same backtick on the bare prompt as the Mac.
 - **End-to-end real generation on the engine: 40/40 tokens identical to the fp32-HF reference** — a
   synthetic document read verbatim (*"Quarterly Report / On-device inference shipped across all
   product lines this quarter…"*), **~375 tok/s** decode (int8hu S=1), driving the S=1 bundle on the

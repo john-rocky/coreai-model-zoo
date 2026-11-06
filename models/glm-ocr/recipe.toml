@@ -15,6 +15,9 @@ runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
 notes = [
   "Recorded mode: conversion/_glmocr_hf_upload.py publishes \"vision (fp16) + decoder (int8hu S=1)\"",
   "— the exporter names it glm_ocr_decode_int8hu; the upload renames it to decoder/.",
-  "The vision tower comes from the same run.",
+  "The vision tower comes from the original 2026-07 run. The decoder was re-exported alone on 2026-11-07 JST",
+  "(`-- --skip-vision --skip-dynamic`) from zai-org/GLM-OCR@ca5d8b3; model.safetensors is the same file at every",
+  "revision up to 2e85a62. Since then the decoder keeps its RoPE frequencies in fp32: the overlay's GlmOcrTextAttention",
+  "holds inv_freq as a plain attribute, not a buffer, so the exporter's .to(fp16) does not round it.",
   "Downloaded checkpoint dir: ZOO_WORK_ROOT/_glmocr_dl (see conversion/_paths.py).",
 ]
