@@ -267,8 +267,10 @@ Details and evidence in [`knowledge/timestral-port.md`](../../knowledge/timestra
   8,192 steps
   and nothing at 2,048.
 - On the Neural Engine the graph initially missed L3 by 0.09 % on one group. The cause was the Neural Engine's sigmoid /
-  SiLU (the patch embedding alone was 3.4 % off); writing them through tanh passes. An R = 2 graph compiles for the
-  Neural Engine only with 1×1-conv projections. The Neural Engine form has the lowest latency of the passing forms
+  SiLU (the patch embedding alone was 3.4 % off); writing them through tanh passes. This model's R = 2 graph compiles for the
+  Neural Engine only with 1×1-conv projections; in a minimal attention block, Linear projections at R = 2 abort
+  only with the where-mask, a sigmoid gating branch and the output Linear together (2026-11-05, macOS 27.0
+  26A428, coreai-torch 0.4.3). The Neural Engine form has the lowest latency of the passing forms
   on the iPhone 18 Pro in every bucket (9.44 ms against 14.58 ms for its best GPU form at 2,048 steps).
 - int8 per block of 32 on every Linear misses L3 (×1.018); leaving the patch embedding and the head unquantized passes
   at a 222–250 MB `.aimodel`, but a compile expands the weights back to dense ones and the speed does not improve

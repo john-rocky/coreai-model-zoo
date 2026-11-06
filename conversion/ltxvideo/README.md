@@ -1,7 +1,9 @@
 # LTX-Video 2B → Core AI (zoo's first VIDEO)
 
 [Lightricks/LTX-Video](https://github.com/Lightricks/LTX-Video), config
-`ltxv-2b-0.9.6-distilled` — **text → video** flow-matching DiT, 8 distilled steps, MIT/OpenRAIL-M.
+`ltxv-2b-0.9.6-distilled` — **text → video** flow-matching DiT, 8 distilled steps (code Apache-2.0;
+the 0.9.6-distilled weights are under the [LTXV Open Weights License 0.X](https://huggingface.co/Lightricks/LTX-Video/blob/main/LTX-Video-Open-Weights-License-0.X.txt),
+under which commercial use by entities with $10M or more annual revenue needs a paid license).
 The zoo's first video model: all three neural nets run as Core AI `.aimodel` bundles; only the
 FlowMatch sampler loop stays on host.
 

@@ -76,8 +76,10 @@ where. Two instruments that pair with it:
 | w6 + fp16 | 14 | **FAIL** | 0.9983865 | **1** |
 | w4 + fp16 | **0** | **FAIL** | 0.9621623 | **16** |
 
-- **w4 forms zero regions** — it reproduces the repo's *"4-bit g8 does not compile for the ANE"*
+- **w4 forms zero regions** — it reproduces the repo's MiniCPM5-2B record *"4-bit g8 does not compile for the ANE"*
   with **group 16**, so the group size is not the explanation — *and* it inverts 16 document pairs.
+  Not every g8 export hits it: Qwen3-0.6B with `4bit_weight_palettized_group8` compiles with 18 ANE regions for
+  `h18p` and `h19p` (2026-11-06, macOS 27.0 26A428, coreai-build 3600.83.1; compiled, not run).
 - **w6** compiles (14 regions) and fails the gate. It shipped for a 2B LLM; it does not hold here.
 - **w8** passes the gate and is **4.8× slower** (19.48 vs 4.05 ms): int8-affine weights fold to
   dense fp16 before the data-movement step, so they save storage and not bandwidth. It is a storage

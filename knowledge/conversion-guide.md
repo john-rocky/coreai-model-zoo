@@ -97,7 +97,10 @@ res = await fn({"x": rt.NDArray(np_or_tensor)})        # __call__ is ASYNC -> di
   front-end norm kept as an attribute), externalizing fails ("custom op not found"). Opt out by
   exposing `coreai_externalize_specs = ()` on the module, or pass an empty externalize list.
 - **fp16 conversion**: keep RoPE `inv_freq` a plain fp32 attribute (NOT a buffer) so `.half()`
-  can't underflow the small frequencies to zero. Cast RoPE cos/sin to the query dtype.
+  can't underflow the small frequencies to zero. Cast RoPE cos/sin to the query dtype. In bf16 the frequencies
+  are rounded too when `model.to(dtype)` reaches the buffer (up to 0.37% off), and the error grows with position:
+  six DiffusionGemma layers at positions 2048–4095 differ from fp32 by 3.1% (mean relative L2) against 1.5% with fp32 `inv_freq`
+  (in PyTorch, not on the Core AI runtime; 2026-11-06; [apple/coreai-models#482](https://github.com/apple/coreai-models/issues/482)).
 - **Truncating layers for smoke tests**: keep architectural regions (KV-shared / double-wide MLP)
   aligned with the checkpoint's real layout, or weights won't load.
 - **No complex ops** (`torch.polar`, `view_as_complex`/`view_as_real`, complex `*`). Rewrite complex

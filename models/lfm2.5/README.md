@@ -125,7 +125,7 @@ conversation history; `streamResponse(to:)` yields tokens as they decode.
 
 ## Two GPU-delegate findings this port surfaced (both worked around in the model file)
 
-Both are macOS 27 beta MPSGraph GPU-delegate behaviors (not re-tested on the release OS), found by bisection with single-layer
+Both are macOS 27 beta MPSGraph GPU-delegate behaviors (small repros re-checked on macOS 27.0 26A428, 2026-11-06, below), found by bisection with single-layer
 probes; the workarounds live in the re-authored `models/macos/lfm2.py`:
 
 1. **Chained fixed-shape state writes are silently dropped.** Per-layer
@@ -137,6 +137,10 @@ probes; the workarounds live in the re-authored `models/macos/lfm2.py`:
    **Workaround: layers return their new conv columns and the model issues ONE fused
    full-state `slice_update` per step.** (qwen3.5's 18-slot graph happens not to trigger
    this — pattern-dependent.)
+   Re-checked 2026-11-06 (macOS 27.0 26A428, coreai-torch 0.4.3, M4 Max; this model not re-run): a 3-slot
+   chained repro keeps every write on the GPU, crashes on the CPU from 2 slots (exit −11), and under the Neural
+   Engine preference loses the write, as the fused form does, when the state's last axis is not a multiple of
+   64 bytes ([apple/coreai-models#469](https://github.com/apple/coreai-models/issues/469)).
 2. **fp16 attention projections compute ~1.3% relative error under a dynamic-shape graph**
    (the fused attention-prologue matmul accumulates in fp16; the *same* matmul in a static
    graph measures 0.07%). LFM2.5's large q/k-norm gains (|k| up to ~14) amplify this and it
@@ -144,6 +148,9 @@ probes; the workarounds live in the re-authored `models/macos/lfm2.py`:
    **Workaround: the four attention projections (q/k/v/out) keep fp32 weights** (cast in/out
    around the matmul) → layer-level cos 1.000000, +~126 MB. Conv-mixer and MLP matmuls
    measure clean in fp16 and stay fp16/int8.
+   Re-checked 2026-11-06 (macOS 27.0 26A428, coreai-torch 0.4.3, M4 Max) on one fp16 1024 × 1024 Linear over 64
+   positions: relative error 0.032% dynamic against 0.021% static on the GPU, and 0.021% both ways with the input
+   scaled by 14. The LFM2.5 projections were not re-run.
 
 ## int8lin recipe (this model)
 

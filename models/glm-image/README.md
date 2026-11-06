@@ -9,7 +9,7 @@ conditioned on those tokens, and a 16ch VAE decodes. Composition comes from the 
 
 Bundle: [🤗 mlboydaisuke/GLM-Image-CoreAI](https://huggingface.co/mlboydaisuke/GLM-Image-CoreAI)
 — macOS, int8 AR (9.6 GB) + int8 DiT (9.2 GB, 1024² and 512² variants) + fp32 VAE.
-Weights are resolution-independent, so 512 buys speed (~1 min vs ~4.5 min), not memory.
+Weights are resolution-independent, so 512 buys speed (~1 min per image at 512² on an M4 Max, 2026-07-07; no end-to-end timing of 1024² is on record), not memory.
 Mac-only today (iPhone needs int4 + sequential loading — memory, not resolution, is the
 wall).
 

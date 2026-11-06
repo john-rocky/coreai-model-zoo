@@ -36,7 +36,10 @@ tokenizer + chat template; decode-only loop-free for the
 `gpu-pipelined/qwen3_8_27b_vision_fp16/` (0.9 GB ViT tower, one shot per image) ·
 `gpu-pipelined/qwen3_8_27b_vl_decode_int8hu_block32_sym_pf16/` (28 GB embeddings-input VLM
 decoder, multifunction S=1 decode + S=16 chunked prefill, + `embed_tokens.safetensors`).
-*HF upload user-gated.*
+Added on 2026-08-17, in the same `gpu-pipelined/` directory: `qwen3_8_27b_decode_int4lin/` (18 GB int4 text
+decoder) and the lossless MTP drafter set (three bundles: `qwen3_8_27b_verify_s9_int4lin_d4_hpost/`,
+`qwen3_8_27b_mtp_s1_int8hu_block32_sym/`, `qwen3_8_27b_mtp_s9_int8hu_block32_sym/`). All seven are in
+[mlboydaisuke/Qwen3.8-27B-CoreAI](https://huggingface.co/mlboydaisuke/Qwen3.8-27B-CoreAI).
 
 ## Verified
 
@@ -135,9 +138,10 @@ the text bundle covers engine benches): **tower 111 ms/image, prefill 86.0 tok/s
 
 **Dense means no MoE speed trick:** decode reads the whole model per token — ~28 GB/token
 at int8 → 15.7 tok/s is memory-bandwidth-bound on M4 Max, matching the 3.6-27B (15.9)
-within noise. int4 was **not exported**: on the byte-identical 3.6-27B it gated as
-borderline (a real high-confidence flip), and nothing in this generation changes that
-trade; if you want the ~14 GB / ~2× option it is one `int4lin` flag away, unverified here.
+within noise. int4 was left out at first (on the byte-identical 3.6-27B it had a
+real high-confidence flip), then exported on 2026-08-17 as `qwen3_8_27b_decode_int4lin` (18 GB): 15/16 in the
+eager fake-quant check against the bf16 oracle with zero confident flips (the miss is the same 0.061-margin tie as int8), and
+22.2 tok/s decode against 15.6 for int8 in the same CoreAIChatMac engine (M4 Max, macOS 27.0 beta 26A5406e).
 
 ## Reproduce
 

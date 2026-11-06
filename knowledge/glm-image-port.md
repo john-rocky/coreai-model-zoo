@@ -48,12 +48,16 @@ sigma forensics. Scripts live in the working tree as `_glmimg_*` (coreai root).
 
 ## Other gotchas
 
-- **AOT `.aimodelc` must load with `SpecializationOptions.default`/`.cpuOnly`** — forcing
+- **AOT `.aimodelc` must load with `SpecializationOptions.default`** — forcing
   `preferredComputeUnitKind: .gpu` re-specializes (JIT) and wedges the 9 GB graphs on OS 27
   (`failedToSpecialize`). GUI apps hit this reliably; CLIs sometimes got away with it.
-- **Swift `AIModel(contentsOf:)` does not follow symlinked bundles** to their
+  `.cpuOnly`, once listed here as an alternative, fails with `failedToSpecialize` on a Mac with macOS 27.0
+  (26A428) on small conv test graphs (2026-11-06; the GLM-Image bundles were not re-run).
+- **Swift `AIModel(contentsOf:)` did not follow symlinked bundles** to their
   arch-specific delegate dir (`main-h16c-delegates`) → same `failedToSpecialize`. Resolve
   with `url.resolvingSymlinksInPath()` (the Python runtime follows symlinks fine).
+  That was July 2026. On macOS 27.0 (26A428) a Swift load through a symlinked `.aimodelc` runs on the Mac (2026-11-06; iPhone not
+  re-checked).
 - **AR must be sampled** (temp 0.9 / top-p 0.75 per upstream `generation_config`); greedy
   collapses visual tokens to flat regions. HF's top-p keeps the boundary token
   (inclusive cumsum) — an exclusive nucleus is subtly greedier.
