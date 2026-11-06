@@ -9,7 +9,8 @@
 //
 // Host contract (mirrors the gated python pipeline + the iPhone PipelinedBench gate):
 //   * preprocess: resize 448x448, normalize x/127.5-1 (mean/std 0.5), CHW [1,3,448,448].
-//   * prompt: ChatML; 64x<|image_pad|>(248056) inline in the user turn, rewritten to V+slot.
+//   * prompt: ChatML, the HF processor's ids: <image_id>0</image_id><image> + 64x<|image_pad|>(248056)
+//     + </image> in the user turn (pads rewritten to V+slot), then the empty <think></think> block.
 //   * one image serves a whole chat (each generate re-prefills).
 
 import CoreAI
@@ -147,9 +148,11 @@ final class MiniCPMVLBackend {
         guard let tokenizer else { throw Self.err("not loaded") }
         var ids: [Int32]
         if imageAttached {
-            let text = "<|im_start|>user\n"
+            // The official processor's turn: the pad run wrapped in <image_id>0</image_id><image> …
+            // </image>, and the chat template's closed think block (enable_thinking defaults to false).
+            let text = "<|im_start|>user\n<image_id>0</image_id><image>"
                 + String(repeating: "<|image_pad|>", count: N)
-                + "\n\(prompt)<|im_end|>\n<|im_start|>assistant\n"
+                + "</image>\n\(prompt)<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
             ids = tokenizer.encode(text: text).map { Int32($0) }
             var slot: Int32 = 0
             for i in 0..<ids.count where ids[i] == IMG_TOK {
