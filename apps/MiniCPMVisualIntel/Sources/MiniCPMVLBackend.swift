@@ -139,7 +139,11 @@ final class MiniCPMVLBackend {
 
     // MARK: - Generate
 
-    func generate(_ prompt: String, maxNew: Int, onUpdate: @escaping (String) -> Void) async throws {
+    /// Greedy answer; streams the decoded text, returns the engine's prompt ids + generated ids.
+    @discardableResult
+    func generate(_ prompt: String, maxNew: Int, onUpdate: @escaping (String) -> Void) async throws
+        -> (promptIds: [Int32], tokens: [Int])
+    {
         guard let tokenizer else { throw Self.err("not loaded") }
         var ids: [Int32]
         if imageAttached {
@@ -158,16 +162,17 @@ final class MiniCPMVLBackend {
         }
         guard ids.count < ctx - 1 else { throw Self.err("prompt too long (\(ids.count))") }
         let budget = min(maxNew, ctx - ids.count - 1)
-        _ = try await run(ids: ids, maxTokens: budget) { gen in
+        let gen = try await run(ids: ids, maxTokens: budget) { gen in
             onUpdate(tokenizer.decode(tokens: gen, skipSpecialTokens: true))
         }
+        return (ids, gen)
     }
 
     @discardableResult
-    private func run(ids: [Int32], maxTokens: Int, onText: @escaping ([Int]) -> Void) async throws -> Int {
+    private func run(ids: [Int32], maxTokens: Int, onText: @escaping ([Int]) -> Void) async throws -> [Int] {
         guard let engine else { throw Self.err("not loaded") }
         try await engine.reset()
-        let stream = try engine.generate(
+        let stream = try await engine.generate(
             with: ids, samplingConfiguration: SamplingConfiguration(temperature: 0),
             inferenceOptions: InferenceOptions(maxTokens: maxTokens))
         var gen: [Int] = []
@@ -177,7 +182,7 @@ final class MiniCPMVLBackend {
             gen.append(tok)
             onText(gen)
         }
-        return gen.count
+        return gen
     }
 
     // MARK: - Preprocess (resize 448 + x/127.5-1, CHW [1,3,448,448])

@@ -49,6 +49,8 @@ struct MiniCPMVisualIntelApp: App {
         let router = AppRouter.shared
         AppDependencyManager.shared.add(dependency: engine)
         AppDependencyManager.shared.add(dependency: router)
+        // Headless on-device check (`-mvi-selftest <out>`); does nothing on a normal launch.
+        Task { @MainActor in await MiniCPMVISelfTest.runIfRequested() }
     }
 
     var body: some Scene {
