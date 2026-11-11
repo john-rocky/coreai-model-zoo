@@ -92,8 +92,8 @@ M4-tuned — fusing the wide lane is worth roughly as much as widening it.
 
 ## 4. What we did and didn't take from LiteRT (attribution discipline)
 
-Borrowed: the **weights** (Google's QAT mixed-bit checkpoint, values unchanged —
-which is why shipping is gated on a heads-up to the team), the **existence proof**
+Borrowed: the **weights** (Google's QAT mixed-bit checkpoint, values unchanged),
+the **existence proof**
 (their 44.6 GB/s said the bar was reachable — without it, 36.5 would have read as
 "the silicon's limit"), and **model wiring facts** decoded from their released
 graphs (PLE handling, MTP drafter seams, drafter-off default). NOT borrowed: kernel
