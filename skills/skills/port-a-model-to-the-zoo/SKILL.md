@@ -48,7 +48,7 @@ instead of porting.
 | 6 | Compress, then re-run Gate A on the compressed bundle | §6, `knowledge/compression.md` |
 | 7 | Mac run, timed with `SpecializationOptions.default()` | §7 |
 | 8 | Device: AOT-compile ≥1 GB graphs, sideload, measure with a self-test entrypoint | §8 |
-| 9 | Publish: HF weights + export/gate scripts + a card + a README row | §9 |
+| 9 | Publish: HF weights + export/gate scripts + a card + a `MODELS.md` row | §9 |
 
 Existing exporters are the templates — read the closest one before writing a new one.
 `conversion/export_da3.py` is the stateless archetype; `conversion/export_qwen3_5_decode_pipelined.py`

@@ -63,7 +63,7 @@ def repo_to_family(all_recipes: dict[str, dict]) -> dict[str, set[str]]:
     """Which `models/<family>/` documents a published repo.
 
     In precedence order, because the last one is a guess: the recipe's own `hf_repo`, the
-    kit catalog joined through the gen-cards sidecar, a README table row that carries both
+    kit catalog joined through the gen-cards sidecar, a `MODELS.md` table row that carries both
     a repo link and a card link, and only then a bare link inside some card's body — which
     is why a card that mentions a sibling model used to claim it.
     """
@@ -80,7 +80,7 @@ def repo_to_family(all_recipes: dict[str, dict]) -> dict[str, set[str]]:
             if repo and card:
                 out[repo].add(Path(card).parts[-2])
 
-    for line in (REPO / "README.md").read_text().splitlines():
+    for line in (REPO / "MODELS.md").read_text().splitlines():
         if not line.startswith("|"):
             continue
         repos = {r for r in HF_LINK.findall(line) if not r.startswith("john-rocky/")}

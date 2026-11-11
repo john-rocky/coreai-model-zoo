@@ -3,7 +3,7 @@
 Every model card in this zoo's own namespaces (`mlboydaisuke`, `coreai-community`) opens with the
 same one-sentence definition of Core AI, placed right after the YAML front matter. The related
 repos (`coreai-model-zoo`, `coreai-kit`, `apple-silicon-llm-bench`, `awesome-core-ai`,
-`coreai-assets`) open with the same sentence. Adopted 2026-09-05.
+`coreai-assets`) open with the same sentence. Adopted 2026-09-05. This repo's `README.md` now splits it into shorter sentences, and `MODELS.md` carries it whole.
 
 ## The sentence
 

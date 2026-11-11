@@ -46,7 +46,7 @@ Nothing else does. **A port that works and is legal gets merged, and the rest is
   structure is an edit, and edits are cheaper for the person who wrote the other sixty cards.
 - **`recipe.toml` exactness.** If `zoo_convert.py show <name>` prints something a person could
   run, that is enough to merge on.
-- **the indexes** — `models/index.json`, `models/_INVENTORY.md`, the README tables, the
+- **the indexes** — `models/index.json`, `models/_INVENTORY.md`, `MODELS.md`, the README tables, the
   cross-links from neighbouring cards. All generated or maintainer-owned.
 - **CoreAIKit enrollment** and the card's generated "Use it" block.
 - **`knowledge/` notes.** If your port taught you something, say it in the PR in whatever form

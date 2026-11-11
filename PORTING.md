@@ -260,7 +260,7 @@ Wire the bundle into a runner and produce your first real (timed) runs:
 ## 8. Run it on an iPhone
 
 The device tier is what separates "converted" from "shipped" — Mac-verified is tier 2;
-device-verified is the gold standard, and the zoo README numbers are device numbers.
+device-verified is the gold standard, and the numbers in `MODELS.md` are device numbers.
 
 1. **AOT-compile large graphs.** On-device JIT specialization of a big static graph stalls or
    gets killed; roughly **≥ 1 GB means AOT**, ≤ ~50 MB JITs fine, in between try it:
@@ -311,7 +311,7 @@ A zoo submission is a PR with four things:
    `runtime_env`), and `status = "verified"`. If a flag changed the artifact but cannot be
    recovered from the bundle later, record the question in `open_questions` and mark it
    `unverified` instead of guessing.
-5. **A row in the README model table** linking your HF repo and card.
+5. **A row in the model table in `MODELS.md`** linking your HF repo and card, and the model's name in the task table in `README.md`.
 
 Then run `python3 conversion/zoo_verify.py <your-hf-repo>` — it compares what you published
 against the source model and catches the two most common publishing mistakes (a missing chat

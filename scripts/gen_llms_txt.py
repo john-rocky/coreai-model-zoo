@@ -46,7 +46,8 @@ PREAMBLE = f"""\
 - [AGENTS.md]({SITE}/AGENTS.html): the porting contract in one file — why conversion is not format
   conversion, the two gates every port gets, the traps agents specifically hit, and which
   actions stay a human's call.
-- [README.md]({SITE}/): the catalog itself — every model, its card, its Hugging Face
+- [README.md]({SITE}/): what the zoo is, how to try it, and the models by task.
+- [MODELS.md]({SITE}/MODELS.html): the catalog itself — every model, its card, its Hugging Face
   repo, and the one-line Swift call that runs it.
 - [models/index.json]({SITE}/models/index.json): the same catalog machine-readable. Per recipe:
   `status` (is the configuration recorded), `source_model` (what it was converted from), and

@@ -438,10 +438,9 @@ def update_readme_thanks(subs, repo):
         return
     body = thanks_section(
         subs, repo, heading="### Community benchmarks",
-        lead="Measured by people outside this repo on their own devices, from the Bench tab of the"
-             " CoreAI Zoo app, and credited here by name:")
+        lead="People who ran the Bench tab of the CoreAI Zoo app on their own devices:")
     if body:
-        body = body[:-1] + ["", "The table they built: [`BENCHMARKS.md`](BENCHMARKS.md). Add your device from the"
+        body = body[:-1] + ["", "The results are in [`BENCHMARKS.md`](BENCHMARKS.md). To add your device, use the"
                             " Bench tab of [CoreAI Zoo](https://apps.apple.com/us/app/coreai-zoo/id6780135339).", ""]
     head, rest = text.split(README_BEGIN, 1)
     _, tail = rest.split(README_END, 1)
