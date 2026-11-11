@@ -30,7 +30,7 @@ Measured 2026-07-25 by `scripts/gen_inventory.py`; the full table is
 | Layer | Count |
 | --- | --- |
 | Published Hugging Face repos | **123** (122 owned + 1 contributor-owned) |
-| Of those, Core AI repos | **70** (the rest: pre-Core-AI Core ML ports, LiteRT collaboration repos) |
+| Of those, Core AI repos | **70** (the rest: pre-Core-AI Core ML ports, LiteRT repos) |
 | Bundles inside them | **238** |
 | Core AI repos with a card in `models/<model>/` | **52** |
 | Repos with a recipe | **52** (was 6) |

@@ -147,8 +147,8 @@ equivalence gate cannot detect a defect its reference shares — that is the who
   quality out. Measured on the Core AI standard runtime, mixed-bit loses on *both*: decode
   70.6 vs 75.9 tok/s (int2 unpack eats the bandwidth saving) and 48.0% vs 88.0%.
 - **"Just publish the int4 weights" does not transfer a mobile QAT model.** The wNa8o8
-  weights are half of a co-designed weights+runtime product. This is worth telling the
-  LiteRT team — it bounds what any third-party port of these weights can achieve.
+  weights are half of a co-designed weights+runtime product. This
+  bounds what any third-party port of these weights can achieve.
 
 ## What to do
 

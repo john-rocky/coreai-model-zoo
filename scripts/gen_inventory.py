@@ -245,7 +245,7 @@ def render(rows: list[dict]) -> str:
         "",
         "`fmt` is derived from the files, not the name: `coreai` (`.aimodel`),",
         "`coreml` (pre-Core-AI ports, kept for their download history), `litert`",
-        "(the Google LiteRT collaboration), `other`.",
+        "(`.litertlm` / `.tflite` / `.task`), `other`.",
         "",
         "| metric | count |",
         "| --- | --- |",
