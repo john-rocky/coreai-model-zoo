@@ -94,4 +94,4 @@ static fused-int8).
 
 Evidence: `~/code/coreai/coreai-models/exports/qwen3_5_0_8b_ios_fast_ct042/` (`RESULTS.md`, probe
 script, `aot_*.log`), `…/exports/qwen3_0_6b_ios_fp16_control/`, handoff
-`~/code/standup/handoffs/2026-09-15-ane-s3-qwen35-static.md`.
+`2026-09-15-ane-s3-qwen35-static.md` (local, not published).

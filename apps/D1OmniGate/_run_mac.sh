@@ -7,7 +7,7 @@
 # Mac's own ANE AOT ($D1_WORK/mac/ane: round 7's compile of the same graphs) to try the stage's code; its numbers are
 # not the phone's. The bench is short (D1_BENCH_TIMED 5, 1 s rests): a dry run of the code, not a measurement.
 # Adapted from apps/KevGate/_run_mac.sh. This script takes no lock and waits for nothing: run it through
-#   ~/code/standup/tools/quiet/quiet_wait.py -- <K>/scripts/r11_run.sh <tag> -- ./_run_mac.sh
+#   <quiet tools>/quiet_wait.py -- <K>/scripts/r11_run.sh <tag> -- ./_run_mac.sh
 # (quiet_wait at the start, r7_yield stops the app while another lane's Mac timing window is open).
 #   ./_run_mac.sh            D1_STAGES=assets,parity_jit,parity_aot,bench
 #   ./_run_mac.sh --ane      + ane

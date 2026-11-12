@@ -9,8 +9,8 @@ the Python runtime on the same compiled graphs.
     $PY conversion/d1_omni/gate_swift.py parity      # d1omni parity (aot, jit) -> results/swift_parity_gate.json
     $PY conversion/d1_omni/gate_swift.py --ship pyref|parity|media   # round 10: the same on the stripped bundles
     $PY conversion/d1_omni/gate_swift.py ship-summary                # round 10 -> results/ship_swift_parity.json
-    ~/code/standup/tools/quiet/quiet_hold.py d1d-r8-swift-run1 -- $PY conversion/d1_omni/gate_swift.py window --run run1 --cold
-    ~/code/standup/tools/quiet/quiet_hold.py d1d-r8-swift-run2 -- $PY conversion/d1_omni/gate_swift.py window --run run2
+    <quiet tools>/quiet_hold.py d1d-r8-swift-run1 -- $PY conversion/d1_omni/gate_swift.py window --run run1 --cold
+    <quiet tools>/quiet_hold.py d1d-r8-swift-run2 -- $PY conversion/d1_omni/gate_swift.py window --run run2
     $PY conversion/d1_omni/gate_swift.py timing      # d1omni time + the Python control, two windows -> ranking_r8.json
 
   rows    `d1omni rows` writes, for every record of a fixture version in text mode and in its media mode, each row's

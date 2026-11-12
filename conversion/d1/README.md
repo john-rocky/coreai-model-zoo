@@ -507,7 +507,7 @@ shared = direct and prepared = shared, the bundle's `.aimodel` specialized by Sw
 outputs against `gate_tower.py`'s, and round 3b's picture rows end to end.
 
 ```bash
-PY=<coreai-models venv>/bin/python Q="$HOME/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 --"
+PY=<coreai-models venv>/bin/python Q="<quiet tools>/quiet_wait.py --max-wait 3600 --"
 K=$ZOO_WORK_ROOT/_d1_3b
 $Q $PY decide.py run --bundle <bundle> --request req.json [--tower <tower bundle>] [--shared] --out resp.json --trace trace.json
 $Q $PY decide.py check --bundle $K/exports/toy_bundles/d1_toy_decode_fp16_pf16_tbl2 \

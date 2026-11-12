@@ -48,7 +48,7 @@ of the real groups' shape from the toy table, probabilities by the host's arithm
 `metadata.json` `toy.seed` and `head/` when the file does not exist. Rows, pad and red-arm ids are folded the same way.
 
     cd conversion/d1
-    PY=<coreai-models venv>/bin/python Q="$HOME/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 --"
+    PY=<coreai-models venv>/bin/python Q="<quiet tools>/quiet_wait.py --max-wait 3600 --"
     $Q $PY readout_gate.py run $ZOO_WORK_ROOT/_d1_3b/exports/toy_bundles/d1_toy_decode_fp16_pf16 \\
         --toy-oracle $ZOO_WORK_ROOT/_d1_3b/oracle_toy/records_oracle.json --red --transcript <json>
     $Q $PY readout_gate.py run $ZOO_WORK_ROOT/_d1_3b/exports/bundles/d1_3b_decode_fp16_pf16 --red --transcript <json>

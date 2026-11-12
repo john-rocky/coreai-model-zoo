@@ -239,7 +239,7 @@ xcrun coreai-build compile <x>.aimodel --platform macOS --preferred-compute gpu 
 - **Verified cause:** the path is opened relative to the exporter's cwd, not the caller's; a bare
   file name happens to work only when the caller already sits in the directory holding the YAML.
 - **Fix:** resolve the path to absolute before passing it (`conversion/export_minicpm5.py` does).
-- **Evidence:** log: `~/code/standup/handoffs/assets/2026-09-09-minicpm5-1b-eos-repair/export_step3_b32.log`
+- **Evidence:** log: the local `export_step3_b32.log`
   (first attempt). Record: [`minicpm5-1b.md`](minicpm5-1b.md) (2026-09-09 section).
 - **OS · toolchain:** `coreai-torch` 0.4.1, `coreai-models` 397b337, 2026-09-09.
 
@@ -1095,7 +1095,7 @@ Engine creation fails for every hybrid bundle on the stock engines.
   text (`--raw-tokens` is rejected, next entry) and the runner adds BOS itself, so write the template
   text without `<s>` and check the printed `Context tokens:` count against the reference's ids. The
   sequential engine's *free-running* logits path is the off-by-one below, so do not use that.
-- **Evidence:** log: `~/code/standup/handoffs/assets/2026-09-09-minicpm5-1b-eos-repair/runA_1b_nothink_greedy_printlogits.out`
+- **Evidence:** local logs: `runA_1b_nothink_greedy_printlogits.out`
   (refusal), `runE2_1b_nobos_continuation.out` (the working form). Record: [`minicpm5-1b.md`](minicpm5-1b.md).
 - **OS · toolchain:** `coreai-models` 397b337 `llm-runner`, macOS 27 beta (26A5416b), 2026-09-09.
 

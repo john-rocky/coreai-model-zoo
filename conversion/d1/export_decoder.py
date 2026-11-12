@@ -71,7 +71,7 @@ LICENSE and the metadata writer are the real ones, and metadata.json carries a `
 
     cd conversion/d1
     export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer PY=<coreai-models venv>/bin/python
-    ~/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 -- \\
+    <quiet tools>/quiet_wait.py --max-wait 3600 -- \\
         $PY export_decoder.py fp16 --toy --prefill-chunk 16 --aot --record $ZOO_WORK_ROOT/_d1_3b/results/<json>
     $PY export_decoder.py fp16 --prefill-chunk 16 --aot --record <json>     # round 3: needs model.safetensors
     $PY export_decoder.py int8lin --aot --record <json>

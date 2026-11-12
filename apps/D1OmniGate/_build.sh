@@ -11,7 +11,7 @@
 # (memory: reference_xcodebuild_local_package_resolved): this script copies it before the build and, when the build
 # changed it, keeps the diff in $D1_WORK/build/ and puts the copy back; the md5 of every other file of ../D1Omni (not
 # .build / .swiftpm) is compared before and after. A full-CPU build disturbs another lane's Mac timing window: run it
-# through ~/code/standup/tools/quiet/quiet_wait.py --.
+# through <quiet tools>/quiet_wait.py --.
 set -u
 export DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode-27.0.0-RC.app/Contents/Developer}
 DIR=${0:A:h}

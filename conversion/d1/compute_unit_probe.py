@@ -41,7 +41,7 @@ The GPU is shared with other sessions: every ms here is a contended reference va
 
     cd conversion/d1
     export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer PY=<coreai-models venv>/bin/python
-    Q="$HOME/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 --"
+    Q="<quiet tools>/quiet_wait.py --max-wait 3600 --"
     $Q $PY compute_unit_probe.py ane --transcript $ZOO_WORK_ROOT/_d1_3b/results/r6a_probe_ane.json
     $Q $PY compute_unit_probe.py noefr --transcript $ZOO_WORK_ROOT/_d1_3b/results/r6a_probe_noefr.json
 """

@@ -31,7 +31,7 @@ an extension id), and the same extension row with image_embeds zero must not (re
 Two dtypes: fp16 (the ship dtype: the four attention projections kept fp32, as the overlay's loader does) and fp32.
 
     <coreai-models venv>/bin/python toy_graph_check.py --eager-only          # torch only, no export
-    ~/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 -- <coreai-models venv>/bin/python toy_graph_check.py
+    <quiet tools>/quiet_wait.py --max-wait 3600 -- <coreai-models venv>/bin/python toy_graph_check.py
 
 -> $ZOO_WORK_ROOT/_d1_3b/results/toy_graph.json (--eager-only: toy_graph_eager.json); the assets under
 $ZOO_WORK_ROOT/_d1_3b/exports/toy/<run>/ (a new directory per run; delete after reading).

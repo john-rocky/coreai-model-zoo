@@ -14,7 +14,7 @@ Decision rule (fixed before timing): B is faster when median(B) < 0.97 x median(
 the ratio is printed so a contended window shows up.
 
 Run inside the measurement window (base venv, from conversion/qwenimage21/):
-  python3 ~/code/standup/tools/quiet/quiet_hold.py "<label>" -- \\
+  python3 <quiet tools>/quiet_hold.py "<label>" -- \\
       ~/code/coreai/coreai-models/.venv/bin/python ab_dit.py --a <A.aimodelc> --b <B.aimodelc> \\
       --L 18 --hw 64 --reps 8 --warm 2 --json <out.json>
 """

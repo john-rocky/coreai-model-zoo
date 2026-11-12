@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """d1 decision latency on the Mac GPU (the bundles' AOT `.aimodelc`, decide.py's path), for the card's columns, inside a quiet window.
 
-The window is the caller's: `apps/D1/_time_mac.sh` (or `~/code/standup/tools/quiet/quiet_hold.py d1b-<label> --`)
+The window is the caller's: `apps/D1/_time_mac.sh` (or `<quiet tools>/quiet_hold.py d1b-<label> --`)
 holds `~/code/coreai/_GPU_LOCK` for the whole command. This script never writes the lock; it records it (and whether
 its holder is one of this process's ancestors), the other GPU-capable processes, the one-minute load and
 `sysctl vm.swapusage` before, between and after the worker processes. A run outside a window is marked contended.

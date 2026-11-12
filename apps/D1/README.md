@@ -178,7 +178,7 @@ $D1 prepare-test --bundle <bundle> --records records.json [--groups groups.json]
 
 # the gates (the lane's venv: tokenizers, NumPy, safetensors; the graph sections after conversion/d1/decide.py's records)
 cd conversion/d1 && python gate_swift.py all        # -> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json
-~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph   # -> results/r3c_swift_graph.json (the toys)
+<quiet tools>/quiet_wait.py -- python gate_swift.py graph   # -> results/r3c_swift_graph.json (the toys)
 python gate_swift.py real                           # -> results/r6b_swift_real.json (the model's bundles)
 
 # the timing window (the Release binary; it takes ~/code/coreai/_GPU_LOCK itself)

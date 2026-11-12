@@ -44,7 +44,7 @@ calls (+ its tower calls and the reset re-run); the processes run one after anot
 sessions: the ms are contended reference values for the transcript only.
 
     cd conversion/d1
-    PY=<coreai-models venv>/bin/python Q="$HOME/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 --"
+    PY=<coreai-models venv>/bin/python Q="<quiet tools>/quiet_wait.py --max-wait 3600 --"
     $Q $PY readout_gate_vision.py run --tower $ZOO_WORK_ROOT/_d1_3b/exports/vision/d1_3b_vision_fp16w32 \\
         --decoder $ZOO_WORK_ROOT/_d1_3b/exports/bundles/d1_3b_decode_fp16_pf16 --transcript <json>
         [--records <image_records.json>] [--oracle <records_oracle_images.json>] [--arms e2e,zero,reversed,hf_rows]

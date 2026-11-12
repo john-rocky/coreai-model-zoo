@@ -32,7 +32,7 @@ e2e), the pad is metadata `toy.pad_folded`, and the readout reads the toy table 
 (record, question) (round 2a's random toy groups), else the real groups folded the same way.
 
     cd conversion/d1
-    PY=<coreai-models venv>/bin/python Q="$HOME/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 --"
+    PY=<coreai-models venv>/bin/python Q="<quiet tools>/quiet_wait.py --max-wait 3600 --"
     $Q $PY decide.py run --bundle <bundle> --request req.json [--tower <tower bundle>] [--shared] --out resp.json \\
         [--trace trace.json] [--toy-oracle <records_oracle.json> --record-id <id>]
     $Q $PY decide.py check --bundle $K/exports/toy_bundles/d1_toy_decode_fp16_pf16_tbl2 \\

@@ -35,7 +35,7 @@ sessions: the per-call ms are contended reference values for the transcript only
 
     cd conversion/d1
     PY=<coreai-models venv>/bin/python
-    ~/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 -- $PY gate_tower.py run \\
+    <quiet tools>/quiet_wait.py --max-wait 3600 -- $PY gate_tower.py run \\
         $ZOO_WORK_ROOT/_d1_3b/exports/vision/d1_3b_vision_fp16w32 --transcript $ZOO_WORK_ROOT/_d1_3b/results/<json>
     (the toy: exports/toy_vision/d1_toy_vision_fp32; the oracle follows the bundle: oracle/images/ or oracle_toy_vision/)
 """

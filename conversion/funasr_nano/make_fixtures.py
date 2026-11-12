@@ -147,7 +147,7 @@ def make_fleurs(config: str) -> tuple[list[dict], dict]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--no-shared-copy", action="store_true", help="skip the copy into standup shared/")
+    ap.add_argument("--no-shared-copy", action="store_true", help="skip the copy into the shared fixtures folder")
     ap.add_argument("--examples-only", action="store_true", help="only the 5 model-repo examples")
     args = ap.parse_args()
     FIXTURES.mkdir(parents=True, exist_ok=True)

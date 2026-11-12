@@ -95,6 +95,6 @@ open_questions = [
 ]
 
 # Sources of the numbers above (r3 draft, not part of the zoo file):
-#   ~/code/standup/handoffs/assets/2026-10-10-flux2-klein-reexport/SPEED_LADDER.md rows 14, 15 (and 1, 3)
-#   ~/code/standup/handoffs/assets/2026-10-10-flux2-klein-reexport/r2/numbers.md (Exports, Component gate, Generate)
-#   ~/code/standup/handoffs/assets/2026-10-10-flux2-klein-reexport/r3/logs/stage.json (folder files and bytes)
+#   the 2026-10-10 re-export's local records: SPEED_LADDER.md rows 14, 15 (and 1, 3)
+#   r2/numbers.md (Exports, Component gate, Generate)
+#   r3/logs/stage.json (folder files and bytes)

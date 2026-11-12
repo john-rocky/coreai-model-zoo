@@ -161,7 +161,7 @@ argmax **50/50**, the 40- and 255-option rows included (the 1,449-token row fits
 raw and **0.7249** mean family balanced accuracy — the Mac's figures exactly — at **2,074 ms** median per decision.
 Cooled to thermal state "nominal" (2026-09-24, `decide-cli bench --repeat 3`, a 111-token state and eight questions):
 **1,527 ms per decision** with the state shared, 1,713 from scratch, 13.5 s for the state and its eight (0 tokens
-reused). Load 6.6 s. Records: the SemIf rows in the standup record, and
+reused). Load 6.6 s. Records: the SemIf rows in the local record, and
 [`gate-openthai-systemone-iphone-parity.json`](https://github.com/john-rocky/coreai-model-zoo/blob/main/models/openthai-systemone/gate-openthai-systemone-iphone-parity.json).
 
 ## Bundle

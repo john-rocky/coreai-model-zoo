@@ -3,8 +3,8 @@
 one process, the forms of a workload alternated, two measurement windows -> the speed ladder's numbers.
 
     PY=~/code/coreai/coreai-models/.venv/bin/python
-    ~/code/standup/tools/quiet/quiet_hold.py d1d-r7-run1 -- $PY conversion/d1_omni/timing_run.py window --run run1
-    ~/code/standup/tools/quiet/quiet_hold.py d1d-r7-run2 -- $PY conversion/d1_omni/timing_run.py window --run run2
+    <quiet tools>/quiet_hold.py d1d-r7-run1 -- $PY conversion/d1_omni/timing_run.py window --run run1
+    <quiet tools>/quiet_hold.py d1d-r7-run2 -- $PY conversion/d1_omni/timing_run.py window --run run2
     $PY conversion/d1_omni/timing_run.py summarize                          # run1 + run2 -> ranking.json, r7_table.md
     $PY conversion/d1_omni/timing_run.py main --label dry --workloads W1 --forms dec-wfp16-L256-gpu --rounds 3 --warmup 1
     $PY conversion/d1_omni/timing_run.py main --label prewarm --rounds 1 --warmup 1      # every bundle once, no numbers

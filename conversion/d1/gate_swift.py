@@ -67,7 +67,7 @@ r6b_py_check.sh / r6b_py_images.sh; these sections only read them):
 
     cd conversion/d1
     source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift.py all
-    ~/code/standup/tools/quiet/quiet_wait.py -- python gate_swift.py graph
+    <quiet tools>/quiet_wait.py -- python gate_swift.py graph
     source $ZOO_WORK_ROOT/_d1_3b/venv-oracle/bin/activate && python gate_swift.py real
     (the binary: swift build -c release --package-path apps/D1 --scratch-path $ZOO_WORK_ROOT/_d1_3b/swift/.build)
 

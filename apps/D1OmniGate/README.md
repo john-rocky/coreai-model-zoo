@@ -47,7 +47,7 @@ memory limit; it records `os_proc_available_memory` every 100 ms.
 ## Steps
 
 1. `./_build.sh` (generic iOS, Release) and `./_build.sh --mac` (macOS arm64, Release), each through
-   `~/code/standup/tools/quiet/quiet_wait.py --` (a full-CPU build disturbs another lane's Mac timing window). Derived
+   `<quiet tools>/quiet_wait.py --` (a full-CPU build disturbs another lane's Mac timing window). Derived
    data in `$D1_WORK/build/`; the `.app` paths go to `$D1_WORK/app_path.txt` and `app_path_mac.txt`. The script puts
    `../D1Omni/Package.resolved` back if package resolution rewrote it.
 2. `./_stage.sh` checks every graph against its `provenance/strip.json` and every AOT against its `aot-manifest.json`,

@@ -27,7 +27,7 @@ Configs: `exact` (no int8: the instrument's floor), `all_int8` (the exported int
 NN's linears exact, every other int8; 30) and layer sets `set_L03_L07` (those layers exact, every other int8).
 
     cd conversion/d1
-    PY=<coreai-models venv>/bin/python Q="$HOME/code/standup/tools/quiet/quiet_wait.py --max-wait 3600 --"
+    PY=<coreai-models venv>/bin/python Q="<quiet tools>/quiet_wait.py --max-wait 3600 --"
     $PY int8_bisect_torch.py rule --gate $K/results/<int8lin gate>.json
     $Q $PY int8_bisect_torch.py dump
     $Q $PY int8_bisect_torch.py run --part $K/bisect/parts/part_a.json --configs all_int8,exact,..
