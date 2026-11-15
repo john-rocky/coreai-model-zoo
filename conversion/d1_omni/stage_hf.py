@@ -1143,7 +1143,7 @@ def main() -> int:
         "not_staged": ["each bundle folder's reference.json (rows of every fixture record, published or not)",
                        "the per-row lists of the export and gate files", "coreai-build logs"],
         "disk": {"before": disk_before, "after": disk_free(), "note": "every graph and media file is an APFS clone"},
-        "upload": {"run": False, "needs": "the user's GO", "command": f"HF_HUB_DISABLE_XET=1 hf upload-large-folder {HF_REPO} "
+        "upload": {"run": False, "needs": "approval", "command": f"HF_HUB_DISABLE_XET=1 hf upload-large-folder {HF_REPO} "
                    "<this folder> --repo-type model"},
         "listing": listing,
     }

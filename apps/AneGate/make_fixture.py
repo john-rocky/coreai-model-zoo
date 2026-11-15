@@ -19,7 +19,7 @@ must clear the floor for a prompt to count as clean.
 
 --poison NAME:K writes a deliberately wrong fixture (expected[K] of prompt NAME replaced by
 the oracle's second-best token at that step, a margin-clear position) so the gate's ability
-to go RED is demonstrated before its green is trusted (memory reference_gate_must_be_able_to_fail).
+to go RED is demonstrated before its green is trusted.
 """
 from __future__ import annotations
 

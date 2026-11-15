@@ -31,8 +31,8 @@ are 4.6's line for line after renaming (lane `FEASIBILITY.md` §r1; "lane" recor
 - **Positions are canvas M-RoPE.** 4.6 used plain 1-D positions. 4.7 gives every token three planes (T, H, W,
   interleaved sections [11, 11, 10]): the image sits on a canvas, and the text after it resumes past the canvas. The
   decoder here derives the planes inside the graph ([below](#how-the-vlm-rides-the-text-only-engine)).
-- **The head is untied.** `lm_head.weight` is its own tensor ([248094, 1024], 0.51 GB in the checkpoint's bf16; lane
-  `LANE.md` §1), within max |Δ| 4.9e-4 of the embedding (row cosine ≥ 0.99998). The embedding used as the head moves
+- **The head is untied.** `lm_head.weight` is its own tensor ([248094, 1024], 0.51 GB in the checkpoint's bf16),
+  within max |Δ| 4.9e-4 of the embedding (row cosine ≥ 0.99998). The embedding used as the head moves
   P0's logits by up to 0.196 and reorders the top-5 at 2 of 48 positions (lane `oracle/parity_text.json`), so the
   bundle carries the checkpoint's own head.
 - **The prompt side.** The processor also returns `mm_token_type_ids` (not needed here: the decoder reads the image

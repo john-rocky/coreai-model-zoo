@@ -407,7 +407,7 @@ def export_lfm3_ane_static(src: str, out_dir: Path, name: str, *, qconfig: str |
 
 def aot(aimodel: Path, dest: Path, arch: str, log: Path, compute: str = "neural-engine") -> dict:
     """coreai-build compile (`compute` = neural-engine for the placement check, gpu for the Mac check); `dest` =
-    the .aimodelc path. Regions counted by unique name (memory reference_coreai_ane_requires_palettization:
+    the .aimodelc path. Regions counted by unique name (
     `find` lists each region twice)."""
     tmp = dest.with_name(dest.name + ".tmpout")
     if dest.exists() or tmp.exists():

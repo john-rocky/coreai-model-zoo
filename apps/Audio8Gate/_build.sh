@@ -5,8 +5,8 @@
 #   ./_build.sh --mac            macOS (arm64)                   -> _work/app_path_mac.txt
 # The gate uses the kit's public API only (Audio8TTS.generate with an injected noise source), so every build is a plain
 # Release build: no ENABLE_TESTABILITY, the numbers are the product path's.
-# The kit comes by path (project.yml). A build that resolves packages can write the kit checkout's Package.resolved
-# (memory: reference_xcodebuild_local_package_resolved): this script checks it before and after, and when the build
+# The kit comes by path (project.yml). A build that resolves packages can write the kit checkout's Package.resolved:
+# this script checks it before and after, and when the build
 # changed a file that was clean before, it keeps the diff in _work/ and restores the file (git checkout).
 # Derived data, package checkouts and logs: _work/ (git-ignored).
 set -u

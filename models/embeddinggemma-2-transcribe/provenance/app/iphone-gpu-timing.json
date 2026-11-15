@@ -383,8 +383,8 @@
   }
  },
  "hold_log": [
-  "[2026-10-14 12:55:39] eg2stt_r6a frame pid 41936 enqueued (supervisor coreai-8f, ~30 min); waiting for the hold",
-  "[2026-10-14 12:55:39] hold taken by eg2stt_r6a frame pid 41936: {\"pid\": 41936, \"script\": \"eg2stt_r6a\", \"device\": \"iPhone 18 Pro\", \"session\": \"EG2 STT r6a worker (Opus 5.5), supervisor coreai-8f\", \"started\": \"2026-10-14 12:55:39\"}",
+  "[2026-10-14 12:55:39] eg2stt_r6a frame pid 41936 enqueued (~30 min); waiting for the hold",
+  "[2026-10-14 12:55:39] hold taken by eg2stt_r6a frame pid 41936: {\"pid\": 41936, \"script\": \"eg2stt_r6a\", \"device\": \"iPhone 18 Pro\", \"session\": \"EG2 STT r6a\", \"started\": \"2026-10-14 12:55:39\"}",
   "[2026-10-14 12:59:05] hold released by eg2stt_r6a frame pid 41936 after 206 s; thermal=nominal"
  ]
 }

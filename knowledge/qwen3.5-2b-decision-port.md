@@ -55,7 +55,7 @@ The int8hu re-export produced main.mlirb **3,017,991,723 bytes**, SHA256 `547f2a
 
 ## Through the kit
 
-**Measured through coreai-kit**, as supplied by the supervisor on 2026-09-23 06:5x–07:0x JST: `Decision.Format.decisionFunction`, the sequential engine and the kit's rendering of the author's form. This conversion run did not re-measure the kit.
+**Measured through coreai-kit** on 2026-09-23 06:5x–07:0x JST: `Decision.Format.decisionFunction`, the sequential engine and the kit's rendering of the author's form. This conversion run did not re-measure the kit.
 
 - All 58 fixture rows: tokens, label slots and option argmax each match 58/58 on both bundles. Against B, int8hu max/mean absolute Δp is **0.0079 / 0.0017**; fp16 **0.0058 / 0.0008**. Int8hu median is **986 ms per fixture question**, with long rows up to **13.6 s**.
 - SemIf authored144: 144 English three-option rows, SemIf gold labels and unchanged `benchmarks/evaluate.py`; int8hu gives **114/144 raw**, **0.798 mean family balanced accuracy**, **872 ms median per decision**. On the same rows/evaluator, the kit README reports Qwen3.5-4B int8 zero-shot 0.821, MiniCPM5-2B int8 0.681, OpenThai 0.725 and APUS-OpenJev-v1-4B 0.906. These are contextual numbers, not a ranking.

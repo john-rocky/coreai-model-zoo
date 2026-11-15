@@ -30,7 +30,7 @@ Quality-safe *dramatic* flagship speedup does NOT come from 4-bit (int4/fp4 both
   `Speculators`, external GPU, ~1–2 days) or start with vanilla-draft (qwen3.5-0.8B, no training); (b) wire
   draft→verify→accept/rollback in the pipelined engine; (c) use the tree-attn kernel for the tree verify.
   Design + feasibility: `spec-decode-design.md`. (Note: prompt-lookup spec-decode already shipped in
-  CoreAIChat — [[project_spec_decode_port]]; this is the tree/EAGLE-3 upgrade.)
+  CoreAIChat; this is the tree/EAGLE-3 upgrade.)
 - **Stream D (quant) — re-scoped fp4 → QAT.** fp4 disproven (§8b of findings doc). Next: **QAT-int4** on the
   flagship dense path (OS26-shippable) to recover flagship 4-bit quality. fp4 kernel exists
   (`gemma4_metal_mlp_fp4.py`) if bandwidth-only ever wanted. Alt: **mixed int4+int8-outlier matvec** (bridge

@@ -140,7 +140,7 @@ The easy tier and the first 48 standard rows ran on the charger.
 matched tokens 50/50, answer slots 50/50 and option argmax 50/50 on both bundles, including the
 40- and 255-option rows. int8lin max |Δp| was **0.0226** (`r05-dry`), mean **0.0009**, and max
 |Δabstain| **0.0222**; fp16 was **0.0051** (`r05-task`), **0.0003**, and **0.0165** respectively.
-These are kit measurements supplied by the supervisor, separate from the Python-runtime
+These are kit measurements, separate from the Python-runtime
 table above. Median int8lin wall time per fixture question was **354 ms** over the 50 rows, two to
 three questions per state (a question on a new state pays for the whole state); the 255-option row (1,449 tokens, S=1 prefill) took **7.2 s**. A
 three-question Thai ticket took **351 / 316 / 429 ms** for its 57-, 63- and 83-token rows; the

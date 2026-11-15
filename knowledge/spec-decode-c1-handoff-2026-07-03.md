@@ -1,6 +1,6 @@
 # Spec-decode C1 — DONE (2026-07-03): the loop now beats shipped 15.9 tok/s
 
-> Full detail: `spec-decode-hybrid-verify-design.md` + memory `project_spec_decode_port`.
+> Full detail: `spec-decode-hybrid-verify-design.md`.
 > Code: `apps/CoreAIChatMac/Sources/SpecDecodeEngine.swift` (uncommitted, SHIP-GATE).
 
 ## RESULT

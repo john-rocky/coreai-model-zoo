@@ -178,7 +178,7 @@ each piece. Both bundles then match tokens **50/50**, slots **50/50** and option
 **50/50**, including the **40- and 255-option rows**. This is a kit/swift-transformers change;
 the bundle tokenizer was unchanged. Evidence:
 [`measurements-coreai-kit.json`](../models/openthai-systemone/measurements-coreai-kit.json),
-supplied by the supervisor from its kit worktree and not re-derived in this run.
+not re-derived in this run.
 
 ## Measurement notes
 
@@ -203,7 +203,7 @@ the S=1 graph: the benchmark's synthetic input ids come from the metadata's **25
 output range, and synthetic generation does not measure a decision request. Load is one
 measurement per launch and excludes warmup.
 
-The supervisor's **measured through coreai-kit** results use the sequential engine and the
+The **measured through coreai-kit** results use the sequential engine and the
 kit tokenizer. int8lin max/mean **|Δp| = 0.0226 / 0.0009**, max **|Δabstain| = 0.0222**;
 fp16 **0.0051 / 0.0003**, max **|Δabstain| = 0.0165**. int8lin median wall time was
 **354 ms/question** over the 50 fixture rows, two to three questions per state; the **255-option,
@@ -218,7 +218,7 @@ SemIf authored144, measured through coreai-kit on the Mac GPU with int8lin, gave
 raw and **0.7249 mean family balanced accuracy**. The **144 English rows**, **three options**
 each, use SemIf's gold labels and unchanged `benchmarks/evaluate.py`. The kit README's values
 on the same rows and evaluator are MiniCPM5-2B int8 **0.681** and Qwen3.5-4B int8 **0.821**.
-Evidence: `measurements-coreai-kit.json`; these supervisor measurements were not repeated.
+Evidence: `measurements-coreai-kit.json`; these kit measurements were not repeated.
 There is no phone gate for this port.
 
 ## Bundle provenance

@@ -89,7 +89,7 @@ pinned source and all three restored LFS hashes match. Effective-pin evidence is
 
 ## Swift and coreai-kit
 
-The supervisor's measurements through **coreai-kit** use `Decision.Format.sharedState`, the
+The measurements through **coreai-kit** use `Decision.Format.sharedState`, the
 sequential engine and the kit's own chat-template rendering. The 40 choice/noul rows match
 tokens **40/40**, label slots **40/40** and option argmax **40/40**, max |Δp| **0.0055**, mean
 **0.0002**. Eight score_level rows are skipped because the kit has no such primitive;
@@ -104,7 +104,7 @@ SemIf authored144, measured through coreai-kit: **144 English rows**, three opti
 SemIf gold labels, unchanged `benchmarks/evaluate.py`, kit rendering as choice; **131/144**
 raw, **0.906 mean family balanced accuracy**, median **1.96 s/decision**. The kit README's
 same-row/evaluator figures are Qwen3.5-4B int8 zero-shot **0.821**, MiniCPM5-2B int8 **0.681**,
-and the OpenThai run **0.725**. These supervisor measurements were not re-derived here;
+and the OpenThai run **0.725**. These kit measurements were not re-derived here;
 see [kit record](../models/apus-decision-v1-4b/measurements-coreai-kit.json).
 
 Trap: an earlier OpenThai `ask` measurement ignored `--bundle` and used the catalog default;

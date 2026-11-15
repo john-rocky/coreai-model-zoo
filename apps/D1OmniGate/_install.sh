@@ -3,7 +3,7 @@
 # directory (Library/Application Support/D1OmniAssets). Then check every staged file's size against one recursive
 # listing of the phone's copy (`devicectl device info files --json-output`: the table rounds sizes); a file that is
 # missing or differs is pushed again on its own (up to 3 rounds). `devicectl device copy to` can exit 0 with a file cut
-# short (lane memory reference_devicectl_transfer_gotchas), hence the check; the bytes themselves are md5-checked on the
+# short, hence the check; the bytes themselves are md5-checked on the
 # phone by the app (the small files in its assets stage at launch, the model files in its md5 stage), which reads 6.5 GB
 # in seconds where a pull back over USB takes minutes. D1_VERIFY=pull pulls the whole directory back and compares md5
 # on the Mac instead (apps/KevGate/_install.sh's check). Adapted from apps/KevGate/_install.sh.

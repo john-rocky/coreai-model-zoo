@@ -152,7 +152,7 @@ The kit already has the right distinction between engine capabilities and consum
 
 The currently proven probability path remains `python-gpu-aotc`: AOT h16c `.aimodelc` loaded with `SpecializationOptions.default()`, independent state dictionaries, S=1 steps, full positions and exact first-row reset proof. Both bundles passed 44/44 label argmax and 44/44 full-vocabulary argmax-is-label checks. On macOS 27.0 build 26A428, the Python JIT `.aimodel` path produced `MTL4CommandQueueErrorDomain error 1` and zero logits; the AOT path fixed that observed failure (`results/readout_fp16_round1_failed.json`, `results/aot.json`, `results/readout_{fp16,int8hu}.json`). This says nothing yet about whether an uncompiled Swift N-state fallback needs AOT; test its actual load path in the implementation run.
 
-The supervisor accepted **fp16 max/mean |Δp| = 0.0050 / 0.00018** and **int8hu = 0.0084 / 0.00067**, where mean is the **mean of per-row means**. These are quoted Round 2 results, not new measurements. The ship bar is 44/44 letter argmax, maximum ≤0.02 and that mean ≤0.002 versus the author's fp32 oracle. The fp16 value is an empirical floor for this fixture/run; it is not a universal bound on fp16 rounding.
+Accepted: **fp16 max/mean |Δp| = 0.0050 / 0.00018** and **int8hu = 0.0084 / 0.00067**, where mean is the **mean of per-row means**. These are quoted Round 2 results, not new measurements. The ship bar is 44/44 letter argmax, maximum ≤0.02 and that mean ≤0.002 versus the author's fp32 oracle. The fp16 value is an empirical floor for this fixture/run; it is not a universal bound on fp16 rounding.
 
 ## 5. Cost model and prefix sharing
 

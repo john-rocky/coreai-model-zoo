@@ -80,7 +80,7 @@ The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstan
 
 ## Through the kit
 
-**Measured through coreai-kit** by the supervisor on **2026-09-23 09:05–09:25 JST**, in worktree `~/code/coreai-kit-models-wt` on branch `decision-models-4`, using **`Decision.Format.scalar`**, the sequential engine and the kit's own rendering of the author's rows. **All times in this section are contended:** the GPU was shared with two conversion runs. These supplied measurements were not re-derived by this conversion run.
+**Measured through coreai-kit** on **2026-09-23 09:05–09:25 JST**, in worktree `~/code/coreai-kit-models-wt` on branch `decision-models-4`, using **`Decision.Format.scalar`**, the sequential engine and the kit's own rendering of the author's rows. **All times in this section are contended:** the GPU was shared with two conversion runs. These supplied measurements were not re-derived by this conversion run.
 
 `decide-cli parity` reads the canonical `coreai-scalar-fixtures/1` fixture. Both bundles matched **280/280 option-row token sequences and last-token slots**, and **48/48 question argmaxes** against its FP32 oracle. Question time sums all of that question's option rows.
 
@@ -103,7 +103,7 @@ For the three-question support ticket, the supplied state was:
 | Is the customer angry: yes / no | P(yes) **0.723** | 2 / 80 | 1,094 ms |
 | How urgent: can wait / this week / today / right now | expected level **2.16**; today **0.586**, right now **0.301** | 4 / 163 | 2,198 ms |
 
-The request reused **0 tokens**: every option row is prefilled from its first token on this decode-only graph. A choice costs one row per option. [Supervisor-supplied measurements](measurements-coreai-kit.json).
+The request reused **0 tokens**: every option row is prefilled from its first token on this decode-only graph. A choice costs one row per option. [Kit measurements](measurements-coreai-kit.json).
 
 ## Bundle
 

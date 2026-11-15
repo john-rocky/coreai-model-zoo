@@ -4,7 +4,7 @@
 # staged assets (md5-checked), run the gate with a deadline that ends the window in time, release the hold (on any exit).
 # Copied from apps/KevGate/_gate.sh (zoo d1-3b 4955a23) with the lane's names; the hold's take and the window budget are
 # new.
-# The hold file is shared by two conventions (lane memory reference_iphone_device_hold_file): the gate apps' text line
+# The hold file is shared by two conventions: the gate apps' text line
 # ("d1-3b device gate since <time>, session <name>"), and a JSON form {"pid": <keeper pid>, "started": ...} whose keeper
 # runs while its lane uses the phone. The take: every 5 s, the file must be absent — and the last JSON holder's keeper pid
 # gone (`kill -0`) — for 60 s in a row; then this lane's line is written with noclobber. A JSON hold is never removed

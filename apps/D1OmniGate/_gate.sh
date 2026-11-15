@@ -4,7 +4,7 @@
 # install the app and the staged assets (sizes checked; the app md5-checks the bytes), run the gate with a deadline that
 # ends the window in time, launch once more for the stages a killed launch left, release the hold (on any exit).
 # Adapted from apps/KevGate/_gate.sh with the d1-3b lane's window budget (apps/D1Gate/_gate.sh, 2026-10-08).
-# The hold file is shared by two conventions (lane memory reference_iphone_device_hold_file): the gate apps' text line
+# The hold file is shared by two conventions: the gate apps' text line
 # ("d1-omni device gate since <time>, session <name>"), and a JSON form {"pid": <keeper pid>, "started": ...} whose keeper
 # runs while its lane uses the phone. The take: every 5 s, the file must be absent, the last JSON holder's keeper pid
 # gone (`kill -0`), and no other process may name the phone (its UDID or CoreDevice id: devicectl, xcodebuild, another

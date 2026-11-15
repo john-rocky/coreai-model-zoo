@@ -303,7 +303,7 @@ and MLX 151); iPhone 45 → ~80-100 fresh vs LiteRT's 57.
 measure α on real prompts = the go/no-go gate; (c) Core AI integration — drafter as a tiny extra
 graph (packed-embed gather + int8/int4 transplant machinery all exists), verify companion graph
 S=4 (matvec kernels need M>1 or verify rides MPSGraph int4lin), Stream C spec-decode loop (C2
-draft-model slot, [[project_spec_decode_port]]).
+draft-model slot).
 
 ### P5b DONE (2026-07-03) — α measured with the REAL drafter tflite: tokens/step 2.51
 

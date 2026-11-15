@@ -3,7 +3,7 @@
 # (~/code/coreai/ondevice/.device_hold: one line "kev-0.8b device gate since <time>, session <name>"; while
 # another session holds it, wait in 60 s steps, and after 60 min stop as "contended"), install the app and the staged
 # assets (md5-checked), run the gate, release the hold (on any exit).
-# The hold file is shared by two conventions (lane memory reference_iphone_device_hold_file): the gate apps' text line,
+# The hold file is shared by two conventions: the gate apps' text line,
 # and a JSON form {"pid": <keeper pid>, "started": ...} whose keeper sleeps 10 h. A JSON hold is never removed while its
 # pid is alive; it counts as stale (removed, with a line in the hold log) only when the pid is gone AND it was started
 # more than 10 h ago. Any other hold is waited for, never removed.

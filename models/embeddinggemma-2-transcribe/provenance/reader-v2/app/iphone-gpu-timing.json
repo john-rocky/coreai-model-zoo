@@ -312,10 +312,10 @@
   }
  },
  "hold_log": [
-  "[2026-10-15 12:29:23] eg2stt_r8 frame pid 98886 enqueued (supervisor coreai-8f, ~30 min); waiting for the hold",
+  "[2026-10-15 12:29:23] eg2stt_r8 frame pid 98886 enqueued (~30 min); waiting for the hold",
   "[2026-10-15 14:29:25] eg2stt_r8 frame pid 98886: no hold after 7200 s (queue_cli wait exit 3); still queued",
-  "[2026-10-15 14:33:50] eg2stt_r8 frame pid 52888 enqueued (supervisor coreai-8f, ~30 min); waiting for the hold",
-  "[2026-10-15 15:10:13] hold taken by eg2stt_r8 frame pid 52888: {\"pid\": 52888, \"script\": \"eg2stt_r8\", \"device\": \"iPhone 18 Pro\", \"session\": \"EG2 STT r8 worker (Opus 5.5), supervisor coreai-8f\", \"started\": \"2026-10-15 15:10:13\"}",
+  "[2026-10-15 14:33:50] eg2stt_r8 frame pid 52888 enqueued (~30 min); waiting for the hold",
+  "[2026-10-15 15:10:13] hold taken by eg2stt_r8 frame pid 52888: {\"pid\": 52888, \"script\": \"eg2stt_r8\", \"device\": \"iPhone 18 Pro\", \"session\": \"EG2 STT r8\", \"started\": \"2026-10-15 15:10:13\"}",
   "[2026-10-15 15:25:14] hold released by eg2stt_r8 frame pid 52888 after 901 s; thermal=nominal"
  ]
 }

@@ -46,7 +46,7 @@
 # The output gate (per head, sigmoid(gate_proj(x)) scaling the head before o_proj) and
 # the MLP's SiLU are written as 0.5 * tanh(x / 2) + 0.5 (act="tanh", default; exact):
 # the Neural Engine's sigmoid / SiLU kernels lost 3.4 % on Timestral where tanh lost
-# 0.19 % (lane memory reference_ane_sigmoid_silu_tanh). act="stock" = sigmoid / SiLU.
+# 0.19 %. act="stock" = sigmoid / SiLU.
 #
 # Norms: RMSNorm computed on K * x with eps' = K^2 * eps (RMSNormK from the LFM2.5
 # builder; exact for a power-of-2 K): LFM3's eps 1e-5 is a subnormal fp16 constant, and
@@ -104,8 +104,8 @@ HISTORY_BLOCK = 8
 #   hidden3d  emit_hidden's output reshaped to [b, q, d]: reproduces the ANE compiler crash that made it 4-D (below)
 _DIAG = {d for d in os.environ.get("LFM3_IOS_DIAG", "").split(",") if d}
 # per norm kind; a float applies one K to every norm. 4 everywhere: K^2 * 1e-5 = 1.6e-4 is a normal fp16
-# number (the subnormal eps constant is what the ANE flushed for LFM2.5; its mul keeps subnormal products,
-# memory reference_ane_div), and 4 x the largest input (30.2, the MLP output, r1's absmax) squares to 1.5e4.
+# number (the subnormal eps constant is what the ANE flushed for LFM2.5; its mul keeps subnormal products),
+# and 4 x the largest input (30.2, the MLP output, r1's absmax) squares to 1.5e4.
 NORM_K = {"operator_norm": 4.0, "ffn_norm": 4.0, "post_operator_norm": 4.0, "post_ffn_norm": 4.0,
           "embedding_norm": 4.0, "q_norm": 4.0, "k_norm": 4.0}
 ACTS = ("tanh", "stock")

@@ -8,8 +8,8 @@
 # per-stage times through `@testable import CoreAIKit` (KitFunASRModel.transcribeWindows), as the kit's
 # FunASRSmokeTests do. --public leaves testability off everywhere and builds the gate's text-and-wall-time path
 # (FUNASR_PUBLIC_API): the control for what -enable-testing costs in the numbers.
-# The kit comes by path (project.yml). A build that resolves packages can write the kit checkout's Package.resolved
-# (memory: reference_xcodebuild_local_package_resolved): this script checks it before and after, and when the build
+# The kit comes by path (project.yml). A build that resolves packages can write the kit checkout's Package.resolved:
+# this script checks it before and after, and when the build
 # changed a file that was clean before, it keeps the diff in _work/ and restores the file (git checkout).
 # Derived data, package checkouts and logs: _work/ (git-ignored).
 set -u

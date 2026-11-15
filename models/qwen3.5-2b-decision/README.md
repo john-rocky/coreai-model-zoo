@@ -94,13 +94,13 @@ The phone (iOS 27.0 24A437) received the same request bodies as the Mac run, one
 
 ## Through the kit
 
-**Measured through coreai-kit** by the supervisor, using `Decision.Format.decisionFunction`, the sequential engine and the kit's own rendering of the author's plain-text prompt. No kit measurement was re-derived by this run.
+**Measured through coreai-kit**, using `Decision.Format.decisionFunction`, the sequential engine and the kit's own rendering of the author's plain-text prompt. No kit measurement was re-derived by this run.
 
 `decide-cli parity` on all 58 fixture rows matched tokens **58/58**, label slots **58/58** and option argmax **58/58 on both bundles**. Bool maps to the kit's noul; Score maps to its ordered-level score. Against FP32 B, int8hu max |Δp| / mean were **0.0079 / 0.0017**; fp16 **0.0058 / 0.0008**. Median int8hu time was **986 ms per fixture question**; the two 1,500–2,000-token rows took up to **13.6 s**.
 
 SemIf's authored144 uses 144 English rows, three options each, SemIf's gold labels and its unchanged `benchmarks/evaluate.py`. Rendering each row in the author's Choice form gave **114/144 raw**, **0.798 mean family balanced accuracy**, and **872 ms median per decision** on int8hu. For scale on the same rows/evaluator, the kit README reports Qwen3.5-4B int8 zero-shot **0.821**, MiniCPM5-2B int8 **0.681**, OpenThai **0.725** and APUS-OpenJev-v1-4B **0.906**. These are numbers on that evaluator, not a ranking.
 
-On the author's chipmaker-news example, the kit's int8hu probabilities were **Business 0.684 / Science/Technology 0.309 / World 0.005 / Sports 0.002**; the author's MLX BF16 card quotes **0.70 / 0.29 / 0.005 / 0.002**. A three-question request on that sentence (Choice, yes/no, five-level Score) took **817 / 633 / 766 ms** for its **82 / 73 / 88-token** rows, with **0 tokens reused**. This recurrent hybrid re-prefills each row, about **10 ms per token** on the sequential engine. [Supervisor-supplied record](measurements-coreai-kit.json).
+On the author's chipmaker-news example, the kit's int8hu probabilities were **Business 0.684 / Science/Technology 0.309 / World 0.005 / Sports 0.002**; the author's MLX BF16 card quotes **0.70 / 0.29 / 0.005 / 0.002**. A three-question request on that sentence (Choice, yes/no, five-level Score) took **817 / 633 / 766 ms** for its **82 / 73 / 88-token** rows, with **0 tokens reused**. This recurrent hybrid re-prefills each row, about **10 ms per token** on the sequential engine. [Kit record](measurements-coreai-kit.json).
 
 **iPhone 17 Pro** (iOS 27.0 24A437, the same int8hu bundle sideloaded into the kit's ModelStore, sha256 equal to the
 Hub revision, 2026-09-23, a headless harness that runs the kit's own `decide-cli parity` / `ask` inside an app; the

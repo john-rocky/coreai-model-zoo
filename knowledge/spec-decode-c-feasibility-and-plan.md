@@ -158,8 +158,8 @@ push / HF / model card are user-gated.
   models are MORE bandwidth-bound per token ⇒ c_v stays ~1.) **Economics: GO with wide margin.**
 - **Device constraint FOUND: the S=K verify graph must be iOS-AOT-compiled.** A JIT
   dynamic-query (`main.mlirb`) graph fails `ANECompile → MTL4CommandQueueError` on BOTH the
-  macOS-27 Mac GPU and the A19 (even fed at S=1) — same failure class the env note flags
-  ([[reference_coreai_env]]). The static S=1 decode graphs ship fine; only the dynamic-query
+  macOS-27 Mac GPU and the A19 (even fed at S=1).
+  The static S=1 decode graphs ship fine; only the dynamic-query
   graph trips it. The AOT `.h18p.aimodelc` form runs — and dense AOT dynamic bundles already
   exist: `coreai-models/exports/qwen3_{0_6b,4b,8b}_gpu/*.h18p.aimodelc`. So spec-decode's
   verify-forward must be exported+AOT'd, not JIT'd.

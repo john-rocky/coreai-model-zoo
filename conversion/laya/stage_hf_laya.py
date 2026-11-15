@@ -228,7 +228,7 @@ def main():
         "- UPSTREAM_README.md is the publisher's README, unmodified; it names and compares against another product "
         "by name, so whether to include it is the user's decision", "",
         "| Folder | Bytes |", "|---|---:|", *[f"| `{v}/` | {b:,} |" for v, b in folders.items()], "",
-        "Upload (not run; needs the user's GO):", "",
+        "Upload (not run):", "",
         "```", f"HF_HUB_DISABLE_XET=1 hf upload-large-folder {HF_REPO} {out} --repo-type model --exclude STAGING.md", "```", "",
         "Afterwards: compare the Hub's lfs.sha256 + size (model_info(files_metadata=True)) with SHA256SUMS, then put the",
         "revision into models/laya-multilingual/README.md and recipe.toml.", "",

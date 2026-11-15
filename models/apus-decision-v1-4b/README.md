@@ -170,7 +170,7 @@ its unchanged `benchmarks/evaluate.py` — the kit's rendering of each row as `c
 **131/144** raw and **0.906 mean family balanced accuracy**, median **1.96 s** per decision.
 On the same rows and evaluator, the kit README reports Qwen3.5-4B int8 zero-shot **0.821**,
 MiniCPM5-2B int8 **0.681**, and the OpenThai run **0.725**. These are measurements on that
-fixture and evaluator. [Supervisor-supplied kit record](measurements-coreai-kit.json).
+fixture and evaluator. [Kit record](measurements-coreai-kit.json).
 
 ## Bundle
 

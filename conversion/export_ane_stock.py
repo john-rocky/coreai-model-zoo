@@ -30,8 +30,8 @@ What it does, in order (each step is the same command the MiniCPM5 lane ran by h
    is not the chat turn terminator (MiniCPM5). Qwen ships the right one already.
 4. `xcrun coreai-build compile <aimodel> --output <out>/aot_h18p_ane --platform iOS
    --preferred-compute neural-engine --architecture h18p` (Xcode 27.0 RC, coreai-build 3600.83.1)
-   then counts `*ANE_region*` entries in the .aimodelc. **0 regions = silent GPU fallback = FAIL**
-   (memory reference_coreai_ane_requires_palettization); the standard prompt_opt/extend
+   then counts `*ANE_region*` entries in the .aimodelc. **0 regions = silent GPU fallback = FAIL**;
+   the standard prompt_opt/extend
    {256..4096} x {8,16,64} + load_embeddings set gives 31.
 5. Writes `<out>/aot_h18p_ane/metadata.json` (assets.main -> the .aimodelc, compilation.targets) and
    copies `tokenizer/` next to it: that directory IS a loadable device bundle (EngineFactory ->

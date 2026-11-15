@@ -7,8 +7,8 @@
 # repository. The bundle id is new and the team's only profile that lists the iPhone 18 Pro and fits a new id is the
 # wildcard one, which cannot carry com.apple.developer.kernel.increased-memory-limit: the app is built without
 # entitlements and runs at the default memory limit (it records os_proc_available_memory). The library comes by path
-# (project.yml: ../D1Omni). A first build that resolves packages can write the path dependency's Package.resolved
-# (memory: reference_xcodebuild_local_package_resolved): this script copies it before the build and, when the build
+# (project.yml: ../D1Omni). A first build that resolves packages can write the path dependency's Package.resolved:
+# this script copies it before the build and, when the build
 # changed it, keeps the diff in $D1_WORK/build/ and puts the copy back; the md5 of every other file of ../D1Omni (not
 # .build / .swiftpm) is compared before and after. A full-CPU build disturbs another lane's Mac timing window: run it
 # through <quiet tools>/quiet_wait.py --.

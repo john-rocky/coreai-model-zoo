@@ -8,7 +8,7 @@ the host builds `<bos> <state> state <q> instructions (<opt> <mask> option </opt
 every position, and the host reads the scores at the `<mask>` markers. Images and audio enter as a prefix of
 embeddings in front of the text.
 
-What ships (the supervisor's decision of 2026-10-08, from the speed ladder: the fastest form that passes the bar):
+What ships (decided 2026-10-08 from the speed ladder: the fastest form that passes the bar):
 three graphs in fp16, their MLIR debug locations removed — the decision graph at seven static lengths (L = 64, 128,
 256, 512, 1024, 2048, 4096; L4096 in 2,048-key blocks), the vision graph (one crop) and the audio graph (clip buckets
 5 / 10 / 20 / 30 s) — as `.aimodel` bundles for macOS and iOS and as h19p AOT compiles for the iPhone 18 Pro (all but
@@ -609,8 +609,8 @@ host's softmax; preprocessing apart. In short (the mean of the two windows' medi
 - Speed (one window `d1d-r12`, 30 decisions per form after 5 warm-up rounds, the forms alternated in one process; no
   other GPU job ran; `results/timing/ranking_r12.json`): W1 L64 7.35 ms / L128 10.27 / L256 16.20; W2 21.97 / 30.91 /
   48.87; W5s audio 5 s + L128 17.72 / + L256 23.70; W5 audio 10 s + L256 24.94. The decision graph's call is 7.3 / 10.2 /
-  16.1 ms at L64 / L128 / L256 (L512 was 28.7 in round 7). The ladder rows are in `results/timing/ladder_rows_r12.md`
-  for the supervisor to merge; the Swift host was not timed at L64 / L128.
+  16.1 ms at L64 / L128 / L256 (L512 was 28.7 in round 7). The ladder rows are in `results/timing/ladder_rows_r12.md`;
+  the Swift host was not timed at L64 / L128.
 
 
 ### Round 14 (the files to upload; nothing measured)

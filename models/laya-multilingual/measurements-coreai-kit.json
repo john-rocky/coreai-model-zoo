@@ -226,7 +226,7 @@
       },
       "first_call_ms": 78.8,
       "load_ms": 1899,
-      "record": "laya-gate-laya-ml-wfp16-s256-gpu-20260924-002602.json (standup record)"
+      "record": "laya-gate-laya-ml-wfp16-s256-gpu-20260924-002602.json"
     },
     "bench_cool": {
       "date": "2026-09-24 00:17 JST",
@@ -253,7 +253,7 @@
       "first_call_ms": 68.6,
       "load_ms": 1743,
       "footprint_peak_mb": 357,
-      "record": "laya-gate-laya-ml-wfp16-s256-h18p-gpu-20260924-002825.json (standup record)"
+      "record": "laya-gate-laya-ml-wfp16-s256-h18p-gpu-20260924-002825.json"
     }
   }
 }

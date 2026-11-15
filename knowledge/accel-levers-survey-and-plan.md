@@ -99,7 +99,7 @@ frontier moat.**
 
 ### Stream C — Speculative decoding on the flagship LLMs  ★ most bankable decode 爆速
 - **Why effective**: the ONLY lever that beats the decode bandwidth wall (verify K tokens/forward).
-  Industry: EAGLE-3 3–5×. Apple stack + zoo both LACK it (a flagged gap, [[reference_apple_repo_overlooked_levers]]).
+  Industry: EAGLE-3 3–5×. Apple stack + zoo both LACK it (a flagged gap).
 - **Targets (ranked)**: Qwen3.6-27B dense (15.9 t/s = where decode speed is most needed) and Qwen3.6-35B-A3B
   → other shipped LLMs. Draft sources: (1) **n-gram/prompt-lookup** (training-free, instant, 2–4× on
   code/RAG/structured) as the zero-cost first win; (2) **vanilla draft** = shipped qwen3.5-0.8B / Qwen3-0.6B
@@ -132,7 +132,7 @@ frontier moat.**
 
 ## PART 3 — Cross-stream coordination + conventions (non-negotiable)
 
-- **Parallel = separate sessions, NOT background agents** ([[feedback_parallel_sessions]]): bg agents
+- **Parallel = separate sessions, NOT background agents**: bg agents
   collide on CoreAIChat, the Mac GPU, and the single A19 device.
 - **`_GPU_LOCK`** at `coreai-models-community/` root before any Mac-GPU run; **GPU SOLO** (concurrent CPU
   export/quant is safe). Streams A and D both want Mac GPU — serialize via the lock.
@@ -142,10 +142,10 @@ frontier moat.**
   path first.** Start B before D's fp4 work. A and C are independent.
 - **OS/HW gating**: int4/int8 TensorOps = OS26 point update; **fp4/fp8 = OS27**. Confirm device OS before
   fp4 work.
-- **iOS large graphs need AOT** (`coreai-build compile --platform iOS`); device JIT SIGABRTs on big graphs
-  ([[reference_ios_aot_and_devicectl_sideload]]). ⚠️ Never run iOS bundles on the Mac llm-runner (GPU/ANE
-  wedge → reboot, [[reference_coreai_ios_bundle_mac_crash]]).
-- **Bench truth = `ondevice/PipelinedBench`** (`com.coreai.pipelinedbench`), not chat UIs ([[reference_pipelined_bench]]).
+- **iOS large graphs need AOT** (`coreai-build compile --platform iOS`); device JIT SIGABRTs on big graphs.
+  ⚠️ Never run iOS bundles on the Mac llm-runner (GPU/ANE
+  wedge → reboot).
+- **Bench truth = `ondevice/PipelinedBench`** (`com.coreai.pipelinedbench`), not chat UIs.
 - Git: own files by explicit path, **never `git add -A`** (concurrent sessions dirty the tree); **no
   "claude" in commit/committer**; English code+UI; don't commit coreml bundles or build files. **Push /
   HF / card = USER-GATED.** Don't claim a win until the bench shows one.
@@ -166,7 +166,7 @@ frontier moat.**
      inside `helper_src`/`src` (the `tensor_inline`-from-raw-pointer path). Validate cos/PSNR vs a torch
      matmul on M4 (correctness is HW-independent; speedup only shows on A19).
   2. **Graft ONE FFN matmul** of the LLaDA forward to the kernel → **re-export on a macOS-26.4 box**
-     (⚠️ NOT this Mac — 27 mis-converts, [[reference_coreai_env]]) → AOT h18p → **A/B on A19** against the
+     (⚠️ NOT this Mac — 27 mis-converts) → AOT h18p → **A/B on A19** against the
      baselines already on device (`llada_s128`, `llada_s256`) via `ondevice/_llada_device_probe.sh`.
   - Facts/paths: API + compile facts = `tensorops-quantized-kernels.md` (§"The real matmul2d API");
     header = `iPhoneOS27.0.sdk/…/MetalPerformancePrimitives.framework/Headers/MPPTensorOpsMatMul2d.h`;

@@ -5,8 +5,8 @@
 > text. The port is the Qwen3.5-0.8B ship recipe with the HF id swapped — the work was proving
 > that the **probabilities** the bundle yields equal the author's, and finding where the Swift
 > stack can and cannot read them. Card: [`models/decider-0.8b/README.md`](../models/decider-0.8b/README.md).
-> Converted and gated by Codex (gpt-6-astra) under a supervising Claude session; the facts below
-> are its run record, re-checked by the supervisor from the raw JSON.
+> The facts below
+> are the run record, re-checked from the raw JSON.
 
 ## The readout, and how it was gated
 
