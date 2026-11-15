@@ -84,5 +84,5 @@ Gate transcripts: [gate-agents-a1-4b.json](https://github.com/john-rocky/coreai-
 
 **⬇️ Download:** [🤗 mlboydaisuke/Agents-A1-4B-CoreAI](https://huggingface.co/mlboydaisuke/Agents-A1-4B-CoreAI) — this card and the
 model page are the same document. Reproduce it: `python3 conversion/zoo_convert.py show agents-a1-4b` prints the
-command and its prerequisites; [`recipe.toml`](recipe.toml) is the record. Conversion and gates were run by
-Codex (gpt-6-astra) under supervision; the transcripts above are its evidence.
+command and its prerequisites; [`recipe.toml`](recipe.toml) is the record. The transcripts above are the evidence of
+the conversion and its gates.

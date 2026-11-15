@@ -1,6 +1,6 @@
 # `CoreAI.systemOne(state:questions:options:)` — design note (2026-09-21)
 
-Design only, written at the end of the decider-0.8b port (Codex gpt-6-astra under supervision; the zoo's
+Design only, written at the end of the decider-0.8b port (the zoo's
 card is [`models/decider-0.8b/README.md`](../models/decider-0.8b/README.md)). Nothing here is
 implemented or compiled. The fixture file it keeps referring to is
 [`models/decider-0.8b/fixtures-decider-0.8b.json`](../models/decider-0.8b/fixtures-decider-0.8b.json)
