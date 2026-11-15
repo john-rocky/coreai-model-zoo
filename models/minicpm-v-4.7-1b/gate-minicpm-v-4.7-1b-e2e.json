@@ -68,8 +68,7 @@
   "chip": "Apple M4 Max",
   "pid": 14187,
   "runtime": "coreai python runtime, AOT h16c GPU .aimodelc, SpecializationOptions.default(), no JIT",
-  "gpu_lock_at_start": "",
-  "quiet_ok_env": "1"
+  "gpu_lock_at_start": ""
  },
  "bar": "P1..P4 4/4: free-run greedy <= 32 with no divergence from the oracle, or the first one at an oracle softmax top-2 gap < 0.1",
  "prompts": {

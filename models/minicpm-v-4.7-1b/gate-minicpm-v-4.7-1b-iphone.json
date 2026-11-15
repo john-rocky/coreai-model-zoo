@@ -61,7 +61,6 @@
  ],
  "runs": {
   "run1_cold": {
-   "log": "r4/logs/dec_run1.pb_run.log",
    "lines": 19,
    "tokens_nat": [
     760,
@@ -159,7 +158,6 @@
    }
   },
   "run2_warm": {
-   "log": "r4/logs/dec_run2.pb_run.log",
    "lines": 19,
    "tokens_nat": [
     760,
@@ -257,7 +255,6 @@
    }
   },
   "run3_long": {
-   "log": "r4/logs/dec_run3_long.pb_run.log",
    "lines": 18,
    "tokens_nat": [
     760,
@@ -354,7 +351,6 @@
    }
   },
   "run4_hfrows": {
-   "log": "r4/logs/dec_run4_hfrows.pb_run.log",
    "lines": 19,
    "tokens_nat": [
     760,
@@ -452,7 +448,6 @@
    }
   },
   "run4_misfire_macrows": {
-   "log": "r4/logs/dec_run4_misfire_macrows.pb_run.log",
    "lines": 19,
    "tokens_nat": [
     760,
@@ -550,7 +545,6 @@
    }
   },
   "vis_int8lin": {
-   "log": "r4/logs/vis_int8lin.pb_run.log",
    "lines": 2,
    "tokens_nat": null,
    "numerics_nat": null,
@@ -566,7 +560,6 @@
    "payload": []
   },
   "vis_fp16": {
-   "log": "r4/logs/vis_fp16.pb_run.log",
    "lines": 2,
    "tokens_nat": null,
    "numerics_nat": null,
@@ -582,7 +575,6 @@
    "payload": []
   },
   "vis_fp16_b": {
-   "log": "r4/logs/vis_fp16_b.pb_run.log",
    "lines": 2,
    "tokens_nat": null,
    "numerics_nat": null,
@@ -598,7 +590,6 @@
    "payload": []
   },
   "vis_int8lin_b": {
-   "log": "r4/logs/vis_int8lin_b.pb_run.log",
    "lines": 2,
    "tokens_nat": null,
    "numerics_nat": null,
@@ -614,7 +605,6 @@
    "payload": []
   },
   "probe": {
-   "log": "r4/logs/probe.pb_run.log",
    "lines": 1,
    "tokens_nat": null,
    "numerics_nat": null,

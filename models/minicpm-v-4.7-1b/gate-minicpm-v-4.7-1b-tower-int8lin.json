@@ -25,14 +25,11 @@
   "macos_build": "26A428",
   "chip": "Apple M4 Max",
   "pid": 11286,
-  "runtime": "coreai python runtime, AOT h16c GPU .aimodelc, SpecializationOptions.default(), no JIT",
-  "gpu_lock_at_start": "mv47-r3-g3-int8lin timing pid 11265 since 2026-10-13T16:39:44+0900",
-  "quiet_ok_env": "1"
+  "runtime": "coreai python runtime, AOT h16c GPU .aimodelc, SpecializationOptions.default(), no JIT"
  },
  "window": {
   "label": "g3-minicpmv47_vision_int8lin",
   "taken_at": "2026-10-13T16:39:44+09:00",
-  "gpu_lock": "mv47-r3-g3-int8lin timing pid 11265 since 2026-10-13T16:39:44+0900",
   "loadavg": "{ 14.81 13.25 12.12 }",
   "swapusage": "vm.swapusage: total = 2048.00M  used = 506.75M  free = 1541.25M  (encrypted)",
   "driver_pid": 11286
@@ -161,12 +158,13 @@
   "sha256": "0ad0fee7b3cfad64c0321895605b33fc298c175209651e0b7ee6521fd2b840bc"
  },
  "staged_from": {
-  "source": "lane r3/gate_vision_int8lin.json ($ZOO_WORK_ROOT/_minicpmv47/r3/)",
   "source_sha256": "1eeaf5008257ac90787625de79b586ad5685f89debd61739e7216730dc51347e",
   "removed": [
    "window.lock_lsof",
-   "window.other_processes_cpu20_or_gpu_suspects"
+   "window.other_processes_cpu20_or_gpu_suspects",
+   "environment.gpu_lock_at_start",
+   "window.gpu_lock"
   ],
-  "why": "the measurement window's lsof line and the list of other processes on the machine are not part of the gate; every other key is the source's, unchanged"
+  "why": "left out of this copy: the keys in removed (the timing lock's name in two keys, its lsof line, and the list of other processes on the machine) and one more key, not listed there: a flag set by the wrapper script that started the run (tooling only, no measurement); every other key is the run record's, unchanged"
  }
 }

@@ -1,6 +1,6 @@
 {
  "schema": "minicpmv47-fixtures/1",
- "what": "the five prompts every MiniCPM-V-4.7-1B gate of this port runs (P0 text, P1-P4 one 448x448 image each) and the fp32 transformers 5.19.0 reference answers they are judged against",
+ "what": "the five prompts that the checks of this MiniCPM-V-4.7-1B port run (P0 text, P1-P4 one 448x448 image each) and the fp32 transformers 5.19.0 reference answers they are judged against",
  "images_in_this_repository": false,
  "images_note": "the images are not in this repository: conversion/minicpmv47/make_fixtures.py downloads the two NASA photographs from images-assets.nasa.gov and draws the synthetic one, then resizes each to 448x448 (Pillow BICUBIC); the sha256 below pin every file",
  "licenses": {
@@ -420,8 +420,6 @@
   "resample": "PIL BICUBIC"
  },
  "staged_from": {
-  "fixtures": "lane oracle/fixtures/fixtures.json",
-  "fixtures_sha256": "378b35a283623fc0abccd8d38d959a136e8ce81840d0f9e41081a82790b44763",
-  "prompts": "lane oracle/oracle.json prompts, oracle/margins.json prompts, r3/gate_decoder_int8hu.json G2"
+  "fixtures_sha256": "378b35a283623fc0abccd8d38d959a136e8ce81840d0f9e41081a82790b44763"
  }
 }

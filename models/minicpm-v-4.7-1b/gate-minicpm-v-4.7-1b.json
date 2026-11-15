@@ -27,8 +27,7 @@
   "chip": "Apple M4 Max",
   "pid": 2226,
   "runtime": "coreai python runtime, AOT h16c GPU .aimodelc, SpecializationOptions.default(), no JIT",
-  "gpu_lock_at_start": "",
-  "quiet_ok_env": "1"
+  "gpu_lock_at_start": ""
  },
  "load_seconds": {
   "model": 0.010924417001660913,
