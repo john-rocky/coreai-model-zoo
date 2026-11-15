@@ -1,7 +1,7 @@
 {
  "schema": "coreai-decider-engine-gate/1",
- "bundle": "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/435735e2-59de-4af7-8bc7-8d80e7bc59a1/scratchpad/hfstage/gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym",
- "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-21/decider-08b-coreai/swift-build/out/Products/Release/llm-runner",
+ "bundle": "<work>/hfstage/gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym",
+ "runner": "<work>/2026-09-21/decider-08b-coreai/swift-build/out/Products/Release/llm-runner",
  "protocol": "llm-runner --raw-tokens --max-tokens 1 --temperature 0.0 --inference-engine-variant coreai-pipelined --warmup off, COREAI_CHUNK_THRESHOLD=1",
  "environment": {
   "platform": "macOS-27.0-arm64-arm-64bit-Mach-O"

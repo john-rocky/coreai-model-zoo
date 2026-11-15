@@ -6,7 +6,7 @@
   "build": "Release 0.2.4-zoo f7a75ec + local engine-option patch, Xcode 27.0 (27A266a)",
   "binary": {
     "name": "llm-benchmark",
-    "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+    "path": "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
     "size_bytes": 17063440,
     "sha256": "1161f9076cd66ca279711feca8287789625d0cfda20c765776f309d9ac6cb4f3"
   },
@@ -24,9 +24,9 @@
       "engine": "coreai-pipelined",
       "pid": 93383,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -36,7 +36,7 @@
         "--inference-engine-variant",
         "coreai-pipelined",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+        "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
       "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
@@ -77,9 +77,9 @@
       "engine": "coreai-sequential",
       "pid": 93702,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -89,7 +89,7 @@
         "--inference-engine-variant",
         "coreai-sequential",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+        "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
       "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
@@ -130,9 +130,9 @@
       "engine": "coreai-pipelined",
       "pid": 94066,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -142,7 +142,7 @@
         "--inference-engine-variant",
         "coreai-pipelined",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+        "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
       "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
@@ -183,9 +183,9 @@
       "engine": "coreai-sequential",
       "pid": 94304,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+        "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -195,7 +195,7 @@
         "--inference-engine-variant",
         "coreai-sequential",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+        "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
       "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",
@@ -391,9 +391,9 @@
           "engine": "coreai-pipelined",
           "pid": 93383,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -403,7 +403,7 @@
             "--inference-engine-variant",
             "coreai-pipelined",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+            "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
           "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
@@ -444,9 +444,9 @@
           "engine": "coreai-pipelined",
           "pid": 94066,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -456,7 +456,7 @@
             "--inference-engine-variant",
             "coreai-pipelined",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+            "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
           "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
@@ -567,9 +567,9 @@
           "engine": "coreai-sequential",
           "pid": 93702,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -579,7 +579,7 @@
             "--inference-engine-variant",
             "coreai-sequential",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+            "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
           "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
@@ -620,9 +620,9 @@
           "engine": "coreai-sequential",
           "pid": 94304,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/openthai-systemone-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
+            "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -632,7 +632,7 @@
             "--inference-engine-variant",
             "coreai-sequential",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+            "<work>/2026-09-23/openthai-systemone-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
           "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",

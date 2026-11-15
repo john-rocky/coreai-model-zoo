@@ -2,9 +2,9 @@
  "schema": "coreai-decider-readout-gate/1",
  "head": "slot",
  "mode": "fp16",
- "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_fp16",
- "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/zoo/models/openthai-systemone/fixtures-openthai-systemone.json",
- "config_path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
+ "bundle": "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_fp16",
+ "fixtures": "<work>/2026-09-23/openthai-systemone-coreai/zoo/models/openthai-systemone/fixtures-openthai-systemone.json",
+ "config_path": "<work>/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
  "max_ctx": 4096,
  "runtime": "coreai Python runtime, AOT h16c GPU asset, SpecializationOptions.default()",
  "source": {
@@ -14,7 +14,7 @@
   "transformers": "5.17.0",
   "torch": "2.9.0",
   "client_revision": "5d04bcc",
-  "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/snapshots/f3709948b5e3cc9606a57e74ba62b7a639d17dd3"
+  "snapshot": "<work>/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/snapshots/f3709948b5e3cc9606a57e74ba62b7a639d17dd3"
  },
  "temperature_by_type": {
   "choice": 1.058534,
@@ -28891,8 +28891,8 @@
     29
    ],
    "pid": 11899,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
-   "config_path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
+   "asset": "<work>/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
+   "config_path": "<work>/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
    "started_at": "2026-09-22T19:26:31+00:00",
    "phase": "complete",
    "runtime_calls": 2382,
@@ -29428,13 +29428,13 @@
    "generated_at": "2026-09-22T19:26:47+00:00",
    "wall_seconds_contended": 16.22509829106275,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-00-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-00-kit-a1.log",
+   "transcript": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-00-kit-a1.json",
+   "log": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-00-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
+    "<work>/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
+    "<work>/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-00-kit-a1.config.json"
+    "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-00-kit-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -29443,7 +29443,7 @@
     "at": "2026-09-22T19:26:27+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -29464,7 +29464,7 @@
     "at": "2026-09-22T19:26:47+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -29507,8 +29507,8 @@
     47
    ],
    "pid": 12773,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
-   "config_path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
+   "asset": "<work>/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
+   "config_path": "<work>/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
    "started_at": "2026-09-22T19:26:51+00:00",
    "phase": "complete",
    "runtime_calls": 1274,
@@ -30044,13 +30044,13 @@
    "generated_at": "2026-09-22T19:26:58+00:00",
    "wall_seconds_contended": 7.620699416962452,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-01-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-01-kit-a1.log",
+   "transcript": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-01-kit-a1.json",
+   "log": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-01-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
+    "<work>/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
+    "<work>/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-01-kit-a1.config.json"
+    "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-01-kit-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -30059,7 +30059,7 @@
     "at": "2026-09-22T19:26:47+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -30080,7 +30080,7 @@
     "at": "2026-09-22T19:26:59+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -30106,8 +30106,8 @@
     48
    ],
    "pid": 13272,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
-   "config_path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
+   "asset": "<work>/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
+   "config_path": "<work>/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
    "started_at": "2026-09-22T19:27:02+00:00",
    "phase": "complete",
    "runtime_calls": 434,
@@ -30643,13 +30643,13 @@
    "generated_at": "2026-09-22T19:27:05+00:00",
    "wall_seconds_contended": 2.810466874972917,
    "kind": "wide",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-02-wide-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-02-wide-a1.log",
+   "transcript": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-02-wide-a1.json",
+   "log": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-02-wide-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
+    "<work>/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
+    "<work>/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-02-wide-a1.config.json"
+    "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-02-wide-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -30658,7 +30658,7 @@
     "at": "2026-09-22T19:26:59+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -30679,7 +30679,7 @@
     "at": "2026-09-22T19:27:06+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -30705,8 +30705,8 @@
     49
    ],
    "pid": 13558,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
-   "config_path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
+   "asset": "<work>/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
+   "config_path": "<work>/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
    "started_at": "2026-09-22T19:27:09+00:00",
    "phase": "complete",
    "runtime_calls": 2898,
@@ -31242,13 +31242,13 @@
    "generated_at": "2026-09-22T19:27:26+00:00",
    "wall_seconds_contended": 16.521090624970384,
    "kind": "wide",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-03-wide-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-03-wide-a1.log",
+   "transcript": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-03-wide-a1.json",
+   "log": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-03-wide-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
+    "<work>/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
+    "<work>/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-03-wide-a1.config.json"
+    "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-03-wide-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -31257,7 +31257,7 @@
     "at": "2026-09-22T19:27:06+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -31278,7 +31278,7 @@
     "at": "2026-09-22T19:27:26+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -31304,8 +31304,8 @@
     0
    ],
    "pid": 14408,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
-   "config_path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
+   "asset": "<work>/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
+   "config_path": "<work>/2026-09-23/openthai-systemone-coreai/cache/hf/hub/models--iapp--OpenThai-SystemOne/blobs/d03bf878f6563dd505c0a739ce9b7cc1d3bed63b",
    "started_at": "2026-09-22T19:27:30+00:00",
    "phase": "complete",
    "runtime_calls": 226,
@@ -31841,13 +31841,13 @@
    "generated_at": "2026-09-22T19:27:32+00:00",
    "wall_seconds_contended": 1.6968784159980714,
    "kind": "global_reset",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-04-global_reset-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-04-global_reset-a1.log",
+   "transcript": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-04-global_reset-a1.json",
+   "log": "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/readout-fp16-04-global_reset-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
+    "<work>/2026-09-23/openthai-systemone-coreai/.venv/bin/python",
+    "<work>/2026-09-23/openthai-systemone-coreai/zoo/conversion/slot/readout_gate_slot.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-04-global_reset-a1.config.json"
+    "<work>/2026-09-23/openthai-systemone-coreai/results/round2/slot-gates/readout-fp16/fp16-04-global_reset-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -31856,7 +31856,7 @@
     "at": "2026-09-22T19:27:26+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -31877,7 +31877,7 @@
     "at": "2026-09-22T19:27:32+00:00",
     "glob_patterns": [
      "/private/var/folders/*/*/T/com.apple.MetalPerformanceShadersGraph",
-     "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
+     "<work>/2026-09-23/openthai-systemone-coreai/cache/tmp/com.apple.MetalPerformanceShadersGraph"
     ],
     "paths": [
      {
@@ -31897,14 +31897,14 @@
   }
  ],
  "result": "PASS",
- "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
+ "asset": "<work>/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
  "aot": {
   "source": {
-   "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_fp16/openthai_systemone_decode_fp16.aimodel",
+   "path": "<work>/2026-09-23/openthai-systemone-coreai/exports/openthai_systemone_decode_fp16/openthai_systemone_decode_fp16.aimodel",
    "bytes": 160,
    "mtime_ns": 1790102168038081977
   },
-  "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
+  "asset": "<work>/2026-09-23/openthai-systemone-coreai/exports/aotc/openthai_systemone_decode_fp16.h16c.aimodelc",
   "result": "PASS",
   "reused": true,
   "wall_seconds": 0.0,

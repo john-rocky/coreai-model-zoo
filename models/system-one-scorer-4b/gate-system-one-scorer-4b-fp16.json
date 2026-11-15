@@ -683,8 +683,8 @@
   },
   "readout_reproduction": {
     "result": "PASS",
-    "canonical": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/readout_fp16.json",
-    "candidate": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/readout_fp16.json",
+    "canonical": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/readout_fp16.json",
+    "candidate": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/readout_fp16.json",
     "canonical_argmax_agreement": 48,
     "candidate_argmax_agreement": 48,
     "canonical_max_abs_delta_p": 0.0036843322011962387,

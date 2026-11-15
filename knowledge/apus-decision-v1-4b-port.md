@@ -6,7 +6,7 @@ The [card](../models/apus-decision-v1-4b/README.md),
 [recipe](../models/apus-decision-v1-4b/recipe.toml) and
 [gate summary](../models/apus-decision-v1-4b/gate-apus-decision-v1-4b.json) are the zoo record.
 Run evidence paths below are relative to
-`~/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/`.
+`<work>/2026-09-23/apus-openjev-4b-coreai/`.
 
 ## HF-id swap
 

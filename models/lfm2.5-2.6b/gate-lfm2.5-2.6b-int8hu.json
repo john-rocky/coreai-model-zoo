@@ -90,7 +90,7 @@
   "environment": {
     "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
     "python": "3.14.6",
-    "runner": "/Users/majimadaisuke/code/coreai/coreai-models/.build/release/llm-runner"
+    "runner": "/Users/USER/code/coreai/coreai-models/.build/release/llm-runner"
   },
   "recheck": {
     "engine_side_only": "Download the bundle at the pinned revision, then feed the recorded input_ids to llm-runner with the protocol above (greedy, warmup off, coreai-pipelined, COREAI_CHUNK_THRESHOLD=1). The output must equal engine.gen_text. No oracle, no fp32 weights, no GPU beyond the one running the bundle.",

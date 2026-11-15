@@ -42,10 +42,10 @@
 | battery at launch | 80 % charging | 80 % charging | -100 % unknown | -100 % unknown |
 | elapsed (s) | 197 | 456 | 50 | 47 |
 
-- iPhone run 1 (fresh install, cold): /Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_runs/20260927-030040/result.json
-- iPhone run 2 (relaunch, warm): /Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_runs/20260927-030429/result.json
-- Mac A1 Release (cold for this app): /Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025503/result.json
-- Mac A2 Release (warm): /Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025652/result.json
+- iPhone run 1 (fresh install, cold): /Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_runs/20260927-030040/result.json
+- iPhone run 2 (relaunch, warm): /Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_runs/20260927-030429/result.json
+- Mac A1 Release (cold for this app): /Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025503/result.json
+- Mac A2 Release (warm): /Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025652/result.json
 
 ## Testability control (Mac, paired per clip: the public-API build without -enable-testing / the testable build; run-to-run lines for scale)
 ```

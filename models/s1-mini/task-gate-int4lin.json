@@ -3,7 +3,7 @@
   "subject": "s1_mini_decode_int4lin",
   "hf_id": "superwhisper/s1-mini",
   "revision": null,
-  "verdict_reference": "/Users/majimadaisuke/code/coreai/coreai-models-community/_smoke/s1_mini_task_ref.json",
+  "verdict_reference": "/Users/USER/code/coreai/coreai-models-community/_smoke/s1_mini_task_ref.json",
   "protocol": {
     "greedy": true,
     "max_new_tokens": 192,

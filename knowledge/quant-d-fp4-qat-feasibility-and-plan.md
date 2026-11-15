@@ -78,7 +78,7 @@ Reproduce: `.venv/bin/python coreai-models-community/conversion/quant_fp4/fp4_vs
   `TorchConverter().add_pytorch_module(...).to_coreai()`.
 
 ### Env
-- `/Users/majimadaisuke/code/coreai/.venv` — torch 2.11.0 (`float4_e2m1fn_x2` present),
+- `/Users/USER/code/coreai/.venv` — torch 2.11.0 (`float4_e2m1fn_x2` present),
   torchao 0.17.0, `coreai_opt` importable. (coreai-models/.venv is torch 2.9 — too old for
   the cpp extensions; use root `.venv`.)
 
@@ -175,7 +175,7 @@ D1's fp4 result is what justifies the Stream B investment.
 **3. Gotchas (all hit this session):**
    - torchao's fp4 kernel is **NOT MPS-safe** → run fake-quant on **CPU** (keep `originals` on
      CPU), model forward on MPS. Already handled in the harness.
-   - Env = root `/Users/majimadaisuke/code/coreai/.venv` (torch 2.11 + torchao 0.17 + coreai_opt).
+   - Env = root `/Users/USER/code/coreai/.venv` (torch 2.11 + torchao 0.17 + coreai_opt).
      **NOT** `coreai-models/.venv` (torch 2.9 — too old, skips cpp extensions).
    - `_GPU_LOCK` = **absolute path**. A relative path inside a shell `trap` removes the wrong
      file (we left a stale lock this way). Verify holder pid is dead before reclaiming.

@@ -80,7 +80,7 @@
   "environment": {
     "platform": "macOS-27.0-arm64-arm-64bit",
     "python": "3.11.13",
-    "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-21/agents-a1-4b-coreai/swift-build/out/Products/Release/llm-runner"
+    "runner": "<work>/2026-09-21/agents-a1-4b-coreai/swift-build/out/Products/Release/llm-runner"
   },
   "recheck": {
     "engine_side_only": "Download the bundle at the pinned revision, then feed the recorded input_ids to llm-runner with the protocol above (greedy, warmup off, coreai-pipelined, COREAI_CHUNK_THRESHOLD=1). The output must equal engine.gen_text. No oracle, no fp32 weights, no GPU beyond the one running the bundle.",

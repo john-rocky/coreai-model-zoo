@@ -1,9 +1,9 @@
 {
  "schema": "coreai-scalar-readout-gate/1",
  "mode": "fp16",
- "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
- "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/oracle-fixtures.json",
- "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+ "bundle": "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
+ "fixtures": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/oracle-fixtures.json",
+ "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
  "max_ctx": 4096,
  "runtime": "coreai Python runtime, AOT h16c GPU asset, SpecializationOptions.default()",
  "source": null,
@@ -9055,8 +9055,8 @@
     13
    ],
    "pid": 7907,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:42:52+00:00",
    "phase": "complete",
@@ -9084,13 +9084,13 @@
    "completed_at": "2026-09-23T00:45:20+00:00",
    "wall_seconds_contended": 148.33977275004145,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-000-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-000-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-000-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-000-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-000-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-000-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9117,8 +9117,8 @@
     27
    ],
    "pid": 14282,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:45:21+00:00",
    "phase": "complete",
@@ -9146,13 +9146,13 @@
    "completed_at": "2026-09-23T00:46:16+00:00",
    "wall_seconds_contended": 55.3243713749107,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-001-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-001-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-001-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-001-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-001-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-001-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9179,8 +9179,8 @@
     41
    ],
    "pid": 16627,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:46:18+00:00",
    "phase": "complete",
@@ -9208,13 +9208,13 @@
    "completed_at": "2026-09-23T00:46:46+00:00",
    "wall_seconds_contended": 28.230316624976695,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-002-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-002-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-002-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-002-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-002-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-002-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9241,8 +9241,8 @@
     55
    ],
    "pid": 17813,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:46:47+00:00",
    "phase": "complete",
@@ -9270,13 +9270,13 @@
    "completed_at": "2026-09-23T00:47:18+00:00",
    "wall_seconds_contended": 30.94646545802243,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-003-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-003-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-003-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-003-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-003-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-003-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9303,8 +9303,8 @@
     69
    ],
    "pid": 19147,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:47:19+00:00",
    "phase": "complete",
@@ -9332,13 +9332,13 @@
    "completed_at": "2026-09-23T00:47:43+00:00",
    "wall_seconds_contended": 24.564215915976092,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-004-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-004-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-004-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-004-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-004-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-004-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9365,8 +9365,8 @@
     83
    ],
    "pid": 20178,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:47:44+00:00",
    "phase": "complete",
@@ -9394,13 +9394,13 @@
    "completed_at": "2026-09-23T00:48:09+00:00",
    "wall_seconds_contended": 24.30700445792172,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-005-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-005-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-005-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-005-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-005-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-005-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9427,8 +9427,8 @@
     97
    ],
    "pid": 21289,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:48:10+00:00",
    "phase": "complete",
@@ -9456,13 +9456,13 @@
    "completed_at": "2026-09-23T00:48:35+00:00",
    "wall_seconds_contended": 25.048792415997013,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-006-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-006-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-006-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-006-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-006-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-006-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9489,8 +9489,8 @@
     111
    ],
    "pid": 22389,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:48:36+00:00",
    "phase": "complete",
@@ -9518,13 +9518,13 @@
    "completed_at": "2026-09-23T00:48:52+00:00",
    "wall_seconds_contended": 15.849513333057985,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-007-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-007-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-007-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-007-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-007-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-007-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9551,8 +9551,8 @@
     125
    ],
    "pid": 23081,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:48:52+00:00",
    "phase": "complete",
@@ -9580,13 +9580,13 @@
    "completed_at": "2026-09-23T00:49:08+00:00",
    "wall_seconds_contended": 15.45467358303722,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-008-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-008-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-008-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-008-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-008-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-008-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9613,8 +9613,8 @@
     139
    ],
    "pid": 23783,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:49:08+00:00",
    "phase": "complete",
@@ -9642,13 +9642,13 @@
    "completed_at": "2026-09-23T00:49:25+00:00",
    "wall_seconds_contended": 16.367724666954018,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-009-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-009-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-009-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-009-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-009-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-009-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9675,8 +9675,8 @@
     153
    ],
    "pid": 24468,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:49:25+00:00",
    "phase": "complete",
@@ -9704,13 +9704,13 @@
    "completed_at": "2026-09-23T00:49:42+00:00",
    "wall_seconds_contended": 16.428511666948907,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-010-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-010-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-010-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-010-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-010-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-010-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9737,8 +9737,8 @@
     167
    ],
    "pid": 25169,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:49:43+00:00",
    "phase": "complete",
@@ -9766,13 +9766,13 @@
    "completed_at": "2026-09-23T00:50:39+00:00",
    "wall_seconds_contended": 56.24541620898526,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-011-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-011-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-011-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-011-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-011-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-011-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9799,8 +9799,8 @@
     181
    ],
    "pid": 27540,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:50:40+00:00",
    "phase": "complete",
@@ -9828,13 +9828,13 @@
    "completed_at": "2026-09-23T00:51:04+00:00",
    "wall_seconds_contended": 23.568665999919176,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-012-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-012-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-012-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-012-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-012-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-012-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9861,8 +9861,8 @@
     195
    ],
    "pid": 28571,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:51:04+00:00",
    "phase": "complete",
@@ -9890,13 +9890,13 @@
    "completed_at": "2026-09-23T00:51:21+00:00",
    "wall_seconds_contended": 16.46153820795007,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-013-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-013-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-013-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-013-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-013-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-013-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9923,8 +9923,8 @@
     209
    ],
    "pid": 29300,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:51:23+00:00",
    "phase": "complete",
@@ -9952,13 +9952,13 @@
    "completed_at": "2026-09-23T00:51:44+00:00",
    "wall_seconds_contended": 21.497437790967524,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-014-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-014-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-014-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-014-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-014-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-014-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -9985,8 +9985,8 @@
     223
    ],
    "pid": 30237,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:51:45+00:00",
    "phase": "complete",
@@ -10014,13 +10014,13 @@
    "completed_at": "2026-09-23T00:52:16+00:00",
    "wall_seconds_contended": 31.100759833003394,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-015-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-015-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-015-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-015-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-015-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-015-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -10047,8 +10047,8 @@
     237
    ],
    "pid": 31586,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:52:17+00:00",
    "phase": "complete",
@@ -10076,13 +10076,13 @@
    "completed_at": "2026-09-23T00:52:42+00:00",
    "wall_seconds_contended": 24.130284834071063,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-016-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-016-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-016-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-016-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-016-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-016-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -10109,8 +10109,8 @@
     251
    ],
    "pid": 32608,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:52:43+00:00",
    "phase": "complete",
@@ -10138,13 +10138,13 @@
    "completed_at": "2026-09-23T00:53:10+00:00",
    "wall_seconds_contended": 27.458986666053534,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-017-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-017-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-017-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-017-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-017-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-017-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -10171,8 +10171,8 @@
     265
    ],
    "pid": 33804,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:53:11+00:00",
    "phase": "complete",
@@ -10200,13 +10200,13 @@
    "completed_at": "2026-09-23T00:53:30+00:00",
    "wall_seconds_contended": 18.43355870898813,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-018-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-018-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-018-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-018-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-018-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-018-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -10233,8 +10233,8 @@
     279
    ],
    "pid": 34583,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:53:30+00:00",
    "phase": "complete",
@@ -10262,13 +10262,13 @@
    "completed_at": "2026-09-23T00:53:46+00:00",
    "wall_seconds_contended": 15.990237083053216,
    "kind": "rows",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-019-rows-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-019-rows-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-019-rows-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-019-rows-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-019-rows-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-019-rows-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -10282,8 +10282,8 @@
     0
    ],
    "pid": 35260,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/merged",
+   "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/pngwn-scorer-4b-coreai/merged",
    "license": "cc-by-nc-4.0",
    "started_at": "2026-09-23T00:53:47+00:00",
    "phase": "complete",
@@ -10311,13 +10311,13 @@
    "completed_at": "2026-09-23T00:54:09+00:00",
    "wall_seconds_contended": 22.208872459013946,
    "kind": "global_reset",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-020-global_reset-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-020-global_reset-a1.log",
+   "transcript": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-020-global_reset-a1.json",
+   "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/readout-fp16-020-global_reset-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/.venv/bin/python",
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/zoo/conversion/scalar/readout_gate_scalar.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-020-global_reset-a1.config.json"
+    "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/readout_sessions/fp16-020-global_reset-a1.config.json"
    ],
    "returncode": 0,
    "timed_out": false,
@@ -10325,20 +10325,20 @@
   }
  ],
  "result": "PASS",
- "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+ "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
  "aot": {
   "source": {
-   "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16/system_one_qwen3_5_4b_scorer_decode_fp16.aimodel",
+   "path": "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16/system_one_qwen3_5_4b_scorer_decode_fp16.aimodel",
    "bytes": 160,
    "mtime_ns": 1790114339532808245
   },
-  "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
+  "asset": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc/system_one_qwen3_5_4b_scorer_decode_fp16.h16c.aimodelc",
   "command": [
    "/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.9a6Ccy/Metal.xctoolchain/usr/bin/coreai-build",
    "compile",
-   "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16/system_one_qwen3_5_4b_scorer_decode_fp16.aimodel",
+   "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16/system_one_qwen3_5_4b_scorer_decode_fp16.aimodel",
    "--output",
-   "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc",
+   "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/aotc",
    "--platform",
    "macOS",
    "--preferred-compute",
@@ -10357,7 +10357,7 @@
    "--expect-frequent-reshapes"
   ],
   "license": "cc-by-nc-4.0",
-  "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/aot-fp16.log",
+  "log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/aot-fp16.log",
   "started_at": "2026-09-23T00:42:05+00:00",
   "result": "PASS",
   "reused": false,

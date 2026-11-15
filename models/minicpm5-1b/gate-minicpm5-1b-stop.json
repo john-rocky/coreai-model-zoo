@@ -1,7 +1,7 @@
 {
   "schema": "coreai-verify-transcript/1",
   "generated_at": "2026-09-09T13:44:10+00:00",
-  "bundle": "/Users/majimadaisuke/code/coreai/coreai-models/exports/minicpm5-1b-b32-20260909/minicpm5_1b_minicpm5_int8sym_b32_dynamic",
+  "bundle": "/Users/USER/code/coreai/coreai-models/exports/minicpm5-1b-b32-20260909/minicpm5_1b_minicpm5_int8sym_b32_dynamic",
   "backend": "stock",
   "driver": "llm-runner",
   "oracle_model": "openbmb/MiniCPM5-1B",
@@ -61,6 +61,6 @@
   "environment": {
     "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
     "python": "3.14.6",
-    "runner": "/Users/majimadaisuke/code/coreai/coreai-models/.build/release/llm-runner"
+    "runner": "/Users/USER/code/coreai/coreai-models/.build/release/llm-runner"
   }
 }

@@ -1,19 +1,19 @@
 {
-  "aimodel": "/Users/majimadaisuke/code/coreai/coreai-models/exports/lfm25_1_2b_ios_pal8_g32_mlpfp16_L15679_attn_conv/lfm2_5_1_2b_instruct_lfm25_pal8_g32_mlpfp16_L15679_attn_conv_static/lfm2_5_1_2b_instruct_lfm25_pal8_g32_mlpfp16_L15679_attn_conv_static.aimodel",
+  "aimodel": "/Users/USER/code/coreai/coreai-models/exports/lfm25_1_2b_ios_pal8_g32_mlpfp16_L15679_attn_conv/lfm2_5_1_2b_instruct_lfm25_pal8_g32_mlpfp16_L15679_attn_conv_static/lfm2_5_1_2b_instruct_lfm25_pal8_g32_mlpfp16_L15679_attn_conv_static.aimodel",
   "aimodel_size": "1.6G",
   "checkout": "f7a75ec",
   "coreai_torch": "0.4.2",
   "compression": "../../coreai-models-community/conversion/lfm25_pal8_g32_mlpfp16_L15679_attn_conv.yaml",
   "num_layers": null,
   "max_context_length": 4096,
-  "aimodelc": "/Users/majimadaisuke/code/coreai/coreai-models/exports/lfm25_1_2b_ios_pal8_g32_mlpfp16_L15679_attn_conv/aot_h18p_ane/lfm2_5_1_2b_instruct_lfm25_pal8_g32_mlpfp16_L15679_attn_conv_static.h18p.aimodelc",
+  "aimodelc": "/Users/USER/code/coreai/coreai-models/exports/lfm25_1_2b_ios_pal8_g32_mlpfp16_L15679_attn_conv/aot_h18p_ane/lfm2_5_1_2b_instruct_lfm25_pal8_g32_mlpfp16_L15679_attn_conv_static.h18p.aimodelc",
   "aimodelc_size": "1.7G",
   "ane_regions": 31,
   "anec_failures": 0,
   "validation_messages": 0,
   "validation_kinds": {},
   "aot_s": 90.385557,
-  "devbundle": "/Users/majimadaisuke/code/coreai/coreai-models/exports/apple_bench/devbundles/lfm25_1_2b_ane_pal8_mlpfp16_L15679_attn_conv",
+  "devbundle": "/Users/USER/code/coreai/coreai-models/exports/apple_bench/devbundles/lfm25_1_2b_ane_pal8_mlpfp16_L15679_attn_conv",
   "devbundle_size": "1.7G",
   "resources_bin_gb": 1.522
 }

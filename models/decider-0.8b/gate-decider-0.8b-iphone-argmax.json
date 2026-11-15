@@ -1131,6 +1131,6 @@
   ],
   "log": "results/device/round3/pb_run.log",
   "log_sha256": "f1f819e7798dca06755529846134e5f72815cbd183697e4a0010a38a2274b831",
-  "fixture": "/Users/majimadaisuke/code/codex-conversions/2026-09-21/decider-08b-iphone/inputs/decider/fixtures-decider-0.8b.json",
+  "fixture": "<work>/2026-09-21/decider-08b-iphone/inputs/decider/fixtures-decider-0.8b.json",
   "fixture_sha256": "d3d1620fc825449aa1683f0a5931dea054b56adfc56cba94e4c846579f78421a"
 }

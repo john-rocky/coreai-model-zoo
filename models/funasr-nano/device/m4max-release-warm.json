@@ -7,22 +7,22 @@
   "testable_import": true
  },
  "config": {
-  "assets": "/Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets",
+  "assets": "/Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets",
   "bench_clip": "ja_jp_1719",
   "bench_runs": 5,
   "clip_limit": -1,
   "decoder": "decoder",
   "encoder": "encoder.aimodel",
   "env": {
-   "FUNASR_ASSETS": "/Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets",
+   "FUNASR_ASSETS": "/Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets",
    "FUNASR_GPU_LOCK": "taken by this run (flock; file 0 bytes, last written 2026-09-27 02:56:52; GPU utilization [98, 0, 0, 0, 0])",
    "FUNASR_MAC_VARIANT": "",
-   "FUNASR_OUT": "/Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025652",
+   "FUNASR_OUT": "/Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025652",
    "FUNASR_RUN_ID": "mac-20260927-025652"
   },
   "isolate": true,
   "md5_small_limit_bytes": 16777216,
-  "out": "/Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025652",
+  "out": "/Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/mac_runs/mac-20260927-025652",
   "stages": [
    "assets",
    "load1",
@@ -98,7 +98,7 @@
   "assets": {
    "decoder_bytes": 795677989,
    "decoder_files": 8,
-   "dir": "/Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets",
+   "dir": "/Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets",
    "encoder_bytes": 471485661,
    "encoder_files": 3,
    "free_gb": 483.317014809,
@@ -2124,10 +2124,10 @@
    "cache_bytes_before": 1563735661,
    "cache_files_before": 11,
    "cold_total_est_s": 0.542615084,
-   "decoder": "/Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets/decoder",
+   "decoder": "/Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets/decoder",
    "decoder_est_s": 0.42825662500000006,
    "decoder_mb": 795.677989,
-   "encoder": "/Users/majimadaisuke/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets/encoder.aimodel",
+   "encoder": "/Users/USER/code/coreai/coreai-models-community-funasr-wt/apps/FunASRGate/_work/device_stage/FunASRAssets/encoder.aimodel",
    "encoder_alone_memory": {
     "available_mb_end": -1,
     "available_mb_start": -1,
@@ -2245,7 +2245,7 @@
       "dirs_total": 8,
       "exists": true,
       "files": 11,
-      "path": "/Users/majimadaisuke/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
+      "path": "/Users/USER/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
      },
      "coreai_cache_build_entries": [
       "chat-cli",
@@ -2303,7 +2303,7 @@
       "dirs_total": 8,
       "exists": true,
       "files": 11,
-      "path": "/Users/majimadaisuke/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
+      "path": "/Users/USER/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
      },
      "coreai_cache_build_entries": [
       "chat-cli",
@@ -2361,7 +2361,7 @@
       "dirs_total": 8,
       "exists": true,
       "files": 11,
-      "path": "/Users/majimadaisuke/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
+      "path": "/Users/USER/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
      },
      "coreai_cache_build_entries": [
       "chat-cli",
@@ -2419,7 +2419,7 @@
       "dirs_total": 8,
       "exists": true,
       "files": 11,
-      "path": "/Users/majimadaisuke/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
+      "path": "/Users/USER/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
      },
      "coreai_cache_build_entries": [
       "chat-cli",
@@ -2541,7 +2541,7 @@
       "dirs_total": 8,
       "exists": true,
       "files": 11,
-      "path": "/Users/majimadaisuke/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
+      "path": "/Users/USER/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
      },
      "coreai_cache_build_entries": [
       "chat-cli",
@@ -2599,7 +2599,7 @@
       "dirs_total": 8,
       "exists": true,
       "files": 11,
-      "path": "/Users/majimadaisuke/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
+      "path": "/Users/USER/Library/Caches/coreai-cache/26A428/com.daisukemajima.funasrgate"
      },
      "coreai_cache_build_entries": [
       "chat-cli",

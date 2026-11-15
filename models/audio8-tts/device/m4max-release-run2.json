@@ -5,20 +5,20 @@
     "state" : "unknown"
   },
   "config" : {
-    "assets" : "\/Users\/majimadaisuke\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/device_stage\/Audio8Assets",
+    "assets" : "\/Users\/USER\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/device_stage\/Audio8Assets",
     "bench_fixture" : "en_2",
     "bench_runs" : 5,
     "codec" : "audio8_codec_decoder_fp16_t160",
     "dualar" : "audio8_dualar_int8_cl2048_w32",
     "env" : {
-      "AUDIO8_ASSETS" : "\/Users\/majimadaisuke\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/device_stage\/Audio8Assets",
+      "AUDIO8_ASSETS" : "\/Users\/USER\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/device_stage\/Audio8Assets",
       "AUDIO8_GPU_LOCK" : "taken by this run (flock; file 0 bytes, last written 2026-09-28 08:30:14; GPU utilization [57, 0, 0, 0, 0])",
-      "AUDIO8_OUT" : "\/Users\/majimadaisuke\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/mac_runs\/mac-20260928-084407",
+      "AUDIO8_OUT" : "\/Users\/USER\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/mac_runs\/mac-20260928-084407",
       "AUDIO8_RUN_ID" : "mac-20260928-084407"
     },
     "fixture_limit" : -1,
     "md5_small_limit_bytes" : 16777216,
-    "out" : "\/Users\/majimadaisuke\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/mac_runs\/mac-20260928-084407",
+    "out" : "\/Users\/USER\/code\/coreai\/coreai-models-community-audio8-wt\/apps\/Audio8Gate\/_work\/mac_runs\/mac-20260928-084407",
     "stages" : [
       "assets",
       "load1",

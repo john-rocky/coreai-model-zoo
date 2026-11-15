@@ -6,7 +6,7 @@
 > [`models/openthai-systemone/README.md`](../models/openthai-systemone/README.md).
 
 The conversion run is
-`~/code/codex-conversions/2026-09-23/openthai-systemone-coreai/`; `results/`, `logs/` and
+`<work>/2026-09-23/openthai-systemone-coreai/`; `results/`, `logs/` and
 `scripts/` paths below are relative to that run. Fixture and gate links point to files staged
 for this zoo. Source revision and license are recorded in `results/download.json`; checkpoint
 configuration and model structure are in `results/hf-config-premise.json`,

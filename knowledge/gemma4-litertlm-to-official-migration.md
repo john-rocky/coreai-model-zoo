@@ -67,8 +67,8 @@ New/changed files:
 Reproduce the ship-engine gate from official:
 ```
 cd coreai-models-community/conversion/gemma4_raw_metal
-GEMMA4_EXTRACT=/Users/majimadaisuke/code/litertlm-convert/out/gemma4e2b_extract_official \
-  /Users/majimadaisuke/code/litertlm-convert/.venv/bin/python p1_chain.py --gate
+GEMMA4_EXTRACT=/Users/USER/code/litertlm-convert/out/gemma4e2b_extract_official \
+  /Users/USER/code/litertlm-convert/.venv/bin/python p1_chain.py --gate
 ```
 
 ## Provenance decision (user, 2026-07-17)

@@ -82,7 +82,7 @@
           19.640625,
           15.7734375
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_02.npy",
+        "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_02.npy",
         "full_logits_sha256": "bc016af605c12dd63b45ddea8536747f563b6fcaefa4babcabfe7471164f8a9a",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -185,7 +185,7 @@
           10.78125,
           11.9921875
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_06.npy",
+        "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_06.npy",
         "full_logits_sha256": "85a01f8016616e80033bd3347057d2268ca0f86fd796bbe2e0cd83ff48ab0ed3",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -274,7 +274,7 @@
           19.515625,
           13.296875
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_03.npy",
+        "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_03.npy",
         "full_logits_sha256": "1a19d50ee933df20338af8d4c3bb2a417f5bf286d9df465b73cdefa80ebaedc0",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -377,7 +377,7 @@
           20.640625,
           13.6875
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
+        "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
         "full_logits_sha256": "bfeb5b7da42d6edff0228caff4b7b1ad90b04f8a66eee647e71ff2e5e944d347",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -508,7 +508,7 @@
           19.734375,
           11.6640625
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
+        "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
         "full_logits_sha256": "a4ac30a845f419cb1e698da89a9e620a373c7ff10a3a89626161347882c39850",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -598,7 +598,7 @@
           "model_load_seconds_contended": 6.3255,
           "cache_hit": true,
           "wall_seconds_contended": 12.870604499941692,
-          "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/logs/engine-coreai-pipelined-int8hu-choice16_01.log"
+          "stdout_log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/logs/engine-coreai-pipelined-int8hu-choice16_01.log"
         }
       },
       "coreai-sequential": {
@@ -616,7 +616,7 @@
           "model_load_seconds_contended": 0.7894,
           "cache_hit": true,
           "wall_seconds_contended": 8.30609074991662,
-          "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/logs/engine-coreai-sequential-int8hu-choice16_01.log"
+          "stdout_log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-engine/logs/engine-coreai-sequential-int8hu-choice16_01.log"
         }
       }
     },

@@ -27,7 +27,7 @@
    }
   },
   "vs_publisher_reproduce_typed": {
-   "file": "/Users/majimadaisuke/code/coreai/_julia1/julia-1/author-repro/original-criteria-predictions.jsonl",
+   "file": "/Users/USER/code/coreai/_julia1/julia-1/author-repro/original-criteria-predictions.jsonl",
    "rows": 2000,
    "identical_predictions": 2000
   },
@@ -1430,7 +1430,7 @@
    },
    "bundle": {
     "status": "PASS",
-    "folder": "/Users/majimadaisuke/code/coreai/_julia1/exports/julia-1/macos/fp32-s1024",
+    "folder": "/Users/USER/code/coreai/_julia1/exports/julia-1/macos/fp32-s1024",
     "compute": "gpu",
     "questions": 2000,
     "refused": 0,
@@ -1656,7 +1656,7 @@
     "note": null
    },
    "gpu_lock": {
-    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "path": "/Users/USER/code/coreai/_GPU_LOCK",
     "waited_s": 360.6767948749475,
     "attempts": 13,
     "other_openers_at_acquire": [],
@@ -1796,7 +1796,7 @@
     "note": null
    },
    "gpu_lock": {
-    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "path": "/Users/USER/code/coreai/_GPU_LOCK",
     "waited_s": 0.03512250003404915,
     "attempts": 1,
     "other_openers_at_acquire": [],

@@ -1,7 +1,7 @@
 {
  "schema": "coreai-decider-readout-gate/1",
- "bundle": "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/435735e2-59de-4af7-8bc7-8d80e7bc59a1/scratchpad/hfstage/gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym",
- "asset": "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/435735e2-59de-4af7-8bc7-8d80e7bc59a1/scratchpad/ship-aotc/decider_0_8b_decode_int8hu_block32_sym.h16c.aimodelc",
+ "bundle": "<work>/hfstage/gpu-pipelined/decider_0_8b_decode_int8hu_block32_sym",
+ "asset": "<work>/ship-aotc/decider_0_8b_decode_int8hu_block32_sym.h16c.aimodelc",
  "aot_seconds": 36.893706707982346,
  "fixtures": "models/decider-0.8b/fixtures-decider-0.8b.json",
  "temperature": 1.03,

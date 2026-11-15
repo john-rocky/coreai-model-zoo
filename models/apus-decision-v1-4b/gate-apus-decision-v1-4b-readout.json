@@ -1,10 +1,10 @@
 {
  "schema": "coreai-letter-readout-gate/1",
  "mode": "int8hu",
- "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
- "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json",
+ "bundle": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+ "fixtures": "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json",
  "fixtures_sha256": "e708dcc54a528cee7a61882fa7af7ed01791496dfe89a1158a605183af70a2d6",
- "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+ "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
  "max_ctx": 4096,
  "temperature": 1.0,
  "runtime": "coreai Python runtime, AOT h16c GPU asset, SpecializationOptions.default()",
@@ -22,7 +22,7 @@
  "environment": {
   "python": "3.11.13 (main, Oct  7 2025, 16:08:14) [Clang 20.1.4 ]",
   "deadline_epoch": 1790118133.0,
-  "script": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+  "script": "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
   "script_sha256": "dcbdcfa1f4345e3852b879e1ff5bcf8e536965b964ab747fd82315d0e51f9f86"
  },
  "started_at": "2026-09-22T20:47:52+00:00",
@@ -194,7 +194,7 @@
     20.640625,
     13.6875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
    "full_logits_sha256": "bfeb5b7da42d6edff0228caff4b7b1ad90b04f8a66eee647e71ff2e5e944d347",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -325,7 +325,7 @@
     12.375,
     13.2734375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_02.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_02.npy",
    "full_logits_sha256": "b74410271300410fe8f6c0986906e621b655c046778a710cf927dbd684749d93",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -456,7 +456,7 @@
     9.734375,
     10.8046875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_03.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_03.npy",
    "full_logits_sha256": "d299aa8233e19472e581f81459b2c763018b0668c6b833769caef9921d28fe81",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -587,7 +587,7 @@
     10.3359375,
     11.4296875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_04.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_04.npy",
    "full_logits_sha256": "a471abf4de5c86eacb185626dd3728d66837142e070d45834b8b1aeffd099f12",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -718,7 +718,7 @@
     11.2734375,
     12.0546875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_05.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_05.npy",
    "full_logits_sha256": "5631006405f5b7a82404097c8038e31d82902fa21b6dead5b21ffb7bfddb3100",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -849,7 +849,7 @@
     10.78125,
     11.9921875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_06.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_06.npy",
    "full_logits_sha256": "85a01f8016616e80033bd3347057d2268ca0f86fd796bbe2e0cd83ff48ab0ed3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -980,7 +980,7 @@
     12.765625,
     20.515625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-04-wide-a1/choice16_07.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-04-wide-a1/choice16_07.npy",
    "full_logits_sha256": "8a09bd840b0874037e1abbad29e57530bd731bf179bd8094593b54b748e19154",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1111,7 +1111,7 @@
     19.734375,
     11.6640625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
    "full_logits_sha256": "a4ac30a845f419cb1e698da89a9e620a373c7ff10a3a89626161347882c39850",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1200,7 +1200,7 @@
     20.546875,
     12.8671875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_01.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_01.npy",
    "full_logits_sha256": "74dcd8d34d44ef8d0519d5ce4bd62b8a005ff4742235916c67e59bba9b5b8d4c",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1264,7 +1264,7 @@
     20.703125,
     13.125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_02.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_02.npy",
    "full_logits_sha256": "c0113d656e1cfceb7615abb5c9cb430815aa2823653da958bd15bdf51473dccd",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1327,7 +1327,7 @@
     19.515625,
     13.296875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_03.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_03.npy",
    "full_logits_sha256": "1a19d50ee933df20338af8d4c3bb2a417f5bf286d9df465b73cdefa80ebaedc0",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1391,7 +1391,7 @@
     12.6015625,
     20.78125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_04.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_04.npy",
    "full_logits_sha256": "4c06355939ca36d98b87115652727a97ca992cdac0dd75700b05b18c9f41758e",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1454,7 +1454,7 @@
     19.609375,
     12.71875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_05.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_05.npy",
    "full_logits_sha256": "1a6c824fcda9aa8b90411354708568548843a99de44d0cdd64f736f227ac4a4a",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1518,7 +1518,7 @@
     20.765625,
     12.4453125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_06.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_06.npy",
    "full_logits_sha256": "55f224a095d0ff4c94cbebcc6cacb2abc7bad72839277f83e2940b0db02abf3a",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1581,7 +1581,7 @@
     19.921875,
     11.8046875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_07.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_07.npy",
    "full_logits_sha256": "7c7b26dc5ed81870030a723c55fc20e66a94ed9cae6e3257c77b6f10132f63bd",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1645,7 +1645,7 @@
     20.65625,
     11.78125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_08.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_08.npy",
    "full_logits_sha256": "5c3110c716729c16ef7918cbbfc9780badf00badda5852b56d88620769a4a689",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1714,7 +1714,7 @@
     11.8046875,
     12.2578125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_01.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_01.npy",
    "full_logits_sha256": "623ed2d5b80f8df892981f8c24480fc646dfc947ebf0da2d266d2d0cd7c2c8a0",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1788,7 +1788,7 @@
     19.53125,
     12.1015625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_02.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_02.npy",
    "full_logits_sha256": "5a26c0d56af25d99d8c3b08b5d543f8741144e8d629fda62f2b5e33c8ada92af",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1867,7 +1867,7 @@
     12.21875,
     20.21875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_03.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_03.npy",
    "full_logits_sha256": "64d6f55eec521539796b3747bf0673f4fbb8f77e4ba1bf856fb16f1177a26bf4",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1951,7 +1951,7 @@
     11.2734375,
     11.65625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_04.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_04.npy",
    "full_logits_sha256": "66e74b71fc95c797aca50c9813a1e7b7da39722b6baf62b563368c59b0500503",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2040,7 +2040,7 @@
     11.9140625,
     12.8671875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_05.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_05.npy",
    "full_logits_sha256": "dcc5a2c97bd02e25724304962c93cdc730b3ca29c1bbca61ebb4b65e57fbe06b",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2119,7 +2119,7 @@
     11.3046875,
     19.515625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_06.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_06.npy",
    "full_logits_sha256": "6c3d33867924f0cab72ba30d8eb82d7d797e60508f00681ce2e537220f0f2418",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2193,7 +2193,7 @@
     20.15625,
     12.734375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_07.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_07.npy",
    "full_logits_sha256": "e8c9de61bccb3b5295a661a2c6297db1393c6bd03dfcd6165f908ea4b4c0764e",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2272,7 +2272,7 @@
     12.3515625,
     12.046875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_08.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_08.npy",
    "full_logits_sha256": "a9daf0307fef4a1bfc1f9cbfd2366919a098601f8b47bb50867ec461ccb1deea",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2356,7 +2356,7 @@
     11.6875,
     12.7421875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_09.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_09.npy",
    "full_logits_sha256": "12e93a99bd16fa0fb3603746dbd21452eeec454166987f180deec467a14c2b1c",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2445,7 +2445,7 @@
     11.2265625,
     11.6640625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_10.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_10.npy",
    "full_logits_sha256": "c93a4314328e51a9baa68d34998dff0cc001f12bf27f3298885462645351ca46",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2524,7 +2524,7 @@
     11.78125,
     12.265625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_11.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_11.npy",
    "full_logits_sha256": "080f73ce43a3e284495d26b1382ac7f8bd3fe1118e8da1023a5c2c4c2067a7e2",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2598,7 +2598,7 @@
     20.203125,
     12.7421875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_12.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_12.npy",
    "full_logits_sha256": "18d0062b35d1b8c764cbba45d937c3c4b8cb6cb6e814f343c205bcb5c97f277e",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2665,7 +2665,7 @@
     20.046875,
     12.4921875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_01.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_01.npy",
    "full_logits_sha256": "880cd604a62edd97d60c5f07bb1b1268ddaf7605d1d07dc8fde49504871e0be3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2726,7 +2726,7 @@
     19.640625,
     15.7734375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_02.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_02.npy",
    "full_logits_sha256": "bc016af605c12dd63b45ddea8536747f563b6fcaefa4babcabfe7471164f8a9a",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2787,7 +2787,7 @@
     11.125,
     18.609375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_03.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_03.npy",
    "full_logits_sha256": "06a7a710c1bcb0474b90fddb2408b5bb1c6c9ba8e3d6f9a5efb5350fd69d2746",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2848,7 +2848,7 @@
     19.640625,
     11.625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_04.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_04.npy",
    "full_logits_sha256": "e1c09c8cfcddf005d67c4c676e5700ec2378fcc6033ce5c70d673741f02c6cf2",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2909,7 +2909,7 @@
     11.875,
     19.234375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_05.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_05.npy",
    "full_logits_sha256": "fa0680d618e3cb4d51c538e1c52a11cae62208da02374e2c014388ddb336ca94",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2970,7 +2970,7 @@
     19.6875,
     12.453125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_06.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_06.npy",
    "full_logits_sha256": "ec0eac9fd3cf8ed2761462a6203c3814e0a9808af9884485ed315b745c2abd54",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3031,7 +3031,7 @@
     19.328125,
     11.3828125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_07.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_07.npy",
    "full_logits_sha256": "478a0fa1bdeaf185b14e899c90d36b9d4adcc17750a6de7a3e4b2f164f0f0cdc",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3092,7 +3092,7 @@
     11.5078125,
     18.796875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_08.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_08.npy",
    "full_logits_sha256": "47399e3018200bf6917ebda61f1927385b9eb61bafc888ca8de6c395a04080d7",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3153,7 +3153,7 @@
     19.90625,
     12.203125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_09.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_09.npy",
    "full_logits_sha256": "670a92c815a1001a32d86dcfb766f8c6401833299a63bd98988e8461f4009048",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3214,7 +3214,7 @@
     12.5078125,
     19.328125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_10.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_10.npy",
    "full_logits_sha256": "57064ad3cc68ba7372ca1d8fea7e916c11e52d1f9e25acd8f90c684343fc04fe",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3275,7 +3275,7 @@
     20.125,
     12.4765625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_11.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_11.npy",
    "full_logits_sha256": "7515670e55f13fdc4051a3fc4feeac63470b056f002b18e13d085eac0bf9ccc6",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3336,7 +3336,7 @@
     12.609375,
     19.875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_12.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_12.npy",
    "full_logits_sha256": "9feca74f5a3ca793a90ae046bec55bd2d621e74960381b29cf0677ed45d2363c",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3397,7 +3397,7 @@
     20.1875,
     12.671875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_01.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_01.npy",
    "full_logits_sha256": "72defcb6b5d383e9d6280f4368c23340347269b548ebedbab56983dc4190b1f3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3458,7 +3458,7 @@
     12.703125,
     19.28125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_02.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_02.npy",
    "full_logits_sha256": "86c885cd2b261a24d2bed1d8358eec6b64d04324d509e25d470fde997aea6da2",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3519,7 +3519,7 @@
     19.671875,
     11.8046875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_03.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_03.npy",
    "full_logits_sha256": "69a8d327cd3c72a48a46f81ad7a0884d8d529b3f1ddb0718b3cce8479952ed24",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3580,7 +3580,7 @@
     11.3359375,
     18.953125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_04.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/score_level_04.npy",
    "full_logits_sha256": "aa00ac2b50ce22691588fface06f18c1cf9dafd80bad81d3550ba21193eafcb2",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3641,7 +3641,7 @@
     20.140625,
     12.3515625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_05.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_05.npy",
    "full_logits_sha256": "3b317c85b57a1942ae1f69e23551724f9c4891b05bd8baee0783d90a8b4fe76d",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3702,7 +3702,7 @@
     12.421875,
     19.5625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_06.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_06.npy",
    "full_logits_sha256": "e5366a9f8ac387fb837fa0a21992dc412ca3829ef3a2828ecf9b3faf04784603",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3763,7 +3763,7 @@
     20.1875,
     12.1953125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_07.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_07.npy",
    "full_logits_sha256": "56e027a2a4fd25617248a4458d2abfe14c1c754ec7fc7ec409dfefe7882d7edf",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3824,7 +3824,7 @@
     12.8984375,
     19.828125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_08.npy",
+   "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_08.npy",
    "full_logits_sha256": "fc9d51831e08db2b06119c22c2581047f56a69dbc2807833231869fac6a62aa3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3888,8 +3888,8 @@
     15
    ],
    "pid": 49023,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+   "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:47:58+00:00",
    "phase": "complete",
    "runtime_calls": 4532,
@@ -3905,8 +3905,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/reset-choice16_01.npy",
+    "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
+    "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/reset-choice16_01.npy",
     "final_full_logits_sha256": "bfeb5b7da42d6edff0228caff4b7b1ad90b04f8a66eee647e71ff2e5e944d347",
     "fresh_state_each_row": true,
     "same_process": true
@@ -3914,16 +3914,16 @@
    "completed_at": "2026-09-22T20:50:20+00:00",
    "wall_seconds_contended": 142.64801708399318,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-00-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-00-kit-a1.log",
+   "transcript": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-00-kit-a1.json",
+   "log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-00-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-00-kit-a1.config.json"
+    "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-00-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-00-kit-a1.json",
+   "pid_receipt": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-00-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 148.36169283394702
@@ -3949,8 +3949,8 @@
     29
    ],
    "pid": 55347,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+   "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:50:25+00:00",
    "phase": "complete",
    "runtime_calls": 3841,
@@ -3966,8 +3966,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_01.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/reset-choice_mid_01.npy",
+    "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/choice_mid_01.npy",
+    "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/reset-choice_mid_01.npy",
     "final_full_logits_sha256": "623ed2d5b80f8df892981f8c24480fc646dfc947ebf0da2d266d2d0cd7c2c8a0",
     "fresh_state_each_row": true,
     "same_process": true
@@ -3975,16 +3975,16 @@
    "completed_at": "2026-09-22T20:51:56+00:00",
    "wall_seconds_contended": 91.53724700002931,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-01-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-01-kit-a1.log",
+   "transcript": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-01-kit-a1.json",
+   "log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-01-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-01-kit-a1.config.json"
+    "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-01-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-01-kit-a1.json",
+   "pid_receipt": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-01-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 96.268115999992
@@ -4010,8 +4010,8 @@
     43
    ],
    "pid": 59628,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+   "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:52:01+00:00",
    "phase": "complete",
    "runtime_calls": 1940,
@@ -4027,8 +4027,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_03.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/reset-noul_03.npy",
+    "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/noul_03.npy",
+    "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-02-kit-a1/reset-noul_03.npy",
     "final_full_logits_sha256": "06a7a710c1bcb0474b90fddb2408b5bb1c6c9ba8e3d6f9a5efb5350fd69d2746",
     "fresh_state_each_row": true,
     "same_process": true
@@ -4036,16 +4036,16 @@
    "completed_at": "2026-09-22T20:52:49+00:00",
    "wall_seconds_contended": 47.32506920804735,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-02-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-02-kit-a1.log",
+   "transcript": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-02-kit-a1.json",
+   "log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-02-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-02-kit-a1.config.json"
+    "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-02-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-02-kit-a1.json",
+   "pid_receipt": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-02-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 52.096904000034556
@@ -4061,8 +4061,8 @@
     47
    ],
    "pid": 61896,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+   "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:52:53+00:00",
    "phase": "complete",
    "runtime_calls": 645,
@@ -4078,8 +4078,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_05.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/reset-score_level_05.npy",
+    "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/score_level_05.npy",
+    "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-03-kit-a1/reset-score_level_05.npy",
     "final_full_logits_sha256": "3b317c85b57a1942ae1f69e23551724f9c4891b05bd8baee0783d90a8b4fe76d",
     "fresh_state_each_row": true,
     "same_process": true
@@ -4087,16 +4087,16 @@
    "completed_at": "2026-09-22T20:53:10+00:00",
    "wall_seconds_contended": 17.076580832945183,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-03-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-03-kit-a1.log",
+   "transcript": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-03-kit-a1.json",
+   "log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-03-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-03-kit-a1.config.json"
+    "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-03-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-03-kit-a1.json",
+   "pid_receipt": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-03-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 21.88064754102379
@@ -4109,8 +4109,8 @@
     6
    ],
    "pid": 62850,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+   "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:53:15+00:00",
    "phase": "complete",
    "runtime_calls": 3344,
@@ -4126,8 +4126,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-04-wide-a1/choice16_07.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-04-wide-a1/reset-choice16_07.npy",
+    "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-04-wide-a1/choice16_07.npy",
+    "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-04-wide-a1/reset-choice16_07.npy",
     "final_full_logits_sha256": "8a09bd840b0874037e1abbad29e57530bd731bf179bd8094593b54b748e19154",
     "fresh_state_each_row": true,
     "same_process": true
@@ -4135,16 +4135,16 @@
    "completed_at": "2026-09-22T20:54:36+00:00",
    "wall_seconds_contended": 80.45201450004242,
    "kind": "wide",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-04-wide-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-04-wide-a1.log",
+   "transcript": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-04-wide-a1.json",
+   "log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-04-wide-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-04-wide-a1.config.json"
+    "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-04-wide-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-04-wide-a1.json",
+   "pid_receipt": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-04-wide-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 85.30526454199571
@@ -4157,8 +4157,8 @@
     7
    ],
    "pid": 66714,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+   "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:54:41+00:00",
    "phase": "complete",
    "runtime_calls": 3340,
@@ -4174,8 +4174,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/reset-choice16_08.npy",
+    "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
+    "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/reset-choice16_08.npy",
     "final_full_logits_sha256": "a4ac30a845f419cb1e698da89a9e620a373c7ff10a3a89626161347882c39850",
     "fresh_state_each_row": true,
     "same_process": true
@@ -4183,16 +4183,16 @@
    "completed_at": "2026-09-22T20:56:01+00:00",
    "wall_seconds_contended": 80.84299362497404,
    "kind": "wide",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-05-wide-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-05-wide-a1.log",
+   "transcript": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-05-wide-a1.json",
+   "log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-05-wide-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-05-wide-a1.config.json"
+    "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-05-wide-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-05-wide-a1.json",
+   "pid_receipt": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-05-wide-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 85.68060879106633
@@ -4205,8 +4205,8 @@
     0
    ],
    "pid": 70820,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
+   "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+   "snapshot": "<work>/2026-09-23/apus-openjev-4b-coreai/cache/hf/hub/models--apus-ailab--APUS-OpenJev-v1-4B/snapshots/65797c526c27c4d24f564333779162cd4a64328e",
    "started_at": "2026-09-22T20:56:06+00:00",
    "phase": "complete",
    "runtime_calls": 968,
@@ -4222,8 +4222,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-06-global_reset-a1/choice16_01.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-06-global_reset-a1/reset-choice16_01.npy",
+    "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-06-global_reset-a1/choice16_01.npy",
+    "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-06-global_reset-a1/reset-choice16_01.npy",
     "final_full_logits_sha256": "bfeb5b7da42d6edff0228caff4b7b1ad90b04f8a66eee647e71ff2e5e944d347",
     "fresh_state_each_row": true,
     "same_process": true
@@ -4231,28 +4231,28 @@
    "completed_at": "2026-09-22T20:56:31+00:00",
    "wall_seconds_contended": 24.71449162508361,
    "kind": "global_reset",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-06-global_reset-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-06-global_reset-a1.log",
+   "transcript": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-06-global_reset-a1.json",
+   "log": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/logs/readout-int8hu-06-global_reset-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/../.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/2026-09-23/apus-openjev-4b-coreai/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-06-global_reset-a1.config.json"
+    "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_sessions/int8hu-06-global_reset-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-06-global_reset-a1.json",
+   "pid_receipt": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_pids/int8hu-06-global_reset-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 29.571799166034907
   }
  ],
  "result": "PASS",
- "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+ "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
  "aot": {
   "reused": true,
   "result": "PASS",
-  "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
-  "source": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym/apus_decision_v1_4b_decode_int8hu_block32_sym.aimodel",
+  "asset": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/aotc/apus_decision_v1_4b_decode_int8hu_block32_sym.h16c.aimodelc",
+  "source": "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym/apus_decision_v1_4b_decode_int8hu_block32_sym.aimodel",
   "selection": "explicit existing AOT asset",
   "flags": [
    "--platform",
@@ -4306,7 +4306,7 @@
      19.640625,
      15.7734375
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_02.npy",
+    "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-01-kit-a1/noul_02.npy",
     "full_logits_sha256": "bc016af605c12dd63b45ddea8536747f563b6fcaefa4babcabfe7471164f8a9a",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -4409,7 +4409,7 @@
      10.78125,
      11.9921875
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_06.npy",
+    "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_06.npy",
     "full_logits_sha256": "85a01f8016616e80033bd3347057d2268ca0f86fd796bbe2e0cd83ff48ab0ed3",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -4498,7 +4498,7 @@
      19.515625,
      13.296875
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_03.npy",
+    "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice_small_03.npy",
     "full_logits_sha256": "1a19d50ee933df20338af8d4c3bb2a417f5bf286d9df465b73cdefa80ebaedc0",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -4601,7 +4601,7 @@
      20.640625,
      13.6875
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
+    "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
     "full_logits_sha256": "bfeb5b7da42d6edff0228caff4b7b1ad90b04f8a66eee647e71ff2e5e944d347",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -4732,7 +4732,7 @@
      19.734375,
      11.6640625
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
+    "full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-05-wide-a1/choice16_08.npy",
     "full_logits_sha256": "a4ac30a845f419cb1e698da89a9e620a373c7ff10a3a89626161347882c39850",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -4808,8 +4808,8 @@
   "identical": true,
   "bit_identical": true,
   "max_abs_diff": 0.0,
-  "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
-  "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-06-global_reset-a1/reset-choice16_01.npy",
+  "first_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-00-kit-a1/choice16_01.npy",
+  "final_full_logits_npy": "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/letter-readout/results/readout_logits/int8hu-06-global_reset-a1/reset-choice16_01.npy",
   "final_session": "int8hu-06-global_reset-a1",
   "cross_process": true,
   "local_resets_in_every_session": true

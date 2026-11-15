@@ -1,8 +1,8 @@
 {
   "schema": "coreai-scalar-engine-load/1",
-  "runner": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+  "runner": "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
   "runner_sha256": "9251aee20b044712fde01ddad41bdf4582b0bf09c1888f4dd822c486673422d2",
-  "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/oracle-fixtures.json",
+  "fixtures": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/oracle-fixtures.json",
   "license": "cc-by-nc-4.0",
   "selected_row_ids": [
     "request-01-q01-option-00",
@@ -54,11 +54,11 @@
       "wall_seconds_contended": 29.46438679099083,
       "timeout_seconds": 600,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
         "--raw-tokens",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-00.json",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-00.json",
         "--max-tokens",
         "1",
         "--temperature",
@@ -71,8 +71,8 @@
       "environment_overrides": {
         "COREAI_CHUNK_THRESHOLD": "1"
       },
-      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-00.log",
-      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-00.stderr.log",
+      "stdout_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-00.log",
+      "stderr_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-00.stderr.log",
       "stdout_sha256": "992743d9be4dfa1e65ca3a746278d934f7754fbdb7aacaa8133bfb5b762da79a",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "stderr_tail": "",
@@ -97,11 +97,11 @@
       "wall_seconds_contended": 9.838834165944718,
       "timeout_seconds": 600,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
         "--raw-tokens",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-01.json",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-01.json",
         "--max-tokens",
         "1",
         "--temperature",
@@ -114,8 +114,8 @@
       "environment_overrides": {
         "COREAI_CHUNK_THRESHOLD": "1"
       },
-      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-01.log",
-      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-01.stderr.log",
+      "stdout_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-01.log",
+      "stderr_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-pipelined-fp16-request-01-q01-option-01.stderr.log",
       "stdout_sha256": "bf3b1c74836352b00ef983c1e9a833928958aef2642dbac3d37306090f9a5373",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "stderr_tail": "",
@@ -140,11 +140,11 @@
       "wall_seconds_contended": 10.682686542044394,
       "timeout_seconds": 600,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
         "--raw-tokens",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-00.json",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-00.json",
         "--max-tokens",
         "1",
         "--temperature",
@@ -157,8 +157,8 @@
       "environment_overrides": {
         "COREAI_CHUNK_THRESHOLD": "1"
       },
-      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-00.log",
-      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-00.stderr.log",
+      "stdout_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-00.log",
+      "stderr_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-00.stderr.log",
       "stdout_sha256": "9bde4d4a47597e5ba0532bbe3c375efbb58a18d3a092b9867372ae1cf8acabb2",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "stderr_tail": "",
@@ -183,11 +183,11 @@
       "wall_seconds_contended": 10.861603167024441,
       "timeout_seconds": 600,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build/out/Products/Release/llm-runner",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
         "--raw-tokens",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-01.json",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/results/engine_inputs/request-01-q01-option-01.json",
         "--max-tokens",
         "1",
         "--temperature",
@@ -200,8 +200,8 @@
       "environment_overrides": {
         "COREAI_CHUNK_THRESHOLD": "1"
       },
-      "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-01.log",
-      "stderr_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-01.stderr.log",
+      "stdout_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-01.log",
+      "stderr_log": "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/scalar-work/runtime/logs/engine-load-coreai-sequential-fp16-request-01-q01-option-01.stderr.log",
       "stdout_sha256": "7d997e9f8be24ab067d1601ff5c94db2b508815a9e01b5946dbbb0b19a20fe5f",
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "stderr_tail": "",
@@ -233,7 +233,7 @@
   },
   "bundles": {
     "fp16": {
-      "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
+      "path": "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_fp16",
       "logits_width": 1,
       "expected_id": 0,
       "expected_text": "!",

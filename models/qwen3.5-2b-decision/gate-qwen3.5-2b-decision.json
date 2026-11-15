@@ -250,7 +250,7 @@
           10.5859375,
           9.9609375
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-03-kit-a1/supply_station_6__1_choice.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-03-kit-a1/supply_station_6__1_choice.npy",
         "full_logits_sha256": "b6629b832f527d1d65df99298bce54be47c8bffe2f044ba82e43172df91c6393",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -399,7 +399,7 @@
           16.09375,
           16.21875
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-00-kit-a1/garden_play__3_score.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-00-kit-a1/garden_play__3_score.npy",
         "full_logits_sha256": "01e2483d3bd22c564a67387da2f1add51f37c77cdda8d2ae14a0f3c8d3f9293f",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -501,7 +501,7 @@
           15.4765625,
           15.328125
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-00-kit-a1/river_report__3_score.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-00-kit-a1/river_report__3_score.npy",
         "full_logits_sha256": "07000f127b265ca2d6b0c62805b4875148762ff25e14edc2f19c7668ae59e375",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -602,7 +602,7 @@
           16.0,
           14.765625
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/bakery_line__3_score.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/bakery_line__3_score.npy",
         "full_logits_sha256": "4ac5e4b831d94f36c44c71478d702796a3909c8d5bb2294b2e546c9bef436ce9",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -734,7 +734,7 @@
           10.1328125,
           9.828125
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-03-kit-a1/supply_station_5__1_choice.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-03-kit-a1/supply_station_5__1_choice.npy",
         "full_logits_sha256": "71a8728c0be3271967b4388c61d182737c1e8a8b854f64d0fa4892abfc0c78cf",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -899,7 +899,7 @@
           13.9296875,
           13.578125
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/package_log__3_score.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/package_log__3_score.npy",
         "full_logits_sha256": "7dbd07c3ee57cfe0ae9371962883645287124f492a867f88aba2ba57c16926c2",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -1042,7 +1042,7 @@
           9.828125,
           9.125
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/package_log__1_choice.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/package_log__1_choice.npy",
         "full_logits_sha256": "f7d51c0fceb8d449c4582ca81df403684c1ab4d3524ebe4d186532048cbb7de3",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -1182,7 +1182,7 @@
           11.203125,
           11.109375
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/quiet_gallery__3_score.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-01-kit-a1/quiet_gallery__3_score.npy",
         "full_logits_sha256": "bbb321a79ab81cd1270b72d07af88f00241d2c26b1436908fef6e0ef03a28c1c",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -1304,7 +1304,7 @@
           15.4765625,
           15.328125
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-00-kit-a1/river_report__3_score.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-00-kit-a1/river_report__3_score.npy",
         "full_logits_sha256": "07000f127b265ca2d6b0c62805b4875148762ff25e14edc2f19c7668ae59e375",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -1438,7 +1438,7 @@
           10.1171875,
           9.65625
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-04-wide-a1/long_store_log__1_choice.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-04-wide-a1/long_store_log__1_choice.npy",
         "full_logits_sha256": "ef15db9b79643684526a7860e3355bd3ca4cffaa7c65d5025bf2ec0f73e8d23e",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -1620,7 +1620,7 @@
           10.5234375,
           10.234375
         ],
-        "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-05-wide-a1/long_room_log__1_choice.npy",
+        "full_logits_npy": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/int8hu-05-wide-a1/long_room_log__1_choice.npy",
         "full_logits_sha256": "365419257548f7de8dd59b5e12e9e8a05c081bc9a3810e2c5d0615d895fbb59d",
         "full_logits_dtype": "float16",
         "full_logits_shape": [
@@ -1797,7 +1797,7 @@
           "model_load_seconds_contended": 6.63,
           "cache_hit": true,
           "wall_seconds_contended": 8.082847125013359,
-          "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/engine-coreai-pipelined-int8hu-garden_play__1_choice.log"
+          "stdout_log": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/engine-coreai-pipelined-int8hu-garden_play__1_choice.log"
         },
         "author_rows": 58,
         "author_label_agreement": 58
@@ -1817,7 +1817,7 @@
           "model_load_seconds_contended": 0.45080000000000003,
           "cache_hit": true,
           "wall_seconds_contended": 1.8263187090633437,
-          "stdout_log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/engine-coreai-sequential-int8hu-garden_play__1_choice.log"
+          "stdout_log": "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/engine-coreai-sequential-int8hu-garden_play__1_choice.log"
         },
         "author_rows": 58,
         "author_label_agreement": 58
@@ -1845,7 +1845,7 @@
     "source": "measured through coreai-kit; supervisor supplied in rounds/03.instruction.md",
     "measured_by_this_run": false,
     "date": "2026-09-23 06:5x–07:0x JST",
-    "worktree_read_only_reference": "/Users/majimadaisuke/code/coreai-kit-models-wt",
+    "worktree_read_only_reference": "/Users/USER/code/coreai-kit-models-wt",
     "device": "Apple M4 Max GPU",
     "macos": "27.0 (26A428)",
     "engine": "coreai-sequential",
@@ -2017,9 +2017,9 @@
             "engine": "coreai-pipelined",
             "pid": 31644,
             "command": [
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
               "--model",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
               "-p",
               "128",
               "-g",
@@ -2029,7 +2029,7 @@
               "--inference-engine-variant",
               "coreai-pipelined",
               "--output-json",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-1.json"
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-1.json"
             ],
             "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-pipelined-1.log",
             "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-1.json",
@@ -2070,9 +2070,9 @@
             "engine": "coreai-pipelined",
             "pid": 33898,
             "command": [
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
               "--model",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
               "-p",
               "128",
               "-g",
@@ -2082,7 +2082,7 @@
               "--inference-engine-variant",
               "coreai-pipelined",
               "--output-json",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-2.json"
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-2.json"
             ],
             "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-pipelined-2.log",
             "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-pipelined-2.json",
@@ -2193,9 +2193,9 @@
             "engine": "coreai-sequential",
             "pid": 33351,
             "command": [
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
               "--model",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
               "-p",
               "128",
               "-g",
@@ -2205,7 +2205,7 @@
               "--inference-engine-variant",
               "coreai-sequential",
               "--output-json",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-1.json"
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-1.json"
             ],
             "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-sequential-1.log",
             "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-sequential-1.json",
@@ -2246,9 +2246,9 @@
             "engine": "coreai-sequential",
             "pid": 34332,
             "command": [
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
               "--model",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_int8hu_block32_sym",
               "-p",
               "128",
               "-g",
@@ -2258,7 +2258,7 @@
               "--inference-engine-variant",
               "coreai-sequential",
               "--output-json",
-              "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-2.json"
+              "<work>/2026-09-23/qwen35-2b-decision-coreai/results/round3/quiet-repeat/llm-benchmark-coreai-sequential-2.json"
             ],
             "stdout_stderr": "logs/round3-quiet-repeat-llm-benchmark-coreai-sequential-2.log",
             "tool_json": "results/round3/quiet-repeat/llm-benchmark-coreai-sequential-2.json",

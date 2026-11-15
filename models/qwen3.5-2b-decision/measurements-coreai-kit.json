@@ -3,7 +3,7 @@
   "source": "measured through coreai-kit; supervisor supplied in rounds/03.instruction.md",
   "measured_by_this_run": false,
   "date": "2026-09-23 06:5x–07:0x JST",
-  "worktree_read_only_reference": "/Users/majimadaisuke/code/coreai-kit-models-wt",
+  "worktree_read_only_reference": "/Users/USER/code/coreai-kit-models-wt",
   "device": "Apple M4 Max GPU",
   "macos": "27.0 (26A428)",
   "engine": "coreai-sequential",

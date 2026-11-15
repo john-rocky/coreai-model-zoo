@@ -6,7 +6,7 @@
   "build": "Release 0.2.4-zoo f7a75ec + local engine-option patch, Xcode 27.0 (27A266a)",
   "binary": {
     "name": "llm-benchmark",
-    "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+    "path": "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
     "size_bytes": 17060736,
     "sha256": "4a1cdce76814d048ec1e8ab45b082b63c3bc9a5421e27808a581550ff9585460"
   },
@@ -24,9 +24,9 @@
       "engine": "coreai-pipelined",
       "pid": 24132,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
         "-p",
         "128",
         "-g",
@@ -36,7 +36,7 @@
         "--inference-engine-variant",
         "coreai-pipelined",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+        "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
       "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
@@ -77,9 +77,9 @@
       "engine": "coreai-sequential",
       "pid": 25094,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
         "-p",
         "128",
         "-g",
@@ -89,7 +89,7 @@
         "--inference-engine-variant",
         "coreai-sequential",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+        "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
       "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
@@ -130,9 +130,9 @@
       "engine": "coreai-pipelined",
       "pid": 26069,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
         "-p",
         "128",
         "-g",
@@ -142,7 +142,7 @@
         "--inference-engine-variant",
         "coreai-pipelined",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+        "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
       "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
@@ -183,9 +183,9 @@
       "engine": "coreai-sequential",
       "pid": 27283,
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+        "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
         "-p",
         "128",
         "-g",
@@ -195,7 +195,7 @@
         "--inference-engine-variant",
         "coreai-sequential",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+        "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
       ],
       "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
       "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",
@@ -391,9 +391,9 @@
           "engine": "coreai-pipelined",
           "pid": 24132,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
             "-p",
             "128",
             "-g",
@@ -403,7 +403,7 @@
             "--inference-engine-variant",
             "coreai-pipelined",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
+            "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-1.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-1.log",
           "tool_json": "results/round2/llm-benchmark-coreai-pipelined-1.json",
@@ -444,9 +444,9 @@
           "engine": "coreai-pipelined",
           "pid": 26069,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
             "-p",
             "128",
             "-g",
@@ -456,7 +456,7 @@
             "--inference-engine-variant",
             "coreai-pipelined",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
+            "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-pipelined-2.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-pipelined-2.log",
           "tool_json": "results/round2/llm-benchmark-coreai-pipelined-2.json",
@@ -567,9 +567,9 @@
           "engine": "coreai-sequential",
           "pid": 25094,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
             "-p",
             "128",
             "-g",
@@ -579,7 +579,7 @@
             "--inference-engine-variant",
             "coreai-sequential",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
+            "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-1.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-sequential-1.log",
           "tool_json": "results/round2/llm-benchmark-coreai-sequential-1.json",
@@ -620,9 +620,9 @@
           "engine": "coreai-sequential",
           "pid": 27283,
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/swift-build-round2/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
+            "<work>/2026-09-23/apus-openjev-4b-coreai/exports/apus_decision_v1_4b_decode_int8hu_block32_sym",
             "-p",
             "128",
             "-g",
@@ -632,7 +632,7 @@
             "--inference-engine-variant",
             "coreai-sequential",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
+            "<work>/2026-09-23/apus-openjev-4b-coreai/results/round2/llm-benchmark-coreai-sequential-2.json"
           ],
           "stdout_stderr": "logs/llm-benchmark-coreai-sequential-2.log",
           "tool_json": "results/round2/llm-benchmark-coreai-sequential-2.json",
@@ -700,7 +700,7 @@
   ],
   "contended": false,
   "gpu_lock_read_only": {
-    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "path": "/Users/USER/code/coreai/_GPU_LOCK",
     "contents": "",
     "never_modified": true
   },

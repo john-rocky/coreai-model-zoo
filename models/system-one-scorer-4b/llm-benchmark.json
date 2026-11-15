@@ -22,7 +22,7 @@
   "build": "Release 0.2.4-zoo f7a75ec + local engine-option patch, Xcode 27.0 (27A266a)",
   "binary": {
     "name": "llm-benchmark",
-    "path": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+    "path": "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
     "size_bytes": 17060736,
     "sha256": "cb82aa37f9e5fe1d709786e5bdb4312026b54257d5201d6c161fdcfec69c3d6f"
   },
@@ -40,9 +40,9 @@
       "launch": 1,
       "engine": "coreai-pipelined",
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -52,7 +52,7 @@
         "--inference-engine-variant",
         "coreai-pipelined",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-1.json"
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-1.json"
       ],
       "stdout_stderr": "logs/round3-llm-benchmark-coreai-pipelined-1.log",
       "tool_json": "results/round3/llm-benchmark-coreai-pipelined-1.json",
@@ -95,9 +95,9 @@
       "launch": 1,
       "engine": "coreai-sequential",
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -107,7 +107,7 @@
         "--inference-engine-variant",
         "coreai-sequential",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-1.json"
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-1.json"
       ],
       "stdout_stderr": "logs/round3-llm-benchmark-coreai-sequential-1.log",
       "tool_json": "results/round3/llm-benchmark-coreai-sequential-1.json",
@@ -150,9 +150,9 @@
       "launch": 2,
       "engine": "coreai-pipelined",
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -162,7 +162,7 @@
         "--inference-engine-variant",
         "coreai-pipelined",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-2.json"
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-2.json"
       ],
       "stdout_stderr": "logs/round3-llm-benchmark-coreai-pipelined-2.log",
       "tool_json": "results/round3/llm-benchmark-coreai-pipelined-2.json",
@@ -205,9 +205,9 @@
       "launch": 2,
       "engine": "coreai-sequential",
       "command": [
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
         "--model",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
         "-p",
         "128",
         "-g",
@@ -217,7 +217,7 @@
         "--inference-engine-variant",
         "coreai-sequential",
         "--output-json",
-        "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-2.json"
+        "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-2.json"
       ],
       "stdout_stderr": "logs/round3-llm-benchmark-coreai-sequential-2.log",
       "tool_json": "results/round3/llm-benchmark-coreai-sequential-2.json",
@@ -415,9 +415,9 @@
           "launch": 1,
           "engine": "coreai-pipelined",
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -427,7 +427,7 @@
             "--inference-engine-variant",
             "coreai-pipelined",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-1.json"
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-1.json"
           ],
           "stdout_stderr": "logs/round3-llm-benchmark-coreai-pipelined-1.log",
           "tool_json": "results/round3/llm-benchmark-coreai-pipelined-1.json",
@@ -470,9 +470,9 @@
           "launch": 2,
           "engine": "coreai-pipelined",
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -482,7 +482,7 @@
             "--inference-engine-variant",
             "coreai-pipelined",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-2.json"
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-pipelined-2.json"
           ],
           "stdout_stderr": "logs/round3-llm-benchmark-coreai-pipelined-2.log",
           "tool_json": "results/round3/llm-benchmark-coreai-pipelined-2.json",
@@ -595,9 +595,9 @@
           "launch": 1,
           "engine": "coreai-sequential",
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -607,7 +607,7 @@
             "--inference-engine-variant",
             "coreai-sequential",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-1.json"
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-1.json"
           ],
           "stdout_stderr": "logs/round3-llm-benchmark-coreai-sequential-1.log",
           "tool_json": "results/round3/llm-benchmark-coreai-sequential-1.json",
@@ -650,9 +650,9 @@
           "launch": 2,
           "engine": "coreai-sequential",
           "command": [
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/swift-build-round3/out/Products/Release/llm-benchmark",
             "--model",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/exports/system_one_qwen3_5_4b_scorer_decode_int8lin",
             "-p",
             "128",
             "-g",
@@ -662,7 +662,7 @@
             "--inference-engine-variant",
             "coreai-sequential",
             "--output-json",
-            "/Users/majimadaisuke/code/codex-conversions/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-2.json"
+            "<work>/2026-09-23/pngwn-scorer-4b-coreai/results/round3/llm-benchmark-coreai-sequential-2.json"
           ],
           "stdout_stderr": "logs/round3-llm-benchmark-coreai-sequential-2.log",
           "tool_json": "results/round3/llm-benchmark-coreai-sequential-2.json",
@@ -766,7 +766,7 @@
   "contended": false,
   "started_utc": "2026-09-22T23:53:38.731320+00:00",
   "gpu_lock": {
-    "path": "/Users/majimadaisuke/code/coreai/_GPU_LOCK",
+    "path": "/Users/USER/code/coreai/_GPU_LOCK",
     "method": "fcntl.flock LOCK_EX|LOCK_NB, tagged only while A runs; original untagged bytes restored on release",
     "released": true,
     "initial_contents": "",
