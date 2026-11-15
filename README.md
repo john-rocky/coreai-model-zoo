@@ -111,10 +111,10 @@ These came from other people and stay under their own Hugging Face accounts:
 
 | Port | Contributor | PR |
 |---|---|---|
-| [**pocket-tts**](models/pocket-tts/README.md): Kyutai's streaming text to speech, 7.8× real-time on an iPhone 17 Pro Max | [Rahul Rachuri](https://github.com/RahulRachuri) | [#12](https://github.com/john-rocky/coreai-model-zoo/pull/12) |
-| [**Parakeet-TDT-0.6B-v2**](models/parakeet-v2/README.md): English speech to text, 175.3× real-time on an iPhone 17 Pro Max | [Rahul Rachuri](https://github.com/RahulRachuri) | [#13](https://github.com/john-rocky/coreai-model-zoo/pull/13) |
-| [**Bonsai 2 27B**](models/bonsai2-27b/README.md): PrismML's ternary Qwen3.8-27B, 23.6 tok/s on an M4 Pro | [Rahul Rachuri](https://github.com/RahulRachuri) | [#37](https://github.com/john-rocky/coreai-model-zoo/pull/37) |
-| [**Nanbeige4.2-3B**](models/nanbeige4.2-3b/README.md): a looped Llama, and the first community port here | [Vadim Smirnov](https://github.com/ukint-vs) | [#6](https://github.com/john-rocky/coreai-model-zoo/pull/6) |
+| [**pocket-tts**](models/pocket-tts/README.md): Kyutai's streaming text to speech, 7.8× real-time on an iPhone 17 Pro Max | [@RahulRachuri](https://github.com/RahulRachuri) | [#12](https://github.com/john-rocky/coreai-model-zoo/pull/12) |
+| [**Parakeet-TDT-0.6B-v2**](models/parakeet-v2/README.md): English speech to text, 175.3× real-time on an iPhone 17 Pro Max | [@RahulRachuri](https://github.com/RahulRachuri) | [#13](https://github.com/john-rocky/coreai-model-zoo/pull/13) |
+| [**Bonsai 2 27B**](models/bonsai2-27b/README.md): PrismML's ternary Qwen3.8-27B, 23.6 tok/s on an M4 Pro | [@RahulRachuri](https://github.com/RahulRachuri) | [#37](https://github.com/john-rocky/coreai-model-zoo/pull/37) |
+| [**Nanbeige4.2-3B**](models/nanbeige4.2-3b/README.md): a looped Llama, and the first community port here | [@ukint-vs](https://github.com/ukint-vs) | [#6](https://github.com/john-rocky/coreai-model-zoo/pull/6) |
 
 Thank you both. Each of these ports also found a bug in this repo.
 

@@ -565,7 +565,7 @@ Apple's repo; each recipe names the script it runs.
   attention, which a fixed-capacity graph cannot do — a masked SDPA still multiplies V by a
   zero weight, so `0 * NaN = NaN` poisons the cache, silently. Each exporter gates its graph
   against the oracle capture (`gen_oracle.py --tag orc_a`) on eager, `cpu_only` and `gpu`
-  before writing a bundle. Ported by [Rahul Rachuri](https://github.com/RahulRachuri). See
+  before writing a bundle. Ported by [@RahulRachuri](https://github.com/RahulRachuri). See
   [`../models/pocket-tts/README.md`](../models/pocket-tts/README.md).
 
 - **Nemotron-3-Diarization (8-speaker streaming speaker diarization, NVIDIA, in [`nemotron3_diar/`](nemotron3_diar/)):

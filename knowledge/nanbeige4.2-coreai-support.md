@@ -6,7 +6,7 @@ This report records the final architecture, runtime, verification, and optimizat
 
 The verified int8 LanguageBundle is published at
 [`ukint-vs/Nanbeige4.2-3B-CoreAI@5864ec7`](https://huggingface.co/ukint-vs/Nanbeige4.2-3B-CoreAI/tree/5864ec7a5581940958e58354a6b6c46c8f06891e).
-Port by [Vadim Smirnov (@ukint-vs)](https://github.com/ukint-vs); tracked in
+Port by [@ukint-vs](https://github.com/ukint-vs); tracked in
 [`john-rocky/coreai-model-zoo#5`](https://github.com/john-rocky/coreai-model-zoo/issues/5).
 
 ## Architecture

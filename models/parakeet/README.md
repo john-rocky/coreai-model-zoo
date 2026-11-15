@@ -8,7 +8,7 @@ stateless `.aimodel` graphs + a host-driven greedy loop** — no LLM runtime, ju
 
 English only? [**parakeet-v2**](../parakeet-v2/README.md) is the same architecture trained on
 English alone (vocab 1025, blank 1024), ported by
-[Rahul Rachuri](https://github.com/RahulRachuri) and exported by these same two scripts through
+[@RahulRachuri](https://github.com/RahulRachuri) and exported by these same two scripts through
 `--hf-id`.
 
 A **token-and-duration transducer (TDT)**: a **FastConformer encoder** streams acoustic frames, an
@@ -138,7 +138,7 @@ JIT-specializes for minutes/stalls on-device — see lesson 4). The whole transd
    instead makes the decoder hallucinate extra tokens over the tail.
 
    **The bucket length is therefore baked into the feature values, so it is not a free knob.**
-   [Rahul Rachuri](https://github.com/RahulRachuri) exported the encoder at L=2880 instead of
+   [@RahulRachuri](https://github.com/RahulRachuri) exported the encoder at L=2880 instead of
    2885 while porting [v2](../parakeet-v2/README.md): it gates clean per-token (cos mean
    0.999996) and still fails end to end, 131/152 chunks. The normalization spans the whole
    padded window, so a mel produced at one bucket and truncated to another is not the mel that

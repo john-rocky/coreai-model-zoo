@@ -6,7 +6,7 @@ The Core AI model therefore executes 44 layer passes and uses **44 KV-cache laye
 quantizing only one copy of the 22 physical blocks.
 
 Source checkpoint: `5ff54fb7ed86ce8e216d78bff5417ab9981de3d4` (Apache-2.0).
-Ported by [Vadim Smirnov (@ukint-vs)](https://github.com/ukint-vs); tracked in
+Ported by [@ukint-vs](https://github.com/ukint-vs); tracked in
 [`john-rocky/coreai-model-zoo#5`](https://github.com/john-rocky/coreai-model-zoo/issues/5).
 
 **⬇️ Verified int8 LanguageBundle:

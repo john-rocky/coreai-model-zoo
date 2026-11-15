@@ -2,7 +2,7 @@
 
 Engineering notes from porting [`kyutai/pocket-tts-without-voice-cloning`](https://huggingface.co/kyutai/pocket-tts-without-voice-cloning)
 to Core AI: the zoo's **first Kyutai model** and its **first Mimi conversion**. Ported by
-[Rahul Rachuri](https://github.com/RahulRachuri) ([PR #12](https://github.com/john-rocky/coreai-model-zoo/pull/12));
+[@RahulRachuri](https://github.com/RahulRachuri) ([PR #12](https://github.com/john-rocky/coreai-model-zoo/pull/12));
 card at [`models/pocket-tts/README.md`](../models/pocket-tts/README.md), host at
 [pocket-tts-swift](https://github.com/RahulRachuri/pocket-tts-swift). Drafted here from his card
 and PR comments, so corrections from him overrule this file.

@@ -48,7 +48,7 @@
 ## What following every ANE rule actually buys — measured, on a non-LLM encoder
 
 The rules above are Apple's. Until now nothing here recorded what happens when someone follows
-*all* of them on a model that is not an LLM. [Rahul Rachuri](https://github.com/RahulRachuri)
+*all* of them on a model that is not an LLM. [@RahulRachuri](https://github.com/RahulRachuri)
 re-authored the 600M Parakeet FastConformer encoder on the iOS/ANE track — BC1S between blocks,
 every `nn.Linear` a 1×1 `Conv2d`, per-head sequential attention, the mel image transposed so
 **time** is the width axis (the GPU track's freq-last subsampling ends at width 16, under the 64 B
@@ -84,7 +84,7 @@ against 183.9 ms ANE-authored on ane, a 3.7× gap against 1.8× on the phone. Ha
 
 Instruments `ane-hw-intervals` traces of the same encoder, one phone, same fp16 weights, same
 authoring — Core AI against a Core ML conversion of the same network, exported and measured by
-[Rahul Rachuri](https://github.com/RahulRachuri), who published the finding himself ([write-up](https://rachuri.me/blog/parakeet-apple-silicon/), [traces](https://gist.github.com/RahulRachuri/6761fdb6eb940bd25e4b55926925fbb4)):
+[@RahulRachuri](https://github.com/RahulRachuri), who published the finding himself ([write-up](https://rachuri.me/blog/parakeet-apple-silicon/), [traces](https://gist.github.com/RahulRachuri/6761fdb6eb940bd25e4b55926925fbb4)):
 
 | per encoder pass | Core AI, ANE-authored | Core ML, converted |
 |---|---:|---:|
@@ -97,7 +97,7 @@ authoring — Core AI against a Core ML conversion of the same network, exported
 **Both routes give the ANE the same work — 147.6 ms against 150.4 ms, within 2 %. What differs is
 delivery.** Core ML hands the hardware the whole graph as one job and holds 99.6 % residency. Core
 AI issues one submission per conformer layer and spends ~48 ms per pass in the round trips between
-them; that is where the idle 28.7 % goes. Rahul ties the gap size to the ~2.3 ms IOSurface
+them; that is where the idle 28.7 % goes. @RahulRachuri ties the gap size to the ~2.3 ms IOSurface
 round-trip reported in arXiv 2603.06728, paid 25 times instead of once.
 
 **The submission count is the region count.** 25 regions measured statically in the bundle is
