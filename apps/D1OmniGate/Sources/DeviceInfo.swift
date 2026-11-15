@@ -177,8 +177,8 @@ enum DeviceInfo {
 
 extension DeviceInfo {
     /// The Neural Engine regions a compiled asset holds: the distinct names before the first "." of every file or
-    /// directory whose name contains "_ANE_region_" (a plain find lists each region more than once: lane memory
-    /// reference_coreai_ane_requires_palettization). A GPU compile has none.
+    /// directory whose name contains "_ANE_region_" (a plain find lists each region more than once).
+    /// A GPU compile has none.
     static func aneRegions(_ asset: URL) -> (regions: Int, entries: Int) {
         guard let e = FileManager.default.enumerator(atPath: asset.path) else { return (0, 0) }
         var names = Set<String>()

@@ -9,8 +9,8 @@
 # iPhone 18 Pro is the wildcard one, which cannot carry it, and the build fails with "No Accounts" / "doesn't include the
 # Increased Memory Limit capability"; --no-iml builds without the entitlement (the default memory limit, where the
 # decoder's cold JIT specialization aborts with std::bad_alloc). The library comes by path (project.yml:
-# ../DeciderVision). A first build that resolves packages can write the path dependency's Package.resolved (memory:
-# reference_xcodebuild_local_package_resolved): this script copies it before the build and, when the build changed it,
+# ../DeciderVision). A first build that resolves packages can write the path dependency's Package.resolved:
+# this script copies it before the build and, when the build changed it,
 # keeps the diff in _work/ and puts the copy back.
 # Derived data, package checkouts and logs: _work/ (git-ignored).
 set -u

@@ -91,8 +91,8 @@ What this run isolates and what it does not: **the ANE plateau under sustained l
 it began throttled. The v2 protocol (idle until the thermal state returns to `fair`, cap 10 min) is implemented
 (`Sustain.swift`) but **was not run** — the phone left before the queue reached it. "ANE does not drop over 5 trials" (the earlier observation) was a
 one-minute window; at ten minutes it drops like everything else on this phone once the thermal state
-goes `serious`. Charging over USB with the screen on is itself a heater (memory
-`reference_iphone_screenlock_gpu_cap`), so an unplugged run may plateau higher — that is the
+goes `serious`. Charging over USB with the screen on is itself a heater,
+so an unplugged run may plateau higher — that is the
 battery protocol's job (§6).
 
 ## 4. Equal-byte A/B at 2B (2026-09-16 02:5x–03:4x, 24A437, USB)

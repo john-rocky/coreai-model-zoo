@@ -12,8 +12,8 @@
 # The two iOS builds keep their own derived data (dd_ios, dd_ios_iml); _work/app_path.txt names the last one built,
 # which ./_install.sh installs (D1_APP overrides). A signing failure is printed with its error lines and leaves
 # app_path.txt as it was. The app records os_proc_available_memory either way. The library comes by path (project.yml: ../D1). A
-# first build that resolves packages can write the path dependency's Package.resolved (memory:
-# reference_xcodebuild_local_package_resolved): this script copies it before the build and, when the build changed it,
+# first build that resolves packages can write the path dependency's Package.resolved:
+# this script copies it before the build and, when the build changed it,
 # keeps the diff in _work/ and puts the copy back; the md5 of every other file of ../D1 (not .build / .swiftpm) is
 # compared before and after.
 # A Mac measurement window (~/code/coreai/_GPU_LOCK naming `timing`, its holder alive) is waited out first, in 30 s
