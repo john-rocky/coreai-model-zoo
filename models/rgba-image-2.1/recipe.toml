@@ -45,7 +45,7 @@ notes = [
   "The Hugging Face repo carries the .aimodel bundles, not the .aimodelc, plus host/ written by",
   "make_host_consts.py (RoPE tables, scheduler.json) and host_contract.md.",
   "No quantized variant: the int8 DiT fails the efr compile, and int8 encoder weights break the",
-  "<|im_start|> tokens (quant_export_*.py, round 4 in conversion/qwenimage21/QWENIMAGE21_STATE.md).",
+  "<|im_start|> tokens (quant_export_*.py; knowledge/qwenimage21-port.md, Quantization).",
 ]
 open_questions = [
   "Swift host: does GraphModel(computeUnits: .gpu) run the DiT .aimodel just-in-time, or does it hit",

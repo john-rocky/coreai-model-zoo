@@ -8,8 +8,8 @@ decodes to four channels, RGBA. The pipeline default is 40 FlowMatch Euler steps
 
 Published as [mlboydaisuke/RGBA-Image-2.1-CoreAI](https://huggingface.co/mlboydaisuke/RGBA-Image-2.1-CoreAI)
 (revision `a9b5c94`, 2026-09-25); the licence keeps "Qwen" out of the primary name. Card:
-[`models/rgba-image-2.1/`](../models/rgba-image-2.1/README.md). Scripts and the working state:
-`conversion/qwenimage21/` (`QWENIMAGE21_STATE.md`). The distilled checkpoint Qwen-Image-2.1-Turbo
+[`models/rgba-image-2.1/`](../models/rgba-image-2.1/README.md). Scripts:
+`conversion/qwenimage21/`. The distilled checkpoint Qwen-Image-2.1-Turbo
 runs on the same graphs: [§ Qwen-Image-2.1-Turbo](#qwen-image-21-turbo-rgba-image-21-turbo-2026-10-11).
 
 ## Architecture → export mapping (text-to-image, batch 1)
@@ -275,8 +275,8 @@ it and the bundle 1.9e-5–3.6e-5, so a 1e-5-class bar copied from another input
 reference itself. Alpha is near-constant on an opaque image (0.976–1.000), and its corr falls to
 0.966–0.991 under the band: report alpha in levels.
 
-**Speed levers** (`bench_dit.py` and `ab_dit.py`, measurement window held; the speed ladder of the
-lane). The ship is the bf16 dynamic efr bundle: 0.341 / 1.097 / 4.721 s per forward at 256² /
+**Speed levers** (`bench_dit.py` and `ab_dit.py`, measurement window held). The ship is the bf16
+dynamic efr bundle: 0.341 / 1.097 / 4.721 s per forward at 256² /
 512² / 1024² (L 40), 2.7 / 8.8 / 37.8 s for 8 steps.
 
 | lever | result |
@@ -289,7 +289,7 @@ lane). The ship is the bf16 dynamic efr bundle: 0.341 / 1.097 / 4.721 s per forw
 | text K/V once per image | the 32 text tokens between L 8 and L 40 cost 1.59 % of a forward at 512² and 0.51 % at 1024² |
 | chunking | not applicable: one forward per step |
 
-**Traps of this lane:**
+**Traps of this port:**
 
 - The 09-25 exports directory was archived read-only. `export_dit.py` and `quant_export_dit.py`
   take `--exports-sub` so another checkpoint's bundles land elsewhere (`qwenimage21_turbo`).
@@ -313,6 +313,47 @@ lane). The ship is the bf16 dynamic efr bundle: 0.341 / 1.097 / 4.721 s per forw
   measures the edge. The bf16 pipeline itself repeats bit for bit across processes.
 - Load and initial-call seconds vary between processes on a shared Mac (DiT load 1.9–43.3 s,
   encoder 2.5–55.8 s); quote them from a measurement window only.
+
+## Working numbers
+
+Numbers from the port's working notes that the sections above do not carry. M4 Max, macOS 27.0
+26A428.
+
+**Base port (2026-09-25).**
+
+- The diffusers venv: uv, Python 3.11, torch 2.9.0, transformers 5.17.0, diffusers 0.41.0.dev0
+  (main 4295ee3, installed from a tarball), coreai-torch 0.4.1, coreai-core 1.0.0b2, torchvision
+  0.24.0 (`Qwen3VLProcessor` needs it).
+- Oracle capture (fp32 CPU, contended): 256² in 2 min, 512² in 6 min.
+- DiT export, 32 layers bf16: convert 31 s, peak RAM 14.9 GB, 14.23 GB.
+- `TimeTextEmbed.freqs` has to stay fp32. As a buffer, `.to(bf16)` rounds it and the sinusoid
+  embedding drops to corr 0.958; the re-author keeps it as an fp32 attribute.
+- Host tokens (`Qwen2Tokenizer`): the system part
+  `<|im_start|>system\nComprehend and analyze the provided prompt.<|im_end|>\n` is
+  `[151644, 8948, 198, 1092, 30782, 408, 323, 23643, 279, 3897, 9934, 13, 151645, 198]`, so
+  `drop_idx` is 14. The tail is always `<|im_end|>\n<|im_start|>assistant\n` =
+  `[151645, 198, 151644, 77091, 198]`. Pad id 151643, `<|image_pad|>` 151655. After the slice: the
+  apple prompt L 18 (Lfull 32), the empty prompt `" "` L 9 (Lfull 23), the RGBA sticker prompt
+  L 33 (Lfull 47). The processor also emits `mm_token_type_ids`, all 0 for text, with no effect on
+  the hidden states.
+- The encoder's hidden states reach |h| 4596 (Qwen's outlier dimensions): inside the bf16 range,
+  outside fp16's.
+- DiT `cpu_only()`: 4.2–4.9 s per forward. The efr bundle's first call at N = 256: 35.8 s
+  (contended).
+- Encoder per call, plain bf16: 0.063 / 0.148 s at L = 32 / 128; first call 15–16 s (bf16 and r32).
+  The 8-layer w16a32 probe: rel err 4.1e-6 (r32 6.4e-3), `.aimodelc` 4.04 GiB. The full w16a32
+  encoder on a prompt at L = 32 and the same prompt padded to L = 64: rel 4.4e-6 (the GPU path
+  changes with length).
+- The official pipeline in bf16 on MPS (diffusers main, Python overhead included): 0.47 s/step at
+  256², 1.25 s/step at 512², against the Core AI DiT's 0.34 / 1.10 s.
+
+**Turbo (2026-10-11).**
+
+- DiT export: 61.7 s wall (convert 34 s), `main.mlirb` 14,231,004,528 B, peak footprint 15.0 GB.
+  The efr AOT compile: 107.6 s, 26.52 GiB.
+- DiT per forward at L = 8: 1.079 s (512²), 4.697 s (1024²).
+- Sizes: bf16 `.aimodel` 14.23 GB, efr 28.46 GB; int8 `.aimodel` 7.56 GB, efr 21.79 GB.
+- The published repo: 34 files, 39.98 GB, of which the six bundles are 39.97 GB.
 
 ## Follow-ups
 

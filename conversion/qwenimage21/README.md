@@ -6,8 +6,7 @@ exporters and gates pin that revision; `capture_oracle.py` takes the newest loca
 records its name in `meta.json`. Three graphs: the Qwen3-VL-8B text path, the 7B DiT, the VAE
 decoder. The host runs the tokenizer, the RoPE tables and the sampler. Card:
 [`models/rgba-image-2.1/`](../../models/rgba-image-2.1/README.md). Port notes:
-[`knowledge/qwenimage21-port.md`](../../knowledge/qwenimage21-port.md). Working state and every
-number: [`QWENIMAGE21_STATE.md`](QWENIMAGE21_STATE.md).
+[`knowledge/qwenimage21-port.md`](../../knowledge/qwenimage21-port.md), with every number.
 
 The same scripts port the distilled checkpoint
 [`Qwen/Qwen-Image-2.1-Turbo`](https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo) (revision `d65dbc9`,
