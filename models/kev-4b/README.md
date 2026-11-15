@@ -174,14 +174,14 @@ within one window. Full records: [`gate-kev-4b-forms.json`](gate-kev-4b-forms.js
 
 Mac (Swift Release CLI, the 94-token question, median of the counted processes):
 
-| form | 94-token decision, ms | window | fixture max \|Δp\| | note |
+| form | 94-token decision, ms | window (2026-10-04, JST) | fixture max \|Δp\| | note |
 |---|---:|---|---:|---|
-| Gated DeltaNet unrolled, S = 16 | 269.5 | round 12 | 0.0154 | |
+| Gated DeltaNet unrolled, S = 16 | 269.5 | 14:06–14:30 | 0.0154 | |
 | unrolled, S = 32 / 64 | — | — | 0.0078 / 0.0070 (130 rows) | not timed in a lock window (104.8 / 174.1 ms per call on a shared GPU) |
 | Metal kernel, S = 32 | — | — | 0.0074 (130 rows) | not timed in a lock window (48.4 ms per call on a shared GPU) |
-| Metal kernel, S = 64 | 118.0 | round 12 | 0.0170 | five questions shared: 435.9 ms (S = 128: 615.6) |
-| **Metal kernel, S = 128 (this release)** | **100.2** | round 12 | **0.0153** | |
-| Metal kernel, query length 2..512, host calls of at most 512 ids | 83.3 | round 12 | 0.0132 | not shipped: memory grows (below) |
+| Metal kernel, S = 64 | 118.0 | 14:06–14:30 | 0.0170 | five questions shared: 435.9 ms (S = 128: 615.6) |
+| **Metal kernel, S = 128 (this release)** | **100.2** | 14:06–14:30 | **0.0153** | |
+| Metal kernel, query length 2..512, host calls of at most 512 ids | 83.3 | 14:06–14:30 | 0.0132 | not shipped: memory grows (below) |
 | in-graph chunk scan | — | — | — | not run at 4B; on Kev-0.8B it fails from S = 32 |
 | int8, every linear (unrolled S = 16) | — | — | 0.0601 | fails the bar (Precision) |
 | any form on the Neural Engine | — | — | — | not run: the recurrence's fp32 state is not an ANE element type ([`qwen3.5-static-ane.md`](../../knowledge/qwen3.5-static-ane.md)) |

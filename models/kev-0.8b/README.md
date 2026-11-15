@@ -188,8 +188,8 @@ The earlier upload's graph (below, under Bundle) ran in the same window:
 | a follow-up question on a prepared 137-token state | — | — | 30.3 | — | 34.1 |
 | a follow-up question on a prepared 1,477-token state | — | — | 31.5 | — | 51.5 |
 
-Preparing the two states took 34.1–34.7 ms and 335.9–339.6 ms (the two processes' medians). In round 11's
-lock window (09:43–10:45 JST) the `.aimodel` specialized by Swift, the shipped path, took 29.7 ms for the
+Preparing the two states took 34.1–34.7 ms and 335.9–339.6 ms (the two processes' medians). In the
+lock window of 2026-10-04 09:43–10:45 JST the `.aimodel` specialized by Swift, the shipped path, took 29.7 ms for the
 94-token question and 186.5 ms for the five questions shared, against 30.0 and 189.1 ms for the AOT asset;
 the Python reference took 33.4 and 207.1 ms. Transcript: [`gate-kev-0.8b-timing-mac.json`](gate-kev-0.8b-timing-mac.json).
 
@@ -202,8 +202,8 @@ was re-scored on the Mac from its bit patterns.
 
 - **Load.** The `.aimodel` specialized on the phone (GPU preferred, `expectFrequentReshapes`) took 4.26 s cold,
   3.60 s of it in `AIModel(contentsOf:)`, with +2,502,056,463 B of runtime cache and a peak footprint of 233 MB
-  (round 13, an earlier KevGate build). With the cache warm, the gate run below loaded it in 1.50 s.
-- **Gate** (run `20261004-140048`, KevGate built on round 15's host):
+  (an earlier KevGate build, the same day). With the cache warm, the gate run below loaded it in 1.50 s.
+- **Gate** (run `20261004-140048`, a later KevGate build):
 
 | set | questions | argmax (margin > 0.02) | near-ties agreeing | max \|Δp\| | mean of row means | bar |
 |---|---:|---:|---:|---:|---:|---|
@@ -240,32 +240,32 @@ compare forms only within one window. Full records: [`gate-kev-0.8b-forms.json`]
 
 Mac (Swift Release CLI, the 94-token question, median of the counted processes):
 
-| form | 94-token decision, ms | window | fixture max \|Δp\| | note |
+| form | 94-token decision, ms | window (2026-10-04, JST) | fixture max \|Δp\| | note |
 |---|---:|---|---:|---|
-| Gated DeltaNet unrolled, S = 16 (the earlier upload) | 100.1 | round 15 | 0.0117 | |
-| unrolled, S = 32 | 139.0 | round 11 | 0.0118 | |
+| Gated DeltaNet unrolled, S = 16 (the earlier upload) | 100.1 | 12:13–12:28 | 0.0117 | |
+| unrolled, S = 32 | 139.0 | 09:43–10:45 | 0.0118 | |
 | unrolled, S = 64 | — | — | 0.0100 | not timed in a lock window (68.06 ms per call on a shared GPU) |
 | in-graph chunk scan, S = 16 | — | — | 0.0135 | not timed in a lock window (10.90 ms per call on a shared GPU) |
 | in-graph chunk scan, S = 32 | — | — | — | fails: non-near-tie argmax 112/127, max \|Δp\| 0.125, non-finite rows; breaks in fp32 torch too |
-| Metal kernel, S = 16 / 32 / 64 | 63.6 / 42.7 / 41.5 | round 11 | 0.0115 / 0.0134 / 0.0115 | |
-| **Metal kernel, S = 128 (this release)** | **29.9** | round 15 | **0.0124** | |
-| Metal kernel, query length 2..512, host calls of at most 512 ids | 25.2 | round 15 | 0.0112 | not shipped: memory grows (below) |
-| the same graph, host calls of at most 256 / 128 ids | 25.1 / 25.0 | round 15 | 0.0060 / 0.0060 (130 rows) | not shipped |
+| Metal kernel, S = 16 / 32 / 64 | 63.6 / 42.7 / 41.5 | 09:43–10:45 | 0.0115 / 0.0134 / 0.0115 | |
+| **Metal kernel, S = 128 (this release)** | **29.9** | 12:13–12:28 | **0.0124** | |
+| Metal kernel, query length 2..512, host calls of at most 512 ids | 25.2 | 12:13–12:28 | 0.0112 | not shipped: memory grows (below) |
+| the same graph, host calls of at most 256 / 128 ids | 25.1 / 25.0 | 12:13–12:28 | 0.0060 / 0.0060 (130 rows) | not shipped |
 | int8, every linear (unrolled S = 16) | — | — | 0.0431 | fails the bar (Precision) |
 | any form on the Neural Engine | — | — | — | not run: the recurrence's fp32 state is not an ANE element type ([`qwen3.5-static-ane.md`](../../knowledge/qwen3.5-static-ane.md)) |
 
 iPhone 18 Pro (KevGate bench, the 94-token question):
 
-| form | ms | session | fixture max \|Δp\| |
+| form | ms | session (2026-10-04, JST) | fixture max \|Δp\| |
 |---|---:|---|---:|
-| unrolled, S = 16 (the earlier upload) | 156.7 | round 13, stage C | 0.0102 |
-| Metal kernel, S = 16 / 32 / 64 | 92.4 / 58.5 / 49.3 | round 13, stage A | 0.0110 / 0.0133 / 0.0098 |
-| **Metal kernel, S = 128 (this release)** | **37.8** | round 13, stage C | **0.0110** |
-| Metal kernel, query length 2..512, host calls of at most 512 ids | 32.6 | round 13, stage C | gate stopped by memory (below) |
+| unrolled, S = 16 (the earlier upload) | 156.7 | from 11:56 | 0.0102 |
+| Metal kernel, S = 16 / 32 / 64 | 92.4 / 58.5 / 49.3 | from 10:29 | 0.0110 / 0.0133 / 0.0098 |
+| **Metal kernel, S = 128 (this release)** | **37.8** | from 11:56 | **0.0110** |
+| Metal kernel, query length 2..512, host calls of at most 512 ids | 32.6 | from 11:56 | gate stopped by memory (below) |
 
 **Several short questions on one state.** For these, the S = 64 graph takes less time than S = 128. In
-round 11's Mac window, five questions on one 137-token state, shared, took 145.0 ms with S = 64 and
-189.1 ms with S = 128; one 94-token question took 41.5 and 30.0 ms. On the iPhone (round 13, stage A)
+the Mac's 09:43–10:45 JST window, five questions on one 137-token state, shared, took 145.0 ms with S = 64 and
+189.1 ms with S = 128; one 94-token question took 41.5 and 30.0 ms. On the iPhone (the session from 10:29 JST)
 the same pairs took 180.3 against 224.4 ms and 49.3 against 36.5 ms. The S = 64 bundle is not in this
 release: it would need a new export and a new gate.
 
