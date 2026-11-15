@@ -5,7 +5,7 @@
 > schema head from the backbone's final hidden states. The port is a 9B ids-input decoder that returns
 > hidden rows, a fixed-grid tower from shipped code, the head re-written as a graph, and the untied
 > `lm_head.weight` as a host table. Card: [`models/clef-flash/README.md`](../models/clef-flash/README.md).
-> Transcripts below are in `models/clef-flash/`; records outside the repo are marked "lane" and live
+> Transcripts below are in `models/clef-flash/`; records outside the repo are marked "local" and live
 > under `$ZOO_WORK_ROOT/_clefflash/`. Mac M4 Max, macOS 27.0 26A428, Xcode 27.0 RC.
 
 ## What was reused and what is new

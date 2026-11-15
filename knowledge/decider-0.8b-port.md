@@ -89,6 +89,6 @@ Facts only — the columns are the same fixture, the same model, a different dev
 
 - Ship bundle throughput on M4 Max (Release `llm-benchmark`, p128/g256, 2 launches × 3
   trials): decode 193.6 tok/s median (186.5–197.0), prefill 226.4, load 1.5 s cold / 0.2 s warm;
-  GPU free of other Core AI work, one CPU-bound job from another lane present.
+  GPU free of other Core AI work, one other CPU-bound job present.
 - `coreai_gate.py` (the zoo's language-model gate) passes 16/16 on the ship bundle with the
   alphabet prompt — the fine-tune still continues text, though the API never asks it to.

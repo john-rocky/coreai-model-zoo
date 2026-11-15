@@ -78,7 +78,7 @@ experts int8→int4 AND dense int8→int4 on top of gather_qmm.
   there; the "3–4× prefill" was an M5 claim that doesn't hold on A19). fp8/fp4 matvec is **UNVERIFIED
   on-device** (numerics de-risked, on-device speed/integration not measured yet). Concretely: **swap the
   int4km matvec for an fp4-E2M1 matvec in this same dense-coverage lever** → same ~2× decode bandwidth win,
-  int8-like quality. That + QAT-int4 (OS26-shippable) is Stream D's lane (separate sessions).
+  int8-like quality. That + QAT-int4 (OS26-shippable) is Stream D's work (separate sessions).
 
 ## 6. Also-measured this session
 - **⚠️ CORRECTION — prefill/FlashAttention is A19-specific, OPEN on Mac.** The claim below over-generalized

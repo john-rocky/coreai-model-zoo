@@ -4,7 +4,7 @@
 > about an image by the letter probabilities at each answer slot of one pass. The port is a fixed-grid
 > tower from shipped code plus one new decoder module (ids in, image rows as a static input, M-RoPE in
 > the graph). Card: [`models/decider-2b-vision/README.md`](../models/decider-2b-vision/README.md).
-> Transcripts below are in `models/decider-2b-vision/`; records outside the repo are marked "lane" and
+> Transcripts below are in `models/decider-2b-vision/`; records outside the repo are marked "local" and
 > live under `$ZOO_WORK_ROOT/_decider2bv/`.
 
 ## What was reused and what is new
@@ -50,7 +50,7 @@ The equality check: the decoder module's planes (fp32 torch, the code the graph 
 equal the planes the author's rotary received (captured by a hook in the oracle) on
 111/111 runs (P1), and `host.build_ids` reproduces the
 ids, slots and planes on 111/111 runs with two tokenizers (`test_host.py`). Its negative controls go
-red: `rope_shift_amount` + 1 on 105/105 image runs, H and W swapped on 16/16 non-square runs (lane
+red: `rope_shift_amount` + 1 on 105/105 image runs, H and W swapped on 16/16 non-square runs (local
 `logs/r2_test_host.log`).
 
 ## The fp16 tower fails; fp16 storage with fp32 math passes
@@ -68,7 +68,7 @@ The failing rows have about half the median reference norm (3.19 vs 6.09 at `g25
 `g448`; `g3_isolation_pooled`), and flat image regions are not the cause (40 of 97 failing rows at
 `g256` are flat tokens, as are 730 of 1,856 rows overall). CPU torch in fp16 misses as well (55 of 58
 image-grid pairs below row cosine 0.999), so the cause is the graph's fp16 arithmetic, not the GPU or
-the compiler; the residual stream's absmax peaks at block 23 on every image, 4,698–6,231 (lane
+the compiler; the residual stream's absmax peaks at block 23 on every image, 4,698–6,231 (local
 `logs/r2_isolate_fp16.json`). Rounding the weights and the baked positional constants to fp16 while
 computing in fp32 still misses on 7 of 58 (worst row 0.978, same record).
 
@@ -108,7 +108,7 @@ the fixture is PNG, where the decoded RGB equals Pillow's byte for byte.
 (`gate-decider-2b-vision-readout-*.json`.) The fp16 head does not help (int8lin), so the error is in the
 body's linears. `conversion/decider_vision/int8_bisect_torch.py` evaluates configurations in fp32 torch
 with the exporter's own int8 weights read back through the finalized module's dequantization, on 4
-fixture runs (r29 `g256`, r26 `g448`, r28 `g256`, r20 `g256`). Lane `logs/r6_bisect.json`:
+fixture runs (r29 `g256`, r26 `g448`, r28 `g256`, r20 `g256`). Local `logs/r6_bisect.json`:
 
 - all int8: r29 0.0221; layers 0–11 fp16: ≤ 0.0023 on all four; layers 12–23 fp16: r29 0.0202.
 - MLP linears alone int8: r29 0.0162; Gated DeltaNet projections alone int8: r26 0.0221, above the
@@ -122,7 +122,7 @@ The set was chosen on the fixture. The held-out gate below is what tested it.
 **coreai-opt 0.2.1 does not clip.** `symmetric_with_clipping` gives codes in −127..127 on all 186
 quantized modules (plain `symmetric`: −128..127), and on `layers.3.mlp.down_proj` every one of its
 393,216 blocks keeps its absmax: dequantized block absmax = 127 × fp16(absmax / 127) within 1.1e-4
-(codes: lane `scratch/r6/int8_clipping.json`; the block check read the dequantized weights in
+(codes: local `scratch/r6/int8_clipping.json`; the block check read the dequantized weights in
 `scratch/r6/int8_clipping.pt` against the source safetensors on 2026-09-29). Plain `symmetric` left
 r29 at 0.0178 in the bisect, so the scheme is not the lever.
 
@@ -132,7 +132,7 @@ The fixture chose the layer set, so the test set had to be one no round had look
 of the grid-price table, the first rows of visual7w (150) and vsr (100) in The Cauldron — the two
 subsets the author's `decider/vision/data.py` marks `held_out=True`. `heldout_prepare.py` rebuilds them
 with the author's filter and `thumbnail((768, 768))` and matches each to the grid-price record; it
-needs only the processor, not the model. The images stay in the lane directory; the transcript holds
+needs only the processor, not the model. The images stay in the local directory; the transcript holds
 row indices and numbers only.
 
 Bars were written before any result: ids = the processor's (500/500), pixels within 2 levels
@@ -224,6 +224,6 @@ the entitlement is kept in it).
   (`g256`), 0.584 / 0.579 s (`g448`), 0.284 / 0.286 s (text), two passes; tower 22.0 / 61.3 ms; `main`
   11.6 ms per call, `prefill` 25.2 ms per 16 tokens.
 - What a fixed grid costs, with the author's code alone (`conversion/decider_vision/grid_price.py`,
-  lane `price/grid_price.json`): visual7w 150 accuracy 0.940 native / 0.913 `g256` / 0.940 `g448`
+  local `price/grid_price.json`): visual7w 150 accuracy 0.940 native / 0.913 `g256` / 0.940 `g448`
   (argmax = native 0.947 / 0.980); vsr 100 0.770 / 0.740 / 0.770 (0.910 / 0.940). The 256×240 game
   frames get the 64-token grid from the processor itself, so `native` = `g256` there (7/7 rows).

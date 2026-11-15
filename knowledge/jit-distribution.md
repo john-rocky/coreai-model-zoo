@@ -29,7 +29,7 @@ The question was how large a graph the phone specializes itself, and what that f
 
 Runs `20260926-162943` (fresh install: the app and its container removed first, so no container cache),
 `163212` (relaunch), `163809` (the PII JIT files, then the shipped PII bundle right after); raw under
-`conversion/gliner25_decide/_work/device_runs/` and `~/code/coreai/_jit_distribution/results/` (lane data).
+`conversion/gliner25_decide/_work/device_runs/` and `~/code/coreai/_jit_distribution/results/` (local data).
 
 ### The rest of the zoo's non-LLM iOS graphs, same phone, same mode (runs `20260926-185357`, `185441`, `191440`, `191523`)
 

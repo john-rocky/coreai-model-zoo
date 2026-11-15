@@ -24,7 +24,7 @@ the host.
 
 ## The oracle reproduced the frozen fixture bit for bit
 
-The publisher's own model (transformers 5.17, SDPA attention, CPU fp32) re-ran the LiteRT lane's 201
+The publisher's own model (transformers 5.17, SDPA attention, CPU fp32) re-ran the LiteRT port's 201
 rows × 2 windows: `build_sequence` gives the same ids and markers 402/402, and the batched
 `Agent.predict` gives the same answer dictionaries and the same raw marker and act logits with zero
 difference. Each row alone, right-padded to its window (batch 1), sits at max |Δp| 2.4e-6 from the frozen

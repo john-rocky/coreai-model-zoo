@@ -4,7 +4,7 @@
 > Qwen3.5 hybrid decoder with a new position scheme, canvas M-RoPE, and an untied head. The port is one re-authored
 > tower, one new decoder module on the decider-2b-vision contract, and the engine's existing static-input and
 > extra-state hooks. Card: [`models/minicpm-v-4.7-1b/README.md`](../models/minicpm-v-4.7-1b/README.md). Transcripts
-> are in `models/minicpm-v-4.7-1b/`; records outside the repo are marked "lane" and live under
+> are in `models/minicpm-v-4.7-1b/`; records outside the repo are marked "local" and live under
 > `$ZOO_WORK_ROOT/_minicpmv47/`.
 
 ## What was reused and what is new
@@ -19,7 +19,7 @@
 | device harness | PipelinedBench's GLM-OCR form (binds `image_embeds` + `rope_shift_start` / `rope_shift_amount` by name) | its reference directory became a spec field (`vlRefDir`; it was the fixed name `glm_ocr_ref`) + a 4.7 spec |
 
 The 4.7 vision classes are 4.6's after renaming: `modeling_minicpmv4_7.py` lines 55–604 equal `modeling_minicpmv4_6.py`
-lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
+lines 50–599 with `4_7` → `4_6` (local `FEASIBILITY.md` §r1, `cmp`).
 
 ## The canvas rule and why the gate is on the planes
 
@@ -29,7 +29,7 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
 - With this chat template the frame is followed by one `"\n"` (198), so start = i0 + 67 and amount = 58 on every
   image prompt measured (O = 6, 6, 6, 17).
 - In fp32 torch the rule equals the planes Hugging Face's rotary received: 433/433 prompt positions, 458/458 generate
-  positions, every generated token at p − amount 92/92 (lane `oracle/parity_vl_torch.json`).
+  positions, every generated token at p − amount 92/92 (local `oracle/parity_vl_torch.json`).
 - Red arms in torch: amount + 1 fails 4/4 (only the text before the frame still matches), 1-D planes fail 4/4.
 - **A last-position logits bar passes the wrong scheme**: with 1-D planes (4.6's) the last-position top-5 stays equal
   on all four image prompts, cos 0.9981–0.9996 against the oracle's 0.99999999999. Gate the planes themselves.
@@ -48,7 +48,7 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
 ## The head is untied but 4.9e-4 from the embedding
 
 - `lm_head.weight` vs `embed_tokens.weight`: max |Δ| 4.9e-4, relative Frobenius 1.35e-3, row cosine ≥ 0.99998, no
-  identical row (lane `oracle/parity_text.json` `head_vs_embed_weights`).
+  identical row (local `oracle/parity_text.json` `head_vs_embed_weights`).
 - The embedding as the head (red arm, P0's last 48 positions): argmax 48/48 and cosine 0.999998 survive; the ordered
   top-5 drops to 46/48 and max |Δ| rises from 2.4e-4 to 0.196. Keep the ordered top-5 in a head bar.
 - int8hu has nothing to untie: 187 linears int8 per block of 32 (186 body `symmetric_with_clipping`, the head
@@ -59,7 +59,7 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
 
 ## fp16: the tower's norm inputs overflow fp16 when squared, and the GPU's fp16 tower passes
 
-- fp32 activations (P1–P4): largest 1,498.8 (tower layer 26 residual, P2), text ≤ 76.4, none above 30,000 (lane
+- fp32 activations (P1–P4): largest 1,498.8 (tower layer 26 residual, P2), text ≤ 76.4, none above 30,000 (local
   `oracle/fp16_precheck.json`).
 - One residual channel is written by layer 9's MLP (`fc2` absmax 1,299) and carried to `post_layernorm`: 35 LayerNorm
   inputs (layers 10–26, `post_layernorm`) reach a row sum of squares of 2.39e6 (> 65,504); row mean(x²) ≤ 2,077.
@@ -69,7 +69,7 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
   (mean ≥ 0.9999, min ≥ 0.999); no overflow showed (`gate-minicpm-v-4.7-1b-tower-fp16.json`).
 - fp16w32 on the GPU: cos min 0.9999999986, and 25.5 % slower (55.03 vs 43.85 ms); it does not ship.
 - The tower on the Mac Neural Engine (`--preferred-compute neural-engine`, fp16): 31 ANE regions, 177.3 ms warm
-  against 43.85 ms on the GPU, cos min 0.99627 (below the fp16w32 bar) → the GPU stays (lane `r4/ane_tower.json`).
+  against 43.85 ms on the GPU, cos min 0.99627 (below the fp16w32 bar) → the GPU stays (local `r4/ane_tower.json`).
   The int8lin tower compiled to 24 regions and was not timed.
 
 ## int8lin is stored as fp16 on the Mac AOT and on the phone
@@ -108,7 +108,7 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
   `--expect-frequent-reshapes`, 2.81 GB) stay exact (23/23, 32/32 on three launches) and load in 1.3 s at the initial
   load (JIT 6.4 s), but the AOT decoder decodes at 51.4 tok/s against the JIT's 98.0 / 98.3 in the same session (1.9×
   slower; the asset holds an fp16 copy of the Linears beside the int8 weights, 2.15× the bytes of the JIT cache entry);
-  the AOT tower runs at the JIT's speed (66.4 / 69.0 vs 66.3 ms). The JIT `.aimodel` ships (lane `r5/DEVICE.md`).
+  the AOT tower runs at the JIT's speed (66.4 / 69.0 vs 66.3 ms). The JIT `.aimodel` ships (local `r5/DEVICE.md`).
 
 ## Prefill in chunks and a second turn (Mac, not uploaded)
 
@@ -116,10 +116,10 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
   externalize retry fixed the static-S SDPA guard of the 6 full-attention layers on the initial export) answers P1–P4
   token for token as the S=1 order and the oracle, and cuts P1's 88-token TTFT from 673.3 to 162.7 ms (4.14×); the
   last prompt position is not bit-equal to the S=1 order (cos ≥ 0.999992, max |Δ| ≤ 0.0625), and S=32 would not help
-  P1 (88 = 2 × 32 + 24, and those 24 S=1 calls alone take 178 ms) (lane `r5/chunk.json`).
+  P1 (88 = 2 × 32 + 24, and those 24 S=1 calls alone take 178 ms) (local `r5/chunk.json`).
 - A second question on the same image: the template renders the conversation as turn 1's ids + its answer + 248046,
   198 + the new turn, so the state after turn 1 is reusable — 20 calls (174.3 ms) instead of 140 (1,318.2 ms), the
-  answer = the fp32 oracle's 32 tokens, the carried and re-prefilled last-prompt logits bit-equal (lane `r5/state.json`).
+  answer = the fp32 oracle's 32 tokens, the carried and re-prefilled last-prompt logits bit-equal (local `r5/state.json`).
 
 ## CoreAIKit (VLChat)
 
@@ -166,7 +166,7 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
 - `strip_debug_info` (via `AIModelAsset.load` → `program.save_asset` with the source's metadata) removes all of them:
   op counts and `coreai-build inspect` unchanged, main.mlirb 457 KB / 257 KB / 196 KB smaller, the AOT h16c
   `resources.bin` byte-equal to the export's, the MPSGraph packages smaller (decoder `specialized_model_1.mpsgraph`
-  1,050,915 → 622,419 B) (lane `r6/strip_*.json`, `r6/regate_stripped.json`).
+  1,050,915 → 622,419 B) (local `r6/strip_*.json`, `r6/regate_stripped.json`).
 - The stripped AOT gets a new `main.hash`, so the Python runtime specializes it into a new cache entry instead of
   reusing the export's (`~/Library/Caches/coreai-cache/<os build>/python/<main.hash>`).
 - The stripped int8lin tower + int8hu decoder re-ran G4: greedy ids, tower statistics and last-position logits
@@ -200,7 +200,7 @@ lines 50–599 with `4_7` → `4_6` (lane `FEASIBILITY.md` §r1, `cmp`).
 ## Numbers of record
 
 - Mac M4 Max, Python runtime, AOT h16c, interleaved: decoder int8hu 7.44 ms per S=1 call (134.4 tok/s), fp16 7.42
-  (134.9); towers int8lin 43.81, fp16 43.85, fp16w32 55.03 ms (lane `r3/timing_run3.json`).
+  (134.9); towers int8lin 43.81, fp16 43.85, fp16w32 55.03 ms (local `r3/timing_run3.json`).
 - iPhone 18 Pro, PipelinedBench, JIT: decode 98.0 tok/s warm, prefill 105.7 tok/s, engine ready 6.4 / 0.2 s; towers
   67.8 / 68.5 ms (int8lin), 66.5 / 68.6 ms (fp16).
 - Export walls: decoder int8hu 41 s, fp16 32 s; towers fp16w32 5 s, int8lin 17 s, fp16 4 s. AOT h16c: 37.0 / 10.9 /

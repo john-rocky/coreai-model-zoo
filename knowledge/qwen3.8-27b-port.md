@@ -51,7 +51,7 @@ re-downloading. Blob name MUST be the LFS oid — it is the etag the client vali
 The export venv (4.57) has no `transformers.models.qwen3_5`; the config shim only covers
 config parsing for the overlay. For the HF-side oracle a dedicated venv was created
 (`~/.venvs/qwen38-oracle`: transformers 5.12.1 + torch 2.13) rather than touching any
-existing lane's venv. Two 5.x-era gotchas:
+existing venv. Two 5.x-era gotchas:
 
 - `apply_chat_template(..., return_tensors="pt")` returns a `BatchEncoding`, not a tensor —
   take `enc["input_ids"]` (or `.shape` dies with a misleading `KeyError: 'shape'`).

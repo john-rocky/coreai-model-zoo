@@ -7,7 +7,7 @@
 > Gated DeltaNet recurrence in the overlay's fp32 Metal kernel; the earlier graphs took 16 tokens a call, unrolled.
 > Cards:
 > [`models/kev-0.8b/README.md`](../models/kev-0.8b/README.md), [`models/kev-4b/README.md`](../models/kev-4b/README.md).
-> Transcripts below are in `models/kev-<size>/`; records outside the repo are marked "lane" and live under
+> Transcripts below are in `models/kev-<size>/`; records outside the repo are marked "local" and live under
 > `$ZOO_WORK_ROOT/_kev/`. Mac M4 Max, macOS 27.0 26A428, Xcode 27.0 RC; iPhone 18 Pro, iOS 27.0 24A437.
 
 ## What was reused and what is new
@@ -30,7 +30,7 @@ the hidden state at `<|fim_suffix|>` and at every `<|box_end|>`: `z = (k(h_opt) 
 softmax(z / T)` within the question (T 2.3510958125672174 / 2.406050072164233).
 
 - **The delimiter ids come from the base tokenizer**: 248060 / 248061 / 248049 / 248050 / 248062, pad = eos 248044,
-  no bos (`results/tokenizer_check.json`, lane). The `kev-4b` repository still carries Qwen3-era `vocab.json`,
+  no bos (`results/tokenizer_check.json`, local). The `kev-4b` repository still carries Qwen3-era `vocab.json`,
   `merges.txt`, `added_tokens.json` and `special_tokens_map.json`, whose delimiter ids (151659…) belong to the older
   tokenizer. The author's loader reads the tokenizer from the base (`load_tokenizer(meta.base, …)`); so do the bundles
   (`tokenizer/` = the base's `tokenizer.json` + `tokenizer_config.json`, verbatim). The two bases' `tokenizer.json`
@@ -43,8 +43,8 @@ softmax(z / T)` within the question (T 2.3510958125672174 / 2.406050072164233).
   `score` confidence jumps when two levels of a near-tie swap the mode (a `score` question of `own_t02` on 4B, oracle
   margin 0.0024: 0.3058 on the graph against 0.1813) — compare probabilities, not confidences (`gate-kev-4b-host.json`).
 - The Hub tag `v1.0` (`788ddbdd` for kev-0.8b, `591dcb5b` for kev-4b) is a tag object. For kev-0.8b the Hub resolves
-  it to commit `bf75a6a8`, whose LFS objects equal the card's weights revision (lane `results/source_sha256.json`);
-  kev-4b resolves the same way (lane `ROUND4.md`). huggingface_hub 1.32 (the author's
+  it to commit `bf75a6a8`, whose LFS objects equal the card's weights revision (local `results/source_sha256.json`);
+  kev-4b resolves the same way (local `ROUND4.md`). huggingface_hub 1.32 (the author's
   lock) resolves a 40-hex revision offline only after one online `snapshot_download` with that version has written
   its tree listing.
 
@@ -91,7 +91,7 @@ gives the oracle's p within 3.5e-6 (0.8B) / 6.6e-6 (4B) on all 434 questions, an
   fixture's long states: every argmax equal, max |Δp| 0.0023 (0.8B) / 0.00046 (4B); hidden cosine to the oracle at
   least 0.99994 everywhere at 0.8B and 0.99902 at and after position 4,032 at 4B. At 4B eight positions earlier in
   the state's text read a cosine below 0.99 (lowest 0.46 at position 673), while every readout position stays above
-  0.99999 (lane `results/longrow_kev-<size>.json`). Why those positions drift is not isolated.
+  0.99999 (local `results/longrow_kev-<size>.json`). Why those positions drift is not isolated.
 
 ## The scan form sets the cost of a call
 
@@ -129,7 +129,7 @@ ran beside other GPU work.
   length costs what the static kernel of the same length costs (round 14's rows above, one window).
 - **The in-graph chunk breaks between S = 16 and S = 32, already in fp32 torch.** On the 21 rows the oracle keeps
   hidden states for, C32 is off the unrolled form by up to 6.4 in the hidden state and 0.12 in p; the lowest
-  position cosine to the oracle is 0.845 and 20 of 21 argmaxes hold (lane `results/r11_torch_chunk.json`). C16 is off
+  position cosine to the oracle is 0.845 and 20 of 21 argmaxes hold (local `results/r11_torch_chunk.json`). C16 is off
   by 4.4e-4. On the GPU, C32 fails the screen: non-near-tie argmax 112/127, max |Δp| 0.125, non-finite rows
   (`gate-kev-0.8b-forms.json`). So the GPU failure is the algorithm, not fp16.
 - **The kernel is not bit-equal to the unrolled form, and both pass.** The kernel keeps the recurrent state in fp32
@@ -151,7 +151,7 @@ built for the cap. Round 14 measured caps 128, 256 and 512 on the M4 Max; round 
   graph is the case L = q = S, so the hosts read both kinds of bundle.
 - **Shared and direct runs stop being bit-equal.** The shared prefix ends at a multiple of q, so its calls are cut
   at other places than a direct run's. On the cap-512 graph both pass the bar: the shared fixture pass has max |Δp|
-  0.0128, at most 0.0022 from the direct p (lane `results/r15_gate_0_8b.json` `shared_vs_direct`). A prepared state
+  0.0128, at most 0.0022 from the direct p (local `results/r15_gate_0_8b.json` `shared_vs_direct`). A prepared state
   equals the shared prefix bit for bit.
 - **It does not ship.** In round 15's lock window it decided the 94-token question in 25.2 ms (the `.aimodel`
   specialized by Swift), against 29.9 ms for the static K128 graph and 100.1 ms for U16. Its footprint grows while
@@ -173,7 +173,7 @@ held-out set, at 85 % of fp16's bytes.
 - **Rank layers by the mean, not the worst row.** Alone, layers 0, 7, 10 and 11 leave the worst row where all-int8
   put it (7 and 11 make it worse), so a worst-row ranking puts layers 12–23, which change nothing, ahead of them. By
   the bisect rows' mean every layer of 0–11 ranks above every layer of 12–23: the top 12 by mean is the set that works
-  (lane `ROUND3.md`).
+  (local `ROUND3.md`).
 
 **Kev-4B** (`gate-kev-4b-int8.json`): int8lin fails (0.0601; held out 0.0285). The instrument (40 rows, a rule written
 first, at most 25 % fp16, target worst ≤ 0.006 and mean ≤ 0.0012):
@@ -211,7 +211,7 @@ the one run on the held-out set fails on one `score` row (0.0277, `tv4sh_11`, fp
   9.6–14.6 s for each new length, 46.4 ms per call at a length already seen, probabilities still within 0.0055 of the
   oracle. An int8 asset without the flag folds the dequantization into fp16 constants during that specialization
   (sampled: `specializeWithDevice` → `LowerDequantizeND` → `createOrFoldConstant` → `foldCastAttribute`) and had not
-  finished its first length after 12 minutes (`efr_abba`, `resident_memory`; lane
+  finished its first length after 12 minutes (`efr_abba`, `resident_memory`; local
   `logs/r6_sample_int8_noefr_worker_11034.txt`). The runtime leaves the MPSGraph scratch of those specializations
   under `$TMPDIR/com.apple.MetalPerformanceShadersGraph` after the process exits.
 - **Resident on the Mac.** A gate worker on the 4B efr asset: rss up to 16.6 GB, up to 16.4 GB of it clean mapped
@@ -229,7 +229,7 @@ the one run on the held-out set fails on one `score` row (0.0277, `tv4sh_11`, fp
   call took up to 2,458 ms in the process that had just made the runtime's cache entry. Later processes ran every
   length at its steady cost from the first call. Where that state is kept on the Mac was not found. On the iPhone
   (round 13) the cost came only at the first launch after install. During that launch the app's Metal shader cache
-  grew and the Core AI cache did not change (lane `ROUND13.md`, `device_r13/runs/listings/probe_d128_*/`). Whether
+  grew and the Core AI cache did not change (local `ROUND13.md`, `device_r13/runs/listings/probe_d128_*/`). Whether
   removing that cache brings the cost back was not tested.
 
 ### An AOT cache entry is named by the function's type
@@ -240,7 +240,7 @@ the one run on the held-out set fails on one `score` row (0.0277, `tv4sh_11`, fp
 - So the cap-128 and cap-256 graphs, exported from the same version of `qwen3_5_kev_decoder.py`, share one stub hash
   and one entry name (`3fdbe104…`). Loading the cap-256 asset while the entry held the cap-128 graph ran the cap-128
   graph, with no error. At a call of 200 tokens its hidden rows were off the cap-256 graph's own by up to 34.3, all
-  finite. At 64 tokens they were bit-equal (lane `results/r14_cache_collision_D256.json`, `results/r14_cache_stale.json`).
+  finite. At 64 tokens they were bit-equal (local `results/r14_cache_collision_D256.json`, `results/r14_cache_stale.json`).
 - An edit of the source changes the stub: the cap-512 graph, exported after one, got its own entry.
 - The `.aimodel` specialized by the Swift runtime keeps its entry under the `.aimodel`'s `main.mlirb` sha256
   (`ab60bacd…` for the cap-512 graph), so two different graphs do not share one.
@@ -249,7 +249,7 @@ the one run on the held-out set fails on one `score` row (0.0277, `tv4sh_11`, fp
 
 ### A dynamic-length graph's footprint grows while the call length keeps changing
 
-Round 15 probed the cap-512 dynamic graph through the `.aimodel` specialized by the Swift runtime, on the M4 Max (lane
+Round 15 probed the cap-512 dynamic graph through the `.aimodel` specialized by the Swift runtime, on the M4 Max (local
 `results/r15_leak_0_8b.json`, phys_footprint of one process):
 
 - **Same length: the first call adds the memory, later calls almost none.** 200 calls of the same 96 tokens from zero
@@ -266,7 +266,7 @@ Round 15 probed the cap-512 dynamic graph through the `.aimodel` specialized by 
   Every set of 4 to 32 lengths probed grew on every lap.
 - **Two lengths in turn stop growing.** Alternating 96 and 112 tokens grew only at the opening calls. Bringing in 128
   added 19.1 MB, and going back to 96 / 112 added 1.3 MB (`leak2`).
-- **On the iPhone 18 Pro the same happens** (round 13, lane `results/r13_c_memory.json`). A gate run of the cap-512
+- **On the iPhone 18 Pro the same happens** (round 13, local `results/r13_c_memory.json`). A gate run of the cap-512
   graph grew from 199 MB after the load to 1,381 MB after warm_up (32 calls, 36.4 MB per call). It reached 3,497 MB
   after 370 records and 439 calls, with 43 MB available, and the app wrote nothing after that sample. At the last
   decision of the bench launches the footprint was 3,089, 2,092 and 3,069 MB for host calls of at most 128, 256 and 512
@@ -306,34 +306,34 @@ published K128 graph the Swift host's shared rows equal its direct rows on 434/4
   `kev`; `-scheme Kev` builds the library.
 - **JIT = AOT at both sizes.** The `.aimodel` specialized by Swift (GPU preferred, `expectFrequentReshapes`) equals the
   h16c AOT asset bit for bit on 25 rows of 10 records: 0.8B specialized in 5.4 s and added 2,510,934,016 B to the
-  runtime's cache; 4B in 9.4 s, +15,574,564,864 B, no MPSGraph scratch (lane `results/swift_jit_kev-<size>.json`).
+  runtime's cache; 4B in 9.4 s, +15,574,564,864 B, no MPSGraph scratch (local `results/swift_jit_kev-<size>.json`).
   Those were the S = 16 graphs. The published K128 graphs also equal their AOT assets on 25 rows; they specialized in
   3.34 s (0.8B) and 16.6 s (4B, a 15.55 GB cache entry) (`gate-kev-<size>-swift.json`). The
   cache entry is named by the `.aimodel`'s `main.mlirb` sha256, on the Mac and on the phone.
 - One process answers all 384 fixture records; on the S = 16 graphs its footprint stayed within 556–621 MB (0.8B) and
-  844–976 MB (4B) over the pass (lane `results/swift_gate_kev-<size>.json` `sets.fixture.footprint`).
-- **The GPU lock has two conventions.** This lane writes a tag into `_GPU_LOCK`; the kit's `scripts/with-gpu-lock.py`
+  844–976 MB (4B) over the pass (local `results/swift_gate_kev-<size>.json` `sets.fixture.footprint`).
+- **The GPU lock has two conventions.** This port's scripts write a tag into `_GPU_LOCK`; the kit's `scripts/with-gpu-lock.py`
   takes a `flock(2)` and opens the file with mode `"w"`, which empties it even while it waits. Check the file's text
   and `lsof` before GPU work; keep the lock's file object open under its own name for the whole window (a reused
-  variable name closed it once and let another job in) (lane `ROUND7.md`).
+  variable name closed it once and let another job in) (local `ROUND7.md`).
 
 ## Timing on a shared machine
 
-Other lanes shared this Mac's GPU while the forms were timed. A time in the cards counts only if it was measured under
+Other jobs shared this Mac's GPU while the forms were timed. A time in the cards counts only if it was measured under
 this rule, fixed before the timing runs:
 
 - A process counts when no other GPU job ran during it and the one-minute load average was at most 12 at its start and
   at its end. A form needs two counted processes, and a window runs up to four rounds to get them. Medians are over the
-  counted processes only; the others stay in the record (lane `swift/timing/<run>/clean.json`).
+  counted processes only; the others stay in the record (local `swift/timing/<run>/clean.json`).
 - **The unrolled graph reacts to load.** Round 11's four U16 processes decided the same 94-token question in 177.3,
   106.5, 493.0 and 115.2 ms; one counted. The first ran at a load average of 23; in the same contended round K128 took
-  31.0 ms, against 29.7 and 30.1 ms in its counted processes. The third U16 process overlapped another lane's GPU jobs
-  that no process-list pattern matched; that lane's log showed them afterwards. Round 7's two U16 processes gave 152.9
+  31.0 ms, against 29.7 and 30.1 ms in its counted processes. The third U16 process overlapped other GPU jobs
+  that no process-list pattern matched; their owner's log showed them afterwards. Round 7's two U16 processes gave 152.9
   and 104.1 ms.
-- Inside one screen window the same U16 graph took 27.03 ms per call at the start, while this lane's exports ran, and
+- Inside one screen window the same U16 graph took 27.03 ms per call at the start, while this port's exports ran, and
   18.26 ms at the quiet end.
 - **The lock does not make every GPU job visible.** A job that does not take it, or that runs from a command line the
-  detector does not know, shows up only in its owner's log. Keep a `ps` sample per process, and read the other lanes'
+  detector does not know, shows up only in its owner's log. Keep a `ps` sample per process, and read the other jobs'
   logs before calling a window clean.
 
 ## iPhone 18 Pro
@@ -385,7 +385,7 @@ was not re-run with new names. A screen of invented names needs the exact-word w
 ## Agreement with the fixture's gold labels (our subset)
 
 The author's fp32 oracle against the fixture's labels: our subset of 434 questions, not the author's evaluation suites
-or tables (`oracle_summary.json`, `oracle_summary_4b.json`, lane).
+or tables (`oracle_summary.json`, `oracle_summary_4b.json`, local).
 
 | group | questions | Kev-0.8B | Kev-4B |
 |---|---:|---:|---:|

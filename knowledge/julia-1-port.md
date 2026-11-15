@@ -44,13 +44,13 @@ and reproduces the publisher's 2,000 `predict(state=..., questions=...)` answer 
 The tokenizer file is byte-identical to laya's (sha256 `609d8f4c…`), so the Swift tokenizer lessons of the laya
 note carry over unchanged.
 
-## The oracle reproduced the publisher's CPU result, and a second lane's oracle bit for bit
+## The oracle reproduced the publisher's CPU result, and a second port's oracle bit for bit
 
 The publisher's `scripts/reproduce_typed.py`, run unchanged on an M4 Max (torch 2.14.0, transformers 5.0.0, CPU
 fp32, 4 threads), gives its published 426/600 choice, 542/800 score, 483/600 noul in 71 s. `oracle_julia.py` takes
 the raw logits of the same engine one question per forward: the same three numbers, and all 2,000 answers equal to
 that run's. The publisher's 100 WebGPU parity requests match the PyTorch logits it recorded to 1.03e-4 with
-100/100 argmax (it ran them in padded batches of four). The LiteRT lane's independent oracle of the same pins
+100/100 argmax (it ran them in padded batches of four). The LiteRT port's independent oracle of the same pins
 gives the same ids and the same logits on all 2,000 questions, bit for bit.
 
 Two facts about transformers 5.0 a port runs into: ModernBERT refuses `set_attn_implementation("eager")` with a

@@ -100,6 +100,6 @@ loosen the fp32 one to fit it.
 iPhone 17 Pro (iOS 27.0 24A437, h18p AOT, GPU-preferred): fp32 **5.54 / 20.99 ms** warm median at
 S=128 / 512, load 81 / 586 ms, min cosine 0.9999999999994, peak footprint 640 MB whole-process.
 Mac M4 Max (26A428, JIT, GPU-preferred): **4.14 / 4.89 ms**, load 481 / 470 ms. The Mac h16c
-AOT twin gated 70/70 with identical numerics; its timings were taken alongside another lane's
+AOT twin gated 70/70 with identical numerics; its timings were taken alongside another
 GPU job and were discarded rather than labelled — a timing measured under contention is not a
 timing with a caveat, it is a different measurement.
