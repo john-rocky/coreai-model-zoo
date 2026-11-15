@@ -44,14 +44,14 @@ fixed-grid tower, the head as a graph and the untied `lm_head.weight` as a host 
   `HF_HUB_OFFLINE=1` and `HF_HUB_DISABLE_XET=1`. Everything the scripts write outside the repository goes under
   `$ZOO_WORK_ROOT/_clefflash/` (`conversion/_paths.py`).
 
-Run from `conversion/clef_flash`. `<lane>` below is `$ZOO_WORK_ROOT/_clefflash`, `R=<lane>/results`,
-`G=<lane>/logs`, `B=<lane>/exports/bundles`, `H=<lane>/exports/head/clef_flash_head_bucket_fp16w32`.
+Run from `conversion/clef_flash`. `<work>` below is `$ZOO_WORK_ROOT/_clefflash`, `R=<work>/results`,
+`G=<work>/logs`, `B=<work>/exports/bundles`, `H=<work>/exports/head/clef_flash_head_bucket_fp16w32`.
 
 ## 1. Oracle and fixture
 
 ```bash
-uv run make_fixtures.py --fetch-photos           # once; then offline. -> <lane>/fixtures
-uv run oracle_clef.py                            # 214 runs, about 47 min on an M4 Max CPU -> <lane>/oracle, <lane>/results
+uv run make_fixtures.py --fetch-photos           # once; then offline. -> <work>/fixtures
+uv run oracle_clef.py                            # 214 runs, about 47 min on an M4 Max CPU -> <work>/oracle, <work>/results
 uv run oracle_clef.py --arms g672,g896 --tag _large --independent img_01:g672,photo_01:g896
 uv run grid_price.py --arms native,g256,g448,g672,g896 --out $R/grid_price_large.json
 ```
@@ -80,11 +80,11 @@ The CPU path computes the depthwise conv as one `bmm` over the windows and check
 
 ```bash
 python ../export_qwen38vl_pipelined.py --hf-id Cloudflare/clef-flash --name clef_flash_g256 \
-    --grid-h 8 --grid-w 8 --skip-decoder --vision-dtype fp16w32 --out-dir <lane>/exports
+    --grid-h 8 --grid-w 8 --skip-decoder --vision-dtype fp16w32 --out-dir <work>/exports
 python ../export_qwen38vl_pipelined.py --hf-id Cloudflare/clef-flash --name clef_flash_g448 \
-    --grid-h 14 --grid-w 14 --skip-decoder --vision-dtype fp16w32 --out-dir <lane>/exports
-xcrun coreai-build compile <lane>/exports/clef_flash_g256_vision_fp16w32/clef_flash_g256_vision_fp16w32.aimodel \
-    --output <lane>/exports/clef_flash_g256_vision_fp16w32_aotc --platform macOS --preferred-compute gpu --architecture h16c
+    --grid-h 14 --grid-w 14 --skip-decoder --vision-dtype fp16w32 --out-dir <work>/exports
+xcrun coreai-build compile <work>/exports/clef_flash_g256_vision_fp16w32/clef_flash_g256_vision_fp16w32.aimodel \
+    --output <work>/exports/clef_flash_g256_vision_fp16w32_aotc --platform macOS --preferred-compute gpu --architecture h16c
 #   (the same for g448)
 $PY gate_tower.py --stages torch                                   # g256, g448 -> $R/tower_torch.json
 $PY gate_tower.py --stages torch --arms g672,g896                  # the two larger grids, added to the same file
@@ -103,7 +103,7 @@ $PY readout_gate.py merge $R/readout_fp16_pf64.json $R/readout_fp16_pf64_rest.js
     --compare-with $R/readout_fp16_pf16.json --transcript $R/readout_fp16_pf64_full.json
 ```
 
-The bundle lands in `<lane>/exports/bundles/<name>/`, the AOT asset in `<lane>/exports/bundles_aotc/`. The S = 16
+The bundle lands in `<work>/exports/bundles/<name>/`, the AOT asset in `<work>/exports/bundles_aotc/`. The S = 16
 reference of the chunk-width comparison is `export_decoder.py fp16 --prefill-chunk 16 --aot` and `readout_gate.py
 run $B/clef_flash_decode_fp16_pf16 --red`. Each gate process takes at most 40 runs plus a re-run of its first,
 which must reproduce its hidden rows bit for bit (the Python runtime leaks one IOSurface per call). The GPU is
@@ -120,8 +120,8 @@ $PY readout_gate.py run $B/clef_flash_decode_int8lin_pf64 --red --compare-with $
 $PY int8_bisect_torch.py dump
 $PY int8_bisect_torch.py rule --runs semif_1105577da4c8dad4609d:text,semif_86a15618ba4cb90a307e:text,\
 semif_fb73a85d386cf59b0c51:text,own_j12:text,semif_8a4c3de28be95c105ca1:text,img_06:native --why "..."
-$PY int8_bisect_torch.py run --part <lane>/bisect/parts/part_a.json --candidates
-$PY int8_bisect_torch.py run --part <lane>/bisect/parts/part_b.json --informative \
+$PY int8_bisect_torch.py run --part <work>/bisect/parts/part_a.json --candidates
+$PY int8_bisect_torch.py run --part <work>/bisect/parts/part_b.json --informative \
     --sets "0,1,2,3,4,5,6,7,8;0,1,2,3,4,5,6,7,8,9;0,1,2,3,4,5,6,7,8,9,10"
 $PY int8_bisect_torch.py merge --out $R/int8_bisect.json
 $PY export_decoder.py int8mix --fp16-layers 0,1,2,3,4,5,6,7,8,9,10,11 --prefill-chunk 64 --aot \
@@ -141,7 +141,7 @@ is its test. Two diagnostics ran the same way: `export_decoder.py fp16 --variant
 ## 6. The head and the lm_head table
 
 ```bash
-$PY export_lm_head_table.py                                        # -> <lane>/exports/host/lm_head_fp16.bin + .json
+$PY export_lm_head_table.py                                        # -> <work>/exports/host/lm_head_fp16.bin + .json
 $PY gate_head.py h0 --out $R/head_h0.json
 $PY export_head.py --shape bucket --weights fp16w32 --aot --record $G/r5_export_head_bucket.json
 $PY gate_head.py h1 --head $H --out $R/head_h1.json
@@ -162,15 +162,15 @@ Transcript: `gate-clef-flash-head.json`.
 ## 7. Held out
 
 ```bash
-uv run make_fixtures.py --heldout --fetch-photos                  # -> <lane>/fixtures/heldout
-uv run oracle_clef.py --fixtures <lane>/fixtures/heldout --out-dir <lane>/oracle/heldout \
-    --results-dir <lane>/oracle/heldout --arms text,g256,g448 --independent ho_t01:text,ho_j02:text,ho_i01:g256,ho_p01:g448
-$PY readout_gate.py run $B/clef_flash_decode_fp16_pf64 --oracle <lane>/oracle/heldout --tag heldout_fp16_pf64 \
+uv run make_fixtures.py --heldout --fetch-photos                  # -> <work>/fixtures/heldout
+uv run oracle_clef.py --fixtures <work>/fixtures/heldout --out-dir <work>/oracle/heldout \
+    --results-dir <work>/oracle/heldout --arms text,g256,g448 --independent ho_t01:text,ho_j02:text,ho_i01:g256,ho_p01:g448
+$PY readout_gate.py run $B/clef_flash_decode_fp16_pf64 --oracle <work>/oracle/heldout --tag heldout_fp16_pf64 \
     --transcript $R/readout_heldout_fp16_pf64.json
-$PY readout_gate.py run $B/clef_flash_decode_int8mix_pf64 --oracle <lane>/oracle/heldout --tag heldout_int8mix_pf64 \
+$PY readout_gate.py run $B/clef_flash_decode_int8mix_pf64 --oracle <work>/oracle/heldout --tag heldout_int8mix_pf64 \
     --compare-with $R/readout_heldout_fp16_pf64.json --transcript $R/readout_heldout_int8mix_pf64.json
-$PY gate_head.py h1 --head $H --oracle <lane>/oracle/heldout --tag head_h1_heldout --out $R/head_h1_heldout.json
-$PY gate_head.py h2 --head $H --oracle <lane>/oracle/heldout --readout $R/readout_heldout_fp16_pf64.json \
+$PY gate_head.py h1 --head $H --oracle <work>/oracle/heldout --tag head_h1_heldout --out $R/head_h1_heldout.json
+$PY gate_head.py h2 --head $H --oracle <work>/oracle/heldout --readout $R/readout_heldout_fp16_pf64.json \
     --tag head_h2_heldout --out $R/head_h2_heldout.json
 ```
 
@@ -181,24 +181,24 @@ overwrite the fixture's summary files and look for fixture record ids. Transcrip
 ## 8. Swift
 
 ```bash
-swift build -c release --package-path ../../apps/ClefFlash --scratch-path <lane>/swift/.build   # DEVELOPER_DIR = Xcode 27 RC
-BIN=<lane>/swift/.build/release/clef-flash
-$BIN check-ids --records <lane>/fixtures/records.json --expected <lane>/oracle/records_oracle.json \
-    --tokenizer $B/clef_flash_decode_fp16_pf64/tokenizer --out <lane>/swift/checks/check_ids_fixture.json
+swift build -c release --package-path ../../apps/ClefFlash --scratch-path <work>/swift/.build   # DEVELOPER_DIR = Xcode 27 RC
+BIN=<work>/swift/.build/release/clef-flash
+$BIN check-ids --records <work>/fixtures/records.json --expected <work>/oracle/records_oracle.json \
+    --tokenizer $B/clef_flash_decode_fp16_pf64/tokenizer --out <work>/swift/checks/check_ids_fixture.json
 $PY gate_swift.py prep && $PY gate_swift.py render && $PY gate_swift.py pixels
-$BIN fixture --assets <lane>/exports --bundle-name clef_flash_decode_fp16_pf64 --decoder-asset aot \
-    --records <lane>/fixtures/records.json --images <lane>/fixtures/images --arms text,g256,g448,native \
-    --embeds <lane>/swift/embeds/fixture/manifest.json --embeds-arms native \
-    --dump-dir <lane>/swift/gate/fp16_aot/fixture_dump --dump tiles,embeds,hidden --out <lane>/swift/gate/fp16_aot/fixture.json
+$BIN fixture --assets <work>/exports --bundle-name clef_flash_decode_fp16_pf64 --decoder-asset aot \
+    --records <work>/fixtures/records.json --images <work>/fixtures/images --arms text,g256,g448,native \
+    --embeds <work>/swift/embeds/fixture/manifest.json --embeds-arms native \
+    --dump-dir <work>/swift/gate/fp16_aot/fixture_dump --dump tiles,embeds,hidden --out <work>/swift/gate/fp16_aot/fixture.json
 #   the same for fixtures/heldout -> heldout.json; --arms g256,g448 --embeds-arms g256,g448 -> *_rows.json;
 #   --decoder-asset jit; --bundle-name clef_flash_decode_int8mix_pf64
 $PY gate_swift.py score --asset fp16_aot --fixture .../fixture.json --heldout .../heldout.json \
     --oracle-rows .../fixture_rows.json .../heldout_rows.json --transcript $R/swift_gate_fp16_aot.json
 $PY gate_swift.py score --asset fp16_jit --fixture ... --heldout ... --same-as <fp16_aot passes> --transcript ...
 $PY gate_swift.py towers --passes .../fp16_aot/fixture.json .../fp16_aot/heldout.json
-$BIN ask --assets <lane>/exports --request req.json --out resp.json --trace trace.json
+$BIN ask --assets <work>/exports --request req.json --out resp.json --trace trace.json
 $PY gate_swift.py negative --base own_t01.trace.json --changed one_word.trace.json
-../../apps/ClefFlash/_time_mac.sh && $PY gate_swift.py timing --run-dir <lane>/swift/timing/<run id>
+../../apps/ClefFlash/_time_mac.sh && $PY gate_swift.py timing --run-dir <work>/swift/timing/<run id>
 ```
 
 `--decoder-asset aot` loads the AOT assets with `SpecializationOptions.default`, as the Python gates do;
@@ -210,6 +210,6 @@ The runtime's cache for the Swift CLI is `~/Library/Caches/coreai-cache/<build>/
 ## The published transcripts
 
 `models/clef-flash/fixtures-clef-flash.json` and the twelve `gate-clef-flash-*.json` files were assembled from the
-lane files above in round 7: each names its source files with their bytes and sha256 and lists what it leaves out
+local files above: each names its source files with their bytes and sha256 and lists what it leaves out
 (`trimmed`). The int8mix JIT-vs-AOT comparison in `gate-clef-flash-swift.json` (`jit_vs_aot`) was computed then from
 the Swift pass files; nothing was re-run.

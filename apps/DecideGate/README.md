@@ -46,7 +46,7 @@ of the app's reach).
    (`~/code/coreai/ondevice/.device_hold`; while another session holds it, waits up to 60 min), runs steps 6 and 7,
    and releases the hold on any exit. `_work/device_runs/hold.log` records every take, wait and release.
 6. `./_install.sh <udid>` installs the app and pushes `DecideAssets/` to `Library/Application Support/`. It pulls the
-   files back and re-pushes any whose md5 differs. It runs only under this lane's hold.
+   files back and re-pushes any whose md5 differs. It runs only under this port's hold.
 7. `./_run.sh <udid>` launches with no console and polls `result.json` until it is done. Results land in
    `_work/device_runs/<run id>/`.
 8. Exit codes: 0 = every stage passed, 3 = a stage failed, 1 = no result, 2 = the device is busy, held or refused.

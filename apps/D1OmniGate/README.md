@@ -10,7 +10,7 @@ state and the battery) and `memory.tsv` (the footprint every 100 ms from launch 
 process leaves its series and a file that stops growing means a frozen app): in `Documents/d1omni_gate/` on the iPhone,
 in `D1_OUT` on the Mac.
 
-What it loads (staged by `_stage.sh` into `$D1_WORK/assets/D1OmniAssets/`, default `D1_WORK` = the lane's
+What it loads (staged by `_stage.sh` into `$D1_WORK/assets/D1OmniAssets/`, default `D1_WORK` =
 `~/code/coreai/_d1_omni/device`):
 
 | path in the assets directory | what |
@@ -18,7 +18,7 @@ What it loads (staged by `_stage.sh` into `$D1_WORK/assets/D1OmniAssets/`, defau
 | `jit/<name>/` | the shipping bundles after `strip_ship.py` (the bytes of the Hugging Face `ios/` folder): `metadata.json` and the `.aimodel` of `fp16-L64`, `fp16-L256` (with `tokenizer/`), `fp16-L2048`, `fp16-L4096`, `vision-fp16` (with `position_table.f32`), `audio-fp16-10s` (with `mel_filters_128x257_f32.bin`) |
 | `aot/<name>/<stem>.h19p.aimodelc` | the iPhone 18 Pro's AOT of each (`coreai-build compile --platform iOS --architecture h19p --preferred-compute gpu`, `aot_ship.py --target h19p`) |
 | `ane/<name>/<stem>.h19p.aimodelc` | the Neural Engine AOT of `fp16-L256` (52 regions) and `audio-fp16-10s` (64 regions) (`aot_ship.py --target h19p --compute neural-engine`) |
-| `fixtures/` | `subset.json` (48 records, 78 rows: 60 text, 9 image, 9 audio; the 18 text rows of at most 64 positions again on L64), `oracle_slim.json` (the publisher's fp32 oracle per row), `mac_ref.json` (the Mac's Swift run of the same graphs, rounds 10 and 12: marker logits and probabilities as float32 bits, and the sha256 of every array of the media path), `bench.json` (W1..W5), `media/` (3 PNG, 3 WAV) — written by `_fixtures.py` from the lane's files |
+| `fixtures/` | `subset.json` (48 records, 78 rows: 60 text, 9 image, 9 audio; the 18 text rows of at most 64 positions again on L64), `oracle_slim.json` (the publisher's fp32 oracle per row), `mac_ref.json` (the Mac's Swift run of the same graphs, rounds 10 and 12: marker logits and probabilities as float32 bits, and the sha256 of every array of the media path), `bench.json` (W1..W5), `media/` (3 PNG, 3 WAV) — written by `_fixtures.py` from the local files |
 
 ## Stages
 
@@ -47,7 +47,7 @@ memory limit; it records `os_proc_available_memory` every 100 ms.
 ## Steps
 
 1. `./_build.sh` (generic iOS, Release) and `./_build.sh --mac` (macOS arm64, Release), each through
-   `<quiet tools>/quiet_wait.py --` (a full-CPU build disturbs another lane's Mac timing window). Derived
+   `<quiet tools>/quiet_wait.py --` (a full-CPU build disturbs another job's Mac timing window). Derived
    data in `$D1_WORK/build/`; the `.app` paths go to `$D1_WORK/app_path.txt` and `app_path_mac.txt`. The script puts
    `../D1Omni/Package.resolved` back if package resolution rewrote it.
 2. `./_stage.sh` checks every graph against its `provenance/strip.json` and every AOT against its `aot-manifest.json`,
@@ -56,7 +56,7 @@ memory limit; it records `os_proc_available_memory` every 100 ms.
 3. The Mac: `./_run_mac.sh [--ane]` runs the macOS build on the stage directory (JIT from the stage, AOT = the Mac's
    h16c; the app refuses an iPhone AOT on a Mac) and checks that every row's logits and probabilities are bit-equal to
    `mac_ref.json`, every media array equal, the controls FAIL and the bench outputs PASS (`mac_check.json`). It takes no
-   lock: run it through `quiet_wait.py --` and the lane's `r7_yield.py`.
+   lock: run it through `quiet_wait.py --` and the port's `r7_yield.py`.
 4. The phone: `D1_SESSION=<name> D1_ALLOWED_DEVICES=<udid>,<coredevice id> ./_gate.sh <udid>` takes the device hold
    (`~/code/coreai/ondevice/.device_hold`: absent, no keeper pid alive, and no other process naming the phone, for 60 s
    in a row; a JSON hold is never removed while its keeper pid lives), records `devicectl device info details`,
@@ -98,4 +98,4 @@ One decision, median of 20 (the forms alternating per round in one process, ther
 The phone's probabilities are not the Mac's bits (its GPU's arithmetic): max |dp| against the Mac 0.0040, against the
 oracle 0.0059 (FACTS §7 PASS). The host's own arrays are: the decoded images, every crop and its four vision inputs,
 the samples, the mel and the four masks are bit-equal to the Mac's on all six media items. Numbers and per-row values:
-`~/code/coreai/_d1_omni/results/iphone_{parity_jit,parity_aot,bench,ane}.json` (lane directory, not in the repository).
+`~/code/coreai/_d1_omni/results/iphone_{parity_jit,parity_aot,bench,ane}.json` (local directory, not in the repository).

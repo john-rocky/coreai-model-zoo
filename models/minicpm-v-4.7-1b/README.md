@@ -25,7 +25,7 @@ OpenBMB's MiniCPM-V-4.7-1B reads an image and a question and answers in text. It
 SigLIP-type tower (width 1152, patch 14) with a window-attention merger after layer 6 and a 2×2 downsample MLP, 64
 tokens for a 448×448 image, spliced into a Qwen3.5 hybrid text decoder (24 layers: 18 Gated DeltaNet + 6 full
 attention, hidden 1024, vocabulary 248,094; the source `config.json`). In transformers 5.19.0 the 4.7 vision classes
-are 4.6's line for line after renaming (lane `FEASIBILITY.md` §r1; "lane" records live under
+are 4.6's line for line after renaming (local `FEASIBILITY.md` §r1; "local" records live under
 `$ZOO_WORK_ROOT/_minicpmv47/`, outside the repository). Three things change for a port:
 
 - **Positions are canvas M-RoPE.** 4.6 used plain 1-D positions. 4.7 gives every token three planes (T, H, W,
@@ -33,7 +33,7 @@ are 4.6's line for line after renaming (lane `FEASIBILITY.md` §r1; "lane" recor
   decoder here derives the planes inside the graph ([below](#how-the-vlm-rides-the-text-only-engine)).
 - **The head is untied.** `lm_head.weight` is its own tensor ([248094, 1024], 0.51 GB in the checkpoint's bf16),
   within max |Δ| 4.9e-4 of the embedding (row cosine ≥ 0.99998). The embedding used as the head moves
-  P0's logits by up to 0.196 and reorders the top-5 at 2 of 48 positions (lane `oracle/parity_text.json`), so the
+  P0's logits by up to 0.196 and reorders the top-5 at 2 of 48 positions (local `oracle/parity_text.json`), so the
   bundle carries the checkpoint's own head.
 - **The prompt side.** The processor also returns `mm_token_type_ids` (not needed here: the decoder reads the image
   from the ids), generation stops on either 248044 or 248046, and the chat template has an `enable_thinking` switch.
@@ -54,7 +54,7 @@ min 0.999957) at 474 MB more.
 
 Folder totals: decoder 1,328,120,899 B (its `tokenizer/` is the snapshot's `tokenizer.json`, `tokenizer_config.json`,
 `chat_template.jinja` and `generation_config.json`, byte for byte), int8lin tower 613,968,960 B, fp16 tower
-1,087,750,729 B (lane `r6/STAGE.md`, `r6/strip_*.json`). The int8 block size of the tower is 16 because `mlp.fc2`
+1,087,750,729 B (local `r6/STAGE.md`, `r6/strip_*.json`). The int8 block size of the tower is 16 because `mlp.fc2`
 takes 4,304 inputs, which 32 does not divide.
 
 Each `.aimodel` is the export with its MLIR debug locations removed: coreai-torch 0.4.1 writes the exporting machine's
@@ -62,7 +62,7 @@ source paths into `main.mlirb`, and `strip_debug_info` (the method of
 [`conversion/d1_omni/strip_ship.py`](../../conversion/d1_omni/strip_ship.py)) takes them out. The stripped graphs have
 the export's op counts (3,326 / 1,967 / 1,613) and `coreai-build inspect` summary, their AOT h16c compiles hold the
 export's `resources.bin` byte for byte, and the stripped pair re-ran the end-to-end gate on the Mac with the export's
-greedy ids on all four image prompts (lane `r6/regate_stripped.json`). The timing and iPhone numbers below were measured
+greedy ids on all four image prompts (local `r6/regate_stripped.json`). The timing and iPhone numbers below were measured
 on the exports before the strip. No AOT asset is in the upload: the iPhone numbers are the phone's own specialization
 of the `.aimodel`.
 
@@ -103,7 +103,7 @@ position p its planes:
 `start` = the index after `</image>` and the marker tokens that follow it; `amount` = start − (O + 9), where 9 =
 max(H, W) + 1 for the 8×8 grid. On the four image prompts O = 6, 6, 6, 17, start = 73, 73, 73, 84 and amount = 58.
 This is transformers' `get_rope_index` for `mrope_mode: canvas`: in fp32 torch the rule equals the planes the
-original model's rotary received at 433/433 prompt positions and 458/458 generate positions (lane
+original model's rotary received at 433/433 prompt positions and 458/458 generate positions (local
 `oracle/parity_vl_torch.json`). A text-only prompt sends start = 2³⁰ and amount = 0, every position gets (p, p, p),
 and in fp32 torch the decoder then equals the plain Qwen3.5 text decoder bit for bit (same record). The host side is
 `host_static_inputs` in `conversion/minicpmv47/minicpmv47_vl_pipelined.py`.
@@ -131,7 +131,7 @@ The processor's expansion, which the decoder's ids follow (P1 of
   What that costs in answers is not measured here.
 - Host preprocessing: RGB → Pillow BICUBIC resize to 448×448 (aspect ratio not kept) → x / 255 → (x − 0.5) / 0.5 →
   CHW `[1, 3, 448, 448]`, as `preprocess` in `conversion/minicpmv47/host.py`. Against the processor's own pixels:
-  max |Δ| 5.9e-8 on the four image prompts (lane `oracle/host_preprocess.json`).
+  max |Δ| 5.9e-8 on the four image prompts (local `oracle/host_preprocess.json`).
 
 ## Measured
 
@@ -147,11 +147,11 @@ timed on greedy `main` calls.
 
 | asset | ms per call, all forms in one process, rotated (run 3) | runs 1 / 2 | cold / warm in the tower gate | record |
 |---|---:|---|---|---|
-| decoder int8hu, S=1 `main` | **7.44** (134.4 tok/s) | 7.89 / 9.04, one process per decoder | — | lane `r3/timing_run3.json`, `r3/timing.json`, `r3/timing_run2.json` |
+| decoder int8hu, S=1 `main` | **7.44** (134.4 tok/s) | 7.89 / 9.04, one process per decoder | — | local `r3/timing_run3.json`, `r3/timing.json`, `r3/timing_run2.json` |
 | decoder fp16 (reference, not uploaded) | 7.42 (134.9 tok/s) | 7.96 / 7.37 | — | same |
-| tower int8lin | **43.81** | 44.22 / 43.65 | 921.3 / 44.01 | lane `r3/timing_run3.json`; [`gate-minicpm-v-4.7-1b-tower-int8lin.json`](gate-minicpm-v-4.7-1b-tower-int8lin.json) `timing` |
-| tower fp16 | 43.85 | 44.20 / 43.66 | 86.6 (right after int8lin) / 44.40 | lane `r3/timing_run3.json`; [`gate-minicpm-v-4.7-1b-tower-fp16.json`](gate-minicpm-v-4.7-1b-tower-fp16.json) `timing` |
-| tower fp16w32 (fp16 storage, fp32 math; not uploaded) | 55.03 | 55.21 / 54.64 | 686.7 / 55.54 | lane `r3/timing_run3.json`, `r3/gate_vision_fp16w32.json` |
+| tower int8lin | **43.81** | 44.22 / 43.65 | 921.3 / 44.01 | local `r3/timing_run3.json`; [`gate-minicpm-v-4.7-1b-tower-int8lin.json`](gate-minicpm-v-4.7-1b-tower-int8lin.json) `timing` |
+| tower fp16 | 43.85 | 44.20 / 43.66 | 86.6 (right after int8lin) / 44.40 | local `r3/timing_run3.json`; [`gate-minicpm-v-4.7-1b-tower-fp16.json`](gate-minicpm-v-4.7-1b-tower-fp16.json) `timing` |
+| tower fp16w32 (fp16 storage, fp32 math; not uploaded) | 55.03 | 55.21 / 54.64 | 686.7 / 55.54 | local `r3/timing_run3.json`, `r3/gate_vision_fp16w32.json` |
 
 Separate processes drifted by up to 20 % (in both runs the second process of the window was the slower one); the
 run-3 column is the number to read. int8hu and fp16 take the same time per call on this runtime (7.44 vs 7.42 ms);
@@ -195,13 +195,13 @@ as above, in one device session with the JIT `.aimodel` run before and after the
 
 | asset | compiled bytes | load | speed, AOT | JIT `.aimodel`, same session | runs |
 |---|---:|---|---|---|---|
-| decoder int8hu, AOT h19p | 2,813,728,487 | engine ready 1.3 s at its initial load (JIT: 6.4 s cold) | 51.4 tok/s decode (51.0, 50.7 on the other two launches); prefill 52.6 | 98.0 / 98.3 tok/s decode, prefill 106.1 / 105.9 | lane `r5/logs/dec_aot_run{1,2,3}.pb_run.log`, `r5/logs/dec_jit_{pre,post}.pb_run.log` |
-| tower int8lin, AOT h19p | 1,088,140,018 | opening call 249 ms | 67.7 ms (66.4, 69.0) | 66.3 ms | lane `r5/logs/vis_aot{,_b}.pb_run.log`, `r5/logs/vis_jit_pre.pb_run.log` |
+| decoder int8hu, AOT h19p | 2,813,728,487 | engine ready 1.3 s at its initial load (JIT: 6.4 s cold) | 51.4 tok/s decode (51.0, 50.7 on the other two launches); prefill 52.6 | 98.0 / 98.3 tok/s decode, prefill 106.1 / 105.9 | local `r5/logs/dec_aot_run{1,2,3}.pb_run.log`, `r5/logs/dec_jit_{pre,post}.pb_run.log` |
+| tower int8lin, AOT h19p | 1,088,140,018 | opening call 249 ms | 67.7 ms (66.4, 69.0) | 66.3 ms | local `r5/logs/vis_aot{,_b}.pb_run.log`, `r5/logs/vis_jit_pre.pb_run.log` |
 
 The AOT decoder answered nat 23/23 and oracle 32/32 on all three launches but decodes at about half the JIT's rate:
 its compiled asset holds an fp16 copy of the Linears beside the int8 weights (2.15× the bytes of the phone's JIT cache
 entry), while the phone's own specialization keeps the decoder in int8. Which bytes the AOT graph reads per token was
-not measured. The upload is the JIT `.aimodel` (lane `r5/DEVICE.md`, `r5/AOT.md`).
+not measured. The upload is the JIT `.aimodel` (local `r5/DEVICE.md`, `r5/AOT.md`).
 
 ### Mac M4 Max: prefill in chunks and a second turn (2026-10-13, not in the upload)
 
@@ -212,12 +212,12 @@ Measured on the Python runtime (AOT h16c), one quiet window each:
   oracle, and brings P1's 88-token prompt from 673.3 ms (88 calls) to 162.7 ms (5 prefill + 8 S=1 calls), 4.14×; a
   prefill call takes 18.40 ms. The last prompt position is not bit-equal to the S=1 order (cos 0.999992–0.999998).
   Its AOT with `--expect-frequent-reshapes` is 4,323,182,283 B (an fp16 copy of the Linears per function). Not run on
-  the phone: PipelinedBench's decoder path drives the stock engine one token per call (lane `r5/chunk.json`).
+  the phone: PipelinedBench's decoder path drives the stock engine one token per call (local `r5/chunk.json`).
 - **A second question on the same image.** The chat template renders the two-turn conversation as turn 1's 88 ids +
   its answer + 248046 and `"\n"` + the new turn, so the decoder state after turn 1 can be kept: the second question
   then takes 20 calls instead of 140, 174.3 ms against 1,318.2 ms, and the answer equals the fp32 oracle's 32 tokens
   either way (the carried and the re-prefilled last-prompt logits are bit-equal). This is a host / kit feature; the
-  phone was not run (lane `r5/state.json`, `oracle/turn2.json`).
+  phone was not run (local `r5/state.json`, `oracle/turn2.json`).
 
 ## Gates
 
@@ -227,16 +227,16 @@ never leaves the oracle's greedy ids or leaves them at a knife edge. The bars we
 
 | gate | what | bar | result | record |
 |---|---|---|---|---|
-| text, fp32 torch | the overlay's Qwen3.5 decoder vs the oracle, P0's last 48 positions | ordered top-5 equal | 48/48, cos min 0.999999999832, max \|Δ\| 2.39e-4 | lane `oracle/parity_text.json` |
-| planes, fp32 torch | the canvas rule vs the planes the oracle's rotary received, P0–P4 + generate | equal at every position | 433/433 + 458/458; red arms (amount + 1, 1-D planes) fail 4/4 | lane `oracle/parity_vl_torch.json` |
-| tower, fp32 torch | the re-authored tower vs the oracle's rows, P1–P4 | per-token cos min ≥ 0.9999, max \|Δ\| ≤ 1e-3 | min 0.9999999992, max \|Δ\| 3.8e-5; the baked export path = the reference path bit for bit | lane `oracle/parity_vision.json` |
+| text, fp32 torch | the overlay's Qwen3.5 decoder vs the oracle, P0's last 48 positions | ordered top-5 equal | 48/48, cos min 0.999999999832, max \|Δ\| 2.39e-4 | local `oracle/parity_text.json` |
+| planes, fp32 torch | the canvas rule vs the planes the oracle's rotary received, P0–P4 + generate | equal at every position | 433/433 + 458/458; red arms (amount + 1, 1-D planes) fail 4/4 | local `oracle/parity_vl_torch.json` |
+| tower, fp32 torch | the re-authored tower vs the oracle's rows, P1–P4 | per-token cos min ≥ 0.9999, max \|Δ\| ≤ 1e-3 | min 0.9999999992, max \|Δ\| 3.8e-5; the baked export path = the reference path bit for bit | local `oracle/parity_vision.json` |
 | G1, Mac AOT | int8hu decoder, P0 teacher-forced at positions 19..66 + free-run | argmax equal at every non-knife-edge position; free-run rule | 44/44 (48/48 with the 4 knife edges), logits cos min 0.99458; free-run = the oracle's 23 tokens to `<\|im_end\|>` | [`gate-minicpm-v-4.7-1b.json`](gate-minicpm-v-4.7-1b.json) `G1` |
 | G2, Mac AOT | int8hu decoder, P1–P4 free-run on the oracle's tower rows | free-run rule, 4/4 | 4/4, no divergence over 32 / 30 / 2 / 32 tokens; the 1-D-planes red arm red (max \|d\| at the oracle's top-5, from the frame on: 11.98 vs 0.372) | same, `G2`, `red_arms` |
 | G3, Mac AOT | towers vs the oracle's rows, P1–P4, per-token cos | int8lin: mean ≥ 0.9995, min ≥ 0.99; the fp16w32 bar: mean ≥ 0.9999, min ≥ 0.999 | int8lin mean ≥ 0.99972, min 0.99411 (P2); fp16 mean ≥ 0.999997, min 0.999957 (meets the fp16w32 bar) | [`…-tower-int8lin.json`](gate-minicpm-v-4.7-1b-tower-int8lin.json), [`…-tower-fp16.json`](gate-minicpm-v-4.7-1b-tower-fp16.json) |
 | G4, Mac AOT | image file → host → tower → int8hu decoder → answer, P1–P4 | free-run rule, 4/4 | 4/4 with the int8lin tower and with the fp16 tower; the answers equal the oracle's token for token | [`gate-minicpm-v-4.7-1b-e2e.json`](gate-minicpm-v-4.7-1b-e2e.json), [`…-e2e-fp16.json`](gate-minicpm-v-4.7-1b-e2e-fp16.json) |
 | iPhone 18 Pro | int8hu decoder, nat (P0) + oracle (P1) | free-run rule | 23/23 + 32/32 on all 4 launches, with the Mac tower's rows and with the HF rows | [`gate-minicpm-v-4.7-1b-iphone.json`](gate-minicpm-v-4.7-1b-iphone.json) |
 | iPhone 18 Pro | towers vs the Mac's output of the same form | cos ≥ 0.999 | 0.999997, both forms, both launches | same |
-| staged bytes | the stripped int8lin tower + int8hu decoder, G4 re-run on the Mac | greedy ids = the export's | equal on P1–P4 (and = the oracle's), reset bit-equal | lane `r6/regate_stripped.json` |
+| staged bytes | the stripped int8lin tower + int8hu decoder, G4 re-run on the Mac | greedy ids = the export's | equal on P1–P4 (and = the oracle's), reset bit-equal | local `r6/regate_stripped.json` |
 
 P0's step 8 is a knife edge (gap 0.0553); the Mac and the phone took the oracle's token there. The four answers
 (G4, either tower), ≤ 32 tokens each: P1 *"This image shows **Earth** — specifically, a vivid, close-up view of the
@@ -248,13 +248,13 @@ primitives; the fixture file pins them by sha256 and does not carry them.
 ## What the Mac and the phone do not separate
 
 The Mac's h16c AOT compile and the phone's own specialization both store the int8lin tower as fp16: its compiled
-`resources.bin` is 1,087,609,504 B, the fp16 tower's size (Mac: lane `r3/aot_minicpmv47_vision_{int8lin,fp16}.json`,
-contents different, sha256 `261c57c2…` vs `152bc955…`; phone: lane `r4/logs/container_caches.json`). So the two
+`resources.bin` is 1,087,609,504 B, the fp16 tower's size (Mac: local `r3/aot_minicpmv47_vision_{int8lin,fp16}.json`,
+contents different, sha256 `261c57c2…` vs `152bc955…`; phone: local `r4/logs/container_caches.json`). So the two
 towers run at the same speed wherever measured (Mac 43.81 vs 43.85 ms, iPhone 67.8 / 68.5 vs 66.5 / 68.6 ms), and
 int8lin buys download size only: 614 MB against 1.09 GB. Its cost is tower accuracy against the oracle (per-token cos
 min 0.99411 vs 0.999957, G3), which did not reach the answers (G4 identical with either tower). The decoder keeps its
 int8 bytes on the phone (its cache `resources.bin` is 1,308,616,980 B, the `.aimodel` 1,308,566,922 B); on the Mac its
-AOT with `--expect-frequent-reshapes` is 2,813,727,608 B (lane `r3/FILES.md`).
+AOT with `--expect-frequent-reshapes` is 2,813,727,608 B (local `r3/FILES.md`).
 
 ## Convert / verify
 
@@ -280,7 +280,7 @@ $PY -I -B conversion/minicpmv47/gate_e2e.py $ZOO_EXPORTS/minicpmv47_vision_int8l
 
 The gates load only the AOT `.aimodelc` with `SpecializationOptions.default()`, one bundle per process (the Python
 runtime leaks an IOSurface per call; each gate stays under 15 sequences). On the M4 Max an export takes 4–41 s, an AOT
-compile 3–37 s, a decoder gate about 20 s and a tower gate about 6 s (lane `r3/export_*.json`, `r3/aot_*.json`).
+compile 3–37 s, a decoder gate about 20 s and a tower gate about 6 s (local `r3/export_*.json`, `r3/aot_*.json`).
 
 ## Try it
 
@@ -290,10 +290,10 @@ request #72, merged 2026-10-14). The entry renders the processor's frame (`<imag
 and `"\n"`), sets the canvas shift (start = the index where the 64 pads begin + 66, amount = 58) and adds the
 thinking-off `<think>\n\n</think>\n\n` after the assistant role; the prompt puts the image before the question, as the
 source processor does. On that branch the Mac's `vlchat-cli` answered P1–P4, and P1 again through the VLChat
-example's `ask()`, with the oracle's tokens (lane `r7/mac_gate.json`); on the iPhone 18 Pro the VLChat app (Release,
+example's `ask()`, with the oracle's tokens (local `r7/mac_gate.json`); on the iPhone 18 Pro the VLChat app (Release,
 signed with the `increased-memory-limit` entitlement — without it the tower's specialization ran out of memory once
 the decoder was loaded) gave the same five answers byte for byte from the uploaded bundles, decoding at 103.2–107.1
-tok/s by the app's own timing (lane `r7/device_judge.json`, `r7/DEVICE.md`). The opening question after installing
+tok/s by the app's own timing (local `r7/device_judge.json`, `r7/DEVICE.md`). The opening question after installing
 waited about 21 s for its opening word (engine ready 16.4 s + 4.65 s), the next launch 1.8 s; what the slow launch
 builds was not isolated.
 
@@ -305,9 +305,9 @@ and stops on 248044 or 248046.
 
 - **A last-position logits bar does not see the plane scheme.** With 4.6's 1-D positions on 4.7's weights the
   last-position top-5 still matched on all four image prompts (cos 0.9981–0.9996 against the oracle's
-  0.99999999999; lane `oracle/parity_vl_torch.json`), so the planes are gated for equality in torch, and on the
+  0.99999999999; local `oracle/parity_vl_torch.json`), so the planes are gated for equality in torch, and on the
   engine the plane check is the 1-D-planes red arm (11.98 vs 0.372). The amount + 1 arm went red on the fp16 decoder
-  (0.640 vs 0.140, lane `r3/gate_decoder_fp16.json`) but not on int8hu (0.446 vs 0.372,
+  (0.640 vs 0.140, local `r3/gate_decoder_fp16.json`) but not on int8hu (0.446 vs 0.372,
   [`gate-minicpm-v-4.7-1b.json`](gate-minicpm-v-4.7-1b.json) `red_arms`): shifting the frame and the text after it by
   one changes only their offset from the six tokens before the frame, which int8's own spread covers.
 - **After specialization the int8lin tower is stored as fp16.** The Mac AOT and the phone both hold its weights in

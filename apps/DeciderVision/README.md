@@ -34,7 +34,7 @@ letters' ids through the tokenizer), so an asset that differs fails there, not i
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
-# $ZOO_WORK_ROOT: the lane work root, by default the parent directory of this repository (conversion/_paths.py)
+# $ZOO_WORK_ROOT: the work root, by default the parent directory of this repository (conversion/_paths.py)
 swift build -c release --scratch-path $ZOO_WORK_ROOT/_decider2bv/swift/.build
 BIN=$ZOO_WORK_ROOT/_decider2bv/swift/.build/release/decider-vision
 $BIN ask --bundle <bundle dir> --tower <tower .aimodelc> --grid 256 --image x.png --context "…" \

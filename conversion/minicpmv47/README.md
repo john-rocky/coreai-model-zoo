@@ -28,7 +28,7 @@ in-graph.
 | `gate_vision.py` | G3: one tower form against the oracle's rows on P1–P4 (per-token cos), cold / warm ms — run inside a quiet window |
 | `gate_e2e.py` | G4: image file → tower → decoder → answer on P1–P4, judged like G2 |
 | `timing_decoder.py` | decoder ms per call (one process per bundle, or `--interleave` in one process) and the towers interleaved, with the window record |
-| `strip_stage.py` | run before staging the upload: rebuilds each ship bundle's `.aimodel` with `strip_debug_info` (coreai-torch writes the exporting machine's source paths into `main.mlirb`), checks op counts, `coreai-build inspect` and a byte scan for local paths, and writes `<lane>/stage_hf/gpu-pipelined/<bundle>/` + `<lane>/r6/strip_<bundle>.json` |
+| `strip_stage.py` | run before staging the upload: rebuilds each ship bundle's `.aimodel` with `strip_debug_info` (coreai-torch writes the exporting machine's source paths into `main.mlirb`), checks op counts, `coreai-build inspect` and a byte scan for local paths, and writes `<work>/stage_hf/gpu-pipelined/<bundle>/` + `<work>/r6/strip_<bundle>.json` |
 
 ## Environment
 
@@ -41,16 +41,16 @@ in-graph.
 ## Run (from the repository root)
 
 ```bash
-<oracle-venv>/bin/python -I conversion/minicpmv47/make_fixtures.py       # -> <lane>/oracle/fixtures
-<oracle-venv>/bin/python -I conversion/minicpmv47/oracle_minicpmv47.py   # -> <lane>/oracle/oracle.{npz,json}
-../coreai-models/.venv/bin/python conversion/minicpmv47/parity_text.py      # -> <lane>/oracle/parity_text.json
-../coreai-models/.venv/bin/python conversion/minicpmv47/parity_vl_torch.py  # -> <lane>/oracle/parity_vl_torch.json
-<oracle-venv>/bin/python -I conversion/minicpmv47/dump_vision_stages.py           # -> <lane>/oracle/vision_stages.{npz,json}
-../coreai-models/.venv/bin/python -I conversion/minicpmv47/parity_vision.py        # -> <lane>/oracle/parity_vision.json
-../coreai-models/.venv/bin/python -I conversion/minicpmv47/export_dryrun_vision.py # -> <lane>/oracle/vision_export_ops.txt
-../coreai-models/.venv/bin/python -I conversion/minicpmv47/parity_e2e_torch.py     # -> <lane>/oracle/parity_e2e_torch.json
-../coreai-models/.venv/bin/python -I conversion/minicpmv47/fp16_precheck.py        # -> <lane>/oracle/fp16_precheck.json
-../coreai-models/.venv/bin/python -I conversion/minicpmv47/host.py                 # -> <lane>/oracle/host_preprocess.json
+<oracle-venv>/bin/python -I conversion/minicpmv47/make_fixtures.py       # -> <work>/oracle/fixtures
+<oracle-venv>/bin/python -I conversion/minicpmv47/oracle_minicpmv47.py   # -> <work>/oracle/oracle.{npz,json}
+../coreai-models/.venv/bin/python conversion/minicpmv47/parity_text.py      # -> <work>/oracle/parity_text.json
+../coreai-models/.venv/bin/python conversion/minicpmv47/parity_vl_torch.py  # -> <work>/oracle/parity_vl_torch.json
+<oracle-venv>/bin/python -I conversion/minicpmv47/dump_vision_stages.py           # -> <work>/oracle/vision_stages.{npz,json}
+../coreai-models/.venv/bin/python -I conversion/minicpmv47/parity_vision.py        # -> <work>/oracle/parity_vision.json
+../coreai-models/.venv/bin/python -I conversion/minicpmv47/export_dryrun_vision.py # -> <work>/oracle/vision_export_ops.txt
+../coreai-models/.venv/bin/python -I conversion/minicpmv47/parity_e2e_torch.py     # -> <work>/oracle/parity_e2e_torch.json
+../coreai-models/.venv/bin/python -I conversion/minicpmv47/fp16_precheck.py        # -> <work>/oracle/fp16_precheck.json
+../coreai-models/.venv/bin/python -I conversion/minicpmv47/host.py                 # -> <work>/oracle/host_preprocess.json
 ```
 
 All run on one CPU thread (`--threads 1` is the default); each takes under a minute on an Apple silicon Mac
@@ -61,16 +61,16 @@ Export, AOT and the Mac GPU gates (bundles go to `$ZOO_EXPORTS/minicpmv47_*`, AO
 `$ZOO_EXPORTS/minicpmv47_aotc/`; `DEVELOPER_DIR` = an Xcode 27 whose Metal toolchain carries `coreai-build`):
 
 ```bash
-<oracle-venv>/bin/python -I conversion/minicpmv47/oracle_margins.py                   # -> <lane>/oracle/margins.{npz,json}
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/export_decoder.py int8hu --record <lane>/r3/export_decoder_int8hu.json
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/export_decoder.py fp16   --record <lane>/r3/export_decoder_fp16.json
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/export_vision.py int8lin --record <lane>/r3/export_vision_int8lin.json   # also fp16w32, fp16
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/aot_compile.py $ZOO_EXPORTS/minicpmv47_vlm_decode_int8hu --reshapes --record <lane>/r3/aot_minicpmv47_vlm_decode_int8hu.json
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/aot_compile.py $ZOO_EXPORTS/minicpmv47_vision_int8lin --record <lane>/r3/aot_minicpmv47_vision_int8lin.json
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/gate_decoder.py $ZOO_EXPORTS/minicpmv47_vlm_decode_int8hu --text --vl --red --out <lane>/r3/gate_decoder_int8hu.json
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/gate_vision.py $ZOO_EXPORTS/minicpmv47_vision_int8lin --out <lane>/r3/gate_vision_int8lin.json
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/gate_e2e.py $ZOO_EXPORTS/minicpmv47_vision_int8lin $ZOO_EXPORTS/minicpmv47_vlm_decode_int8hu --out <lane>/r3/gate_e2e_int8lin.json
-../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/timing_decoder.py --interleave --bundles <int8hu>,<fp16> --towers <int8lin>,<fp16w32>,<fp16> --out <lane>/r3/timing_run3.json
+<oracle-venv>/bin/python -I conversion/minicpmv47/oracle_margins.py                   # -> <work>/oracle/margins.{npz,json}
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/export_decoder.py int8hu --record <work>/r3/export_decoder_int8hu.json
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/export_decoder.py fp16   --record <work>/r3/export_decoder_fp16.json
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/export_vision.py int8lin --record <work>/r3/export_vision_int8lin.json   # also fp16w32, fp16
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/aot_compile.py $ZOO_EXPORTS/minicpmv47_vlm_decode_int8hu --reshapes --record <work>/r3/aot_minicpmv47_vlm_decode_int8hu.json
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/aot_compile.py $ZOO_EXPORTS/minicpmv47_vision_int8lin --record <work>/r3/aot_minicpmv47_vision_int8lin.json
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/gate_decoder.py $ZOO_EXPORTS/minicpmv47_vlm_decode_int8hu --text --vl --red --out <work>/r3/gate_decoder_int8hu.json
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/gate_vision.py $ZOO_EXPORTS/minicpmv47_vision_int8lin --out <work>/r3/gate_vision_int8lin.json
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/gate_e2e.py $ZOO_EXPORTS/minicpmv47_vision_int8lin $ZOO_EXPORTS/minicpmv47_vlm_decode_int8hu --out <work>/r3/gate_e2e_int8lin.json
+../coreai-models/.venv/bin/python -I -B conversion/minicpmv47/timing_decoder.py --interleave --bundles <int8hu>,<fp16> --towers <int8lin>,<fp16w32>,<fp16> --out <work>/r3/timing_run3.json
 ```
 
 On the M4 Max each export takes 4–41 s and each AOT 3–37 s; a decoder gate ~20 s, a tower gate ~6 s. The gates load

@@ -108,8 +108,8 @@ iPhone 18 Pro (iOS 27.2) the key moved `os_proc_available_memory` at launch from
    60 s; a JSON hold is never removed while its keeper pid lives), installs the app, pushes `D1Assets/` to
    `Library/Application Support/`, pulls it back and re-pushes any file whose md5 differs, launches the app with no
    console and a deadline that ends the window within `D1_FRAME_S` (1,800 s) of the take, polls `result.json`, and
-   releases the hold on any exit. With `D1_HOLD_SCRIPT=<name>` the scripts also accept this lane's hold in the JSON form
-   other lanes' queue tools respect (`{"pid": <a live keeper>, "script": "<name>", ...}`, written and removed by that
+   releases the hold on any exit. With `D1_HOLD_SCRIPT=<name>` the scripts also accept this port's hold in the JSON form
+   other jobs' queue tools respect (`{"pid": <a live keeper>, "script": "<name>", ...}`, written and removed by that
    keeper), for slots under a kept hold. `D1_ALLOWED_DEVICES` is required: the scripts refuse any other phone. Knobs go in as
    JSON members, e.g. `./_gate.sh <udid> '"D1_STAGES":"load_jit,warm,bench,e2e_fixture,reset","D1_SKIP_DONE":"1"'`.
    `D1_SKIP_INSTALL=1` runs again on what is installed; `D1_INSTALL_ONLY=1 D1_SKIP_PUSH=1 D1_SKIP_VERIFY=1` installs the

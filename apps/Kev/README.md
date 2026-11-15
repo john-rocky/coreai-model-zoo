@@ -94,7 +94,7 @@ limit is the padded end: ⌈T / q⌉·q ≤ max_context_length − 1, so T ≤ 4
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer   # CoreAI.framework is in the Xcode 27 SDK
-# $ZOO_WORK_ROOT: the lane work root, by default the parent directory of this repository (conversion/_paths.py)
+# $ZOO_WORK_ROOT: the work root, by default the parent directory of this repository (conversion/_paths.py)
 swift build -c release --package-path apps/Kev --scratch-path $ZOO_WORK_ROOT/_kev/swift/.build
 BIN=$ZOO_WORK_ROOT/_kev/swift/.build/release/kev
 B=$ZOO_WORK_ROOT/_kev/exports/ship/kev_0_8b_decode_fp16_metal_pf128     # the published Kev-0.8B bundle

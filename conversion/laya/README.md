@@ -12,7 +12,7 @@ bundles go to `<ZOO_EXPORTS>/laya-multilingual/`):
 
 | Stage | Script | Gate |
 |---|---|---|
-| 0 oracle | `uv run --python 3.12 conversion/laya/oracle_laya.py` | the publisher's `laya.load(...)` model, CPU fp32: reproduces the frozen fixture (ids 402/402, batched answers and logits bit-exact), then every row alone, batch 1, padded to its window, vs the fixture (argmax, \|dp\| ≤ 1e-3) and the LiteRT lane's captures (marker ≤ 1e-3, act relative ≤ 1e-4); every hidden state for 14 rows, through SDPA (the package's path) and eager |
+| 0 oracle | `uv run --python 3.12 conversion/laya/oracle_laya.py` | the publisher's `laya.load(...)` model, CPU fp32: reproduces the frozen fixture (ids 402/402, batched answers and logits bit-exact), then every row alone, batch 1, padded to its window, vs the fixture (argmax, \|dp\| ≤ 1e-3) and the LiteRT port's captures (marker ≤ 1e-3, act relative ≤ 1e-4); every hidden state for 14 rows, through SDPA (the package's path) and eager |
 | 1 authoring | `python3 conversion/laya/gate_laya_authoring.py --window 256\|512 [--dtype wfp16] [--negative-controls]` | the re-authored graph vs the oracle: 201 rows (answer + tensor gates); the two-tier layer gate (embeddings–layer 9 max \|err\| ≤ 1e-4; layer 10–head_1 max \|err\| / max \|ref\| ≤ 2e-4 = twice the official model's own SDPA-vs-eager spread); pad isolation; five mutations that must be caught |
 | 3 export | `python3 conversion/laya/export_laya.py --window 256\|512 --dtype fp32\|wfp16\|fp16 --target macos\|ios` | requires the authoring records to PASS; torch-export + decomposition, the same 201-row gate before conversion, then one multifunction `.aimodel` (`main` + `act`); `ios` = a byte copy of the gated macos folder |
 | 3b AOT | `python3 conversion/laya/aot_laya.py --window 256\|512 --dtype wfp16` | `coreai-build compile --preferred-compute gpu --architecture h18p` into `ios-h18p/`, after a neural-engine probe compile whose ANE regions are recorded as evidence |
@@ -23,7 +23,7 @@ bundles go to `<ZOO_EXPORTS>/laya-multilingual/`):
 | stage | `python3 conversion/laya/stage_hf_laya.py` | builds `<exports>/laya-multilingual/hf_stage/` for the Hugging Face repo (hard-linked gated folders, card, LICENSE, SHA256SUMS, STAGING.md); uploads nothing |
 
 Stage 2 (the host) is `_laya_host.py`: the NumPy gather / act features / temperature / decode that
-every stage above runs, and the algorithm the Swift side ports (HOST_CONTRACT §C–§D of the LiteRT lane).
+every stage above runs, and the algorithm the Swift side ports (HOST_CONTRACT §C–§D of the LiteRT port).
 The sequence builder itself is the publisher's `build_sequence`, reproduced by the oracle on all 402
 fixture rows; a Swift port is checked against the same rows (`reference.json` carries ids and markers).
 
@@ -41,7 +41,7 @@ fixture rows; a Swift port is checked against the same rows (`reference.json` ca
 
 `feats` = [top1, top1 − top2, entropy / ln(max(K,2)), max(K,2)/255] of the softmax of the RAW marker
 logits. Temperatures are host work: the source config is T = [1,1,1]; `metadata.json` also carries the
-fitted calibration of the LiteRT lane (bucket first, then per type).
+fitted calibration of the LiteRT port (bucket first, then per type).
 
 ## Environments
 
@@ -50,7 +50,7 @@ fitted calibration of the LiteRT lane (bucket first, then per type).
 - Stages 1, 3, 4: the zoo venv (torch 2.9.0, coreai-torch 0.4.1, coreai-core 1.0.0b2); the graph
   imports neither transformers nor laya.
 - The checkpoint is the pinned HF snapshot `convaiinnovations/laya@1c5edc17…` (sha256-checked on every
-  load); the fixtures are the frozen LiteRT-lane files, sha256-pinned in `_common.py`.
+  load); the fixtures are the frozen LiteRT-port files, sha256-pinned in `_common.py`.
 
 ## What the port found
 

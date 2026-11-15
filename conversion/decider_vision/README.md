@@ -32,15 +32,15 @@ Export and gate scripts for [Mapika/decider-2b-vision](https://huggingface.co/Ma
   `HF_HUB_OFFLINE=1` and `HF_HUB_DISABLE_XET=1`. Everything the scripts write outside the repository goes under
   `$ZOO_WORK_ROOT/_decider2bv/` (`conversion/_paths.py`).
 
-Run everything from the repository root. `<lane>` below is `$ZOO_WORK_ROOT/_decider2bv`.
+Run everything from the repository root. `<work>` below is `$ZOO_WORK_ROOT/_decider2bv`.
 
 ## 1. Oracle and fixture
 
 ```bash
-python3 conversion/decider_vision/make_fixture_images.py                  # -> <lane>/fixtures
+python3 conversion/decider_vision/make_fixture_images.py                  # -> <work>/fixtures
 uv run conversion/decider_vision/oracle_decider_vision.py \
-    --public-json models/decider-2b-vision/fixtures-decider-2b-vision.json  # -> <lane>/oracle + the public fixture
-uv run conversion/decider_vision/grid_price.py                            # -> <lane>/price (The Cauldron shards, MPS fp32)
+    --public-json models/decider-2b-vision/fixtures-decider-2b-vision.json  # -> <work>/oracle + the public fixture
+uv run conversion/decider_vision/grid_price.py                            # -> <work>/price (The Cauldron shards, MPS fp32)
 python conversion/decider_vision/test_host.py                             # host ids / slots / planes, 111/111
 ```
 
@@ -52,12 +52,12 @@ their contexts were changed to plain game descriptions (`--rows r23,…,r27 --me
 
 ```bash
 python conversion/export_qwen38vl_pipelined.py --hf-id Mapika/decider-2b-vision --name decider_2b_vision_g256 \
-    --grid-h 8 --grid-w 8 --skip-decoder --vision-dtype fp16w32 --out-dir <lane>/exports
+    --grid-h 8 --grid-w 8 --skip-decoder --vision-dtype fp16w32 --out-dir <work>/exports
 python conversion/export_qwen38vl_pipelined.py --hf-id Mapika/decider-2b-vision --name decider_2b_vision_g448 \
-    --grid-h 14 --grid-w 14 --skip-decoder --vision-dtype fp16w32 --out-dir <lane>/exports
+    --grid-h 14 --grid-w 14 --skip-decoder --vision-dtype fp16w32 --out-dir <work>/exports
 # the Python gates load AOT assets, e.g. for the fp16w32 g256 tower:
-xcrun coreai-build compile <lane>/exports/decider_2b_vision_g256_vision_fp16w32/decider_2b_vision_g256_vision_fp16w32.aimodel \
-    --output <lane>/exports/decider_2b_vision_g256_vision_fp16w32_aotc --platform macOS --preferred-compute gpu --architecture h16c
+xcrun coreai-build compile <work>/exports/decider_2b_vision_g256_vision_fp16w32/decider_2b_vision_g256_vision_fp16w32.aimodel \
+    --output <work>/exports/decider_2b_vision_g256_vision_fp16w32_aotc --platform macOS --preferred-compute gpu --architecture h16c
 python conversion/decider_vision/gate_tower.py        # -> models/decider-2b-vision/gate-decider-2b-vision-tower.json
 ```
 
@@ -75,19 +75,19 @@ python conversion/decider_vision/export_decoder.py int8mix --fp16-layers 0,2,5 -
 python conversion/decider_vision/export_decoder.py fp16 --prefill-chunk 16 --aot                         # reference
 ```
 
-The bundles land in `<lane>/exports/bundles/<name>/`, the AOT assets in `<lane>/exports/bundles_aotc/`. The
+The bundles land in `<work>/exports/bundles/<name>/`, the AOT assets in `<work>/exports/bundles_aotc/`. The
 non-shipping decoders of the transcripts come from the same script: `fp16`, `int8hu --head-sym`, `int8lin`,
 `int8lin --prefill-chunk 16`, each with `--aot`.
 
 ## 4. Readout gates
 
 ```bash
-B=<lane>/exports/bundles
+B=<work>/exports/bundles
 python conversion/decider_vision/readout_gate_vision.py b1 $B/decider_2b_vision_decode_int8mix_pf16 \
-    --order chunk --also-s1 --red --work-dir <lane>/readout_r6 \
+    --order chunk --also-s1 --red --work-dir <work>/readout_r6 \
     --transcript models/decider-2b-vision/gate-decider-2b-vision-readout-int8mix_pf16.json
 python conversion/decider_vision/readout_gate_vision.py b2 --bundles $B/decider_2b_vision_decode_int8mix_pf16 \
-    --order chunk --append --work-dir <lane>/readout_r6 \
+    --order chunk --append --work-dir <work>/readout_r6 \
     --transcript models/decider-2b-vision/gate-decider-2b-vision-e2e.json
 ```
 
@@ -100,7 +100,7 @@ Python runtime leaks one IOSurface per call); the GPU is not locked, so the reco
 ```bash
 python conversion/decider_vision/int8_bisect_torch.py dump --qscheme clipping
 python conversion/decider_vision/int8_bisect_torch.py run --part <dir>/part_a.json      # (split over processes)
-python conversion/decider_vision/int8_bisect_torch.py merge --parts <dir> --out <lane>/logs/r6_bisect.json
+python conversion/decider_vision/int8_bisect_torch.py merge --parts <dir> --out <work>/logs/r6_bisect.json
 ```
 
 Rule, fixed before the search: r29 |Δp| ≤ 0.010, no bisect run worse than all-int8, at most four layers, the
@@ -109,9 +109,9 @@ smallest set. It selected {0, 2, 5}.
 ## 6. Held out
 
 ```bash
-uv run conversion/decider_vision/heldout_prepare.py                       # -> <lane>/heldout (the photos stay here)
+uv run conversion/decider_vision/heldout_prepare.py                       # -> <work>/heldout (the photos stay here)
 python conversion/decider_vision/heldout_eval.py run \
-    --bundles <lane>/exports/bundles/decider_2b_vision_decode_int8mix_pf16,<lane>/exports/bundles/decider_2b_vision_decode_fp16_pf16 \
+    --bundles <work>/exports/bundles/decider_2b_vision_decode_int8mix_pf16,<work>/exports/bundles/decider_2b_vision_decode_fp16_pf16 \
     --transcript models/decider-2b-vision/gate-decider-2b-vision-heldout.json
 ```
 
@@ -121,16 +121,16 @@ held-out result.
 ## 7. Swift
 
 ```bash
-cd apps/DeciderVision && swift build -c release --scratch-path <lane>/swift/.build && cd -
-BIN=<lane>/swift/.build/release/decider-vision
+cd apps/DeciderVision && swift build -c release --scratch-path <work>/swift/.build && cd -
+BIN=<work>/swift/.build/release/decider-vision
 $BIN fixture --bundle $B/decider_2b_vision_decode_int8mix_pf16 \
-    --tower-g256 <lane>/exports/decider_2b_vision_g256_vision_fp16w32_aotc/decider_2b_vision_g256_vision_fp16w32.h16c.aimodelc \
-    --tower-g448 <lane>/exports/decider_2b_vision_g448_vision_fp16w32_aotc/decider_2b_vision_g448_vision_fp16w32.h16c.aimodelc \
-    --rows <lane>/fixtures/rows.json --images <lane>/fixtures/images --meta <lane>/fixtures/meta.json \
-    --out <lane>/swift/aot/fixture_aot.json
-# --asset jit with the towers' .aimodel files -> <lane>/swift/jit/fixture_jit.json (the JIT row)
-python conversion/decider_vision/gate_swift.py score --aot <lane>/swift/aot/fixture_aot.json \
-    --jit <lane>/swift/jit/fixture_jit.json --transcript models/decider-2b-vision/gate-decider-2b-vision-swift.json
+    --tower-g256 <work>/exports/decider_2b_vision_g256_vision_fp16w32_aotc/decider_2b_vision_g256_vision_fp16w32.h16c.aimodelc \
+    --tower-g448 <work>/exports/decider_2b_vision_g448_vision_fp16w32_aotc/decider_2b_vision_g448_vision_fp16w32.h16c.aimodelc \
+    --rows <work>/fixtures/rows.json --images <work>/fixtures/images --meta <work>/fixtures/meta.json \
+    --out <work>/swift/aot/fixture_aot.json
+# --asset jit with the towers' .aimodel files -> <work>/swift/jit/fixture_jit.json (the JIT row)
+python conversion/decider_vision/gate_swift.py score --aot <work>/swift/aot/fixture_aot.json \
+    --jit <work>/swift/jit/fixture_jit.json --transcript models/decider-2b-vision/gate-decider-2b-vision-swift.json
 apps/DeciderVision/_time_mac.sh                     # timed passes under the machine-wide GPU lock
 ```
 

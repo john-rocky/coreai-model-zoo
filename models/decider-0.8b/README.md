@@ -83,7 +83,7 @@ System One API never asks of it.
 **Throughput** (ship bundle, Release `llm-benchmark`, p=128 g=256, `coreai-pipelined`,
 `COREAI_CHUNK_THRESHOLD=1`, 2 launches × 3 trials): decode **193.6 tok/s** median (186.5–197.0),
 prefill 226.4 (201.6–236.6), load 1.5 s cold / 0.2 s warm. No other Core AI work was on the GPU;
-a CPU-bound job from another lane ran on the same machine during the measurement. Because
+another CPU-bound job ran on the same machine during the measurement. Because
 prefill is S=1 on this graph, a System One request costs about `rows × (state + question
 tokens) / decode rate` — ten independent questions over a 300-token state are ~3,500 steps.
 

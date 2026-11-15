@@ -152,7 +152,7 @@ dynamic axis: `position_ids [1, S]` and both caches at `max_context_length` slot
 ## Build and run (Mac)
 
 ```bash
-# $ZOO_WORK_ROOT: the lane work root, by default the parent directory of this repository (conversion/_paths.py)
+# $ZOO_WORK_ROOT: the work root, by default the parent directory of this repository (conversion/_paths.py)
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 swift build -c release --package-path apps/D1 --scratch-path $ZOO_WORK_ROOT/_d1_3b/swift/.build
 D1=$ZOO_WORK_ROOT/_d1_3b/swift/.build/release/d1
@@ -176,7 +176,7 @@ $D1 fixture --bundle <bundle> (--records records.json | --image-records image_re
     [--tower-inputs <dir>] [--zero-image-control] [--dump-tower <dir>]] [--dump-hidden <dir>] --out pass.json
 $D1 prepare-test --bundle <bundle> --records records.json [--groups groups.json] --out out.json
 
-# the gates (the lane's venv: tokenizers, NumPy, safetensors; the graph sections after conversion/d1/decide.py's records)
+# the gates (the port's venv: tokenizers, NumPy, safetensors; the graph sections after conversion/d1/decide.py's records)
 cd conversion/d1 && python gate_swift.py all        # -> $ZOO_WORK_ROOT/_d1_3b/results/r3a_swift_text.json
 <quiet tools>/quiet_wait.py -- python gate_swift.py graph   # -> results/r3c_swift_graph.json (the toys)
 python gate_swift.py real                           # -> results/r6b_swift_real.json (the model's bundles)

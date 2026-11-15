@@ -130,7 +130,7 @@ rollout of 2026-09-15 did the measurement. `conversion/export_ane_stock.py Nanbe
 does not stop the compiler. What the int4 section above predicts is the *quality* cliff: the on-device
 fp32-oracle gate (`ondevice/_ane_gate`, fixture = alphabet 24 steps / chat "Reply with only the word yes."
 behind an empty `<think>` block, 4 steps incl. the stop, min margin 0.737 / 396-id count 16 steps;
-red twin first) is **pending** — the device slot comes after the S1 lane. 8-bit palettization (the
+red twin first) is **pending** — the device slot comes after other device work. 8-bit palettization (the
 MiniCPM5-1B rescue) would be ~4 GB here and is out of the iPhone envelope, so a 4-bit FAIL means
 **no ANE bundle ships** and this section keeps the transcript. The chat template has no
 `enable_thinking` switch: every plain turn opens a `<think>` trace and none reaches EOS within 40

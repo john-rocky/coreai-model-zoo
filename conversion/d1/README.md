@@ -14,7 +14,7 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
 
 | file | what it does |
 |---|---|
-| `make_fixtures.py` | the fixture: the Kev fixture's records as they are (its tweet_offensive records and its red arm left out), the model card's example requests, two long JSON states written for the port; `red_arms.json` (a word arm, two grammatical "not" arms, two state swaps); `--heldout`: the Core AI Kev lane's held-out set in d1's form (`heldout.json`, its tweet_offensive records left out), checked against `records.json` |
+| `make_fixtures.py` | the fixture: the Kev fixture's records as they are (its tweet_offensive records and its red arm left out), the model card's example requests, two long JSON states written for the port; `red_arms.json` (a word arm, two grammatical "not" arms, two state swaps); `--heldout`: the Core AI Kev port's held-out set in d1's form (`heldout.json`, its tweet_offensive records left out), checked against `records.json` |
 | `host.py` | the host specification (`tokenizers`, NumPy, json): the request checks, the prompt text, option codes and readout groups, the row and the Tree split, the readout arithmetic, the answers and the response, the graph's static-S rows |
 | `test_host.py` | `host.py` against the provider's code (through `oracle_d1.dry_run`) and transformers' tokenizer on every fixture question with two tokenizers; the tokenizer contract, the readout's equivalence on random full-vocabulary logits, a request table, negative controls, the fixture's lengths |
 | `oracle_d1.py` | the provider's code unchanged (`AutoModel` + `trust_remote_code`, fp32, CPU): the API path and the row form per question, Tree against row, the final-norm hook and its proof, determinism; `--dry-run` runs the same code on a stand-in backbone (no weights); --images runs the picture records through the provider's image path: the API path (one question = the whole prompt in one plain pass, several = the Tree), each question's plain pass, the image features and the final-norm rows of the --hidden records |
@@ -65,7 +65,7 @@ readout (the vocabulary's log-sum-exp cancels in a softmax over options).
   Loading an AOT asset makes an entry named by the asset's `main.hash` under
   `~/Library/Caches/coreai-cache/<build>/python/`: remove your own entries by that name when you are done (an asset of
   the same graph reuses the entry).
-- **A shared machine:** on the machine this lane ran on, a guard holds back commands that mention export, compile,
+- **A shared machine:** on the machine this port ran on, a guard holds back commands that mention export, compile,
   gate, parity, readout, timing or oracle while a timing window is open (the machine-wide GPU lock, `_paths.gpu_lock()`,
   holds a `timing` label); the steps below run through a wrapper that waits for the window to close, and `timing.py`
   runs inside a window its caller holds (it reads the lock and never writes it). The private venv's name contains one
@@ -103,7 +103,7 @@ objects come from that copy's `prompt` (`provider(engine)`); `oracle_summary.jso
 (transformers' missing / unexpected keys, and every language tensor of the checkpoint bit-equal to the loaded
 parameter), and the oracle's header (`model.provider_code`) the remote-code files' sha256 against the snapshot's.
 
-`make_fixtures.py` reads the Kev fixture from the lane's copy (`$K/fixtures/src/requests.json`, sha256 checked) and the
+`make_fixtures.py` reads the Kev fixture from a local copy (`$K/fixtures/src/requests.json`, sha256 checked) and the
 checkpoint's tokenizer to size the two long states. The fixture keeps the Kev records' gold keys (`"true"` / `"false"` for
 a noul); d1 reports a noul's probabilities as `[yes, no]`, and `host.gold_key` maps the two. One copied question has no
 `instructions` (`own_email_03` / `next_step`): the provider's `as_question` refuses it, and so does the host. The sciq,
@@ -123,7 +123,7 @@ HF_HUB_OFFLINE=1 $K/venv-oracle/bin/python oracle_d1.py --threads 1 --fixtures $
     --out-dir $K/oracle/heldout --results-dir $K/oracle/heldout
 ```
 
-`--heldout` reads the Core AI Kev lane's held-out file (`$ZOO_WORK_ROOT/_kev/fixtures/heldout.json`, sha256 pinned in
+`--heldout` reads the Core AI Kev port's held-out file (`$ZOO_WORK_ROOT/_kev/fixtures/heldout.json`, sha256 pinned in
 the script: transfer-v4 development records past the fixture's slices) and writes only `heldout.json`: its
 tweet_offensive records left out as in `records.json`, the request's `model` key dropped, ids and gold kept, Kev's
 provenance kept with that file's sha256 and each row's `_meta.id`. It asserts that no id and no transfer-v4 line is

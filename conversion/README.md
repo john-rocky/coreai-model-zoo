@@ -169,7 +169,7 @@ Apple's repo; each recipe names the script it runs.
   (`_laya_model.py`: the ModernBERT encoder with the inclusive radius-64 window, the type embedding, two
   explicit head layers, the scorer at every position, the fp32 act head as a second graph function). Five
   stages, each gated on the one before: `oracle_laya.py` (the publisher's own laya 0.3.4 package in its own
-  `uv run` environment — transformers 5.17 — reproducing the LiteRT lane's frozen 201 rows × 2 windows bit
+  `uv run` environment — transformers 5.17 — reproducing the LiteRT port's frozen 201 rows × 2 windows bit
   for bit, and dumping every hidden state of 14 rows) → `gate_laya_authoring.py --negative-controls` (row
   gate on all 201 rows; a two-tier layer gate, 1e-4 absolute through layer 9 and 2e-4 relative above, where
   the [CLS] position carries a ~1.4e4 activation and the official model's own two attention paths differ by

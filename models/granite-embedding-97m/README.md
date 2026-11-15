@@ -78,7 +78,7 @@ The driver refused to run while any foreign accelerator job was present; 105 war
 | 512 | 35/35 | 0.99999999999887 | 2.98e-7 | 470 ms | 264 ms | **4.89 ms** |
 
 The Mac h16c AOT twin also passed 70/70 (same numerics), but its timings were taken with another
-lane's GPU evaluation running and are not reported. The w8 variant on Mac is gated on **CPU
+job's GPU evaluation running and are not reported. The w8 variant on Mac is gated on **CPU
 only** (min cosine 0.999410, max |err| 5.67e-3, ranking exact); Mac GPU for w8 was not run.
 
 The fixed grid computes every position, so pick the smallest grid that covers the text: S=128

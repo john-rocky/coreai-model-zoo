@@ -238,7 +238,7 @@ coreai-torch 0.4.1, coreai-core 1.0.0b2, no transformers); the graph is plain to
 | `strip_ship.py --only fp16-L64 fp16-L128`, `aot_ship.py --target h16c\|h19p --only fp16-L64 fp16-L128` | round 12: the small buckets stripped into `bundles/d1-omni-600m/macos-ship-small/` (not `macos-ship/`: the Swift host's `D1Omni.folders(macos:)` takes every `fp16-L<L>` folder of a directory, so they would move the short rows of every Swift run over `macos-ship/`), compiled into `compiled/ship-h16c/fp16-L<L>/` and `compiled/ship-h19p/fp16-L<L>/` (summaries `manifest.small.json`; the ship set's `manifest.json` untouched) | as round 10 |
 | `runtime_check.py` (bucket set from `reference.json`), `compare_ship.py --small`, `audio_check.py --stage runtime … --buckets 64,128,256,512,1024,2048,4096` | round 12: the runtime gates of L64 / L128 (unstripped `compiled/fp16-L<L>-h16c/` and stripped `ship-h16c/`), compared (`results/small_runtime_compare.json`); the 46 audio rows end to end with the rows routed by `host.ALL_BUCKETS` (4 rows on L64, 5 on L128) → `results/small_runtime_audio_e2e_*.json` | FACTS §7; stripped = unstripped (SAME); the controls FAIL |
 | `gate_swift.py --small pyref \| parity` | round 12: the Python runtime on the stripped L64 / L128 AOTs over the oracle rows they take (342) as the reference, `d1omni parity --bundle-dir macos-ship-small` (AOT and JIT) scored → `results/swift_parity_L64_128.json` | every row bit-equal to the Python runtime, AOT and JIT; FACTS §7; the control FAILs |
-| `timing_run.py window --set r12 --run run5_r12 --lock-label d1d-r12` (under `quiet_hold.py d1d-r12`), `summarize --set r12` | round 12: round 7's harness on the stripped ship AOTs: W1 / W2 at L64 / L128 / L256, W5s (audio 5 s + L128 / L256), W5 (audio 10 s + L256); a stopped job of another lane is not waited on; one window ranked by its medians (`results/timing/ranking_rule_r12.md`) → `results/timing/run5_r12_*.json`, `ranking_r12.json`, `r12_table.md` | every timed decision: argmax and \|Δp\| ≤ 0.02 against the oracle row |
+| `timing_run.py window --set r12 --run run5_r12 --lock-label d1d-r12` (under `quiet_hold.py d1d-r12`), `summarize --set r12` | round 12: round 7's harness on the stripped ship AOTs: W1 / W2 at L64 / L128 / L256, W5s (audio 5 s + L128 / L256), W5 (audio 10 s + L256); a stopped job of other work is not waited on; one window ranked by its medians (`results/timing/ranking_rule_r12.md`) → `results/timing/run5_r12_*.json`, `ranking_r12.json`, `r12_table.md` | every timed decision: argmax and \|Δp\| ≤ 0.02 against the oracle row |
 | `stage_hf.py --ship` | round 10: the Hugging Face folder from the stripped bundles and `ship-h19p`, with `reference/LICENSE-MMLU-MIT.txt`, the NOTICE lines for the strip and MMLU, and `host/` (the Swift host's sources + `host/README.md`: what it does, the JPEG rule) | as above, and every staged file, binary included, free of '/Users/', the home directory and the user name |
 | `stage_hf.py --ship --with-small` | round 13: the same folder with the decision graph at L64 / L128 too (`macos-ship-small/`, their h16c / h19p compiles, round 12's gates): `metadata.json` lists the seven buckets and `bucket_for(positions, ALL_BUCKETS)`; NOTICE says seven lengths; `host/README.md` says which rows ran through which graph in Swift; each audio folder adds `provenance/e2e-gate-all-buckets.json`. Without `--with-small`, `--ship` stages round 10's folder unchanged | as above; the staged files of round 10 that the small buckets do not touch stay byte for byte |
 | `zoo_fixtures.py [--check]` | round 13: `models/d1-omni-600m/fixtures-d1-omni-600m.json` (schema `coreai-d1-omni-fixtures/1`): the 237 public records of fixture v3, the MIT notices of the sources whose text they carry, the 18 media files by name and sha256, and one row per question (360) with ids, markers, the prefix length, the bucket (`ALL_BUCKETS`), the temperature and the oracle's numbers. Its own schema: coreai-kit's `decide-cli parity` routes every `coreai-encoder-fixtures*` file through laya's prompt builder | `--check`: the file = a build = the staging's `reference/` (records by sha256 of their canonical JSON, media by file sha256, rows by ids / markers / logits / p) |
@@ -308,7 +308,7 @@ Runtime (AOT `.aimodelc`, explicit specialization options, every row 3 times):
   the same bytes): `CoreAIDelegates.AIModelError error 1` (failedToSpecialize). The asset holds only the MPSGraph
   package. The fp32 GPU run is the runtime's reference instead.
 - The first Neural Engine run of the wfp16 graph died at row 400+ with `MPSCommandBufferImageCache.mm:1220: failed
-  assertion 'Internal error: Released a texture not in current cache frame.'` while another lane timed a GPU job on
+  assertion 'Internal error: Released a texture not in current cache frame.'` while another GPU job was being timed on
   the same Mac; run alone it completed (the numbers above). The cause is not isolated.
 - Load: 0.2–0.3 s on the GPU; 17.5 s (fp16) and 75.4 s (wfp16) the first time with a Neural Engine preference,
   0.005 s the next time the same asset loaded. Peak RSS 1.5 GiB (2.9 GiB for fp32). No milliseconds per call were
@@ -362,7 +362,7 @@ Runtime (AOT `.aimodelc`, GPU preferred, every row 3 times, 5 at 4096):
 ### Round 5 results (the vision graph, Mac M4 Max, macOS 27.0 26A428, coreai-build 3600.83.1)
 
 Pictures (`images/manifest.json`; nothing generated or downloaded in this round). Two sieved pools, read only:
-Wikimedia Commons hotel-room photographs whose licence template is CC0 (the decider-2b-vision lane's set, no person in
+Wikimedia Commons hotel-room photographs whose licence template is CC0 (the decider-2b-vision port's set, no person in
 frame) and this zoo's own FLUX.2 klein 4B rooms (prompt, seed, hub revision in its manifest). Every file used was
 looked at by eye at full size before its questions were written: no person, no legible text or logo, no existing
 design (the 11 photographs with a burned-in date stamp, and those with a readable brand, sign, magazine or clock, were
@@ -456,7 +456,7 @@ moves every clip (cos ≤ 0.80). The fp32 absmax is 1,403 (the subsampling's out
 
 ### Round 7 results (speed, Mac M4 Max, macOS 27.0 26A428, Core AI Python runtime, AOT h16c)
 
-The speed table is the lane's speed ladder (`$ZOO_WORK_ROOT/_d1_omni/SPEED_LADDER.md`), built by `timing_run.py` in two
+The speed table is the port's speed ladder (`$ZOO_WORK_ROOT/_d1_omni/SPEED_LADDER.md`), built by `timing_run.py` in two
 measurement windows (`quiet_hold.py`), every form of a workload alternated in one process, the ranking rule fixed
 before the first window (`results/timing/ranking_rule.md`). One decision = graph inputs → graph call(s) → copy → the
 host's softmax; preprocessing apart. In short (the mean of the two windows' medians):
@@ -583,7 +583,7 @@ host's softmax; preprocessing apart. In short (the mean of the two windows' medi
   Neural Engine preferred loads: audio 10 s → 9 audio rows PASS, W5 59.98 ms (its audio graph 39.5 ms against the GPU's
   6.8 ms); decision L256 → 56 rows FAIL (argmax 33/55, as on the Mac), W1 155.9 ms. Whether those graphs ran on the
   Neural Engine is not confirmed from the app (its Core AI cache holds no region file).
-- Lane records: `~/code/coreai/_d1_omni/results/iphone_{parity_jit,parity_aot,bench,ane}.json`, `ROUND11.md`.
+- Local records: `~/code/coreai/_d1_omni/results/iphone_{parity_jit,parity_aot,bench,ane}.json`.
 
 ### Round 12 results (the small decision buckets, Mac M4 Max, macOS 27.0 26A428, coreai-torch 0.4.1, coreai-build 3600.83.1)
 
