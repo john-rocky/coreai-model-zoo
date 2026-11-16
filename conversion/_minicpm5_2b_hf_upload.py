@@ -1,4 +1,4 @@
-"""Stage + upload the MiniCPM5-2B Core AI int8 bundle to HF. USER-GATED — run only when asked.
+"""Stage + upload the MiniCPM5-2B Core AI int8 bundle to HF.
 
 Mirrors the published 1B repo layout (mlboydaisuke/MiniCPM5-1B-CoreAI): `int8/` holds the
 FM-format dynamic bundle (metadata.json + <name>.aimodel + tokenizer/), the source LICENSE

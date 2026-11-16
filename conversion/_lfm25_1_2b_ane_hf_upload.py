@@ -1,4 +1,4 @@
-"""Add the LFM2.5-1.2B Neural Engine bundles to HF (S6, 2026-09-17). USER-GATED — run only when asked.
+"""Add the LFM2.5-1.2B Neural Engine bundles to HF (S6, 2026-09-17).
 
 mlboydaisuke/LFM2.5-1.2B-CoreAI:
   ios-ane-h18p/   metadata.json + lfm2_5_1_2b_instruct_lfm25_pal8_g32_static.h18p.aimodelc + tokenizer/   (AOT h18p, ANE)

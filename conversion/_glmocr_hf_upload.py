@@ -1,4 +1,4 @@
-"""Upload the GLM-OCR Core AI bundles (vision fp16 + decoder int8hu + tokenizer) to HF. USER-GATED."""
+"""Upload the GLM-OCR Core AI bundles (vision fp16 + decoder int8hu + tokenizer) to HF."""
 import os
 os.environ["HF_HUB_DISABLE_XET"] = "1"
 from huggingface_hub import HfApi

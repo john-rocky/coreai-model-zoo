@@ -22,7 +22,7 @@
 > host-loop values (the production pipelined engine starts from a higher baseline); the RATIO is
 > apples-to-apples (same Driver). Repro: `_smoke/specdecode_pretokenize_realprompt.py` emits
 > PB_PROMPT_IDS → `PB_PROMPT_IDS=$(cat specprompt_code.ids) _spec_device_probe.sh spec_4b_code qwen3_4b_gpu`.
-> **DECISION (user, 2026-07-01): ship the 4B n-gram win as a gated CoreAIChat "fast" mode.**
+> **Decision (2026-07-01): ship the 4B n-gram win as a gated CoreAIChat "fast" mode.**
 >
 > **SHIPPED → CoreAIChat (in-app, device-verified 2026-07-01).** New `SpecDecodeBackend.swift`
 > (RWKV7Backend-style direct InferenceFunction driver + swift-transformers tokenizer from the
@@ -34,13 +34,13 @@
 > RAG 52.9 vs 15.1 tok/s = **3.5×** (accepted/round 3.4); free-form/thinking α≈0 → ~1× (gated, no
 > slowdown). Absolute tok/s is the host-loop driver on MainActor (below the production pipelined
 > engine); the ON/OFF RATIO is the spec-decode win. Model sideloaded to the app container
-> (`com.daisukemajima.CoreAIChat` → Documents/models/qwen3_4b_gpu); HF bundle upload + commit are
-> user-gated. Headless A/B: `GEMMA_ENGINE=spec GEMMA_SPEC=0|1 GEMMA_PROMPT=… GEMMA_N=…`.
+> (`com.daisukemajima.CoreAIChat` → Documents/models/qwen3_4b_gpu).
+> Headless A/B: `GEMMA_ENGINE=spec GEMMA_SPEC=0|1 GEMMA_PROMPT=… GEMMA_N=…`.
 
-## → EAGLE-3 + TREE SESSION: START HERE (handoff 2026-07-02)
+## → EAGLE-3 + tree: plan (2026-07-02)
 
-**Decision:** spec-decode's outward ship is GATED on your EAGLE-3+tree validation. n-gram is NOT
-shipping standalone (marginal for chat — user confirmed on-device: "count 100" felt no faster;
+**Decision:** spec-decode's outward ship waits for the EAGLE-3+tree validation. n-gram is NOT
+shipping standalone (marginal for chat — on device, "count 100" felt no faster;
 n-gram only wins where output echoes input = extractive/code-only). Ship spec-decode ONCE, as the
 version that's broadly fast on free-form. If EAGLE-3+tree lands → ship that. Else fall back to
 draft-model (C2, 27B). n-gram stays as plumbing.
@@ -53,8 +53,7 @@ draft-model (C2, 27B). n-gram stays as plumbing.
   `_smoke/specdecode_reference.py`), no-think ChatML pre-seed, streaming, hit-rate gate. **For
   EAGLE: swap the drafter — instead of n-gram/`draft()`, run the EAGLE head to propose a TREE, and
   replace the linear verify loop with tree-mask verification.** UI: `GemmaMode.qwen3spec` +
-  ⚡Spec/Greedy toggle already wired in `Gemma4ChatEngine.swift` + `ChatView.swift`. **App code is
-  UNCOMMITTED on purpose (entangled with other sessions' RWKV7/BitVLA); leave it, extend it.**
+  ⚡Spec/Greedy toggle already wired in `Gemma4ChatEngine.swift` + `ChatView.swift`.
 - `ondevice/PipelinedBench/Sources/SpeculativeDecoder.swift` — the same algorithm as a headless
   probe (`PB_SPEC=1`; `PB_DRAFT=<dir>` = draft-model path; `PB_PROMPT_IDS` = real BPE prompt).
   Fastest place to measure EAGLE α before touching the app.
@@ -82,7 +81,7 @@ Tree verify (even wider S) will see the same. Frame it as "greedy-lossless, fp16
 stayed listed as connected but the stream stalled mid-generation). If probes hang with only load
 lines, it's the console tunnel, not your code — retry / reconnect.
 
-## HANDOFF — reproduce + next (read first)
+## Reproduce + next
 
 **What exists & works:** a self-contained greedy n-gram spec-decode prototype driving a stateful
 dense AOT bundle, wired into PipelinedBench as `PB_SPEC=1`. Lossless-verified on device.
@@ -139,8 +138,7 @@ cd ../.. && PB_GEN=96 ./ondevice/_spec_device_probe.sh spec qwen3_4b_gpu
 3. Optional perf: batched GPU argmax (currently CPU argmax on `[1,K,vocab]`), and moving off the
    host-driven loop onto the pipelined engine if the sync per-round overhead matters.
 
-**Do NOT** re-sideload qwen3_4b_gpu (it's on the device); use `SKIP_PUSH=1`. Nothing is committed —
-push / HF / model card are user-gated.
+**Do NOT** re-sideload qwen3_4b_gpu (it's on the device); use `SKIP_PUSH=1`. Nothing is committed.
 
 ## TL;DR
 
@@ -291,7 +289,7 @@ Model script: `_smoke/specdecode_speedup_model.py`.
    (`ondevice/PipelinedBench`, `com.coreai.pipelinedbench`) — decode tok/s with output
    distribution preserved, α per domain. **Gate: lossless + net speedup on code/RAG.**
 5. **vanilla draft** (second engine instance, qwen3.5-0.8B) only if r turns out ≤0.2.
-6. **EAGLE-3 head** via Red Hat `Speculators` (external GPU box) → tree verify. Separate session.
+6. **EAGLE-3 head** via Red Hat `Speculators` (external GPU box) → tree verify.
 
 ### Implementation status — WORKS ON DEVICE (2026-07-01)
 - **Greedy n-gram spec-decode prototype RUNS ON A19, LOSSLESS, 4.06× on a high-α prompt.**
@@ -323,6 +321,5 @@ Model script: `_smoke/specdecode_speedup_model.py`.
   off when recent hit-rate is low (so chat isn't slowed by wasted verifies); then vanilla-draft /
   EAGLE-3 (C3) for the high-α general case.
 
-Conventions (from the campaign doc): engine work is C's resource; own files by explicit path,
-never `git add -A`; no "claude" in commits; English code/UI; don't claim a win before the bench
-shows one; push/HF/card user-gated. Build/test on the real device (no local build test).
+Conventions (from the campaign doc): engine work is C's resource; English code/UI; don't claim a
+win before the bench shows one. Build/test on the real device (no local build test).

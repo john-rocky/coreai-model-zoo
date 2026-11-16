@@ -72,7 +72,7 @@ the LUT) + **dispatch tax ≈ 1.8 ms (253 × ~7 µs)** + thermal band ±0.5 ms.
 | embed_gather folded into model_proj prologue (front 4→3) | ~+0.03 | trivial |
 | TOKENS_PER_CB retune under 253 dispatches | ~0 (was flat at 452) | one env sweep |
 | lm_head stream 40.6 → 45 GB/s question (short 96-word rows ⇒ per-row epilogue density; try R=8 head tile) | +0.3–0.8 IF it's not the true DRAM ceiling | KPROBE first (`G4_KPROBE=1`) |
-| **mega-kernel restructure** (LiteRT-style: whole-layer or multi-stage single dispatches to attack the 1.8 ms issue tax) | up to +5, uncertain | a PROJECT, not a lever; only if the user wants LiteRT-beating rather than parity |
+| **mega-kernel restructure** (LiteRT-style: whole-layer or multi-stage single dispatches to attack the 1.8 ms issue tax) | up to +5, uncertain | a PROJECT, not a lever; only if the goal is beating LiteRT rather than parity |
 | MTP on A19 | ⛔ stays OFF | with all session-2 levers: sky 48.0 eff < S=1 55.9 (verify still compute-bound; bandwidth-bound-runtime lever only) |
 
 Env knobs baked into both runners (defaults = ship config): `G4_R1O/G4_R1D` (R=1/4),

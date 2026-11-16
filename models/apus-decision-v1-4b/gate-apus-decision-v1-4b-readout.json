@@ -4284,7 +4284,7 @@
   "session_resets_identical": true,
   "provisional_int8hu_max_delta_p_expectation": 0.05,
   "provisional_expectation_exceeded": false,
-  "provisional_expectation_policy": "Exceedance is recorded for supervisor judgment; no investigation or new tolerance.",
+  "provisional_expectation_policy": "Exceedance is recorded; no investigation or new tolerance.",
   "worst_five": [
    {
     "id": "noul_02",

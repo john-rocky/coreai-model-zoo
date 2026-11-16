@@ -2,10 +2,10 @@
 # Community port — NOT an Apple model.
 """Lay out the Hugging Face repo mlboydaisuke/Fun-ASR-Nano-2512-CoreAI in <work>/ship/ exactly as it is
 uploaded (APFS clones of the gated bundles), check sizes and metadata, write SHA256SUMS and print the size
-table. Nothing is uploaded here; the upload is a separate, owner-gated step:
+table. Nothing is uploaded here; the upload is a separate step:
 
     HF_HOME=~/code/coreai/_funasr_nano/hf ~/code/coreai/coreai-models/.venv/bin/python stage_ship.py            # stage + checks
-    HF_HOME=~/code/coreai/_funasr_nano/hf ~/code/coreai/coreai-models/.venv/bin/python stage_ship.py --upload   # owner's GO only
+    HF_HOME=~/code/coreai/_funasr_nano/hf ~/code/coreai/coreai-models/.venv/bin/python stage_ship.py --upload
 (HF_HOME points hf_snapshot at the cache that holds the source repos' config files.)
 
 Layout (the paths CoreAIKit's FunASRModelID names; one subtree serves macOS and iOS because both bundles are
@@ -61,7 +61,7 @@ def clone(src: Path, dst: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--upload", action="store_true", help="upload the staged tree (owner GO required)")
+    ap.add_argument("--upload", action="store_true", help="upload the staged tree")
     args = ap.parse_args()
 
     dec_src, enc_src = EXPORTS / DECODER, EXPORTS / ENCODER

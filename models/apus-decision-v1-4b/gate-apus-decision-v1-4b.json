@@ -60,7 +60,7 @@
     "session_resets_identical": true,
     "provisional_int8hu_max_delta_p_expectation": 0.05,
     "provisional_expectation_exceeded": false,
-    "provisional_expectation_policy": "Exceedance is recorded for supervisor judgment; no investigation or new tolerance.",
+    "provisional_expectation_policy": "Exceedance is recorded; no investigation or new tolerance.",
     "worst_five": [
       {
         "id": "noul_02",
@@ -645,8 +645,8 @@
   },
   "measured_through_coreai_kit": {
     "schema": "coreai-kit-supervisor-measurements/1",
-    "provenance": "Supervisor supplied in rounds/02.instruction.md; measured through coreai-kit, not rerun in this conversion round",
-    "supplied_text": "Facts the supervisor measured on the kit side (2026-09-23 05:2x–05:4x JST, worktree ~/code/coreai-kit-models-wt,\n`Decision.Format.sharedState`, the sequential engine, the kit's own chat-template rendering) — quote as \"measured\nthrough coreai-kit\", do not re-derive:\n- `decide-cli parity` on results/fixtures.json: the 40 `choice` and `noul` rows — tokens identical 40/40 (the kit's\n  chat-template rendering equals the author's `compile()` byte for byte), label slots 40/40, option argmax 40/40,\n  max |Δp| 0.0055, mean 0.0002. The 8 `score_level` rows are skipped: the kit's question kinds have no primitive of\n  that name (the author's score_level is a yes/no on one proposition, the kit's `noul`, but the JSON says\n  `\"primitive\": \"score_level\"` and the kit renders `\"noul\"`). Median 2.8 s per fixture question over those 40 rows\n  (124–1,672 compiled tokens, S=1 prefill), 24 s for the 1,672-token row.\n- A two-question workflow request (a 20-token state, a 3-criteria choice and a noul): 2,069 ms for the 134-token\n  row and 1,540 ms for the 107-token row, 0 tokens reused (the recurrent hybrid re-prefills every row) — about\n  15 ms per token on the sequential engine. Answers: close 0.999; refund asked P(yes) 0.000.\n- SemIf's authored144 (144 English rows, 3 options each, SemIf's gold labels, its unchanged `benchmarks/evaluate.py`),\n  the kit's own rendering of each row as a `choice`: raw 131/144, **mean family balanced accuracy 0.906**, median\n  1.96 s per decision. For scale on the same rows and evaluator the kit README reports Qwen3.5-4B int8 zero-shot\n  0.821 and MiniCPM5-2B int8 0.681, and the OpenThai run 0.725. Numbers, not a ranking.\n- The kit's own \"which model\" mistake, for the knowledge page's Swift paragraph: an earlier `ask` measurement of\n  the OpenThai sibling had silently used the catalog default model because the command ignored `--bundle`; the\n  command was fixed and every figure above was taken with the model line printed (`model: apus_openjev_… format: sharedState`).\n",
+    "provenance": "Measured through coreai-kit, not rerun in this conversion round",
+    "supplied_text": "Facts measured on the kit side (2026-09-23 05:2x–05:4x JST, worktree ~/code/coreai-kit-models-wt,\n`Decision.Format.sharedState`, the sequential engine, the kit's own chat-template rendering):\n- `decide-cli parity` on results/fixtures.json: the 40 `choice` and `noul` rows — tokens identical 40/40 (the kit's\n  chat-template rendering equals the author's `compile()` byte for byte), label slots 40/40, option argmax 40/40,\n  max |Δp| 0.0055, mean 0.0002. The 8 `score_level` rows are skipped: the kit's question kinds have no primitive of\n  that name (the author's score_level is a yes/no on one proposition, the kit's `noul`, but the JSON says\n  `\"primitive\": \"score_level\"` and the kit renders `\"noul\"`). Median 2.8 s per fixture question over those 40 rows\n  (124–1,672 compiled tokens, S=1 prefill), 24 s for the 1,672-token row.\n- A two-question workflow request (a 20-token state, a 3-criteria choice and a noul): 2,069 ms for the 134-token\n  row and 1,540 ms for the 107-token row, 0 tokens reused (the recurrent hybrid re-prefills every row) — about\n  15 ms per token on the sequential engine. Answers: close 0.999; refund asked P(yes) 0.000.\n- SemIf's authored144 (144 English rows, 3 options each, SemIf's gold labels, its unchanged `benchmarks/evaluate.py`),\n  the kit's own rendering of each row as a `choice`: raw 131/144, **mean family balanced accuracy 0.906**, median\n  1.96 s per decision. For scale on the same rows and evaluator the kit README reports Qwen3.5-4B int8 zero-shot\n  0.821 and MiniCPM5-2B int8 0.681, and the OpenThai run 0.725. Numbers, not a ranking.\n- The kit's own \"which model\" mistake, for the knowledge page's Swift paragraph: an earlier `ask` measurement of\n  the OpenThai sibling had silently used the catalog default model because the command ignored `--bundle`; the\n  command was fixed and every figure above was taken with the model line printed (`model: apus_openjev_… format: sharedState`).\n",
     "measurement_date": "2026-09-23 JST",
     "worktree_read_only": "~/code/coreai-kit-models-wt",
     "format": "Decision.Format.sharedState",
@@ -717,7 +717,7 @@
     "mean_abs_dp": 0.0002,
     "skipped_score_level_rows": 8,
     "record": "models/apus-decision-v1-4b/measurements-coreai-kit.json",
-    "provenance": "measured through coreai-kit; supervisor-provided, not re-derived"
+    "provenance": "measured through coreai-kit, not re-derived"
   },
   "fixture": "models/apus-decision-v1-4b/fixtures-apus-decision-v1-4b.json",
   "generated_from": "the two executed letter transcripts' summary blocks; shape follows d6ca61a:models/openthai-systemone/gate-openthai-systemone.json",

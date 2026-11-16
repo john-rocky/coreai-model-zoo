@@ -2434,6 +2434,6 @@
     "verdict": "FAIL"
    }
   },
-  "purpose": "the same tool on a deliberately wrong fixture must go RED (memory: a gate must be able to fail)"
+  "purpose": "the same tool on a deliberately wrong fixture must go RED"
  }
 }

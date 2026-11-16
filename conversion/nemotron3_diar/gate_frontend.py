@@ -26,7 +26,7 @@
   audio and filterbank). (ii) chunk boundaries -- every streamed chunk's frames against the same
   global frames of the offline pass, for transformers and for NumPy separately.
 
-Why these bars (revised by the supervisor on 2026-09-24 after round 1; the round-1 bar was a flat
+Why these bars (revised on 2026-09-24 after round 1; the round-1 bar was a flat
 mel max|Δ| <= 1e-4, and embed <= 1e-5 for the stacking alone):
   - the reference is not exact at 1e-4. transformers' own float32 torch.stft is 1.82e-4 (97.6 s) /
     8.26e-5 (21.5 s) away from a float64 FFT of the same float32 frames, and 2.41e-4 / 1.09e-4 away

@@ -86,7 +86,7 @@ ROW_FIELDS = ("ids_sha256", "markers", "prefix", "n_ids", "positions", "bucket",
               "state_room", "state_cut", "instructions_tokens", "instructions_cut", "budget", "per_option", "option_cut",
               "row_cut", "calibrate", "type", "K")
 GRAPH_INPUTS = ("input_ids", "pad_mask", "prefix_mask", "keep_right", "qtype_onehot")
-# The shipped decision buckets: round 13 adds round 12's L64 / L128 (the supervisor's ship decision, 2026-10-08) =
+# The shipped decision buckets: round 13 adds round 12's L64 / L128 (the ship decision, 2026-10-08) =
 # host.ALL_BUCKETS. A record of the ship form only: no subcommand routes by it (pyref routes by PYREF_BUCKETS below, the
 # Swift host by the folders it is given), so the round 8-12 runs and their results are unchanged.
 SHIP_BUCKETS = host.ALL_BUCKETS

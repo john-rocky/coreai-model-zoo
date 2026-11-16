@@ -1,4 +1,4 @@
-"""Stage + upload the VibeVoice-Realtime-0.5B Core AI bundles to HF. USER-GATED.
+"""Stage + upload the VibeVoice-Realtime-0.5B Core AI bundles to HF.
 
 Stages the 5 macOS fp16 `.aimodel`, their iOS AOT `.h18p.aimodelc`, the voice presets, the host
 embedding table and the compact device self-test bundle into /tmp/vibevoice_hf, then uploads to

@@ -1,4 +1,4 @@
-"""Stage + upload the S1-mini Core AI bundle to HF. USER-GATED — run only when asked.
+"""Stage + upload the S1-mini Core AI bundle to HF.
 
 Uploads ONLY the int8lin bundle. int4lin is smaller and faster and passes the same 16/16
 fp32 oracle gate, and it corrupts digits ($23,450 -> $2,345) — publishing it beside the

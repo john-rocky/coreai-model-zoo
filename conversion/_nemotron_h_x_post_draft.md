@@ -1,4 +1,4 @@
-# X post drafts (user posts; understated, technical, link is incidental)
+# X post drafts
 
 ## A — the port
 
@@ -16,7 +16,7 @@ https://huggingface.co/mlboydaisuke/Nemotron-3-Nano-4B-CoreAI
 
 ---
 
-## B — the 4-bit trilemma (probably the most useful thing here)
+## B — the 4-bit trilemma
 
 Wanted this 4B under 3 GB. Tried every 4-bit scheme I had. All three fail, and
 each one fails for a *different* reason:
@@ -69,17 +69,7 @@ A 5% effect cannot be measured by running each side once. I know this. I did it
 anyway, twice, and each time the number was decisive enough to explain.
 ---
 
-Recommendation: **B**, then **A** a day or two later.
-
-B is the only one that changes what someone else does tomorrow. "The 4-bit scheme
-your kernel can run and the 4-bit scheme that keeps your accuracy are not the same
-scheme" is counterintuitive, self-contained, and needs no context about the zoo.
-A is the artifact announcement and lands better once B has framed why int8.
-C is a good reply-thread addendum to A (it explains the 16 tok/s). D is inward-facing
-— true, useful, but it's a process lesson, not a result.
-
 Notes:
-- No zoo pitch. Links are incidental.
 - All numbers measured: iPhone 17 Pro (A19 Pro) cooled, PipelinedBench, AOT h18p;
   M4 Max via raw AIModel calls. Quality = teacher-forced top-1 vs the fp32 oracle at
   the 33 margin-clean prompt positions.

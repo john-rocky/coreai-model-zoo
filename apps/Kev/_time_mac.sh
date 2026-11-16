@@ -28,7 +28,7 @@
 #   KEV_FORMS entries take options after the bundle, comma-separated: "D=kev_0_8b_decode_fp16_metal_dyn128,asset=jit,
 #       call_max=128,multiple=16,warm" -> `kev time --asset jit --call-max 128 --multiple 16 --warm` (asset aot|jit; warm =
 #       every call length of the plan once after the load; a dynamic-S bundle's L and q default to its metadata)
-#   KEV_CLEAN=1   the supervisor's clean-process rule (10-04): a process counts when no other GPU job ran during it and the
+#   KEV_CLEAN=1   the clean-process rule (10-04): a process counts when no other GPU job ran during it and the
 #       1-minute load average was <= KEV_LOAD_MAX (12) at its start and its end; the rounds A B C ... go on, only for the
 #       forms with fewer than 2 clean processes, up to KEV_MAX_ROUNDS (4); every process is kept in window.json with its
 #       verdict and reasons (`clean`), and after the lock is taken a load above KEV_LOAD_MAX is waited out for up to 10 min
@@ -231,7 +231,7 @@ clean_count = {}   # round 15: label -> clean processes so far
 next_slot = len(plan)
 
 def process_clean(rec):
-    """round 15: the supervisor's rule -> (clean, reasons)."""
+    """round 15: the clean-process rule -> (clean, reasons)."""
     reasons = []
     if rec.get("other_gpu_jobs_during"):
         reasons.append(f"other GPU jobs: {rec['other_gpu_jobs_during'][:3]}")

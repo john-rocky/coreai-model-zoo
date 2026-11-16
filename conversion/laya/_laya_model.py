@@ -51,7 +51,7 @@ PARAMETER_COUNT = 321_908_998
 MUTATIONS = ("none", "all_global", "all_local", "window63", "ignore_padding", "no_type_emb")
 MASK_VALUE = -1.0e4
 FP32_ISLANDS = ("rope", "softmax", "layernorm", "residual", "scorer")
-# The recipe for --dtype fp16 (supervisor 2026-09-23, §0.2 item 12): model.half() with fp32 graph I/O,
+# The recipe for --dtype fp16 (2026-09-23): model.half() with fp32 graph I/O,
 # RoPE applied in fp32, attention softmax in fp32. The act head is a separate function and stays fp32.
 FP16_RECIPE = ("rope", "softmax")
 # fp32: fp32 weights and compute. fp16: fp16 weights and compute except the fp32 islands.

@@ -1,4 +1,4 @@
-"""Upload the ColModernVBERT Core AI bundles (query + doc encoders, fp16/fp32) to HF. USER-GATED.
+"""Upload the ColModernVBERT Core AI bundles (query + doc encoders, fp16/fp32) to HF.
 
 Run:  HF_XET_HIGH_PERFORMANCE=1 python conversion/_colmodernvbert_hf_upload.py
 Staging dir holds the 4 *.aimodel bundles, tokenizer/, reference_*.json, test_doc.png, README.md.

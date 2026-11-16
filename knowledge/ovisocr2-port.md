@@ -3,7 +3,7 @@
 Status **in progress**. Numerics are done: **128/128 tokens exact** end to end vs the fp32 HF
 oracle, on Mac, through both the JIT and the AOT assets. Mac is shippable at ~6.3 s/page. The phone
 **loads** the 2.15 GiB bundle but cannot yet run it — that needs one authoring variant, which is the
-whole of the handoff below. Nothing is published, so there is deliberately **no `models/ovisocr2/`**
+whole of the remaining work below. Nothing is published, so there is deliberately **no `models/ovisocr2/`**
 — that directory is the catalog's published surface (every entry needs a real `hf_repo` and a card
 whose numbers are measured). The recipe below moves there when it ships.
 
@@ -77,7 +77,7 @@ open_questions = [
 ]
 ```
 
-## Start here (the port is unfinished — this is the handoff)
+## Remaining work (the port is unfinished)
 
 **One thing is left: a static-input `image_embeds` VL variant for the qwen3.5 family.** Everything
 else is measured and recorded below. Why that one thing, and why it is not blocked, is in
@@ -93,7 +93,7 @@ is **tracked** upstream, so the new class rides `overlay/patches/python-overlay.
 
 ⚠️ **`overlay/regen.sh` sweeps the whole checkout.** It runs
 `git diff <BASE> -- python/src/coreai_models` and copies every untracked package file into `files/`.
-As of this writing the checkout also holds another session's in-flight work — `bailing_moe_v3.py`
+As of this writing the checkout also holds other in-flight work — `bailing_moe_v3.py`
 (Ling-3.0), `qwen3_5_mtp_ios.py`, and edits to `lfm2.py` / `model_registry.py` / `models/base.py` /
 `models/registry.py`. Running regen as-is publishes all of it. Check
 `git -C ~/code/coreai/coreai-models status --short -- python/src/coreai_models` first.
@@ -390,8 +390,7 @@ engine nor the kit can run it, whatever the kit contains.
 
 The actual gap is upstream of both: **`coreai_models/models/macos/qwen3_5.py` has exactly one VL
 class, `Qwen3_5VLStatefulEmbeds`.** The qwen3.5 family has no static-input `image_embeds` variant at
-all. Writing one — modelled on `Qwen3VLPipelinedForCausalLM` — is a **new authoring module**, which
-is this project's session boundary.
+all. Writing one — modelled on `Qwen3VLPipelinedForCausalLM` — is a **new authoring module**.
 
 Two things it would fix for free: no 508 MB host-side embed table (it moves back into the graph,
 cutting the phone footprint), and chunked prefill through the engine instead of the S=1 ingest that
@@ -419,7 +418,7 @@ shipped `qwen3.5-0.8b` decode bundle already rides the pipelined engine with tho
 `apps/coreai-pipelined-extra-states.patch`, so that piece exists too.
 
 **Net: the variant is tractable and closely modelled on an existing file.** It is still a new
-authoring module, which is this project's session boundary — but it is not blocked on an unknown.
+authoring module, but it is not blocked on an unknown.
 
 ## Not done
 

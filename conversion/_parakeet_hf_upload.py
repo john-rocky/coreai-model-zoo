@@ -1,4 +1,4 @@
-"""Stage + upload a Parakeet-TDT-0.6B Core AI bundle to HF. USER-GATED — run only when asked.
+"""Stage + upload a Parakeet-TDT-0.6B Core AI bundle to HF.
 
 Stages the 30 s encoder (fp16) + predict/joint (fp32) `.aimodel`s, the tokenizer assets
 (`parakeet/stage_bundle_assets.py`, which retags `tokenizer_class` for swift-transformers),

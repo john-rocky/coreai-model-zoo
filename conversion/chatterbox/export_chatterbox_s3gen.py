@@ -6,7 +6,7 @@ S3Gen = flow.encoder (UpsampleConformerEncoder: token-embeds -> mu) + flow.decod
 Euler loop + AR host-side. The only export snag is the Conformer's streaming chunk mask
 (`add_optional_chunk_mask` has a data-dependent `.item()`), patched to a static form here.
 
-Run (in the coreai venv WITH chatterbox installed via uv, see project memory):
+Run (in the coreai venv WITH chatterbox installed via uv):
   cd ~/code/coreai/coreai-models && HF_HUB_DISABLE_XET=1 .venv/bin/python \
     ../coreai-models-community/conversion/chatterbox/export_chatterbox_s3gen.py --out-dir exports
 """

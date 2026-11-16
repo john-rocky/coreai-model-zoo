@@ -1,4 +1,4 @@
-"""Upload the LTX-Video 2B Core AI bundles + README to HF. USER-GATED (needs HF auth).
+"""Upload the LTX-Video 2B Core AI bundles + README to HF. Needs HF auth.
 
 Ships the half-size bundles (DiT fp16 + VAE fp16 + T5 bf16) — the ship recipe. The bundles are
 resolution-specific for DiT/VAE; upload the demo-resolution set + the recipe README.

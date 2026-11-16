@@ -1,4 +1,4 @@
-# X post drafts (user posts; understated, technical, link is incidental)
+# X post drafts
 
 ## A — the port
 
@@ -14,7 +14,7 @@ https://huggingface.co/mlboydaisuke/Z-Image-Turbo-CoreAI
 
 ---
 
-## B — the int8 finding (probably the most useful thing here)
+## B — the int8 finding
 
 Porting a 6B diffusion DiT, I assumed int8 would be the small-and-fast option.
 It's neither, on this shape:
@@ -47,7 +47,7 @@ The model stayed on the Mac.
 
 ---
 
-## D — the honest one (if in the mood)
+## D — the honest one
 
 Spent a day trying to get Z-Image onto an iPhone. fp16 sends the DiT all-NaN at
 sampler step 2; bf16 is exact but AOT won't take a bf16 module. I tried five
@@ -61,15 +61,6 @@ Should have gone to the device three hypotheses earlier.
 
 ---
 
-Recommendation: **B**, then **A** with images a day later.
-
-B is the only one that changes what someone else does tomorrow — "int8 makes my
-diffusion model slower" is counterintuitive, self-contained, and needs no context
-about the zoo. A is the artifact announcement and lands better once B has framed it.
-C and D are narrower (C assumes you care about Core AI's AOT path; D is a process
-lesson, good but inward-facing).
-
 Notes:
-- No zoo pitch. Links are incidental.
 - Numbers above are the shipped --io-fp32 graphs, M4 Max, measured.
 - Images: conversion/zimage/oracle/{engine_image,engine_prompt,engine_s1024}.png

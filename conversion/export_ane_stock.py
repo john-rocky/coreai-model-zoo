@@ -38,8 +38,8 @@ What it does, in order (each step is the same command the MiniCPM5 lane ran by h
    StaticShapeEngine) — `--devbundle NAME` clones it to `exports/apple_bench/devbundles/NAME` for
    `ondevice/_ane_gate` (`BUNDLE=... ./_build.sh`) and the bench app.
 6. `--stage <Repo>` clones the two HF subtrees to `exports/hf_stage/<Repo>/ios-ane-h18p/` (AOT) and
-   `ios-static/` (the IR before AOT — portable, compile it for another chip). Upload is user-gated
-   (`_ane_stock_hf_upload.py`). Clones are APFS `cp -c` (no extra bytes).
+   `ios-static/` (the IR before AOT — portable, compile it for another chip).
+   Upload: `_ane_stock_hf_upload.py`. Clones are APFS `cp -c` (no extra bytes).
 
 A summary lands in `<out>/_ane_stock.json` (sizes, region count, paths). Gate the device bundle
 with `ondevice/_ane_gate` (red first, then clean) before anything ships; 4-bit FAIL -> re-run with
@@ -230,7 +230,7 @@ def main() -> None:
     ap.add_argument("--devbundle", default=None, metavar="NAME",
                     help=f"clone the device bundle to {DEVBUNDLES}/NAME (for ondevice/_ane_gate)")
     ap.add_argument("--stage", default=None, metavar="REPO",
-                    help=f"clone ios-ane-<arch>/ + ios-static/ to {HF_STAGE}/REPO (upload is user-gated)")
+                    help=f"clone ios-ane-<arch>/ + ios-static/ to {HF_STAGE}/REPO")
     ap.add_argument("--overwrite", action="store_true", help="pass --overwrite to the exporter")
     ap.add_argument("--skip-export", action="store_true", help="reuse an existing export under --output-dir")
     ap.add_argument("--export-extra", default="", help="extra args for coreai.llm.export, space separated")

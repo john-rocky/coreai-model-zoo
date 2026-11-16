@@ -1,4 +1,4 @@
-"""Replace the MiniCPM5-2B Neural Engine bundles on HF with the 6-bit export (S5, 2026-09-16). USER-GATED — run only when asked.
+"""Replace the MiniCPM5-2B Neural Engine bundles on HF with the 6-bit export (S5, 2026-09-16).
 
 mlboydaisuke/MiniCPM5-2B-CoreAI:
   ios-ane-h18p/   metadata.json + minicpm5_2b_minicpm5_pal6_g8_static.h18p.aimodelc + tokenizer/   (AOT h18p, ANE, 2.5 GB)

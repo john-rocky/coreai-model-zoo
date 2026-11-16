@@ -127,7 +127,7 @@ correctly, not a gap.
 
 **The host-build rules (0.2.0), and the premise that did not survive measurement.**
 `IR-040-DEBUG-LOC` said a 0.4.0-era asset "loads on beta 1 and nowhere after", and the
-0.2.0 kickoff asked for it to be relaxed because Apple's OS 27 beta 5 release notes list the
+0.2.0 plan was to relax it because Apple's OS 27 beta 5 release notes list the
 incident (177008303) as fixed. Before relaxing it, the zoo's new load sweep
 (`conversion/zoo_smoke.py`) downloaded a published 0.4.0-era bundle
 (`qwen3.5-0.8B-CoreAI/gpu-pipelined/qwen3_5_0_8b_decode_int8hu_perchan_sym`) and loaded it

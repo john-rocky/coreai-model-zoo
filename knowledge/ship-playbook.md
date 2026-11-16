@@ -10,14 +10,14 @@ Deep docs per stage: ML convert → [`conversion-guide.md`](conversion-guide.md)
 [`swift-runtime.md`](swift-runtime.md); `LanguageModelSession` → [`fm-provider.md`](fm-provider.md);
 on-device AOT → [`aot-and-specialization.md`](aot-and-specialization.md).
 
-## Conventions (every session)
+## Conventions
 - **Mac-GPU is exclusive** — `echo <tag> > ~/code/coreai/_GPU_LOCK` before any python/AOT GPU run,
   `rm` after; run GPU work solo (the OS 27 beta driver kernel-panicked under parallel GPU load; not re-tested on the release OS).
 - **Two venvs** — an *isolated* env for the HF golden (some archs need a newer `transformers` than the
   export env); the *main* `coreai-models/.venv` for export + gating. Don't cross-contaminate.
-- **`git add` EXPLICIT paths only** (repos carry unrelated WIP). **Never commit** models/weights/
-  `.aimodel`/`.aimodelc`/build files/large `.npz`. **No "claude"** in messages or committer.
-- **push / HF upload / social posts are USER-GATED.** Build the iOS app on the device.
+- **Never commit** models/weights/
+  `.aimodel`/`.aimodelc`/build files/large `.npz`.
+- Build the iOS app on the device.
 
 ## Stages
 
@@ -58,13 +58,13 @@ xcrun devicectl device copy from --device <UDID> --domain-type appDataContainer 
       --domain-identifier <bid> --source "Documents/<x>_selftest_result.txt" --destination /tmp/r.txt
 ```
 
-**7. Publish (USER-GATED).** HF upload (`conversion/_<x>_hf_upload.py`: stage → `upload_folder`;
+**7. Publish.** HF upload (`conversion/_<x>_hf_upload.py`: stage → `upload_folder`;
 **patch `tokenizer_class`** at stage time). `zoo/<x>.md` (pipeline, graph contracts, on-device speed,
 "lessons", convert-yourself) + a `models/README.md` row + a **root `README.md`** row (don't forget this
-one). Commit (explicit paths). Draft the X post with the measured RTF — **post is the user's.**
+one). Commit. Draft the X post with the measured RTF.
 
 ## Cross-cutting traps (each cost real time)
-- **Gate before you port — don't trust handoff/kickoff specs.** Parakeet's notes said "no mel
+- **Gate before you port — don't trust earlier notes.** Parakeet's notes said "no mel
   normalization, pad the mel with a constant"; the real `ParakeetFeatureExtractor` *always*
   per-utterance normalizes (the `do_normalize` arg is dead code) and the bucket must be filled by
   **silence-padding the audio** (zero-padding the mel makes the decoder hallucinate). Caught only

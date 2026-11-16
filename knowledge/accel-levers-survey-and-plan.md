@@ -4,8 +4,8 @@
 > (per-model TensorOps impact table + the absorbed-MLA win) and
 > [`tensorops-quantized-kernels.md`](tensorops-quantized-kernels.md) (WWDC26 §330 foundation).
 > **Purpose**: run the four levers (custom kernel / TensorOps / spec-decode / quantization) as
-> **PARALLEL work streams** next session. Parallel = **explicit separate sessions** — background
-> agents collide on CoreAIChat, `_GPU_LOCK`, and the single A19 device. **All speedups marked ⚗️ are
+> **PARALLEL work streams**; they share CoreAIChat, `_GPU_LOCK`, and the single A19 device.
+> **All speedups marked ⚗️ are
 > targets/estimates** (industry numbers are cited; nothing below is zoo-device-measured yet).
 
 ---
@@ -55,7 +55,7 @@
 
 ---
 
-## PART 2 — The plan: 4 parallel streams (one session each)
+## PART 2 — The plan: 4 parallel streams
 
 Each stream = "apply the lever to the models where the survey says it's effective, and optimize those
 to the metal." Effectiveness mapping is grounded in the 5-bucket zoo analysis (see companion doc):
@@ -130,10 +130,8 @@ frontier moat.**
 
 ---
 
-## PART 3 — Cross-stream coordination + conventions (non-negotiable)
+## PART 3 — Cross-stream coordination + conventions
 
-- **Parallel = separate sessions, NOT background agents**: bg agents
-  collide on CoreAIChat, the Mac GPU, and the single A19 device.
 - **`_GPU_LOCK`** at `coreai-models-community/` root before any Mac-GPU run; **GPU SOLO** (concurrent CPU
   export/quant is safe). Streams A and D both want Mac GPU — serialize via the lock.
 - **Single A19 device** (iPhone 17 Pro, id `A6F3E849`) = APPLE-BENCH. Streams B and D (fp4 runtime) share
@@ -146,18 +144,17 @@ frontier moat.**
   ⚠️ Never run iOS bundles on the Mac llm-runner (GPU/ANE
   wedge → reboot).
 - **Bench truth = `ondevice/PipelinedBench`** (`com.coreai.pipelinedbench`), not chat UIs.
-- Git: own files by explicit path, **never `git add -A`** (concurrent sessions dirty the tree); **no
-  "claude" in commit/committer**; English code+UI; don't commit coreml bundles or build files. **Push /
-  HF / card = USER-GATED.** Don't claim a win until the bench shows one.
+- English code+UI; don't commit coreml bundles or build files.
+  Don't claim a win until the bench shows one.
 
 ---
 
-## PART 4 — Start-here per session
-- **Session A (MLA kernel)**: read `MLA_KERNEL_BREAKTHROUGH.md` → do Step 0 + Step 1 in
-  `_smoke/test_mla_absorbed_kernel.py` (no 60 GB load). [[project_absorbed_mla]]
-- **Session B (TensorOps)**: **✅ GATE DONE 2026-07-01 — LLaDA forward on A19 is matmul-bound (S-scaling
+## PART 4 — First steps per stream
+- **Stream A (MLA kernel)**: read `MLA_KERNEL_BREAKTHROUGH.md` → do Step 0 + Step 1 in
+  `_smoke/test_mla_absorbed_kernel.py` (no 60 GB load).
+- **Stream B (TensorOps)**: **✅ GATE DONE 2026-07-01 — LLaDA forward on A19 is matmul-bound (S-scaling
   1.79×, ~80–89% compute; baseline S128 warm_min 385.8ms/med 450ms, S256 692.1/754ms).** GO to the kernel.
-  **START HERE (kernel phase):**
+  **Kernel phase:**
   1. **M4 numerical-validation prototype** of a `TorchMetalKernel` wrapping `matmul2d` for
      `half activations × int4b_format weights (block-32 fp16 scales) → half`. Two unknowns to resolve
      FIRST: (a) can coreai-torch compile the embedded MSL at **`-std=metal4.1`**? (blockwise scale plane
@@ -173,12 +170,12 @@ frontier moat.**
     validated test kernel = scratchpad `mm_test.metal`; harness = `PipelinedBench` PB_LLADA mode;
     integration ref = `custom-metal-kernels.md`; LLaDA quant = body int4 block-32 + int8 head.
     Projected win: TensorOps 3×@matmul → forward 2.1–2.4× → device generation ~2–3× (Amdahl floor = the
-    ~79.5ms fixed term). [[project_accel_levers_campaign]] [[project_dllm_port]]
-- **Session C (spec-decode)**: confirm pipelined-engine verify-forward (S=K) feasibility → n-gram +
+    ~79.5ms fixed term).
+- **Stream C (spec-decode)**: confirm pipelined-engine verify-forward (S=K) feasibility → n-gram +
   vanilla qwen3.5-0.8B draft on Qwen3.6 (no training) → EAGLE-3 head via Speculators.
-- **Session D (quant/FP4)**: coreai-opt PTQ-`w8` pipe-cleaner on a shipped 3B → fp4 convert Qwen3.6/LFM-8B
-  → existing int4 gather → multi-token reasoning gate. (Blocks on Session B for fp4 runtime.)
+- **Stream D (quant/FP4)**: coreai-opt PTQ-`w8` pipe-cleaner on a shipped 3B → fp4 convert Qwen3.6/LFM-8B
+  → existing int4 gather → multi-token reasoning gate. (Blocks on Stream B for fp4 runtime.)
 
 **Ranked by confidence-of-win**: C (spec-decode, technique proven) > A (MLA, half-built, real risk) >
 B (TensorOps, greenfield but Apple-measured 3–4×) > D (FP4 quality unproven on these models). **Ranked by
-"地味でない / kernel romance"**: A (pure MSL moat) > B (neural-accelerator) > D > C (engine/algo).
+kernel novelty**: A (pure MSL moat) > B (neural-accelerator) > D > C (engine/algo).

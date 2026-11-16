@@ -1,8 +1,7 @@
-# VibeVoice-1.5B → Core AI — KICKOFF (2026-07-06)
+# VibeVoice-1.5B → Core AI — PLAN (2026-07-06)
 
 zoo's **first multi-speaker / dialogue (podcast) TTS**. Selected via `/next-target`; precheck 🟢 GREEN.
-Authority memo = `project_vibevoice_tts_port.md`. Rubric = `strategy/SHIP_RUBRIC.md`.
-⛔ All outward push (HF / zoo / X) + on-device runs are user-gated.
+Rubric = `strategy/SHIP_RUBRIC.md`.
 
 **target**: HF [`microsoft/VibeVoice-1.5B`](https://huggingface.co/microsoft/VibeVoice-1.5B) — **MIT**,
 non-gated, ~5.4 GB BF16, ~3B params. Synthesizes **up to 4 speakers, up to 90 min** dialogue, 24 kHz,

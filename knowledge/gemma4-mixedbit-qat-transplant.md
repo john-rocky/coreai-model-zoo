@@ -36,7 +36,7 @@ conversion recipe stops reverse-engineering Google's binary.
   504s intermittently and `snapshot_download` then falsely returns the local dir) →
   `scripts/gemma4_official_to_mixedbit_extract.py --official <dir> --out out/gemma4e2b_extract_official`
   → export `--extract-dir out/gemma4e2b_extract_official --out-dir exports_official`.
-- **Not adopted/pushed yet** (user-gated external): switching the shipped export default source +
+- **Not adopted/pushed yet**: switching the shipped export default source +
   publishing the official-sourced recipe. E4B (`gemma-4-E4B-it-qat-mobile-transformers`) is a
   NEW config (all-layer int4 MLP, int2 PLE) but 2258 MB/token ⇒ ~13-19 tok/s on A19 (byte floor) —
   too heavy to ship. MTP drafters now public too: `gemma-4-*-it-assistant` (the Section-11 drafter,
@@ -355,7 +355,7 @@ gate under-counts because chain conditionals exceed α1). Net of ~13.5% draft co
 **~2.2× expected — Mac 84 → ~185, iPhone 45-proj → ~99 fresh; worst case (creative) 1.37× →
 iPhone ~62, still > LiteRT 57.** Caveats: α measured vs the fp16 oracle as target (device engine
 near-tie forks may shave a few points); chat-style usage skews to the explanatory/structured
-rows. P5c decision = user call; recommendation GO.
+rows. P5c recommendation: GO.
 
 ## Why transplant works (vs re-QAT)
 These are Google's QAT weights FOR this exact config — transplanting the quantized values bit-exact
@@ -400,7 +400,7 @@ Conventions settled by direct comparison with the MLX checkpoint (all cos ≥0.9
 scattering**. Here"), then a synonym fork ("Here's a breakdown" vs "Here is a detailed
 breakdown") that MOVES with oracle dtype (bf16 "of the process" → fp16 "of why" = LiteRT's
 wording) ⇒ near-tie fusion-numerics class, same PASS standard as prior device ports
-(margin-fork precedent in [[project_gemma4_vl_port]]). **Transplant is numerically faithful.**
+(margin-fork precedent). **Transplant is numerically faithful.**
 
 Bonus datapoint: LiteRT-LM Gemma4-E2B on Mac M4 Max (WebGPU): **decode 113.2 / prefill 52.2
 tok/s** — their Mac decode BEATS our current E2B int4linsym engine (82.4 tbl) purely on bytes
@@ -409,7 +409,7 @@ tok/s** — their Mac decode BEATS our current E2B int4linsym engine (82.4 tbl) 
 ## Plan
 1. ~~P1 extract~~ ✅  2. ~~P2 oracle~~ ✅  3. ~~P3 Core AI receiving end (Mac)~~ ✅ (below)
 4. **P4 — device**: iPhone PipelinedBench (A19), AOT h18p required (large graph). **Goalposts
-   REVISED (2026-07-03, user-confirmed): LiteRT Gemma4 iPhone = 57 tok/s FRESH** (the 30.8 in
+   REVISED (2026-07-03): LiteRT Gemma4 iPhone = 57 tok/s FRESH** (the 30.8 in
    `litert-community-vs-mlx-coreai.md` is the SUSTAINED/energy-protocol number — do not mix
    conditions). Fresh-vs-fresh today: our int4lin tbl 30.3 (~1.15 GB/tok → ~35 GB/s effective)
    vs LiteRT 57 (777 MB → ~44 GB/s effective) — their lead = 1.48× bytes × ~1.27× kernel

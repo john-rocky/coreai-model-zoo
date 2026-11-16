@@ -255,7 +255,7 @@ Apple's repo; each recipe names the script it runs.
   always `--max-context-length 4096`) → author/license/description patched into the IR when the id is unregistered →
   AOT `--preferred-compute neural-engine --architecture h18p` → `*ANE_region*` count (0 = silent GPU fallback = FAIL) →
   a loadable device bundle (`--devbundle NAME` for `ondevice/_ane_gate`) → HF staging (`--stage <Repo>` =
-  `ios-ane-h18p/` + `ios-static/`; upload via `_ane_stock_hf_upload.py`, user-gated). `--aot-only <dir>` skips the
+  `ios-ane-h18p/` + `ios-static/`; upload via `_ane_stock_hf_upload.py`). `--aot-only <dir>` skips the
   export and compiles an IR that already exists (the official repos' `ios/` subtrees). Gate on the phone before anything
   ships; 4-bit FAIL → `--qconfig minicpm5_pal8_g32.yaml` (8-bit) → FAIL again = do not ship, FAIL transcript on the card.
   Records: [`../models/qwen3-0.6b-official/`](../models/qwen3-0.6b-official/), [`../models/qwen3-4b-official/`](../models/qwen3-4b-official/),

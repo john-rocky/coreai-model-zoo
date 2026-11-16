@@ -7,7 +7,7 @@ unified diff per repo and a summary table; `--go` writes, one commit per repo.
 
     python3 tools/card_first_line.py --list                    # regenerate the target list from the HF API
     python3 tools/card_first_line.py                           # dry run against tools/card_first_line_targets.txt
-    python3 tools/card_first_line.py --go                      # write (after the owner's GO)
+    python3 tools/card_first_line.py --go                      # write
     python3 tools/card_first_line.py --report path.md          # also save the summary table
 
 The same tool serves another namespace and sentence, e.g. the LiteRT cards the owner created
@@ -20,7 +20,7 @@ Guards, all checked live at run time, never from a cached list:
   * logged-in user must be `mlboydaisuke`;
   * a target must live in one of OWN_NAMESPACES (or the --namespace values given);
   * a target's oldest commit must be authored by `mlboydaisuke` (ownership = created by the
-    user, not "has a commit" — see the 2026-09-05 litert-community incident). Anything else is
+    user, not "has a commit"). Anything else is
     listed under EXCLUDED and never written, even with --go.
   * a card whose first body line already equals the sentence is skipped (idempotent); a card
     whose first body line starts with SENTENCE_MARKER but differs is reported as `stale` and

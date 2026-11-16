@@ -50,7 +50,7 @@ hidden output is read as rows [0:s] (dynamic [1, s, H] or the padded [1, cap, H]
 the state ids (row_ids up to the first <q>) run once in pieces, the four states are copied, and every question's branch
 (from <q>) runs on a copy with positions continuing after the state; the reset re-run repeats the process's first
 record the same way. A record whose state is 1 id runs direct (no 1-id call); it is listed in the process record.
-`--host-q q` (supervisor's addition, 09:19; default 1 = the above): with q >= 2 every call's length is a multiple of q
+`--host-q q` (default 1 = the above): with q >= 2 every call's length is a multiple of q
 (<= cap): the ids are cut into cap-sized pieces and the last piece is padded with <|endoftext|> (248044) up to the next
 multiple of q, the padded rows' hidden discarded (`host_pieces`); --shared runs the first floor(Ls / q) * q state ids once
 (cap-sized calls, no padding: cap is a multiple of q) and each question's remaining state ids + branch on a copy.

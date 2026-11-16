@@ -13,7 +13,7 @@ name = ``qi21_encoder_dynL_{bf16|bf16_r32|w16a32}_ids_iofp32`` (probes: ``qi21_e
 ``--aot`` compiles it for this Mac's GPU — the Python runtime's JIT put part of the full DiT graph
 on the ANE and asserted (``ANERegion.mm:414 ... Code=-19``), plain AOT too; what runs is
 ``xcrun coreai-build compile <bundle> --platform macOS --architecture h16c --preferred-compute gpu
---expect-frequent-reshapes`` -> ``<name>_aot_efr/<name>.h16c.aimodelc`` (supervisor, 2026-09-25).
+--expect-frequent-reshapes`` -> ``<name>_aot_efr/<name>.h16c.aimodelc`` (2026-09-25).
 
 ``--check`` (default for ``--random-init``) loads the AOT bundle with
 ``SpecializationOptions.default()`` (``--cpu-only``: the ``.aimodel`` on ``cpu_only()``, for

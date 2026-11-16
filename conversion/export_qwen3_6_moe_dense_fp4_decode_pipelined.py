@@ -2,8 +2,8 @@
 ``gather_qmm`` AND (b) the fused **FP4 (E2M1)** matvec on the dense path (lm_head + full-attention
 q/o). This is the quality-safe twin of ``export_qwen3_6_moe_dense_int4km_decode_pipelined.py``: SAME
 ¼-byte weight reads (~2x decode bandwidth, measured fp4 == int4km speed in ``_dense_fp4_microbench.py``)
-but E2M1 numerics instead of int4 k-means -> int8-level quality (fp4 ≈ int8 perplexity, de-risked in
-``project_quant_d_port``), fixing int4's flagship quality cliff (the Nanbeige/RTN degradation).
+but E2M1 numerics instead of int4 k-means -> int8-level quality (fp4 ≈ int8 perplexity),
+fixing int4's flagship quality cliff (the Nanbeige/RTN degradation).
 
 vs the shipped ``export_qwen3_6_moe_metal_decode_pipelined.py`` (experts sym8, dense int8, int8 head):
   * routed experts:  sym8 -> km4 / km8 / sym8   (per ``mode``)

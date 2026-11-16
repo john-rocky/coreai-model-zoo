@@ -75,7 +75,7 @@ is always reused. Prior ASSISTANT turns reuse only when the model's raw generati
 template's re-render (thinking-stripping / retokenization can diverge); LCP handles the divergence
 gracefully (reuse the common part, re-prefill the tail).
 
-## Remaining work / blocked (assessed 2026-07-03, do not re-derive)
+## Remaining work / blocked (assessed 2026-07-03)
 
 - **Assistant re-anchoring** (deeper reuse when content is stripped, e.g. gpt-oss harmony): would
   keep reuse O(new tokens) per turn instead of O(distance-to-first-stripped-turn). Needs a

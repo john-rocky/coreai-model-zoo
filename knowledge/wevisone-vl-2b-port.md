@@ -38,7 +38,7 @@ record `r2/hidden_int8hu-pf64.json`).
 - **The queries of one answer attend to each other.** The decoder's self-attention runs over all `<OBJ>` rows of an
   answer at once (`nn.MultiheadAttention`, 16 per batch in the package), so one call per object is a different
   computation. Graph A takes up to 16 query rows with a key-padding mask (`where(keep, scores, fill)`); padding
-  contents leave the real rows bit-equal on Core AI, and the arm without the mask moves them (record `ROUND2.md`).
+  contents leave the real rows bit-equal on Core AI, and the arm without the mask moves them.
 - **The levels' sizes are Python ints** and `F.grid_sample` is the gather sampler: torch.export turns the package's
   `.tolist()` sizes into data-dependent symbols, and `aten.grid_sampler_2d` has no Core AI lowering.
 - **The alpha cascade is cut after `semantic_s2`**: graph A computes the shared part once per answer, graph B runs the
@@ -52,8 +52,8 @@ record `r2/hidden_int8hu-pf64.json`).
 
 The box prior is `FourierPE1D`: sin / cos of 2π · v · 2^k for k = 0 … 31 over v = x1, y1, 0.2 log w + 0.5 and
 0.2 log h + 0.5. The phases run to about 1e10 rad (1.12e10 at k = 31 over the fixture's boxes), so one fp32 ulp of
-difference in v turns the high-k features into unrelated values (k = 12: 2e-3, k = 20: 0.4, k ≥ 22: 1–2; records
-`ROUND2.md`, `r2/fourier_sin_probe_boxes.json`).
+difference in v turns the high-k features into unrelated values (k = 12: 2e-3, k = 20: 0.4, k ≥ 22: 1–2; record
+`r2/fourier_sin_probe_boxes.json`).
 
 - **On the GPU it was the log, not the sine.** With the features made inside graph A, 0.2 log w + 0.5 came out one ulp
   off the CPU's on 28 of 92 box terms and one matte fell to IoU 0.906. The GPU's sin / cos of a given fp32 phase stayed
@@ -78,7 +78,7 @@ on 33/33 and D on none (lowest 0.99581). fp16 weights in fp32 compute reach 32/3
 so D at 0.9999 is at the edge of fp16
 weights themselves (record `GATE.md`). The int8 error is spread over the body: in fp32 torch the body alone gives
 0.99912 and the head alone 0.99998; four body qschemes (block 32 / 16, with and without clipping) stay at 0.9936–0.9956,
-and the four most sensitive of the 28 layers back in fp16 lift the lowest row only to 0.9977 (records `ROUND5.md`,
+and the four most sensitive of the 28 layers back in fp16 lift the lowest row only to 0.9977 (record
 `logs/qscheme_B*_g14.json`). On the task level the int8 decoder finds every reference box at IoU ≥ 0.75 and every
 count (record `SUITE.md`). On the iPhone 18 Pro the device-specialized int8 decoder decodes 2.1 × as fast as fp16
 (53.3 against 24.9 tok/s; the JIT keeps int8 there, while the Mac's AOT adds an fp16 copy of the linears).
@@ -108,16 +108,16 @@ its KV state at 1,024 slots on both platforms.
   compile fails (`ANECCompileOffline() failed: aneCompileStatus=1`) on the Mac h16c and the iPhone h19p alike; on the
   Mac both run bit-equal to their GPU AOT.
 - Apple's static iOS export of the text decoder runs on the iPhone 18 Pro's ANE and passes AneGateRunner on the text
-  rows at 6-bit (60.74 tok/s) and 8-bit (45.24 tok/s) (record `ROUND6.md`).
+  rows at 6-bit (60.74 tok/s) and 8-bit (45.24 tok/s).
 - **With the image path**: the host fills the image rows of `transformer_input`, adds the three deepstack rows after
   layers 0–2 as inputs, and makes the M-RoPE cos / sin itself. Making the M-RoPE inside the static graph (three gathers
   of the RoPE table merged by 0/1 masks) crashes the h19p neural-engine compile (`coreai-build` rc −11 after 16.7 s,
   `CanonicalizeCopyWithConstraints::matchAndRewrite`, `KERN_INVALID_ADDRESS at 0x18`; two layers reproduce it in 1 s),
-  while host-made cos / sin inputs compile with an ANE region in all 18 functions (record `ROUND7.md`). 8-bit weights
+  while host-made cos / sin inputs compile with an ANE region in all 18 functions. 8-bit weights
   (the 152,680-row head stays fp16: it does not split into groups of 32) pass AneGateRunner on the 6 image rows tried:
   a 237-token prompt in 85.9 ms, decode 42.96 tok/s; 6-bit fails 2 of 6 rows (69.7 ms, 62.88 tok/s). These times, and
   the phone's times in the next item, were measured with a system permission alert on the phone's screen; the effect
-  is not measured. D is 0/6 for both (record `ROUND9.md`). These graphs return logits only, not the hidden state the
+  is not measured. D is 0/6 for both. These graphs return logits only, not the hidden state the
   pixel decoder needs.
 - **The pixel decoder**: on the Mac ANE (coreai-torch 0.4.1), `PixelShuffle(2)` after graph A's first upsampling conv (3×3, 192 → 768
   channels) and `ConvTranspose2d` (k4 s2 p1) return values unrelated to
@@ -125,7 +125,7 @@ its KV state at 1,024 slots on both platforms.
   rank-5 reshape / permute runs on the ANE within the matte bar, and graph A then runs 1.63 × faster on the phone's ANE
   than on its GPU alone (54.7 against 89.3 ms), but the GPU's graph B after it takes 45–55 ms longer, so the request is
   no faster. Graph B's fp32 islands (its resizes and logit sums) fail the ANE compile from the S/2 stage on, and its
-  fp16-only form misses the bar in two rewrites of the transposed convolution (record `ROUND8.md`).
+  fp16-only form misses the bar in two rewrites of the transposed convolution.
   Re-measured 2026-11-05 with coreai-torch 0.4.3 on the same macOS 27.0 (26A428): a lone `PixelShuffle(2)` is
   correct, and the wrong bias appears after a 3×3 conv with bias and 456 or more output channels
   ([apple/coreai-models#427](https://github.com/apple/coreai-models/issues/427)); the same `ConvTranspose2d`
@@ -162,14 +162,14 @@ its KV state at 1,024 slots on both platforms.
   iPhone UI test cannot answer the first one unattended (`Timed out while enabling automation mode`: the first
   automation session needs the passcode). On a shared phone, inject the denied state to check the app's sentence.
 - **Graph B with K instances per call** is 1.11 × faster per instance on the phone at K = 2 but pays a full call for a
-  short last chunk and grows the load-time footprint with K; it was not shipped (record `ROUND8.md`).
+  short last chunk and grows the load-time footprint with K; it was not shipped.
 
 ## Numbers of record
 
 | what | value | record |
 |---|---|---|
 | iPhone 18 Pro, one cut-out request (1 match / 7 matches, warm) | 0.988–0.997 s / 4.119–4.138 s | `r4/device_docs/cutout-run-*.json` |
-| iPhone 18 Pro, first launch | 6.85 s to READY, 8.14 s first request | `ROUND4.md` |
+| iPhone 18 Pro, first launch | 6.85 s to READY, 8.14 s first request | — |
 | iPhone 18 Pro, peak footprint | 2.00 GB (app), 1.932 GB (Instruments) | `r4/xt/frame_footprint.json` |
 | Mac M4 Max, one match in a 3744 × 5616 NASA photo (decoded at 2731 × 4096) | 0.545–0.554 s | `r4/bench_mac_guppy.json` |
 | decoder A / B / D (int8, 33 rows) | 33/33, 33/33, 0/33 (lowest 0.99581) | `GATE.md` |

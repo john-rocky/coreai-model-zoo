@@ -1,5 +1,4 @@
-"""Stage + upload the Streaming Sortformer (speaker diarization) Core AI bundle to HF. USER-GATED —
-run only when asked.
+"""Stage + upload the Streaming Sortformer (speaker diarization) Core AI bundle to HF.
 
 Stages the macOS fp16 graph + the iOS h18p AOT graph + the librosa-slaney mel filterbank + metadata
 + a cc-by-4.0 model card into /tmp/sortformer_hf, then uploads to

@@ -48,7 +48,7 @@ decoder's int8 linears).
 
 ## Decoder accuracy
 
-The bar the port set itself before any number (record `ROUND1.md`) has three parts, named A, B and D in the records,
+The bar the port set itself before any number has three parts, named A, B and D in the records,
 against the package in fp32 on the same fixed grid, over 33 rows: A, the argmax at the last four prompt positions; B, a
 16-token greedy run that never leaves the reference's tokens, or leaves them only where the reference's own top-2
 softmax gap is under 0.1 (a knife
@@ -58,7 +58,7 @@ edges), and misses D on all 33: its lowest step cosine is 0.99581 (record `GATE.
 No decoder with fp16 weights passes D on every row either: fp16 31 of 33 (lowest 0.999811), fp16 weights with fp32
 compute 32 of 33 (lowest 0.9998997, at a knife edge). In torch, the int8 body alone accounts for it (body only
 0.99912, head only 0.99998), and putting the 4 most sensitive of the 28 layers back in fp16 still leaves the lowest
-row at 0.9977 (record `ROUND5.md`). This port ships the int8 decoder on the A, B and task-level gates below: on the
+row at 0.9977. This port ships the int8 decoder on the A, B and task-level gates below: on the
 structured-output suite it finds every one of the reference's boxes at IoU ≥ 0.75 and gives every count exactly.
 
 ## How the app drives it
@@ -83,8 +83,7 @@ and every pair (record `r4/boxpe_table_check_torch{29,211}.json`).
 ## Measured
 
 iPhone 18 Pro (iPhone19,2, iOS 27.2 24B5099f), the app's Release build, the four `.aimodel` graphs specialized on the
-phone (GPU), 2026-10-25, thermal state nominal, three warm requests each (records `r4/device_docs/cutout-run-*.json`,
-`ROUND4.md`):
+phone (GPU), 2026-10-25, thermal state nominal, three warm requests each (record `r4/device_docs/cutout-run-*.json`):
 
 | request | total | parts |
 |---|---|---|
@@ -140,10 +139,10 @@ runs on the iPhone 18 Pro's Neural Engine: with 8-bit weights (the head left in 
 (the zoo's Neural Engine parity check against the fp32 reference) on the 6 image rows tried and took a 237-token image
 prompt in 85.9 ms, decoding at 42.96 tok/s; with 6-bit weights it failed 2 of the 6 rows (69.7 ms, 62.88 tok/s). These
 times were measured with a system permission alert on the phone's screen; the effect is not measured. D was 0 of 6 for
-both (records `SPEED_LADDER.md` rows 13 and 13d, `ROUND7.md`, `ROUND9.md`). These graphs return logits
+both (record `SPEED_LADDER.md` rows 13 and 13d). These graphs return logits
 only, and the pixel decoder needs the last hidden state at each
 `<OBJ>`. The mask graphs stay on the GPU: part B's fp32 islands fail the Neural Engine compile, and part A on the
-Neural Engine was faster alone but made the request no faster (record `ROUND8.md`).
+Neural Engine was faster alone but made the request no faster.
 
 ## Convert / verify
 

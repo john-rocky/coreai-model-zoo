@@ -1,7 +1,7 @@
 """Steps (2)-(4): metalize the MoE (sym8), export the R-SWA decode graph, gate the
 engine logits vs the fp32 oracle via coreai.runtime.
 
-THE decode graph is the constant-window gather (kickoff section 3): each decode step
+THE decode graph is the constant-window gather: each decode step
 gathers prefix[0,Lm) ++ tail[max(seq_len-W,0), +W) -> a CONSTANT [Lm+W] key set ->
 constant-shape SDPA + MetalSwitchGLU MoE -> the whole graph is shape-static, so the
 engine compiles it ONCE and decode latency is FLAT (no per-step Metal recompile, the

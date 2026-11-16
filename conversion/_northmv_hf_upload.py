@@ -1,4 +1,4 @@
-"""Stage + upload the North-Micro-Vision Core AI bundles to HF. USER-GATED.
+"""Stage + upload the North-Micro-Vision Core AI bundles to HF.
 
 Publishes what was gated: the fp16 tower and the int8lin decoder (the pair that
 IS the model), the text core (same weights, no image inputs — the only shape

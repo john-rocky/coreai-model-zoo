@@ -3,7 +3,7 @@
 **Status: source migrated + proven bit-exact (2026-07-17). Provenance switched to official.
 Pack regeneration + external push are the remaining mechanical steps.**
 
-Shareable handoff for other sessions. Companion docs:
+Companion docs:
 `knowledge/gemma4-mixedbit-qat-transplant.md` ("P6 DONE" = the full test log),
 `knowledge/gemma4-raw-metal-port.md` (the ship engine), `../../GEMMA4_OFFICIAL_SHIP_PREP.md`
 (ship checklist + open decisions).
@@ -71,7 +71,7 @@ GEMMA4_EXTRACT=/Users/USER/code/litertlm-convert/out/gemma4e2b_extract_official 
   /Users/USER/code/litertlm-convert/.venv/bin/python p1_chain.py --gate
 ```
 
-## Provenance decision (user, 2026-07-17)
+## Provenance decision (2026-07-17)
 
 **Drop the "extracted from LiteRT-LM / `.litertlm`" narrative from all ship-facing text; the source
 is now the official `google/gemma-4-E2B-it-qat-mobile-transformers` checkpoint.** The weights are
@@ -79,10 +79,6 @@ still Google's official Gemma-4 mobile QAT release (credit to Google DeepMind st
 container and the extraction method change. Files updated: the raw-Metal conversion README, the
 staging README + HF model card drafts, `gemma4-raw-metal-port.md`, the community README raw-Metal
 row, and both `Gemma4MetalEngine.swift` header comments.
-
-Note for whoever runs the ship: because the source no longer touches the litert-community binary,
-the original rationale for the "LiteRT notice" (courtesy heads-up for extracting from their
-release) is weaker — reassess that ship-checklist item.
 
 ## What is left (mechanical)
 
@@ -93,10 +89,10 @@ release) is weaker — reassess that ship-checklist item.
    `google/gemma-4-E2B-it-assistant`, non-quantized bf16). Since MTP is A19-negative and the engine
    ships S=1, the clean move is to regenerate WITHOUT the drafter (needs a `--no-drafter` path in
    `p2_export_pack.py`, which today requires `RawLoopMTP`). See `GEMMA4_OFFICIAL_SHIP_PREP.md` D1/D2.
-2. External push (unchanged, still user-gated): GitHub `john-rocky/gemma4-metal` → HF
+2. External push: GitHub `john-rocky/gemma4-metal` → HF
    `mlboydaisuke/gemma-4-E2B-metal` → kit/zoo commits.
 
-## One-line summary for other sessions
+## One-line summary
 
 Gemma-4-E2B mixed-bit QAT is now sourced from the official HF checkpoint
 `google/gemma-4-E2B-it-qat-mobile-transformers` (bit-exact vs the old `.litertlm` extraction,

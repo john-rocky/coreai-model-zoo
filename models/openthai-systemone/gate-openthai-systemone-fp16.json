@@ -48,5 +48,5 @@
   "record": "models/openthai-systemone/measurements-coreai-kit.json"
  },
  "fixture": "models/openthai-systemone/fixtures-openthai-systemone.json",
- "generated_from": "the two transcripts' summary blocks (supervisor, 2026-09-23)"
+ "generated_from": "the two transcripts' summary blocks (2026-09-23)"
 }

@@ -1919,7 +1919,7 @@
   },
   "measured_through_coreai_kit": {
     "schema": "coreai-kit-measurements/1",
-    "source": "measured through coreai-kit; supervisor supplied in rounds/03.instruction.md",
+    "source": "measured through coreai-kit",
     "measured_by_this_run": false,
     "date": "2026-09-23 06:5x–07:0x JST",
     "worktree_read_only_reference": "/Users/USER/code/coreai-kit-models-wt",
@@ -2026,10 +2026,10 @@
     "max_abs_dp": 0.0058,
     "mean_abs_dp": 0.0008,
     "record": "models/qwen3.5-2b-decision/measurements-coreai-kit.json",
-    "provenance": "measured through coreai-kit; supervisor-provided, not re-derived"
+    "provenance": "measured through coreai-kit; not re-derived"
   },
   "fixture": "models/qwen3.5-2b-decision/fixtures-qwen3.5-2b-decision.json",
-  "generated_from": "the two executed letter transcripts and the supervisor-supplied kit record; shape follows the APUS sibling gate summary",
+  "generated_from": "the two executed letter transcripts and the kit record; shape follows the APUS sibling gate summary",
   "benchmark_measurements": {
     "path": "llm-benchmark.json",
     "contended": false,

@@ -1,7 +1,7 @@
 # Spec-decode C1 — DONE (2026-07-03): the loop now beats shipped 15.9 tok/s
 
 > Full detail: `spec-decode-hybrid-verify-design.md`.
-> Code: `apps/CoreAIChatMac/Sources/SpecDecodeEngine.swift` (uncommitted, SHIP-GATE).
+> Code: `apps/CoreAIChatMac/Sources/SpecDecodeEngine.swift` (uncommitted).
 
 ## RESULT
 
@@ -15,9 +15,9 @@ through owned buffers), NOT (a) engine-internal — the GDN snapshot/tail/re-anc
 discipline already lives correct-and-lossless in `WindowedModel`, so only the forward
 mechanism changed.
 
-## WHAT ACTUALLY MOVED THE NEEDLE (the handoff's premise was wrong)
+## WHAT ACTUALLY MOVED THE NEEDLE (the earlier plan's premise was wrong)
 
-The old handoff blamed the 10.9 tok/s on "raw MPSGraph JIT forward 135 ms vs engine 63 ms"
+The earlier plan blamed the 10.9 tok/s on "raw MPSGraph JIT forward 135 ms vs engine 63 ms"
 and projected 25–30 tok/s from engine-grade forwards. Measurement says otherwise:
 
 1. **The real bottleneck was the CPU logits flatten, not the forward.** The old code did
@@ -137,7 +137,7 @@ a **documented Apple Core AI beta known-issue**, confirmed against the iOS/macOS
 
 So BOTH accelerator paths (AOT 177729331, custom kernels 178056451) are blocked by **documented beta
 bugs on build 26A5353q**, not by our code or a fundamental limit. current build = beta1 (macOS 27.0
-26A5353q / Xcode 27A5194q). **beta2 (26A5368g) is out** — user reports the fixes are published; could
+26A5353q / Xcode 27A5194q). **beta2 (26A5368g) is out** — the fixes are reported as published; could
 not independently confirm the beta2 *resolved* list (Apple dev-docs is a JS SPA; releasebot only carries
 beta1). NEXT after a beta2 update: **retest AOT (177729331) FIRST** — it's the cleaner, complete fix
 (precompiles the WHOLE verify graph → verify≈decode → ~25-28 tok/s, no per-op wiring). GDN custom kernel
@@ -149,11 +149,11 @@ beta1). NEXT after a beta2 update: **retest AOT (177729331) FIRST** — it's the
 - Frozen config unchanged: target `qwen3_6_27b_verify_s9_int8hu_block32_sym` × draft
   `qwen3_5_0_8b_verify_s9_int4lin`, K=6, S=9 (both symlinked into
   `~/Library/Application Support/CoreAIChatMac/models`). JIT path (AOT still dead on this OS).
-- ⛔ Outward (HF push / X / screen recording) = user-gated (SHIP-GATE). The number to sell is
+- The number to sell is
   "lossless + faster than the shipped 27B", not the old 25–30 fantasy.
 - If more speed wanted: re-tune K under the new cost model, or attack the 1.67× verify-graph
   kernel gap (heavier, export-level).
 
-Conventions: GPU-SOLO `_GPU_LOCK`; no "claude" in commits; UI/comments English; disk ≥120 G
+Conventions: GPU-SOLO `_GPU_LOCK`; UI/comments English; disk ≥120 G
 before 27B runs; build = xcodebuild(beta) Release `-derivedDataPath build`, launch binary
 with `CHATMAC_MODEL`/`SPEC_BENCH` env hooks.

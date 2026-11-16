@@ -1,5 +1,5 @@
 """Upload a Neural Engine lane staging dir (from `export_ane_stock.py --stage <Repo>`) to HF.
-USER-GATED — run only when asked. Generalizes `_minicpm5_ane_hf_upload.py`.
+Generalizes `_minicpm5_ane_hf_upload.py`.
 
 Adds two subtrees next to the repo's existing GPU bundle:
   ios-ane-h18p/   metadata.json + <name>.h18p.aimodelc + tokenizer/   — AOT for iPhone 17-class (h18p), ANE

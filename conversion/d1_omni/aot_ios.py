@@ -4,7 +4,7 @@
     python3 conversion/d1_omni/aot_ios.py                      # the 10 ship bundles, h19p
     python3 conversion/d1_omni/aot_ios.py --only decide-fp16-L256 vision-fp16
 
-The ship form (round 7's speed ladder, decided by the supervisor on 2026-10-08): the fp16 decision graph at L = 256 /
+The ship form (round 7's speed ladder, 2026-10-08): the fp16 decision graph at L = 256 /
 512 / 1024 / 2048 / 4096, the fp16 vision graph and the fp16 audio graph at 5 / 10 / 20 / 30 s. Each bundle's files are
 checked against its export manifest first, then
 

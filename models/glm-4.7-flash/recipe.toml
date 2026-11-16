@@ -13,8 +13,8 @@ status = "unverified"
 overlay = true
 runtime_env = { COREAI_CHUNK_THRESHOLD = "1" }
 open_questions = [
-  "Was --head-sym / --head-quant passed? Asked and closed as unknowable on 2026-07-25: the owner",
-  "does not recall, and nothing published records it — the bundle name omits the head flags, the",
+  "Was --head-sym / --head-quant passed? Closed as unknowable on 2026-07-25:",
+  "nothing published records it — the bundle name omits the head flags, the",
   "metadata declares no compression, and unlike embeddinggemma this repo ships no reference.json.",
   "For the twin port (qwen3.6-35b-a3b) knowledge/ recorded a bare `sym8`, but that is not evidence",
   "for this one. Settling it needs a re-export of the lm_head under both settings and a byte",

@@ -107,7 +107,7 @@ CONFIG = {
     },
 }
 MODES = ("text", "image", "audio")
-BUCKETS = (256, 512, 1024, 2048, 4096)  # the decision graph's lengths (supervisor's design, round 1)
+BUCKETS = (256, 512, 1024, 2048, 4096)  # the decision graph's lengths (round 1's design)
 # Round 12 (the chunk lever): the decision graph also exported at L64 / L128. BUCKETS stays the shipped set, the default
 # of bucket_for: every reference, gate and host that recorded a bucket (records_ref*.json, reference.json, gate_swift,
 # the Swift host's folder scan) was made with it. A host that ships the small buckets calls

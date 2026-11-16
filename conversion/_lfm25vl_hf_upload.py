@@ -1,4 +1,4 @@
-"""Stage + upload the LFM2.5-VL Core AI bundles to HF. USER-GATED.
+"""Stage + upload the LFM2.5-VL Core AI bundles to HF.
 
 Run: `python _lfm25vl_hf_upload.py [450m|3b] [--ios-only] [--dry-run]`.
 

@@ -1,4 +1,4 @@
-# Z-Image-Turbo → Core AI port — STATE / handoff
+# Z-Image-Turbo → Core AI port — STATE
 
 **Model:** Tongyi-MAI/Z-Image-Turbo (6B, Apache-2.0). Single-Stream Diffusion
 Transformer (S3-DiT) T2I. Qwen3-4B text encoder → S3-DiT (8-step FlowMatchEuler,
@@ -61,7 +61,7 @@ only on **bandwidth-bound** shapes (LLM decode, S=1) and on footprint.
 `default()` spec == GPU spec (same time), so this is not a placement issue.
 **The only lever that could make int8 fast here is a true int8×int8 quantized matmul
 (TensorOps, WWDC26 330) — which is exactly the "diffusion/encoder" case.** Untested here;
-note reference_wwdc/accel-levers says matmul2d prefill was *negated* on A19.
+note `knowledge/tensorops-quantized-kernels.md` says matmul2d prefill was *negated* on A19.
 
 ## 🧩 One graph for every resolution AND every prompt length
 
@@ -174,7 +174,7 @@ The files are intact (readable, correct size via `devicectl info files`) — the
 runtime. **`coreai-build compile` happily produces the 6.2 GB bundle with 0 errors**, so
 *compiles* ≠ *loads*. So even a fixed fp16 would still need the DiT split into ≤2 GiB chunks —
 which is exactly why the LiteRT/Android port shipped ~866 MB chunks, and matches
-`project_nemotron_asr_port`'s ">2 GB multi-IO AOT" split.
+the Nemotron ASR port's ">2 GB multi-IO AOT" split.
 
 Device speed, for the record: 1.14 s/forward for 10 of 34 blocks at 256px → ~3.9 s/forward at
 full depth → ~62 s per image (16 forwards), ~31 s at `guidance=0`.
@@ -188,7 +188,7 @@ Everything now reduces to a single problem. AOT needs fp16 (bf16 rejected); fp16
 sampler step 2 (depth-driven, also at 256px). Solve it and iPhone is live: full DiT = 6.1 GB
 AOT bundle, ~0.69 s/fwd on M4 Max @256 → **est. 28–44 s at g=0 (8 fwd) on A19**.
 
-#### What has been TRIED and does NOT fix it (all verified, do not repeat)
+#### What has been TRIED and does NOT fix it (all verified)
 
 | attempt | fp32 exactness | fp16 engine |
 |---|---|---|
@@ -252,7 +252,7 @@ chunked FP32-compute design.
    to LOAD every bundle (`Failed to convert to versioned IR / cannot unwrap empty
    odiec_module_t`). Fix = bump to `coreai-core 1.0.0b2 + coreai-torch 0.4.1 +
    coreai-opt 0.2.1` (pulls torch 2.11). This was the real cause of two red herrings
-   (looked like hand-rolled-attention op-hostility). See reference_coreai_env memory.
+   (looked like hand-rolled-attention op-hostility).
 2. **fp16 overflows Z-Image → use bf16.** The S3-DiT residual reaches ~4400; fp16
    activations NaN on late/some sampler steps (input-specific, not a repeat-call bug).
    bf16 (range ±3e38) fixes it cleanly, 16-bit. Native SDPA is more robust than the

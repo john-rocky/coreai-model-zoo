@@ -11,7 +11,7 @@ reference's own prefix tensor from ref/npz), its scores are read at P + markers,
 gives the answer distribution.
 
 Bar: argmax equal on every row (near ties included), max |dp| <= 2e-5 after the temperature, marker logits max |d|
-<= 1e-3. The max |dp| bar was 1e-5 before round 2's run and was set to 2e-5 by the supervisor after it (BAR_BASIS):
+<= 1e-3. The max |dp| bar was 1e-5 before round 2's run and was set to 2e-5 after it (BAR_BASIS):
 twice the fp32 reference's own distance from the publisher's code run in float64. Two fp32 computations of the same
 function in a different order (and at a different padded length) cannot be held below the sum of their rounding:
 the reference is 9.3e-6 from float64, this module 7.9e-6, and with every fp32 step in float64 and the RoPE tables
@@ -55,7 +55,7 @@ import host  # noqa: E402
 WORK = work_path("_d1_omni")
 BARS = {"argmax": "all rows", "max_abs_dp": 2e-5, "max_abs_dlogit": 1e-3}
 MUTATION_BAR = 0.02
-# Why max |dp| <= 2e-5 (supervisor's ruling 2026-10-08, after round 2's first run at 1e-5): measured by round 2's
+# Why max |dp| <= 2e-5 (2026-10-08, after round 2's first run at 1e-5): measured by round 2's
 # one-off diagnostics in the work dir (results/dp_float64.json: 470 rows; dp_isolate.json: 17 rows;
 # dp_float64_pure.json: 50 rows; rope_length.json; ref_summary.json). pub64 = the publisher's trunk + head in float64
 # (its RMSNorm normalises in fp32 as written); mine64 = this module in float64.

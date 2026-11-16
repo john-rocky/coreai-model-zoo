@@ -1,5 +1,5 @@
-"""Stage + upload the Nemotron 3.5 ASR Streaming bundle to the Hub (USER-GATED — run only after
-explicit approval). Whisper-style platform subtrees so `ModelID.nemotronASRStreaming` (path nil)
+"""Stage + upload the Nemotron 3.5 ASR Streaming bundle to the Hub.
+Whisper-style platform subtrees so `ModelID.nemotronASRStreaming` (path nil)
 resolves per platform:
 
   macos/  six JIT .aimodel graphs + tokenizer.json/tokenizer_config.json

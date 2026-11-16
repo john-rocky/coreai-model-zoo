@@ -1,5 +1,5 @@
 """Stage + upload the MiniCPM5-1B Core AI int8 (per-block-32) bundle as a NEW REVISION of the
-published repo. USER-GATED — run only when asked.
+published repo.
 
 Replaces the per-channel bundle of rev 5ad650f (2026-07-20), whose LM head has dead rows from
 vocab id ~65024 up (<|im_end|> included — it never halted a chat turn). Layout is unchanged so the

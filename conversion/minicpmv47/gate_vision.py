@@ -11,7 +11,7 @@ Timing (run the whole process inside a quiet_hold window): the first call after 
 four prompts, then 5 more calls on P1 (warm; median and all values). The process ends with one more P1 call
 whose output must be bit-equal to the first P1 output.
 
-Bars (the supervisor's, fixed): fp16w32 cos mean >= 0.9999 and min >= 0.999; int8lin mean >= 0.9995 and
+Bars (fixed): fp16w32 cos mean >= 0.9999 and min >= 0.999; int8lin mean >= 0.9995 and
 min >= 0.99; fp16 recorded only (said to pass when it meets the fp16w32 bar).
 
     QW QH mv47-r3-g3-<mode> -- coreai-models/.venv/bin/python conversion/minicpmv47/gate_vision.py \

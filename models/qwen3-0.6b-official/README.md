@@ -23,7 +23,7 @@ another chip. The 0.4.0-era IR carried no `author`/`license`/`description`; the 
 
 ## Device gate (iPhone 17 Pro, iOS 27.0 24A435, `ondevice/_ane_gate`)
 
-Pending — this session's device slot comes after S1. The fixture is `Qwen/Qwen3-0.6B` fp32: alphabet
+Pending. The fixture is `Qwen/Qwen3-0.6B` fp32: alphabet
 list (24 steps), no-think chat "What is the capital of France?" (10 steps incl. the stop), 396-id
 counting prompt (16 steps). The tool goes RED on a poisoned fixture first. Rules and the transcript
 format: [`../../knowledge/minicpm5-1b.md`](../../knowledge/minicpm5-1b.md) §2026-09-15.

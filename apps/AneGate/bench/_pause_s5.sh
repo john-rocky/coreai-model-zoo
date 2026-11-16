@@ -1,5 +1,5 @@
 #!/bin/zsh
-# S5 pause (user 2026-09-17 12:5x): let the 6-bit remainder finish on the phone, pull it, restore PipelinedBench, score
+# S5 pause (2026-09-17 12:5x): let the 6-bit remainder finish on the phone, pull it, restore PipelinedBench, score
 # what exists (4-bit, 6-bit, Mac bf16, Mac 6-bit sim). The int8 arm is left for the next resume (task app must be reinstalled).
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 UDID=A6F3E849-1947-5202-9AD1-9C881CA58EEF; ID=com.coreai.pipelinedbench; T=task_6bit_rest_124305

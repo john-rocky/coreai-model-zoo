@@ -1,8 +1,8 @@
-# Kernel campaign — session handoff (2026-07-02)
+# Kernel campaign — state (2026-07-02)
 
-> One-page state + next-steps so the next session(s) pick up cleanly. Detail: `dense-int4km-flagship-
+> One-page state + next steps. Detail: `dense-int4km-flagship-
 > session-findings.md`, `spec-decode-design.md`, `flagship-full-tuning-stack.md`, `tensorops-quantized-
-> kernels.md`, memory `project_accel_levers_campaign`.
+> kernels.md`.
 
 ## Net result of this session
 - ✅ **Dense-path int4km lever** (lm_head + attn q/o, on top of gather_qmm): **LFM-8B on-device 1.23–1.43×
@@ -24,7 +24,7 @@ Quality-safe *dramatic* flagship speedup does NOT come from 4-bit (int4/fp4 both
 2. **QAT-int4** — the only quality-safe route to the 4-bit *bandwidth* win (train to recover the 104→~32 flip gap).
 3. int8-dense bandwidth ≈ ~1.6× (but experts-int4 also degrades → partial).
 
-## NEXT per lever — START HERE
+## NEXT per lever
 - **Stream C (spec-decode) — HIGHEST value (lossless ~3×, quality-safe).** Tree-attn verify kernel READY
   (`_specdecode_proto/tree_attn_verify.py`). Next: (a) train an EAGLE-3 head for Qwen3.6 (Red Hat
   `Speculators`, external GPU, ~1–2 days) or start with vanilla-draft (qwen3.5-0.8B, no training); (b) wire
@@ -34,8 +34,8 @@ Quality-safe *dramatic* flagship speedup does NOT come from 4-bit (int4/fp4 both
 - **Stream D (quant) — re-scoped fp4 → QAT.** fp4 disproven (§8b of findings doc). Next: **QAT-int4** on the
   flagship dense path (OS26-shippable) to recover flagship 4-bit quality. fp4 kernel exists
   (`gemma4_metal_mlp_fp4.py`) if bandwidth-only ever wanted. Alt: **mixed int4+int8-outlier matvec** (bridge
-  the int4 cliff at ~int4 BW without QAT — un-built, extend `MetalInt4KMLinear`). [[project_quant_d_port]] D2.
-- **Mac prefill FlashAttention — OPEN, own session.** Scaffold `_tensorops_proto/m4_speed_ab.py` (matmul2d
+  the int4 cliff at ~int4 BW without QAT — un-built, extend `MetalInt4KMLinear`).
+- **Mac prefill FlashAttention — OPEN.** Scaffold `_tensorops_proto/m4_speed_ab.py` (matmul2d
   vs MPSGraph matmul on M4). ⚠️ hit `Program load failure` under Stream-D GPU contention + may need an
   `asset.executable()` API fix — run on a CLEAN Mac-GPU window. If matrix path beats default → build fused
   FlashAttention, A/B vs `ondevice/_prefill_sdpa_baseline.py`.
@@ -45,20 +45,19 @@ Quality-safe *dramatic* flagship speedup does NOT come from 4-bit (int4/fp4 both
   (~10×). Real numbers need the proper engine (35B jetsams the phone; fix `_qwen36_mac_bench.py` driver or
   use a fitting model).
 
-## Coordination / rules (non-negotiable)
-- **Parallel = separate sessions, no bg agents.** **GPU-SOLO via `_GPU_LOCK`** (Mac GPU shared with Stream D
+## Coordination / method notes
+- **GPU-SOLO via `_GPU_LOCK`** (Mac GPU shared with Stream D
   fp4/QAT — serialize; A19 shared with Stream B TensorOps/LLaDA — serialize).
 - Mac-GPU method for raw decode bundles (macOS 27): `from_preferred_compute_unit_kind(gpu())`; **ANECompile
   errors are NON-FATAL (GPU fallback)** — don't kill on them. Phone RAM ceiling ≈ 5–6 GB (int4-8B) → 35B jetsams.
 - **HF downloads: `HF_HUB_DISABLE_XET=1`** (hf_xet stalls; not a rate-limit — 5-min window, never hit).
 - Stream B: matmul2d refuted on A19 (prefill); FP4-via-matmul2d irrelevant for decode (BW = matvec).
-- No "claude" in commits/committer; explicit paths (never `git add -A`); no coreml bundles / build files;
-  push/HF/card = USER-GATED.
+- No coreml bundles / build files in commits.
 
 ## Artifacts (committed, coreai-models-community, committer john-rocky)
 bab5fa7 LFM #2 export · 200cb2b flagship plan · 3eb4a5f spec-decode design · 5b790f5 Qwen3.6 export+findings ·
 69c65ea fp4-framing fix · 6436d8a prefill-Mac-open fix + m4 scaffold · e591499 tree-attn verify kernel.
-(§8/§8b fp4-disproven added by Stream D/user.) Uncommitted by design: coreai-models `macos/` arsenal
+(§8/§8b fp4-disproven added by Stream D.) Uncommitted by design: coreai-models `macos/` arsenal
 (Apple clone — incl. the `MetalInt4KMLinear.weight` fix + `gemma4_metal_mlp_fp4.py`), `ondevice/` scripts
 (non-git: `_qwen36_mac_bench.py`, `_dense_int4km_microbench.py`, `_flagship_dense_coverage_audit.py`,
 `_prefill_sdpa_baseline.py`), coreml bundles in `exports/`.

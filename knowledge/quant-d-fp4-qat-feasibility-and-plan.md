@@ -148,11 +148,10 @@ D1's fp4 result is what justifies the Stream B investment.
 
 ---
 
-## 5. Start-here (next session) — read this first
+## 5. Next steps in detail
 
-**0. Orient.** Read memory `project_quant_d_port` + §1 and §4 above. Check no other session
-   (Stream A) is on the Mac GPU: `ls coreai-models-community/_GPU_LOCK`. Stream C (spec-decode)
-   is in a *separate* session — do not touch its files.
+**0. Orient.** Read §1 and §4 above. Check that Stream A
+   is not on the Mac GPU: `ls coreai-models-community/_GPU_LOCK`.
 
 **1. First move (recommended): confirm D1 on the real iPhone target — LFM2.5-8B-A1B (MoE).**
    - The result so far is N=1 at 1.2B. Re-run the gate at the actual 8B-A1B target where int4
@@ -179,8 +178,7 @@ D1's fp4 result is what justifies the Stream B investment.
      **NOT** `coreai-models/.venv` (torch 2.9 — too old, skips cpp extensions).
    - `_GPU_LOCK` = **absolute path**. A relative path inside a shell `trap` removes the wrong
      file (we left a stale lock this way). Verify holder pid is dead before reclaiming.
-   - push / HF / model-card = **USER-GATED**. Never `git add -A` (parallel sessions). Delete
-     `__pycache__` before finishing.
+   - Delete `__pycache__` before finishing.
 
 **4. Blocked / parallel:** fp4 **on-device runtime** needs **Stream B** (TensorOps fp4
    `matmul2d` dequant, A19/**OS27**). Do not attempt fp4 device bench until B lands. **Device OS is

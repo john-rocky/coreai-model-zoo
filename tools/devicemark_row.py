@@ -21,7 +21,7 @@ Guards, checked live at run time, never from a cached list:
   * targets are cut by the API, not by name: author == owner and a `.aimodel` in the file list
     (LiteRT / Core ML / ExecuTorch repos cannot match);
   * a target must live in the owner's namespace AND its oldest commit must be authored by the owner
-    (the 2026-09-05 litert-community incident) — anything else is EXCLUDED, even with --go;
+    — anything else is EXCLUDED, even with --go;
   * every write is verified by re-reading the README at the new commit: the block is there once and
     every byte outside it equals the pre-write text. A mismatch is reported as FAILED, loudly.
 """

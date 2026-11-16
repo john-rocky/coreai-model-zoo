@@ -20,7 +20,7 @@
 | Precision | **fp16 only** (no fp32 literals/intermediates) | fp16 weights, fp32 intermediates OK | fp32/fp16 |
 
 > The "ANE can't run custom MSL" row is *why* the GPU speed track exists — see
-> [`custom-metal-kernels.md`](custom-metal-kernels.md) (project memory: `project_ane_vs_gpu_premise`).
+> [`custom-metal-kernels.md`](custom-metal-kernels.md).
 
 ## ANE authoring rules (the high-leverage ones)
 - **BC1S layout** `(B, C, 1, S)`; all matmuls as 1×1 Conv2d. `neural_engine_rules.md:43-65,92-109`.
@@ -221,4 +221,4 @@ exact when real inputs showed it diverged from layer 1). This project's hardest-
 - **GPU** when large (7B+), batch, dynamic shapes, or you need custom kernels / max throughput. macOS default.
 - **CPU** for debugging/fallback only.
 - This project's call: **GPU now** (custom kernels, robust across the betas) **+ ANE later** (KV-write bug still present on 26A428; when it lifts +
-  int4 head + AOT). (Project memory: `project_ane_vs_gpu_premise`.)
+  int4 head + AOT).

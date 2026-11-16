@@ -4,7 +4,7 @@ Written 2026-07-17, after a Gemma-4-E2B GSM8K comparison (Core AI / MLX / LiteRT
 produced a Core AI "quality win" that was entirely an artifact of the harness.
 
 This is a checklist for any *quality* comparison across runtimes. Speed benchmarks have
-their own traps (see `reference_coreai_vs_mlx_speed_map`); this doc is about accuracy.
+their own traps; this doc is about accuracy.
 
 ## The failure, concretely
 
@@ -85,7 +85,7 @@ and the runtime is the only variable.
 
 - HF python downloads stall (xet). Use `curl -C -` against
   `https://huggingface.co/<repo>/resolve/main/<file>`; check `x-linked-size` for the
-  real size. `HF_HUB_DISABLE_XET=1` also helps. See `reference_hf_download_xet_stall`.
+  real size. `HF_HUB_DISABLE_XET=1` also helps.
 - The QAT unquantized checkpoint's big blob is often already in the HF cache — hardlink
   it and `curl` only the small configs rather than re-downloading 10 GB.
 - `llm-runner` on a gemma4 `tbl` bundle needs `--raw-dir <ple dump>` (PLE static inputs)

@@ -101,7 +101,7 @@ np.savez("oracle.npz", **{k: v.float().cpu().numpy() for k, v in tensors.items()
   drift by step 30.
 
 Do this **even if you have someone's notes claiming how the model behaves**. A real example from
-the zoo: a port's handoff notes said "no input normalization"; the oracle showed the feature
+the zoo: a port's notes said "no input normalization"; the oracle showed the feature
 extractor *always* normalizes (the flag that appeared to control it was dead code). The oracle
 caught it; the notes would have shipped a broken model. Gate before you port.
 

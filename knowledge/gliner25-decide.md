@@ -149,5 +149,5 @@ buys back at most that second and needs one artifact per device generation. The 
 dynamic shapes) are a different case: there the device JIT is known to abort, and AOT stays required; a 1.6 GB
 static graph (whisper-large-v3-turbo) does specialize on the 18 Pro ([jit-distribution.md](jit-distribution.md)).
 Evidence:
-`_gliner25_decide/results/ROUND5.md`, device runs `20260926-152949` (B), `153200` (B relaunch), `153844` and
+Device runs `20260926-152949` (B), `153200` (B relaunch), `153844` and
 `154639` (A), `154103` (C).

@@ -633,7 +633,7 @@ def t_timing_mac() -> dict:
                          "rule_round9": "results/timing/ranking_rule_r9.md"}
     b.note("results/timing/ranking_rule_r8.md")
     b.note("results/timing/ranking_rule_r9.md")
-    # the ship form per workload (the supervisor's ship decision of 2026-10-08: fp16 graphs, decision buckets 64 ... 4096)
+    # the ship form per workload (the ship decision of 2026-10-08: fp16 graphs, decision buckets 64 ... 4096)
     ship = {}
     for w, wl in py12.items():
         best = [r for r in wl["forms"] if r["ship_candidate"]]

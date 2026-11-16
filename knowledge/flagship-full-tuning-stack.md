@@ -3,7 +3,7 @@
 > Target: **Qwen3.6-35B-A3B** (primary) and **GLM-4.7-Flash** (MLA sibling). Goal: stack EVERY
 > applicable lever so the gains **multiply**, not just add. Grounded in this session's on-device
 > measurements (`_flagship_dense_coverage_audit.py`, LFM #2 A/B) + the accel-levers survey
-> ([[project_accel_levers_campaign]]). All ⚗️ numbers are targets/estimates unless marked MEASURED.
+> ([`accel-levers-survey-and-plan.md`](accel-levers-survey-and-plan.md)). All ⚗️ numbers are targets/estimates unless marked MEASURED.
 
 ## The core idea — three orthogonal axes that MULTIPLY
 
@@ -107,5 +107,5 @@ token — the Nanbeige lesson; validated this session: LFM #2 dense-int4 PASSED 
 - On-device decode bundles: raw `.aimodel` (main.mlirb) JITs on A19 for ≤8B decode-only graphs (MEASURED,
   engine ready ~47 s); needs **>15 GB device free** for the on-device compile scratch. Flagship 35B may
   need AOT (`coreai-build compile --platform iOS --architecture h18p`) — verify.
-- Never `git add -A`; no "claude" in commits; don't commit coreml bundles/build files. Ship = USER-GATED.
+- Don't commit coreml bundles/build files.
 ```

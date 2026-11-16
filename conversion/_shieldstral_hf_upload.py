@@ -1,4 +1,4 @@
-"""Stage + upload the Shieldstral Core AI classifier bundles to HF. USER-GATED.
+"""Stage + upload the Shieldstral Core AI classifier bundles to HF.
 
 Publishes what was gated: the int4lin classifier at two grids (S=512 general, S=256
 for short messages — same 2.53 GB of weights, 232.5 ms vs 123.6 ms per verdict).

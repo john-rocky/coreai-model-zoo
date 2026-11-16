@@ -1,4 +1,4 @@
-"""Upload the MinerU2.5-Pro Core AI bundles (vision fp16 + decoder int8lin S=1 + tokenizer) to HF. USER-GATED."""
+"""Upload the MinerU2.5-Pro Core AI bundles (vision fp16 + decoder int8lin S=1 + tokenizer) to HF."""
 import os
 
 os.environ["HF_HUB_DISABLE_XET"] = "1"

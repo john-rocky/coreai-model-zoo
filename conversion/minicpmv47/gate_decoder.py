@@ -24,7 +24,7 @@ fresh zero states per sequence, S=1 calls with the full position ramp (gate_comm
               oracle's top-5 ids over the positions from the frame on exceeds 2x the green run's.
   reset       the process ends by re-running its first sequence; its kept logits must be bit-equal.
 
-Bar (the supervisor's, fixed): G1 non-knife-edge TF 48/48-excluded and free-run divergence none or knife
+Bar (fixed): G1 non-knife-edge TF 48/48-excluded and free-run divergence none or knife
 edge; G2 P1..P4 4/4 by the same rule. Prompts per process: <= 10 (the runtime leaks an IOSurface per call).
 
     QW coreai-models/.venv/bin/python conversion/minicpmv47/gate_decoder.py <bundle-dir> --text --vl --red \

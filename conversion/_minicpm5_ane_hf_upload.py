@@ -1,4 +1,4 @@
-"""Upload the MiniCPM5 (1B or 2B) Neural Engine bundles to HF. USER-GATED — run only when asked.
+"""Upload the MiniCPM5 (1B or 2B) Neural Engine bundles to HF.
 
 Adds two subtrees to mlboydaisuke/MiniCPM5-<size>-CoreAI next to the existing `int8/` (GPU, pipelined):
   ios-ane-h18p/   metadata.json + <name>.h18p.aimodelc + tokenizer/   — AOT for iPhone 17-class (h18p), ANE

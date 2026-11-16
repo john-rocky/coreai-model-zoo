@@ -116,7 +116,7 @@ shallow model. The 32-layer number is the honest one.
   (`kIOGPUCommandBufferCallbackErrorOutOfMemory`) — 8 layers was fine. Route through
   `coreai-build compile --platform macOS --architecture h16c --preferred-compute gpu
   --expect-frequent-reshapes` and load the `.aimodelc` with `SpecializationOptions.default()`,
-  per [`coreai-env`](../../CLAUDE.md) — the documented workaround, and it works here.
+  the known workaround, and it works here.
 - `_ANECompiler: ANECCompile() FAILED` appears on the Mac JIT path (the GPU-only kernel can't be
   ANE-placed) and is benign — it falls back to GPU. It does **not** appear on the iOS AOT path
   where `--preferred-compute gpu` is explicit.

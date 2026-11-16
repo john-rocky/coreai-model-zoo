@@ -1,21 +1,20 @@
-# Streaming Sortformer v2 (speaker diarization) — HANDOFF (updated 2026-07-05)
+# Streaming Sortformer v2 (speaker diarization) — STATE (updated 2026-07-05)
 
-Pillar ② of the "audio suite completion" campaign (話者分離). Authority memo =
-`project_audio_suite_completion.md` / rubric = `strategy/SHIP_RUBRIC.md`.
-⛔ All outward push (HF / zoo / X) and on-device runs are user-gated.
+Pillar ② of the "audio suite completion" campaign (話者分離).
+Rubric = `strategy/SHIP_RUBRIC.md`.
 
 **target**: HF `nvidia/diar_streaming_sortformer_4spk-v2`, **license cc-by-4.0** (commercial+redistribute OK).
 ⛔ offline `diar_sortformer_4spk-v1` is CC-BY-NC = never use. Single `.nemo` (471MB fp32 / 117M params).
 
 ---
 
-## STATUS: SWIFT PORT + iPhone DEVICE GATE DONE (2026-07-06). Remaining = ship only (user-gated).
+## STATUS: SWIFT PORT + iPhone DEVICE GATE DONE (2026-07-06). Remaining = ship only.
 
 The neural core is an exported, byte-faithful Core AI static graph, and the full streaming diarization
 algorithm (incl. AOSC speaker-cache compression) is validated end-to-end at **100% speaker-activity
 agreement** vs NeMo — in Python, in **Swift on Mac GPU**, AND on **iPhone 17 Pro (A19 Pro, AOT h18p)**,
 all driving the exported fp16 graph. The Transcribe tab is wired for a diarized transcript. Only the
-outward ship (HF/zoo) remains, user-gated.
+outward ship (HF/zoo) remains.
 
 ### ✅ iPhone device gate PASS (2026-07-06, A19 Pro, AOT h18p GPU)
 `coreai-build compile ... --platform iOS --architecture h18p --preferred-compute gpu` → 450 MB
@@ -91,14 +90,14 @@ Chunks for a 2160-frame clip: chunk0 mel 1512→pe189 (spkcache empty), chunk1 m
 
 ---
 
-## REMAINING — iPhone + ship (all user-gated)
+## REMAINING — iPhone + ship
 
 1. ✅ **Swift host loop** — DONE (`SortformerDiarizer.swift`, Mac-GPU-gated 100% activity-agree).
 2. ✅ **Transcribe tab** — DONE (Diarize toggle → per-turn ASR → "Speaker N: text"). NOTE: went with
    diarize-then-transcribe-each-turn (Kit `Transcription` exposes no word timestamps), NOT word-timing
    alignment — cleaner and robust; the diarizer supplies turn boundaries.
 3. ✅ **iPhone** — DONE (A19 Pro, AOT h18p GPU, DIARIZE_SELFTEST 100% activity-agree vs Mac; see above).
-4. ship (⛔user-gated): HF `mlboydaisuke/Streaming-Sortformer-Diar-CoreAI` (bundle `sortformer_float16.aimodel`
+4. ship: HF `mlboydaisuke/Streaming-Sortformer-Diar-CoreAI` (bundle `sortformer_float16.aimodel`
    macOS + `.h18p.aimodelc` iOS + mel filterbank + CC-BY-4.0 text) + zoo README/conversion.
 
 ### ⚠️ strategy (unchanged): parity-not-novelty
@@ -115,7 +114,7 @@ export+GPU gate) · `host_loop.py` (AOSC reference, PASS) · `gate_e2e_engine.py
 Swift: `apps/coreai-audio/Sources/{SortformerDiarizer,DiarizeSelfTest}.swift` + `TranscribeModel/View` diarize wiring.
 envs: NeMo oracle = `_sortformer_oracle/.venv` (torch2.10); re-author/export = `coreai-models/.venv` (torch2.9).
 
-### re-open first move
+### Reproduce
 ```bash
 # Python — all PASS (activity-agree 100%):
 coreai-models/.venv/bin/python gate_reauthor.py      # stage cos 1.0
@@ -128,7 +127,7 @@ cd apps/coreai-audio && xcodegen generate && \
   xcodebuild -scheme coreai-audio -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath build build
 APP=build/Build/Products/Release/coreai-audio.app; \
   DYLD_FRAMEWORK_PATH=$PWD/$APP/Contents/Frameworks DIARIZE_SELFTEST=1 DIAR_RESULT=/tmp/d.txt $APP/Contents/MacOS/coreai-audio; cat /tmp/d.txt
-# then: iPhone AOT (h18p) + device gate, ship (both user-gated)
+# then: iPhone AOT (h18p) + device gate, ship
 ```
 
 ### TODO (2026-07-07) — zoo card: add the kit door
@@ -141,5 +140,5 @@ API) + `Examples/Meeting` CLI. Both golden gates 100% on Mac GPU; ModelStore see
 let meeting = try await MeetingTranscriber(asr: "whisper-large-v3-turbo")
 print(try await meeting.transcribe(samples: AudioFile.pcm16kMono(url)).text)
 ```
-— and regenerate the HF README (byte-identical; HF push = user-gated). Also pending: run
+— and regenerate the HF README (byte-identical). Also pending: run
 `Examples/Meeting` once on the iPhone (graph already device-gated via the app self-test).

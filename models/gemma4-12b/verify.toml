@@ -7,6 +7,6 @@ eos_token = "<turn|>"
 bos_token = "<bos>"
 
 # The chat template was refreshed to Google's 2026-07-09 canonical revision on
-# 2026-07-25 (owner decision) — it fixes tool-calling loops, turn closures and thinking
+# 2026-07-25 — it fixes tool-calling loops, turn closures and thinking
 # content-ordering, and changes prompt formatting only, not the graph. It now matches the
 # source byte for byte, so no declaration is needed.

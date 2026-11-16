@@ -9,7 +9,7 @@
     "deadline_utc": "2026-09-23T00:31:38+00:00",
     "wall_limit_seconds": 9000,
     "fence": "OPEN",
-    "machine_facts_source": "supervisor; ps explicitly authorized this round",
+    "machine_facts_source": "ps",
     "timing": "A quiet throughput first; later correctness may contend",
     "instruction": "rounds/03.instruction.md"
   },

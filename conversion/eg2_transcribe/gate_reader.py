@@ -39,7 +39,7 @@ twice (drift). Two red arms on the 10 shortest fixture utterances, so the gate c
 the second half of each utterance's valid soft tokens set to 0 with token_mask unchanged (red = the labels change on
 >= 9 of the 10).
 
-Bars (registered by the lane supervisor before the run):
+Bars (registered before the run):
     float32 forms (fp32, h-out)       fixture: 20/20 transcripts identical to torch; test-clean 200: token
                                        agreement >= 99.9 %
     float16 forms (fp16, h-out-fp16)  test-clean 200: WER <= torch WER + 0.2 pt; fixture: >= 19/20 transcripts

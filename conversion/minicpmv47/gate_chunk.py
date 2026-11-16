@@ -11,7 +11,7 @@ efr) with `SpecializationOptions.default()` (gate_common), fresh zero states per
                             then "main" one token at a time to the end of the prompt (`vlm.prefill_order`);
                S=1 order    "main" only, one token per call (r3 G2's order, same bundle);
              then free-run greedy (<= 32, stop ids end it) with "main" from the same states.
-             Verdicts (the supervisor's rule, fixed before running): the chunk order's answer against the oracle's
+             Verdicts (fixed before running): the chunk order's answer against the oracle's
              `<P>__gen_ids` by the first-divergence rule (`margins.npz`: a divergence passes only at an oracle
              softmax top-2 gap < 0.1), and against the S=1 order's answer by the same rule; the last prompt
              position's logits chunk vs S=1: cos >= 0.999. Recorded: every chunk boundary's "prefill" logits

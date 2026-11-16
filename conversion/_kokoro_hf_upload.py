@@ -1,4 +1,4 @@
-"""Upload the Kokoro-82M Core AI bundles + English voices to HF. USER-GATED."""
+"""Upload the Kokoro-82M Core AI bundles + English voices to HF."""
 import os
 os.environ["HF_HUB_DISABLE_XET"] = "1"
 from huggingface_hub import HfApi

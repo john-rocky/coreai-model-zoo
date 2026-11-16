@@ -49,8 +49,8 @@ notes = [
   "(LFS sha256 from the Hub, the small files downloaded and hashed; record r10/hf_readback.txt).",
 ]
 open_questions = [
-  "The decoder's bar D: the maintainer chose (2026-10-25) to ship the int8 decoder on A, B and the task suite with D",
-  "recorded as measured (the card's Decoder accuracy section; record LANE.md section 3-7).",
+  "The decoder's bar D: the int8 decoder ships (2026-10-25) on A, B and the task suite with D",
+  "recorded as measured (the card's Decoder accuracy section).",
 ]
 
 ["wevisone-vl-2b-vision-taps"]

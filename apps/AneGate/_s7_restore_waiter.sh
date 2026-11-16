@@ -1,7 +1,7 @@
 #!/bin/zsh
 # S7 close-out (2026-09-18 18:4x): the phone left the USB bus while the cand gate app (C + A) was installed under the
 # PipelinedBench bundle id. Wait for the phone (live container listing, poll 30 s, cap 12 h), restore PipelinedBench,
-# verify Documents/models, release the device hold. No gate run (candC's 90-min re-run needs a user GO).
+# verify Documents/models, release the device hold. No gate run.
 export DEVELOPER_DIR=/Applications/Xcode-27.0.0-RC.app/Contents/Developer
 UDID=A6F3E849-1947-5202-9AD1-9C881CA58EEF; PHONE_UDID=00008150-0018713A0207801C
 DIR=$(cd "$(dirname "$0")" && pwd); ROOT=$DIR/../..

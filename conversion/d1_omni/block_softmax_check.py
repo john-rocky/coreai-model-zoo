@@ -20,7 +20,7 @@ forms agree to float64 rounding, and in fp32 each sits about as far from the exa
              the 6 rows with the largest fp32 blocked-vs-plain gap and the 2 with the smallest; each fp32 form against
              its own float64 run (the fp32 rounding of each form)
 
-Bars (supervisor's ruling, round 4, 2026-10-08): the same function = float64 blocked vs plain, marker logits max |d|
+Bars (round 4, 2026-10-08): the same function = float64 blocked vs plain, marker logits max |d|
 <= 1e-12 (toy and full64); blocked fp32 vs the reference = round 2's eager bar (argmax on every row, max |dp| <= 2e-5,
 marker logits <= 1e-3). The fp32 blocked-vs-plain gap is recorded, not a bar: the plain form itself sits about 3e-5
 (marker logits) from its float64 run on these rows, so no blocked form can hold the two fp32 forms within 1e-5 (the

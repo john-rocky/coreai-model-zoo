@@ -58,7 +58,7 @@ is the stateful-LLM archetype.
 
 ## The traps that cost real sessions
 
-- **Trusting notes over the oracle.** A port's handoff notes said "no input normalization"; the
+- **Trusting notes over the oracle.** A port's notes said "no input normalization"; the
   oracle showed the feature extractor always normalizes. Gate before you port.
 - **Writing Swift before NumPy.** Host bugs become unfindable inside an app.
 - **Skipping the per-token gate on LLMs.** Step 1 looking fine is not a gate; AR drift shows up

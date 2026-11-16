@@ -26,7 +26,7 @@ family as the shipped 0.8B / 2B / Qwen3.6-27B — so it rides the
 
 **⬇️ Converted `.aimodel` bundle:** `ornith_1_0_9b_decode_int8hu_block32_sym/`
 (9.8 GB, full LanguageBundle incl. tokenizer + chat template; decode-only loop-free,
-max_ctx 8192). *HF upload user-gated.*
+max_ctx 8192). *HF upload pending.*
 
 ## Numbers (verified 2026-07-03)
 

@@ -1,4 +1,4 @@
-"""Upload the Nemotron-3-Nano-4B Core AI bundles to HF. USER-GATED.
+"""Upload the Nemotron-3-Nano-4B Core AI bundles to HF.
 
 Stages two variants of the int8hu ship config, because a 4B graph cannot specialize
 on-device and the AOT bundle is iOS-only:

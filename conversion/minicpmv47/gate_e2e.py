@@ -11,7 +11,7 @@ gap < 0.1, `margins.npz`). Recorded too: the tower rows against the oracle's (co
 prompt position's logits against `<P>__logits`, both answers as text. The process ends by re-running P1
 end to end: tower output, answer and last-prompt logits must be bit-equal.
 
-Bar (the supervisor's): P1..P4 4/4 with the ship pair.
+Bar: P1..P4 4/4 with the ship pair.
 
     QW coreai-models/.venv/bin/python conversion/minicpmv47/gate_e2e.py <exports>/minicpmv47_vision_<mode> \
         <exports>/minicpmv47_vlm_decode_int8hu --out <lane>/r3/gate_e2e_<mode>.json

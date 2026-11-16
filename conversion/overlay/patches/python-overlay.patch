@@ -1443,7 +1443,7 @@ index 0000000..c754979
 +#
 +# RoPE cos/sin are GRAPH INPUTS (a "sidecar"), looked up by position on the Swift side from precomputed
 +# tables — NOT baked constant tables gathered in-graph. This matches CoreML-LLM's 34 tok/s gemma4 recipe
-+# and the handoff brief, and it is REQUIRED here: baking gemma4's RoPE tables as in-graph constants (the
++# and it is REQUIRED here: baking gemma4's RoPE tables as in-graph constants (the
 +# mistral-style `RoPECache`) trips the macOS-27 MPSGraph `CanonicalizeCopyWithConstraints` pass (SIGSEGV
 +# at specialization) once the RoPE'd key flows into the IOSurface-constrained KV cache — dropping the
 +# constant tables in favour of runtime cos/sin inputs avoids the constant-folding that crashes the pass.
@@ -10072,7 +10072,7 @@ index 0000000..c539147
 +``gemma4_metal_attn_int4km.py``. The dense-path-coverage lever (lm_head + attn q/o on a fused
 +4-bit matvec) gives the flagship decode ~2x (¼ the weight bytes), but **int4 degrades flagship
 +quality** (the Nanbeige/RTN cliff). FP4 (E2M1) reads the SAME ¼ bytes yet holds int8-level
-+quality (de-risked: fp4 ≈ int8 perplexity, ``project_quant_d_port``). This file is the drop-in
++quality (de-risked: fp4 ≈ int8 perplexity). This file is the drop-in
 +fp4 replacement for that matvec.
 +
 +WHAT DIFFERS FROM int4km (everything else — packing, tiling, dispatch — is identical):

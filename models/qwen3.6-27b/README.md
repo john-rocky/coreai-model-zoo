@@ -24,7 +24,7 @@ head_dim-512 Gemma 4 12B. The qwen3.5 family already runs on this engine.
 
 **⬇️ Converted `.aimodel` bundle:** `qwen3_6_27b_decode_int8hu_block32_sym/` (28 GB,
 full LanguageBundle incl. tokenizer; decode-only loop-free for the
-[pipelined engine](../../knowledge/pipelined-engine.md)). *HF upload user-gated.*
+[pipelined engine](../../knowledge/pipelined-engine.md)). *HF upload pending.*
 
 <!-- gen-cards:use-it begin id=qwen3.6-27b (managed by scripts/gen-cards — edit cards.json / QuickStart.swift, not this block) -->
 ## Use it

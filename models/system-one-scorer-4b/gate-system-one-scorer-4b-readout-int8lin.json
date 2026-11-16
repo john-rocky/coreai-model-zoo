@@ -24,7 +24,7 @@
   "license": "cc-by-nc-4.0",
   "timing": "A: quiet-window GPU throughput; B: correctness only",
   "result": "BLOCKED",
-  "phase": "external read-only CPython3.11.13 disappeared; supervisor repair decision pending",
+  "phase": "external read-only CPython3.11.13 disappeared; repair pending",
   "updated_at_utc": "2026-09-23T01:08:54.773565+00:00",
   "elapsed_seconds": 4833.77369594574,
   "status": "RUNNING",

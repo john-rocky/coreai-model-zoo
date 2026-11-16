@@ -22,7 +22,7 @@
 //                    via `readF16` (stride-safe fp16, no fp32) — the PROVEN structure, just fp16.
 //   * conv/rec     : the 1.3M-elem bottleneck. DEFAULT threads the chunk's `*_cur` output NDArray
 //                    straight back as next step's `*_state` input — zero copy, zero conversion
-//                    (the handoff's prescribed fix). Set env `QWEN_RT=1` to fall back to the proven
+//                    (the prescribed fix). Set env `QWEN_RT=1` to fall back to the proven
 //                    fp16 host round-trip (still no fp32) if direct NDArray threading misbehaves on
 //                    device — so one device window validates both without a rebuild.
 // This is numerically the exact recurrence the GPU `--verify` runs (conv[ci]=conv_cur, rec[ci]=rec_cur,

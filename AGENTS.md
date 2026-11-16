@@ -83,7 +83,7 @@ tokenizer that silently disagrees with the source).
 
 ## Traps that specifically catch agents
 
-- **Trusting notes over the oracle.** A handoff note said "no input normalization"; the oracle
+- **Trusting notes over the oracle.** A porting note said "no input normalization"; the oracle
   showed the feature extractor always normalizes. Gate, don't read.
 - **Re-authoring from the HF `modeling_*.py` instead of the weights.** The modeling file has
   branches that never run for this checkpoint, and hides ones that do.

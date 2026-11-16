@@ -18,8 +18,8 @@ The result is **cached**: first load pays the cost, later loads are fast. *"This
 amount of time for very large models… avoid having model specialization occur within user-interactive flows."*
 
 This is exactly this project's **re-specialization** finding: a *dynamic*-shape core re-specializes on every new
-sequence length (~60–80× per-shape compile tax). (Project memories: `project_macos_speed_state`,
-`reference_wwdc_coreai_sessions`; verbatim talks in `ondevice/_wwdc{324,326}_transcript.txt`.)
+sequence length (~60–80× per-shape compile tax).
+(Verbatim talks in `ondevice/_wwdc{324,326}_transcript.txt`.)
 
 ## Moving the cost off the interactive path (Swift API, 324 verbatim)
 ```swift
@@ -57,7 +57,7 @@ So 4B-class GPU bundles must be **AOT-compiled per device class** and shipped as
 Gemma-4B zoo bundle ships `…aotc_h18p`. **ANE is worse at this size:** the FastContext ANE bundle
 static-loads (31 ANE regions, ~518 s cold) but the warmup **inference** dies with
 `com.apple.appleneuralengine` / `ANECompilerService` `Code=4097` ("ANE compile failed"), so the GPU
-AOT bundle is the only on-device path. (Source: `project_fastcontext_4b_coreai` on-device runs, 2026-06-27.)
+AOT bundle is the only on-device path. (Source: on-device runs, 2026-06-27.)
 
 ### Tool naming — RESOLVED (corrects the earlier "aimodelc not coreai-build" note)
 - **CLI command you invoke = `xcrun coreai-build compile`.** Confirmed: `models/README.md:157`
@@ -170,6 +170,6 @@ the interactive flow. Subsequent inferences use the cached specialized asset.
   (host-cache) pattern as the fix for stateful-reset (`common_issues.md:145-148`) — i.e. host-cache is an
   Apple-acknowledged workaround, not a hack.
 - The ANE-later goal (~34 tok/s class) bundles three things: (1) **stateful KV** (blocked by the KV-write
-  SIGSEGV — [`coreai-beta-mpsgraph-kvwrite-bug.md`](coreai-beta-mpsgraph-kvwrite-bug.md), memory
-  `project_ane_vs_gpu_premise`), (2) **int4 / vocab-pruned head** (resolved above + [`compression-reference.md`](compression-reference.md)),
+  SIGSEGV — [`coreai-beta-mpsgraph-kvwrite-bug.md`](coreai-beta-mpsgraph-kvwrite-bug.md)),
+  (2) **int4 / vocab-pruned head** (resolved above + [`compression-reference.md`](compression-reference.md)),
   (3) **AOT** (now unblocked ✅).

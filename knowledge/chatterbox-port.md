@@ -78,7 +78,7 @@ $V $C/export_chatterbox_t3.py                 # T3 int8 embeds-in stateful graph
 $V $C/export_chatterbox_s3gen.py              # encoder + CFM estimator + HiFT trunk
 $V $C/export_chatterbox_hostdata.py           # embed tables, cond prefix, default-voice conditioning
 # fp16 estimator + bucketed encoder@256 / estimator@512 / f0@256 / hift_trunk@256 + f0 ELU-swap:
-#   see the session notes; all are export_to_coreai(...) with a padded static shape.
+#   all are export_to_coreai(...) with a padded static shape.
 ```
 
 On-device: `PipelinedBench` env flags drive the headless gates — `PB_CHATTERBOX` (estimator),

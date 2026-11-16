@@ -1,4 +1,4 @@
-"""Upload the TripoSplat Core AI fp16 bundles + README to HF. USER-GATED (needs HF auth).
+"""Upload the TripoSplat Core AI fp16 bundles + README to HF. Needs HF auth.
 
 Stages the 4 fp16 .aimodel bundles (the on-device .aimodelc are too big / device-only — ship the
 portable fp16 .aimodel) + the decode/octree nets + the recipe README, then uploads.

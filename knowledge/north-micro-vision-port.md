@@ -79,8 +79,8 @@ generations of the model in front of you; nothing else predicts it.
 ## The iOS load wall is further out than this repo thought
 
 This bundle's AOT `resources.bin` is **2.39 GiB** and loads on an iPhone 17 Pro (nat 16/16,
-image oracle 24/24, 21.5 prefill / 18.2 decode tok/s, clean at `PB_G=1024`). The note in
-`reference_ios_aot_and_devicectl_sideload` put the wall at 2 GiB (2^31) on a 1.96 ✅ / 3.92 ❌
+image oracle 24/24, 21.5 prefill / 18.2 decode tok/s, clean at `PB_G=1024`). An earlier note
+put the wall at 2 GiB (2^31) on a 1.96 ✅ / 3.92 ❌
 bracket; LFM2.5-VL-3B cleared it at 2.03 GiB the same day and this at 2.39. **Measure the
 compiled artifact, then ask a phone.** A bracket with a 2 GiB gap in it is not a verdict.
 

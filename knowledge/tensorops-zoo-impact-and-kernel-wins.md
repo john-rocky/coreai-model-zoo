@@ -58,13 +58,13 @@ PSNR gate" on FLUX / LLaDA / a MoE could unlock smaller footprints (→ iPhone f
 ## THE pure custom-Metal-kernel win (no TensorOps, no new Apple HW) — Absorbed-MLA cross-head staging
 
 This is the genuine hand-rolled-MSL win on the table, independent of the neural accelerator / OS 27.
-Source: `MLA_KERNEL_BREAKTHROUGH.md`, `ABSORBED_MLA_STATE.md`, memory `project_absorbed_mla`.
+Source: `MLA_KERNEL_BREAKTHROUGH.md`, `ABSORBED_MLA_STATE.md`.
 
 - **What**: a 2-pass MQA-staged flash-decode for Multi-head Latent Attention. Today's kernel
   (`mla_metal_sdpa.py`) is per-head, so each of H heads re-reads the shared latent → `H·S·576` global
   reads = **0.78× (slower than naive), crashes at ctx≥512**. The lever: stage each KV tile **once in
   threadgroup memory**, all H heads read from tg-mem ⇒ `S·576` reads (≈ H≈20× less latent traffic).
-- **Why it's not 地味**: (1) pure zoo kernel craft, ships on current Mac/A19 — no waiting on Apple HW;
+- **Why it matters**: (1) pure zoo kernel craft, ships on current Mac/A19 — no waiting on Apple HW;
   (2) **write-once, accelerate a whole class** — the kernel is config-driven and already proven on GLM
   (H20) *and* DeepSeek-V2-Lite (H16) dims; (3) it's the **moat for the 2026 frontier**, which is all
   **MoE+MLA** (GLM-4.7/5.x, DeepSeek V2/V3/V4, Kimi K2.x, Mistral 3 Large) — a class dense porting

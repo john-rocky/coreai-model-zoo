@@ -36,8 +36,7 @@ backend is MLX-native by its own README, so a vendor's shipped on-device artifac
 behind the runtime it wraps is the finding. "The vendor ships it, so it is the fast path" does
 not hold; measure it.
 
-Sources: rows 1–7 `apple-models-bench.md` (head-to-head matrix); 8–11 `project_gather_qmm_kernel.md`,
-`project_qwen36_moe_port.md`, `project_gather_qmm_next_target.md`; 12 `project_audio_understanding_qwen_omni.md`.
+Sources: rows 1–7 `apple-models-bench.md` (head-to-head matrix).
 
 ## 2. The one-line answer
 
@@ -122,8 +121,8 @@ same line one layer lower: it bundles its tensor framework + kernels on top of O
 Metal/MPS. The binary-size delta is tens of MB against GB-class model assets — noise.
 
 OS-residency is also **double-edged** (all incidents verified in this repo): beta seed-to-seed
-ABI churn kills TestFlight launches (`FoundationModels` must be weak-linked, see
-reference_fm_beta_abi_churn); the OS reclaims model assets into 6-byte zeroed stubs; the
+ABI churn kills TestFlight launches (`FoundationModels` must be weak-linked);
+the OS reclaims model assets into 6-byte zeroed stubs; the
 ~O(p²) prefill scratch lives in the closed compiler and **cannot be fixed app-side** (MLX's
 stack is fully open — every layer is fixable). "The OS owns it" = "you can't repair it."
 

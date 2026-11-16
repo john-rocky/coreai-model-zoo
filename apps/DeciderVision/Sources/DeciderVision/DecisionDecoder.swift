@@ -7,7 +7,7 @@
 //   states   keyCache / valueCache [6, 1, 2, -1, 256] f16 (the dynamic length resolved to max_context_length),
 //            convState [18, 1, 6144, 3] f16, recState [18, 1, 16, 128, 128] f16 — zero at the start of every row.
 //
-// Read order (the bundle's `decision.readout`, the supervisor's check_chunk.py): cursor = 0; for each slot s
+// Read order (the bundle's `decision.readout`, check_chunk.py): cursor = 0; for each slot s
 // ascending, while s - cursor + 1 >= C run "prefill" on ids[cursor ..< cursor + C] (its logits are the slot's when
 // cursor + C - 1 == s) and advance C; then "main" one token at a time up to and including s (the logits at
 // cursor == s are the slot's). The last slot is the row's last token.

@@ -164,7 +164,7 @@ Read: **at equal byte width (4 vs 4 bits) the GPU decodes faster than the ANE on
 34–56), the opposite sign of MiniCPM5-1B's 8-bit pair (+17 % for the ANE). The ANE's round 1 is depressed
 (it ran ~40 min after a 13-minute cold ANE program build on a sibling bundle; thermal state was not logged
 in this mode), so 55.5 is the steadier ANE figure — still below the GPU. The 6-bit ANE arm that actually
-passes the gate was not speed-measured (the session stopped on the owner's clock). The June-beta `ios-gpu/`
+passes the gate was not speed-measured. The June-beta `ios-gpu/`
 bundle in the zoo repo does not load on 27.0 GA with the current engine; the same preset re-exported
 today does. Record: `models/qwen3-1.7b-official/bench-iphone-ane-vs-gpu-2026-09-15.json`.
 
@@ -200,7 +200,7 @@ loads the phone, so it is a separate experiment, not a substitute.
   `devicectl device process launch` command line; the guard now anchors on the executable.
 - **`make_fixture.py`'s chat prompt is capped at 16 steps** — a prompt whose EOS lands at step 20 yields
   a chat fixture without the stop. Pick a prompt that stops within 16 (`explore_chat.py` prints the length).
-- **Derived data in another session's scratchpad gets deleted under you** (the parent session's cleanup
+- **Derived data in another job's scratch directory gets deleted under you** (that job's cleanup
   removed a freshly built 4 GB app); the build scripts now default to `/private/tmp/ane_gate_dd/<name>`.
   Two `_build.sh` in the same directory at once clobber each other's `project.yml` — one at a time.
 - **Editing a running zsh script** shifts its read offset (`command not found: onfiguration` at the end).
@@ -273,7 +273,7 @@ the phone was at `serious` throughout, which is why the A/B mode now needs the t
 The 4-bit ANE bundle measured 54.8 / 55.7 in fresh containers the same morning (§9b), so at 2B: 4-bit ≈ 55 (unfaithful),
 6-bit ≈ 38 (nearly), GPU int8 ≈ 24 (faithful).
 
-**Consequence for the zoo card.** The owner set the bar at "runs on the ANE, answers do not break, faster than the GPU"
+**Consequence for the zoo card.** The bar is "runs on the ANE, answers do not break, faster than the GPU"
 rather than token-exact, so the **6-bit bundle replaced the 4-bit one as `ios-ane-h18p/`** (2026-09-16; `ios-static/` is
 its IR). The card says what it is: exact on the three short prompts, a 0.17-margin divergence at token 33 of the long
 answer, 38.5 tok/s, a 23-minute first load. A token-exact 2B ANE bundle would need an 8-bit recipe the ANE path can
@@ -281,7 +281,7 @@ execute below ~2 GB, which this model does not fit; the task-accuracy gate (§9a
 
 ### 9a. Task accuracy: the token gate was not the quality gate (2026-09-17)
 
-The owner asked the right question — why gate on token match at all — and the answer is a 20-point hole. GSM8K test, first
+Why gate on token match at all? The answer is a 20-point hole. GSM8K test, first
 200 questions in the litertlm-convert order, 0-shot CoT asking for `#### <number>`, chat template no-think, greedy, 640 new
 tokens, the litertlm-convert extraction and normalization (`ondevice/_ane_gate/bench/{TaskEval.swift,_task_f.sh,
 score_gsm8k.py,ref_gsm8k_hf.py}`; record `models/minicpm5-2b/gsm8k-200-2026-09-17.json`):
@@ -399,7 +399,7 @@ Same failing steps, same wrong tokens, and the natural-prompt deviation does not
 LUT (1.44 → 1.73); the short-prompt compression stays at 0.71–0.78×. The Mac model that chose these recipes —
 int8-coarse activations at the palettized matmuls, MLP 7 ≫ 1 — is refuted on the device (it predicted the MLP 1 + 7
 recipe would pass natural / chat / long). The chat prompt's deviation does fall with the fp16 volume (1.50 → 0.71),
-but on 9 steps and against the natural prompt's direction. Left unexcluded, for whoever picks this up: a LUT-free
+but on 9 steps and against the natural prompt's direction. Left unexcluded: a LUT-free
 (fp16 dense) truncated model judged against its own twin with a fixture that has margin (the S6 attempt had none);
 the q=16 prompt graph (the short prompts, compressed 0.7×) vs the q=64 graph (sky, 0.96×), one graph at a time; and
 the one thing this builder does that Apple's passing Qwen3 builder does not — the conv history read back from the

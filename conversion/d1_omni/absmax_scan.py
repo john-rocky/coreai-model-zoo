@@ -17,7 +17,7 @@ every row's scores are bit-identical to a plain module's).
 fp16 / wfp16 (set_precision; fp16 = fp16 compute with RMSNorm / LayerNorm / softmax / scorer in fp32, wfp16 = fp16
 weights with fp32 compute): 60 rows — every source, own_L01..03, long_3400, the 5 prefix rows and the 13 near ties
 — against the reference: max |dp| after the temperature, argmax, marker logits max |d|, NaN / inf in the scores,
-seconds; also against the fp32 module. Values only: the bar is the supervisor's call.
+seconds; also against the fp32 module. Values only: this script applies no bar.
 """
 from __future__ import annotations
 

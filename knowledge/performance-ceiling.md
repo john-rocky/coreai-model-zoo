@@ -10,8 +10,8 @@
 >
 > Foundation note so future work doesn't chase wins that aren't there. The point: **within Core AI, on the
 > Mac GPU, on-device LLM decode is near its ceiling** — and the remaining levers are enablement/energy, not
-> dramatic throughput. Evidence: this project's gemma4 E2B macOS measurements (memory
-> `project_macos_speed_state`) + WWDC 325 + `skills/.../gpu_rules.md`.
+> dramatic throughput. Evidence: this project's gemma4 E2B macOS measurements
+> + WWDC 325 + `skills/.../gpu_rules.md`.
 
 ## General principles (reusable, not just this project)
 1. **Custom Metal kernels beat MPSGraph ONLY for big memory-bound matmuls** (FFN, the 262144-vocab head).

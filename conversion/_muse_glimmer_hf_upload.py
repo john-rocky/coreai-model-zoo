@@ -1,4 +1,4 @@
-"""Stage + upload the Muse-Glimmer-30B Core AI text-decoder bundle to HF. USER-GATED.
+"""Stage + upload the Muse-Glimmer-30B Core AI text-decoder bundle to HF.
 
 Publishes the dynamic-ids `int4hu --head-sym` bundle — the ship shape for a Mac-only
 model. The `--static-ids` variant is deliberately not published: it buys 1.5% decode

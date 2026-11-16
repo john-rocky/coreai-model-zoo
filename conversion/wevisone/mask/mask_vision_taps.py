@@ -10,7 +10,7 @@ build:  the overlay's `Qwen3VLVisionEncoder` (fp16, the exporter's externalized 
 
 run:    Core AI (python runtime, AOT h16c, default specialization, one load each) on every dense row of the grid's
         O2 form, the oracle's own pixel_values (fp16) as input:
-          taps vs the oracle's captured `dense_tap_maps`: cos per level and row (bar cos >= 0.999, ROUND2.md)
+          taps vs the oracle's captured `dense_tap_maps`: cos per level and row (bar cos >= 0.999)
           alpha: Core AI taps -> torch fp32 package vs oracle taps -> torch fp32 package (bar MAE <= 0.01,
                  IoU(alpha > 0.5) >= 0.95)
           image_embeds / deepstack_embeds vs the two-output tower (`--r1-aot`) on the same patches: bit-equal?

@@ -53,7 +53,7 @@ correctness half.
 5. Reinstall `../PipelinedBench/build/Build/Products/Release-iphoneos/PipelinedBench.app` (same id) and
    confirm its `Documents/models` container still lists 135 files.
 
-Rules that apply on the device (memory): another session's `devicectl … launch` means wait; never
+Rules that apply on the device: a running `devicectl … launch` means wait; never
 run an iOS bundle in the Mac llm-runner; never `copy … --remove-existing-content`.
 
 ## Output grammar
@@ -77,7 +77,7 @@ GATE_SUMMARY fixture=<stem> model=<name> prompts=<n> pass=<p> fail=<f> load_s=�
 Pollers (`_run.sh`, `bench/_ab.sh`, `_abn.sh`, `_sustain.sh`, `_probe.sh`) stop on `ERROR:` as well — a launch that dies
 with `CoreDeviceError 10002` right after an install (post-install race) no longer burns the 900 s cap; sleep ~10 s after
 `_install.sh` and retry. Never run two `_build.sh` in the same dir at once (shared `project.yml`), and never build into
-another session's scratchpad (derived data now defaults to `/private/tmp/ane_gate_dd/<name>`).
+another build's scratch directory (derived data now defaults to `/private/tmp/ane_gate_dd/<name>`).
 
 ## S5 additions (2026-09-16, the 2B on the ANE with Apple's other recipes)
 

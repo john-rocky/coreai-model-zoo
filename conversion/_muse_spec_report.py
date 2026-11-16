@@ -104,7 +104,7 @@ def main():
             f"baseline (spec off) over usable runs: {min(offs):.2f}–{max(offs):.2f} tok/s, "
             f"mean {sum(offs)/len(offs):.2f} · shipped pipelined engine reference 26.69"
         )
-    # Best usable config per workload — what the handoff quotes.
+    # Best usable config per workload.
     print("\nbest usable config per workload:")
     for w in ("chat", "code", "tools"):
         candidates = [r for r in clean if r["workload"] == w and r["gen"] >= 256]

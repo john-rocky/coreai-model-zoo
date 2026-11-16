@@ -1,4 +1,4 @@
-"""Stage + upload the TimesFM 2.5 200M Core AI bundle to HF. USER-GATED — run only when asked.
+"""Stage + upload the TimesFM 2.5 200M Core AI bundle to HF.
 
 Stages the ctx-2048 fp16 .aimodel (host front-pads shorter contexts) + the Python host-DSP
 reference (timesfm_core.py / host_forecast.py) + an Apache-2.0 model card into /tmp/timesfm_hf,

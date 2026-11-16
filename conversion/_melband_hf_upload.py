@@ -1,4 +1,4 @@
-"""Stage + upload the Mel-Band RoFormer (Kim Vocal) Core AI bundles to HF. USER-GATED.
+"""Stage + upload the Mel-Band RoFormer (Kim Vocal) Core AI bundles to HF.
 
 Stages the macOS fp16 `.aimodel`, the iOS AOT `.h18p.aimodelc`, the shared metadata and the
 self-test goldens into /tmp/melband_hf, then uploads to mlboydaisuke/MelBandRoformer-Vocal-CoreAI.

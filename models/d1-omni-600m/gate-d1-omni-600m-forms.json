@@ -1473,6 +1473,6 @@
    "ir_bytes": 5746
   }
  },
- "ship_form": "fp16 for all three graphs, decision buckets 64 / 128 / 256 / 512 / 1024 / 2048 / 4096 on the GPU (the supervisor's decision, 2026-10-08, from the speed ladder: the fastest form that passes)",
+ "ship_form": "fp16 for all three graphs, decision buckets 64 / 128 / 256 / 512 / 1024 / 2048 / 4096 on the GPU (2026-10-08, from the speed ladder: the fastest form that passes)",
  "written_by": "conversion/d1_omni/zoo_transcripts.py"
 }

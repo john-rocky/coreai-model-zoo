@@ -103,7 +103,7 @@ dynamic KV slice makes the runtime **recompile the Metal shader every step** —
 
 No tensor shape ever changes → the engine compiles **once** → decode is **flat ~12.7 ms/token**
 (`max/median 1.22×`, no freeze). The MoE FFN runs the `sym8` [`gather_qmm`](../../knowledge/compute-units-and-authoring.md)
-kernel (reads only the routed 6/64 experts). The kickoff's dynamic constant-window *gather* was
+kernel (reads only the routed 6/64 experts). The planned dynamic constant-window *gather* was
 math-proven (cos 1.0) but un-exportable: `sym_max` has no lowering, and the dynamic narrow recompiles.
 
 **Prefill** is a separate static graph (`prefill` function, q_len = Lm, batched `gather_qmm`) that

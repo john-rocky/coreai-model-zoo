@@ -195,7 +195,7 @@ verify-guaranteed), so quantizing the draft can only cost acceptance, not correc
   28 GB target. → 2B dropped.
 - **Training verdict: NOT needed for wiring.** Lossless never depends on the draft;
   the only training-worthy lever is **EAGLE-3 (C3)** to lift free-form α beyond the
-  off-the-shelf ceiling (~1.5-1.8 accepted/round) — parallel-session scope, does not
+  off-the-shelf ceiling (~1.5-1.8 accepted/round) — separate work, does not
   block the engine wiring. Cheaper fine-tunes (distilling 0.8B toward 27B outputs,
   layer-truncated drafts) are dominated by EAGLE-3 and not worth a session.
 - **Wiring config frozen: target 27B int8hu S=9 (+S=13 code-mode option) ×
@@ -220,7 +220,7 @@ cache = one ~28 GB entry per 27B verify graph in `~/Library/Caches/coreai-cache`
       (general S=9 K=6, code S=13 K=8; S=17 dropped). Table above.
 - [x] Draft A/B: 0.8B-int4 ≥ 0.8B-int8 on α at half the bytes; 2B dropped (cost eats
       its α gain). Wiring draft = `qwen3_5_0_8b_verify_s9_int4lin`. No training
-      needed to wire; EAGLE-3 (C3) is the only training lever, separate session.
+      needed to wire; EAGLE-3 (C3) is the only training lever.
 - [x] CoreAIChatMac wiring (commit f574c75): `SpecDecodeEngine.swift` — two-model
       WindowedModel port (S=9, K=6, snapshot/tail/exact-S re-anchor), draft
       auto-pairs via bundle metadata `spec_draft`, ⚡Spec lossless toggle + α
@@ -229,14 +229,13 @@ cache = one ~28 GB entry per 27B verify graph in `~/Library/Caches/coreai-cache`
       harness's reload-every crutch). Bundles symlinked into
       `~/Library/Application Support/CoreAIChatMac/models`. UNTESTED on the
       real app yet (build + a code-prompt ON/OFF byte-compare are the
-      acceptance gate). HF upload of the verify pair: user-gated.
+      acceptance gate).
       Found & fixed on the way: the harness anchor bootstrap read a PAD row
       whenever prompt length ≡ 0 (mod S) — rag (72 tok) was affected; lossless
       gate couldn't see it (both sides shared the bootstrap). Harness now
       holds the last prompt token back and peeks it (always-correct anchor);
       stale _spec_ref_* caches deleted.
-- [ ] EAGLE-3 head (C3, separate session) to lift free-form α — window tuning is
+- [ ] EAGLE-3 head (C3) to lift free-form α — window tuning is
       exhausted, drafter quality is the remaining α lever.
 
-Conventions: GPU-SOLO `_GPU_LOCK`; push/HF/card USER-GATED; no "claude" in commits;
-explicit paths only; coreml bundles never committed.
+Conventions: GPU-SOLO `_GPU_LOCK`; coreml bundles never committed.

@@ -24,7 +24,7 @@ iOS 27 **beta** bench loaded it: 13.2 tok/s decode, 3.3 GB footprint, 194 s cold
 
 ## Device gate (iPhone 17 Pro, iOS 27.0 24A435, `ondevice/_ane_gate`)
 
-Pending — this session's device slot comes after S1. Fixture = `Qwen/Qwen3-4B` fp32: alphabet list
+Pending. Fixture = `Qwen/Qwen3-4B` fp32: alphabet list
 (24 steps, min margin 0.930), no-think chat "What is the capital of France?" (10 steps incl. the stop,
 min 0.664, EOS 0.999), 396-id counting prompt (16 steps, min 0.958); red twin poisons natural[5]. Rules
 and transcript format: [`../../knowledge/minicpm5-1b.md`](../../knowledge/minicpm5-1b.md) §2026-09-15.

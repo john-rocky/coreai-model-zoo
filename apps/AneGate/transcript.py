@@ -46,6 +46,6 @@ if a.red_log:
     rtf, rfr, rgate, rsum, _ = parse(a.red_log)
     rfx = json.load(open(a.fixture.replace("fixture.json", "fixture_red.json")))
     out["red_test"] = {"poison": rfx["poison"], "summary": rsum, "gate": rgate,
-                       "purpose": "the same tool on a deliberately wrong fixture must go RED (memory: a gate must be able to fail)"}
+                       "purpose": "the same tool on a deliberately wrong fixture must go RED"}
 json.dump(out, open(a.out, "w"), indent=1)
 print("wrote", a.out, "verdict", summary and summary["verdict"], "red:", a.red_log and out["red_test"]["summary"]["verdict"])

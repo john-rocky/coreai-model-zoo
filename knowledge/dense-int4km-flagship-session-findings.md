@@ -70,7 +70,7 @@ experts int8→int4 AND dense int8→int4 on top of gather_qmm.
   (the quick Mac driver produced garbage for BOTH int8 and int4 = a driver bug, not int4). So the 2.18×
   is a **speed win at a known int4 quality cost**.
 - **The quality-safe path to the flagship speedup = FP4 (E2M1) or QAT-int4** (the "int4 answer" —
-  int4-speed at int8-quality; fp4 numerics de-risked: fp4 ≈ int8 perplexity, `project_quant_d_port`).
+  int4-speed at int8-quality; fp4 numerics de-risked: fp4 ≈ int8 perplexity).
   **CORRECTION (per [`tensorops-quantized-kernels.md`](tensorops-quantized-kernels.md) §"A19 DEVICE A/B"
   + §"fp8/fp4"):** FP4's flagship win is DECODE-bandwidth (¼ the weight bytes, like this int4 lever), which
   **rides an fp4/int4 MATVEC kernel (like `int4km`), NOT the TensorOps `matmul2d`** — so it is **NOT
@@ -78,7 +78,7 @@ experts int8→int4 AND dense int8→int4 on top of gather_qmm.
   there; the "3–4× prefill" was an M5 claim that doesn't hold on A19). fp8/fp4 matvec is **UNVERIFIED
   on-device** (numerics de-risked, on-device speed/integration not measured yet). Concretely: **swap the
   int4km matvec for an fp4-E2M1 matvec in this same dense-coverage lever** → same ~2× decode bandwidth win,
-  int8-like quality. That + QAT-int4 (OS26-shippable) is Stream D's work (separate sessions).
+  int8-like quality. That + QAT-int4 (OS26-shippable) is Stream D's work.
 
 ## 6. Also-measured this session
 - **⚠️ CORRECTION — prefill/FlashAttention is A19-specific, OPEN on Mac.** The claim below over-generalized
@@ -106,7 +106,7 @@ cd coreai-models && .venv/bin/python ../coreai-models-community/conversion/expor
 # LFM-8B on-device A/B (fits the phone): PipelinedBench + ondevice deploy script, PB_N=6, reasoning oraclePrompt
 ```
 bundles are coreml (NOT committed); `ondevice/` isn't a git repo (scripts live there, documented here).
-Nothing pushed to HF — USER-GATED.
+Nothing pushed to HF.
 
 ---
 
@@ -150,7 +150,7 @@ GPUs and made fp4 ~1.4× SLOWER than int4km (0.70× at lm_head). **Staging the 1
 threadgroup memory** (as int4km does its codebook) turns the lookup into a fast tg-mem gather → fp4 back
 to int4km speed. Extra fp4 cost vs int4km = the per-K-block scale read (~12% traffic), absorbed.
 
-**Quality:** inherited from the de-risked fp4 (fp4 ≈ int8 perplexity, [[project_quant_d_port]]); the
+**Quality:** inherited from the de-risked fp4 (fp4 ≈ int8 perplexity); the
 kernel reproduces those numerics bit-for-bit, so the flagship dense path gets int8-level quality where
 int4km flips ~12/41 tokens.
 
@@ -170,7 +170,7 @@ are linear-attn → no KV state); NOT fp4-related (int4km export shares it). Use
 ### 8b. QUALITY — the honest result: **fp4 does NOT beat int4km on the flagship dense path**
 
 The premise ("swap int4km→fp4 for int8-level quality") came from the fp4-vs-int4-**RTN** de-risk
-([[project_quant_d_port]]: fp4 +1.0% vs int4-RTN +10.2% ppl). But the flagship dense bundle uses int4-**km**
+(fp4 +1.0% vs int4-RTN +10.2% ppl). But the flagship dense bundle uses int4-**km**
 (k-means, `palettize_grouped` n_bits=4), which is already outlier-robust. Measured on the REAL flagship
 weights (`conversion/quant_fp4/flagship_dense_fp4_vs_int4km_quality.py`, no forward — weights loaded from
 the safetensors shards; lm_head top-1 flip on embed-rows-through-final-RMSNorm hidden proxy, S=512):
@@ -188,7 +188,7 @@ RTN-vs-fp4 issue (k-means already fixed the RTN part). So **int4km→fp4 is a no
 
 **The actual quality-safe paths to the flagship dense speedup** (unchanged from §5's other options):
 (a) keep the dense path **int8** (int8km: 6% flip, ~half the byte win), or (b) **QAT-int4** (train the
-4-bit to recover — the real "int4 answer", OS26-shippable, [[project_quant_d_port]] D2). fp4's genuine
+4-bit to recover — the real "int4 answer", OS26-shippable). fp4's genuine
 edge is only when the neural accelerator dequants it for free (TensorOps) — which is decode-irrelevant
 (BW-bound) and A19-refuted for prefill. ⚠️ Caveat: flip measured on a hidden-state PROXY (embed rows via
 RMSNorm), not real decode hidden; real-hidden confirmation needs a 35B forward or an on-device LFM-8B run.

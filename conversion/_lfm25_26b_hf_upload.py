@@ -1,4 +1,4 @@
-"""Stage + upload the LFM2.5-2.6B Core AI bundles (int8hu + int4lin) to HF. USER-GATED.
+"""Stage + upload the LFM2.5-2.6B Core AI bundles (int8hu + int4lin) to HF.
 
 Publishes the two bundles that are worth running: `int8hu --head-sym` (the quality
 ship) and `int4lin` (2.0 GB, no quality cliff observed). `int8lin` is deliberately

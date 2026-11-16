@@ -1026,7 +1026,7 @@ def cmd_timing_r11(args) -> int:
     window = json.loads((run_dir / "window.json").read_text()) if (run_dir / "window.json").exists() else {}
     files = window.get("swift_processes") or sorted(p.name for p in run_dir.glob("p*_*.json"))
     clean = json.loads((run_dir / "clean.json").read_text()) if (run_dir / "clean.json").exists() else None
-    if clean:   # the supervisor's clean-process rule: only these processes enter the medians (every process is recorded)
+    if clean:   # the clean-process rule: only these processes enter the medians (every process is recorded)
         files = clean["clean_swift"]
     procs = [json.loads((run_dir / f).read_text()) for f in files if (run_dir / f).exists()]
     summary = summarize_forms(procs)

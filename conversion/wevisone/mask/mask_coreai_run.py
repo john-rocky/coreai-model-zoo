@@ -11,7 +11,7 @@ Per row (the oracle's captured decoder inputs: tap maps, `<OBJ>` hidden states, 
            graph B's logits_s2 / logits_s1 (iso) — max|d| and cos, to name the stage when a row misses the bar
   p1       Core AI graph A with random padding vs zero padding: real rows must be bit-equal
   repeat   the first row's graph A and B calls run twice: bit-equal
-  bar      per instance MAE <= 0.01 and IoU(alpha > 0.5) >= 0.95 (ROUND2.md)
+  bar      per instance MAE <= 0.01 and IoU(alpha > 0.5) >= 0.95
 
     WATCH -- <coreai venv>/bin/python mask_coreai_run.py --a28 <aimodelc> --a32 <aimodelc> --b <aimodelc> \
         --pkg <dir> --sidecar <pt> --answers <dir> --out <json> [--forms O2-448,O2-512] [--rows a,b] [--label x]

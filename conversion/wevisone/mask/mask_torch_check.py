@@ -7,7 +7,7 @@ oracle's captured decoder inputs (tap maps, `<OBJ>` hidden states, boxes, 1024 x
   m        mask_graph.GraphA (n_max 16, padded) + GraphB per instance, gather sampler
   m_gs     the same with the package's F.grid_sample (separates the sampler from the restructure)
   alpha    every output goes through the package's own `WeVisOneVL._masks_from_logits` to the original size
-  bar      per instance MAE <= 0.01 and IoU(alpha > 0.5) >= 0.95 (ROUND2.md, fixed before any number)
+  bar      per instance MAE <= 0.01 and IoU(alpha > 0.5) >= 0.95 (fixed before any number)
   floor    pkg (this venv) vs the oracle's captured alpha / logits (same function, other torch, 1 thread)
   padding  p1: same n_max, padding rows zeros vs random -> real rows bit-equal;
            p2: n_max = N vs n_max 16 -> real rows bit-equal or max|d|;

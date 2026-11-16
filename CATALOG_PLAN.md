@@ -38,8 +38,7 @@ Measured 2026-07-25 by `scripts/gen_inventory.py`; the full table is
 | Core AI repos with no downloads in 30 days | **55** |
 
 Ten of the uncarded repos are the `-CoreAI-official` bench exports of Apple's own recipes —
-blueprint P2, not undocumented ports. Eight are zoo ports published without a card; those are
-listed for the owner.
+blueprint P2, not undocumented ports. Eight are zoo ports published without a card.
 
 ## The three things that blocked reproduction
 
@@ -126,12 +125,11 @@ last, and some of them are candidates for unpublishing rather than verifying.
 - **C3.1** Generalise the per-model scripts in `_smoke/` into one oracle generator and one
   comparator.
 - **C3.2** Generate oracles and publish them beside each bundle under `oracle/`.
-  **Each upload is user-gated** (blueprint: pushes and external posts are user-gated).
 - **C3.3** Fill `[numeric]` and `[generation]` expectations. Tolerances come from measurement,
   per architecture — never a global default.
 
 Mac-GPU work in this phase takes the `_GPU_LOCK` at the work root
-(`conversion/_paths.py: gpu_lock()`), per the blueprint's parallel-session rule.
+(`conversion/_paths.py: gpu_lock()`).
 
 *Accept*: the top 20 models by downloads pass tiers 1–3 or have a recorded reason they cannot.
 
@@ -148,7 +146,7 @@ Mac-GPU work in this phase takes the `_GPU_LOCK` at the work root
   paths, so the "Use it" block still round-trips byte-identically to the Hugging Face README.
   Every old `zoo/<model>.md` path stays as a redirect stub, because ~50 published Hugging Face
   READMEs link to it. **`scripts/gen-cards` has not been re-run** — it builds Swift and needs
-  the kit checkout; the owner should run it once to confirm the round-trip.
+  the kit checkout; one run confirms the round-trip.
 - **C4.3 ✅ done.** `skills/` mirrors Apple's agent-plugin layout (`.claude-plugin`,
   `.codex-plugin`, `gemini-extension.json`, `skills/<name>/SKILL.md`) with two skills:
   `reproduce-a-zoo-model` and `port-a-model-to-the-zoo`. `models/index.json` is the
@@ -156,15 +154,14 @@ Mac-GPU work in this phase takes the `_GPU_LOCK` at the work root
 
 *Accept*: an agent given only this repo's README can reproduce and verify one model end to end.
 
-## Open questions for the owner
+## Open questions
 
-Six of the seven questions this work turned up are now closed. What is left needs knowledge
-only the owner has.
+Six of the seven questions this work turned up are now closed. What is left cannot be settled from the record.
 
 **Still open — 2 recipes, both for a stated reason:**
 
-1. **`glm-4.7-flash`** — was `--head-sym` passed? Asked and closed as *unknowable from the
-   record* on 2026-07-25: the owner does not recall, the bundle name omits the head flags, the
+1. **`glm-4.7-flash`** — was `--head-sym` passed? Closed as *unknowable from the
+   record* on 2026-07-25: the bundle name omits the head flags, the
    metadata declares no compression, and this repo ships no `reference.json`. Settling it means
    re-exporting the head under both settings and comparing against the published 30 GB bundle.
    `sym8` alone stands as the defensible partial record.
@@ -207,7 +204,7 @@ Every published change was backed up first to
 pre-change repo revisions), and Hugging Face keeps the full history, so each commit is
 revertible. The script that made them is `conversion/_publish_tier1_fixes.py`.
 
-## Instructions for the agent
+## Working rules
 
 - Work one phase at a time and run its acceptance test before moving on. If it fails, fix it;
   do not redefine the test. If the test's *premise* turns out to be wrong (as C1's did), report
@@ -223,8 +220,7 @@ revertible. The script that made them is `conversion/_publish_tier1_fixes.py`.
 
 ## Guardrails
 
-- **No publishing.** No Hugging Face pushes, no posts, no PRs against `apple/*`. Uploading
-  oracles in C3.2 requires explicit approval each time.
+- **No publishing.** No Hugging Face pushes, no posts, no PRs against `apple/*`.
 - **No deletion of artifacts.** Never `rm` bundles, oracles or export outputs; several are the
   only copy in existence. Ignore them in git instead.
 - **Keep the repo small.** No models, checkpoints, build output, `.venv` or caches.

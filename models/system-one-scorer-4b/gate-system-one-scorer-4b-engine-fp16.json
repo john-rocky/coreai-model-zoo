@@ -23,7 +23,7 @@
     "fence": "OPEN",
     "device": "Apple M4 Max, 128 GiB RAM, macOS 27.0 (26A428)",
     "license": "cc-by-nc-4.0",
-    "timing": "Contended correctness only; round-3 quiet throughput retained, supervisor kit timings quoted as contended",
+    "timing": "Contended correctness only; round-3 quiet throughput retained, kit timings quoted as contended",
     "result": "RUNNING",
     "phase": "Round 4: restored venvs verified, int8lin readout and both engine checks in progress",
     "updated_at_utc": "2026-09-23T01:23:35.080493+00:00",

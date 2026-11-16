@@ -7,7 +7,7 @@
     $PY conversion/d1_omni/stage_hf.py --ship --with-small   # round 13: + the decision graph at L64 / L128 (round 12)
     $PY conversion/d1_omni/stage_hf.py --ship --final        # round 14: the form to upload (implies --with-small)
 
---final (round 14) is the form to upload. README.md is the card (<work>/card/README.md, the supervisor's checked text,
+--final (round 14) is the form to upload. README.md is the card (<work>/card/README.md, the checked text,
 copied byte for byte). ios-h19p/ leaves out decide-fp16-L4096: on the iPhone 18 Pro its compile loaded but its first
 call was killed at the per-process memory limit (round 11, results/iphone_*.json), so a phone runs
 ios/decide-fp16-L4096; NOTICE.md, metadata.json (`platforms`, the decision folders, `staged`) and the record say so.
@@ -24,8 +24,8 @@ hundreds of thousands of times). host/README.md says where the Swift host has ru
 gate app apps/D1OmniGate, round 11).
 
 --with-small (round 13) adds the decision graph's two small buckets (64 and 128 positions, host.SMALL_BUCKETS; round
-12: exported, stripped into bundles/.../macos-ship-small/, AOT in compiled/ship-h16c/ and ship-h19p/), which the
-supervisor added to the ship form on 2026-10-08: the decision folders become host.ALL_BUCKETS, a host routes a row to
+12: exported, stripped into bundles/.../macos-ship-small/, AOT in compiled/ship-h16c/ and ship-h19p/), which were
+added to the ship form on 2026-10-08: the decision folders become host.ALL_BUCKETS, a host routes a row to
 the smallest of them that holds it, and the gates of the small buckets are round 12's (the Python runtime's GPU gate
 on the stripped AOT, results/small_runtime_compare.json = the unstripped numbers, the Swift host's parity on the 342
 text rows, results/swift_parity_L64_128.json, and the audio end-to-end gate routed by host.ALL_BUCKETS,
@@ -40,7 +40,7 @@ with host/README.md (what the folder holds, the JPEG rule), reference/LICENSE-MM
 and the MMLU line of NOTICE.md, and the graphs' hashes in metadata.json. Its binary check is fatal: no staged file,
 binary or text, holds "/Users/", the home directory or the user name.
 
-The ship form (round 7's speed ladder, decided by the supervisor on 2026-10-08): the fp16 decision graph at L = 256 /
+The ship form (round 7's speed ladder, 2026-10-08): the fp16 decision graph at L = 256 /
 512 / 1024 / 2048 / 4096, the fp16 vision graph and the fp16 audio graph at 5 / 10 / 20 / 30 s. The layout is the
 zoo's (knowledge/jit-distribution.md): one self-contained folder per graph and platform.
 
@@ -153,7 +153,7 @@ SMALL = {"compare": "results/small_runtime_compare.json",  # stripped vs unstrip
 
 # --final (round 14): the form to upload
 FINAL_MODE = False
-CARD = WORK / "card" / "README.md"  # the card, checked by the supervisor: README.md byte for byte
+CARD = WORK / "card" / "README.md"  # the checked card: README.md byte for byte
 NOT_H19P = {"decide-fp16-L4096": "on the iPhone 18 Pro (iOS 27.2, round 11) the compile loaded but its first call was "
                                  "killed at the per-process memory limit (footprint 3,306 MB, JetsamEvent reason "
                                  "per-process-limit; the .aimodel in ios/ passed there): a phone runs "
@@ -1096,7 +1096,7 @@ def main() -> int:
     host_swift = stage_host_swift(out) if SHIP_MODE else None
     ref = stage_reference(out, scrub, unpublished, edits)
     write_text(out / "NOTICE.md", notice_text())
-    if FINAL_MODE:  # the card the supervisor checked, byte for byte
+    if FINAL_MODE:  # the checked card, byte for byte
         clone(CARD, out / "README.md")
         if sha256_file(out / "README.md") != sha256_file(CARD):
             raise SystemExit("README.md differs from the card")
