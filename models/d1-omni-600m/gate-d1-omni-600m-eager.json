@@ -163,7 +163,7 @@
    },
    "float64_max_abs": 1e-06,
    "pos_numpy_max_abs": 1e-05,
-   "launch_prefix_max_abs_recorded": 0.001,
+   "prefix_max_abs_recorded": 0.001,
    "why_max_abs_is_recorded": "the fp32 rounding floor of this tower is above it: the publisher's own fp32 prefix vs its float64 run (fp32_floor_publisher_max_abs)",
    "bit_equal": "rows, pixel_values, patch masks, position tables (publisher call and hooked), unshuffle order"
   },

@@ -72,7 +72,7 @@ REFERENCE_SHA256 = "e7dba6f44d0452a6aea3e401746d417503056d6f468ff72b56c551188343
 REFERENCE_IMAGES_SHA256 = "681d2d10eef35ecb8980a3caf93d922a77a17e88ee58795468e78b915ac91b08"  # round 5
 FIXTURES_IMAGES_SHA256 = "07ea38a2c0f3d8da4afe4dd4ae79e083c46404cb8ab0ba150b9c0a3fca83ae62"
 PREFIX_BAR = {"cos": 0.999999}
-LAUNCH_MAX_ABS = 1e-3      # the expectation for the fp32 prefix max |d|: recorded (below the fp32 floor)
+MAX_ABS_RECORDED = 1e-3    # the expectation for the fp32 prefix max |d|: recorded (below the fp32 floor)
 FLOAT64_BAR = 1e-6         # D1Vision float64 vs the publisher's Vision float64, max |d| of the prefix
 NUMPY_POS_BAR = 1e-5
 EXTRA_GRIDS = [(2, 2), (2, 8), (8, 2), (2, 32), (32, 2), (24, 42), (42, 24), (32, 32)]
@@ -314,7 +314,7 @@ def eager(args) -> int:
                   "px": list(Image.open(img["file"]).size), "crops": len(crops), "prefix_rows": int(prefix.shape[0]),
                   "rows_equal_reference": f"{sum(rows_equal)}/{len(rows_equal)}",
                   "prefix": stats, "prefix_pass": passes(stats),
-                  "prefix_max_abs_le_launch_1e-3": stats["max_abs"] <= LAUNCH_MAX_ABS,
+                  "prefix_max_abs_le_1e-3": stats["max_abs"] <= MAX_ABS_RECORDED,
                   "float64": float64, "float64_pass": float64["mine64_vs_publisher64"]["max_abs"] <= FLOAT64_BAR,
                   "red_arm_prefix": red_stats,
                   "red_arm_caught": not passes(red_stats), "tower_absmax": max(peaks),
@@ -370,7 +370,7 @@ def eager(args) -> int:
         "prefix_min_row_cos": min(r["prefix"]["min_row_cos"] for r in records),
         "prefix_max_abs": max(r["prefix"]["max_abs"] for r in records),
         "prefix_worst_image": min(records, key=lambda r: r["prefix"]["cos"])["id"],
-        "prefix_max_abs_le_launch_1e-3": f"{sum(r['prefix_max_abs_le_launch_1e-3'] for r in records)}/{len(records)}",
+        "prefix_max_abs_le_1e-3": f"{sum(r['prefix_max_abs_le_1e-3'] for r in records)}/{len(records)}",
         "float64_mine_vs_publisher_max_abs": max(r["float64"]["mine64_vs_publisher64"]["max_abs"] for r in records),
         "fp32_floor_publisher_max_abs": max(r["float64"]["floor_publisher32_vs_publisher64"]["max_abs"] for r in records),
         "fp32_floor_mine_max_abs": max(r["float64"]["floor_mine32_vs_mine64"]["max_abs"] for r in records),
@@ -395,7 +395,7 @@ def eager(args) -> int:
     status = "PASS" if all(verdict.values()) else "FAIL"
     doc = {"status": status, "verdict": verdict, "stage": "eager (CPU fp32, D1Vision vs the publisher's reference)",
            "bars": {"prefix": PREFIX_BAR, "float64_max_abs": FLOAT64_BAR, "pos_numpy_max_abs": NUMPY_POS_BAR,
-                    "launch_prefix_max_abs_recorded": LAUNCH_MAX_ABS,
+                    "prefix_max_abs_recorded": MAX_ABS_RECORDED,
                     "why_max_abs_is_recorded": "the fp32 rounding floor of this tower is above it: the publisher's own "
                                                "fp32 prefix vs its float64 run (fp32_floor_publisher_max_abs)",
                     "bit_equal": "rows, pixel_values, patch masks, position tables (publisher call and hooked), "

@@ -38,7 +38,9 @@ keys in that record's order. Sources, in file order:
   every file's licence template cc-zero, no person in frame) and this zoo's own FLUX.2 klein 4B output (prompt,
   seed and revision in its manifest). Each picked file was looked at by eye at full size before its questions were
   written: no people, no legible text or logo, no existing design; gold is the answer seen there.
-  `images/manifest.json` (written here) keeps every file's origin, licence, resize and sha256.
+  `images/manifest.json` (written here) keeps every file's origin, licence, resize and sha256. The two pools'
+  manifests are read from the folder in `$D1_OMNI_IMAGE_MANIFEST_DIR` (`pretest/c1_real-images-manifest.json`,
+  `demo-runs/rooms-manifest.json`, sha256-pinned); without it the run stops and names the file.
 * `imgm_01`..`imgm_12` - the same kind of requests over 8 more CC0 photographs (4 at 1024 px = tiled, 4 downscaled
   to 512 px = one crop) and 4 more FLUX rooms (1024 x 1024 = 2 x 2 tiles + thumbnail): the measured image rows
   (public false: they are the gate's, not the card's).
@@ -186,15 +188,15 @@ CHECK_STATE = "Photo from a room check."
 # lists the Commons file, page, artist, original sha256 and resize, not the PNG's sha256, which is pinned here).
 # FLUX: this zoo's FLUX.2 klein 4B (Core AI int4) rooms; rooms-manifest.json holds the six looked at by eye before use
 # (prompt, seed, hub revision, sha256), the gen manifest all twelve.
+# The two manifests are read from the folder named by D1_OMNI_IMAGE_MANIFEST_DIR (see image_manifest()).
+IMAGE_MANIFEST_ENV = "D1_OMNI_IMAGE_MANIFEST_DIR"
 IMAGE_POOLS = {
     "cc0": {"dir": work_path("_decidervision_demo", "pretest", "c1_real", "images"),
-            "manifest": code_path("standup", "drafts", "2026-09-29-decidervision-demo-attachments", "pretest",
-                                  "c1_real-images-manifest.json"),
+            "manifest": "pretest/c1_real-images-manifest.json",
             "manifest_sha256": "eb05cad78ac038f27eb99e8a109b035fbb3194d9698f3bc6609e09120ae6cb7f",
             "license": "CC0 1.0 (Wikimedia Commons licence template in the cc-zero family; no attribution required)"},
     "flux": {"dir": work_path("_decidervision_demo", "demo", "gen", "images"),
-             "manifest": code_path("standup", "drafts", "2026-09-29-decidervision-demo-attachments", "demo-runs",
-                                   "rooms-manifest.json"),
+             "manifest": "demo-runs/rooms-manifest.json",
              "manifest_sha256": "99f26f8a961dfd168df20855cc1c47bb17ff5a5c1ad6b9306b114305b1e9a5aa",
              "license": "own model output: FLUX.2 klein 4B (Apache-2.0) on Core AI, no third-party image involved"},
 }
@@ -665,11 +667,23 @@ def long_1500_check(own: list[dict], tok: RawTokenizer) -> dict:
             "long_1500": "not written: " + ", ".join(public_hits or hits) + " is in range" if hits else "needed"}
 
 
+def image_manifest(name: str) -> Path:
+    """A picture pool's manifest: `name` under the folder in D1_OMNI_IMAGE_MANIFEST_DIR; stops with the file's name
+    when the variable is not set or the file is not there."""
+    root = os.environ.get(IMAGE_MANIFEST_ENV)
+    path = Path(root).expanduser() / name if root else None
+    if path is None or not path.is_file():
+        raise SystemExit(f"the picture manifest {name} is needed: set {IMAGE_MANIFEST_ENV} to the folder that holds it"
+                         + (f" (not a file: {path})" if path else ""))
+    return path
+
+
 def _pool_entries() -> dict[str, dict]:
     """{pool: {file stem: the pool manifest's entry}} for the two picture pools (manifests sha256-pinned)."""
     out = {}
     for pool, spec in IMAGE_POOLS.items():
-        doc = json.loads(_read_pinned(spec["manifest"], spec["manifest_sha256"], f"{pool} picture manifest"))
+        doc = json.loads(_read_pinned(image_manifest(spec["manifest"]), spec["manifest_sha256"],
+                                      f"{pool} picture manifest"))
         if pool == "cc0":
             out[pool] = {Path(e["file"]).stem: {**e, "_pool": {k: doc[k] for k in ("source", "license_rule", "people")}}
                          for e in doc["images"]}
@@ -753,8 +767,8 @@ def make_images() -> dict:
         "schema": "d1-omni-images/1", "written_by": "conversion/d1_omni/make_fixtures.py (make_images)",
         "rule": "pictures only from the two sieved pools below, read only; nothing generated or downloaded here; "
                 "no person, no legible text or logo, no existing design (each file looked at by eye at full size)",
-        "pools": {k: {"dir": str(v["dir"]), "manifest": str(v["manifest"]), "manifest_sha256": v["manifest_sha256"],
-                      "license": v["license"]} for k, v in IMAGE_POOLS.items()},
+        "pools": {k: {"dir": str(v["dir"]), "manifest": str(image_manifest(v["manifest"])),
+                      "manifest_sha256": v["manifest_sha256"], "license": v["license"]} for k, v in IMAGE_POOLS.items()},
         "images": items,
         "summary": {"public": sum(i["public"] for i in items), "measured_only": sum(not i["public"] for i in items),
                     "by_pool": dict(Counter(i["pool"] for i in items)),
@@ -1008,8 +1022,9 @@ def main() -> int:
             "images": {"status": "made (round 5)", "manifest": made["path"], "manifest_sha256": made["sha256"],
                        "rule": "CC0 photographs or own FLUX.2 klein output from two sieved pools, read only; no "
                                "person, no legible text or logo, no existing design (looked at by eye)",
-                       "pools": {k: {"manifest": str(v["manifest"]), "manifest_sha256": v["manifest_sha256"],
-                                     "license": v["license"]} for k, v in IMAGE_POOLS.items()}},
+                       "pools": {k: {"manifest": str(image_manifest(v["manifest"])),
+                                     "manifest_sha256": v["manifest_sha256"], "license": v["license"]}
+                                 for k, v in IMAGE_POOLS.items()}},
             "audio": {"synth": SYNTH, "synth_r6": SYNTH_R6, "script_file": "audio/script.json",
                       "manifest": "audio/manifest.json",
                       "rule": "own Kokoro-82M output from scripts written here (English, no names, no real person, "

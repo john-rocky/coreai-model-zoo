@@ -25,6 +25,9 @@ Pinned behaviour (all checked at run time and written to ``oracle.json``):
 Run with the private oracle venv (funasr 1.4.16, CPU torch):
     ~/code/coreai/_funasr_nano/venv-oracle/bin/python conversion/funasr_nano/make_oracle.py
 
+A full run also writes ``<--shared-dir>/oracle_transcripts.json`` (one transcript per clip); it needs
+``--shared-dir`` or ``--no-shared-copy``.
+
 Prompt variants (``get_prompt`` options: hotwords, language, itn) run one clip under a case name and
 write ``oracle_hotwords/<case>.{npz,json}`` instead — ``oracle/`` and the shared copy are not touched:
     ... make_oracle.py --case zh_hotwords --only zh --hotwords 开放时间
@@ -52,7 +55,6 @@ OFFICIAL = WORK / "official"
 FIXTURES = WORK / "fixtures"
 ORACLE = WORK / "oracle"
 VARIANTS = WORK / "oracle_hotwords"
-SHARED = Path("~/code/standup/handoffs/assets/2026-09-26-funasr-nano/shared").expanduser()
 EXAMPLES = ["zh", "en", "ja", "ko", "yue"]
 VLLM_EXPECTED_ZH = "开饭时间早上九点至下午五点。"   # Fun-ASR-Nano-2512-vllm MODEL_PROVENANCE.json
 RUNTIME = dict(cache={}, batch_size=1, language=None, itn=True, hotwords=[],
@@ -150,6 +152,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--only", nargs="*", help="clip names to run (default: all in meta.json)")
     ap.add_argument("--ncpu", type=int, default=8)
+    ap.add_argument("--shared-dir", type=Path,
+                    help="folder that gets oracle_transcripts.json (a full run needs it or --no-shared-copy)")
     ap.add_argument("--no-shared-copy", action="store_true")
     ap.add_argument("--case", help="prompt-variant run: output name under oracle_hotwords/ (needs one --only clip)")
     ap.add_argument("--hotwords", nargs="+", default=[], help="get_prompt hotwords (prompt-variant run)")
@@ -160,6 +164,8 @@ def main() -> None:
     runtime = RUNTIME | {"hotwords": list(args.hotwords), "language": args.language, "itn": not args.no_itn}
     if variant and not (args.case and args.only and len(args.only) == 1):
         raise SystemExit("a prompt-variant run needs --case and exactly one --only clip")
+    if not args.no_shared_copy and not args.only and args.shared_dir is None:
+        ap.error("the transcripts file (oracle_transcripts.json) needs --shared-dir DIR; --no-shared-copy skips it")
 
     logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
     import funasr
@@ -269,13 +275,20 @@ def main() -> None:
     (ORACLE / "oracle.json").write_text(json.dumps(out, ensure_ascii=False, indent=1, default=str))
     print(f"[oracle] {len(rows)} clips -> {ORACLE}", flush=True)
     if not args.no_shared_copy and not args.only:
-        SHARED.mkdir(parents=True, exist_ok=True)
-        (SHARED / "oracle_transcripts.json").write_text(json.dumps(
-            {"versions": versions, "note": NOTE,
-             "setup": {"official_revision": info["official_revision"], "runtime": info["runtime"],
-                       "dither": 0.0, "device": "cpu", "dtype": "fp32 (steady state)"},
-             "transcripts": {r["name"]: r["text"] for r in rows}}, ensure_ascii=False, indent=1))
-        print(f"[oracle] transcripts -> {SHARED / 'oracle_transcripts.json'}", flush=True)
+        path = write_shared(args.shared_dir.expanduser(), versions, info, rows)
+        print(f"[oracle] transcripts -> {path}", flush=True)
+
+
+def write_shared(shared_dir: Path, versions: dict, info: dict, rows: list) -> Path:
+    """oracle_transcripts.json in shared_dir: the versions, the note, the setup and each clip's transcript."""
+    shared_dir.mkdir(parents=True, exist_ok=True)
+    path = shared_dir / "oracle_transcripts.json"
+    path.write_text(json.dumps(
+        {"versions": versions, "note": NOTE,
+         "setup": {"official_revision": info["official_revision"], "runtime": info["runtime"],
+                   "dither": 0.0, "device": "cpu", "dtype": "fp32 (steady state)"},
+         "transcripts": {r["name"]: r["text"] for r in rows}}, ensure_ascii=False, indent=1))
+    return path
 
 
 if __name__ == "__main__":

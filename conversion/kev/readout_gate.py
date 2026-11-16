@@ -833,9 +833,9 @@ V2_NEGATIONS = (
     ("tv4x_legacy_holdout_00", 0, "Is the refund authorized?", "Is the refund not authorized?"),
     ("own_t05", 2, "Would the reviewer recommend this jacket?", "Would the reviewer not recommend this jacket?"),
 )
-RED_RULE_FACTS7 = ("red = the perturbed runs against the unperturbed ones fail the gate's own bar: (a) an "
-                   "argmax moves on at least one question whose oracle top-2 margin is above 0.02, or (b) max |dp| > "
-                   "0.02, or (c) the mean over runs of the run's mean |dp| > 0.002")
+RED_RULE = ("red = the perturbed runs against the unperturbed ones fail the gate's own bar: (a) an "
+            "argmax moves on at least one question whose oracle top-2 margin is above 0.02, or (b) max |dp| > "
+            "0.02, or (c) the mean over runs of the run's mean |dp| > 0.002")
 
 
 def user_tokens(tok, text: str) -> list[int]:
@@ -903,7 +903,7 @@ def write_red_v2(recs: dict, path: Path) -> dict:
            "semif_states": {"records": len(semif), "distinct_states": n_states,
                             "v1_first_pair": [semif[0], semif[1], "same state: the v1 swap was a no-op (dp exactly 0)"]},
            "negations": [{"id": r, "q": k, "old": o, "new": n} for r, k, o, n in V2_NEGATIONS],
-           "tokenizer": f"{BASE_REPO}@{BASE_REVISION} (AutoTokenizer, {snap})", "runs": runs, "rule": RED_RULE_FACTS7,
+           "tokenizer": f"{BASE_REPO}@{BASE_REVISION} (AutoTokenizer, {snap})", "runs": runs, "rule": RED_RULE,
            "written": datetime.now().astimezone().isoformat(timespec="seconds")}
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, indent=1) + "\n")
@@ -949,7 +949,7 @@ def score_red(head, recs: dict, red_doc: dict, rarr: dict, gate_arrays: dict) ->
                                     "c_mean_of_run_means": mean_run > BAR["mean_of_run_mean_abs_dp"]},
                      "red": moved_far >= 1 or mdp > BAR["max_abs_dp"] or mean_run > BAR["mean_of_run_mean_abs_dp"],
                      "red_v1_rule": moved >= 1 and mdp > BAR["max_abs_dp"], "items": items}
-    return {"rule": RED_RULE_FACTS7, "v1_rule": "argmax moved on >= 1 row AND max |dp| > 0.02", "arms": arms,
+    return {"rule": RED_RULE, "v1_rule": "argmax moved on >= 1 row AND max |dp| > 0.02", "arms": arms,
             "base_vs_gate_run": base_bits,
             "base_bit_equal_all": all(b["bit_equal_gate_run"] for b in base_bits if b["bit_equal_gate_run"] is not None),
             "all_arms_red": all(a["red"] for a in arms.values())}

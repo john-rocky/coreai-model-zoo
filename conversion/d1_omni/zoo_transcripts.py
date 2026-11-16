@@ -164,6 +164,12 @@ def status_of(*parts) -> str:
     return "PASS" if all(p == "PASS" or p is True for p in parts) else "FAIL"
 
 
+def vision_bars(bars: dict) -> dict:
+    """The vision record's bars under the names vision_check.py writes now. A record written before the rename keeps
+    the recorded prefix max |d| under a longer key that ends in _prefix_max_abs_recorded (same value, same place)."""
+    return {("prefix_max_abs_recorded" if k.endswith("_prefix_max_abs_recorded") else k): v for k, v in bars.items()}
+
+
 # =========================================================================== eager
 def t_eager() -> dict:
     b = Book()
@@ -218,7 +224,7 @@ def t_eager() -> dict:
     vmin = min(i["prefix"]["cos"] for i in ve["images"])
     vision = {"what": "d1_omni_vision.py (SigLIP2 NaFlex tower + projector, one crop -> 256 rows, fp32) on the CPU "
                       "against the publisher's vision code, 16 images / 62 crops",
-              "status": ve["status"], "bars": ve["bars"],
+              "status": ve["status"], "bars": vision_bars(ve["bars"]),
               "prefix_min_cos": vmin, "prefix_min_cos_file": ve["summary"]["prefix_min_cos"],
               "recomputed_equal": vmin == ve["summary"]["prefix_min_cos"],
               **{k: ve["summary"][k] for k in ("images", "crops", "rows_equal_reference", "pixel_values_bit_equal",

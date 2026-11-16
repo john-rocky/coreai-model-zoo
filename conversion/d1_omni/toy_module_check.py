@@ -6,6 +6,9 @@ driven through host.graph_inputs.
 
     python3 conversion/d1_omni/toy_module_check.py   # -> $ZOO_WORK_ROOT/_d1_omni/results/toy_parity.json
 
+(j) reads the checkpoint header from the snapshot's model.safetensors; before the weights are downloaded, set
+D1_OMNI_HEADER_JSON to a copy of that header as JSON.
+
 Two configurations: `toy64` (hidden 64, layers conv/conv/attention/conv, 4 query / 2 key-value heads, vocab 128;
 its head has 64 // 64 = 1 head, so PyTorch's encoder-layer fast path is off: odd head count) and `toy256` (hidden
 256, head_dim 64 as in the checkpoint, 6 layers with 2 attentions, a 4-head head: the fast path is on, as in the
@@ -29,6 +32,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -42,7 +46,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 import d1_omni_model as dm  # noqa: E402
 import host  # noqa: E402
-from _paths import code_path, hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, work_path  # noqa: E402
 
 WORK = work_path("_d1_omni")
 BASE = {"norm_eps": 1e-05, "conv_L_cache": 3, "block_ffn_dim_multiplier": 1.0, "rope_theta": 1000000.0}
@@ -242,15 +246,19 @@ def run_toy(name: str, cfg: dict, enc) -> dict:
 
 
 def checkpoint_header(snapshot: Path) -> dict:
-    """model.safetensors' JSON header: from the file when it is downloaded, else from the lane's copy of the header
-    (round 1 runs before the weights are fetched)."""
+    """model.safetensors' JSON header: from the file when it is downloaded, else from a copy of the header named by
+    D1_OMNI_HEADER_JSON (a run before the weights are fetched); stops with the file's name when neither is there."""
     weights = snapshot / dm.WEIGHTS["file"]
     if weights.exists():
         with open(weights, "rb") as handle:
             size = int.from_bytes(handle.read(8), "little")
             return json.loads(handle.read(size))
-    return json.loads(code_path("standup", "handoffs", "assets", "2026-10-08-d1", "source",
-                                "d1-omni-600m_safetensors_header.json").read_text())
+    value = os.environ.get("D1_OMNI_HEADER_JSON")
+    copy = Path(value).expanduser() if value else None
+    if copy is None or not copy.is_file():
+        raise SystemExit(f"{weights} is not there: set D1_OMNI_HEADER_JSON to a copy of its JSON header "
+                         "(d1-omni-600m_safetensors_header.json)" + (f"; not a file: {copy}" if copy else ""))
+    return json.loads(copy.read_text())
 
 
 def full_size_checks(enc, snapshot: Path) -> dict:

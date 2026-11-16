@@ -13,6 +13,9 @@ revision, licence, duration, sha256, reference text for every clip):
 
 Run with the oracle venv (pyarrow + soundfile):
     ~/code/coreai/_funasr_nano/venv-oracle/bin/python conversion/funasr_nano/make_fixtures.py
+
+A full run also copies ``meta.json`` to ``<--shared-dir>/fixtures_meta.json``; it needs ``--shared-dir`` or
+``--no-shared-copy``.
 """
 from __future__ import annotations
 
@@ -45,7 +48,6 @@ FLEURS_CONFIGS = ["en_us", "cmn_hans_cn", "ja_jp"]
 PER_CONFIG = 50
 MAX_SECONDS = 30.0
 SR = 16000
-SHARED_META = Path("~/code/standup/handoffs/assets/2026-09-26-funasr-nano/shared/fixtures_meta.json").expanduser()
 
 
 def sha256(path: Path) -> str:
@@ -147,9 +149,14 @@ def make_fleurs(config: str) -> tuple[list[dict], dict]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--shared-dir", type=Path,
+                    help="folder that gets a copy of meta.json as fixtures_meta.json (a full run needs it or "
+                         "--no-shared-copy)")
     ap.add_argument("--no-shared-copy", action="store_true", help="skip the copy into the shared fixtures folder")
     ap.add_argument("--examples-only", action="store_true", help="only the 5 model-repo examples")
     args = ap.parse_args()
+    if not args.no_shared_copy and not args.examples_only and args.shared_dir is None:
+        ap.error("the copy of meta.json (fixtures_meta.json) needs --shared-dir DIR; --no-shared-copy skips it")
     FIXTURES.mkdir(parents=True, exist_ok=True)
     clips = make_examples()
     selection = {}
@@ -174,9 +181,10 @@ def main() -> None:
     (FIXTURES / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
     print(f"[meta] {len(clips)} clips -> {FIXTURES / 'meta.json'}", flush=True)
     if not args.no_shared_copy and not args.examples_only:
-        SHARED_META.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(FIXTURES / "meta.json", SHARED_META)
-        print(f"[meta] copied -> {SHARED_META}", flush=True)
+        shared_meta = args.shared_dir.expanduser() / "fixtures_meta.json"
+        shared_meta.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(FIXTURES / "meta.json", shared_meta)
+        print(f"[meta] copied -> {shared_meta}", flush=True)
 
 
 if __name__ == "__main__":
