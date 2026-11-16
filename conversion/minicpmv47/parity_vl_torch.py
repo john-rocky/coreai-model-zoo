@@ -18,7 +18,7 @@ HF fp32 tower output (`oracle.npz <P>__image_features`), so this isolates the de
            P0 (text only: start 1 << 30, amount 0, image_embeds 0): the last 48 positions vs the
            oracle, and the same forward through the overlay's plain text graph
            (`Qwen3_5ForCausalLMStateful.forward`, 1-D RoPE) — bit-equal expected.
-  Bars (round-1 launch): planes 100 % on P0..P4 + generate rows; red arms FAIL; P1..P4 top-5 4/4,
+  Bars (round 1): planes 100 % on P0..P4 + generate rows; red arms FAIL; P1..P4 top-5 4/4,
   cos >= 0.9999.
 
     QW coreai-models/.venv/bin/python conversion/minicpmv47/parity_vl_torch.py [--threads 1]

@@ -7,7 +7,7 @@ loop, not the chat engine):
    keyCache, valueCache) -> logits [1,s,16512]
 
 mrope is pre-computed on the host (cos/sin are graph inputs). See the model def
-coreai_models.models.macos.glm_image_ar and GLM_IMAGE_KICKOFF.md.
+coreai_models.models.macos.glm_image_ar.
 
 Run (coreai-models venv, from conversion/):
   python export_glm_image_ar.py [int8lin|int8hu|fp16] \

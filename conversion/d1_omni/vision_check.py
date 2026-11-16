@@ -21,7 +21,7 @@ Stage eager (CPU, the fp32 module, venv-d1 = the reference's environment):
         well (bar <= 1e-5); a float64 filter is recorded beside it
   (iii) tower: D1Vision.tower on the host's inputs vs last_hidden_state on the crop's patches: max |d|, cos
   (iv)  prefix: D1Vision on every crop, each crop's rows concatenated, vs the reference prefix: max |d|, cos, min row
-        cos. Bar: cos >= 0.999999. The launch's max |d| <= 1e-3 is recorded, not the bar: it lies below the fp32
+        cos. Bar: cos >= 0.999999. The expected max |d| <= 1e-3 is recorded, not the bar: it lies below the fp32
         rounding floor of this tower (the publisher's own fp32 prefix is up to 0.12 from its float64 run, round 5)
   (vi)  float64: D1Vision in float64 vs the publisher's Vision (vision.py on transformers 5.19) in float64 on the same
         inputs, every image: max |d| <= 1e-6 (the same function); recorded beside it, each one's fp32 floor (its fp32
@@ -35,8 +35,8 @@ Stage runtime (Core AI Python runtime, the AOT .aimodelc, explicit compute unit,
   (i)   the vision bundle's prefix on the host's inputs vs the reference prefix, per image: max |d|, cos, min row cos;
         drift = max |d| between --repeats calls
   (ii)  end to end: every image row (45 + card_cats) with this prefix -> host.graph_inputs at the row's bucket -> the
-        wfp16 decision bundle of that bucket -> marker logits -> probabilities vs the reference (_metrics.SHIP_BAR,
-        FACTS §7); beside it, the same rows with the reference's own prefix through the same bundles (what the
+        wfp16 decision bundle of that bucket -> marker logits -> probabilities vs the reference (_metrics.SHIP_BAR);
+        beside it, the same rows with the reference's own prefix through the same bundles (what the
         decision graph alone moves), and a control with another image's prefix (the next image's, its rows cut or
         repeated to the row's P), which must FAIL
 Cosines are float64 (a float32 reduction over 1e6 elements is not exact to 1e-6).
@@ -72,7 +72,7 @@ REFERENCE_SHA256 = "e7dba6f44d0452a6aea3e401746d417503056d6f468ff72b56c551188343
 REFERENCE_IMAGES_SHA256 = "681d2d10eef35ecb8980a3caf93d922a77a17e88ee58795468e78b915ac91b08"  # round 5
 FIXTURES_IMAGES_SHA256 = "07ea38a2c0f3d8da4afe4dd4ae79e083c46404cb8ab0ba150b9c0a3fca83ae62"
 PREFIX_BAR = {"cos": 0.999999}
-LAUNCH_MAX_ABS = 1e-3      # the launch's expectation for the fp32 prefix max |d|: recorded (below the fp32 floor)
+LAUNCH_MAX_ABS = 1e-3      # the expectation for the fp32 prefix max |d|: recorded (below the fp32 floor)
 FLOAT64_BAR = 1e-6         # D1Vision float64 vs the publisher's Vision float64, max |d| of the prefix
 NUMPY_POS_BAR = 1e-5
 EXTRA_GRIDS = [(2, 2), (2, 8), (8, 2), (2, 32), (32, 2), (24, 42), (42, 24), (32, 32)]

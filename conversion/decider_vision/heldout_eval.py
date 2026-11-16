@@ -577,7 +577,7 @@ def main_run(args) -> int:
     elif ok(SHIP):
         concl = f"{SHIP} meets bars 1-5 on the held-out runs: ship it (ship rule)"
     elif ok345(FALLBACK):
-        concl = f"{SHIP} held-out FAIL; {FALLBACK} meets bars 3-5 (the rule names no ship for this case: the supervisor decides)"
+        concl = f"{SHIP} held-out FAIL; {FALLBACK} meets bars 3-5 (the rule names no ship for this case)"
     else:
         concl = f"both held-out FAIL ({SHIP} and {FALLBACK})"
     record["ship_rule_result"] = concl

@@ -15,7 +15,7 @@ unpacked to [1, 3, 448, 448] — an exact permutation, checked by repacking):
            first stage that departs (cos < 0.9999, or max |d| > 1e-3 x max(1, stage absmax)) is
            where a miss starts.
   consts   the baked position ids and window index vs transformers' own functions (the dump).
-  Bars (round-2 launch): load 459/459, missing / unexpected / meta 0; (a) and (b) per-token cos
+  Bars (round 2): load 459/459, missing / unexpected / meta 0; (a) and (b) per-token cos
   min >= 0.9999 and max |d| <= 1e-3 on P1..P4; max |(a) - (b)| <= 1e-5.
 
     QW coreai-models/.venv/bin/python -I conversion/minicpmv47/parity_vision.py [--threads 1]

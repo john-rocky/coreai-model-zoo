@@ -13,7 +13,7 @@
 //                     media graph output, the prefix)
 //   bench.json        the timed workloads W1..W5 and the series rules
 //
-// The bar (FACTS §7, conversion/d1_omni/_metrics.py SHIP_BAR, unchanged): argmax equal on every row whose oracle top-2
+// The bar (conversion/d1_omni/_metrics.py SHIP_BAR, unchanged): argmax equal on every row whose oracle top-2
 // margin is above 0.02 (near ties counted apart); max |dp| <= 0.02 over every option of every row; the mean over rows of
 // each row's max |dp| <= 0.002; here also every row's ids, markers and bucket equal to the publisher's, and finite
 // logits. The control (_metrics.wrong_pairing) judges each row against the oracle of the next row of its class (type,
@@ -265,7 +265,7 @@ struct Fixtures {
                         macMaxAbsDp: macDp, macMaxAbsDlogit: macDl)
     }
 
-    /// FACTS §7 over a set of scored rows, with the Mac comparison.
+    /// The ship bar over a set of scored rows, with the Mac comparison.
     static func summarize(_ rows: [RowScore]) -> [String: Any] {
         let clear = rows.filter { !$0.nearTie }, ties = rows.filter(\.nearTie)
         let finite = rows.filter(\.finite).count

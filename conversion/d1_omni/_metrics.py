@@ -8,7 +8,7 @@ for text rows, the fp32 softmax, a noul reported as [yes, no]).
 Bars:
   FP32_BAR  round 2's eager bar (eager_check.py): argmax equal on every row, near ties included; max |dp| <= 2e-5;
             marker logits max |d| <= 1e-3
-  SHIP_BAR  FACTS §7: argmax equal on every non-near-tie row (near tie = the oracle's top-2 margin <= 0.02, reported
+  SHIP_BAR  argmax equal on every non-near-tie row (near tie = the oracle's top-2 margin <= 0.02, reported
             apart); max |dp| <= 0.02; the mean over rows of each row's max |dp| <= 0.002
 The wrong-pairing control judges each row's candidate against the oracle of the next row of the same class
 (type, K, mode, so the same temperature) under SHIP_BAR. It must FAIL, or the instrument cannot go red.
@@ -23,7 +23,7 @@ import host
 
 FP32_BAR = {"name": "fp32 (round 2 eager bar)", "argmax": "every row, near ties included", "max_abs_dp": 2e-5,
             "max_abs_dlogit": 1e-3}
-SHIP_BAR = {"name": "ship (FACTS §7)", "argmax": "every non-near-tie row; near ties reported apart",
+SHIP_BAR = {"name": "the ship bar", "argmax": "every non-near-tie row; near ties reported apart",
             "max_abs_dp": 0.02, "mean_row_max_abs_dp": 0.002}
 NEAR_TIE_MARGIN = 0.02
 

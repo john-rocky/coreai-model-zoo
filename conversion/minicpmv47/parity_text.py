@@ -13,7 +13,7 @@ Then one forward over the oracle's P0 row (prompt + 48 greedy tokens, `oracle.np
 with positions 0..L-1, and the logits of the last 48 positions against the oracle's
 (`P0__logits`, HF fp32 CPU one thread): ordered top-5 equal, argmax equal, cosine (float64) and
 max |d| per position. Over all L positions: argmax and top-5 against the oracle's argmax/top-5.
-Bars (round-1 launch): top-5 48/48, argmax 48/48, min cos >= 0.9999.
+Bars (round 1): top-5 48/48, argmax 48/48, min cos >= 0.9999.
 
 Red arm (same hidden states, no extra forward): the LM head replaced by the tied embedding table
 (the 4.6 convention) must lose top-5 / argmax — the comparison sees a wrong head. The weight-level

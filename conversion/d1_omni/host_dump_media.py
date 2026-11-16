@@ -26,7 +26,7 @@ logits and probabilities (bits too), two calls; an audio row once per mel (numpy
 host). Every AOT is loaded with SpecializationOptions.from_preferred_compute_unit_kind(gpu), never default().
 
 index.json lists every file with its sha256, shape and dtype; the rows carry the oracle's numbers (the publisher's fp32
-model with its own media prefix) for the FACTS §7 bar.
+model with its own media prefix) for the ship bar.
 """
 from __future__ import annotations
 

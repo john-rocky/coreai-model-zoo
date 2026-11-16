@@ -19,7 +19,7 @@ Compared with the oracle in its two forms: `row` = each question's whole prompt 
 `questions[k].probs`, what the graph computes; readout_gate.py's oracle form) and `api` = the provider's API path
 (`api.probs`: one question = that plain pass, several = its Tree). The design asks both to hold the bar.
 
-Bar (FACTS §7, readout_gate.py's, fixed before any result: written at the top of the transcript before the first GPU
+Bar (readout_gate.py's, fixed before any result: written at the top of the transcript before the first GPU
 process), on the `e2e` arm, against each oracle form:
   (a) argmax = the oracle's on every question whose oracle top-2 margin is above 0.02 (near-ties listed apart)
   (b) max |dp| <= 0.02 over every option of every question, near-ties included

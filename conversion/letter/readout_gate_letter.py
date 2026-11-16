@@ -517,7 +517,7 @@ def summary(record: dict, expected: int) -> dict:
             "provisional_int8hu_max_delta_p_expectation": 0.05,
             "provisional_max_delta_p_expectation": expectation,
             "provisional_expectation_exceeded": any(row["max_abs_delta_p"] > expectation for row in rows),
-            "provisional_expectation_policy": "Exceedance is recorded for supervisor judgment; no investigation or new tolerance.",
+            "provisional_expectation_policy": "Exceedance is recorded; no investigation or new tolerance.",
             "max_abs_delta_noul": max((row["abs_delta_noul"] for row in rows if "abs_delta_noul" in row), default=None),
             "max_process_peak_rss_bytes": max((session.get("peak_rss_bytes", 0) for session in sessions), default=None),
             "worst_five": sorted(rows, key=lambda row: row["max_abs_delta_p"], reverse=True)[:5]}

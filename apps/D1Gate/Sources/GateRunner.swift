@@ -46,7 +46,7 @@
 //                tower bundle: the Mac)
 //   warm         one decision (D1_WARM, default card_refund): the first calls after the load, scored, not in the bar
 //   red          round 4's five red arms: every perturbed request against its base record's questions on this graph
-//                (FACTS §7 inverted: an arm is red when an argmax moves on a non-near-tie question, max |dp| > 0.02 or
+//                (the bar inverted: an arm is red when an argmax moves on a non-near-tie question, max |dp| > 0.02 or
 //                the mean of its rows' mean |dp| > 0.002), and the graph's |dp| against the provider's on the same rows
 //   e2e_images   the picture records (D1_IMAGE_IDS / D1_IMAGE_LIMIT): each file decoded and cut here (D1Pixels), every
 //                crop through the tower, the decoder on the image rows; per question the ids / groups / keys against the
@@ -1046,7 +1046,7 @@ actor GateRunner {
     // MARK: - red arms
 
     /// Round 4's red arms on this graph: each perturbed row against its base row (the same question of the base record,
-    /// direct on this graph), FACTS §7 inverted; and the graph's |dp| against the provider's on the same rows.
+    /// direct on this graph), the bar inverted; and the graph's |dp| against the provider's on the same rows.
     func stageRed() async -> [String: Any] {
         guard let d1, let fx = fixtures else { return noDecider("red") }
         var base: [String: [String: [Double]]] = [:]
@@ -1126,7 +1126,7 @@ actor GateRunner {
         line("red: \(red)/\(arms.count) arms red in \(f1(seconds(since: c0))) s")
         return ["arms": arms, "base_runs": baseRuns, "red_arms": red, "arm_count": arms.count, "arms_planned": fx.red.count,
                 "deadline_stop": cut, "seconds": seconds(since: c0),
-                "rule": "red = the perturbed rows against their base rows fail FACTS §7: (a) an argmax moves on a question "
+                "rule": "red = the perturbed rows against their base rows fail the gate's own bar: (a) an argmax moves on a question "
                     + "whose oracle top-2 margin is above 0.02, or (b) max |dp| > 0.02, or (c) the mean over the arm's rows "
                     + "of the row's mean |dp| > 0.002", "pass": allRed && !arms.isEmpty]
     }

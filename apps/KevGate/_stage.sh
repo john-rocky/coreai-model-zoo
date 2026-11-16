@@ -137,7 +137,7 @@ json.dump({"schema": "kev-gate-mac-ref/1", "sources": {k: sources[k] for k in ("
 
 def item(name, record, keep, modes, reps):
     return {"name": name, "record": record, "keep": keep, "modes": modes, "reps": reps}
-bench = {"schema": "kev-gate-bench/1", "source": "conversion/kev/timing.py items (round 5) and the r8 launch",
+bench = {"schema": "kev-gate-bench/1", "source": "conversion/kev/timing.py items (round 5) and round 8",
          "bench": [item("tv4_000:q0", "tv4_000", [0], ["direct"], 5), item("own_j03:q0", "own_j03", [0], ["direct"], 5),
                    item("own_L02:q0", "own_L02", [0], ["direct"], 5), item("own_L01:q2", "own_L01", [2], ["direct"], 5),
                    item("own_m01:first5", "own_m01", [0, 1, 2, 3, 4], ["direct", "shared"], 5),

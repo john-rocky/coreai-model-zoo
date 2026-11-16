@@ -5,7 +5,7 @@
   rectangles and a green sign whose word "EXIT" is built from polygons, so no font file is
   involved. Same every run, byte for byte.
 * `saturn_v.orig.jpg`, `earth.orig.jpg` — NASA photographs (public domain, NASA media guidelines),
-  fetched from the images-api.nasa.gov search the way the round-1 launch names it: the item whose
+  fetched from the images-api.nasa.gov search: the item whose
   `nasa_id` matches, `links[0].href`. Nothing here shows a person.
 
 Every image is then resized to 448x448 with Pillow BICUBIC (`*.448.png`): the thumbnail-only

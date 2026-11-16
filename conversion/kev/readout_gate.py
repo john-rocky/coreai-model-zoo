@@ -25,7 +25,7 @@ unperturbed (`base`, compared bit for bit with the gate's run of the same row) a
                 by the length difference
   instr_negate  the id of " not" (the base tokenizer, recorded) inserted right after the <q> delimiter
                 (248061); the readout indices shift by one
-Per arm: argmax changes against the unperturbed run / rows, and max |dp| against it. Red (FACTS §7: the perturbed
+Per arm: argmax changes against the unperturbed run / rows, and max |dp| against it. Red (the perturbed
 runs fail the gate's own bar against the unperturbed ones) = an argmax moves on a question whose oracle top-2 margin
 is above 0.02, or max |dp| > 0.02, or the mean of the runs' mean |dp| > 0.002. (The v1 run of 2026-10-03 was scored
 with a stricter rule written before it, argmax AND max |dp|; both are in the transcript.)
@@ -833,7 +833,7 @@ V2_NEGATIONS = (
     ("tv4x_legacy_holdout_00", 0, "Is the refund authorized?", "Is the refund not authorized?"),
     ("own_t05", 2, "Would the reviewer recommend this jacket?", "Would the reviewer not recommend this jacket?"),
 )
-RED_RULE_FACTS7 = ("red = the perturbed runs against the unperturbed ones fail the gate's own bar (FACTS §7): (a) an "
+RED_RULE_FACTS7 = ("red = the perturbed runs against the unperturbed ones fail the gate's own bar: (a) an "
                    "argmax moves on at least one question whose oracle top-2 margin is above 0.02, or (b) max |dp| > "
                    "0.02, or (c) the mean over runs of the run's mean |dp| > 0.002")
 
@@ -912,7 +912,7 @@ def write_red_v2(recs: dict, path: Path) -> dict:
 
 def score_red(head, recs: dict, red_doc: dict, rarr: dict, gate_arrays: dict) -> dict:
     """Every arm of a red rows file: the perturbed runs against the unperturbed runs of the same process, under the
-    FACTS §7 rule (and the v1 rule, kept for the v1 transcript); the unperturbed runs against the gate's runs."""
+    current red rule (and the v1 rule, kept for the v1 transcript); the unperturbed runs against the gate's runs."""
     base_bits = []
     for x in red_doc["runs"]:
         if x["variant"] != "base":

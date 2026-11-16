@@ -23,7 +23,7 @@ Two ways to make the fp32-compute encoder quantizable (``--struct``):
          AttributeError). ``ToLinear`` (below) is the same module with the upcast spelled
          ``.to(torch.float32)`` (same numbers), which the ``module_state_spec`` on it can catch:
          bf16 scales, dequant -> bf16 -> cast fp32 in the graph.
-  lin32  the launch fallback: the projections hold the checkpoint's bf16 values upcast to fp32
+  lin32  the fallback: the projections hold the checkpoint's bf16 values upcast to fp32
          (exact) in plain ``F.linear`` (``compute_fp32`` off, ``residual_fp32`` on), so the
          quantizer sees each weight directly: fp32 scales, dequant -> fp32.
 Either way the census after quantization asserts that exactly the 7 x n_layers projection weights

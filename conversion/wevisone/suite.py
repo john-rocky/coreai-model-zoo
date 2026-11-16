@@ -241,7 +241,7 @@ def score_pair(ref: dict, cand: dict, rows: list[dict]) -> dict:
 
 
 def bar_from_wobble(wobble: dict) -> dict:
-    """The looser of the launch line and twice the fp32-vs-bf16 wobble."""
+    """The looser of the preset line and twice the fp32-vs-bf16 wobble."""
     out = {}
     for key, metric in (("box", "box_found"), ("count", "count_exact"), ("point", "point_found")):
         agree = wobble.get(metric)
@@ -324,8 +324,8 @@ def render_md(out: dict) -> str:
 
     lines = ["# SUITE — WeVisOne-VL-2B structured outputs (Core AI r1)", "",
              f"Scoring code: `conversion/wevisone/suite.py` sha256 `{out['script_sha256']}`.", "",
-             "Bars (the looser of the launch line and twice the O2-448 fp32-vs-bf16 wobble):", "",
-             "| metric | launch line | 2x wobble | bar |", "|---|---|---|---|"]
+             "Bars (the looser of the preset line and twice the O2-448 fp32-vs-bf16 wobble):", "",
+             "| metric | preset line | 2x wobble | bar |", "|---|---|---|---|"]
     for k in ("box", "count", "point"):
         b = out["bar"][k]
         lines.append(f"| {k} | ≥ {f(b['line'])} | {f(b['twice_wobble'])} | ≥ {f(b['bar'])} |")

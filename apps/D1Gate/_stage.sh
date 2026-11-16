@@ -440,7 +440,7 @@ def item(name, kind, record, questions, shared, reps=5, rest=0):
     qs = None if questions is None else ([names[0]] if questions == "first" else questions)
     assert qs is None or all(q in names for q in qs), (name, qs)
     return {"name": name, "kind": kind, "record": record, "questions": qs, "shared": shared, "reps": reps, "rep_rest_s": rest}
-bench = {"schema": "d1-gate-bench/1", "source": "conversion/d1/timing.py ITEMS (round 7) and the r8 launch: warm-up 1 + 5 reps, "
+bench = {"schema": "d1-gate-bench/1", "source": "conversion/d1/timing.py ITEMS (round 7) and round 8: warm-up 1 + 5 reps, "
          "60 s before every item, nominal start; state_3_4k (one decision past 20 s of back-to-back GPU work) rests 30 s "
          "between its decisions",
          "bench": [item("one_question", "text", "card_refund", ["refund"], False),

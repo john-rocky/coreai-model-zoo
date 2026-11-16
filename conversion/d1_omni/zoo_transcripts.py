@@ -68,14 +68,14 @@ OUT_DIR = repo_root() / "models" / "d1-omni-600m"
 CHECK_OUT = WORK / "results" / "zoo_fixtures_check.json"
 NAMES = ("eager", "runtime-decide", "runtime-vision", "runtime-audio", "swift", "strip", "timing-mac", "forms", "iphone")
 LANE = "$ZOO_WORK_ROOT/_d1_omni (the lane: every source path below is relative to it)"
-SHIP_BAR = {"name": "FACTS §7 (the ship bar)", "argmax": "equal to the oracle's on every row whose oracle top-2 margin is "
+SHIP_BAR = {"name": "the ship bar", "argmax": "equal to the oracle's on every row whose oracle top-2 margin is "
             "above 0.02 (near ties reported apart)", "max_abs_dp": 0.02, "mean_row_max_abs_dp": 0.002,
             "oracle": "the publisher's model, AutoModel.from_pretrained(trust_remote_code=True), CPU, fp32: text rows after "
                       "the config.json temperature, image and audio rows the raw softmax"}
 FP32_BAR = {"name": "round 2's eager bar (fp32 against fp32)", "argmax": "every row, near ties included",
             "max_abs_dp": 2e-5, "max_abs_dlogit": 1e-3,
             "basis": "2 x the fp32 oracle's own max |dp| against the publisher's code run in float64 (eager_check.json "
-                     "bar_basis), the supervisor's ruling of 2026-10-08 round 2"}
+                     "bar_basis), set 2026-10-08 (round 2)"}
 SMALL = host.SMALL_BUCKETS
 ALL = host.ALL_BUCKETS
 
@@ -727,7 +727,7 @@ def t_forms() -> dict:
             "status": status_of(*checks), "runtime_gates": gates, "timed": timing, "export_bundles": export,
             "torch_cpu_eager": torch_fp16, "neural_engine_compiles": probes,
             "ship_form": "fp16 for all three graphs, decision buckets 64 / 128 / 256 / 512 / 1024 / 2048 / 4096 on the GPU "
-                         "(the supervisor's decision, 2026-10-08, from the speed ladder: the fastest form that passes)"}
+                         "(2026-10-08: the fastest form that passes)"}
 
 
 # =========================================================================== iPhone (round 11)

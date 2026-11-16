@@ -19,7 +19,7 @@ paired, the rows whose logits and p are equal, max |d logit|, max |d p| (None wh
 argmax changes; the summaries (argmax counts, max |dp|, the mean of the rows' max |dp|, max |dlogit|, the controls,
 the drift) before and after. A prefix file carries statistics per item (cos, max |d|, min row cos), compared as numbers.
 Status per pair: SAME (everything equal), WITHIN (every row paired, argmax counts equal and max |dp| within 1e-6: the
-launch's stop rule), DIFFERS.
+stop rule), DIFFERS.
 """
 from __future__ import annotations
 
@@ -165,7 +165,7 @@ def main() -> int:
     doc = {"schema": "d1-omni-ship-runtime-compare/1",
            "written": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
            "status": "SAME" if statuses == {"SAME"} else "WITHIN" if statuses <= {"SAME", "WITHIN"} else "DIFFERS",
-           "stop_rule": f"argmax or max |dp| differing by more than {STOP} stops the round (launch r10)",
+           "stop_rule": f"argmax or max |dp| differing by more than {STOP} stops the round",
            "set": "round 12 small buckets (L64 / L128)" if small else "round 10 ship bundles",
            "after_all_pass": all(p["after_status"] == "PASS" for p in pairs.values()),
            "pairs": pairs, "code_sha256": {"compare_ship.py": sha256_file(HERE / "compare_ship.py")}}

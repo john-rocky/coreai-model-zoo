@@ -250,7 +250,7 @@ actor GateRunner {
                       + "— on the D1Omni library",
                   "options": ["gpu": describe(DecisionGraph.gpuOptions), "ane": describe(Self.aneOptions)],
                   "build": ["configuration": Self.buildConfiguration],
-                  "bar": ["name": "FACTS §7 (conversion/d1_omni/_metrics.py SHIP_BAR)",
+                  "bar": ["name": "the ship bar (conversion/d1_omni/_metrics.py SHIP_BAR)",
                           "argmax": "every row whose oracle top-2 margin is above 0.02 (near ties counted apart)",
                           "max_abs_dp": 0.02, "mean_row_max_abs_dp": 0.002,
                           "ids": "every row's ids, markers and bucket = the publisher's", "finite": "finite logits",

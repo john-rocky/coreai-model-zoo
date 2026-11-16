@@ -31,7 +31,7 @@ the Python runtime on the same compiled graphs.
           oracle's numbers; the media prefixes as raw float32 files for the Swift side. (= runtime_check.py with a
           dump, over every bucket at once.)
   parity  `d1omni parity` (the same rows on the Swift runtime: AOT .aimodelc, and the .aimodel specialized by
-          Swift = JIT): the FACTS §7 bar against the oracle (_metrics.summarize), the wrong-pairing control (must
+          Swift = JIT): the ship bar against the oracle (_metrics.summarize), the wrong-pairing control (must
           FAIL), the Python runtime's logits / p (bit-equal rows, max |d|), JIT against AOT.
   window  one measurement window (run it under quiet_hold.py; results/timing/ranking_rule_r8.md §5): the lock must
           hold this run's label; snapshots of the lock, load, swap, GPU jobs and the busiest processes around each
@@ -47,7 +47,7 @@ the Python runtime on the same compiled graphs.
           (results/ship_swift_ref/, ship_swift_parity_{aot,jit}.json, ship_swift_ref_media/ ...).
   ship-summary  (round 10) the Swift parity on the stripped bundles in one verdict, results/ship_swift_parity.json:
           text 470 + image 46 + audio 46 rows, AOT and JIT, bit for bit against the Python runtime on the same stripped
-          AOT, the FACTS §7 bar and the controls; and the stripped against the unstripped bundles (the Python references
+          AOT, the ship bar and the controls; and the stripped against the unstripped bundles (the Python references
           of round 8 / 9 and the Swift outputs, bit for bit).
 """
 from __future__ import annotations
@@ -518,7 +518,7 @@ def cmd_parity(args) -> int:
             dp = max(dp, max(abs(p - q) for p, q in zip(r["probs"], x["probs"])))
         out["jit_vs_aot"] = {"rows": len(docs["jit"]["rows"]), "bit_equal": equal, "max_abs_dlogit": dl, "max_abs_dp": dp,
                              "first_different": first[:10]}
-    if SMALL_MODE:  # round 12: the verdict per small bucket, and the launch's file name
+    if SMALL_MODE:  # round 12: the verdict per small bucket, and its file name
         from _metrics import row_record, summarize
 
         out["buckets"] = list(PYREF_BUCKETS)
@@ -1197,7 +1197,7 @@ def _media_vs_python(swift: dict, index: dict, mode: str, arm: str) -> dict:
 def cmd_ship_summary(args) -> int:
     """Round 10: the Swift host on the stripped bundles in one verdict (results/ship_swift_parity.json): text 470 rows
     (ship_swift_parity_gate.json) + image 46 + audio 46 (ship_swift_media_{image,audio}.json and the raw parity-media
-    outputs), AOT and JIT, each against the Python runtime on the same stripped AOT, the oracle's FACTS §7 bar and the
+    outputs), AOT and JIT, each against the Python runtime on the same stripped AOT, the oracle's ship bar and the
     controls; beside it, the stripped bundles against the unstripped ones (round 8 / 9): the Python references (every
     row's marker logits, p, graph inputs and the sha256 of all its scores; every media prefix and graph output) and the
     Swift outputs, bit for bit."""
@@ -1270,7 +1270,7 @@ def cmd_ship_summary(args) -> int:
     doc = {"schema": "d1-omni-ship-swift-parity/1", "written": now(), "status": "PASS" if ok else "FAIL",
            "what": "the Swift host (apps/D1Omni d1omni parity / parity-media) on the stripped bundles (macos-ship/; AOT = "
                    "compiled/ship-h16c/, JIT = the .aimodel specialized by Swift) against the Python Core AI runtime on the "
-                   "same stripped AOT (bit for bit), the oracle (FACTS §7) and the controls; 470 rows of ref/records_ref.json "
+                   "same stripped AOT (bit for bit), the oracle (the ship bar) and the controls; 470 rows of ref/records_ref.json "
                    "(459 text + 11 media rows with the oracle's prefix) + 46 image + 46 audio rows (the Swift media path)",
            "rows_total": total, "per_kind": per_kind, "text_jit_vs_aot": text["jit_vs_aot"], "media": media,
            "stripped_vs_unstripped": invariance,

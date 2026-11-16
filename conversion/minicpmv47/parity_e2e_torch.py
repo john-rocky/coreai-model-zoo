@@ -16,7 +16,7 @@ processor ids through `host_static_inputs` (64 <|image_pad|> -> V + k, `rope_shi
            min(8, len(<P>__gen_ids)) tokens vs the oracle's greedy `<P>__gen_ids`.
   planes   the module's in-graph (T, H, W) planes on the prompt and on the rows the greedy loop fed
            vs the planes the HF rotary received (`<P>__planes`, `<P>__gen_rotary_planes`) — round 1's gate.
-  Bars (round-2 launch): top-5 4/4, cos >= 0.9999, greedy 4/4, planes 100 %.
+  Bars (round 2): top-5 4/4, cos >= 0.9999, greedy 4/4, planes 100 %.
 
     QW coreai-models/.venv/bin/python -I conversion/minicpmv47/parity_e2e_torch.py [--threads 1]
 """

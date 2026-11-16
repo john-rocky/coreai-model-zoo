@@ -24,7 +24,7 @@ probabilities (`oracle/records_oracle.json` from oracle_d1.py: the provider's co
   p4   `--red`: the five arms of `fixtures/red_arms.json` on fp32 torch, every perturbed row against its base row
        (the same question of the unperturbed record): red when (a) an argmax moves on a question whose oracle top-2
        margin is above 0.02, or (b) max |dp| > 0.02, or (c) the mean over the arm's rows of the row's mean |dp| >
-       0.002 — the gate's own bar (FACTS §7). The arms show whether the model itself moves; readout_gate.py asks the
+       0.002 — the gate's own bar. The arms show whether the model itself moves; readout_gate.py asks the
        same of the graph.
   merge   the stage files -> results/parity_decoder_torch.json
 
@@ -81,7 +81,7 @@ WIDTHS = (16, 32, 64)
 BAR = {"argmax_equal": "every question, near-ties included", "max_abs_dp": 1e-4, "min_pos_cos": 0.9999,
        "p2_max_abs_diff": 1e-4, "p2_max_abs_diff_toy": 1e-5}
 RED_BAR = {"max_abs_dp": 0.02, "mean_of_run_mean_abs_dp": 0.002, "near_tie_top2_margin": 0.02}
-RED_RULE = ("red = the perturbed rows against their base rows fail the gate's own bar (FACTS §7): (a) an argmax moves "
+RED_RULE = ("red = the perturbed rows against their base rows fail the gate's own bar: (a) an argmax moves "
             "on a question whose oracle top-2 margin is above 0.02, or (b) max |dp| > 0.02, or (c) the mean over the "
             "arm's rows of the row's mean |dp| > 0.002")
 P2_ROWS = (("tv4_000", "answer"), ("card_refund", "team"), ("long_34k", "refunded_twice"))
@@ -434,7 +434,7 @@ def build_toy_red_oracle(seed: int, toy_oracle: Path, out_json: Path) -> dict:
 
 
 def score_red_arm(arm: dict, probs: dict, base_probs: dict, oracle_recs: dict) -> dict:
-    """One arm: every row's perturbed p against its base row's p (both from the same instrument) -> the FACTS §7 rule."""
+    """One arm: every row's perturbed p against its base row's p (both from the same instrument) -> RED_RULE."""
     items = []
     for i, row in enumerate(arm["rows"]):
         rid, k = row["base"]

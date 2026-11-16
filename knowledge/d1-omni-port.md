@@ -31,7 +31,7 @@
 - The publisher pads a request's questions to its longest row; one question alone and in its request differ by up to 4.9e-6 in p (round 2; local `ref/records_ref.json` `checks.batch_invariance`).
 - A wrong mask on a media row can leave p nearly unchanged when one option is saturated (keep_right all ones: |Δp| 0.0084) while the marker logits move by 0.04 to 0.74: gate the media rows on logits too (round 2; `gate-d1-omni-600m-eager.json` `red_arms`).
 - The largest fp32 activation is 2,069, the residual of one text position in layers 10–14 (a massive activation written by layer 9's MLP): 31.7× below fp16's 65,504; nothing is non-finite (round 2; `gate-d1-omni-600m-eager.json` `activation_range`).
-- The ship bar for every reduced-precision form is FACTS §7: argmax on every row whose oracle top-2 margin is above 0.02 (near ties reported apart), max |Δp| ≤ 0.02, mean of the rows' max |Δp| ≤ 0.002 (round 3; `gate-d1-omni-600m-runtime-decide.json` `bar`).
+- The ship bar for every reduced-precision form: argmax on every row whose oracle top-2 margin is above 0.02 (near ties reported apart), max |Δp| ≤ 0.02, mean of the rows' max |Δp| ≤ 0.002 (round 3; `gate-d1-omni-600m-runtime-decide.json` `bar`).
 - Every runtime gate carries a wrong-pairing control (each row judged against another row's oracle) that must fail, and does on every run (round 3–12; `gate-d1-omni-600m-runtime-decide.json`).
 
 ## The graph's form

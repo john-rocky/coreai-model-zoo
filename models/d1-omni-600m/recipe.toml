@@ -122,7 +122,7 @@ notes = [
   "762,255,228 (L64 to L2048: ios-h19p/ has no L4096); vision 188,218,374 / 188,303,983; audio 224,920,212 to",
   "225,561,282 / 225,226,318 to 225,867,256 (<work>/_d1_omni/hf_staging/d1-omni-600M-CoreAI/metadata.json `staged`).",
   "ios/ holds the same .aimodel files as macos/; each phone specializes them at load.",
-  "Gates against the publisher's model in fp32 on the CPU (FACTS §7: argmax on every row whose oracle top-2 margin is",
+  "Gates against the publisher's model in fp32 on the CPU (the ship bar: argmax on every row whose oracle top-2 margin is",
   "above 0.02, max |dp| 0.02, mean of the rows' max |dp| 0.002): gate-d1-omni-600m-runtime-decide.json (L64 ... L4096),",
   "-runtime-vision.json, -runtime-audio.json, -swift.json, -strip.json; the torch module before any export:",
   "-eager.json; every form measured (fp32, wfp16, fp16, int8, the Neural Engine): -forms.json; time per decision on the",

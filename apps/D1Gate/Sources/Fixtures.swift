@@ -18,7 +18,7 @@
 //   bench.json        the timed items (round 7's: one_question, three_shared, three_direct, state_3_4k, image_384px) and
 //                     the AOT asset's subset; bench_pf<S>.json the same items for another chunk width (D1_BENCH)
 //
-// The bar (FACTS §7, readout_gate.py BAR, unchanged): argmax = the oracle's on every question whose oracle top-2 margin
+// The bar (readout_gate.py BAR, unchanged): argmax = the oracle's on every question whose oracle top-2 margin
 // is above 0.02 (the near-ties counted apart); max |dp| <= 0.02 over every option of every question; the mean over runs
 // (one run = one question) of the run's mean |dp| <= 0.002; and, as gate_swift.py asks, every row's ids (the picture
 // slots mapped back to <image>), readout groups and keys equal the oracle's, every hidden value finite, no row all zero.

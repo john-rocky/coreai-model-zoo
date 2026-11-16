@@ -11,7 +11,7 @@ trimmed from). The one non-trivial bit is the BIG UNTIED head (vocab 166144,
 
 Arch parity is proven on CPU (`_smoke/test_nanbeige_parity.py`: top-1 6/6,
 cosine 1.0, Δ=0 vs the native HF `LlamaForCausalLM` oracle). After exporting,
-the FIRST on-device gate is the ANE-smoke (see NANBEIGE4_1_3B_KICKOFF.md): a
+the FIRST on-device check is the ANE-smoke: a
 plain-Llama GQA is the most ANE-likely shape, but the stock static engine + the
 untied big head must be confirmed to place on ANE, not GPU-fallback — that is
 the whole reason this model (over a hybrid/MoE one) was picked.

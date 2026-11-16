@@ -108,7 +108,7 @@ RULE = {
     ],
     "choose": "among the layer and kind sets of steps 1-3 that meet the target, the smallest size (ties: the layer "
               "set, then the lexicographically smallest sorted list); if none, the first union of step 4 that meets "
-              "it; if none, no set (report the numbers: the ship form is the supervisor's call)",
+              "it; if none, no set (report the numbers; the ship form is chosen separately)",
     "then": "the chosen set is exported (export_decoder.py int8mix) and gated on all 434 rows with the gate's own bar, "
             "then on the 130 held-out rows (never used to choose)",
 }

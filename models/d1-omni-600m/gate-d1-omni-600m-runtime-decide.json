@@ -55,7 +55,7 @@
   }
  ],
  "bar": {
-  "name": "FACTS §7 (the ship bar)",
+  "name": "the ship bar",
   "argmax": "equal to the oracle's on every row whose oracle top-2 margin is above 0.02 (near ties reported apart)",
   "max_abs_dp": 0.02,
   "mean_row_max_abs_dp": 0.002,

@@ -262,7 +262,7 @@ def main() -> int:
               "records": records, "rows": subset_rows, "images": media_images, "clips": media_clips,
               "sources": sources}
     oracle = {"schema": "d1omni-gate-oracle-slim/1",
-              "bar": {"name": "FACTS §7", "argmax": "every row whose oracle top-2 margin is above 0.02 (near ties apart)",
+              "bar": {"name": "the ship bar", "argmax": "every row whose oracle top-2 margin is above 0.02 (near ties apart)",
                       "max_abs_dp": 0.02, "mean_row_max_abs_dp": 0.002,
                       "mean_definition": "the mean over rows of each row's max |dp| (conversion/d1_omni/_metrics.py)"},
               "rows": oracle_rows,

@@ -13,7 +13,7 @@
 //                        requests direct and shared) and `bench_aot` (the AOT asset's subset)
 //   oracle_slim_4b.json / mac_ref_4b.json   the same two references for Kev-4B, the one record load_4b decides
 //
-// The bar (conversion/kev/readout_gate.py BAR, FACTS §7, unchanged): per question, argmax = the oracle's on every
+// The bar (conversion/kev/readout_gate.py BAR, unchanged): per question, argmax = the oracle's on every
 // question whose oracle top-2 margin is above 0.02 (the near-ties are counted apart); max |dp| <= 0.02 over every option
 // of every question; the mean over runs (one run = one question) of the run's mean |dp| <= 0.002; and here, as the
 // Swift gate (gate_swift.py G1) also asks: every row's ids, <decide> / </opt> indices and keys equal the oracle's, and

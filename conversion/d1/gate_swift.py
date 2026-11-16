@@ -50,7 +50,7 @@ r6b_py_check.sh / r6b_py_images.sh; these sections only read them):
   real-graph     every text record, AOT: G1 ids / slot / readout groups = render_ids.json and the provider's oracle, G2 every
                  row's hidden sha256 = round 4's readout gate and decide.py check, G3 p bits = both and the response bytes
                  = decide.py check (361 records, the refusal's text), G4 shared = direct (hidden bits) and = decide.py's
-                 shared, prepared = shared (`d1 prepare-test`), G5 the reset re-run, G6 finite; FACTS §7's bar on the Swift
+                 shared, prepared = shared (`d1 prepare-test`), G5 the reset re-run, G6 finite; the bar on the Swift
                  p against the provider's fp32 oracle directly
   real-e2e       every picture record from its PNG (ImagePixels -> tower -> decoder), AOT: the crops' four inputs = the
                  vision_host inputs of the HF tower oracle (sha256), every crop's tower output = round 5b's tower gate and
@@ -1306,7 +1306,7 @@ def p_bits(ps: list[float]) -> list[str]:
 
 
 def bar_vs_oracle(pairs: list[tuple[str, list[float], list[float]]]) -> dict:
-    """FACTS §7 on (question, p, oracle p): (a) argmax equal on every question whose oracle top-2 margin is above 0.02,
+    """The bar on (question, p, oracle p): (a) argmax equal on every question whose oracle top-2 margin is above 0.02,
     (b) max |dp| <= 0.02 over every option, (c) the mean over questions of the question's mean |dp| <= 0.002."""
     rows = []
     for q, p, po in pairs:
@@ -1696,7 +1696,7 @@ def real_main(names: list[str], out_path: Path | None) -> int:
                  "gate": "apps/D1 on the model's assets (decoder d1_3b_decode_fp16_pf16, tower d1_3b_vision_fp16w32; AOT, "
                          "and the .aimodel specialized by Swift on a subset) vs the Python runtime's records of the same "
                          "assets (round 4's readout gate, decide.py check / run, round 5b's e2e and tower gates): exact "
-                         "(ids, hidden sha256, p bits, tower outputs, response bytes); FACTS §7's bar on the Swift p against "
+                         "(ids, hidden sha256, p bits, tower outputs, response bytes); the bar on the Swift p against "
                          "the provider's fp32 oracle",
                  "bar": FACTS_BAR, "env": {"python": sys.version.split()[0], "numpy": np.__version__},
                  "package": package_record(), "sections": {}}

@@ -36,7 +36,7 @@ Two more sets for the Swift host's pixel gate (`gate_swift_pixels.py`); neither 
                quality 95) whose EXIF Orientation is 6, so a reader that applies the tag turns it another 90 degrees
                clockwise (the card's `load_image` = `ImageOps.exif_transpose` then `convert("RGB")`: img01 rotated
                180 degrees); <id>_rot90_o6.png = exactly those decoded and transposed pixels, lossless, no EXIF, to
-               tell a decoder's difference from an orientation error. img01 (384x384, the pair the launch names) is
+               tell a decoder's difference from an orientation error. img01 (384x384) is
                square, so its crop plan cannot show a wrong orientation; img04 (640x480 -> stored 480x640) can.
 
 The drawing is deterministic: a re-run reproduces each picture's raw-RGB sha256 (the PNG bytes depend on zlib, the

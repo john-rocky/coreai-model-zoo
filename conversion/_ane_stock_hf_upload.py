@@ -37,7 +37,7 @@ def main() -> None:
         assert (d / "metadata.json").exists() and (d / "tokenizer").is_dir(), f"stage incomplete: {d}"
     api = HfApi()
     who = api.whoami()["name"]
-    assert a.repo.split("/")[0] == who, f"repo owner is not {who}: {a.repo} (other people's repos take a PR + user GO)"
+    assert a.repo.split("/")[0] == who, f"repo owner is not {who}: {a.repo} (other people's repos take a PR)"
 
     if a.section:
         section = Path(a.section).read_text()

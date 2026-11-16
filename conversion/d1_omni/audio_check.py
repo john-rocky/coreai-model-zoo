@@ -17,7 +17,7 @@ digital silence), whose reference is the publisher's Audio run here.
 Stage mel (the publisher's waveform() + MelFrontend vs mel_host):
   (a) mel_torch == the publisher's MelFrontend bit for bit, frames equal (and the publisher's mel == the oracle's
       hooked mel bit for bit on the 16 fixture clips); a float-sample input == the int16 input
-  (b) mel_numpy (float64) vs (a): max |d| (the launch's 1e-4 recorded per clip); beside it the same function check
+  (b) mel_numpy (float64) vs (a): max |d| (1e-4, recorded per clip); beside it the same function check
       (mel_numpy float64 vs mel_torch run in float64: <= 1e-6) and each clip's fp32 floor (the publisher's fp32 mel vs
       its float64 run); mel_numpy in float32 recorded too
   the filterbank: mel_host.slaney_filterbank == the publisher's bit for bit; mel_filters_128x257_f32.bin bytes + sha256
@@ -37,7 +37,7 @@ Stage runtime (Core AI Python runtime, the AOT .aimodelc of each bucket, explici
         cos, min row cos; drift = max |d| between --repeats calls; the NumPy mel's prefix beside it
   (ii)  end to end: every audio row (card_audio + aud_01..03: 10, aud_04..aud_15: 36) with this prefix (torch mel and
         NumPy mel) -> host.graph_inputs at the row's bucket -> the wfp16 decision bundle of that bucket -> marker logits
-        -> probabilities vs the reference (_metrics.SHIP_BAR, FACTS §7); beside it the reference's own prefix through the
+        -> probabilities vs the reference (_metrics.SHIP_BAR); beside it the reference's own prefix through the
         same bundles, and a control with the next clip's prefix (its rows cut or repeated to the row's P): must FAIL
 Cosines are float64.
 
@@ -73,7 +73,7 @@ FIXTURES_AUDIO_SHA256 = "18b4ddff73a8044b63f949c69245210e1af8a26c48c5fdb785fd91a
 PREFIX_BAR = {"cos": 0.999999}
 FLOAT64_BAR = 1e-6          # D1Audio float64 vs the publisher's Audio float64, max |d| of the prefix
 PAD_BAR = 1e-5              # the same clip in a larger bucket, valid prefix rows
-MEL_NUMPY_BAR = 1e-4        # the launch's bar for mel_numpy vs mel_torch (recorded per clip)
+MEL_NUMPY_BAR = 1e-4        # the bar for mel_numpy vs mel_torch (recorded per clip)
 MEL_SAME_FUNCTION_BAR = 1e-6
 FP16_MAX = 65504.0
 # measured-only edge clips: (id, what, [(source clip, start, stop) ...] or "silence:<samples>")

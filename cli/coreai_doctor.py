@@ -144,7 +144,7 @@ SYMLINKED_ASSET = rule(
     scope="asset", severity="fatal",
     title="asset path is a symlink — Swift AIModel(contentsOf:) does not follow symlinks and "
           "cannot resolve the per-arch delegates directory (failedToSpecialize)",
-    source="GLM_IMAGE_KICKOFF.md 'Swift Phase 3' gotcha 2",
+    source="found while porting GLM-Image to Swift",
 )
 
 AOTC_LOAD_OPTIONS = rule(
@@ -153,7 +153,7 @@ AOTC_LOAD_OPTIONS = rule(
     scope="asset", severity="requires",
     title="an AOT .aimodelc must be loaded with SpecializationOptions.default() or .cpuOnly() — "
           "asking for preferredComputeUnitKind re-specializes the baked graph on device",
-    source="GLM_IMAGE_KICKOFF.md 'Swift Phase 3' gotcha 1; "
+    source="found while porting GLM-Image to Swift; "
            "knowledge/aot-and-specialization.md 'expectFrequentReshapes on a FIXED-shape graph'",
 )
 

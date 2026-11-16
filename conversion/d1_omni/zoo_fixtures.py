@@ -225,7 +225,7 @@ def build() -> dict:
                              "temperature_key from config.json (type default 1.0); image and audio rows no temperature; "
                              "noul reported as [yes, no] = [true, false] (the model's order reversed)",
             "argmax": "the option key at argmax_index of probabilities (noul: 'true' or 'false')",
-            "near_tie": "the oracle's top-2 probability margin <= 0.02 (FACTS §7: argmax compared apart)",
+            "near_tie": "the oracle's top-2 probability margin <= 0.02 (argmax compared apart)",
             "official_answer": "the publisher's response for this question (`system_one` answer shape)",
             "qtype": QTYPE,
         },

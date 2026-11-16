@@ -1123,14 +1123,14 @@ def main() -> int:
                      "gates": {"python_runtime_vs_unstripped": STRIP_COMPARE, "swift_parity": SWIFT_SHIP},
                      "host_swift": host_swift}} if SHIP_MODE else {}),
         **({"small": {"what": "round 13 (--with-small): the decision graph at L64 / L128 (round 12: exported, stripped into "
-                              "macos-ship-small/, AOT in compiled/ship-h16c/ and ship-h19p/), added to the ship form by the "
-                              "supervisor on 2026-10-08; a host routes a row by host.ALL_BUCKETS",
+                              "macos-ship-small/, AOT in compiled/ship-h16c/ and ship-h19p/), added to the ship form on "
+                              "2026-10-08; a host routes a row by host.ALL_BUCKETS",
                       "buckets": list(host.SMALL_BUCKETS),
                       "gates": {"python_runtime_vs_unstripped": SMALL["compare"], "swift_parity": SMALL["swift_ship"],
                                 "audio_e2e_all_buckets": SMALL["audio_e2e"]},
                       "not_run": "the Swift host on the 9 audio rows of 128 positions or fewer at L64 / L128 (the Python "
                                  "runtime ran them: audio_e2e_all_buckets)"}} if SMALL_MODE else {}),
-        **({"final": {"what": "round 14 (--final): the form to upload. README.md is the card checked by the supervisor "
+        **({"final": {"what": "round 14 (--final): the form to upload. README.md is the card "
                               "(card/README.md in the lane, byte for byte); ios-h19p/ leaves out the graphs listed under "
                               "not_in_ios_h19p; the values listed under edits were rewritten or removed so that no file "
                               "names a measured-only source or a path on the converting machine; checks.final_scans",
