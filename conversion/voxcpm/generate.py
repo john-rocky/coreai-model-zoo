@@ -14,6 +14,7 @@ import argparse
 import glob
 import os
 import sys
+import tempfile
 import wave
 
 import numpy as np
@@ -117,7 +118,7 @@ def main():
     g = VoxCPMGen()
     if a.reproduce_oracle:
         wav, _ = g.generate("Hello world, this is a test.", seed=0, max_len=6, min_len=999)
-        SCRATCH = "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/45e9e394-d51b-410b-ac9c-7cf0fe60195f/scratchpad"
+        SCRATCH = os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "voxcpm_scratch")
         ref = np.load(os.path.join(SCRATCH, "oracle_ref.npz"))["wav__0"].reshape(-1)
         n = min(len(wav), len(ref))
         c = torch.nn.functional.cosine_similarity(wav[:n], torch.tensor(ref[:n]), dim=0).item()

@@ -4,6 +4,8 @@ Run in .venv-chatterbox. Default voice (conds.pt), fixed text, seeded. Saves:
   speech_tokens (T3 AR output), and the reference 24 kHz wav.
 Also dumps the T3 hp config + component module trees for the export."""
 import inspect
+import os
+import tempfile
 import numpy as np
 import torch
 import torchaudio
@@ -18,7 +20,7 @@ class _NoWatermark:
         return wav
 perth.PerthImplicitWatermarker = _NoWatermark
 
-OUT = "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/12092699-84bf-47c0-ab23-e00f8fa504b0/scratchpad/chatterbox_oracle"
+OUT = os.path.join(os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "chatterbox_scratch"), "chatterbox_oracle")
 TEXT = "The capital of France is Paris."
 SEED = 0
 

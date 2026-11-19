@@ -14,6 +14,7 @@ import glob
 import os
 import struct
 import sys
+import tempfile
 
 import numpy as np
 import torch
@@ -82,8 +83,8 @@ def main():
     raw = cos(my_wav[:n], off_wav[:n])
     mag = cos(magspec(my_wav[:n]), magspec(off_wav[:n]))
 
-    sp = ("/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/"
-          "a4149fdc-581b-493d-b5b4-23758b780150/scratchpad")
+    sp = (os.environ.get("SCRATCH")
+          or os.path.join(tempfile.gettempdir(), "voxcpm_scratch"))
     os.makedirs(sp, exist_ok=True)
     mp, op = os.path.join(sp, "voxcpm2_mine.wav"), os.path.join(sp, "voxcpm2_official.wav")
     write_wav(mp, my_wav.numpy()); write_wav(op, off_wav.numpy())

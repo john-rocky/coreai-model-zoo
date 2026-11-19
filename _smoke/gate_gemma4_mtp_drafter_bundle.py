@@ -9,11 +9,12 @@ over the sampled cases and mean logits cos >= 0.99.
 Run: .venv/bin/python ../coreai-models-community/_smoke/gate_gemma4_mtp_drafter_bundle.py
 """
 import asyncio
+import os
 import sys
 
 import numpy as np
 
-EXTRACT = "/Users/majimadaisuke/code/litertlm-convert/out/gemma4e2b_extract"
+EXTRACT = os.path.expanduser("~/code/litertlm-convert/out/gemma4e2b_extract")
 BUNDLE = "exports/gemma4_e2b_mtp_drafter"
 MAX_SEQ = 1024
 N_CASES = 10

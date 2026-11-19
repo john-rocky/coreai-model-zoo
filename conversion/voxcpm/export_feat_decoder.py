@@ -13,6 +13,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -26,7 +27,7 @@ from feat_decoder import load_feat_decoder  # noqa: E402
 _macos._EXTERNALIZE_SPECS = [s for s in _macos._EXTERNALIZE_SPECS
                              if s.composite_op_name not in {"scaled_dot_product_attention", "rope"}]
 ART = Path(__file__).resolve().parent / "artifacts"
-SCRATCH = "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/45e9e394-d51b-410b-ac9c-7cf0fe60195f/scratchpad"
+SCRATCH = os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "voxcpm_scratch")
 
 
 def _du(p):

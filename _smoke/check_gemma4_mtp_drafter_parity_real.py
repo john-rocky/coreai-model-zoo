@@ -9,6 +9,7 @@ PASS: argmax agreement >= 90%, mean logits cos >= 0.995, proj cos >= 0.995.
 
 Run: .venv/bin/python ../coreai-models-community/_smoke/check_gemma4_mtp_drafter_parity_real.py
 """
+import os
 import sys
 
 import numpy as np
@@ -22,7 +23,7 @@ from coreai_models.models.macos.gemma4_mtp_drafter import (
     load_transplant,
 )
 
-EXTRACT = "/Users/majimadaisuke/code/litertlm-convert/out/gemma4e2b_extract"
+EXTRACT = os.path.expanduser("~/code/litertlm-convert/out/gemma4e2b_extract")
 N_SLOTS = 15
 HD_MAX = 512
 

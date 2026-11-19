@@ -7,13 +7,14 @@ import asyncio
 import glob
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
 import torch
 
 ART = Path(__file__).resolve().parent / "artifacts"
-SCRATCH = "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/45e9e394-d51b-410b-ac9c-7cf0fe60195f/scratchpad"
+SCRATCH = os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "voxcpm_scratch")
 REF = np.load(os.path.join(SCRATCH, "oracle_ref.npz"))
 NL, NKV, HD, CL = 24, 2, 64, 512
 

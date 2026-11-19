@@ -16,6 +16,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -94,7 +95,7 @@ async def main():
     if a.which == "base":
         import engine_generate as eg
         REF = np.load(os.path.join(
-            "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/45e9e394-d51b-410b-ac9c-7cf0fe60195f/scratchpad",
+            os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "voxcpm_scratch"),
             "oracle_ref.npz"))
         emb = torch.tensor(REF["prefill_base.in_inputs_embeds__0"]).to(DT)
         gpu = rt.SpecializationOptions.from_preferred_compute_unit_kind(rt.ComputeUnitKind.gpu())

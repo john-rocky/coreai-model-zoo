@@ -13,7 +13,9 @@ Run (in the coreai venv WITH chatterbox installed via uv):
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -69,8 +71,8 @@ def main():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-dir", default="exports")
-    ap.add_argument("--oracle", default="/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/"
-                    "12092699-84bf-47c0-ab23-e00f8fa504b0/scratchpad/chatterbox_oracle.npz")
+    ap.add_argument("--oracle", default=os.path.join(os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "chatterbox_scratch"),
+                    "chatterbox_oracle.npz"))
     args = ap.parse_args()
     out_dir = Path(args.out_dir)
 

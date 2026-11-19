@@ -18,6 +18,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 
 os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
 from pathlib import Path  # noqa: E402
@@ -29,8 +30,8 @@ SRC = "openbmb/MiniCPM5-1B"
 BUNDLE = (Path.home() / "code/coreai/coreai-models/exports/minicpm5-1b-b32-20260909"
           / "minicpm5_1b_minicpm5_int8sym_b32_dynamic")            # what coreai.llm.export wrote
 PUBLISHED_NAME = "minicpm5_1b_int8"                                # what the repo calls it (unchanged)
-STAGE = Path("/private/tmp/claude-501/-Users-majimadaisuke-code-coreai-coreai-models-community"
-             "/f2dbfa48-1d05-4cdd-a4eb-3302f5e4fb03/scratchpad/minicpm5_1b_hf_stage")
+STAGE = Path(os.environ.get("MINICPM5_HF_STAGE")
+             or os.path.join(tempfile.gettempdir(), "minicpm5_hf_stage"))
 COMMIT = ("Re-export int8 per-block-32: the per-channel bundle had dead LM-head rows from vocab "
           "id ~65024 up (never emitted <|im_end|>)")
 

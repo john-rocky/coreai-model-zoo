@@ -2,18 +2,20 @@
 + the patched-eager full pipeline vs the oracle wav (patch is lossless). Run in the coreai venv
 (chatterbox installed via uv)."""
 import asyncio
+import os
 import numpy as np
 import torch
 import torch.nn.functional as F
 
 import coreai.runtime as rt
 import sys
+import tempfile
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # conversion/
 from _paths import exports_dir  # noqa: E402
 
 EXPORTS = str(exports_dir())
-ORACLE = "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/12092699-84bf-47c0-ab23-e00f8fa504b0/scratchpad/chatterbox_oracle.npz"
+ORACLE = os.path.join(os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "chatterbox_scratch"), "chatterbox_oracle.npz")
 
 
 def patch():

@@ -11,18 +11,18 @@
 # thermal state, so block ordering measures the order, not the engines.
 set -u
 
-ET_ROOT=/Users/majimadaisuke/code/et-pr/executorch
+ET_ROOT="$HOME/code/et-pr/executorch"
 SOLO=$ET_ROOT/cmake-out/examples/models/muse-glimmer/solo_runner
 PTE_DIR=$(ls -d ~/.cache/huggingface/hub/models--meta-models--Muse-Glimmer-30B-ExecuTorch-PTE/snapshots/*)
 VARIANT=muse-glimmer-k-quant-17G-128K-text-solo-metal
 PTE=$PTE_DIR/$VARIANT/$VARIANT.pte
 TOK=$(ls -d ~/.cache/huggingface/hub/models--meta-models--Muse-Glimmer-30B/snapshots/*)/tokenizer.json
 
-CA_ROOT=/Users/majimadaisuke/code/coreai/coreai-models
+CA_ROOT="$HOME/code/coreai/coreai-models"
 RUNNER=$CA_ROOT/.build/release/llm-runner
 BUNDLE=$CA_ROOT/exports/muse_glimmer_30b_decode_int4hu_block32_sym
 
-SCRATCH=/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/1022b3b8-66ba-4bd4-ac8d-a534c3261ea5/scratchpad
+SCRATCH="${SCRATCH:-${TMPDIR:-/tmp}/muse_scratch}"
 MLXPY=$SCRATCH/mlx_venv/bin/python
 MLX_MODEL=mlx-community/Muse-Glimmer-30B-4bit
 

@@ -13,6 +13,7 @@ import asyncio
 import glob
 import os
 import sys
+import tempfile
 import wave
 from pathlib import Path
 
@@ -23,7 +24,7 @@ import torch.nn.functional as F
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 ART = Path(__file__).resolve().parent / "artifacts"
-SCRATCH = "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/45e9e394-d51b-410b-ac9c-7cf0fe60195f/scratchpad"
+SCRATCH = os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "voxcpm_scratch")
 NL_B, NL_R, NKV, HD, CL = 24, 6, 2, 64, 512
 SR = 16000
 AUDIO_START = 101

@@ -24,6 +24,7 @@ import glob
 import json
 import os
 import sys
+import tempfile
 
 import numpy as np
 import torch
@@ -185,8 +186,8 @@ def main():
     n = min(len(off_wav), len(my_wav))
     raw = cos(my_wav[:n], off_wav[:n])
     mag = cos(magspec(my_wav[:n]), magspec(off_wav[:n]))
-    sp = os.environ.get("SCRATCH", "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/"
-                                   "a4149fdc-581b-493d-b5b4-23758b780150/scratchpad")
+    sp = os.environ.get("SCRATCH", os.path.join(tempfile.gettempdir(),
+                                   "voxcpm_scratch"))
     os.makedirs(sp, exist_ok=True)
     my_wav.numpy().astype("float32").tofile(os.path.join(sp, "voxcpm2_e2e_mine.f32"))
     off_wav.numpy().astype("float32").tofile(os.path.join(sp, "voxcpm2_e2e_official.f32"))

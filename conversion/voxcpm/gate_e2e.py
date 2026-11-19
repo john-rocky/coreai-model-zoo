@@ -9,6 +9,7 @@ from __future__ import annotations
 import glob
 import os
 import sys
+import tempfile
 
 import numpy as np
 import torch
@@ -18,7 +19,7 @@ from minicpm4 import build_kv_state, load_backbone  # noqa: E402
 from feat_decoder import load_feat_decoder  # noqa: E402
 from feat_encoder import load_feat_encoder, load_fsq, load_linear  # noqa: E402
 
-SCRATCH = "/private/tmp/claude-501/-Users-majimadaisuke-code-coreai/45e9e394-d51b-410b-ac9c-7cf0fe60195f/scratchpad"
+SCRATCH = os.environ.get("SCRATCH") or os.path.join(tempfile.gettempdir(), "voxcpm_scratch")
 REF = np.load(os.path.join(SCRATCH, "oracle_ref.npz"))
 D = torch.float32
 BUF = 64
