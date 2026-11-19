@@ -1195,7 +1195,7 @@
       "instruction": "rounds/02.instruction.md"
     }
   },
-  "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+  "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
   "api_checks": [
     {
       "row_id": "garden_play__1_choice",

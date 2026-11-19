@@ -6,7 +6,7 @@
   "model_id": "fastino/GLiNER2.5-Decide",
   "model_rev": "7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6",
   "model_safetensors_sha256": "40a5a23ff860dc3dff426cecd1048cacdd29c648c96db209dad818e9686dc997",
-  "snapshot_dir": "/Users/majimadaisuke/code/coreai/_gliner25_decide/hf/hub/models--fastino--GLiNER2.5-Decide/snapshots/7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6",
+  "snapshot_dir": "~/code/coreai/_gliner25_decide/hf/hub/models--fastino--GLiNER2.5-Decide/snapshots/7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6",
   "oracle": {
    "package": "gliner2 2.0.0",
    "device": "cpu",

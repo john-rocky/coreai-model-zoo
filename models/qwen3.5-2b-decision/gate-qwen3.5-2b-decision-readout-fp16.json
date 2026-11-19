@@ -1,12 +1,12 @@
 {
  "schema": "coreai-letter-readout-gate/1",
  "mode": "fp16",
- "bundle": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_fp16",
+ "bundle": "<work>/exports/qwen3_5_2b_decision_decode_fp16",
  "label_style": "space-prefixed",
  "prompt_format": "decision-function",
- "fixtures": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/fixtures.json",
+ "fixtures": "<work>/results/fixtures.json",
  "fixtures_sha256": "99dd3d1a695ad53578463b09af1affa4dca428ca9413b2ea1a18415cfa5ca025",
- "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+ "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
  "max_ctx": 4096,
  "temperature": 1.0,
  "runtime": "coreai Python runtime, AOT h16c GPU asset, SpecializationOptions.default()",
@@ -41,7 +41,7 @@
  "environment": {
   "python": "3.11.13 (main, Oct  7 2025, 16:08:14) [Clang 20.1.4 ]",
   "deadline_epoch": 1790123498.0,
-  "script": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+  "script": "<work>/zoo/conversion/letter/readout_gate_letter.py",
   "script_sha256": "a3e1a4f10c9e6201195c5c40680e801d61a0efeba85d665fe1c5ec2ee43e379c"
  },
  "started_at": "2026-09-22T22:22:02+00:00",
@@ -181,7 +181,7 @@
     12.90625,
     17.28125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__1_choice.npy",
    "full_logits_sha256": "06bf30a1d44e94fa0e2f89701920f8b794a8a073594f4284e87bec7d25e74451",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -265,7 +265,7 @@
     16.859375,
     13.234375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__2_bool.npy",
    "full_logits_sha256": "66c296c185c23282725601fba1777ad344f0e42584377045e7b523c32ad7d15a",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -358,7 +358,7 @@
     16.0625,
     16.21875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__3_score.npy",
    "full_logits_sha256": "312a8e92e15e80f7969907069e2f0064ee187f7ad6b49f7520f9cd43e59d2c0c",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -457,7 +457,7 @@
     17.09375,
     13.0234375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/repair_visit__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/repair_visit__1_choice.npy",
    "full_logits_sha256": "ba5eb9d52ffe92fab0c2b120430e9b6dc3cb98153e977bb202eef4d54c22fa8d",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -545,7 +545,7 @@
     13.8046875,
     16.40625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/repair_visit__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/repair_visit__2_bool.npy",
    "full_logits_sha256": "ca21592530d6eb2a5996b1d383378abace63af82c020fcc9625d7791d92d2c64",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -638,7 +638,7 @@
     13.1484375,
     10.75
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/repair_visit__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/repair_visit__3_score.npy",
    "full_logits_sha256": "ce898495dc70ee013ac3d0d042db1bed29e9cac7fff1e52abc857357b79bc169",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -740,7 +740,7 @@
     11.3984375,
     12.0
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__1_choice.npy",
    "full_logits_sha256": "1be75c19f374c155c0e139c8c242b3516c1bd3004f05da1b9d6e1b5a82700d1b",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -832,7 +832,7 @@
     13.53125,
     16.90625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__2_bool.npy",
    "full_logits_sha256": "768e34f6b08973170d8c323989812954b6be967108b7eff610ec0742d33e230f",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -922,7 +922,7 @@
     15.46875,
     15.328125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__3_score.npy",
    "full_logits_sha256": "6ba0d7742f4becde6a872035e23f92532da67305d3ed980929daaa290281e8c0",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1023,7 +1023,7 @@
     13.2421875,
     12.03125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/seed_trial__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/seed_trial__1_choice.npy",
    "full_logits_sha256": "0e8a612aff851d308083b6740f6ce402382f7fec24ed6e908884da0a6bf9bdad",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1119,7 +1119,7 @@
     16.90625,
     13.2734375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/seed_trial__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/seed_trial__2_bool.npy",
    "full_logits_sha256": "d76d4eb6830e4354d15027b0ab4baf5c0654ffee8b7ae53561d51035c3db02fc",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1212,7 +1212,7 @@
     15.9375,
     15.1953125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/seed_trial__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/seed_trial__3_score.npy",
    "full_logits_sha256": "c7a46f7cfd98ee87dc11d390a0c053a99bd694680e482736d3d50b6968b984d5",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1320,7 +1320,7 @@
     12.9296875,
     9.6875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/bakery_line__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/bakery_line__1_choice.npy",
    "full_logits_sha256": "796bc84f24f77d1a2715277871951f981b8528517e3b752e5f58b1779b21837c",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1420,7 +1420,7 @@
     13.6015625,
     16.59375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/bakery_line__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/bakery_line__2_bool.npy",
    "full_logits_sha256": "c2d58403623f0240faab53efd026a65fa16c1c0fd120f1843790f50efebcf175",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1513,7 +1513,7 @@
     15.96875,
     14.765625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/bakery_line__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/bakery_line__3_score.npy",
    "full_logits_sha256": "0ee62643ad72cb7e456afe20846b0e89fa34a3b7409a3196f2ea3e333f03a9be",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1624,7 +1624,7 @@
     9.8046875,
     9.390625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__1_choice.npy",
    "full_logits_sha256": "18b3dc5b4017b9f635a38884ad86c8b9811d7b1346d1f6659e9767a8694c9f1d",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1728,7 +1728,7 @@
     16.671875,
     13.7890625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__2_bool.npy",
    "full_logits_sha256": "b4a81b8ed7660b1f1b3cfd3ba23524e6695305cde1b3ad61e821706c8eeacdfc",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1815,7 +1815,7 @@
     15.1875,
     16.421875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__3_score.npy",
    "full_logits_sha256": "2a28d209cfbebb6a778380af709fa2bcdc37cb566fb8eba34de3536ba0f7850d",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -1921,7 +1921,7 @@
     10.6640625,
     9.875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__1_choice.npy",
    "full_logits_sha256": "327d14984f05a8f3f20249c24a13e996a9479b047132dceebd057cf7296aefc3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2029,7 +2029,7 @@
     13.5078125,
     17.0
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__2_bool.npy",
    "full_logits_sha256": "c75a7c1f4c5b6b8ffd3e706da18257fd824047013dafffb489a275b6263405ba",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2137,7 +2137,7 @@
     11.21875,
     11.140625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__3_score.npy",
    "full_logits_sha256": "d4dcef31846c0637628cd1dbb0137f6bc4796cbf3f8df6bbe3594099725cf4fb",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2274,7 +2274,7 @@
     9.578125,
     9.890625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/evening_rehearsal__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/evening_rehearsal__1_choice.npy",
    "full_logits_sha256": "c4786b3538177d98fb874bfc9af5cf2252657c48cc39a1179f56d970cbb0eca5",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2386,7 +2386,7 @@
     13.21875,
     17.171875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/evening_rehearsal__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/evening_rehearsal__2_bool.npy",
    "full_logits_sha256": "ee3db50972009088a57990235ab11aea6d020dbc0e4b2aae9e2428ff98e24843",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2479,7 +2479,7 @@
     15.296875,
     14.78125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/evening_rehearsal__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/evening_rehearsal__3_score.npy",
    "full_logits_sha256": "c95f2d58fe35e7b1d0d86154f2ad07ab6c02028c147868ddc3b6285383cad63d",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2599,7 +2599,7 @@
     9.8359375,
     9.140625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__1_choice.npy",
    "full_logits_sha256": "67839a547610c81398ace41e9635e20c30b194a0c023d874656aefcf6afeb9a9",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2715,7 +2715,7 @@
     13.609375,
     16.828125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__2_bool.npy",
    "full_logits_sha256": "aba5f7ee9b24bc86f68531f08670d08d137802acffcab58aa32297a0244f0518",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2823,7 +2823,7 @@
     13.90625,
     13.5625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__3_score.npy",
    "full_logits_sha256": "8c0d4bdb6b59392158623e49e6d2bf3d7d4d43d41682c2801fab624e32fb6788",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -2966,7 +2966,7 @@
     9.4921875,
     10.859375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/water_check__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/water_check__1_choice.npy",
    "full_logits_sha256": "efd75d7232460cf6534593108e7ee76371b79b1ebede9b9e909fb3f9111b6e1c",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3086,7 +3086,7 @@
     14.0390625,
     16.140625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/water_check__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/water_check__2_bool.npy",
    "full_logits_sha256": "ba16c920f8e34289785ebbe12c6bea3e307a184776ea3808bb799dad0bed0714",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3173,7 +3173,7 @@
     15.828125,
     16.171875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/water_check__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/water_check__3_score.npy",
    "full_logits_sha256": "0ee76ed56ab0b7c241b0c1d58fa0a1834c594f8eef3d3ef9c3dff7f51c9b4451",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3291,7 +3291,7 @@
     9.1796875,
     9.6796875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/late_bus__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/late_bus__1_choice.npy",
    "full_logits_sha256": "ebffb49195005622899a83f89364d8f00b1b9d3224279d134e8465277e2093c8",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3415,7 +3415,7 @@
     16.765625,
     13.375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/late_bus__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/late_bus__2_bool.npy",
    "full_logits_sha256": "ffc5992b170fcbb6cc165a1acde24c1b98f21e0c6a6767275533eab86d3a98c3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3508,7 +3508,7 @@
     14.9921875,
     14.09375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/late_bus__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/late_bus__3_score.npy",
    "full_logits_sha256": "dff46d67d429f99ecf5774ad209dc8c4169e8d8c72857fb1727137beb2023b62",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3637,7 +3637,7 @@
     10.6796875,
     9.9921875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/shared_shed__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/shared_shed__1_choice.npy",
    "full_logits_sha256": "6b5c8603f7bf0fa4a7922ac14bd5018ce3632a1c2c3b229eed03c1fb59d13af3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3765,7 +3765,7 @@
     15.59375,
     14.75
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/shared_shed__2_bool.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/shared_shed__2_bool.npy",
    "full_logits_sha256": "f13f5f9530738e8f43ba040786a1ea46f5909ee971e049bec04c7f806f62c6ae",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3852,7 +3852,7 @@
     15.890625,
     15.2265625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/shared_shed__3_score.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/shared_shed__3_score.npy",
    "full_logits_sha256": "d7f6b514107dacc8027bbdb6a7cf2935856479bb359c97072177366600db5fd8",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -3964,7 +3964,7 @@
     10.4921875,
     9.953125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_1__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_1__1_choice.npy",
    "full_logits_sha256": "2ea18fd3d5f0e42f5892377305339d07a1cd72282868b7dfd42a4404bb81a8b8",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4083,7 +4083,7 @@
     12.9921875,
     14.4921875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_1__2_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_1__2_choice.npy",
    "full_logits_sha256": "d2850bb8175ee05dc3a30c230b3ae9692e90996c8bcb92db6626769097991a89",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4177,7 +4177,7 @@
     13.4609375,
     13.09375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_1__3_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_1__3_choice.npy",
    "full_logits_sha256": "08133fa026aeeac6408d6bc71ea57855a4b86ad09c9f58b59e8a050a408e608a",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4296,7 +4296,7 @@
     9.734375,
     10.6796875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_2__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_2__1_choice.npy",
    "full_logits_sha256": "635b0ebea3524f629a22b71cb28d2669cdab2b816e1e28cd8de28bf2e65a391b",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4419,7 +4419,7 @@
     13.0078125,
     14.515625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_2__2_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_2__2_choice.npy",
    "full_logits_sha256": "8a18fbeeca3e032613aa2a3d22025c0df95566a03165a189d82fff9281db9aa4",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4513,7 +4513,7 @@
     13.46875,
     13.140625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_2__3_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/supply_station_2__3_choice.npy",
    "full_logits_sha256": "da179fbae2ec7a3eb89372dc2933997cd56933618b482a5719a72115150be532",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4635,7 +4635,7 @@
     9.4375,
     9.0546875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__1_choice.npy",
    "full_logits_sha256": "bc75ac49d55a3ac144ce368f8d0f9350bd581eb57d9cdfcd180d4afe1d223913",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4762,7 +4762,7 @@
     13.015625,
     14.5078125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__2_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__2_choice.npy",
    "full_logits_sha256": "53c256a039bce932a0ce0e64bb210a322c47679a0df02713df55a59f1b871515",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4856,7 +4856,7 @@
     13.46875,
     13.1171875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__3_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__3_choice.npy",
    "full_logits_sha256": "dd977d42e865fc9b92a844bda545ef4b56a69620f0eaac1a0cc69bbcd52b951e",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -4981,7 +4981,7 @@
     10.125,
     9.7890625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_4__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_4__1_choice.npy",
    "full_logits_sha256": "11eb1ef058e0390303a3e32bc1bdef0d39212b031f885517fb390b8ece763b85",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5112,7 +5112,7 @@
     13.015625,
     14.53125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_4__2_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_4__2_choice.npy",
    "full_logits_sha256": "465f6e76471f20f8b21660341701c8cbfebd713018d48712a6d5a4c9f0839bfa",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5206,7 +5206,7 @@
     13.453125,
     13.109375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_4__3_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_4__3_choice.npy",
    "full_logits_sha256": "1247b97b663966e86f2dfa332df4a90ac8b823a6e30c5f9671b430bff6efb7fc",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5334,7 +5334,7 @@
     10.140625,
     9.8125
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_5__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_5__1_choice.npy",
    "full_logits_sha256": "3026c5846b81e7fdb7945694e52dc8c75afbc7f89187505b5a68d8573f0c6a90",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5469,7 +5469,7 @@
     13.0078125,
     14.515625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_5__2_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_5__2_choice.npy",
    "full_logits_sha256": "64ba824407f676b8ea1f870dd08d062106229e6dc7a1f477e51b854c05ecd988",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5563,7 +5563,7 @@
     13.453125,
     13.09375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_5__3_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_5__3_choice.npy",
    "full_logits_sha256": "5e425025072ec4079765ade714d200e02cba6a7cf6c3658482576437a86eff52",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5697,7 +5697,7 @@
     10.5546875,
     9.9375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__1_choice.npy",
    "full_logits_sha256": "20fe422f85fc01d72c805888cfe5cdd600c7bd3de81e0b16d30a43c446366aa3",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5840,7 +5840,7 @@
     12.9765625,
     14.5234375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__2_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__2_choice.npy",
    "full_logits_sha256": "6748a79cbc166d903bf718d57fdb57090adf45969a14b61700c7e06f7689dc9b",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -5934,7 +5934,7 @@
     13.5,
     13.109375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__3_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__3_choice.npy",
    "full_logits_sha256": "d5eb5747bb1ddf9e8d9fae8aee125bf69bc5da702cd94c75552e11404ba400f8",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -6029,7 +6029,7 @@
     11.953125,
     11.4140625
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/spanish_notice__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/spanish_notice__1_choice.npy",
    "full_logits_sha256": "44728071b24acb83778a0f8370089fc85b5895d6afa6647266e478bac3a50ac8",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -6120,7 +6120,7 @@
     16.8125,
     13.9921875
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/spanish_review__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/spanish_review__1_choice.npy",
    "full_logits_sha256": "c3fac3535ae78125c306b573c29720680e3064893be04049a73ced639acd365c",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -6250,7 +6250,7 @@
     10.1171875,
     9.6484375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
    "full_logits_sha256": "920b08f0b56ef28fd959ae6a31294eb05d908605b428a9b6acc7ddf1c30f829a",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -6432,7 +6432,7 @@
     10.53125,
     10.234375
    ],
-   "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
+   "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
    "full_logits_sha256": "17d9c324c9b0bc655873a3e2a38397833ccc04cc739cc13465cd8b55ce2f56f7",
    "full_logits_dtype": "float16",
    "full_logits_shape": [
@@ -6575,8 +6575,8 @@
     13
    ],
    "pid": 90083,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+   "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
    "started_at": "2026-09-22T22:22:07+00:00",
    "phase": "complete",
    "runtime_calls": 1675,
@@ -6592,8 +6592,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__1_choice.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/reset-garden_play__1_choice.npy",
+    "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__1_choice.npy",
+    "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/reset-garden_play__1_choice.npy",
     "final_full_logits_sha256": "06bf30a1d44e94fa0e2f89701920f8b794a8a073594f4284e87bec7d25e74451",
     "fresh_state_each_row": true,
     "same_process": true
@@ -6601,16 +6601,16 @@
    "completed_at": "2026-09-22T22:22:46+00:00",
    "wall_seconds_contended": 39.442943166941404,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-00-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/readout-fp16-00-kit-a1.log",
+   "transcript": "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-00-kit-a1.json",
+   "log": "<work>/results/round3/zoo-gates-work/logs/readout-fp16-00-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/.venv/bin/python",
+    "<work>/.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-00-kit-a1.config.json"
+    "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-00-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_pids/fp16-00-kit-a1.json",
+   "pid_receipt": "<work>/results/round3/zoo-gates-work/results/readout_pids/fp16-00-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 44.73722645803355
@@ -6636,8 +6636,8 @@
     27
    ],
    "pid": 91930,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+   "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
    "started_at": "2026-09-22T22:22:52+00:00",
    "phase": "complete",
    "runtime_calls": 2017,
@@ -6653,8 +6653,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/bakery_line__3_score.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/reset-bakery_line__3_score.npy",
+    "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/bakery_line__3_score.npy",
+    "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/reset-bakery_line__3_score.npy",
     "final_full_logits_sha256": "0ee62643ad72cb7e456afe20846b0e89fa34a3b7409a3196f2ea3e333f03a9be",
     "fresh_state_each_row": true,
     "same_process": true
@@ -6662,16 +6662,16 @@
    "completed_at": "2026-09-22T22:23:23+00:00",
    "wall_seconds_contended": 31.359861791948788,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-01-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/readout-fp16-01-kit-a1.log",
+   "transcript": "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-01-kit-a1.json",
+   "log": "<work>/results/round3/zoo-gates-work/logs/readout-fp16-01-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/.venv/bin/python",
+    "<work>/.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-01-kit-a1.config.json"
+    "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-01-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_pids/fp16-01-kit-a1.json",
+   "pid_receipt": "<work>/results/round3/zoo-gates-work/results/readout_pids/fp16-01-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 36.85539237491321
@@ -6697,8 +6697,8 @@
     41
    ],
    "pid": 93502,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+   "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
    "started_at": "2026-09-22T22:23:28+00:00",
    "phase": "complete",
    "runtime_calls": 2189,
@@ -6714,8 +6714,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/water_check__2_bool.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/reset-water_check__2_bool.npy",
+    "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/water_check__2_bool.npy",
+    "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-02-kit-a1/reset-water_check__2_bool.npy",
     "final_full_logits_sha256": "ba16c920f8e34289785ebbe12c6bea3e307a184776ea3808bb799dad0bed0714",
     "fresh_state_each_row": true,
     "same_process": true
@@ -6723,16 +6723,16 @@
    "completed_at": "2026-09-22T22:24:04+00:00",
    "wall_seconds_contended": 35.87422766594682,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-02-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/readout-fp16-02-kit-a1.log",
+   "transcript": "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-02-kit-a1.json",
+   "log": "<work>/results/round3/zoo-gates-work/logs/readout-fp16-02-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/.venv/bin/python",
+    "<work>/.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-02-kit-a1.config.json"
+    "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-02-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_pids/fp16-02-kit-a1.json",
+   "pid_receipt": "<work>/results/round3/zoo-gates-work/results/readout_pids/fp16-02-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 41.44159012497403
@@ -6758,8 +6758,8 @@
     55
    ],
    "pid": 96000,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+   "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
    "started_at": "2026-09-22T22:24:10+00:00",
    "phase": "complete",
    "runtime_calls": 2604,
@@ -6775,8 +6775,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__1_choice.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/reset-supply_station_3__1_choice.npy",
+    "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_3__1_choice.npy",
+    "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/reset-supply_station_3__1_choice.npy",
     "final_full_logits_sha256": "bc75ac49d55a3ac144ce368f8d0f9350bd581eb57d9cdfcd180d4afe1d223913",
     "fresh_state_each_row": true,
     "same_process": true
@@ -6784,16 +6784,16 @@
    "completed_at": "2026-09-22T22:24:55+00:00",
    "wall_seconds_contended": 44.883326040930115,
    "kind": "kit",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-03-kit-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/readout-fp16-03-kit-a1.log",
+   "transcript": "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-03-kit-a1.json",
+   "log": "<work>/results/round3/zoo-gates-work/logs/readout-fp16-03-kit-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/.venv/bin/python",
+    "<work>/.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-03-kit-a1.config.json"
+    "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-03-kit-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_pids/fp16-03-kit-a1.json",
+   "pid_receipt": "<work>/results/round3/zoo-gates-work/results/readout_pids/fp16-03-kit-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 50.54800016595982
@@ -6806,8 +6806,8 @@
     56
    ],
    "pid": 4909,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+   "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
    "started_at": "2026-09-22T22:25:01+00:00",
    "phase": "complete",
    "runtime_calls": 3486,
@@ -6823,8 +6823,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/reset-long_store_log__1_choice.npy",
+    "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
+    "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/reset-long_store_log__1_choice.npy",
     "final_full_logits_sha256": "920b08f0b56ef28fd959ae6a31294eb05d908605b428a9b6acc7ddf1c30f829a",
     "fresh_state_each_row": true,
     "same_process": true
@@ -6832,16 +6832,16 @@
    "completed_at": "2026-09-22T22:26:02+00:00",
    "wall_seconds_contended": 61.00994095799979,
    "kind": "wide",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-04-wide-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/readout-fp16-04-wide-a1.log",
+   "transcript": "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-04-wide-a1.json",
+   "log": "<work>/results/round3/zoo-gates-work/logs/readout-fp16-04-wide-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/.venv/bin/python",
+    "<work>/.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-04-wide-a1.config.json"
+    "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-04-wide-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_pids/fp16-04-wide-a1.json",
+   "pid_receipt": "<work>/results/round3/zoo-gates-work/results/readout_pids/fp16-04-wide-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 66.94631575001404
@@ -6854,8 +6854,8 @@
     57
    ],
    "pid": 8742,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+   "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
    "started_at": "2026-09-22T22:26:07+00:00",
    "phase": "complete",
    "runtime_calls": 3484,
@@ -6871,8 +6871,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/reset-long_room_log__1_choice.npy",
+    "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
+    "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/reset-long_room_log__1_choice.npy",
     "final_full_logits_sha256": "17d9c324c9b0bc655873a3e2a38397833ccc04cc739cc13465cd8b55ce2f56f7",
     "fresh_state_each_row": true,
     "same_process": true
@@ -6880,16 +6880,16 @@
    "completed_at": "2026-09-22T22:27:08+00:00",
    "wall_seconds_contended": 60.347513791988604,
    "kind": "wide",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-05-wide-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/readout-fp16-05-wide-a1.log",
+   "transcript": "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-05-wide-a1.json",
+   "log": "<work>/results/round3/zoo-gates-work/logs/readout-fp16-05-wide-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/.venv/bin/python",
+    "<work>/.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-05-wide-a1.config.json"
+    "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-05-wide-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_pids/fp16-05-wide-a1.json",
+   "pid_receipt": "<work>/results/round3/zoo-gates-work/results/readout_pids/fp16-05-wide-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 65.55646366695873
@@ -6902,8 +6902,8 @@
     0
    ],
    "pid": 12174,
-   "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-   "snapshot": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
+   "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+   "snapshot": "<work>/cache/hf/hub/models--chaoliangUNSW--Jev-Style-Qwen3.5-2B-Decision-MLX-bf16/snapshots/69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5",
    "started_at": "2026-09-22T22:27:13+00:00",
    "phase": "complete",
    "runtime_calls": 198,
@@ -6919,8 +6919,8 @@
     "identical": true,
     "bit_identical": true,
     "max_abs_diff": 0.0,
-    "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-06-global_reset-a1/garden_play__1_choice.npy",
-    "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-06-global_reset-a1/reset-garden_play__1_choice.npy",
+    "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-06-global_reset-a1/garden_play__1_choice.npy",
+    "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-06-global_reset-a1/reset-garden_play__1_choice.npy",
     "final_full_logits_sha256": "06bf30a1d44e94fa0e2f89701920f8b794a8a073594f4284e87bec7d25e74451",
     "fresh_state_each_row": true,
     "same_process": true
@@ -6928,28 +6928,28 @@
    "completed_at": "2026-09-22T22:27:17+00:00",
    "wall_seconds_contended": 4.6031745000509545,
    "kind": "global_reset",
-   "transcript": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-06-global_reset-a1.json",
-   "log": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/logs/readout-fp16-06-global_reset-a1.log",
+   "transcript": "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-06-global_reset-a1.json",
+   "log": "<work>/results/round3/zoo-gates-work/logs/readout-fp16-06-global_reset-a1.log",
    "command": [
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/.venv/bin/python",
+    "<work>/.venv/bin/python",
     "-B",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/zoo/conversion/letter/readout_gate_letter.py",
+    "<work>/zoo/conversion/letter/readout_gate_letter.py",
     "--worker",
-    "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_sessions/fp16-06-global_reset-a1.config.json"
+    "<work>/results/round3/zoo-gates-work/results/readout_sessions/fp16-06-global_reset-a1.config.json"
    ],
-   "pid_receipt": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_pids/fp16-06-global_reset-a1.json",
+   "pid_receipt": "<work>/results/round3/zoo-gates-work/results/readout_pids/fp16-06-global_reset-a1.json",
    "returncode": 0,
    "timed_out": false,
    "process_wall_seconds_contended": 9.80162783304695
   }
  ],
  "result": "PASS",
- "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+ "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
  "aot": {
   "reused": true,
   "result": "PASS",
-  "asset": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
-  "source": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/exports/qwen3_5_2b_decision_decode_fp16/qwen3_5_2b_decision_decode_fp16.aimodel",
+  "asset": "<work>/exports/aotc/qwen3_5_2b_decision_decode_fp16.h16c.aimodelc",
+  "source": "<work>/exports/qwen3_5_2b_decision_decode_fp16/qwen3_5_2b_decision_decode_fp16.aimodel",
   "selection": "explicit existing AOT asset",
   "flags": [
    "--platform",
@@ -7078,7 +7078,7 @@
      10.53125,
      10.234375
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
     "full_logits_sha256": "17d9c324c9b0bc655873a3e2a38397833ccc04cc739cc13465cd8b55ce2f56f7",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -7260,7 +7260,7 @@
      10.1171875,
      9.6484375
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
     "full_logits_sha256": "920b08f0b56ef28fd959ae6a31294eb05d908605b428a9b6acc7ddf1c30f829a",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -7403,7 +7403,7 @@
      15.1875,
      16.421875
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__3_score.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/path_notice__3_score.npy",
     "full_logits_sha256": "2a28d209cfbebb6a778380af709fa2bcdc37cb566fb8eba34de3536ba0f7850d",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -7497,7 +7497,7 @@
      15.46875,
      15.328125
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__3_score.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__3_score.npy",
     "full_logits_sha256": "6ba0d7742f4becde6a872035e23f92532da67305d3ed980929daaa290281e8c0",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -7631,7 +7631,7 @@
      10.5546875,
      9.9375
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__1_choice.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-03-kit-a1/supply_station_6__1_choice.npy",
     "full_logits_sha256": "20fe422f85fc01d72c805888cfe5cdd600c7bd3de81e0b16d30a43c446366aa3",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -7804,7 +7804,7 @@
      13.90625,
      13.5625
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__3_score.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__3_score.npy",
     "full_logits_sha256": "8c0d4bdb6b59392158623e49e6d2bf3d7d4d43d41682c2801fab624e32fb6788",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -7947,7 +7947,7 @@
      9.8359375,
      9.140625
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__1_choice.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/package_log__1_choice.npy",
     "full_logits_sha256": "67839a547610c81398ace41e9635e20c30b194a0c023d874656aefcf6afeb9a9",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -8105,7 +8105,7 @@
      10.1171875,
      9.6484375
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-04-wide-a1/long_store_log__1_choice.npy",
     "full_logits_sha256": "920b08f0b56ef28fd959ae6a31294eb05d908605b428a9b6acc7ddf1c30f829a",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -8269,7 +8269,7 @@
      11.21875,
      11.140625
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__3_score.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-01-kit-a1/quiet_gallery__3_score.npy",
     "full_logits_sha256": "d4dcef31846c0637628cd1dbb0137f6bc4796cbf3f8df6bbe3594099725cf4fb",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -8427,7 +8427,7 @@
      10.53125,
      10.234375
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-05-wide-a1/long_room_log__1_choice.npy",
     "full_logits_sha256": "17d9c324c9b0bc655873a3e2a38397833ccc04cc739cc13465cd8b55ce2f56f7",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -8573,7 +8573,7 @@
      15.46875,
      15.328125
     ],
-    "full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__3_score.npy",
+    "full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/river_report__3_score.npy",
     "full_logits_sha256": "6ba0d7742f4becde6a872035e23f92532da67305d3ed980929daaa290281e8c0",
     "full_logits_dtype": "float16",
     "full_logits_shape": [
@@ -8652,8 +8652,8 @@
   "identical": true,
   "bit_identical": true,
   "max_abs_diff": 0.0,
-  "first_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__1_choice.npy",
-  "final_full_logits_npy": "/Users/majimadaisuke/code/codex-conversions/2026-09-23/qwen35-2b-decision-coreai/results/round3/zoo-gates-work/results/readout_logits/fp16-06-global_reset-a1/reset-garden_play__1_choice.npy",
+  "first_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-00-kit-a1/garden_play__1_choice.npy",
+  "final_full_logits_npy": "<work>/results/round3/zoo-gates-work/results/readout_logits/fp16-06-global_reset-a1/reset-garden_play__1_choice.npy",
   "final_session": "fp16-06-global_reset-a1",
   "cross_process": true,
   "local_resets_in_every_session": true
