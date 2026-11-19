@@ -58,7 +58,7 @@ REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 import host  # noqa: E402
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 
 LANE = work_path("_clefflash")
 BIN = LANE / "swift" / ".build" / "release" / "clef-flash"
@@ -528,7 +528,7 @@ def cmd_score(args) -> int:
         if not path:
             continue
         sw = json.loads(Path(path).read_text())
-        sw["_path"] = str(Path(path).resolve())
+        sw["_path"] = record_path(Path(path).resolve())
         dref = decide_refs(set_name) if scheme == "fp16" else None
         passes[set_name] = score_pass(sw, set_name, scheme, kind, dref)
         p = passes[set_name]
@@ -546,7 +546,7 @@ def cmd_score(args) -> int:
     rec["passes"] = passes
     if args.oracle_rows:
         docs = [json.loads(Path(p).read_text()) for p in args.oracle_rows]
-        rec["oracle_rows_pass"] = {"fixture_json": [str(Path(p).resolve()) for p in args.oracle_rows],
+        rec["oracle_rows_pass"] = {"fixture_json": [record_path(Path(p).resolve()) for p in args.oracle_rows],
                                    "what": "g256 / g448 runs fed the oracle's fp32 rows (the readout_gate.py inputs): the "
                                            "Swift decoder + head vs the Python decoder + head on identical inputs",
                                    "reset_checks": [d.get("reset_check") for d in docs],
@@ -565,7 +565,7 @@ def cmd_score(args) -> int:
                 for r in json.loads(Path(path).read_text())["runs"]]
         both = [(r, other[(r["id"], r["arm"])]) for r in mine if (r["id"], r["arm"]) in other]
         rec["same_as"] = {
-            "other_passes": [str(Path(p).resolve()) for p in args.same_as], "runs_compared": len(both),
+            "other_passes": [record_path(Path(p).resolve()) for p in args.same_as], "runs_compared": len(both),
             "hidden_bit_equal": sum(a["hidden_sha256"] == b["hidden_sha256"] for a, b in both),
             "logits_bit_equal": sum(np.array_equal(np.asarray(a["logits"], np.float32).view(np.uint32),
                                                    np.asarray(b["logits"], np.float32).view(np.uint32)) for a, b in both),
@@ -607,7 +607,7 @@ def cmd_negative(args) -> int:
                    "argmax": [int(pa.argmax()), int(pb.argmax())], "p_base": pa.tolist(), "p_changed": pb.tolist(),
                    "question_span": [qa["question_span"], qb["question_span"]]})
     rec = {"schema": "clef-flash-swift-negative/1", "generated_at": now(), "run": f"{args.id}/text",
-           "base_trace": str(Path(args.base).resolve()), "changed_trace": str(Path(args.changed).resolve()),
+           "base_trace": record_path(Path(args.base).resolve()), "changed_trace": record_path(Path(args.changed).resolve()),
            "changed_request": neg.get("request"), "tokens": [base["tokens"], neg["tokens"]],
            "base_vs_oracle": vs_oracle(base), "changed_vs_oracle": vs_oracle(neg), "questions": qs,
            "max_abs_dp": max(q["max_abs_dp"] for q in qs)}

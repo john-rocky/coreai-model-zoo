@@ -48,7 +48,7 @@ import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 
 WORK = work_path("_funasr_nano")
 OFFICIAL = WORK / "official"
@@ -201,9 +201,10 @@ def main() -> None:
     assert effective == {k: expected.get(k) for k in keys}, (effective, expected)
     info = {
         "dither": "AutoModel(frontend_conf={'dither': 0.0}); every WavFrontend.forward call asserted to run with 0.0",
-        "model_dir": str(OFFICIAL.resolve()),
+        "model_dir": record_path(OFFICIAL.resolve()),
         "official_revision": "FunAudioLLM/Fun-ASR-Nano-2512@272c57b82523ada6fd87095e955f8e29100979ab",
-        "frontend_effective": effective | {"snip_edges": frontend.snip_edges,
+        "frontend_effective": {k: record_path(v) if isinstance(v, str) else v for k, v in effective.items()}
+                              | {"snip_edges": frontend.snip_edges,
                                            "upsacle_samples": frontend.upsacle_samples,
                                            "cmvn_loaded": frontend.cmvn is not None},
         "frontend_expected_config_yaml_plus_dither0": {k: expected.get(k) for k in keys},

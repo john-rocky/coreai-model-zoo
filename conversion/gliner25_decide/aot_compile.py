@@ -31,7 +31,7 @@ HERE = Path(__file__).resolve().parent
 WORK = HERE / "_work"
 AOT = WORK / "aot"
 sys.path.insert(0, str(HERE.parent))
-from _paths import exports_dir  # noqa: E402
+from _paths import exports_dir, record_argv, record_path  # noqa: E402
 
 XCODE = "/Applications/Xcode-27.0.0-RC.app/Contents/Developer"
 TARGETS = {
@@ -83,11 +83,11 @@ def main():
     version = subprocess.run([tool, "--version"], env=env, capture_output=True, text=True).stdout.strip()
     AOT.mkdir(parents=True, exist_ok=True)
     name = f"aot_compile_{args.tag}.json"
-    report = {"bundle": str(bundle), "bundle_mb": round(tree_bytes(bundle) / 1e6, 1), "tool": tool,
+    report = {"bundle": record_path(bundle), "bundle_mb": round(tree_bytes(bundle) / 1e6, 1), "tool": record_path(tool),
               "tool_version": version, "developer_dir": env["DEVELOPER_DIR"], "targets": {}}
     if (AOT / name).exists():                                   # keep the other targets' records (same source)
         old = json.loads((AOT / name).read_text())
-        if old.get("bundle") == str(bundle):
+        if old.get("bundle") in (record_path(bundle), str(bundle)):
             report["targets"] = old.get("targets", {})
     for t in args.targets.split(","):
         platform, arch, compute = TARGETS[t]
@@ -102,10 +102,10 @@ def main():
         wall = time.time() - t0
         free1 = df_free_gb()
         (AOT / f"{args.tag}_{t}.log").write_text(
-            f"$ {' '.join(cmd)}\nexit {p.returncode}\n--- stdout\n{p.stdout}\n--- stderr\n{p.stderr}")
+            f"$ {' '.join(record_argv(cmd))}\nexit {p.returncode}\n--- stdout\n{p.stdout}\n--- stderr\n{p.stderr}")
         compiled = sorted(str(x.relative_to(out)) for x in out.rglob("*.aimodelc")) if out.exists() else []
-        rec = {"cmd": " ".join(cmd), "exit": p.returncode, "wall_s": round(wall, 1), "disk_free_gb_before": round(free0, 1),
-               "disk_free_gb_after": round(free1, 1), "out": str(out), "aimodelc": compiled,
+        rec = {"cmd": " ".join(record_argv(cmd)), "exit": p.returncode, "wall_s": round(wall, 1), "disk_free_gb_before": round(free0, 1),
+               "disk_free_gb_after": round(free1, 1), "out": record_path(out), "aimodelc": compiled,
                "out_bytes": tree_bytes(out), "out_mb": round(tree_bytes(out) / 1e6, 1), "ane_regions": ane_regions(out),
                "stderr_tail": p.stderr.strip().splitlines()[-5:] if p.stderr.strip() else []}
         report["targets"][t] = rec

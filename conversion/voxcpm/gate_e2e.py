@@ -3,6 +3,9 @@
 the produced latents match the oracle ``latent_pred`` (so the host orchestration itself is correct,
 not just the individual bundles). Uses oracle prefill inputs + captured z noise; derives everything
 else (dit_hidden, pred_feat, curr_embed, KV continuation) with our own modules.
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
 """
 from __future__ import annotations
 

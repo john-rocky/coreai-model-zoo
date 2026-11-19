@@ -48,7 +48,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 import host  # noqa: E402
 import oracle_d1  # noqa: E402
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 
 LANE = work_path("_d1_3b")
 EQUIV_BAR = 1e-6
@@ -498,7 +498,7 @@ def main() -> int:
     toks = {f"tokenizers {tokenizers.__version__} Tokenizer.from_file": rs,
             f"transformers {transformers.__version__} {type(tf).__name__}": tf}
     report: dict = {"schema": "d1-host-test/1", "what": __doc__.splitlines()[0], "python": platform.python_version(),
-                    "interpreter": sys.executable, "fixtures": {"path": str(fx), "sha256": sha256_file(fx)},
+                    "interpreter": record_path(sys.executable), "fixtures": {"path": record_path(fx), "sha256": sha256_file(fx)},
                     "files_sha256": {n: sha256_file(HERE / n) for n in ("host.py", "test_host.py", "oracle_d1.py")},
                     "provider_files_sha256": {p.name: sha256_file(p) for p in sorted((oracle_d1.PROVIDER_SRC / "d1").glob("*.py"))},
                     "snapshot": str(snap)}

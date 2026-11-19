@@ -73,7 +73,7 @@ REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 import host  # noqa: E402
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 
 LANE = work_path("_decider2bv")
 ORACLE = LANE / "oracle"
@@ -618,7 +618,7 @@ def timing(runs: list[dict], procs: list[dict], steps: dict) -> dict:
 def bundle_record(bundle: Path, aimodelc: Path) -> dict:
     meta = json.loads((bundle / "metadata.json").read_text())
     mlirb = bundle / meta["assets"]["main"] / "main.mlirb"
-    return {"bundle": str(bundle), "name": meta["name"], "compression": meta.get("compression"),
+    return {"bundle": record_path(bundle), "name": meta["name"], "compression": meta.get("compression"),
             "metadata_sha256": sha256_file(bundle / "metadata.json"),
             "main_mlirb": {"bytes": mlirb.stat().st_size, "sha256": sha256_file(mlirb)},
             "tokenizer_sha256": {f.name: sha256_file(f) for f in sorted((bundle / "tokenizer").iterdir())},

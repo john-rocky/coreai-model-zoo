@@ -1,5 +1,9 @@
 # Community port — NOT an Apple model.
-"""Gate the AudioVAE decoder (weight_norm folded) vs the oracle: oracle latent -> wav."""
+"""Gate the AudioVAE decoder (weight_norm folded) vs the oracle: oracle latent -> wav.
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
+"""
 from __future__ import annotations
 
 import glob

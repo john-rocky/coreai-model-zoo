@@ -121,6 +121,19 @@ def resolve_runner(flag: str | None = None) -> str:
     return shutil.which("llm-runner") or "llm-runner"
 
 
+def record_path(path: str) -> str:
+    """How the transcript names a local file: `~/...` under the home folder, else its name alone.
+
+    The transcript is published next to the card, and an absolute path would name this machine.
+    The same rule as conversion/_paths.py `record_path`, kept here because this file does not
+    import `_paths`."""
+    p = Path(path).expanduser()
+    if not p.is_absolute():
+        return path  # a bare name, found on PATH
+    home = Path.home()
+    return "~/" + p.relative_to(home).as_posix() if p.is_relative_to(home) else p.name
+
+
 def preflight(python: str, runner: str) -> None:
     """Fail with an actionable message instead of a confusing subprocess error.
 
@@ -383,7 +396,7 @@ def finish(args, record: dict, result: str, line: str) -> NoReturn:
     record["environment"] = {
         "platform": platform.platform(),
         "python": sys.version.split()[0],
-        "runner": resolve_runner(args.runner),
+        "runner": record_path(resolve_runner(args.runner)),
     }
     record["recheck"] = {
         "engine_side_only": (

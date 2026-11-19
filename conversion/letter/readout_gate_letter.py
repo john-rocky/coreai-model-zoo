@@ -43,6 +43,9 @@ from types import SimpleNamespace
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _paths import record_argv, record_path  # noqa: E402
+
 RUN = Path.cwd()
 AOT_FLAGS = ["--platform", "macOS", "--preferred-compute", "gpu", "--architecture", "h16c",
              "--expect-frequent-reshapes"]
@@ -113,8 +116,8 @@ def exec_child(arguments: list[str]) -> None:
     deadline, receipt, *command = arguments
     delay = remaining(float(deadline))
     write_json(Path(receipt), {"pid": os.getpid(), "parent_pid": os.getppid(),
-               "command": command, "deadline_epoch": float(deadline), "started_at": utc_now(),
-               "cwd": os.getcwd(), "termination": "self ITIMER_REAL/SIGALRM; parent sends no signal"})
+               "command": record_argv(command), "deadline_epoch": float(deadline), "started_at": utc_now(),
+               "cwd": record_path(os.getcwd()), "termination": "self ITIMER_REAL/SIGALRM; parent sends no signal"})
     signal.signal(signal.SIGALRM, signal.SIG_DFL)
     signal.setitimer(signal.ITIMER_REAL, delay)
     os.execvpe(command[0], command, os.environ)
@@ -565,7 +568,7 @@ def controller(args: argparse.Namespace) -> int:
               "license": fx.get("license"), "template": args.prompt_format,
               "runtime": "coreai Python runtime, AOT h16c GPU asset, SpecializationOptions.default()",
               "source": fx["source"], "vocab_size": VOCAB_SIZE,
-              "environment": {"python": sys.version, "deadline_epoch": deadline, "script": str(Path(__file__).resolve()), "script_sha256": sha256(Path(__file__).resolve())},
+              "environment": {"python": sys.version, "deadline_epoch": deadline, "script": record_path(Path(__file__).resolve()), "script_sha256": sha256(Path(__file__).resolve())},
               "started_at": utc_now(), "timing": "contended; correctness only, no performance claim",
               "caps": {"prompt_evaluations_per_process_including_reset": MAX_PROMPT_EVALUATIONS,
                        "calls_per_process_including_reset": MAX_CALLS},

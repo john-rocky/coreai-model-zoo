@@ -53,7 +53,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import work_path  # noqa: E402
+from _paths import from_record_path, work_path  # noqa: E402
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
@@ -516,7 +516,7 @@ def checks(table: dict, rdoc: dict) -> dict:
     """The reproduction check and the instrument floor (before any selection)."""
     out: dict = {}
     if "all_int8" in table:
-        gate = json.loads(Path(rdoc["gate_transcript"]["path"]).read_text())
+        gate = json.loads(from_record_path(rdoc["gate_transcript"]["path"]).read_text())
         g_by = {row_key(r["id"], r["k"]): r["max_abs_dp"] for r in gate["runs"]}
         rows = [row_key(rid, k) for rid, k in rdoc["rows"]]
         x = np.array([g_by[r] for r in rows])

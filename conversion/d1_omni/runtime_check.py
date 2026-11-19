@@ -48,7 +48,7 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import gpu_lock, work_path  # noqa: E402
+from _paths import gpu_lock, record_argv, record_path, work_path  # noqa: E402
 
 import coreai.runtime as rt  # noqa: E402
 
@@ -97,8 +97,8 @@ def environment() -> dict:
             "machine": _command(["sysctl", "-n", "machdep.cpu.brand_string"]),
             "macos_version": _command(["sw_vers", "-productVersion"]),
             "macos_build": _command(["sw_vers", "-buildVersion"]),
-            "python": platform.python_version(), "executable": sys.executable, "packages": versions,
-            "argv": sys.argv, "pid": os.getpid()}
+            "python": platform.python_version(), "executable": record_path(sys.executable), "packages": versions,
+            "argv": record_argv(sys.argv), "pid": os.getpid()}
 
 
 def free_name(path: Path) -> Path:

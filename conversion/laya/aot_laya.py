@@ -30,11 +30,16 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import environment, export_root, file_inventory, sha256_of, work_dir, write_json  # noqa: E402
+from _common import environment, export_root, file_inventory, record_argv, sha256_of, work_dir, write_json  # noqa: E402
 
 
 def disk_free() -> str:
     return subprocess.run(["df", "-h", "/System/Volumes/Data"], capture_output=True, text=True).stdout.splitlines()[-1]
+
+
+def without_mount_point(df_line: str) -> str:
+    """A `df` line without its last column (the mount point): records name no local path."""
+    return " ".join(df_line.split(None, 8)[:8])
 
 
 def compile_bundle(bundle: Path, out_dir: Path, preferred: str, architecture: str) -> dict:
@@ -47,7 +52,7 @@ def compile_bundle(bundle: Path, out_dir: Path, preferred: str, architecture: st
     compiled = sorted(out_dir.glob("*.aimodelc"))
     if completed.returncode != 0 or len(compiled) != 1:
         raise SystemExit(f"coreai-build exit {completed.returncode}, {len(compiled)} .aimodelc:\n{completed.stderr[-2000:]}")
-    return {"command": argv, "seconds": seconds, "exit_code": completed.returncode, "aimodelc": compiled[0],
+    return {"command": record_argv(argv), "seconds": seconds, "exit_code": completed.returncode, "aimodelc": compiled[0],
             "log": completed.stdout + completed.stderr}
 
 
@@ -131,7 +136,7 @@ def main():
         "source": {"variant": f"macos/{source_dir.name}", "bundle": manifest["bundle"],
                    "export_manifest_sha256": sha256_of(source_dir / "provenance" / "export-manifest.json"),
                    "files": manifest["files"], "precision": manifest["precision"]},
-        "disk_free_before": before, "disk_free_after": after,
+        "disk_free_before": without_mount_point(before), "disk_free_after": without_mount_point(after),
         "runtime_gate": "NOT RUN — never on a Mac; the device gate on the iPhone 17 Pro runs this folder",
         "environment": environment(()),
     }

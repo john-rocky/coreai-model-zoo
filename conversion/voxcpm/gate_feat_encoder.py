@@ -1,6 +1,10 @@
 # Community port — NOT an Apple model.
 """Gate LocEnc + FSQ + enc_to_lm_proj vs oracle. Also verify enc_to_lm_proj(LocEnc)==base_step input
-(closes the audio->LM feedback loop)."""
+(closes the audio->LM feedback loop).
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
+"""
 from __future__ import annotations
 
 import glob

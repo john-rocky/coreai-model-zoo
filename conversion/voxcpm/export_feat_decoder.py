@@ -3,6 +3,9 @@
 (no state): (mu[1,1024], cond[1,64,2], z[1,64,2]) -> pred_feat[1,64,2], and engine-gate vs oracle.
 
   python export_feat_decoder.py [--mode fp16|fp32]
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
 """
 from __future__ import annotations
 

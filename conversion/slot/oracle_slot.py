@@ -38,6 +38,9 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _paths import record_path  # noqa: E402
+
 """Synthetic deterministic fixture requests; no sampling and no external entities."""
 
 def choice(instructions, criteria):
@@ -244,7 +247,7 @@ def main():
         assert tokenizer.encode(name, add_special_tokens=False) == [expected_id], name
     assert len(tokenizer) == 248339
     model_info = {
-        'snapshot': str(args.snapshot.resolve()), 'temperature_by_type': temperature_6,
+        'snapshot': record_path(args.snapshot.resolve()), 'temperature_by_type': temperature_6,
         'temperature_exact_by_type': temperature_exact,
         'temperature_6_decimal_strings': {k: f'{v:.6f}' for k, v in temperature_exact.items()},
         'log_temperature': model.log_temperature.detach().cpu().tolist(),
@@ -392,7 +395,7 @@ def main():
         'source': {'hf_id': args.hf_id, 'revision': args.revision,
                    'oracle': "author's modeling.py slot_logits, fp32, CPU",
                    'transformers': transformers.__version__, 'torch': torch.__version__,
-                   'client_revision': '5d04bcc', 'snapshot': str(args.snapshot.resolve())},
+                   'client_revision': '5d04bcc', 'snapshot': record_path(args.snapshot.resolve())},
         'temperature_by_type': temperature_6, 'temperature_exact_by_type': temperature_exact,
         'layout': 'openthai_systemone', 'independent_rows': True, 'permutations': 1,
         'n_slots': 256, 'abstain_slot': 255, 'answer_token_id': 248082,

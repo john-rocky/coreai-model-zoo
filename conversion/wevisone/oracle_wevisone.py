@@ -48,6 +48,9 @@ import time  # noqa: E402
 from datetime import datetime, timezone  # noqa: E402
 from pathlib import Path  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _paths import record_path  # noqa: E402
+
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
 
@@ -352,8 +355,8 @@ def main() -> int:
           f"{sum(p.numel() for p in wv.mask_decoder.parameters()):,} params", flush=True)
     rec = Recorder(wv.model)
     env = env_record()
-    env.update({"model_dir": str(Path(args.model).resolve()), "fixtures": str(fx_path),
-                "fixtures_sha256": sha256_file(fx_path), "package_dir": str(Path(args.pkg).resolve()),
+    env.update({"model_dir": record_path(Path(args.model).resolve()), "fixtures": record_path(fx_path),
+                "fixtures_sha256": sha256_file(fx_path), "package_dir": record_path(Path(args.pkg).resolve()),
                 "engine_py_sha256": sha256_file(Path(E.__file__)), "model_dtypes": sorted(pdt), "load_seconds": load_s,
                 "script_sha256": sha256_file(Path(__file__))})
 

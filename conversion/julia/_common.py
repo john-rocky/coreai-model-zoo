@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from _paths import exports_dir, hf_snapshot, work_path  # noqa: E402
+from _paths import exports_dir, from_record_path, hf_snapshot, record_argv, record_path, work_path  # noqa: E402
 
 MODEL_ID = "SupersonicLabs/Julia-1"
 MODEL_SHA = "a85b127321d580d65176c89ced8273f305745d85"
@@ -108,12 +108,22 @@ def sha256_of(path: Path) -> str:
 
 
 def hashes(paths) -> dict[str, str]:
-    return {str(Path(p)): sha256_of(Path(p)) for p in paths}
+    """sha256 per file, keyed by its `record_path` name (records are published: no absolute path)."""
+    return {record_path(p): sha256_of(Path(p)) for p in paths}
+
+
+def recorded_hash(record: dict[str, str], path: Path) -> str:
+    """The digest a `hashes` record holds for `path` (records written before `record_path` key it by
+    the absolute path)."""
+    for key in (record_path(path), str(path)):
+        if key in record:
+            return record[key]
+    raise KeyError(f"no hash recorded for {record_path(path)}")
 
 
 def verify_hashes(records: dict[str, str]) -> None:
     for name, digest in records.items():
-        if sha256_of(Path(name)) != digest:
+        if sha256_of(from_record_path(name)) != digest:
             raise ValueError(f"Hash changed since it was gated: {name}")
 
 
@@ -256,5 +266,5 @@ def environment(packages=("torch", "coreai-torch", "coreai-core", "numpy", "safe
         "coreai_build": _command(["xcrun", "coreai-build", "--version"]),
         "python": platform.python_version(),
         "packages": versions,
-        "argv": sys.argv,
+        "argv": record_argv(sys.argv),
     }

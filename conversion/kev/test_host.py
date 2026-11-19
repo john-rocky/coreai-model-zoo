@@ -53,7 +53,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 import host  # noqa: E402
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 
 LANE = work_path("_kev")
 BUNDLES = {"kev-0.8b": LANE / "exports" / "bundles" / "kev_0_8b_decode_fp16_pf16",
@@ -431,7 +431,7 @@ def main() -> int:
     args = ap.parse_args()
     report = {"schema": "kev-host-test/1",
               "what": "host.build_rows / to_answers / output_tokens / response vs the author's fp32 oracle, every record",
-              "python": platform.python_version(), "interpreter": sys.executable,
+              "python": platform.python_version(), "interpreter": record_path(sys.executable),
               "host_py_sha256": sha256_file(HERE / "host.py"), "test_host_py_sha256": sha256_file(Path(__file__).resolve()),
               "tokenizer_sha256": {m: {f.name: sha256_file(f) for f in sorted((b / "tokenizer").iterdir())}
                                    for m, b in BUNDLES.items()},

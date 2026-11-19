@@ -95,7 +95,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_argv, work_path  # noqa: E402
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
@@ -865,7 +865,7 @@ def main() -> None:
         sys.exit(f"{args.record} exists: records are never overwritten")
     record: dict = {"mode": args.mode, "name": name, "toy": args.toy, "toy_seed": args.toy_seed if args.toy else None,
                     "hf_id": MODEL["hf_id"], "revision": MODEL["revision"], "prefill_chunk": args.prefill_chunk,
-                    "fp16_layers": args.fp16_layers, "quant_block": args.quant_block, "argv": sys.argv[1:],
+                    "fp16_layers": args.fp16_layers, "quant_block": args.quant_block, "argv": record_argv(sys.argv[1:]),
                     "pid": os.getpid(), "started": now(), "script_sha256": sha256_file(Path(__file__).resolve()),
                     "module_sha256": sha256_file(HERE / "lfm2_d1_decoder.py"),
                     "static": static_info(args),

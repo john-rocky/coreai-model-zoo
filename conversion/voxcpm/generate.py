@@ -7,6 +7,9 @@ res_decode], stop on the stop head -> AudioVAE -> 16kHz wav. Plain TTS (no voice
 
   python generate.py --text "..." [--seed 0] [--max-len 200] [--out out.wav]
   python generate.py --reproduce-oracle   # seed 0, oracle text, 6 steps -> bit-check vs oracle wav
+
+--reproduce-oracle reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it
+(unset: voxcpm_scratch under the system temp folder).
 """
 from __future__ import annotations
 

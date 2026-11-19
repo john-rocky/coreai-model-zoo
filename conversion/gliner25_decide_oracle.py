@@ -51,7 +51,7 @@ import sys
 import time
 from pathlib import Path
 
-from _paths import work_path
+from _paths import record_path, work_path
 
 MODEL_ID = "fastino/GLiNER2.5-Decide"
 MODEL_REV = "7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6"
@@ -334,7 +334,7 @@ def header(oracle, kind, extra, snapshot_dir, model_sha):
         "created": now.isoformat(timespec="seconds"),
         "script": "conversion/gliner25_decide_oracle.py",
         "model_id": MODEL_ID, "model_rev": MODEL_REV, "model_safetensors_sha256": model_sha,
-        "snapshot_dir": str(snapshot_dir),
+        "snapshot_dir": record_path(snapshot_dir),
         "oracle": {
             "package": "gliner2 2.0.0", "device": "cpu", "dtype": "float32", "batch": 1,
             "encoder": type(oracle.model.encoder).__name__,

@@ -57,7 +57,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import from_record_path, hf_snapshot, work_path  # noqa: E402
 
 LANE = work_path("_kev")
 os.environ.setdefault("HF_HOME", str(LANE / "hf"))
@@ -615,7 +615,7 @@ def merge(args) -> None:
     rdoc = json.loads(RULE_PATH.read_text())
     table, procs = load_parts()
     p = plan_steps(table)
-    gate = json.loads(Path(rdoc["gate_transcript"]["path"]).read_text())
+    gate = json.loads(from_record_path(rdoc["gate_transcript"]["path"]).read_text())
     g_by = {f"{r['id']}:q{r['q']}": r["max_abs_dp"] for r in gate["runs"]}
     rows = [f"{a}:q{b}" for a, b in rdoc["rows"]]
     top, rand = rows[:N_TOP], rows[N_TOP:]
@@ -1209,7 +1209,7 @@ def r6_plan(table: dict) -> dict:
         return {"stage": "fixed", "next": missing}
     out: dict = {"cap_params": cap, "next": []}
     # reproduction
-    gate = json.loads(Path(rdoc["gate_transcript"]["path"]).read_text())
+    gate = json.loads(from_record_path(rdoc["gate_transcript"]["path"]).read_text())
     g_by = {f"{r['id']}:q{r['q']}": r["max_abs_dp"] for r in gate["runs"]}
     rows = [f"{a}:q{b}" for a, b in rdoc["rows"]]
     gw = max(g_by[r] for r in rows)
@@ -1305,7 +1305,7 @@ def r6_merge(args) -> None:
     table, procs = r6_load_parts()
     p = r6_plan(table)
     params, table_params = r6_module_params()
-    gate = json.loads(Path(rdoc["gate_transcript"]["path"]).read_text())
+    gate = json.loads(from_record_path(rdoc["gate_transcript"]["path"]).read_text())
     g_by = {f"{r['id']}:q{r['q']}": r["max_abs_dp"] for r in gate["runs"]}
     rows = [f"{a}:q{b}" for a, b in rdoc["rows"]]
     top, rand = rows[:R6_N_TOP], rows[R6_N_TOP:]

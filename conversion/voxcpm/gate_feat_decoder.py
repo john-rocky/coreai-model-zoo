@@ -1,5 +1,9 @@
 # Community port — NOT an Apple model.
-"""Gate the CFM feat_decoder (LocDiT + euler loop) vs the oracle, with host-supplied z noise."""
+"""Gate the CFM feat_decoder (LocDiT + euler loop) vs the oracle, with host-supplied z noise.
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
+"""
 from __future__ import annotations
 
 import glob

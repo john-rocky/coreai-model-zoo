@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from _paths import exports_dir, work_path  # noqa: E402
+from _paths import exports_dir, from_record_path, record_path, work_path  # noqa: E402
 
 MODEL_ID = "ibm-granite/granite-embedding-97m-multilingual-r2"
 MODEL_SHA = "835ad14087e140460703cf0fae09f97d469d65c2"
@@ -54,12 +54,22 @@ def sha256_of(path: Path) -> str:
 
 
 def hashes(paths) -> dict[str, str]:
-    return {str(Path(p)): sha256_of(Path(p)) for p in paths}
+    """sha256 per file, keyed by its `record_path` name (records are published: no absolute path)."""
+    return {record_path(p): sha256_of(Path(p)) for p in paths}
+
+
+def recorded_hash(record: dict[str, str], path: Path) -> str:
+    """The digest a `hashes` record holds for `path` (records written before `record_path` key it by
+    the absolute path)."""
+    for key in (record_path(path), str(path)):
+        if key in record:
+            return record[key]
+    raise KeyError(f"no hash recorded for {record_path(path)}")
 
 
 def verify_hashes(records: dict[str, str]) -> None:
     for name, digest in records.items():
-        actual = sha256_of(Path(name))
+        actual = sha256_of(from_record_path(name))
         if actual != digest:
             raise ValueError(f"Hash changed since gate: {name}")
 

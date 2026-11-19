@@ -62,7 +62,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 import export_decoder as ed  # noqa: E402
-from _paths import work_path  # noqa: E402
+from _paths import record_argv, work_path  # noqa: E402
 
 LANE = work_path("_d1_3b")
 TOY_SNAPSHOT = LANE / "oracle_toy_vision" / "toy_snapshot"
@@ -392,7 +392,7 @@ def main() -> None:
         sys.exit(f"{args.record} exists: records are never overwritten")
     record: dict = {"name": name, "dtype": args.dtype, "attention": args.attention, "toy": args.toy,
                     "toy_seed": args.toy_seed if args.toy else None, "hf_id": ed.MODEL["hf_id"],
-                    "revision": ed.MODEL["revision"], "argv": sys.argv[1:], "pid": os.getpid(), "started": ed.now(),
+                    "revision": ed.MODEL["revision"], "argv": record_argv(sys.argv[1:]), "pid": os.getpid(), "started": ed.now(),
                     "script_sha256": ed.sha256_file(Path(__file__).resolve()),
                     "module_sha256": ed.sha256_file(HERE / "lfm2_vl_tower.py")}
 

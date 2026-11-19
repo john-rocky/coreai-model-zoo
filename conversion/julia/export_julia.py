@@ -53,7 +53,7 @@ from coreai_torch import TorchConverter, get_decomp_table
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (CLS_ID, HEAD_LENGTH, MASK_ID, MODEL_ID, MODEL_SHA, OPTION_TOKENS, PAD_ID, SEP_ID,  # noqa: E402
                      environment, export_root, file_inventory, hashes, load_rows, oracle_dir, results_dir,
-                     row_inputs, sha256_of, subset, verify_hashes, verify_source, write_json)
+                     record_path, row_inputs, sha256_of, subset, verify_hashes, verify_source, write_json)
 from _gate_metrics import POLICY, evaluate_row, summarize  # noqa: E402
 from _julia_host import gather_markers  # noqa: E402
 from _julia_model import MainGraph, load_julia  # noqa: E402
@@ -242,7 +242,7 @@ def main():
                               "rows_in_window": len(rows),
                               **{k: summary.get(k) for k in ("rows", "argmax_identical", "max_probability_error",
                                                              "max_marker_abs_error", "typed_accuracy")}},
-        "authoring_records": [str(p) for p in authoring_paths],
+        "authoring_records": [record_path(p) for p in authoring_paths],
         "runtime_gate": "NOT RUN — gate_julia_runtime.py <this folder> --compute cpu_only|gpu",
         "environment": environment(),
         "input_hashes": hashes([*authoring_paths, oracle_dir() / "rows.json", Path(__file__),

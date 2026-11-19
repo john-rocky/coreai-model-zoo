@@ -69,7 +69,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import code_path, hf_snapshot, repo_root, work_path  # noqa: E402
+from _paths import code_path, hf_snapshot, record_path, repo_root, work_path  # noqa: E402
 from host import (MODEL_ID, MODEL_SHA, QTYPES, RawTokenizer, as_question, escape, image_crops,  # noqa: E402
                   image_prefix_length, layout, serialize)
 
@@ -767,7 +767,7 @@ def make_images() -> dict:
         "schema": "d1-omni-images/1", "written_by": "conversion/d1_omni/make_fixtures.py (make_images)",
         "rule": "pictures only from the two sieved pools below, read only; nothing generated or downloaded here; "
                 "no person, no legible text or logo, no existing design (each file looked at by eye at full size)",
-        "pools": {k: {"dir": str(v["dir"]), "manifest": str(image_manifest(v["manifest"])),
+        "pools": {k: {"dir": record_path(v["dir"]), "manifest": record_path(image_manifest(v["manifest"])),
                       "manifest_sha256": v["manifest_sha256"], "license": v["license"]} for k, v in IMAGE_POOLS.items()},
         "images": items,
         "summary": {"public": sum(i["public"] for i in items), "measured_only": sum(not i["public"] for i in items),
@@ -1022,7 +1022,7 @@ def main() -> int:
             "images": {"status": "made (round 5)", "manifest": made["path"], "manifest_sha256": made["sha256"],
                        "rule": "CC0 photographs or own FLUX.2 klein output from two sieved pools, read only; no "
                                "person, no legible text or logo, no existing design (looked at by eye)",
-                       "pools": {k: {"manifest": str(image_manifest(v["manifest"])),
+                       "pools": {k: {"manifest": record_path(image_manifest(v["manifest"])),
                                      "manifest_sha256": v["manifest_sha256"], "license": v["license"]}
                                  for k, v in IMAGE_POOLS.items()}},
             "audio": {"synth": SYNTH, "synth_r6": SYNTH_R6, "script_file": "audio/script.json",

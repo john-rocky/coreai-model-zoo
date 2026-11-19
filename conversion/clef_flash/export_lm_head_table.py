@@ -43,7 +43,7 @@ import numpy as np
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_path, work_path  # noqa: E402
 
 os.environ.setdefault("HF_HOME", str(work_path("_clefflash", "hf")))
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
@@ -169,7 +169,7 @@ def main() -> int:
         assert got == want, (name, got, want)
         shutil.copyfile(src, out / name)
         assert sha256_file(out / name) == want
-        copies[name] = {"bytes": (out / name).stat().st_size, "sha256": want, "source": str(src.resolve())}
+        copies[name] = {"bytes": (out / name).stat().st_size, "sha256": want, "source": record_path(src.resolve())}
 
     shard_sha = sha256_file(shard)
     assert shard_sha == SHARD_SHA256, shard_sha

@@ -1,6 +1,10 @@
 """S3Gen Mac-engine gate: each exported Core AI graph vs its eager output (export fidelity),
 + the patched-eager full pipeline vs the oracle wav (patch is lossless). Run in the coreai venv
-(chatterbox installed via uv)."""
+(chatterbox installed via uv).
+
+Reads chatterbox_oracle.npz from $SCRATCH: set SCRATCH to the folder that holds it (oracle_chatterbox.py
+writes it there; unset: chatterbox_scratch under the system temp folder).
+"""
 import asyncio
 import os
 import numpy as np

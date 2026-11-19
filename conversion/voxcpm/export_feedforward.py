@@ -4,6 +4,9 @@
   vocoder      : AudioVAE decoder       : latents[1,64,T] -> wav[1,1,640T]
 
   python export_feedforward.py [--which feat_encoder|vocoder] [--mode fp16|fp32] [--vae-frames 12]
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
 """
 from __future__ import annotations
 

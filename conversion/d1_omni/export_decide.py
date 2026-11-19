@@ -73,7 +73,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_argv, record_path, work_path  # noqa: E402
 
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
@@ -139,8 +139,8 @@ def environment(packages=("torch", "coreai-torch", "coreai-core", "coreai-opt", 
             "machine": _command(["sysctl", "-n", "machdep.cpu.brand_string"]),
             "macos_version": _command(["sw_vers", "-productVersion"]),
             "macos_build": _command(["sw_vers", "-buildVersion"]),
-            "python": platform.python_version(), "executable": sys.executable, "packages": versions,
-            "torch_threads": torch.get_num_threads(), "argv": sys.argv, "pid": os.getpid()}
+            "python": platform.python_version(), "executable": record_path(sys.executable), "packages": versions,
+            "torch_threads": torch.get_num_threads(), "argv": record_argv(sys.argv), "pid": os.getpid()}
 
 
 def bundle_dir(precision: str, seq_len: int) -> Path:

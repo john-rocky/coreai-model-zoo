@@ -113,7 +113,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_argv, work_path  # noqa: E402
 
 LANE = work_path("_kev")
 os.environ.setdefault("HF_HOME", str(LANE / "hf"))
@@ -894,7 +894,7 @@ def main() -> None:
     out_dir = Path(args.bundle_dir).expanduser().resolve() if args.bundle_dir else Path(args.out_dir) / "bundles" / name
     aot_dir = Path(args.out_dir) / "bundles_aotc"
     record: dict = {"mode": args.mode, "model": args.model, "name": name, "hf_id": args.hf_id, "weights_sha256": WEIGHTS_SHA256,
-                    "prefill_chunk": args.prefill_chunk, "gdn_scan": args.gdn_scan, "argv": sys.argv[1:], "pid": os.getpid(),
+                    "prefill_chunk": args.prefill_chunk, "gdn_scan": args.gdn_scan, "argv": record_argv(sys.argv[1:]), "pid": os.getpid(),
                     "started": datetime.now().astimezone().isoformat(timespec="seconds"),
                     "script_sha256": sha256_file(Path(__file__).resolve()),
                     "module_sha256": sha256_file(HERE / "qwen3_5_kev_decoder.py")}

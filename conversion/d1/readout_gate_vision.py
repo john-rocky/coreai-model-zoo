@@ -73,7 +73,7 @@ sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 import host  # noqa: E402
 import vision_host as vh  # noqa: E402
-from _paths import gpu_lock, work_path  # noqa: E402
+from _paths import gpu_lock, record_path, work_path  # noqa: E402
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
@@ -687,7 +687,7 @@ def gate(args) -> int:
         "decoder": dec.record(), "tower": tow.record(),
         "oracle": {"path": str(oracle_path), "sha256": sha256_file(oracle_path), "schema": odoc["schema"],
                    "fixtures_sha256": odoc["fixtures"]["sha256"], "hidden_dir": str(hidden_dir)},
-        "tower_oracle": {"path": str(Path(args.tower_oracle).resolve()), "sha256": sha256_file(Path(args.tower_oracle)),
+        "tower_oracle": {"path": record_path(Path(args.tower_oracle).resolve()), "sha256": sha256_file(Path(args.tower_oracle)),
                          "position_table_sha256": tdoc["position_table"]["sha256"]},
         "records": {"path": str(records_path), "sha256": sha256_file(records_path), "skipped": skipped,
                     "checks": rec_checks},

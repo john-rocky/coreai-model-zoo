@@ -20,8 +20,12 @@ import json
 import math
 import os
 from pathlib import Path
+import sys
 import time
 import traceback
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _paths import record_path  # noqa: E402
 
 LICENSE = "cc-by-nc-4.0"
 ADAPTER_REPO = "pngwn/system-one-qwen3.5-4b-scorer"
@@ -396,8 +400,8 @@ def main():
                 for a,b in zip(canonical["questions"],fixture["questions"])]
             max_dp = max(q["max_abs_delta_p"] for q in questions)
             record = {"schema": "coreai-scalar-oracle-comparison/1", "license": LICENSE,
-                "canonical": str(args.compare.resolve()), "canonical_sha256_before": canonical_sha_before,
-                "canonical_sha256_after": sha256(args.compare), "candidate": str(out), "candidate_sha256": sha256(out),
+                "canonical": record_path(args.compare.resolve()), "canonical_sha256_before": canonical_sha_before,
+                "canonical_sha256_after": sha256(args.compare), "candidate": record_path(out), "candidate_sha256": sha256(out),
                 "canonical_model": "unmerged PEFT CPU fp32", "candidate_model": "PEFT merge_and_unload in-memory CPU fp32",
                 "rows": len(fixture["rows"]), "questions": questions, "ids_and_truncation_identical": ids_identical,
                 "argmax_agreement": sum(q["argmax_equal"] for q in questions), "max_abs_delta_p": max_dp,

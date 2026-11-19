@@ -6,6 +6,9 @@ export_backbone.py. Only the decode bundle is produced — prefill runs through 
 
   python export_backbone_int8.py --which base   # -> artifacts/voxcpm_base_int8_decode_cl512
   python export_backbone_int8.py --which res
+
+The base gate reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
 """
 from __future__ import annotations
 

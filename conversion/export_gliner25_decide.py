@@ -55,7 +55,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from _paths import exports_dir, hf_snapshot
+from _paths import exports_dir, hf_snapshot, record_path
 
 MODEL_ID = "fastino/GLiNER2.5-Decide"
 MODEL_REV = "7ee5da4c2415e32259bcdc0b1a7367c32ce8d6f6"
@@ -562,7 +562,7 @@ def main():
               f"max|dlogit| {sp['max_abs_dlogit']:.3f}")
     write_json(res_dir / f"{gate_name}.json", {
         "header": {"kind": "gliner25-decide-gate-engine", "created": started, "model_rev": MODEL_REV,
-                   "bundle": str(gate_path), "bundle_bytes": bundle_size, "dtype": args.dtype, "S": S,
+                   "bundle": record_path(gate_path), "bundle_bytes": bundle_size, "dtype": args.dtype, "S": S,
                    "MMAX": MMAX, "relpos": args.relpos,
                    "path": "AOT .aimodelc (coreai-build macOS h16c gpu), default()" if args.aot
                    else "JIT, SpecializationOptions.from_preferred_compute_unit_kind(gpu)",

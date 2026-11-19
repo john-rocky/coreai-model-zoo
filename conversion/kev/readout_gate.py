@@ -104,7 +104,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import gpu_lock, hf_snapshot, work_path  # noqa: E402
+from _paths import gpu_lock, hf_snapshot, record_path, work_path  # noqa: E402
 
 LANE = work_path("_kev")
 os.environ.setdefault("HF_HOME", str(LANE / "hf"))
@@ -1125,7 +1125,7 @@ def gate(args) -> int:
     red = None
     if red_recs:
         rruns, rprocs, rarr = collect(red_recs)
-        red = {"rows_file": str(READOUT / "red_arms.json"), "rows_file_sha256": sha256_file(READOUT / "red_arms.json"),
+        red = {"rows_file": record_path(READOUT / "red_arms.json"), "rows_file_sha256": sha256_file(READOUT / "red_arms.json"),
                "pairs": red_doc["pairs"], "not_token": red_doc["not_token"], "process": rprocs,
                **score_red(head, recs, red_doc, rarr, {(i, q): a["hidden"] for (i, q, v), a in arrays.items()
                                                        if v == "base"})}
@@ -1148,7 +1148,7 @@ def gate(args) -> int:
         "oracle": {"path": str(ORACLE / "records_oracle.json"), "sha256": sha256_file(ORACLE / "records_oracle.json"),
                    "checkpoint": doc["model"]["checkpoint"], "versions": doc["versions"]},
         "model": args.model, "head": head.provenance,
-        "subset": args.subset, "rows_file": ({"path": str(Path(args.rows).resolve()), "sha256": sha256_file(Path(args.rows))}
+        "subset": args.subset, "rows_file": ({"path": record_path(Path(args.rows).resolve()), "sha256": sha256_file(Path(args.rows))}
                                              if args.rows else None),
         "subset_file": ({"path": str(s80_path), "sha256": sha256_file(s80_path)} if args.subset == "s80" else None),
         "script": {"path": "conversion/kev/readout_gate.py", "sha256": sha256_file(Path(__file__).resolve())},
@@ -1241,11 +1241,11 @@ def red_cmd(args) -> int:
     record = {
         "schema": "kev-decoder-readout-red-arms/1",
         "bundle": bundle_record(bundle, aimodelc), "chunk": S, "max_ctx": max_ctx,
-        "rows_file": {"path": str(red_file), "sha256": sha256_file(red_file), "version": red_doc.get("version", 1)},
+        "rows_file": {"path": record_path(red_file), "sha256": sha256_file(red_file), "version": red_doc.get("version", 1)},
         "model": args.model, "head": head.provenance,
         "oracle": {"path": str(ORACLE / "records_oracle.json"), "sha256": sha256_file(ORACLE / "records_oracle.json"),
                    "checkpoint": doc["model"]["checkpoint"]},
-        "gate_transcript": {"path": str(Path(args.gate_transcript).resolve()),
+        "gate_transcript": {"path": record_path(Path(args.gate_transcript).resolve()),
                             "sha256": sha256_file(Path(args.gate_transcript)), "result": gate_t["result"]},
         "script": {"path": "conversion/kev/readout_gate.py", "sha256": sha256_file(Path(__file__).resolve())},
         "environment": env_record(), "gpu_lock": {"start": lock_start, "end": lock_end},

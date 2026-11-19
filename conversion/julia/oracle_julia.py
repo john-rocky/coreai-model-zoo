@@ -52,7 +52,7 @@ import torch  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (CLS_ID, HEAD_LENGTH, HIDDEN, MASK_ID, MODEL_ID, MODEL_SHA, PAD_ID,  # noqa: E402
-                     PUBLISHED_TYPED_CPU, QTYPES, SEP_ID, SOURCE_SHA256, WINDOWS, environment, hashes,
+                     PUBLISHED_TYPED_CPU, QTYPES, SEP_ID, SOURCE_SHA256, WINDOWS, environment, hashes, record_path,
                      oracle_dir, parity_path, parity_requests, results_dir, dataset_path, typed_requests,
                      verify_source, work_dir, write_json)
 
@@ -215,7 +215,7 @@ def main():
     if author_file.exists():
         author = [json.loads(line) for line in author_file.read_text().splitlines() if line.strip()]
         same = sum(a["prediction"] == r["prediction"] and a["id"] == r["row_id"].split(":", 1)[1] for a, r in zip(author, typed))
-        author_check = {"file": str(author_file), "rows": len(author), "identical_predictions": same}
+        author_check = {"file": record_path(author_file), "rows": len(author), "identical_predictions": same}
         print("vs the publisher's reproduce_typed.py predictions", author_check, flush=True)
 
     # 3. the publisher's parity requests, built the way its parity.py built them (head 256, strict).
@@ -384,7 +384,7 @@ def main():
         "code_path_diagnostics": diagnostics, "sliding_pad_rows": pad_rows, "determinism_max_abs": determinism,
         "environment": environment(("torch", "transformers", "tokenizers", "safetensors", "numpy", "pyarrow")),
         "transformers": transformers.__version__, "source_sha256": SOURCE_SHA256,
-        "data": {"dataset": str(dataset_path()), "parity": str(parity_path())},
+        "data": {"dataset": record_path(dataset_path()), "parity": record_path(parity_path())},
         "output_hashes": hashes(output_files), "seconds": time.perf_counter() - started,
     }
     write_json(results_dir() / "oracle.json", report)

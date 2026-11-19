@@ -45,7 +45,7 @@ from _gate_metrics import POLICY, evaluate_row, summarize, wrong_pairing  # noqa
 from _laya_host import act_features, gather_markers  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from _paths import gpu_lock  # noqa: E402
+from _paths import gpu_lock, record_path  # noqa: E402
 
 DRIFT_BAR = 1e-6
 
@@ -88,7 +88,7 @@ def other_gpu_jobs() -> list[str]:
 
 def lock_openers(path: Path) -> list[str]:
     pids = subprocess.run(["lsof", "-t", str(path)], capture_output=True, text=True).stdout.split()
-    return [f"{pid} {_ps(int(pid), 'comm')}" for pid in pids if pid.isdigit() and int(pid) != os.getpid()]
+    return [f"{pid} {os.path.basename(_ps(int(pid), 'comm'))}" for pid in pids if pid.isdigit() and int(pid) != os.getpid()]
 
 
 def acquire_gpu_lock(max_wait_s: float):
@@ -113,7 +113,7 @@ def acquire_gpu_lock(max_wait_s: float):
             continue
         jobs = other_gpu_jobs()
         if not jobs:
-            return handle, {"path": str(path), "waited_s": time.monotonic() - started, "attempts": attempts,
+            return handle, {"path": record_path(path), "waited_s": time.monotonic() - started, "attempts": attempts,
                             "other_openers_at_acquire": lock_openers(path)}
         fcntl.flock(handle, fcntl.LOCK_UN)
         if time.monotonic() - started > max_wait_s:

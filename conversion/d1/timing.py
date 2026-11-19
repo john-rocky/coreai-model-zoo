@@ -65,7 +65,7 @@ sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 import host  # noqa: E402
 import vision_host as vh  # noqa: E402
-from _paths import gpu_lock, hf_snapshot, work_path  # noqa: E402
+from _paths import gpu_lock, hf_snapshot, record_path, work_path  # noqa: E402
 
 LANE = work_path("_d1_3b")
 FIXTURES = LANE / "fixtures" / "records.json"
@@ -186,7 +186,7 @@ def worker(args) -> int:
     reqs = item_requests(args.items.split(",") if args.items else None)
     e = Engine(Path(args.bundle), args.aimodelc, args.tower)
     doc: dict = {"pid": os.getpid(), "slot": args.slot, "bundle": e.d1.name, "aimodelc": str(e.d1.aimodelc),
-                 "tower": str(e.tower.aimodelc) if e.tower else None, "executable": sys.executable,
+                 "tower": str(e.tower.aimodelc) if e.tower else None, "executable": record_path(sys.executable),
                  "started": time.time(), "items": []}
 
     async def one(item: dict, pics: dict | None) -> tuple[dict, dict]:
@@ -466,10 +466,10 @@ def cmd_run(args) -> int:
     doc = {"schema": "d1-timing/2", "what": __doc__.splitlines()[0], "bundle": rec, "tower": tower_rec, "tag": tag,
            "contended": contended, "window": window, "warmup": args.warmup, "reps": args.reps,
            "processes": [{k: v for k, v in p.items() if k != "items"} for p in procs],
-           "gate_transcript": ({"path": str(Path(args.gate_transcript).resolve()), "result": gate["result"]} if gate else None),
-           "e2e_transcript": ({"path": str(Path(args.e2e_transcript).resolve()), "result": e2e["result"]} if e2e else None),
+           "gate_transcript": ({"path": record_path(Path(args.gate_transcript).resolve()), "result": gate["result"]} if gate else None),
+           "e2e_transcript": ({"path": record_path(Path(args.e2e_transcript).resolve()), "result": e2e["result"]} if e2e else None),
            "runtime_cache_entries": entries,
-           "machine": {"python": platform.python_version(), "executable": sys.executable, "memory_bytes": int(subprocess.run(
+           "machine": {"python": platform.python_version(), "executable": record_path(sys.executable), "memory_bytes": int(subprocess.run(
                ["sysctl", "-n", "hw.memsize"], capture_output=True, text=True).stdout)},
            "scripts": {n: sha256_file(HERE / n) for n in ("timing.py", "decide.py", "host.py", "vision_host.py", "readout_gate.py")},
            "summary": summary, "raw": str(raw),

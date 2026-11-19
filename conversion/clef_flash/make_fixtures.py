@@ -75,7 +75,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from _paths import code_path, hf_snapshot, work_path  # noqa: E402
+from _paths import code_path, hf_snapshot, record_path, work_path  # noqa: E402
 
 MODEL = "clef-flash"
 HF_ID = "Cloudflare/clef-flash"
@@ -2291,7 +2291,7 @@ def main() -> int:
             "own_image": f"images drawn by make_fixtures.py ({IMAGE_LICENSE}); text written for this fixture",
             "cc0_photo": ("Wikimedia Commons photographs whose extmetadata.LicenseShortName is CC0 (checked at fetch time); "
                           "960 px thumbnails, sha256 pinned in PHOTOS; text written for this fixture"),
-            "semif_authored144": dict(SEMIF, mapping=("state -> state; question -> questions['decision'].instructions; "
+            "semif_authored144": dict(SEMIF, path=record_path(SEMIF["path"]), mapping=("state -> state; question -> questions['decision'].instructions; "
                                                       "options -> criteria {id: description}; type choice; "
                                                       "gold = options[label].id")),
         },

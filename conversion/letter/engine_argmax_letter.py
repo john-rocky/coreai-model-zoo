@@ -38,6 +38,7 @@ from readout_gate_letter import (
     RUN, RUNTIME_STOP, VOCAB_SIZE, alarm_returncode, deadline_for, foreground,
     local_path, remaining, safe_id, sha256, utc_now, validate_rows, validate_tokenization, write_json,
 )
+from _paths import record_path  # noqa: E402  (conversion/ is on sys.path through readout_gate_letter)
 
 ENGINES = ("coreai-pipelined", "coreai-sequential")
 
@@ -182,7 +183,7 @@ def main() -> int:
               "text_comparison_note": "The prescribed comparison uses decoded text; distinct token IDs can decode identically.",
               "oracle_comparison": "Separately count exact text equality to the oracle argmax LABEL letter.",
               "timing": "contended; correctness only, no performance claim",
-              "environment": {"python": sys.version, "deadline_epoch": deadline, "script": str(Path(__file__).resolve()), "script_sha256": sha256(Path(__file__).resolve())},
+              "environment": {"python": sys.version, "deadline_epoch": deadline, "script": record_path(Path(__file__).resolve()), "script_sha256": sha256(Path(__file__).resolve())},
               "started_at": utc_now(), "rows": [], "result": "RUNNING"}
     write_json(transcript, record)
     start = time.monotonic()

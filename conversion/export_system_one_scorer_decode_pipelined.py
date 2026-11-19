@@ -24,6 +24,8 @@ Example: python export_system_one_scorer_decode_pipelined.py int8lin \
 from __future__ import annotations
 import argparse, hashlib, json, os, re, shutil, subprocess, sys, time
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _paths import record_argv, record_path  # noqa: E402
 HF_ID='pngwn/system-one-qwen3.5-4b-scorer'
 REVISION='e6464dce15f013c2ef641593a85cc6afcdaea928'
 BASE_ID='Qwen/Qwen3.5-4B-Base'
@@ -55,7 +57,7 @@ def download(work):
             files.append({'name':item.rfilename,'bytes':path.stat().st_size,'sha256':digest,'lfs_sha256':expected,'lfs_match':digest==expected if expected else None})
         if label=='adapter':assert len(files)==len(info.siblings)
         if label=='base':assert len([f for f in files if f['name'].endswith('.safetensors')and f['lfs_match']])==2
-        record['repositories'][label]={'repo':repo,'revision':rev,'path':str(snapshot),'files':files,'bytes':sum(f['bytes']for f in files)}
+        record['repositories'][label]={'repo':repo,'revision':rev,'path':record_path(snapshot),'files':files,'bytes':sum(f['bytes']for f in files)}
         paths[label]=snapshot;dump(work/'download.json',record)
         print(f'Verified pinned {label}: {snapshot}',flush=True)
     record['status']='PASS';dump(work/'download.json',record);return paths
@@ -213,7 +215,7 @@ def main():
     os.environ.setdefault('HF_HOME',str(Path(args.out_dir)/'.hf-home'))
     Path(os.environ['HF_HOME']).mkdir(parents=True,exist_ok=True)
     for key in ('OMP_NUM_THREADS','MKL_NUM_THREADS','VECLIB_MAXIMUM_THREADS'):os.environ.setdefault(key,'8')
-    rec={'schema':'coreai-scalar-export/1','status':'RUNNING','license':LICENSE,'mode':args.mode,'argv':sys.argv,'started_epoch':time.time()}
+    rec={'schema':'coreai-scalar-export/1','status':'RUNNING','license':LICENSE,'mode':args.mode,'argv':record_argv(sys.argv),'started_epoch':time.time()}
     dump(work/f'export_{args.mode}.json',rec)
     try:
         paths=download(work)

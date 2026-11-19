@@ -34,7 +34,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (HEAD_LENGTH, MODEL_SHA, environment, hashes, oracle_dir, results_dir, source_dir,  # noqa: E402
-                     verify_hashes, write_json)
+                     record_path, recorded_hash, verify_hashes, write_json)
 from _julia_host import Tokenizer, answer, build_row, render_named  # noqa: E402
 
 READOUT_TOLERANCE = 1e-12
@@ -123,7 +123,7 @@ def check_bundle(folder: Path, compute: str, named, rows) -> dict:
         by_type[kind] = {"count": len(of_kind), "correct": sum(r["correct"] for r in of_kind)}
     worst = max(r["max_probability_error"] for r in records)
     status = "PASS" if all(r["argmax_identical"] for r in records) and worst <= BUNDLE_PROBABILITY_BAR else "FAIL"
-    return {"status": status, "folder": str(folder), "compute": compute, "questions": len(records),
+    return {"status": status, "folder": record_path(folder), "compute": compute, "questions": len(records),
             "refused": len(refused), "refused_examples": refused[:5],
             "argmax_identical": sum(r["argmax_identical"] for r in records), "max_probability_error": worst,
             "max_answer_value_error": max(r["answer_value_error"] for r in records),
@@ -139,8 +139,8 @@ def main():
     oracle_record = json.loads((results_dir() / "oracle.json").read_text())
     named_record = json.loads((results_dir() / "oracle_named.json").read_text())
     rows_file, named_file = oracle_dir() / "rows.json", oracle_dir() / "named.json"
-    verify_hashes({str(rows_file): oracle_record["output_hashes"][str(rows_file)],
-                   str(named_file): named_record["output_hashes"][str(named_file)]})
+    verify_hashes({str(rows_file): recorded_hash(oracle_record["output_hashes"], rows_file),
+                   str(named_file): recorded_hash(named_record["output_hashes"], named_file)})
     rows = json.loads(rows_file.read_text())["rows"]
     named = json.loads(named_file.read_text())
     tokenizer = Tokenizer(source_dir() / "tokenizer" / "tokenizer.json")

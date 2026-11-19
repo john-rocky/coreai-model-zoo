@@ -87,7 +87,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 
 LANE = work_path("_clefflash")
 os.environ.setdefault("HF_HOME", str(LANE / "hf"))
@@ -716,7 +716,7 @@ def gate(args) -> int:
                    "source": doc["source"]["hf_id"] + "@" + doc["source"]["revision"], "versions": doc["versions"],
                    "npz_sha256": {f"{i}__{a}": sha256_file(ORACLE / "npz" / f"{i}__{a}.npz") for i, a in expected}},
         "subset": args.subset,
-        "runs_file": ({"path": str(Path(args.runs_file).resolve()), "sha256": sha256_file(Path(args.runs_file)),
+        "runs_file": ({"path": record_path(Path(args.runs_file).resolve()), "sha256": sha256_file(Path(args.runs_file)),
                        "why": json.loads(Path(args.runs_file).read_text()).get("why")} if args.runs_file else None),
         "script": {"path": "conversion/clef_flash/readout_gate.py", "sha256": sha256_file(Path(__file__).resolve())},
         "skipped": ([{"run": "photo_01/native", "reason": "N = 40 x 30 = 1,200 image rows > the graph's 1024-row "

@@ -83,7 +83,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 import host  # noqa: E402
-from _paths import gpu_lock, work_path  # noqa: E402
+from _paths import gpu_lock, record_path, work_path  # noqa: E402
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
@@ -926,7 +926,7 @@ def red_cmd(args) -> int:
     ok = all(checks.values())
     record = {"schema": "d1-decoder-readout-red-arms/1", "red_rule": red_rec["rule"], "bar": BAR, "checks": checks,
               "result": "PASS" if ok else "FAIL", **arms, "bundle": b.record(),
-              "gate_transcript": {"path": str(Path(args.gate_transcript).resolve()),
+              "gate_transcript": {"path": record_path(Path(args.gate_transcript).resolve()),
                                   "sha256": sha256_file(Path(args.gate_transcript)), "result": gate_t["result"]},
               "oracle": {"path": str(oracle_path), "sha256": sha256_file(oracle_path)},
               "script": {"path": "conversion/d1/readout_gate.py", "sha256": sha256_file(Path(__file__).resolve())},

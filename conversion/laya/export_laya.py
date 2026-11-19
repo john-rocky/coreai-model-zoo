@@ -63,7 +63,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (CLS_ID, HEAD_MAX_LEN, HIDDEN, MASK_ID, MODEL_ID, MODEL_SHA, OPTION_TEXT_TOKENS, PAD_ID,  # noqa: E402
                      SEP_ID, SOURCE_MAX_LEN, SUBFOLDER, environment, export_root, file_inventory, fixtures_dir,
                      hashes, load_calibration, load_rows, oracle_dir, results_dir, row_inputs, sha256_of,
-                     verify_hashes, verify_source, write_json)
+                     record_path, recorded_hash, verify_hashes, verify_source, write_json)
 from _gate_metrics import POLICY, evaluate_row, summarize  # noqa: E402
 from _laya_host import act_features, gather_markers  # noqa: E402
 from _laya_model import ActGraph, FP16_RECIPE, MainGraph, load_laya  # noqa: E402
@@ -253,7 +253,7 @@ def main():
 
     oracle_record = json.loads((results_dir() / "oracle.json").read_text())
     outputs = oracle_dir() / f"outputs_s{args.window}.npz"
-    oracle_hash = oracle_record["output_hashes"][str(outputs)]
+    oracle_hash = recorded_hash(oracle_record["output_hashes"], outputs)
     verify_hashes({str(outputs): oracle_hash})
     with np.load(outputs) as data:
         oracle = {k: data[k] for k in data.files}
@@ -317,7 +317,7 @@ def main():
                               **{k: summary.get(k) for k in ("argmax_identical", "choice_score_rows", "max_probability_error",
                                                              "max_act_probability_error", "max_marker_abs_error",
                                                              "max_act_relative_error", "tensor_status")}},
-        "authoring_records": [str(p) for p in authoring_paths],
+        "authoring_records": [record_path(p) for p in authoring_paths],
         "runtime_gate": "NOT RUN — gate_laya_runtime.py <this folder> --compute cpu_only|gpu|neural_engine",
         "environment": environment(),
         "input_hashes": hashes([*authoring_paths, outputs, Path(__file__), Path(__file__).parent / "_laya_model.py",

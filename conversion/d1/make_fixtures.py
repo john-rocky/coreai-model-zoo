@@ -60,7 +60,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 import host  # noqa: E402
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_path, work_path  # noqa: E402
 
 LANE = work_path("_d1_3b")
 MODEL = {"hf_id": "LiquidAI/d1-3B", "revision": "da1fe36a861f24690f27f622dca1d8688503d113",
@@ -263,7 +263,7 @@ def heldout_main(out: Path) -> int:
         "summary": {**summarize(records, refused), "checks_against_records_json": checks},
         "sources": {
             "kev_heldout": {**{k: v for k, v in KEV_HELDOUT.items() if k != "local_copy"},
-                            "path": KEV_HELDOUT["local_copy"],
+                            "path": record_path(KEV_HELDOUT["local_copy"]),
                             "kev_file": {k: kev[k] for k in ("schema", "role", "model", "checkpoint")},
                             "transfer_v4": kev["sources"]["transfer_v4"],
                             "copied": len(records), "ids": "Kev's, unchanged",

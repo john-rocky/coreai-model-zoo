@@ -303,7 +303,8 @@ def main() -> int:
 
     rec["versions"] = {"torch": torch.__version__, "coreai_torch": getattr(coreai_torch, "__version__", None),
                        "coreai": getattr(coreai, "__version__", None)}
-    rec["df_g_home"] = subprocess.run(["df", "-g", str(Path.home())], capture_output=True, text=True).stdout.strip().splitlines()[-1]
+    df_line = subprocess.run(["df", "-g", str(Path.home())], capture_output=True, text=True).stdout.strip().splitlines()[-1]
+    rec["df_g_home"] = " ".join(df_line.split(None, 8)[:8])  # the mount point (last column) names this machine's volume
     rec["generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     rec["script_sha256"] = sha256_file(Path(__file__))
     rec["exporter_sha256"] = sha256_file(HERE.parent / "export_qwen3_vl_pipelined.py")

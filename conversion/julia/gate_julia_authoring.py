@@ -35,7 +35,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (MODEL_SHA, environment, hashes, load_rows, oracle_dir, results_dir, row_inputs,  # noqa: E402
-                     subset, verify_hashes, verify_source, write_json)
+                     recorded_hash, subset, verify_hashes, verify_source, write_json)
 from _gate_metrics import POLICY, evaluate_row, summarize  # noqa: E402
 from _julia_host import gather_markers  # noqa: E402
 from _julia_model import MUTATIONS, load_julia  # noqa: E402
@@ -243,7 +243,7 @@ def main():
     oracle_record = json.loads((results_dir() / "oracle.json").read_text())
     assert oracle_record["status"] == "PASS", "the oracle must pass first"
     rows_file = oracle_dir() / "rows.json"
-    verify_hashes({str(rows_file): oracle_record["output_hashes"][str(rows_file)]})
+    verify_hashes({str(rows_file): recorded_hash(oracle_record["output_hashes"], rows_file)})
     rows = load_rows(args.window)
     model = load_julia(source, args.window, precision=args.dtype)
 

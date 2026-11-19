@@ -59,7 +59,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 
 LANE = work_path("_kev")
 SWIFT = LANE / "swift"
@@ -536,8 +536,8 @@ def score_set(model: str, set_name: str, sw_path: Path, only: list[str] | None =
             "footprint": {k: sw.get(k) for k in ("footprint_start_bytes", "footprint_after_load_bytes", "footprint_bytes_min_max",
                                                  "footprint_end_bytes")},
             "environment": sw.get("environment"),
-            "references": {"oracle": str(ORACLES[(model, set_name)]), "gate": str(GATES[(model, set_name)]),
-                           "gate_sha256": sha256_file(GATES[(model, set_name)]), "e2e": str(E2E[(model, set_name)]),
+            "references": {"oracle": record_path(ORACLES[(model, set_name)]), "gate": record_path(GATES[(model, set_name)]),
+                           "gate_sha256": sha256_file(GATES[(model, set_name)]), "e2e": record_path(E2E[(model, set_name)]),
                            "e2e_sha256": sha256_file(E2E[(model, set_name)])},
             "summary": summ, "checks": checks, "result": "PASS" if all(checks.values()) else "FAIL", "rows": rows_out}
 
@@ -550,7 +550,7 @@ def package_record() -> dict:
         rec["resolved"] = {p["identity"]: p["state"].get("version") or p["state"].get("revision")
                            for p in json.loads(resolved.read_text()).get("pins", [])}
     if BIN.exists():
-        rec["binary"] = {"path": str(BIN), "sha256": sha256_file(BIN), "bytes": BIN.stat().st_size}
+        rec["binary"] = {"path": record_path(BIN), "sha256": sha256_file(BIN), "bytes": BIN.stat().st_size}
     return rec
 
 
@@ -591,9 +591,9 @@ def cmd_score(args) -> int:
             print("   ", f)
     rec["result"] = "PASS" if all(p["result"] == "PASS" for p in rec["sets"].values()) else "FAIL"
     if args.bundle:
-        rec["bundle_override"] = {"bundle": str(BUNDLES[args.model]),
-                                  "gates": {k[1]: str(v) for k, v in GATES.items() if k[0] == args.model},
-                                  "e2e": {k[1]: str(v) for k, v in E2E.items() if k[0] == args.model}}
+        rec["bundle_override"] = {"bundle": record_path(BUNDLES[args.model]),
+                                  "gates": {k[1]: record_path(v) for k, v in GATES.items() if k[0] == args.model},
+                                  "e2e": {k[1]: record_path(v) for k, v in E2E.items() if k[0] == args.model}}
     out = Path(args.transcript or RESULTS / f"swift_gate_{args.model}.json")
     if args.bundle and out.exists():
         raise SystemExit(f"{out} exists: records are never overwritten")
@@ -634,7 +634,7 @@ def cmd_negative(args) -> int:
     dest = Path(args.out) if getattr(args, "out", None) else RESULTS / "swift_negative_control.json"
     if getattr(args, "out", None) and dest.exists():
         raise SystemExit(f"{dest} exists: records are never overwritten")
-    rec.update({"bundle": str(BUNDLES["kev-0.8b"]), "binary": str(BIN)})
+    rec.update({"bundle": record_path(BUNDLES["kev-0.8b"]), "binary": record_path(BIN)})
     dest.write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n")
     print(json.dumps({k: rec[k] for k in ("changed_instructions", "results", "red")}, ensure_ascii=False))
     return 0 if rec["red"] else 1

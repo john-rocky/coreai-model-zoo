@@ -63,7 +63,7 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_argv, record_path, work_path  # noqa: E402
 
 import host  # noqa: E402
 
@@ -107,8 +107,8 @@ def environment(packages) -> dict:
         except metadata.PackageNotFoundError:
             versions[name] = None
     return {"date": datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat(timespec="seconds"),
-            "python": platform.python_version(), "executable": sys.executable, "packages": versions,
-            "argv": sys.argv, "pid": os.getpid(), "macos": platform.mac_ver()[0]}
+            "python": platform.python_version(), "executable": record_path(sys.executable), "packages": versions,
+            "argv": record_argv(sys.argv), "pid": os.getpid(), "macos": platform.mac_ver()[0]}
 
 
 def compare(got, want) -> dict:
@@ -575,7 +575,7 @@ def runtime(args) -> int:
                   "note": "the bar for the shipped forms is end to end (vision_e2e_<p>.json); the eager prefix bar "
                           "is shown for reference"}
     e2e_doc = {**common, "status": "PASS" if shipped == "PASS" and control == "FAIL" else "FAIL",
-               "bar": SHIP_BAR, "decide": {str(k): {"folder": str(Path(v[0]).parent), "aimodelc": Path(v[0]).name,
+               "bar": SHIP_BAR, "decide": {str(k): {"folder": record_path(Path(v[0]).parent), "aimodelc": Path(v[0]).name,
                                                     "precision": v[1]["precision"], "seq_len": v[1]["seq_len"],
                                                     "hashes": v[1]["hashes"]} for k, v in sorted(decide.items())},
                "rows": len(rows), "repeat_drift_max": max(drifts), "summaries": summaries,

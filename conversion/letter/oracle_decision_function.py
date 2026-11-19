@@ -50,6 +50,9 @@ import sys
 import time
 import traceback
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _paths import record_path  # noqa: E402
+
 HF_ID = "chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-MLX-bf16"
 REVISION = "69a91b6778df7d11b9e13e0f7d4c6a5aa6ad1bc5"
 SOURCE_SHA256 = "95fc80a9c0bb7dbecd29896d67b6de1ba3306870dc7018bb4a240c9d63d00649"
@@ -282,9 +285,9 @@ def arm_deadline(deadline):
 
 
 def environment():
-    return {"python": sys.version, "interpreter": sys.executable,
+    return {"python": sys.version, "interpreter": record_path(sys.executable),
             "packages": {d.metadata["Name"]: d.version for d in importlib.metadata.distributions()},
-            "environment": {key: os.environ.get(key) for key in (
+            "environment": {key: record_path(os.environ[key]) if key in os.environ else None for key in (
                 "HF_HOME", "HF_HUB_DISABLE_XET", "HF_HUB_OFFLINE", "OMP_NUM_THREADS")},
             "timing": "correctness only; may be contended"}
 

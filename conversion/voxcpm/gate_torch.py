@@ -4,6 +4,9 @@
 Loads the VoxCPM-0.5B checkpoint into the standalone overlay, replays the oracle's captured
 prefill input + per-step decode inputs (continuous ``inputs_embeds`` + positions), and checks
 cosine similarity of every hidden against ``oracle_ref.npz``. Pass = cos >= 0.999 everywhere.
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
 """
 from __future__ import annotations
 

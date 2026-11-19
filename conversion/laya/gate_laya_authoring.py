@@ -39,7 +39,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import (MODEL_SHA, SUBSET, environment, hashes, load_rows, oracle_dir, results_dir,  # noqa: E402
-                     row_inputs, verify_hashes, verify_source, write_json)
+                     recorded_hash, row_inputs, verify_hashes, verify_source, write_json)
 from _gate_metrics import POLICY, evaluate_row, summarize  # noqa: E402
 from _laya_host import act_features, gather_markers  # noqa: E402
 from _laya_model import FP16_RECIPE, FP32_ISLANDS, MUTATIONS, load_laya  # noqa: E402
@@ -198,7 +198,7 @@ def main():
     oracle_record = json.loads((results_dir() / "oracle.json").read_text())
     assert oracle_record["status"] == "PASS", "the oracle must pass first"
     outputs = oracle_dir() / f"outputs_s{args.window}.npz"
-    verify_hashes({str(outputs): oracle_record["output_hashes"][str(outputs)]})
+    verify_hashes({str(outputs): recorded_hash(oracle_record["output_hashes"], outputs)})
     with np.load(outputs) as data:
         oracle = {k: data[k] for k in data.files}
     rows = load_rows(args.window)

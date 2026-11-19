@@ -216,7 +216,7 @@ def strip_one(name: str, cb: str) -> dict:
                 "source": sum(before.values()), "stripped": sum(after.values()), "saved_reloaded": sum(reloaded.values()),
                 "export_manifest": manifest["ops_total"], "op_counts": dict(sorted(before.items()))},
         "inspect": {"equal": inspect_equal, "source": inspect_src, "stripped": inspect_out},
-        "local_path_needles": {k: v.decode() for k, v in NEEDLES.items()},
+        "local_path_needles": sorted(NEEDLES),  # what was searched for, by name: the values name this machine
         "other_files_local_paths": others,
         "other_files_note": "cloned unchanged from the source folder (cp -c): the lane's records, which hold the "
                             "lane's paths; the HF staging scrubs what it stages",

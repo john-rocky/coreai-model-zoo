@@ -5,6 +5,9 @@ FSQ, stop head) runs host-side (numpy/torch) — exactly what the Swift/CoreAIKi
 
   python engine_generate.py --reproduce-oracle   # seed0 oracle text -> engine wav, spectral vs oracle
   python engine_generate.py --text "..." [--seed 3] [--max-len 220] [--out engine.wav]
+
+--reproduce-oracle reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it
+(unset: voxcpm_scratch under the system temp folder).
 """
 from __future__ import annotations
 

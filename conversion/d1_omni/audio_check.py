@@ -60,7 +60,7 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_path, work_path  # noqa: E402
 
 import host  # noqa: E402
 import mel_host  # noqa: E402
@@ -739,9 +739,9 @@ def runtime_stage(args) -> int:
     e2e_doc = {**common,
                "status": "PASS" if shipped == "PASS" and shipped_np == "PASS" and control == "FAIL" else "FAIL",
                "bar": SHIP_BAR,
-               "audio": {str(k): {"folder": str(v[0]), "aimodelc": v[1].name, "hashes": v[2]["hashes"]}
+               "audio": {str(k): {"folder": record_path(v[0]), "aimodelc": v[1].name, "hashes": v[2]["hashes"]}
                          for k, v in sorted(audio.items())},
-               "decide": {str(k): {"folder": str(Path(v[0]).parent), "aimodelc": Path(v[0]).name,
+               "decide": {str(k): {"folder": record_path(Path(v[0]).parent), "aimodelc": Path(v[0]).name,
                                    "precision": v[1]["precision"], "seq_len": v[1]["seq_len"], "hashes": v[1]["hashes"]}
                           for k, v in sorted(decide.items())},
                "decide_buckets": list(buckets),

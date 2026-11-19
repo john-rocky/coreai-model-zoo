@@ -9,6 +9,9 @@ Euler loop + AR host-side. The only export snag is the Conformer's streaming chu
 Run (in the coreai venv WITH chatterbox installed via uv):
   cd ~/code/coreai/coreai-models && HF_HUB_DISABLE_XET=1 .venv/bin/python \
     ../coreai-models-community/conversion/chatterbox/export_chatterbox_s3gen.py --out-dir exports
+
+The oracle comes from --oracle, default $SCRATCH/chatterbox_oracle.npz: set SCRATCH to the folder that holds it
+(oracle_chatterbox.py writes it there; unset: chatterbox_scratch under the system temp folder).
 """
 from __future__ import annotations
 

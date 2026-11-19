@@ -41,7 +41,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 from _fixtures import fixtures_path as fixtures_path_for  # noqa: E402
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_path, work_path  # noqa: E402
 
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
@@ -373,7 +373,7 @@ def main() -> int:
                 "blocked_vs_reference": "fp32: round 2's eager bar", "blocked_vs_plain_fp32": "recorded, not a bar"},
         "toy": toy, "full": full,
         "code_sha256": {f: sha256_file(HERE / f) for f in ("block_softmax_check.py", "d1_omni_model.py", "host.py")},
-        "environment": {"python": platform.python_version(), "executable": sys.executable, "torch": torch.__version__,
+        "environment": {"python": platform.python_version(), "executable": record_path(sys.executable), "torch": torch.__version__,
                         "numpy": np.__version__, "torch_threads": torch.get_num_threads(), "pid": os.getpid()},
         "seconds": time.perf_counter() - started,
     }

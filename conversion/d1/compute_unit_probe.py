@@ -69,7 +69,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import gpu_lock, work_path  # noqa: E402
+from _paths import gpu_lock, record_path, work_path  # noqa: E402
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
@@ -730,12 +730,12 @@ def ane_cmd(args) -> int:
     tag = args.tag
     doc = {"schema": "d1-compute-unit-probe/1", "probe": "ane", "status": "running", "started": now(),
            "rules": RULES["ane"], "graphs": graphs, "tag": tag, "note": args.note, "control": not args.no_control,
-           "decoder": {"bundle": str(dec.dir), "gpu_asset": str(dec.aimodelc),
-                       "gpu_gate": str(Path(args.decoder_gate).resolve()),
+           "decoder": {"bundle": record_path(dec.dir), "gpu_asset": record_path(dec.aimodelc),
+                       "gpu_gate": record_path(Path(args.decoder_gate).resolve()),
                        "subset": [f"{r['id']}:{r['k']}" for r in rows]},
-           "tower": {"bundle": str(tow), "gpu_asset": str(tow_gpu), "gpu_gate": str(Path(args.tower_gate).resolve()),
+           "tower": {"bundle": record_path(tow), "gpu_asset": record_path(tow_gpu), "gpu_gate": record_path(Path(args.tower_gate).resolve()),
                      "subset": [c["key"] for c in crops]},
-           "out_dir": str(Path(args.out_dir).resolve()), "work": str(work)}
+           "out_dir": record_path(Path(args.out_dir).resolve()), "work": record_path(work)}
     for g in ("decoder", "tower"):
         if g not in graphs:
             doc[g] = {"skipped": True}
@@ -850,13 +850,13 @@ def noefr_cmd(args) -> int:
     g = next(r for r in gate["runs"] if (r["id"], r["k"]) == (row["id"], row["k"]))
     work = Path(args.work)
     doc = {"schema": "d1-compute-unit-probe/1", "probe": "noefr", "status": "running", "started": now(),
-           "rules": RULES["noefr"], "decoder": {"bundle": str(dec.dir), "efr_asset": str(dec.aimodelc),
-                                                "gpu_gate": str(Path(args.decoder_gate).resolve())},
+           "rules": RULES["noefr"], "decoder": {"bundle": record_path(dec.dir), "efr_asset": record_path(dec.aimodelc),
+                                                "gpu_gate": record_path(Path(args.decoder_gate).resolve())},
            "row": {"id": row["id"], "k": row["k"], "tokens": len(row["ids"]), "gate_index": row["gate_index"],
                    "position_lengths": [(c + 1) * dec.S for c in range(-(-len(row["ids"]) // dec.S))],
                    "efr_asset_record": {"hidden_sha256": g["hidden_sha256"], "max_abs_dp": g["max_abs_dp"],
                                         "call_ms_contended": g["call_ms"], "first_in_process": g["first_in_process"]}},
-           "out_dir": str(Path(args.out_dir).resolve()), "work": str(work), "options": args.options,
+           "out_dir": record_path(Path(args.out_dir).resolve()), "work": record_path(work), "options": args.options,
            "tag": args.tag, "note": args.note}
     open_transcript(out, doc)
     doc["environment"] = env_record()

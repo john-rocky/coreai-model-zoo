@@ -46,7 +46,7 @@ REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 import host  # noqa: E402
-from _paths import work_path  # noqa: E402
+from _paths import record_path, work_path  # noqa: E402
 from readout_gate_vision import BAR, softmax64, tree_digest  # noqa: E402
 
 LANE = work_path("_decider2bv")
@@ -395,7 +395,7 @@ def cmd_score(args) -> int:
     checked: dict = {}
     if args.aot:
         sw = json.loads(Path(args.aot).read_text())
-        sw["_path"] = str(Path(args.aot).resolve())
+        sw["_path"] = record_path(Path(args.aot).resolve())
         rec["s1"] = score_s1(sw, orc)
         rec["s2"] = score_s2(sw)
         rec["s3"] = score_readout(sw, orc, "aot")
@@ -413,7 +413,7 @@ def cmd_score(args) -> int:
         report_readout("S3", rec["s3"])
     if args.alt:
         sw = json.loads(Path(args.alt).read_text())
-        sw["_path"] = str(Path(args.alt).resolve())
+        sw["_path"] = record_path(Path(args.alt).resolve())
         rec["s3_alt"] = score_readout(sw, orc, "aot")
         rec["s3_alt"]["asset_identity"] = asset_identity(sw, checked)
         s1 = score_s1(sw, orc)
@@ -423,7 +423,7 @@ def cmd_score(args) -> int:
         report_readout("S3-alt", rec["s3_alt"])
     if args.jit:
         sw = json.loads(Path(args.jit).read_text())
-        sw["_path"] = str(Path(args.jit).resolve())
+        sw["_path"] = record_path(Path(args.jit).resolve())
         rec["s4"] = score_readout(sw, orc, "jit")
         s1 = score_s1(sw, orc)
         rec["s4"]["s1_same_pass"] = {k: s1[k] for k in ("ids_equal_oracle", "slots_equal_oracle", "result")}
@@ -555,7 +555,7 @@ def cmd_ask(args) -> int:
     ids_equal = [host.IMAGE_PAD if t >= V else t for t in sw["ids"]] == [host.IMAGE_PAD if t >= V else t
                                                                          for t in py["numpy"]["ids"]]
     rec = {"image": str(image) if image else None, "image_sha256": sha256_file(image) if image else None,
-           "grid": grid, "context": sw["context"], "questions": qs, "swift_json": str(Path(args.swift_json).resolve()),
+           "grid": grid, "context": sw["context"], "questions": qs, "swift_json": record_path(Path(args.swift_json).resolve()),
            "rows": rows, "ids_equal": ids_equal, "slots_swift": sw["slots"], "slots_python": py["numpy"]["slots"],
            "patches_sha256_equal_python_resize_bicubic": sw.get("patches_sha256") == py["numpy"].get("patches_sha256"),
            "tower_embeds_sha256_equal_python_resize_bicubic":
@@ -587,7 +587,7 @@ def cmd_timing(args) -> int:
     passes = []
     for p in args.passes:
         sw = json.loads(Path(p).read_text())
-        sw["_path"] = str(Path(p).resolve())
+        sw["_path"] = record_path(Path(p).resolve())
         passes.append(sw)
     lock = json.loads(Path(args.gpu_lock).read_text()) if args.gpu_lock else None
 

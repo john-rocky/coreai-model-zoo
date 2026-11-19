@@ -1,6 +1,10 @@
 # Community port — NOT an Apple model.
 """Engine gate: run the exported base_lm prefill+decode .aimodel bundles on the Core AI engine and
-compare hidden states to the oracle. Shared keyCache/valueCache NDArrays threaded prefill->decode."""
+compare hidden states to the oracle. Shared keyCache/valueCache NDArrays threaded prefill->decode.
+
+Reads oracle_ref.npz from $SCRATCH: set SCRATCH to the folder that holds it (unset: voxcpm_scratch
+under the system temp folder).
+"""
 from __future__ import annotations
 
 import asyncio

@@ -63,7 +63,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
-from _paths import gpu_lock, hf_snapshot, work_path  # noqa: E402
+from _paths import gpu_lock, hf_snapshot, record_argv, record_path, work_path  # noqa: E402
 
 import host  # noqa: E402
 
@@ -253,7 +253,7 @@ def environment() -> dict:
             "memory_bytes": int(_command(["sysctl", "-n", "hw.memsize"]) or 0),
             "macos_version": _command(["sw_vers", "-productVersion"]),
             "macos_build": _command(["sw_vers", "-buildVersion"]), "python": platform.python_version(),
-            "executable": sys.executable, "packages": versions, "argv": sys.argv, "pid": os.getpid()}
+            "executable": record_path(sys.executable), "packages": versions, "argv": record_argv(sys.argv), "pid": os.getpid()}
 
 
 def rule_info() -> dict:

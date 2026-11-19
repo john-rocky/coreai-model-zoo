@@ -49,7 +49,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
-from _paths import hf_snapshot, work_path  # noqa: E402
+from _paths import hf_snapshot, record_argv, work_path  # noqa: E402
 
 os.environ.setdefault("HF_HOME", str(work_path("_clefflash", "hf")))
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
@@ -284,7 +284,7 @@ def main() -> None:
     args = ap.parse_args()
     name = args.name or f"clef_flash_head_{args.shape}_{args.weights}"
     out_dir = Path(args.out_dir) / name
-    record: dict = {"name": name, "argv": sys.argv[1:], "pid": os.getpid(),
+    record: dict = {"name": name, "argv": record_argv(sys.argv[1:]), "pid": os.getpid(),
                     "started": datetime.now().astimezone().isoformat(timespec="seconds"),
                     "script_sha256": sha256_file(Path(__file__).resolve()),
                     "clef_head_sha256": sha256_file(HERE / "clef_head.py")}
