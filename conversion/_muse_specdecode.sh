@@ -54,7 +54,7 @@ Rewrite this class so that push, pop and peek are all O(1) by using a fixed-size
 EOF
 
 cat > "$WORK/tools.txt" <<'EOF'
-Set up the quarterly planning review for the on-device inference team. Find a 90 minute slot where daisuke.majima@example.com, lena.ortiz@example.com and priya.raman@example.com are all free between 2026-08-18T09:00:00-07:00 and 2026-08-20T17:00:00-07:00, book it in Room Kirin with the title "Q3 on-device inference planning review", and put this agenda in the description: decode throughput targets, speculative decoding rollout, quantization backlog, hiring. Then email the same three people to tell them it is booked.
+Set up the quarterly planning review for the on-device inference team. Find a 90 minute slot where taro.yamada@example.com, lena.ortiz@example.com and priya.raman@example.com are all free between 2026-08-18T09:00:00-07:00 and 2026-08-20T17:00:00-07:00, book it in Room Kirin with the title "Q3 on-device inference planning review", and put this agenda in the description: decode throughput targets, speculative decoding rollout, quantization backlog, hiring. Then email the same three people to tell them it is booked.
 EOF
 
 cat > "$WORK/tools.json" <<'EOF'
