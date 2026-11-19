@@ -45,7 +45,7 @@ func runNemotronSelfTest() async {
             bundle = sideload
         } else {
             let art = URL(filePath:
-                "/Users/majimadaisuke/code/coreai/coreai-models-community/conversion/nemotron_asr/artifacts")
+                (NSHomeDirectory() + "/code/coreai/coreai-models-community/conversion/nemotron_asr/artifacts"))
             let stage = URL(filePath: NSTemporaryDirectory()).appending(path: "nemotron_bundle")
             try? fm.removeItem(at: stage)
             try fm.createDirectory(at: stage, withIntermediateDirectories: true)

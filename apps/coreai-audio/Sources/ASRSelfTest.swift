@@ -10,7 +10,7 @@ func runASRSelfTest() async {
     let env = ProcessInfo.processInfo.environment
     let wav = env["ASR_SELFTEST_WAV"] ?? "/tmp/asr_test/ja1.wav"
     let artifacts =
-        "/Users/majimadaisuke/code/coreai/coreai-models-community/conversion/qwen3_asr/artifacts"
+        (NSHomeDirectory() + "/code/coreai/coreai-models-community/conversion/qwen3_asr/artifacts")
     let out = "/tmp/asr_swift_result.txt"
 
     func write(_ s: String) {

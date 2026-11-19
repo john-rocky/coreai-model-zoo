@@ -29,7 +29,7 @@ func runParakeetSelfTest() async {
             bundle = sideload
         } else {
             let art = URL(filePath:
-                "/Users/majimadaisuke/code/coreai/coreai-models-community/conversion/parakeet/artifacts")
+                (NSHomeDirectory() + "/code/coreai/coreai-models-community/conversion/parakeet/artifacts"))
             let stage = URL(filePath: NSTemporaryDirectory()).appending(path: "parakeet_bundle")
             try? fm.removeItem(at: stage)
             try fm.createDirectory(at: stage, withIntermediateDirectories: true)
