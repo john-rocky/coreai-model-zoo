@@ -61,7 +61,10 @@ xcrun devicectl device copy from --device <UDID> --domain-type appDataContainer 
 **7. Publish.** HF upload (`conversion/_<x>_hf_upload.py`: stage → `upload_folder`;
 **patch `tokenizer_class`** at stage time). `zoo/<x>.md` (pipeline, graph contracts, on-device speed,
 "lessons", convert-yourself) + a `models/README.md` row + a **root `README.md`** row (don't forget this
-one). Commit. Draft the X post with the measured RTF.
+one). Commit. Draft the X post with the measured RTF. A later card change to a repo whose `SHA256SUMS`
+lists `README.md` goes up with `python3 scripts/hf_card_push.py push <repo> <card> -m "..."`: the
+README.md line changes in the same commit, and `python3 scripts/hf_card_push.py check <repo>` compares
+the list with the repo (a card edited on the Hub leaves that line stale too).
 
 ## Cross-cutting traps (each cost real time)
 - **Gate before you port — don't trust earlier notes.** Parakeet's notes said "no mel

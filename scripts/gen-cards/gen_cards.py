@@ -241,6 +241,17 @@ def fetch_text(url: str, tries: int = 6) -> str:
     raise RuntimeError(f"gave up on {url} (429 after {tries} tries)")
 
 
+def lists_card_in_sha256sums(repo: str) -> bool:
+    """Whether the repo's SHA256SUMS (absent = no) has a README.md line, which a README uploaded alone leaves stale."""
+    try:
+        sums = fetch_text(f"https://huggingface.co/{repo}/raw/main/SHA256SUMS")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return False
+        raise
+    return re.search(r"(?m)^[0-9a-f]{64}  README\.md$", sums) is not None
+
+
 # ---------------------------------------------------------------- DeviceMark rows
 
 def load_devicemark(data_dir: Path) -> tuple[dict, dict]:
@@ -669,6 +680,11 @@ def main() -> int:
             if args.push:
                 if fetch_text(f"https://huggingface.co/{entry['repo']}/raw/main/README.md") != hf_old:
                     fail(f"HF README changed during this run: {entry['repo']} — rerun to preserve it")
+                    continue
+                if lists_card_in_sha256sums(entry["repo"]):
+                    fail(f"{entry['repo']}: SHA256SUMS lists README.md — push this card with "
+                         f"`python3 scripts/hf_card_push.py push {entry['repo']} {out_path} -m <message>`, "
+                         "which changes that line in the same commit")
                     continue
                 r = run(["hf", "upload", entry["repo"], str(out_path), "README.md",
                          "--commit-message", "gen-cards: regenerate Use-it block"])
