@@ -34,7 +34,7 @@ def main():
     transcript = {
         "model": MODEL_ID, "subfolder": SUBFOLDER, "model_sha": MODEL_SHA, "hf_repo": HF_REPO,
         "gate": ("the publisher's laya 0.3.4 model (transformers 5.17.0, SDPA attention), CPU fp32, each question row "
-                 "alone (batch 1) right-padded to its window; answers from the frozen LiteRT-lane fixture: 201 rows per "
+                 "alone (batch 1) right-padded to its window; answers from the frozen fixture made for the LiteRT port: 201 rows per "
                  "window (37 choice, 44 score, 120 noul), official Agent.predict answers at T=1"),
         "oracle": {"status": oracle["status"], "record": record(results_dir() / "oracle.json", work, "<work>"),
                    "sequence_identity": {w: v["identical"] for w, v in oracle["sequence_identity"].items()},

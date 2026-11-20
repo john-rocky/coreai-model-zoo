@@ -1,11 +1,12 @@
-"""The host half of the graph contract, in NumPy (HOST_CONTRACT §C–§D of the LiteRT lane).
+"""The host half of the graph contract, in NumPy (HOST_CONTRACT.md §D of the LiteRT port).
 
 The graph returns `token_logits` [1,S] and `pooled_cls` [1,768]; everything below is host work,
 written as the exact algorithm the Swift side ports: gather the marker positions, compute the four
 act features from the RAW (untempered) marker softmax, run the act function, then apply the
-question's temperature and decode the answer. The arithmetic and rounding follow the LiteRT lane's
-host_decode.py, which reproduced every official `Agent.predict` answer exactly
-(laya 0.3.4, laya/agent.py and laya/common.py; Apache-2.0).
+question's temperature and decode the answer. The arithmetic and rounding follow the decoder functions
+of the LiteRT port's laya_host.py (the block headed "Conversion host decoder functions"), which its
+HOST_CONTRACT.md §D names the arithmetic reference; that port targets the host behavior of laya 0.3.4
+(laya/agent.py and laya/common.py; Apache-2.0).
 """
 from __future__ import annotations
 

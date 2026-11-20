@@ -16,9 +16,9 @@
     uv run --python 3.12 conversion/laya/oracle_authored144_laya.py
 
 Each authored144 row (id, state, question, three options, integer label) becomes one choice question,
-criteria = {option.id: option.description}, answered by `laya.load(<pinned snapshot>, subfolder=
-"multilingual").predict(state, {...})` with max_len = 256 and = 512 (head_max_len 256), CPU fp32, at two
-temperatures: T = 1 (the checkpoint's config) and the fitted calibration of the LiteRT lane
+criteria = {option.id: option.description}, answered by `laya.load(<snapshot at revision 1c5edc17>,
+subfolder="multilingual").predict(state, {...})` with max_len = 256 and = 512 (head_max_len 256), CPU
+fp32, at two temperatures: T = 1 (the checkpoint's config) and the fitted calibration of the LiteRT port
 (laya_ml_calibration.json set as agent.temperature / agent.temperature_by_options).
 
 The package rounds its probabilities to four decimals; the raw marker logits and act logits are captured

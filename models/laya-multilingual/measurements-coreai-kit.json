@@ -1,8 +1,8 @@
 {
-  "source": "coreai-kit lane measurements (worktree ~/code/coreai-kit-encoder-wt, branch decide-encoder), read from its scratch records and re-checked in this lane against the zoo's own references; not re-run here",
-  "records": "coreai-kit lane scratchpad r2/ (parity-*.txt, bench-*.txt, load-*.txt, tokenizer-footprint-release.txt, gpu-session.log, ids-*.txt) and <work>/laya-multilingual/authored144/kit.*",
+  "source": "measured with CoreAIKit's encoder backend on the branch decide-encoder, which became pull request #40 (https://github.com/john-rocky/coreai-kit/pull/40, merged 2026-09-23 19:50 JST); the Mac numbers were copied from the raw logs of their runs, checked against the zoo's own references and not re-run for this file",
+  "records": "the raw logs of the Mac runs (parity, bench, load, tokenizer footprint, GPU conditions, token ids) and the kit's outputs on SemIf authored144; not published",
   "reported_time_jst": "2026-09-23 14:26–14:36",
-  "catalog_id": "laya-multilingual (valid once the kit pull request lands)",
+  "catalog_id": "laya-multilingual",
   "engine": "EncoderDecider (TypedDecisions encoder backend), GraphModel over the multifunction .aimodel",
   "device": "Apple M4 Max, macOS 27.0 26A428",
   "bundles": {
@@ -17,7 +17,7 @@
       "mlirb_bytes": 645772283
     }
   },
-  "gpu_conditions": "machine-wide GPU lock held (scripts/with-gpu-lock.py) and no other GPU job visible when the runs started (gpu-session.log 14:33:57)",
+  "gpu_conditions": "no other GPU job visible when the runs started (14:33:57 JST)",
   "parity": {
     "fixture": "coreai-encoder-fixtures/1 (models/laya-multilingual/fixtures-laya-multilingual.json), T = [1,1,1]",
     "gpu": {
@@ -83,7 +83,7 @@
           "within_1e-3": 183
         }
       ],
-      "kit_behaviour": "TypedDecisions refuses a .neuralEngine preference for an encoder bundle at load (DecisionError.unsupportedModel; coreai-kit commit c01edc8 on decide-encoder, with a test); the default is .gpu"
+      "kit_behaviour": "TypedDecisions refuses a .neuralEngine preference for an encoder bundle at load (DecisionError.unsupportedModel; coreai-kit commit 3e425fb in pull request #40, with a test); the default is .gpu"
     }
   },
   "latency": {
@@ -126,7 +126,7 @@
       498.0
     ],
     "runs": 7,
-    "note": "ranges over the runs in load-gpu.txt / tokenizer-footprint-release.txt; the tokenizer (256,000-entry tokenizer.json) is most of the load time"
+    "note": "ranges over the runs in the load and tokenizer footprint logs; the tokenizer (256,000-entry tokenizer.json) is most of the load time"
   },
   "semif": {
     "dataset": "authored144",
@@ -139,11 +139,11 @@
     "max_abs_dp_vs_official_at_T1": 0.1015,
     "mean_family_balanced_accuracy": 0.6114,
     "accuracy": 0.5903,
-    "official_reference": "<work>/laya-multilingual/authored144/laya-multilingual.s{256,512}.cal.jsonl (the publisher's laya.load(...).predict with the calibration set as agent.temperature)"
+    "official_reference": "<work>/laya-multilingual/authored144/laya-multilingual.s{256,512}.cal.jsonl (the publisher's laya.load(...).predict with the calibration set as agent.temperature); not published"
   },
   "iphone": {
     "device": "iPhone 17 Pro (iPhone18,1), iOS 27.0 24A437, wired, 2026-09-23 22:14–22:16 JST",
-    "harness": "<work>/laya-multilingual/ios-gate (LayaGate: EncoderDecider.decideRow on the fixture's own token ids; --typed = TypedDecisions on the rows that carry their state)",
+    "test_app": "a headless test app, not published, that runs EncoderDecider.decideRow on the fixture's own token ids; in a second mode it runs the rows that carry their state through TypedDecisions, which tokenizes each question on the phone",
     "bundle": "ios/wfp16-s256 (the catalog's iOS bundle; sha256 of every file equal to the Hub revision 1175a4e6)",
     "reference": "fixtures-laya-multilingual.json (coreai-encoder-fixtures/1), T = 1",
     "gpu": {
@@ -226,12 +226,12 @@
       },
       "first_call_ms": 78.8,
       "load_ms": 1899,
-      "record": "laya-gate-laya-ml-wfp16-s256-gpu-20260924-002602.json"
+      "record": "not published"
     },
     "bench_cool": {
       "date": "2026-09-24 00:17 JST",
       "thermal": "nominal",
-      "tool": "decide-cli bench --repeat 3 (inside DecideGate, --model laya-multilingual from the sideloaded store)",
+      "tool": "decide-cli bench --repeat 3 (inside another test app, not published, that runs the kit's Examples/Decide CLI commands on the phone; --model laya-multilingual, with the model files copied onto the phone beforehand)",
       "state_tokens": 109,
       "questions": 8,
       "ms_per_decision_shared": 47.1,
@@ -253,7 +253,7 @@
       "first_call_ms": 68.6,
       "load_ms": 1743,
       "footprint_peak_mb": 357,
-      "record": "laya-gate-laya-ml-wfp16-s256-h18p-gpu-20260924-002825.json"
+      "record": "not published"
     }
   }
 }

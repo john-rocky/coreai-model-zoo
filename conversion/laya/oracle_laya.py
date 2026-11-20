@@ -15,7 +15,7 @@
 
     uv run --python 3.12 conversion/laya/oracle_laya.py
 
-Loads `laya.load(<pinned snapshot>, subfolder="multilingual", device="cpu")` exactly as the package
+Loads `laya.load(<snapshot at revision 1c5edc17>, subfolder="multilingual", device="cpu")` exactly as the package
 does (transformers 5.x ModernBERT with SDPA attention; transformers 4.x cannot read this encoder
 config) and checks, in order:
 
@@ -30,7 +30,7 @@ config) and checks, in order:
      for all 402 rows; every hidden state (embeddings, 22 residual layers, final_norm, after type_emb,
      both head layers, token logits at every position) for the SUBSET rows
   5. that reference vs the frozen fixture (argmax, |dp| <= 1e-3 at T=1, act probability) and vs the
-     LiteRT lane's captures of the same official model padded to 512 (marker |d| <= 1e-3, act
+     captures of the same official model padded to 512, made for the LiteRT port (marker |d| <= 1e-3, act
      relative <= 1e-4)
 
 Diagnostics (recorded, not gated): the head layers through PyTorch's non-fast path and the encoder

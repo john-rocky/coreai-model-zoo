@@ -26,8 +26,12 @@ needs = [
   "Stage 0 first, in its own environment: `uv run --python 3.12 conversion/laya/oracle_laya.py` (Python >= 3.12,",
   "torch 2.12.1, transformers 5.17.0, laya 0.3.4 from the script header; the zoo venv's transformers 4.57.6",
   "cannot read this encoder's v5 config). It writes the oracle dumps and results/oracle.json the gates read.",
-  "The frozen fixtures of the LiteRT lane in <work>/laya-multilingual/fixtures/ (sha256-pinned in _common.py)",
-  "and its captures in <work>/laya-multilingual/oracle-litert/.",
+  "The frozen fixtures made for the LiteRT port in <work>/laya-multilingual/fixtures/ (checked by sha256",
+  "in _common.py) and the captures made for it in <work>/laya-multilingual/oracle-litert/. These files are",
+  "not published, apart from laya_ml_calibration.json (the LiteRT port's file at its first revision, eae8f621).",
+  "ml_rows_s256.json can be rebuilt byte for byte from that revision's fixtures/gate_rows_s256.json (see _common.py).",
+  "fixtures-laya-multilingual.json beside this recipe holds both windows' rows in the format coreai-kit's",
+  "`decide-cli parity` reads; the gates do not read it.",
 ]
 notes = [
   "One multifunction JIT .aimodel per folder: `main` (input_ids / attention_mask int32 [1,S], qtype_onehot",

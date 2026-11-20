@@ -4,7 +4,7 @@ A row is one question. Its inputs are the candidate's raw marker logits (K float
 at the marker positions) and act logits (2 floats). Two references:
 
   answer reference  the frozen fixture: official probabilities at T=1, official act probability,
-                    official answer dictionary (the batched `Agent.predict` of the LiteRT lane)
+                    official answer dictionary (the batched `Agent.predict` run for the LiteRT port)
   tensor reference  the official DecisionModel on the same ids padded to the same window, batch 1
                     (this port's oracle), or any other named tensor reference
 

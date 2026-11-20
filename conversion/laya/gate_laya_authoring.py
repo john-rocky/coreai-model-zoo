@@ -61,8 +61,7 @@ LAYER_POLICY = {
                "because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the "
                "relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 "
                "absolute."),
-    "decided": ("2026-09-23 round 2, after a correction: the round-1 report gave the "
-                "S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"),
+    "decided": "2026-09-23",
 }
 
 

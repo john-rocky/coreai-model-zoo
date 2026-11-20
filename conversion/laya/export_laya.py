@@ -187,7 +187,7 @@ def reference(rows, window, oracle, oracle_hash: str) -> dict:
         out_rows.append(entry)
     return {"schema": "coreai-encoder-fixtures/1", "model": MODEL_ID, "model_sha": MODEL_SHA, "subfolder": SUBFOLDER,
             "window": window, "temperature": [1.0, 1.0, 1.0], "temperature_by_options": {},
-            "answers": "the official laya 0.3.4 Agent.predict, batched per fixture, max_len = window (frozen LiteRT-lane fixture)",
+            "answers": "the official laya 0.3.4 Agent.predict, batched per fixture, max_len = window (frozen fixture made for the LiteRT port)",
             "oracle": "the official DecisionModel on each row alone, batch 1, right-padded to this window, CPU fp32",
             "fixture_sha256": sha256_of(fixtures_dir() / f"ml_rows_s{window}.json"), "oracle_outputs_sha256": oracle_hash,
             "rows": out_rows}

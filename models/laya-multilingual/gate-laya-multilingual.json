@@ -3,7 +3,7 @@
  "subfolder": "multilingual",
  "model_sha": "1c5edc17a7acd8701df6fc341c0d179f1c62c982",
  "hf_repo": "mlboydaisuke/Laya-Multilingual-CoreAI",
- "gate": "the publisher's laya 0.3.4 model (transformers 5.17.0, SDPA attention), CPU fp32, each question row alone (batch 1) right-padded to its window; answers from the frozen LiteRT-lane fixture: 201 rows per window (37 choice, 44 score, 120 noul), official Agent.predict answers at T=1",
+ "gate": "the publisher's laya 0.3.4 model (transformers 5.17.0, SDPA attention), CPU fp32, each question row alone (batch 1) right-padded to its window; answers from the frozen fixture made for the LiteRT port: 201 rows per window (37 choice, 44 score, 120 noul), official Agent.predict answers at T=1",
  "oracle": {
   "status": "PASS",
   "record": {
@@ -112,7 +112,7 @@
      },
      "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
      "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
-     "decided": "2026-09-23 round 2, after a correction: the round-1 report gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+     "decided": "2026-09-23"
     },
     "max_absolute_tier": 4.1961669921875e-05,
     "max_relative_tier": 5.720494448104789e-05,
@@ -481,7 +481,7 @@
      },
      "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
      "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
-     "decided": "2026-09-23 round 2, after a correction: the round-1 report gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+     "decided": "2026-09-23"
     },
     "max_absolute_tier": 4.9591064453125e-05,
     "max_relative_tier": 7.761197617061503e-06,
@@ -850,7 +850,7 @@
      },
      "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
      "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
-     "decided": "2026-09-23 round 2, after a correction: the round-1 report gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+     "decided": "2026-09-23"
     },
     "max_absolute_tier": 4.1961669921875e-05,
     "max_relative_tier": 5.720494448104789e-05,
@@ -1159,7 +1159,7 @@
      },
      "reference": "the official SDPA path (laya.load), real positions; pad positions are reported, never read",
      "reason": "From layer 11 the CLS position carries a ~1.4e4 activation (dims 488/580/530/614/468; one fp32 ulp there is ~1e-3). The official model's own two attention paths (SDPA as laya.load runs it, and eager) differ by up to 4.8e-2 absolute on layers 12-21, and in these relative terms by up to 1.2e-4 at final_norm / head_input (S=256; 1.7e-5 at S=512), 1.8e-5 at head_1 and 3.6e-6 on layers 12-21 (max over the 14 SUBSET rows). The relative bar is 2x that 1.2e-4 maximum; 1e-4 was not taken because the official eager path itself exceeds it at final_norm (S=256). Layer 10 is in the relative tier because at S=512 the official SDPA-vs-eager distance there already reaches 1.1e-4 absolute.",
-     "decided": "2026-09-23 round 2, after a correction: the round-1 report gave the S=512 relative error (7.8e-6) as if it held for both windows (S=256: 5.7e-5)"
+     "decided": "2026-09-23"
     },
     "max_absolute_tier": 4.9591064453125e-05,
     "max_relative_tier": 7.761197617061503e-06,

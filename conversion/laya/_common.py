@@ -1,17 +1,24 @@
 """Shared paths, source pinning, fixtures and records for the laya multilingual port.
 
 Everything the scripts in this directory read or write lives under
-`_paths.work_path("laya-multilingual")` (frozen fixtures, the LiteRT lane's captures, oracle dumps,
+`_paths.work_path("laya-multilingual")` (frozen fixtures and captures made for the LiteRT port, oracle dumps,
 results) and `_paths.exports_dir() / "laya-multilingual"` (bundles laid out the way the HF repo is).
 The checkpoint is the pinned Hugging Face snapshot, resolved through `_paths.hf_snapshot` and
 verified by sha256 on every load. Set `ZOO_WORK_ROOT` / `ZOO_EXPORTS` / `HF_HUB_CACHE` to move them;
 nothing here hardcodes a home directory.
 
 Work-dir layout:
-  fixtures/        the frozen LiteRT-lane fixtures (201 rows per window, official answers at T=1)
-  oracle-litert/   the LiteRT lane's per-row captures (s256/NNN.npz, s512/NNN.npz, official model padded to 512)
+  fixtures/        the frozen fixtures made for the LiteRT port (201 rows per window, official answers at T=1)
+  oracle-litert/   per-row captures made for the LiteRT port (s256/NNN.npz, s512/NNN.npz, official model padded to 512)
   oracle/          this port's oracle dumps (oracle_laya.py): outputs_s{S}.npz, hidden/s{S}/NNN.npz
   results/         every gate's JSON record
+
+The files in fixtures/ and oracle-litert/ are not published, apart from fixtures/laya_ml_calibration.json,
+the LiteRT port's file at its first revision (eae8f621). ml_rows_s256.json can be rebuilt byte for byte from
+that revision's fixtures/gate_rows_s256.json: take its "rows", drop each row's "state" and write the list
+with json.dumps(..., indent=2) and a final newline. models/laya-multilingual/fixtures-laya-multilingual.json
+holds the rows of both windows in the format coreai-kit's `decide-cli parity` reads; the gates here do not
+read it.
 """
 from __future__ import annotations
 
@@ -51,9 +58,8 @@ SOURCE_SHA256 = {
     "rl_agent_config.json": "25061739243b617ad88d1219ba6f8a9c86c5881ca28df024fa2d9b3b2fcc30c6",
 }
 
-# The frozen fixtures from the LiteRT lane (byte-identical to
-# codex-conversions/2026-09-21/laya/fixtures/, checked 2026-09-23). A swapped fixture must stop the
-# gates, not silently re-baseline them.
+# The frozen fixtures made for the LiteRT port, by sha256 (checked 2026-09-23). A swapped fixture must
+# stop the gates, not silently re-baseline them.
 FIXTURE_SHA256 = {
     "ml_rows_s256.json": "98d0e591826c708375191425f4b475d1fa3f997051172ee24b91e9a52f46c83f",
     "ml_rows_s512.json": "dce5e82ea27f86d6027b34c9e76c565d862cb865e27b31f80db9d23e475756e0",
@@ -174,7 +180,7 @@ def load_calibration() -> dict:
 
 
 def load_capture(window: int, index: int, row: dict | None = None) -> dict[str, np.ndarray]:
-    """One LiteRT-lane capture: the official model on this window's ids padded to 512, batch 1."""
+    """One capture made for the LiteRT port: the official model on this window's ids padded to 512, batch 1."""
     with np.load(captures_dir() / f"s{window}" / f"{index:03d}.npz") as data:
         capture = {k: data[k] for k in data.files}
     if row is not None:

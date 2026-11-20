@@ -3,12 +3,12 @@
 A **typed decision model** that answers in one forward pass: give it a state (a message, an email, a
 JSON record, a conversation) and a typed question — `choice` (pick one of named options), `score`
 (an ordered scale) or `noul` (yes/no) — and it returns a probability for every option, no generation.
-[`convaiinnovations/laya`](https://huggingface.co/convaiinnovations/laya), subfolder `multilingual/`
-(Apache-2.0, revision `1c5edc17…`, laya 0.3.4), as a static `.aimodel` for macOS 27 and for the iPhone
-17 Pro (run there 2026-09-23: the same 201 rows pass, 47 ms per decision on the GPU). It is the catalog's first **encoder-type
-decision model**: the other
-decision models here are language models read out after a prefill; this one scores every option at its
-own marker position in a single encoder call.
+This is [`convaiinnovations/laya`](https://huggingface.co/convaiinnovations/laya), subfolder `multilingual/`
+(Apache-2.0, revision `1c5edc17…`, laya 0.3.4), exported as a static `.aimodel` for macOS 27 and for the
+iPhone 17 Pro. On the iPhone's GPU (2026-09-23), all 201 question rows at the 256-token window stay within
+1e-3 of the publisher's probabilities, at 53 ms median per decision with tokenizing excluded. It is the zoo's
+first **encoder-type decision model**: the decision models added before it are language models read out after
+a prefill; this one scores every option at its own marker position in a single encoder call.
 
 Architecture (from `model.safetensors` and `encoder/config.json`; 321,908,998 parameters, all stored in F16
 but the three-value temperature buffer):
@@ -18,7 +18,8 @@ GELU, biasless attention/MLP/LayerNorm (ε 1e-5), vocabulary 256,000 — with gl
 type embedding (choice / score / noul), two pre-norm transformer layers (768, 12 heads, ReLU 3072), a scorer (LayerNorm → Linear → GELU → Linear) at every position, and a small act head.
 
 **This is an encoder, not a generator.** One question is one forward over a right-padded window; no
-KV cache, no sampling loop. It runs through raw `AIModel` calls, not the generate engine.
+KV cache, no sampling loop. It runs through raw `AIModel` calls, not Apple's engine for language models
+(its `coreai-sequential` and `coreai-pipelined` variants).
 
 ## Graph contract
 
@@ -44,7 +45,7 @@ S = 256 or 512 (export-time choice); batch = 1; one bundle holds both functions
 - Gather `token_logits` at the markers (K logits), softmax them **raw** for the four `feats`, run `act`;
   then divide the K logits by the question's temperature (bucket by type and K first, then per type) and
   softmax for the answer. `metadata.json` carries the checkpoint's temperatures (T = 1) and the fitted
-  calibration the LiteRT port published (`temperature`, `temperature_by_options`).
+  calibration the [LiteRT port](https://huggingface.co/litert-community/Laya-Multilingual-LiteRT) published (`temperature`, `temperature_by_options`).
 - `reference.json` in every folder is the parity instrument: 201 question rows for that window with token
   ids, marker positions, the publisher's answers at T = 1 and the official model's raw logits.
 
@@ -53,8 +54,9 @@ S = 256 or 512 (export-time choice); batch = 1; one bundle holds both functions
 **Mac** (Apple M4 Max), macOS 27.0 build **26A428**, coreai-build 3600.83.1, the JIT `.aimodel`,
 2026-09-23. Every row: the 201 rows of its window through the whole pipeline (main → host features →
 act), 3 runs per row, then 40 warm questions; the warm time is one whole question, NumPy I/O included.
-The GPU rows ran alone on the GPU (the machine-wide GPU lock held, no other GPU job visible during the
-run). `cpu_only` is the parity option, and its milliseconds were taken while other jobs used the machine's
+While the GPU rows ran, `gate_laya_runtime.py` watched for other model jobs (processes matching its
+`GPU_JOB_PATTERN`, not other apps' GPU use) and saw none; it discards a run in which one appears.
+`cpu_only` is the parity option, and its milliseconds were taken while other jobs used the machine's
 CPU: reference values, not a speed claim.
 
 | Variant | S | Compute | Argmax (choice + score) | Max \|Δp\| at T=1 | Marker max \|Δ\| | Act relative | Repeat drift | Load | Warm median |
@@ -73,7 +75,7 @@ weights in fp16 — exact, the checkpoint is F16 — and computes in fp32. On th
 1e-4 of the CPU run as well. **Use the GPU, and request it explicitly**: with the Neural Engine preference
 the Mac returned the GPU's results bit for bit for fp32, but for wfp16 it returned different results that
 changed from run to run (next section). **iPhone 17 Pro** (iOS 27.0 24A437, the `ios/wfp16-s256` JIT bundle,
-2026-09-23, a headless harness over CoreAIKit's `EncoderDecider.decideRow` on the 201 fixture rows, the
+2026-09-23, a headless test app that runs CoreAIKit's `EncoderDecider.decideRow` on the 201 fixture rows, the
 fixture's own token ids, T = 1): on the GPU **201/201 rows within 1e-3, argmax 81/81, max |Δp| 8.1e-6**,
 act probability delta 0, no drift over three passes; CPU-only the same verdict at 9.4e-6. The kit's builder
 renders every row identically on the phone (201/201 tokens and markers). One decision on the phone's GPU:
@@ -83,15 +85,18 @@ through `TypedDecisions` with the state's tokens kept (the question tokenized on
 Engine preference the phone misses the bar the way the Mac does — 196/201 within 1e-3, argmax 80/81, max
 |Δp| 0.33 on five rows — at 82 ms and 1.4 GB, so the kit keeps refusing that preference for this bundle.
 Thermal state during those runs: "fair" for the GPU rows, "serious" for the CPU-only and Neural Engine
-rows; the GPU gate run again at "nominal" (2026-09-24) gave the same verdict at 54.5 ms median (p90 59.6),
+rows; the GPU rows, run again at "nominal" (2026-09-24), gave the same verdict at 54.5 ms median (p90 59.6),
 so the row cost is not thermal-bound. Through the kit's own `decide-cli bench --repeat 3` on the cool phone
-(a 109-token state, eight questions, the measure of the Mac's 11.5 ms): **47.1 ms per decision** with the
-state shared, 46.4 from scratch, 390 / 458 ms for the state and its eight. `gate-laya-multilingual-iphone-gpu.json`
+(a 109-token state, eight questions, the same test that gave 11.5 ms on the Mac in the CoreAIKit section below): **47.1 ms per decision** with the
+state shared, 46.4 from scratch, 390 / 458 ms for the state and its eight. The bench ran in another test app,
+so its times are not comparable with those of the rows. `gate-laya-multilingual-iphone-gpu.json`
 is the first GPU run's record. The AOT `ios-h18p/wfp16-s256` bundle, run the same way on the cool phone
 (2026-09-24): the same verdict (201/201, argmax 81/81, max |Δp| 8.1e-6) at **51.0 ms** median (p90 54.4), first call
-68.6 ms after a 1.7 s load, peak 357 MB — no faster to load or to run than the JIT bundle the catalog ships.
+68.6 ms after a 1.7 s load, peak 357 MB. Two minutes earlier, the re-run at "nominal" above used the JIT bundle
+the kit catalog ships; its first call took 78.8 ms after a 1.9 s load. The AOT run and that JIT re-run are
+single runs.
 
-The publisher's own model on the SemIf `authored144` fixture (144 three-option evidence / rule /
+The publisher's own model on the [SemIf](https://github.com/TheoLeeCJ/SemIf-OpenJev) `authored144` fixture (144 three-option evidence / rule /
 candidate questions it was not trained for), as `laya.load(...).predict` answers them: mean family
 balanced accuracy **0.6114**, accuracy 0.5903 (the same at T = 1 and with the fitted calibration, and at
 both windows). That is the reference a port's decisions are compared with, not a claim about the port.
@@ -108,8 +113,8 @@ The benchmark's own harness ([fstandhartinger/jevbench](https://github.com/fstan
 window is 256 tokens: 95 of the 111 hard items were truncated to it (hard states are up to 3,677 tokens
 long), and no easy or standard item was (the longest is 107 tokens). Accuracy per tier and the hard
 tier's ECE are JevBench's own scoring (argmax of the returned probabilities); p50 and p95 are per-request
-latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured without an
-exclusive GPU window (contended), with this model's server running alone. JevBench's published scores
+latency over all 231 requests, hard max the maximum over the hard tier. Latency was measured with this
+model's server the only model server running; other programs could still use the GPU. JevBench's published scores
 (Intelligence and the rest) are chance-corrected over 534 items, sealed ones included, and are not
 comparable to these accuracies.
 
@@ -122,18 +127,20 @@ comparable to these accuracies.
 | p95 | 0.05 s | 0.05 s | 0.26 s |
 | p50 / p95 over | 48 rows, nominal | 72 rows, nominal | 111 rows, nominal |
 
-The phone (iOS 27.0 24A437) received the same request bodies as the Mac run, one question per request. A
-headless harness app answered each with coreai-kit 0.7.1, through the call the kit's System One server makes.
+The phone (iOS 27.0 24A437) received the same request bodies as the Mac run, one question per request. Each
+went to a headless test app, built with coreai-kit 0.7.1, that makes the same call as the kit's [System One server](https://github.com/john-rocky/coreai-kit/blob/main/docs/system-one-serve.md).
 It ran the `ios/wfp16-s256` bundle; the Mac run used `macos/wfp16-s256`. Every bundle file on the phone
 matched the Hub revision by hash. Every answer's argmax equals the Mac run's. p50 and p95 are the kit's time
 per request. A nominal row started and ended with the phone on its battery at thermal state nominal.
 
 ## Numerics gate
 
-The oracle is the publisher's package itself (`laya.load(<pinned snapshot>, subfolder="multilingual")`,
-transformers 5.17.0, CPU fp32): it reproduces the frozen fixture of the LiteRT port exactly (token ids
+The oracle is the publisher's package itself (`laya.load(<snapshot at revision 1c5edc17>, subfolder="multilingual")`,
+transformers 5.17.0, CPU fp32): it reproduces the frozen fixture made for the LiteRT port exactly (token ids
 402/402; batched answers and logits bit-identical), and each row alone, right-padded to its window, is the
-tensor reference. Bars, at every stage: argmax identical on every choice and score row, max |Δp| ≤ 1e-3 at
+tensor reference. Both windows of that fixture are published in `fixtures-laya-multilingual.json` beside this card,
+the file coreai-kit's `decide-cli parity` reads.
+Bars, at every stage: argmax identical on every choice and score row, max |Δp| ≤ 1e-3 at
 T = 1 over the options, |Δ act probability| ≤ 1e-3; marker logits ≤ 1e-3 and act logits ≤ 1e-4 relative
 to the official batch-1 run; repeat drift ≤ 1e-6 on CPU; a wrong-pairing control (every row judged
 against another same-shape row's outputs) must fail — it does, on 162–166 of 200 pairs.
@@ -151,6 +158,10 @@ against another same-shape row's outputs) must fail — it does, on 162–166 of
 
 `gate-laya-multilingual.json` beside this card is the transcript: every stage's summary with the sha256
 of the full record it came from; the records keep each row's raw marker and act logits, unrounded.
+The records from the conversion's work folder and those of the fp16 recipe's bundles are not published; the
+others are in the `provenance/` folders of [mlboydaisuke/Laya-Multilingual-CoreAI](https://huggingface.co/mlboydaisuke/Laya-Multilingual-CoreAI).
+In that repository, a later commit replaced absolute local paths in some of these records, the only change
+inside them, so a record that commit changed no longer has the sha256 the transcript gives.
 
 ## Neural Engine and fp16
 
@@ -180,8 +191,8 @@ region count is recorded in its manifest.
 ## ⬇️ Bundle
 
 **[mlboydaisuke/Laya-Multilingual-CoreAI](https://huggingface.co/mlboydaisuke/Laya-Multilingual-CoreAI)**
-(revision `1175a4e6231fdfe8946e6566276f8d71eb8f02ef`, 2026-09-23; every file's sha256 and size checked against the
-staging manifest after the upload). One folder per variant, each
+(revision `1175a4e6231fdfe8946e6566276f8d71eb8f02ef`, 2026-09-23; every file's sha256 checked against the repository's
+`SHA256SUMS` after the upload). One folder per variant, each
 self-contained: the bundle, `tokenizer/` (the checkpoint's files, unmodified), `metadata.json` (the
 decision contract), `reference.json` and `provenance/` (export manifest with per-file sha256, the export
 and runtime gate records).
@@ -202,16 +213,17 @@ The `ios-h18p/` bundles are compiled for one device architecture (`h18p`, the iP
 --architecture h18p` (coreai-build 3600.83.1). **Never load an iOS bundle on a Mac.**
 
 Convert yourself: [`conversion/laya/`](../../conversion/laya/README.md) — staged scripts, and
-`recipe.toml` here names the commands.
+`recipe.toml` here names the commands, but the conversion needs the frozen files and captures made for the
+LiteRT port, and most of them are not published; `conversion/laya/README.md` says which.
 
 ## CoreAIKit (Swift)
 
-Catalog id `laya-multilingual` (active once the kit's encoder backend is merged). `TypedDecisions` loads
+Catalog id `laya-multilingual`. `TypedDecisions` loads
 the bundle as an encoder backend — the same `decide` / `prefill` calls as the kit's language-model
 decision models — and runs it on the GPU; a Neural Engine preference is refused at load.
 
-Measured through the kit on the same Mac (M4 Max, macOS 27.0 26A428, the wfp16 bundles above, GPU lock
-held, 2026-09-23):
+Measured through the kit on the same Mac (M4 Max, macOS 27.0 26A428, the wfp16 bundles above, no other GPU
+job visible when the runs started, 2026-09-23):
 
 - Parity on the 201 rows of each window: token ids and marker positions 201/201, argmax 81/81, max |Δp|
   5e-6 on the GPU and 9e-6 with `cpuOnly`.
@@ -225,7 +237,7 @@ held, 2026-09-23):
 - With a Neural Engine preference (measured before it was refused): 168–183 of 201 rows within the 1e-3
   bar over four runs, max |Δp| 0.61.
 
-`measurements-coreai-kit.json` beside this card holds these numbers and the records they came from.
+`measurements-coreai-kit.json` beside this card holds these numbers. The records of these Mac runs are not published.
 
 ## The port in one lesson: a massive activation moves the layer bar
 
@@ -240,7 +252,7 @@ at the final norm (0.13 at S=256 in torch), the state that normalizes those larg
 
 ## License and limits
 
-Apache-2.0 at the pinned upstream revision. Not tested: the 512 window on the phone (the 256 window was, JIT
+Apache-2.0 at upstream revision `1c5edc17…`. Not tested: the 512 window on the phone (the 256 window was, JIT
 and AOT h18p, on one iPhone 17 Pro), other Macs or OS builds, dynamic or batched shapes, windows other than 256 and 512, more than 20 options, the
 fitted calibration's quality at S = 512, languages beyond the fixture's English, Japanese and mixed rows,
 sustained thermals. The act probability is saturated at 1.0 on every fixture row, in the publisher's
