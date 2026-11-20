@@ -54,7 +54,7 @@
       "warm_min_ms": 3.477958,
       "warm_max_ms": 4.5755,
       "first_inference_after_load_ms": 642.140125,
-      "timing_environment": "Round01 JIT gate; driver precheck refused to run with a foreign accelerator job present"
+      "timing_environment": "The timing script recognized a few kinds of model job by their names and command lines and would not start while one was running; it did not count other processes; running when it checked were GPU processes of other apps, such as Chrome's, and two other jobs each using a full CPU core"
     },
     {
       "folder": "macos/fp32-s512",
@@ -97,7 +97,7 @@
       "warm_min_ms": 4.732292,
       "warm_max_ms": 7.800458,
       "first_inference_after_load_ms": 263.635833,
-      "timing_environment": "Round01 JIT gate; driver precheck refused to run with a foreign accelerator job present"
+      "timing_environment": "The timing script recognized a few kinds of model job by their names and command lines and would not start while one was running; it did not count other processes; running when it checked were GPU processes of other apps, such as Chrome's, and two other jobs each using a full CPU core"
     },
     {
       "folder": "macos/w8-fp32table-s128",
@@ -219,7 +219,7 @@
         "architecture": "h18p",
         "app_build": "2026091902"
       },
-      "timing_environment": "iPhone idle; personal widgets resident; caches retained; thermal state fair"
+      "timing_environment": "none of our other apps, such as benchmarks or tests, was running on the iPhone; app extensions such as widgets kept running and were not counted; personal apps were not stopped or changed; caches were kept, not cleared; thermal state fair"
     },
     {
       "folder": "ios/fp32-s512",
@@ -267,7 +267,7 @@
         "architecture": "h18p",
         "app_build": "2026091902"
       },
-      "timing_environment": "iPhone idle; personal widgets resident; caches retained; thermal state fair"
+      "timing_environment": "none of our other apps, such as benchmarks or tests, was running on the iPhone; app extensions such as widgets kept running and were not counted; personal apps were not stopped or changed; caches were kept, not cleared; thermal state fair"
     },
     {
       "folder": "ios/w8-fp32table-s128",
@@ -315,7 +315,7 @@
         "architecture": "h18p",
         "app_build": "2026091902"
       },
-      "timing_environment": "iPhone idle; personal widgets resident; caches retained; thermal state fair"
+      "timing_environment": "none of our other apps, such as benchmarks or tests, was running on the iPhone; app extensions such as widgets kept running and were not counted; personal apps were not stopped or changed; caches were kept, not cleared; thermal state fair"
     },
     {
       "folder": "ios/w8-fp32table-s512",
@@ -363,7 +363,7 @@
         "architecture": "h18p",
         "app_build": "2026091902"
       },
-      "timing_environment": "iPhone idle; personal widgets resident; caches retained; thermal state fair"
+      "timing_environment": "none of our other apps, such as benchmarks or tests, was running on the iPhone; app extensions such as widgets kept running and were not counted; personal apps were not stopped or changed; caches were kept, not cleared; thermal state fair"
     }
   ],
   "tokenizer_gate": {
@@ -430,12 +430,12 @@
     "cases": 70,
     "min_cosine": 0.999999999998868,
     "max_abs": 2.98e-07,
-    "timing": "not reported: taken with another lane's GPU evaluation running (contended)"
+    "timing": "not reported: taken with another job's GPU evaluation running (contended)"
   },
   "not_tested": [
     "other phones / OS builds",
     "Mac GPU with w8",
-    "Neural Engine",
+    "the iPhone's Neural Engine",
     "dynamic or batched shapes",
     "S > 512",
     "languages beyond the JA/EN fixtures",

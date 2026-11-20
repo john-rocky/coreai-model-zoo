@@ -1,6 +1,6 @@
 # Granite-Embedding-97M-Multilingual-R2 — Core AI
 
-Sample app: [CoreAISearchiOS](https://github.com/john-rocky/coreai-samples/tree/main/CoreAISearchiOS) downloads `ios/fp32-s128` from [`mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI`](https://huggingface.co/mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI) and searches your own notes by meaning, 16.5 ms per query on an iPhone 18 Pro (iOS 27.2, 2026-10-09).
+Sample app: [CoreAISearchiOS](https://github.com/john-rocky/coreai-samples/tree/main/CoreAISearchiOS) downloads `ios/fp32-s128` from [`mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI`](https://huggingface.co/mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI) and searches your own notes by meaning, 16.5 ms per query on an iPhone 18 Pro (iOS 27.2, 2026-10-09; median of 10 queries in one launch, whose record is not published).
 
 IBM's 97M-parameter **multilingual text embedder** — a ModernBERT encoder, 384-d CLS-pooled
 unit vectors, Japanese and English among its languages — as a static `.aimodel` for macOS 27 and
@@ -15,7 +15,8 @@ is a parity instrument (35 texts, 4 queries, 12 documents), not a benchmark.
 
 **This is an encoder, not a generator** — one forward over the right-padded grid returns one
 unit vector. No autoregressive loop, no KV cache, no LM head. It runs as a plain `.aimodel`
-through raw `AIModel.run` (like the vision encoders), not the pipelined generate engine.
+through raw `AIModel.run` (like the vision encoders), not Apple's engine for language models
+(its `coreai-sequential` and `coreai-pipelined` variants).
 
 Architecture (`model_type: modernbert`): 12 layers, hidden 384, 12 heads × 32, GLU MLP 1536
 (SiLU), vocabulary 180,000, biasless everything (attention, MLP, LayerNorm ε 1e-5). Global
@@ -38,9 +39,10 @@ S = 128 or 512 (export-time choice); batch = 1
   the checkpoint. Raw whitespace is kept: sentence-transformers strips text before tokenizing,
   the upstream README's `AutoTokenizer` path does not, and the two disagree on `"  東京駅から…\n"`.
   The reference is the raw path.
-- Tokenize with the pinned `tokenizer.json`: regex `Split(Isolated)` → `ByteLevel` (no prefix
-  space) → byte BPE with **`ignore_merges = true`** (a whole pre-token that is in the vocabulary
-  wins; ` ક` is token 2999, not three). A BPE that ignores the flag tokenizes differently.
+- Tokenize with the checkpoint's `tokenizer.json` (in each variant folder's `tokenizer/`): regex
+  `Split(Isolated)` → `ByteLevel` (no prefix space) → byte BPE with **`ignore_merges = true`** (a whole
+  pre-token that is in the vocabulary wins; ` ક` is token 2999, not three). A BPE that ignores the flag
+  tokenizes differently.
 - Truncate the **body to S−2**, then wrap: `[CLS 179934] body… [SEP 179938]`, right-pad with
   **PAD 179935** and mask 0. Truncating after adding the specials loses SEP; padding with 0 is a
   different token. Both are silent.
@@ -67,10 +69,12 @@ hashing included. Measured 2026-09-19.
 | w8 / fp32 table | 128 | 35/35 | 0.999410 | 5.67e-3 | 61 ms | 25.3 ms | 6.64 ms | 555 MB |
 | w8 / fp32 table | 512 | 35/35 | 0.999410 | 5.67e-3 | 447 ms | 138.7 ms | 23.07 ms | 553 MB |
 
-Each row matched 4/4 retrieval top-1s with 0 clear-pair flips and 0 repeat drift.
+Each row matched 4/4 retrieval top-1s with 0 clear-pair flips (defined under Numerics gate) and 0 repeat drift.
 
 **Mac** (M4 Max, Mac16,9), macOS 27.0 build 26A428, the JIT `.aimodel`, GPU-preferred, fp32.
-The driver refused to run while any foreign accelerator job was present; 105 warm samples.
+The timing script recognized a few kinds of model job by their names and command lines and would not start
+while one was running. It did not count other processes; running when it checked were GPU processes of other
+apps, such as Chrome's, and two other jobs each using a full CPU core. 105 warm samples.
 
 | S | Gate | Min cosine vs HF | Max \|err\| | Load | First after load | **Warm median** |
 |---:|---|---:|---:|---:|---:|---:|
@@ -101,12 +105,12 @@ the configuration that beats the GPU path. 4000 warm iterations per row.
 The two fixes are one line each, both fp32 ops that Apple's authoring rules say create an f32
 buffer the engine cannot execute — the attention softmax (`F.softmax(…, dtype=torch.float32)`) and
 the pooling head's `.float()` cast. The progression is the point: **13 regions cost 13.19 ms,
-1 region costs 4.60 ms** for the same graph at the same precision, because each boundary is a GPU
-dispatch inside the layer loop (a (1,128,384) fp16 boundary tensor is ~98 KB ≈ 1 µs, so the cost
-is latency, not transfer).
+1 region costs 4.60 ms** for the same graph at the same precision (both measured in the same pass),
+because each boundary is a GPU dispatch inside the layer loop (a (1,128,384) fp16 boundary tensor is
+~98 KB ≈ 1 µs, so the cost is latency, not transfer).
 
 The embedding + retrieval gate is run on **runtime** embeddings: 4/4 queries keep their exact
-top-1, 0 clear pair flips, worst score error 2.20e-03 (≤ 0.01), cosine 24× over the floor. The
+top-1, 0 clear-pair flips, worst score error 2.20e-03 (≤ 0.01), minimum cosine above 0.99995 (≥ 0.999). The
 **layer** gate (per-hidden-state ≤ 1e-4) is the one it fails — the gate whose documented purpose is
 catching graph bugs (a window of 63 instead of 64 passes the embedding gate at cos 0.99995) — so
 this is a uniform precision reduction, not a structural error. **Not a shippable variant**: the
@@ -124,8 +128,8 @@ and only `cpuOnly` drops it to zero.
 One gate at every stage, the oracle being official HF eager CPU fp32 (transformers 4.57.6):
 per text cosine ≥ 0.999, max element error ≤ 0.02, L2-norm error ≤ 0.002; per query exact
 top-1 over the 12 documents, retrieval-score error ≤ 0.01, and no inversion of any document
-pair the oracle separates by ≥ 0.001; repeat drift ≤ 1e-6. A wrong-pairing control (every vector
-matched to the wrong text) must FAIL.
+pair the oracle separates by ≥ 0.001 (a clear-pair flip); repeat drift ≤ 1e-6. A wrong-pairing
+control (every vector matched to the wrong text) must FAIL.
 
 - **Authoring** (`gate_granite_authoring.py`): the re-authored graph against every one of the 13
   saved hidden states, max |err| ≤ **1e-4** at fp32, both grids. Five mutations must trip it:
@@ -144,10 +148,18 @@ authoring gate, each with the sha256 of the full record it summarizes.
 ## ⬇️ Bundle
 
 **[mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI](https://huggingface.co/mlboydaisuke/Granite-Embedding-97M-Multilingual-R2-CoreAI)**
-— one folder per variant, each self-contained: the bundle, `tokenizer/`, `reference.json` (the
+— one folder per variant, each holding the bundle, `tokenizer/`, `reference.json` (the
 35 HF fixtures with ids, masks and embeddings — the parity test) and `provenance/` (export
-manifest with per-file sha256, the runtime gate record). `coreai-kit.json` at the root maps
-platform → folder.
+manifest with per-file sha256, the runtime gate record). In `macos/` and `ios-h18p/` these records
+describe the bundle in the same folder. In `ios/` they do not: the files in `ios/<variant>/provenance/` and
+`ios/QUALIFICATION.md` are the same files as in `ios-h18p/`. They record the `h18p` AOT bundles that `ios/`
+held before, not the JIT bundles it holds now; so do the gate transcript's iPhone rows, which name
+`ios/<variant>`. An `ios/` bundle is byte-identical to the `macos/` bundle of the same variant, so its
+per-file sha256 values are in `macos/<variant>/provenance/export-manifest.json`.
+`coreai-kit.json` at the root maps platform → folder. CoreAIKit does not read it from the repo yet, and this
+model is not in the kit catalog, so the file matters only if you pick a folder from it yourself.
+The file's iOS entries point only at the `h18p` bundles in `ios-h18p/`, which only h18p iPhones accept
+(the iPhone 18 Pro refuses them). Until those entries change, use `ios/` directly, as the sample app does.
 
 | Folder | Platform | Format | Bundle | Bytes |
 |---|---|---|---|---:|
@@ -164,11 +176,11 @@ platform → folder.
 | `ios-h18p/w8-fp32table-s512/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_w8_fp32table_s512_r02.h18p.aimodelc` | 305,479,184 |
 | `ios-h18p/w8-fp32table-s128/` | iOS 27, h18p only | AOT `.aimodelc` | `granite97m_w8_fp32table_s128_r02.h18p.aimodelc` | 305,251,774 |
 
-Since Hub revision `a27dc73e` (2026-09-26) `ios/` holds the JIT graphs and the `ios-h18p/` bundles are the
+Since Hub revision `a27dc73e` (2026-09-26) `ios/` holds the JIT bundles and the `ios-h18p/` bundles are the
 ones compiled for one device architecture (`h18p`, the iPhone 17 Pro) with `xcrun coreai-build compile
 --platform iOS --min-deployment-version 27.0 --preferred-compute gpu --architecture h18p` (coreai-build
 3600.83.1), from a separate iOS export; the iPhone 18 Pro refuses them (`incompatibleCompiledAssetArchitecture`).
-The iPhone rows above were measured on those h18p bundles. The `ios/` JIT graphs were load-and-call checked on
+The iPhone rows above were measured on those h18p bundles. The `ios/` JIT bundles were load-and-call checked on
 the iPhone 18 Pro (first load 0.33–1.01 s, first call 88–619 ms, a finite 384-value embedding; 2026-09-26,
 [`knowledge/jit-distribution.md`](../../knowledge/jit-distribution.md)) and not re-gated for embedding parity
 there. **Never load an iOS AOT bundle on a Mac.**
@@ -184,7 +196,7 @@ the special tokens (losing SEP), applies its own BPE without `ignore_merges`, di
 model. Running it today means: the Swift tokenizer from the HF repo's `host/` folder, a fixed
 grid, `AIModel` on the platform's folder. Enrolling it needs a `textEmbedding` driver that takes
 the pad id, a SEP-preserving truncation, a per-platform variant path and an AOT-aware loader —
-tracked as maintainer work, not a blocker on the bundle.
+[maintainer work](../../CONTRIBUTING.md#what-blocks-a-merge-and-what-does-not), not a blocker on the bundle.
 
 ## The port in one lesson: gate the layers, not just the vector
 
@@ -198,11 +210,13 @@ epsilon because the converter's `F.normalize` decomposition drops it.
 
 ## License and limits
 
-Apache-2.0 at the pinned upstream revision; the HF repo carries IBM's unmodified card as
+Apache-2.0 at upstream revision `835ad1408…`; the HF repo carries IBM's unmodified card as
 `UPSTREAM_README.md` and a `LICENSE-NOTE.md` listing the changes (static graph, in-graph
-pooling, optional w8 palettes, h18p compile). Not tested: other phones or OS builds, the Mac GPU
-with w8, the iPhone's Neural Engine, dynamic or batched shapes, S > 512, languages beyond the JA/EN
-fixtures, retrieval quality on a benchmark, sustained thermals, true cache-cold load.
+pooling, optional w8 palettes, h18p compile). Not tested: phones other than the iPhone 17 Pro (which ran
+the h18p bundles above) and the iPhone 18 Pro (only the JIT runs described above), iOS builds other than
+24A437 (27.0) and 24B5099f (27.2), other macOS builds, the Mac GPU with w8, the iPhone's Neural Engine,
+dynamic or batched shapes, S > 512, languages beyond the JA/EN fixtures, retrieval quality on a benchmark,
+sustained thermals, true cache-cold load.
 
 The Mac's Neural Engine is **no longer untested** — see the Mac ANE block above. Short version: the fp32
 bundle cannot use it (0 ANE regions), fp16 can, and two fp32-op removals make it worth having
